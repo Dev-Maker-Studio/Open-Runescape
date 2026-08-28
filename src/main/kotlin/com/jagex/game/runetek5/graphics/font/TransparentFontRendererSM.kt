@@ -7,21 +7,21 @@ import com.jagex.game.runetek5.toolkit.ComponentDimensionSM
 import kotlin.math.min
 
 class TransparentFontRendererSM(
-    hardwarerenderer1: SafeModeToolkit,
-    fontmetrics2: FontMetrics,
-    arr_3: Array<SpriteType>,
-    ints_4: IntArray,
-    ints_5: IntArray
-) : AbstractFontRenderer(hardwarerenderer1, fontmetrics2) {
+    toolkit: SafeModeToolkit,
+    fontMetrics: FontMetrics,
+    sprites: Array<SpriteType>,
+    spriteWidths: IntArray,
+    spriteHeights: IntArray
+) : AbstractFontRenderer(toolkit, fontMetrics) {
 
     @JvmField
-    var safeModeToolkit: SafeModeToolkit = hardwarerenderer1
+    var safeModeToolkit: SafeModeToolkit = toolkit
 
     @JvmField
-    val glyphWidths: IntArray = ints_4
+    val glyphWidths: IntArray = spriteWidths
 
     @JvmField
-    val glyphHeights: IntArray = ints_5
+    val glyphHeights: IntArray = spriteHeights
 
     @JvmField
     val glyphAlphaData: Array<ByteArray?>
@@ -33,255 +33,255 @@ class TransparentFontRendererSM(
     val glyphOffsetX: IntArray
 
     init {
-        glyphAlphaData = arrayOfNulls(arr_3.size)
-        glyphOffsetY = IntArray(arr_3.size)
-        glyphOffsetX = IntArray(arr_3.size)
+        glyphAlphaData = arrayOfNulls(sprites.size)
+        glyphOffsetY = IntArray(sprites.size)
+        glyphOffsetX = IntArray(sprites.size)
 
-        for (i_6 in arr_3.indices) {
-            val class917 = arr_3[i_6]
-            if (class917.alpha != null) {
-                glyphAlphaData[i_6] = class917.alpha
+        for (index in sprites.indices) {
+            val sprite = sprites[index]
+            if (sprite.alpha != null) {
+                glyphAlphaData[index] = sprite.alpha
             } else {
-                val bytes_8 = class917.pixels
-                val bytes_9 = ByteArray(bytes_8.size)
-                glyphAlphaData[i_6] = bytes_9
+                val pixels = sprite.pixels
+                val alphaData = ByteArray(pixels.size)
+                glyphAlphaData[index] = alphaData
 
-                for (i_10 in bytes_8.indices) {
-                    bytes_9[i_10] = if (bytes_8[i_10].toInt() == 0) 0 else -1
+                for (i in pixels.indices) {
+                    alphaData[i] = if (pixels[i].toInt() == 0) 0 else -1
                 }
             }
 
-            glyphOffsetY[i_6] = class917.minY
-            glyphOffsetX[i_6] = class917.minX
+            glyphOffsetY[index] = sprite.minY
+            glyphOffsetX[index] = sprite.minX
         }
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean) {
-        val i_31 = i_3
-        var i_21 = i_2
+    override fun drawChar(glyphIndex: Int, drawX: Int, drawY: Int, color: Int, useAlpha: Boolean) {
+        val baseY = drawY
+        var x = drawX
         if (safeModeToolkit.colourBuffer != null) {
-            i_21 += glyphOffsetX[var_1]
-            var i_31_mod = i_31 + glyphOffsetY[var_1]
-            var i_6 = glyphWidths[var_1]
-            var i_7 = glyphHeights[var_1]
-            val i_8 = safeModeToolkit.viewportWidth
-            var i_9 = i_21 + i_31_mod * i_8
-            var i_10 = i_8 - i_6
-            var i_11 = 0
-            var i_12 = 0
-            var i_13: Int
-            if (i_31_mod < safeModeToolkit.clipTop) {
-                i_13 = safeModeToolkit.clipTop - i_31_mod
-                i_7 -= i_13
-                i_31_mod = safeModeToolkit.clipTop
-                i_12 += i_6 * i_13
-                i_9 += i_8 * i_13
+            x += glyphOffsetX[glyphIndex]
+            var y = baseY + glyphOffsetY[glyphIndex]
+            var glyphWidth = glyphWidths[glyphIndex]
+            var glyphHeight = glyphHeights[glyphIndex]
+            val viewportWidth = safeModeToolkit.viewportWidth
+            var pixelIndex = x + y * viewportWidth
+            var dstRowPadding = viewportWidth - glyphWidth
+            var srcRowPadding = 0
+            var srcOffset = 0
+            var clippedAmount: Int
+            if (y < safeModeToolkit.clipTop) {
+                clippedAmount = safeModeToolkit.clipTop - y
+                glyphHeight -= clippedAmount
+                y = safeModeToolkit.clipTop
+                srcOffset += glyphWidth * clippedAmount
+                pixelIndex += viewportWidth * clippedAmount
             }
 
-            if (i_31_mod + i_7 > safeModeToolkit.clipBottom) {
-                i_7 -= i_31_mod + i_7 - safeModeToolkit.clipBottom
+            if (y + glyphHeight > safeModeToolkit.clipBottom) {
+                glyphHeight -= y + glyphHeight - safeModeToolkit.clipBottom
             }
 
-            if (i_21 < safeModeToolkit.clipLeft) {
-                i_13 = safeModeToolkit.clipLeft - i_21
-                i_6 -= i_13
-                i_21 = safeModeToolkit.clipLeft
-                i_12 += i_13
-                i_9 += i_13
-                i_11 += i_13
-                i_10 += i_13
+            if (x < safeModeToolkit.clipLeft) {
+                clippedAmount = safeModeToolkit.clipLeft - x
+                glyphWidth -= clippedAmount
+                x = safeModeToolkit.clipLeft
+                srcOffset += clippedAmount
+                pixelIndex += clippedAmount
+                srcRowPadding += clippedAmount
+                dstRowPadding += clippedAmount
             }
 
-            if (i_6 + i_21 > safeModeToolkit.clipRight) {
-                i_13 = i_6 + i_21 - safeModeToolkit.clipRight
-                i_6 -= i_13
-                i_11 += i_13
-                i_10 += i_13
+            if (glyphWidth + x > safeModeToolkit.clipRight) {
+                clippedAmount = glyphWidth + x - safeModeToolkit.clipRight
+                glyphWidth -= clippedAmount
+                srcRowPadding += clippedAmount
+                dstRowPadding += clippedAmount
             }
 
-            if (i_6 > 0 && i_7 > 0) {
-                blendGlyphPixels(glyphAlphaData[var_1]!!, safeModeToolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
+            if (glyphWidth > 0 && glyphHeight > 0) {
+                blendGlyphPixels(glyphAlphaData[glyphIndex]!!, safeModeToolkit.colourBuffer!!, color, srcOffset, pixelIndex, glyphWidth, glyphHeight, dstRowPadding, srcRowPadding)
             }
         }
     }
 
-    fun blendGlyphPixels(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
-        var i_4_mod = i_4
-        var i_5_mod = i_5
-        for (i_10 in -i_7 until 0) {
-            for (i_11 in -i_6 until 0) {
-                var i_12 = bytes_1[i_4_mod++].toInt() and 0xff
-                if (i_12 != 0) {
-                    val i_13 = (i_12 * (i_3 and 0xff00) and 0xff0000) + ((i_3 and 0xff00ff) * i_12 and -16711936) shr 8
-                    i_12 = 256 - i_12
-                    val i_14 = ints_2[i_5_mod]
-                    ints_2[i_5_mod++] = i_13 + ((i_12 * (i_14 and 0xff00) and 0xff0000) + ((i_14 and 0xff00ff) * i_12 and -16711936) shr 8)
+    fun blendGlyphPixels(glyphData: ByteArray, pixels: IntArray, color: Int, glyphOffset: Int, pixelOffset: Int, clippedWidth: Int, clippedHeight: Int, dstRowPadding: Int, srcRowPadding: Int) {
+        var glyphPos = glyphOffset
+        var pixelPos = pixelOffset
+        for (row in -clippedHeight until 0) {
+            for (col in -clippedWidth until 0) {
+                var alpha = glyphData[glyphPos++].toInt() and 0xff
+                if (alpha != 0) {
+                    val blendedSrc = (alpha * (color and 0xff00) and 0xff0000) + ((color and 0xff00ff) * alpha and -16711936) shr 8
+                    alpha = 256 - alpha
+                    val dstPixel = pixels[pixelPos]
+                    pixels[pixelPos++] = blendedSrc + ((alpha * (dstPixel and 0xff00) and 0xff0000) + ((dstPixel and 0xff00ff) * alpha and -16711936) shr 8)
                 } else {
-                    ++i_5_mod
+                    ++pixelPos
                 }
             }
 
-            i_5_mod += i_8
-            i_4_mod += i_9
+            pixelPos += dstRowPadding
+            glyphPos += srcRowPadding
         }
     }
 
     fun blendGlyphPixelsMasked(
-        bytes_1: ByteArray,
-        ints_2: IntArray,
-        i_3: Int,
-        i_4: Int,
-        i_5: Int,
-        i_6: Int,
-        i_7: Int,
-        i_8: Int,
-        i_9: Int,
-        i_10: Int,
-        i_11: Int,
-        i_12: Int,
-        class45513: ComponentSurface,
-        i_14: Int,
-        i_15: Int
+        glyphData: ByteArray,
+        pixels: IntArray,
+        color: Int,
+        glyphOffset: Int,
+        pixelOffset: Int,
+        clippedWidth: Int,
+        clippedHeight: Int,
+        dstRowPadding: Int,
+        srcRowPadding: Int,
+        drawX: Int,
+        drawY: Int,
+        fullGlyphWidth: Int,
+        surface: ComponentSurface,
+        surfaceOffsetX: Int,
+        surfaceOffsetY: Int
     ) {
-        val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val ints_17 = packetsdecoder16.rowStartX
-        val ints_18 = packetsdecoder16.rowWidth
-        val i_19 = i_10 - safeModeToolkit.clipLeft
-        var i_20 = i_11
-        if (i_15 > i_11) {
-            i_20 = i_15
-            var i_5_mod = i_5 + safeModeToolkit.viewportWidth * (i_15 - i_11)
-            var i_4_mod = i_4 + (i_15 - i_11) * i_12
+        val dimensionSM = surface as ComponentDimensionSM
+        val rowStartXArr = dimensionSM.rowStartX
+        val rowWidthArr = dimensionSM.rowWidth
+        val relativeDrawX = drawX - safeModeToolkit.clipLeft
+        var currentY = drawY
+        if (surfaceOffsetY > drawY) {
+            currentY = surfaceOffsetY
+            var pixelPos = pixelOffset + safeModeToolkit.viewportWidth * (surfaceOffsetY - drawY)
+            var glyphPos = glyphOffset + (surfaceOffsetY - drawY) * fullGlyphWidth
         }
 
-        val i_21 = min(ints_17.size + i_15, i_11 + i_7)
-        var i_4_mod = i_4
-        var i_5_mod = i_5
+        val maxY = min(rowStartXArr.size + surfaceOffsetY, drawY + clippedHeight)
+        var glyphPos = glyphOffset
+        var pixelPos = pixelOffset
 
-        for (i_22 in i_20 until i_21) {
-            val i_23 = ints_17[i_22 - i_15] + i_14
-            val i_24_orig = ints_18[i_22 - i_15]
-            var i_25 = i_6
-            val i_26: Int
-            var i_24 = i_24_orig
-            if (i_19 > i_23) {
-                i_26 = i_19 - i_23
-                if (i_26 >= i_24) {
-                    i_4_mod += i_9 + i_6
-                    i_5_mod += i_8 + i_6
+        for (scanlineY in currentY until maxY) {
+            val rowStartX = rowStartXArr[scanlineY - surfaceOffsetY] + surfaceOffsetX
+            val rowWidthOrig = rowWidthArr[scanlineY - surfaceOffsetY]
+            var remainingWidth = clippedWidth
+            val adjustAmount: Int
+            var rowWidth = rowWidthOrig
+            if (relativeDrawX > rowStartX) {
+                adjustAmount = relativeDrawX - rowStartX
+                if (adjustAmount >= rowWidth) {
+                    glyphPos += srcRowPadding + clippedWidth
+                    pixelPos += dstRowPadding + clippedWidth
                     continue
                 }
 
-                i_24 -= i_26
+                rowWidth -= adjustAmount
             } else {
-                i_26 = i_23 - i_19
-                if (i_26 >= i_6) {
-                    i_4_mod += i_9 + i_6
-                    i_5_mod += i_8 + i_6
+                adjustAmount = rowStartX - relativeDrawX
+                if (adjustAmount >= clippedWidth) {
+                    glyphPos += srcRowPadding + clippedWidth
+                    pixelPos += dstRowPadding + clippedWidth
                     continue
                 }
 
-                i_4_mod += i_26
-                i_25 = i_6 - i_26
-                i_5_mod += i_26
+                glyphPos += adjustAmount
+                remainingWidth = clippedWidth - adjustAmount
+                pixelPos += adjustAmount
             }
 
-            var i_26_mod = 0
-            if (i_25 < i_24) {
-                i_24 = i_25
+            var skipCount = 0
+            if (remainingWidth < rowWidth) {
+                rowWidth = remainingWidth
             } else {
-                i_26_mod = i_25 - i_24
+                skipCount = remainingWidth - rowWidth
             }
 
-            for (i_27 in -i_24 until 0) {
-                var i_28 = bytes_1[i_4_mod++].toInt() and 0xff
-                if (i_28 != 0) {
-                    val i_29 = (i_28 * (i_3 and 0xff00) and 0xff0000) + ((i_3 and 0xff00ff) * i_28 and -16711936) shr 8
-                    i_28 = 256 - i_28
-                    val i_30 = ints_2[i_5_mod]
-                    ints_2[i_5_mod++] = (((i_30 and 0xff00ff) * i_28 and -16711936) + (i_28 * (i_30 and 0xff00) and 0xff0000) shr 8) + i_29
+            for (col in -rowWidth until 0) {
+                var alpha = glyphData[glyphPos++].toInt() and 0xff
+                if (alpha != 0) {
+                    val blendedSrc = (alpha * (color and 0xff00) and 0xff0000) + ((color and 0xff00ff) * alpha and -16711936) shr 8
+                    alpha = 256 - alpha
+                    val dstPixel = pixels[pixelPos]
+                    pixels[pixelPos++] = (((dstPixel and 0xff00ff) * alpha and -16711936) + (alpha * (dstPixel and 0xff00) and 0xff0000) shr 8) + blendedSrc
                 } else {
-                    ++i_5_mod
+                    ++pixelPos
                 }
             }
 
-            i_4_mod = i_26_mod + i_4_mod + i_9
-            i_5_mod += i_26_mod + i_8
+            glyphPos = skipCount + glyphPos + srcRowPadding
+            pixelPos += skipCount + dstRowPadding
         }
     }
 
     override fun drawChar(
-        var_1: Int,
-        i_2: Int,
-        i_3: Int,
-        i_4: Int,
-        bool5: Boolean,
+        glyphIndex: Int,
+        drawX: Int,
+        drawY: Int,
+        color: Int,
+        useAlpha: Boolean,
         dimension: ComponentSurface,
-        i_7: Int,
-        i_8: Int
+        surfaceOffsetX: Int,
+        surfaceOffsetY: Int
     ) {
-        val i_31 = i_3
-        var i_21 = i_2
+        val baseY = drawY
+        var x = drawX
         if (safeModeToolkit.colourBuffer != null) {
             if (dimension == null) {
-                drawChar(var_1, i_21, i_31, i_4, bool5)
+                drawChar(glyphIndex, x, baseY, color, useAlpha)
             } else {
-                i_21 += glyphOffsetX[var_1]
-                var i_31_mod = i_31 + glyphOffsetY[var_1]
-                var i_9 = glyphWidths[var_1]
-                var i_10 = glyphHeights[var_1]
-                val i_11 = safeModeToolkit.viewportWidth
-                var i_12 = i_21 + i_31_mod * i_11
-                var i_13 = i_11 - i_9
-                var i_14 = 0
-                var i_15 = 0
-                var i_16: Int
-                if (i_31_mod < safeModeToolkit.clipTop) {
-                    i_16 = safeModeToolkit.clipTop - i_31_mod
-                    i_10 -= i_16
-                    i_31_mod = safeModeToolkit.clipTop
-                    i_15 += i_16 * i_9
-                    i_12 += i_16 * i_11
+                x += glyphOffsetX[glyphIndex]
+                var y = baseY + glyphOffsetY[glyphIndex]
+                var glyphWidth = glyphWidths[glyphIndex]
+                var glyphHeight = glyphHeights[glyphIndex]
+                val viewportWidth = safeModeToolkit.viewportWidth
+                var pixelIndex = x + y * viewportWidth
+                var dstRowPadding = viewportWidth - glyphWidth
+                var srcRowPadding = 0
+                var srcOffset = 0
+                var clippedAmount: Int
+                if (y < safeModeToolkit.clipTop) {
+                    clippedAmount = safeModeToolkit.clipTop - y
+                    glyphHeight -= clippedAmount
+                    y = safeModeToolkit.clipTop
+                    srcOffset += clippedAmount * glyphWidth
+                    pixelIndex += clippedAmount * viewportWidth
                 }
 
-                if (i_31_mod + i_10 > safeModeToolkit.clipBottom) {
-                    i_10 -= i_31_mod + i_10 - safeModeToolkit.clipBottom
+                if (y + glyphHeight > safeModeToolkit.clipBottom) {
+                    glyphHeight -= y + glyphHeight - safeModeToolkit.clipBottom
                 }
 
-                if (i_21 < safeModeToolkit.clipLeft) {
-                    i_16 = safeModeToolkit.clipLeft - i_21
-                    i_9 -= i_16
-                    i_21 = safeModeToolkit.clipLeft
-                    i_15 += i_16
-                    i_12 += i_16
-                    i_14 += i_16
-                    i_13 += i_16
+                if (x < safeModeToolkit.clipLeft) {
+                    clippedAmount = safeModeToolkit.clipLeft - x
+                    glyphWidth -= clippedAmount
+                    x = safeModeToolkit.clipLeft
+                    srcOffset += clippedAmount
+                    pixelIndex += clippedAmount
+                    srcRowPadding += clippedAmount
+                    dstRowPadding += clippedAmount
                 }
 
-                if (i_9 + i_21 > safeModeToolkit.clipRight) {
-                    i_16 = i_9 + i_21 - safeModeToolkit.clipRight
-                    i_9 -= i_16
-                    i_14 += i_16
-                    i_13 += i_16
+                if (glyphWidth + x > safeModeToolkit.clipRight) {
+                    clippedAmount = glyphWidth + x - safeModeToolkit.clipRight
+                    glyphWidth -= clippedAmount
+                    srcRowPadding += clippedAmount
+                    dstRowPadding += clippedAmount
                 }
 
-                if (i_9 > 0 && i_10 > 0) {
+                if (glyphWidth > 0 && glyphHeight > 0) {
                     blendGlyphPixelsMasked(
-                        glyphAlphaData[var_1]!!,
+                        glyphAlphaData[glyphIndex]!!,
                         safeModeToolkit.colourBuffer!!,
-                        i_4,
-                        i_15,
-                        i_12,
-                        i_9,
-                        i_10,
-                        i_13,
-                        i_14,
-                        i_21,
-                        i_31_mod,
-                        glyphWidths[var_1],
+                        color,
+                        srcOffset,
+                        pixelIndex,
+                        glyphWidth,
+                        glyphHeight,
+                        dstRowPadding,
+                        srcRowPadding,
+                        x,
+                        y,
+                        glyphWidths[glyphIndex],
                         dimension,
-                        i_7,
-                        i_8
+                        surfaceOffsetX,
+                        surfaceOffsetY
                     )
                 }
             }

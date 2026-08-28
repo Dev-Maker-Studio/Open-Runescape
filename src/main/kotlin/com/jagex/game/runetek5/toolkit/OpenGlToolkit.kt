@@ -42,14 +42,14 @@ import com.jagex.game.runetek5.graphics.texture.AbstractCubeTextureGenerator
 import com.jagex.game.runetek5.graphics.texture.AbstractOpenGlCubeTextureGenerator
 import com.jagex.game.runetek5.graphics.texture.GlElementsArrayBuffer
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture
-import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.graphics.texture.OpenGl2DImageTexture
 import com.jagex.game.runetek5.graphics.texture.OpenGlArbCubeMapTexture
 import com.jagex.game.runetek5.graphics.texture.OpenGlCubeTextureGenerator
 import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
 import com.jagex.game.runetek5.graphics.texture.RectangularTextureGL
 import com.jagex.game.runetek5.imageproducer.DelegatingDisplay
 import com.jagex.game.runetek5.imageproducer.DirectDisplay
-import com.jagex.game.runetek5.imageproducer.ImageProducerGL2
+import com.jagex.game.runetek5.imageproducer.ImageProducerGL
 import com.jagex.game.runetek5.imageproducer.IntegratedGraphicsDisplayGL
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.math.Matrix43
@@ -139,7 +139,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField val antiSunPreviousPosition: FloatArray = FloatArray(4)
 
     /**
-     * For naming see: [com.jagex.game.runetek5.toolkit.opengl.effect.MaterialEffect9GL.toggle]
+     * For naming see: [com.jagex.game.runetek5.toolkit.opengl.effect.BreakingWaterEffect.toggle]
      */
     @JvmField val sunDirection: FloatArray = FloatArray(4)
 
@@ -235,7 +235,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField var enableDepthMask: Boolean = false
     @JvmField var activeLightCount: Int = 0
     @JvmField var fogEnabled: Boolean = false
-    @JvmField var worldMapTexture: OpenGl2DTexture_Sub1? = null
+    @JvmField var worldMapTexture: OpenGl2DImageTexture? = null
     @JvmField var gpuCompanyString: String? = null
     @JvmField var gpuNameString: String? = null
     @JvmField var openglVersion: Int = 0
@@ -439,7 +439,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                     this.rectangularTexture = null
                 }
             }
-            addImageProducer(canvas, ImageProducerGL2(this, canvas, generatedUid))
+            addImageProducer(canvas, ImageProducerGL(this, canvas, generatedUid))
             setActiveCanvas(canvas)
             this.effectManager = EffectManagerGL(this)
             prepareForRendering()
@@ -605,10 +605,10 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     override fun shutdown() {
-        var node1 = this.heapManager.getTail()
-        while (node1 != null) {
-            (node1 as NativeMemoryGL).deallocate()
-            node1 = this.heapManager.getPrevious()
+        var heapNode = this.heapManager.getTail()
+        while (heapNode != null) {
+            (heapNode as NativeMemoryGL).deallocate()
+            heapNode = this.heapManager.getPrevious()
         }
         this.framebufferCompositor?.shutdown()
         if (this.colortableReset) {
@@ -797,72 +797,72 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             deltaY *= inverseMagnitude
             OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
             offset %= lineLength + lineSpacing
-            val dx1 = deltaX * lineSpacing
-            val dy1 = deltaY * lineSpacing
-            var dx2 = 0.0f
-            var dy2 = 0.0f
-            var dx3 = dx1
-            var dy3 = dy1
+            val dashSpacingX = deltaX * lineSpacing
+            val dashSpacingY = deltaY * lineSpacing
+            var segStartOffsetX = 0.0f
+            var segStartOffsetY = 0.0f
+            var segLengthX = dashSpacingX
+            var segLengthY = dashSpacingY
             if (offset > lineSpacing) {
-                dx2 = deltaX * (lineLength + lineSpacing - offset)
-                dy2 = deltaY * (lineLength + lineSpacing - offset)
+                segStartOffsetX = deltaX * (lineLength + lineSpacing - offset)
+                segStartOffsetY = deltaY * (lineLength + lineSpacing - offset)
             } else {
-                dx3 = deltaX * (lineSpacing - offset)
-                dy3 = deltaY * (lineSpacing - offset)
+                segLengthX = deltaX * (lineSpacing - offset)
+                segLengthY = deltaY * (lineSpacing - offset)
             }
 
-            var x = startX + 0.35f + dx2
-            var y = startY + 0.35f + dy2
-            val dx4 = deltaX * lineLength
-            val dy4 = deltaY * lineLength
+            var curX = startX + 0.35f + segStartOffsetX
+            var curY = startY + 0.35f + segStartOffsetY
+            val dashLengthX = deltaX * lineLength
+            val dashLengthY = deltaY * lineLength
 
             while (true) {
                 if (endX > startX) {
-                    if (x > endX + 0.35f) {
+                    if (curX > endX + 0.35f) {
                         break
                     }
-                    if (x + dx3 > endX) {
-                        dx3 = endX - x
+                    if (curX + segLengthX > endX) {
+                        segLengthX = endX - curX
                     }
                 } else {
-                    if (x < endX + 0.35f) {
+                    if (curX < endX + 0.35f) {
                         break
                     }
-                    if (x + dx3 < endX) {
-                        dx3 = endX - x
+                    if (curX + segLengthX < endX) {
+                        segLengthX = endX - curX
                     }
                 }
 
                 if (endY > startY) {
-                    if (y > endY + 0.35f) {
+                    if (curY > endY + 0.35f) {
                         break
                     }
-                    if (y + dy3 > endY) {
-                        dy3 = endY - y
+                    if (curY + segLengthY > endY) {
+                        segLengthY = endY - curY
                     }
                 } else {
-                    if (y < endY + 0.35f) {
+                    if (curY < endY + 0.35f) {
                         break
                     }
-                    if (y + dy3 < endY) {
-                        dy3 = endY - y
+                    if (curY + segLengthY < endY) {
+                        segLengthY = endY - curY
                     }
                 }
 
                 OpenGL.glBegin(GL_LINES)
-                OpenGL.glVertex2f(x, y)
-                OpenGL.glVertex2f(x + dx3, y + dy3)
+                OpenGL.glVertex2f(curX, curY)
+                OpenGL.glVertex2f(curX + segLengthX, curY + segLengthY)
                 OpenGL.glEnd()
-                x += dx4 + dx3
-                y += dy4 + dy3
-                dx3 = dx1
-                dy3 = dy1
+                curX += dashLengthX + segLengthX
+                curY += dashLengthY + segLengthY
+                segLengthX = dashSpacingX
+                segLengthY = dashSpacingY
             }
         }
     }
 
-    override fun drawSurfaceLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
-        val spriteSurface = dimension as SpriteSurfaceGL
+    override fun drawSurfaceLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int) {
+        val spriteSurface = surface as SpriteSurfaceGL
         val texture = spriteSurface.surface
         setupSpriteRendering()
         setActiveTexture(spriteSurface.surface)
@@ -871,17 +871,17 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         setTexture(0, GL_PRIMARY_COLOR, GL_SRC_COLOR)
         val textureScaleU = texture!!.s / texture.singleWidth
         val textureScaleV = texture.t / texture.singleLength
-        var deltaX = (rightX - leftX).toFloat()
-        var deltaY = (bottomY - topY).toFloat()
+        var deltaX = (endX - startX).toFloat()
+        var deltaY = (endY - startY).toFloat()
         val inverseMagnitude = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
         deltaX *= inverseMagnitude
         deltaY *= inverseMagnitude
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         OpenGL.glBegin(GL_LINES)
-        OpenGL.glTexCoord2f(textureScaleU * (leftX - clipLeft), textureScaleV * (topY - clipTop))
-        OpenGL.glVertex2f(leftX + 0.35f, topY + 0.35f)
-        OpenGL.glTexCoord2f(textureScaleU * (rightX - clipLeft), textureScaleV * (bottomY - clipTop))
-        OpenGL.glVertex2f(rightX + deltaX + 0.35f, bottomY + deltaY + 0.35f)
+        OpenGL.glTexCoord2f(textureScaleU * (startX - clipLeft), textureScaleV * (startY - clipTop))
+        OpenGL.glVertex2f(startX + 0.35f, startY + 0.35f)
+        OpenGL.glTexCoord2f(textureScaleU * (endX - clipLeft), textureScaleV * (endY - clipTop))
+        OpenGL.glVertex2f(endX + deltaX + 0.35f, endY + deltaY + 0.35f)
         OpenGL.glEnd()
         setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
     }
@@ -973,9 +973,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    override fun drawThickLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, lineWidth: Int, blendMode: Int) {
+    override fun drawThickLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, lineWidth: Int, blendMode: Int) {
         OpenGL.glLineWidth(lineWidth.toFloat())
-        drawTransparentLine(leftX, topY, rightX, bottomY, colorArgb, blendMode)
+        drawTransparentLine(startX, startY, endX, endY, colorArgb, blendMode)
         OpenGL.glLineWidth(1.0f)
     }
 
@@ -1024,24 +1024,24 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    override fun drawTransparentLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, blendMode: Int) {
+    override fun drawTransparentLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, blendMode: Int) {
         setupShapeRendering()
         setBlendMode(blendMode)
         setMultisampleEnabled(true)
-        var deltaX = (rightX - leftX).toFloat()
-        var deltaY = (bottomY - topY).toFloat()
+        var deltaX = (endX - startX).toFloat()
+        var deltaY = (endY - startY).toFloat()
         if (deltaX == 0.0f && deltaY == 0.0f) {
             deltaX = 1.0f
         } else {
-            val length = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
-            deltaX *= length
-            deltaY *= length
+            val inverseMagnitude = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
+            deltaX *= inverseMagnitude
+            deltaY *= inverseMagnitude
         }
 
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         OpenGL.glBegin(GL_LINES)
-        OpenGL.glVertex2f(leftX + 0.35f, topY + 0.35f)
-        OpenGL.glVertex2f(rightX + deltaX + 0.35f, bottomY + deltaY + 0.35f)
+        OpenGL.glVertex2f(startX + 0.35f, startY + 0.35f)
+        OpenGL.glVertex2f(endX + deltaX + 0.35f, endY + deltaY + 0.35f)
         OpenGL.glEnd()
     }
 
@@ -1054,75 +1054,75 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     override fun setNativeHeap(nativeMemoryNode: NativeMemoryNode) {
         this.nativeHeap = (nativeMemoryNode as NativeMemoryGL).nativeHeap
         if (this.screenQuadArrayBuffer == null) {
-            val textureBuffer = GlBitBuffer(80)
+            val quadBuffer = GlBitBuffer(80)
             if (this.bigEndianess) {
-                textureBuffer.writeFloatBigEndian(-1.0f)
-                textureBuffer.writeFloatBigEndian(-1.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(-1.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(-1.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
-                textureBuffer.writeFloatBigEndian(1.0f)
-                textureBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(-1.0f)
+                quadBuffer.writeFloatBigEndian(-1.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(-1.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(-1.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
+                quadBuffer.writeFloatBigEndian(1.0f)
+                quadBuffer.writeFloatBigEndian(0.0f)
             } else {
-                textureBuffer.writeFloatLittleEndian(-1.0f)
-                textureBuffer.writeFloatLittleEndian(-1.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(-1.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(-1.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
-                textureBuffer.writeFloatLittleEndian(1.0f)
-                textureBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(-1.0f)
+                quadBuffer.writeFloatLittleEndian(-1.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(-1.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(-1.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
+                quadBuffer.writeFloatLittleEndian(1.0f)
+                quadBuffer.writeFloatLittleEndian(0.0f)
             }
 
-            this.screenQuadArrayBuffer = createArrayBuffer(20, textureBuffer.buffer, textureBuffer.currentPosition, false)
+            this.screenQuadArrayBuffer = createArrayBuffer(20, quadBuffer.buffer, quadBuffer.currentPosition, false)
             this.quadVertexBuffer = OpenGlArrayDrawBuffer(this.screenQuadArrayBuffer!!, GL_FLOAT, 3, 0)
             this.quadTexCoordBuffer = OpenGlArrayDrawBuffer(this.screenQuadArrayBuffer!!, GL_FLOAT, 2, 12)
             this.particleRenderer.initialize(this)
         }
     }
 
-    override fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, bool4: Boolean): NativeSprite {
+    override fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, mipmapped: Boolean): NativeSprite {
         return SpriteGL(this, width, height, transparent)
     }
 
-    override fun generateSprite(spriteType: SpriteType?, bool2: Boolean): NativeSprite {
+    override fun generateSprite(spriteType: SpriteType?, hasPalette: Boolean): NativeSprite {
         val pixels = IntArray(spriteType!!.width * spriteType.height)
         var src = 0
         var dst = 0
         if (spriteType.alpha != null) {
-            for (x in 0 until spriteType.height) {
-                for (y in 0 until spriteType.width) {
+            for (y in 0 until spriteType.height) {
+                for (x in 0 until spriteType.width) {
                     pixels[dst++] = spriteType.alpha!![src].toInt() shl 24 or spriteType.pallete[spriteType.pixels[src++].toInt() and 0xff]
                 }
             }
         } else {
-            for (x in 0 until spriteType.height) {
-                for (y in 0 until spriteType.width) {
+            for (y in 0 until spriteType.height) {
+                for (x in 0 until spriteType.width) {
                     val pixel = spriteType.pallete[spriteType.pixels[src++].toInt() and 0xff]
                     pixels[dst++] = if (pixel != 0) 0xffffff.inv() or pixel else 0
                 }
@@ -1145,8 +1145,8 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         return SpriteSurfaceGL.create(this, sizeX, sizeY, rowStartX, rowWidth)
     }
 
-    override fun clearRectangle(dimension: ComponentSurface, offsetX: Int, offsetY: Int) {
-        val spriteSurface = dimension as SpriteSurfaceGL
+    override fun clearRectangle(surface: ComponentSurface, offsetX: Int, offsetY: Int) {
+        val spriteSurface = surface as SpriteSurfaceGL
         val texture = spriteSurface.surface
         setupSpriteRendering()
         setActiveTexture(spriteSurface.surface)
@@ -1393,9 +1393,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             handleCount = 0
         }
         while (!this.renderBuffersAwaitingRemoval.isEmpty()) {
-            val renderBufferNode = this.renderBuffersAwaitingRemoval.popTail() as IntNode
-            HANDLE_BUFFER[handleCount++] = renderBufferNode.pointer.toInt()
-            this.renderBuffersSize -= renderBufferNode.value
+            val handle = this.renderBuffersAwaitingRemoval.popTail() as IntNode
+            HANDLE_BUFFER[handleCount++] = handle.pointer.toInt()
+            this.renderBuffersSize -= handle.value
             if (handleCount == 1000) {
                 OpenGL.glDeleteRenderbuffersEXT(1000, HANDLE_BUFFER, 0)
                 handleCount = 0
@@ -1440,46 +1440,46 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             setBlendMode(1)
             setMultisampleEnabled(true)
             OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
-            val startX = x + 0.35f
-            val startY = y + 0.35f
+            val centerX = x + 0.35f
+            val centerY = y + 0.35f
             val pointSize = radius shl 1
             if (pointSize < this.fillCirclePointSize) {
                 // Filled circle
                 OpenGL.glBegin(GL_QUADS)
-                OpenGL.glVertex2f(startX + 1.0f, startY + 1.0f)
-                OpenGL.glVertex2f(startX + 1.0f, startY - 1.0f)
-                OpenGL.glVertex2f(startX - 1.0f, startY - 1.0f)
-                OpenGL.glVertex2f(startX - 1.0f, startY + 1.0f)
+                OpenGL.glVertex2f(centerX + 1.0f, centerY + 1.0f)
+                OpenGL.glVertex2f(centerX + 1.0f, centerY - 1.0f)
+                OpenGL.glVertex2f(centerX - 1.0f, centerY - 1.0f)
+                OpenGL.glVertex2f(centerX - 1.0f, centerY + 1.0f)
                 OpenGL.glEnd()
             } else if (pointSize <= this.outlineCirclePointSize) {
                 // Circle outline
                 OpenGL.glEnable(GL_POINT_SMOOTH)
                 OpenGL.glPointSize(pointSize.toFloat())
                 OpenGL.glBegin(GL_POINTS)
-                OpenGL.glVertex2f(startX, startY)
+                OpenGL.glVertex2f(centerX, centerY)
                 OpenGL.glEnd()
                 OpenGL.glDisable(GL_POINT_SMOOTH)
             } else {
                 // Filled circle with complex outline
                 OpenGL.glBegin(GL_TRIANGLE_FAN)
-                OpenGL.glVertex2f(startX, startY)
-                var segments = 262144 / (radius * 6)
-                if (segments <= 64) {
-                    segments = 64
-                } else if (segments > 512) {
-                    segments = 512
+                OpenGL.glVertex2f(centerX, centerY)
+                var angleStep = 262144 / (radius * 6)
+                if (angleStep <= 64) {
+                    angleStep = 64
+                } else if (angleStep > 512) {
+                    angleStep = 512
                 }
 
-                segments = MathUtils.furtestBitValue(segments)
-                OpenGL.glVertex2f(startX + radius, startY)
+                angleStep = MathUtils.furtestBitValue(angleStep)
+                OpenGL.glVertex2f(centerX + radius, centerY)
 
-                var i = 16384 - segments
+                var i = 16384 - angleStep
                 while (i > 0) {
-                    OpenGL.glVertex2f(startX + COSINE[i] * radius, startY + SINE[i] * radius)
-                    i -= segments
+                    OpenGL.glVertex2f(centerX + COSINE[i] * radius, centerY + SINE[i] * radius)
+                    i -= angleStep
                 }
 
-                OpenGL.glVertex2f(startX + radius, startY)
+                OpenGL.glVertex2f(centerX + radius, centerY)
                 OpenGL.glEnd()
             }
         }
@@ -1489,10 +1489,10 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glLoadMatrixf(matrix4x4.elements, 0)
     }
 
-    override fun setSunPosition(matrix44var1: Matrix43) {
-        this.viewMatrix43.copyFrom(matrix44var1)
+    override fun setSunPosition(viewMatrix: Matrix43) {
+        this.viewMatrix43.copyFrom(viewMatrix)
         this.viewMatrix44.fromMatrix(this.viewMatrix43)
-        this.inverseSunMatrix43.copyFrom(matrix44var1)
+        this.inverseSunMatrix43.copyFrom(viewMatrix)
         this.inverseSunMatrix43.updateIdentitiyMatrix()
         this.inverseSunMatrix44.fromMatrix(this.inverseSunMatrix43)
         updateViewProjectionMatrix()
@@ -1572,10 +1572,10 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             this.antiSunPreviousPosition[0] = -x
             this.antiSunPreviousPosition[1] = -y
             this.antiSunPreviousPosition[2] = -z
-            val length = (1.0 / sqrt((x * x + y * y + z * z).toDouble())).toFloat()
-            this.sunDirection[0] = x * length
-            this.sunDirection[1] = y * length
-            this.sunDirection[2] = z * length
+            val inverseMagnitude = (1.0 / sqrt((x * x + y * y + z * z).toDouble())).toFloat()
+            this.sunDirection[0] = x * inverseMagnitude
+            this.sunDirection[1] = y * inverseMagnitude
+            this.sunDirection[2] = z * inverseMagnitude
             this.lightingDirection[0] = -this.sunDirection[0]
             this.lightingDirection[1] = -this.sunDirection[1]
             this.lightingDirection[2] = -this.sunDirection[2]
@@ -1987,7 +1987,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         renderTexture(materialId, hasLight, true)
     }
 
-    fun renderTexture(materialId: Int, hasLight: Boolean, has0x8: Boolean) {
+    fun renderTexture(materialId: Int, hasLight: Boolean, allowStillWater: Boolean) {
         // Every non-glyph textured draw funnels through here (directly or via the
         // setup*Rendering functions), so it is the central point to undo glyph
         // rendering's lazily-held state and rect rendering's multisample disable.
@@ -1998,8 +1998,8 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         if (this.lastMaterialId != effectiveMaterialId || this.renderStillWater != this.stillWaterToggled) {
             var texture: OpenGl2DTexture? = null
             var combineMode = 0
-            var param1 = 0
-            var param2 = 0
+            var effectParam1 = 0
+            var effectParam2 = 0
             var effectId = if (this.stillWaterToggled) 3 else 0
             if (effectiveMaterialId < 0) {
                 renderStationaryTexture()
@@ -2012,13 +2012,13 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                     renderAnimatedTexture((this.textureAnimatingProgression % 128000) / 1000.0f * material.textureSpeedU / 64.0f % 1.0f, (this.textureAnimatingProgression % 128000) / 1000.0f * material.textureSpeedV / 64.0f % 1.0f)
                 }
                 if (!this.stillWaterToggled) {
-                    param1 = material.effectParam1.toInt()
-                    param2 = material.effectParam2.toInt()
+                    effectParam1 = material.effectParam1.toInt()
+                    effectParam2 = material.effectParam2.toInt()
                     effectId = material.effectId.toInt()
                 }
                 combineMode = material.combineMode.toInt()
             }
-            this.effectManager!!.loadEffect(effectId, param1, param2, hasLight, has0x8)
+            this.effectManager!!.loadEffect(effectId, effectParam1, effectParam2, hasLight, allowStillWater)
             if (!this.effectManager!!.loadCombiner(texture, combineMode)) {
                 setActiveTexture(texture)
                 loadTextureCombineMode(combineMode)
@@ -2227,11 +2227,11 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun renderLights() {
-        var lightCount: Int
-        lightCount = 0
-        while (lightCount < this.lastSceneLightCount) {
-            val activeLight = this.lightNodes[lightCount]!!
-            val lightHandle = lightCount + 16386
+        var lightIndex: Int
+        lightIndex = 0
+        while (lightIndex < this.lastSceneLightCount) {
+            val activeLight = this.lightNodes[lightIndex]!!
+            val lightHandle = lightIndex + 16386
             LIGHT_MATRIX[0] = activeLight.getX().toFloat()
             LIGHT_MATRIX[1] = activeLight.getY().toFloat()
             LIGHT_MATRIX[2] = activeLight.getZ().toFloat()
@@ -2245,11 +2245,11 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             OpenGL.glLightfv(lightHandle, GL_DIFFUSE, LIGHT_MATRIX, 0)
             OpenGL.glLightf(lightHandle, GL_QUADRATIC_ATTENUATION, 1.0f / (activeLight.getSize2d() * activeLight.getSize2d()))
             OpenGL.glEnable(lightHandle)
-            lightCount++
+            lightIndex++
         }
-        while (lightCount < this.activeLightCount) {
-            OpenGL.glDisable(lightCount + GL_LIGHT2)
-            lightCount++
+        while (lightIndex < this.activeLightCount) {
+            OpenGL.glDisable(lightIndex + GL_LIGHT2)
+            lightIndex++
         }
         this.activeLightCount = this.lastSceneLightCount
     }
@@ -2286,10 +2286,10 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     override fun generateFlags() {
-        var meme = 32
+        var shadowSize = 32
         this.shadowScale = 0
-        while (meme > 1) {
-            meme = meme shr 1
+        while (shadowSize > 1) {
+            shadowSize = shadowSize shr 1
             this.shadowScale++
         }
         this.openglFlags = 1 shl this.shadowScale
@@ -2423,9 +2423,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    override fun drawTransparentHorizontalLine(x: Int, y: Int, width: Int, colorArgb: Int, alpha: Int) {
+    override fun drawTransparentHorizontalLine(x: Int, y: Int, width: Int, colorArgb: Int, blendMode: Int) {
         setupShapeRendering()
-        setBlendMode(alpha)
+        setBlendMode(blendMode)
         setMultisampleEnabled(true)
         val lineX = x + 0.35f
         val lineY = y + 0.35f
@@ -2456,14 +2456,14 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun accumulateCapabilities(): Int {
-        var attributes = 0
+        var capabilityFlags = 0
         this.gpuCompanyString = OpenGL.glGetString(GL_VENDOR).lowercase()
         this.gpuNameString = OpenGL.glGetString(GL_RENDERER).lowercase()
         if (this.gpuCompanyString!!.indexOf("microsoft") != -1) {
-            attributes = attributes or 0x1
+            capabilityFlags = capabilityFlags or 0x1
         }
         if (this.gpuCompanyString!!.indexOf("brian paul") != -1 || this.gpuCompanyString!!.indexOf("mesa") != -1) {
-            attributes = attributes or 0x1
+            capabilityFlags = capabilityFlags or 0x1
         }
         val version = OpenGL.glGetString(GL_VERSION)
         val versionStrings = Utils.split(version.replace('.', ' '), ' ')
@@ -2472,20 +2472,20 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                 val majorVersion = Utils.parseInt(versionStrings[0])
                 val minorVersion = Utils.parseInt(versionStrings[1])
                 this.openglVersion = majorVersion * 10 + minorVersion
-            } catch (numberformatexception: NumberFormatException) {
-                attributes = attributes or 0x4
+            } catch (exception: NumberFormatException) {
+                capabilityFlags = capabilityFlags or 0x4
             }
         } else {
-            attributes = attributes or 0x4
+            capabilityFlags = capabilityFlags or 0x4
         }
         if (this.openglVersion < 12) {
-            attributes = attributes or 0x2
+            capabilityFlags = capabilityFlags or 0x2
         }
         if (!this.activeOpenglInstance!!.supportsExtension("GL_ARB_multitexture")) {
-            attributes = attributes or 0x8
+            capabilityFlags = capabilityFlags or 0x8
         }
         if (!this.activeOpenglInstance!!.supportsExtension("GL_ARB_texture_env_combine")) {
-            attributes = attributes or 0x20
+            capabilityFlags = capabilityFlags or 0x20
         }
         val textureInfo = IntArray(1)
         OpenGL.glGetIntegerv(GL_MAX_TEXTURE_UNITS, textureInfo, 0)
@@ -2495,7 +2495,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, textureInfo, 0)
         this.maxTextureImageUnits = textureInfo[0]
         if (this.maxTextureUnits < 2 || this.maxTextureCoordinates < 2 || this.maxTextureImageUnits < 2) {
-            attributes = attributes or 0x10
+            capabilityFlags = capabilityFlags or 0x10
         }
         this.bigEndianess = Stream.bigEndianessEnabled()
         this.vertexbufferSupported = this.activeOpenglInstance!!.supportsExtension("GL_ARB_vertex_buffer_object")
@@ -2517,7 +2517,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glGetFloatv(GL_POINT_SIZE_RANGE, BUFFER_4F, 0)
         this.fillCirclePointSize = BUFFER_4F[0]
         this.outlineCirclePointSize = BUFFER_4F[1]
-        return attributes
+        return capabilityFlags
     }
 
     open fun setActiveTexture(replacingCombiner: OpenGlTexture?) {
@@ -2566,8 +2566,8 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         return GroundGL(this, floorFunctionMask, waterFunctionMask, regionSizeX, regionSizeY, heightsCurrentLvl, heightsNextLvl)
     }
 
-    override fun createDelegatingDisplay(canvas: Canvas, i_2: Int, i_3: Int): DelegatingDisplay {
-        return ImageProducerGL2(this, canvas)
+    override fun createDelegatingDisplay(canvas: Canvas, width: Int, height: Int): DelegatingDisplay {
+        return ImageProducerGL(this, canvas)
     }
 
     fun updateDepthRange() {
@@ -2598,7 +2598,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glLightModelfv(GL_LIGHT_MODEL_AMBIENT, BUFFER_4F, 0)
     }
 
-    override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixelData: ByteArray, i_8: Int, textureBlendColor: Int) {
+    override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixelData: ByteArray, tileWidth: Int, blendMode: Int) {
         val textureCoordV: Float
         val textureCoordU: Float
         if (this.worldMapTexture != null && this.worldMapTexture!!.width >= width && this.worldMapTexture!!.length >= height) {
@@ -2606,14 +2606,14 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             textureCoordV = this.worldMapTexture!!.t * height / this.worldMapTexture!!.length
             textureCoordU = this.worldMapTexture!!.s * width / this.worldMapTexture!!.width
         } else {
-            this.worldMapTexture = OpenGl2DTexture_Sub1.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, pixelData, GLFormat.RGBA)
+            this.worldMapTexture = OpenGl2DImageTexture.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, pixelData, GLFormat.RGBA)
             this.worldMapTexture!!.setRepeat(false, false)
             textureCoordV = this.worldMapTexture!!.t
             textureCoordU = this.worldMapTexture!!.s
         }
         setupSpriteRendering()
         setActiveTexture(this.worldMapTexture)
-        setBlendMode(textureBlendColor)
+        setBlendMode(blendMode)
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         setTextureEnvColor(textureEnvColor)
         loadTextureCombineMode(GL_INTERPOLATE, GL_INTERPOLATE)
@@ -2706,8 +2706,8 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
 
     override fun getMaxLights(): Int = 4
 
-    override fun setModelMatrix(matrix441: Matrix44) {
-        this.currentModelMatrix.copyFrom(matrix441)
+    override fun setModelMatrix(modelMatrix: Matrix44) {
+        this.currentModelMatrix.copyFrom(modelMatrix)
         updateViewProjectionMatrix()
         recalculateFogAndProjection()
     }

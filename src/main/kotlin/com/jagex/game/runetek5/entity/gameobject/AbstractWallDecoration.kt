@@ -51,7 +51,7 @@ abstract class AbstractWallDecoration protected constructor(
         val abs = getAbsolutePosition().coords
         val tileX = (abs.x.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionX + scene!!.visibleTiles
         val tileZ = (abs.z.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionY + scene!!.visibleTiles
-        return scene!!.adjacent_tile_on_screen[tileX][tileZ]
+        return scene!!.tileInFrustum[tileX][tileZ]
     }
 
     override fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, renderTypeAdjustment: Boolean) {

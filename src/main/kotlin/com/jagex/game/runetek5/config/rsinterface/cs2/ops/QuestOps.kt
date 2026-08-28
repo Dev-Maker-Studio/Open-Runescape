@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -182,22 +182,22 @@ object QuestOps {
     @JvmStatic
     fun questParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            val text: String? = attributedefault4!!.typeName
-            if (i_2 == -1) {
-                executor.stringStack[++executor.stringStackPtr - 1] = text
+        val questId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            val defaultString: String? = paramType!!.typeName
+            if (questId == -1) {
+                executor.stringStack[++executor.stringStackPtr - 1] = defaultString
             } else {
-                executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUEST!!.list(i_2).getParamstring(i_3, text)
+                executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUEST!!.list(questId).getParamstring(paramId, defaultString)
             }
         } else {
-            val i_6 = attributedefault4!!.defaultInt
-            if (i_2 == -1) {
-                executor.intStack[++executor.intStackPtr - 1] = i_6
+            val defaultInt = paramType!!.defaultInt
+            if (questId == -1) {
+                executor.intStack[++executor.intStackPtr - 1] = defaultInt
             } else {
-                executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUEST!!.list(i_2).getParamint(i_3, i_6)
+                executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUEST!!.list(questId).getParamint(paramId, defaultInt)
             }
         }
     }
@@ -225,14 +225,14 @@ object QuestOps {
 
     @JvmStatic
     fun questQuestReqCount(executor: CS2Executor) {
-        val questdefinitions2: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
-        executor.intStack[++executor.intStackPtr - 1] = if (questdefinitions2!!.questPrerequisiteIds == null) 0 else questdefinitions2.questPrerequisiteIds!!.size
+        val quest: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
+        executor.intStack[++executor.intStackPtr - 1] = if (quest!!.questPrerequisiteIds == null) 0 else quest.questPrerequisiteIds!!.size
     }
 
     @JvmStatic
     fun questStatReqCount(executor: CS2Executor) {
-        val questdefinitions2: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
-        executor.intStack[++executor.intStackPtr - 1] = if (questdefinitions2!!.levelRequirements == null) 0 else questdefinitions2!!.levelRequirements!!.size
+        val quest: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
+        executor.intStack[++executor.intStackPtr - 1] = if (quest!!.levelRequirements == null) 0 else quest!!.levelRequirements!!.size
     }
 
     @JvmStatic
@@ -259,8 +259,8 @@ object QuestOps {
 
     @JvmStatic
     fun questVarbitReqCount(executor: CS2Executor) {
-        val questdefinitions2: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
-        executor.intStack[++executor.intStackPtr - 1] = if (questdefinitions2!!.varbitRequirements == null) 0 else questdefinitions2!!.varbitRequirements!!.size
+        val quest: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
+        executor.intStack[++executor.intStackPtr - 1] = if (quest!!.varbitRequirements == null) 0 else quest!!.varbitRequirements!!.size
     }
 
     @JvmStatic
@@ -291,8 +291,8 @@ object QuestOps {
 
     @JvmStatic
     fun questVarpReqCount(executor: CS2Executor) {
-        val questdefinitions2: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
-        executor.intStack[++executor.intStackPtr - 1] = if (questdefinitions2!!.varpRequirements == null) 0 else questdefinitions2!!.varpRequirements!!.size
+        val quest: QuestType? = TypeLists.QUEST!!.list(executor.intStack[--executor.intStackPtr])
+        executor.intStack[++executor.intStackPtr - 1] = if (quest!!.varpRequirements == null) 0 else quest!!.varpRequirements!!.size
     }
 
     @JvmStatic

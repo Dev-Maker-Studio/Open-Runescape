@@ -11,7 +11,7 @@ abstract class ScheduledAudioEvent : Node<Any?>() {
         throw Error()
     }
 
-    abstract fun processEvent(var1: PcmStreamScheduler): Int
+    abstract fun processEvent(mixer: PcmStreamMixer): Int
 
     abstract fun onRemove()
 
@@ -19,5 +19,5 @@ abstract class ScheduledAudioEvent : Node<Any?>() {
 
     abstract fun method12357()
 
-    abstract fun method12358(var1: PcmStreamScheduler): Int
+    abstract fun method12358(mixer: PcmStreamMixer): Int
 }

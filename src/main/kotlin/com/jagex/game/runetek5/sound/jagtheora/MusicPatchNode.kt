@@ -23,7 +23,7 @@ class MusicPatchNode : Node<MusicPatchNode>() {
     @JvmField var tickSampleLength: Int = 0
     @JvmField var patch: MusicPatch? = null
     @JvmField var audioFile: AbstractAudioFile? = null
-    @JvmField var musicPatchInfo: MusicPatchNode2? = null
+    @JvmField var musicPatchInfo: MusicPatchInfo? = null
     @JvmField var stream: AreaSoundStream? = null
 
     fun clearMusicPatchNode() {

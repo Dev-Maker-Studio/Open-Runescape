@@ -135,7 +135,7 @@ class ShaderProgram private constructor(
         //
         // A global "currently bound" cache would not be safe either: the legacy
         // toolkit calls jaggl OpenGL.glUseProgram directly (ShaderGL,
-        // RectangularTextureGL, MaterialEffect9GL...), including glUseProgram(0),
+        // RectangularTextureGL, BreakingWaterEffect...), including glUseProgram(0),
         // with no way to notify us. A redundant bind is one cheap call per batch
         // flush; a missed one silently corrupts a frame.
         // A run of terrain draws leaves the ground shader, its VAO and its attribute

@@ -24,7 +24,7 @@ abstract class AbstractBloomShader protected constructor(
 
     abstract fun onRendererInitialized()
 
-    abstract fun initialize(type: Int, display: DirectDisplay, compositeSampler: NativeTextureSampler, var5: NativeTextureSampler)
+    abstract fun initialize(type: Int, display: DirectDisplay, compositeSampler: NativeTextureSampler, sceneSampler: NativeTextureSampler)
 
     abstract fun reset()
 

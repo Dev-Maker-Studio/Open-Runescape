@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -182,12 +182,12 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun getMyPlayerPos(executor: CS2Executor) {
-        val b_2 = PlayerUpdate.MY_PLAYER!!.plane
-        val vector33: Vector3? = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
-        val coordgrid4: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
-        val i_5 = (vector33!!.x.toInt() shr 9) + coordgrid4!!.x
-        val i_6 = (vector33!!.z.toInt() shr 9) + coordgrid4!!.y
-        executor.intStack[++executor.intStackPtr - 1] = (i_5 shl 14) + i_6 + b_2.toInt() shl 28
+        val plane = PlayerUpdate.MY_PLAYER!!.plane
+        val pos: Vector3? = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
+        val baseCoord: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
+        val x = (pos!!.x.toInt() shr 9) + baseCoord!!.x
+        val y = (pos!!.z.toInt() shr 9) + baseCoord!!.y
+        executor.intStack[++executor.intStackPtr - 1] = (x shl 14) + y + plane.toInt() shl 28
     }
 
     @JvmStatic
@@ -197,8 +197,8 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun mapIsOwner(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (Client.mapOwnerIdentifier != null && Client.mapOwnerIdentifier.equals(text!!)) {
+        val ownerName: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (Client.mapOwnerIdentifier != null && Client.mapOwnerIdentifier.equals(ownerName!!)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -225,17 +225,17 @@ object PlayerWorldOps {
     @JvmStatic
     fun invTotal(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getContainerTotal(i_2, i_3, false)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val itemId = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getContainerTotal(containerId, itemId, false)
     }
 
     @JvmStatic
     fun invOtherTotal(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getContainerTotal(i_2, i_3, true)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val itemId = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getContainerTotal(containerId, itemId, true)
     }
 
     @JvmStatic
@@ -261,9 +261,9 @@ object PlayerWorldOps {
     @JvmStatic
     fun containerTotalParamStack(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getParamBasedContainerTotal(i_2, i_3, true)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getParamBasedContainerTotal(containerId, paramId, true)
     }
 
     @JvmStatic
@@ -274,9 +274,9 @@ object PlayerWorldOps {
     @JvmStatic
     fun invGetnum(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getAmountAtSlot(i_2, i_3, false)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val slot = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getAmountAtSlot(containerId, slot, false)
     }
 
     @JvmStatic
@@ -288,7 +288,7 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun getSecondMiniMenuEntry(executor: CS2Executor) {
-        method11160(MiniMenu.getSecondaryEntry()!!, executor)
+        pushMiniMenuEntry(MiniMenu.getSecondaryEntry()!!, executor)
     }
 
     @JvmStatic
@@ -298,8 +298,8 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun invSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.CONTAINER!!.list(value).maxItemSize
+        val containerId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.CONTAINER!!.list(containerId).maxItemSize
     }
 
     @JvmStatic
@@ -310,8 +310,8 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun coordx(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = (value shr 14) and 0x3fff
+        val coord = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = (coord shr 14) and 0x3fff
     }
 
     @JvmStatic
@@ -326,15 +326,15 @@ object PlayerWorldOps {
     @JvmStatic
     fun containerTotalParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getParamBasedContainerTotal(i_2, i_3, false)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getParamBasedContainerTotal(containerId, paramId, false)
     }
 
     @JvmStatic
     fun getContainerFreeSpace(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getFreeSlots(value)
+        val containerId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getFreeSlots(containerId)
     }
 
     @JvmStatic
@@ -345,22 +345,22 @@ object PlayerWorldOps {
     @JvmStatic
     fun invOtherGetnum(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getAmountAtSlot(i_2, i_3, true)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val slot = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getAmountAtSlot(containerId, slot, true)
     }
 
     @JvmStatic
     fun moveCoord(executor: CS2Executor) {
         executor.intStackPtr -= 4
-        var i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val i_5 = executor.intStack[executor.intStackPtr + 3]
-        i_2 += (i_3 shl 14)
-        i_2 += (i_4 shl 28)
-        i_2 += i_5
-        executor.intStack[++executor.intStackPtr - 1] = i_2
+        var coord = executor.intStack[executor.intStackPtr]
+        val dx = executor.intStack[executor.intStackPtr + 1]
+        val dy = executor.intStack[executor.intStackPtr + 2]
+        val dz = executor.intStack[executor.intStackPtr + 3]
+        coord += (dx shl 14)
+        coord += (dy shl 28)
+        coord += dz
+        executor.intStack[++executor.intStackPtr - 1] = coord
     }
 
     @JvmStatic
@@ -370,8 +370,8 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun statVisibleXp(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_XP[value]
+        val skillId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_XP[skillId]
     }
 
     @JvmStatic
@@ -382,15 +382,15 @@ object PlayerWorldOps {
     @JvmStatic
     fun invGetobj(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getItemIdAtSlot(i_2, i_3, false)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val slot = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getItemIdAtSlot(containerId, slot, false)
     }
 
     @JvmStatic
     fun statBase(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_LEVEL_ACTUAL[value]
+        val skillId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_LEVEL_ACTUAL[skillId]
     }
 
     @JvmStatic
@@ -419,11 +419,11 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun getActiveMiniMenuEntry(executor: CS2Executor) {
-        method11160(method8697(), executor)
+        pushMiniMenuEntry(getActiveEntry(), executor)
     }
 
     @JvmStatic
-    fun method8697(): MiniMenuEntry? {
+    fun getActiveEntry(): MiniMenuEntry? {
         return MiniMenu.activeEntry
     }
 
@@ -438,8 +438,8 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun coordz(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = value and 0x3fff
+        val coord = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = coord and 0x3fff
     }
 
     @JvmStatic
@@ -455,16 +455,16 @@ object PlayerWorldOps {
     @JvmStatic
     fun invTotalCat(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val inventorydef2: ItemContainerType? = TypeLists.CONTAINER!!.list(executor.intStack[executor.intStackPtr])
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        var i_4 = -1
-        for (i_5 in 0 until inventorydef2!!.defaultItemSize) {
-            if (i_3 == inventorydef2!!.itemIds!![i_5]) {
-                i_4 = inventorydef2!!.amounts!![i_5]
+        val containerType: ItemContainerType? = TypeLists.CONTAINER!!.list(executor.intStack[executor.intStackPtr])
+        val itemId = executor.intStack[executor.intStackPtr + 1]
+        var amount = -1
+        for (i in 0 until containerType!!.defaultItemSize) {
+            if (itemId == containerType!!.itemIds!![i]) {
+                amount = containerType!!.amounts!![i]
                 break
             }
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        executor.intStack[++executor.intStackPtr - 1] = amount
     }
 
     @JvmStatic
@@ -484,22 +484,22 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun coordy(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = (value shr 28)
+        val coord = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = (coord shr 28)
     }
 
     @JvmStatic
     fun invOtherGetobj(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getItemIdAtSlot(i_2, i_3, true)
+        val containerId = executor.intStack[executor.intStackPtr]
+        val slot = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = ItemContainer.getItemIdAtSlot(containerId, slot, true)
     }
 
     @JvmStatic
     fun stat(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_LEVEL_VISIBLE[value]
+        val skillId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_LEVEL_VISIBLE[skillId]
     }
 
     @JvmStatic
@@ -508,11 +508,11 @@ object PlayerWorldOps {
     }
 
     @JvmStatic
-    fun method11160(class282Sub50Sub70: MiniMenuEntry?, cs2executor1: CS2Executor) {
-        cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = MiniMenu.getClickType(class282Sub50Sub70)
-        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.getActionText(class282Sub50Sub70)
-        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.getColoredNameText(class282Sub50Sub70)
-        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.addQuestChaticons(class282Sub50Sub70)
+    fun pushMiniMenuEntry(entry: MiniMenuEntry?, executor: CS2Executor) {
+        executor.intStack[++executor.intStackPtr - 1] = MiniMenu.getClickType(entry)
+        executor.stringStack[++executor.stringStackPtr - 1] = MiniMenu.getActionText(entry)
+        executor.stringStack[++executor.stringStackPtr - 1] = MiniMenu.getColoredNameText(entry)
+        executor.stringStack[++executor.stringStackPtr - 1] = MiniMenu.addQuestChaticons(entry)
     }
 
 }

@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -162,8 +162,8 @@ object InterfaceSetterOps {
             ClientScriptOpCode.IF_SETMAXLINES -> ifSetMaxLines(exec)
             ClientScriptOpCode.IF_SETPARAM_INT -> ifSetParamInt(exec)
             ClientScriptOpCode.IF_SETPARAM_STRING -> ifSetParamString(exec)
-            ClientScriptOpCode.IF_SETVIDEO_SPRITE -> method14342(exec)
-            ClientScriptOpCode.IF_SETVIDEO_TEXT -> method305(exec)
+            ClientScriptOpCode.instr6193 -> ifSetVideoSprite(exec)
+            ClientScriptOpCode.instr6194 -> ifSetVideoText(exec)
             ClientScriptOpCode.IF_SETRECOL -> ifSetRecol(exec)
             ClientScriptOpCode.IF_SETRETEX -> ifSetRetex(exec)
             ClientScriptOpCode.IF_SETFONTMONO -> ifSetfontMono(exec)
@@ -175,18 +175,18 @@ object InterfaceSetterOps {
             ClientScriptOpCode.IF_SETPLAYERMODEL -> ifSetPlayerModel(exec)
             ClientScriptOpCode.IF_SETOBJECT_NONUM -> ifSetItemNoNum(exec)
             ClientScriptOpCode.IF_SETMODELLIGHTING -> ifSetModelLighting(exec)
-            ClientScriptOpCode.IF_SETMODELLIGHTING_SUNROTATION -> method12492(exec)
+            ClientScriptOpCode.IF_SETMODELLIGHTING_SUNROTATION -> ifSetModelLightingSunRotation(exec)
             ClientScriptOpCode.IF_SETOBJECT_WEARCOL -> ifSetItemWearCol(exec)
-            ClientScriptOpCode.IF_SETOBJECT_WEARCOL_NONUM -> ifSetItemWearColNoNum(exec)
-            ClientScriptOpCode.IF_SETMODEL_ITEMCONTAINER -> method11126(exec)
+            ClientScriptOpCode.instr6208 -> ifSetItemWearColNoNum(exec)
+            ClientScriptOpCode.instr6209 -> ifSetModelItemContainer(exec)
             ClientScriptOpCode.IF_SETPLAYERMODEL_SELF -> ifSetPlayerModelSelf(exec)
             ClientScriptOpCode.IF_SETOBJECT_ALWAYSNUM -> ifSetItemAlwaysNum(exec)
-            ClientScriptOpCode.IF_SETOBJECT_WEARCOL_ALWAYSNUM -> ifSetItemWearColAlwaysNum(exec)
+            ClientScriptOpCode.instr6793 -> ifSetItemWearColAlwaysNum(exec)
             ClientScriptOpCode.IF_SETOP -> ifSetop(exec)
             ClientScriptOpCode.IF_SETDEPTHCHILD -> ifSetDepthChild(exec)
-            ClientScriptOpCode.IF_SETDRAGRENDERBEHAVIOUR -> method2150(exec)
-            ClientScriptOpCode.IF_SETDRAGDEADZONE -> method8208(exec)
-            ClientScriptOpCode.IF_SETDRAGDEADTIME -> method5488(exec)
+            ClientScriptOpCode.IF_SETDRAGRENDERBEHAVIOUR -> ifSetDragRenderBehaviour(exec)
+            ClientScriptOpCode.IF_SETDRAGDEADZONE -> ifSetDragDeadZone(exec)
+            ClientScriptOpCode.IF_SETDRAGDEADTIME -> ifSetDragDeadTime(exec)
             ClientScriptOpCode.IF_SETOPBASE -> ifSetopBase(exec)
             ClientScriptOpCode.IF_SETTARGETVERB -> ifSetTargetVerb(exec)
             ClientScriptOpCode.IF_CLEAROPS -> ifClearOps(exec)
@@ -239,643 +239,643 @@ object InterfaceSetterOps {
 
     @JvmStatic
     fun ifSetParamInt(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method1454(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setParamInt(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetopChar(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        CS2SharedOps.method7927(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        CS2SharedOps.setOpChar(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetopTKey(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method12209(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOpTKey(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetScrollSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method506(component!!, parentInterface!!, executor)
+        CS2SharedOps.setScrollSize(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetColour(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.ifSetColor(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetNpcModel(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method11337(component!!, parentInterface!!, executor)
+        CS2SharedOps.setNpcModel(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetFill(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method8754(component!!, executor)
+        CS2SharedOps.setFill(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetLineWid(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method14892(component!!, executor)
+        CS2SharedOps.setLineWid(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnTargetEnter(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method1642(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnTargetEnter(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnScrollWheel(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method6288(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnScrollWheel(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetop(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method5291(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOp(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetNpcHead(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.ifSetNPCHead(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifClearOps(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method15474(component!!)
+        CS2SharedOps.clearOps(component!!)
     }
 
     @JvmStatic
     fun hideComp(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method786(component!!, parentInterface!!, executor)
+        CS2SharedOps.setHide(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetScrollPos(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method1852(component!!, parentInterface!!, executor)
+        CS2SharedOps.setScrollPos(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
-    fun method11126(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+    fun ifSetModelItemContainer(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method1455(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelItemContainer(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetVFlip(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method4280(component!!, executor)
+        CS2SharedOps.setVFlip(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnCamfinished(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method14653(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnCamfinished(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetTextAntimacro(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method2960(component!!, parentInterface!!, executor)
+        CS2SharedOps.setTextAntimacro(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun hookMousePress(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method15409(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnClick(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnOp(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method14586(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnOp(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetTargetOpCursor(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setTargetOpCursor(component!!, executor)
     }
 
     @JvmStatic
-    fun method14342(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+    fun ifSetVideoSprite(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method789(component!!, parentInterface!!, executor)
+        CS2SharedOps.setVideoSprite(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetModelLighting(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method6313(component!!, executor)
+        CS2SharedOps.setModelLighting(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetPosition(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setComponentPosition(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetResumeText(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setResumeText(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetClickmask(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method13468(component!!, parentInterface!!, executor)
+        CS2SharedOps.setClickmask(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetAlpha(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method2741(component!!, executor)
+        CS2SharedOps.setAlpha(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnOpt(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method910(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnOpt(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetMouseOverCursor(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method2955(component!!, executor)
+        CS2SharedOps.setMouseOverCursor(component!!, executor)
     }
 
     @JvmStatic
-    fun method5488(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+    fun ifSetDragDeadTime(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method15256(component!!, executor)
+        CS2SharedOps.setDragDeadTime(component!!, executor)
     }
 
     @JvmStatic
     fun setCompSprite(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method8390(component!!, parentInterface!!, executor)
+        CS2SharedOps.setGraphic(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetopBase(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setOpBase(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetPlayerHeadSelf(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method3987(component!!, parentInterface!!)
+        CS2SharedOps.setPlayerHeadSelf(component!!, parentInterface!!)
     }
 
     @JvmStatic
     fun ifSetRecol(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method7667(component!!, parentInterface!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setRecol(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnDialogAbort(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method2170(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnDialogAbort(component!!, executor)
     }
 
     @JvmStatic
-    fun method305(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+    fun ifSetVideoText(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method6186(component!!, parentInterface!!, executor)
+        CS2SharedOps.setVideoText(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun setIfTextAlign(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setComponentTextAlign(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetItemWearColAlwaysNum(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setItemIFComp(component!!, parentInterface!!, true, Component.StackMode.ALWAYS_NUM, executor)
     }
 
     @JvmStatic
     fun ifSetDepthChild(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         CS2SharedOps.setDepthChild(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnHold(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method3078(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnHold(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetModelOrigin(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setComponentModelOrigin(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnKey(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method4651(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnKey(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetopTChar(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        CS2SharedOps.method14605(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        CS2SharedOps.setOpTChar(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetMaxLines(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method569(component!!, executor)
+        CS2SharedOps.setMaxLines(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnMouseLeave(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         CS2SharedOps.setOnMouseLeave(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnClanSettingsTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method5017(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnClanSettingsTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetAspect(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setComponentAspect(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOutline(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method4160(component!!, executor)
+        CS2SharedOps.setOutline(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnStatTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method3338(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnStatTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun animateComp(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method797(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelAnim(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun setCompTransparency(executor: CS2Executor) {
-        val interfaceId = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(interfaceId)
-        val parentInterface: Interface? = Interface.INTERFACES!![(interfaceId shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setTransparency(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnVarTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method6689(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnVarTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method12260(component!!, parentInterface!!, executor)
+        CS2SharedOps.setComponentSize(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnMiscTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method4772(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnMiscTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetfont(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setIfFont(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetModelOrthog(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method7267(component!!, executor)
+        CS2SharedOps.setModelOrthog(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnMouseOver(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         CS2SharedOps.setOnMouseOver(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetLineDirection(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method13450(component!!, executor)
+        CS2SharedOps.setLineDirection(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetTextShadow(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method7142(component!!, executor)
+        CS2SharedOps.setTextShadow(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnTargetLeave(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method11221(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnTargetLeave(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetModelTint(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method4159(component!!, executor)
+        CS2SharedOps.setModelTint(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetPlayerModel(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method5066(component!!, parentInterface!!, executor)
+        CS2SharedOps.setPlayerModel(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnRelease(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method3365(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnRelease(component!!, executor)
     }
 
     @JvmStatic
-    fun method2150(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method869(component!!, executor)
+    fun ifSetDragRenderBehaviour(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setDragRenderBehaviour(component!!, executor)
     }
 
     @JvmStatic
     fun hookMouseExit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method11223(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnMouseExit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetRetex(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method6010(component!!, parentInterface!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setRetex(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnTimer(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method4136(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnTimer(component!!, executor)
     }
 
     @JvmStatic
-    fun method12492(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+    fun ifSetModelLightingSunRotation(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method7729(component!!, executor)
+        CS2SharedOps.setModelLightingSunRotation(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnVarClanTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method542(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnVarClanTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetItemNoNum(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setItemIFComp(component!!, parentInterface!!, false, Component.StackMode.NONUM, executor)
     }
 
     @JvmStatic
     fun ifSetModelAngle(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method4276(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelAngle(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetModelZoom(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method15511(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelZoom(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetLinkActiveClanChannel(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method5455(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnClanChannelTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetTargetVerb(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setTargetVerb(component!!, executor)
     }
@@ -884,268 +884,268 @@ object InterfaceSetterOps {
     fun ifSetopKey(executor: CS2Executor) {
         executor.intStackPtr -= 3
         @Suppress("UNCHECKED_CAST")
-        val bytes_2: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr]] as ByteArray?
+        val keyCodes: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr]] as ByteArray?
         @Suppress("UNCHECKED_CAST")
-        val bytes_3: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr + 1]] as ByteArray?
-        val value = executor.intStack[executor.intStackPtr + 2]
-        val component: Component? = Component.fromHash(value)
-        CS2SharedOps.method1838(component!!, bytes_2, bytes_3, executor)
+        val keyModifiers: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr + 1]] as ByteArray?
+        val idHash = executor.intStack[executor.intStackPtr + 2]
+        val component: Component? = Component.fromHash(idHash)
+        CS2SharedOps.setOpKey(component!!, keyCodes, keyModifiers, executor)
     }
 
     @JvmStatic
     fun ifSetPlayerModelSelf(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method12401(component!!, parentInterface!!)
+        CS2SharedOps.setPlayerModelSelf(component!!, parentInterface!!)
     }
 
     @JvmStatic
     fun ifSetItem(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setItemIFComp(component!!, parentInterface!!, false, Component.StackMode.WHEN_MULTIPLE, executor)
     }
 
     @JvmStatic
     fun ifSetOnDragComplete(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method2593(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnDragComplete(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetModel(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method7555(component!!, parentInterface!!, executor)
+        CS2SharedOps.setComponentModel(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun hookMouseEnter(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method6289(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnMouseEnter(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetHFlip(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method774(component!!, executor)
+        CS2SharedOps.setHFlip(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetTiling(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method501(component!!, executor)
+        CS2SharedOps.setTiling(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnChatTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method5009(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnChatTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun setCompText(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setComponentText(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnClanchannelTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method3366(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnFriendsChatTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifClearscripthooks(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method12630(component!!)
+        CS2SharedOps.clearScriptHooks(component!!)
     }
 
     @JvmStatic
     fun ifSetItemWearColNoNum(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setItemIFComp(component!!, parentInterface!!, true, Component.StackMode.NONUM, executor)
     }
 
     @JvmStatic
     fun ifSetOnInvTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method502(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnInvTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetParamString(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method505(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setParamString(component!!, executor)
     }
 
     @JvmStatic
     fun ifSet2DAngle(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method8310(component!!, executor)
+        CS2SharedOps.set2DAngle(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetNoClickThrough(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setNoClickThrough(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetfontMono(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method6697(component!!, parentInterface!!, executor)
+        CS2SharedOps.setFontMono(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnClickRepeat(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method2874(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnClickRepeat(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetGraphicShadow(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method2915(component!!, executor)
+        CS2SharedOps.setGraphicShadow(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetItemWearCol(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setItemIFComp(component!!, parentInterface!!, true, Component.StackMode.WHEN_MULTIPLE, executor)
     }
 
     @JvmStatic
     fun ifSetItemAlwaysNum(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
         CS2SharedOps.setItemIFComp(component!!, parentInterface!!, false, Component.StackMode.ALWAYS_NUM, executor)
     }
 
     @JvmStatic
     fun ifSetOnFriendTransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method6158(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnFriendTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnSubchange(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method7889(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnSubchange(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetTargetCursors(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method6045(component!!, executor)
+        CS2SharedOps.setTargetCursors(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnDrag(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method1083(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnDrag(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetopCursor(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method14482(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOpCursor(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnStocktransmit(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method6690(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnStockTransmit(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnResize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method1845(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnResize(component!!, executor)
     }
 
     @JvmStatic
     fun ifSetOnMouseRepeat(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        CS2SharedOps.method3672(component!!, executor)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        CS2SharedOps.setOnMouseRepeat(component!!, executor)
     }
 
     @JvmStatic
-    fun method8208(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
+    fun ifSetDragDeadZone(executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
         assert(component != null)
-        CS2SharedOps.method8387(component!!, executor)
+        CS2SharedOps.setDragDeadZone(component!!, executor)
     }
 
 }

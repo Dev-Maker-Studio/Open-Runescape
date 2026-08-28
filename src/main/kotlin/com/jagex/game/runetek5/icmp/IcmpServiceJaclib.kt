@@ -15,11 +15,11 @@ import jaclib.ping.IcmpService
 open class IcmpServiceJaclib : IcmpService() {
     @JvmField var listeners: MutableList<ICmpServiceListener> = ArrayList()
 
-    override protected fun notify(i: Int) {
+    override protected fun notify(state: Int) {
         val iterator = listeners.iterator()
         while (iterator.hasNext()) {
             val listener = iterator.next()
-            listener.dummy(0 == i, -1942989186)
+            listener.onNotify(0 == state, -1942989186)
         }
     }
 
@@ -27,39 +27,39 @@ open class IcmpServiceJaclib : IcmpService() {
         val iterator = listeners.iterator()
         while (iterator.hasNext()) {
             val listener = iterator.next()
-            listener.onMouseMoved(bitpackedPosition, meta, dummyAlways0, 53718982)
+            listener.onMouseEvent(bitpackedPosition, meta, dummyAlways0, 53718982)
         }
     }
 
-    override protected fun method11597(i: Int) {
+    override protected fun method11597(state: Int) {
         val iterator = listeners.iterator()
         while (iterator.hasNext()) {
             val listener = iterator.next()
-            listener.dummy(0 == i, -1493708806)
+            listener.onNotify(0 == state, -1493708806)
         }
     }
 
-    override protected fun method11598(i: Int) {
+    override protected fun method11598(state: Int) {
         val iterator = listeners.iterator()
         while (iterator.hasNext()) {
             val listener = iterator.next()
-            listener.dummy(0 == i, 1478443735)
+            listener.onNotify(0 == state, 1478443735)
         }
     }
 
-    override protected fun method11599(i: Int, i2: Int, i3: Int) {
+    override protected fun method11599(bitpackedPosition: Int, meta: Int, dummyAlways0: Int) {
         val iterator = listeners.iterator()
         while (iterator.hasNext()) {
             val listener = iterator.next()
-            listener.onMouseMoved(i, i2, i3, 53718982)
+            listener.onMouseEvent(bitpackedPosition, meta, dummyAlways0, 53718982)
         }
     }
 
-    override protected fun method11600(i: Int, i4: Int, i5: Int) {
+    override protected fun method11600(bitpackedPosition: Int, meta: Int, dummyAlways0: Int) {
         val iterator = listeners.iterator()
         while (iterator.hasNext()) {
             val listener = iterator.next()
-            listener.onMouseMoved(i, i4, i5, 53718982)
+            listener.onMouseEvent(bitpackedPosition, meta, dummyAlways0, 53718982)
         }
     }
 
@@ -67,31 +67,31 @@ open class IcmpServiceJaclib : IcmpService() {
         @JvmStatic @Volatile var icmpService: IcmpServiceJaclib? = null
 
         @JvmStatic
-        fun appendListener(toAdd: ICmpServiceListener) {
+        fun appendListener(listener: ICmpServiceListener) {
             if (icmpService == null) {
                 throw IllegalStateException("")
             } else {
-                icmpService!!.listeners.add(toAdd)
+                icmpService!!.listeners.add(listener)
             }
         }
 
         @JvmStatic
         fun initialize() {
             if (start(-1)) {
-                appendListener(MouseMovedICmpServiceListener())
+                appendListener(MouseEventICmpServiceListener())
             }
         }
 
         @JvmStatic
         fun start(dummy: Int): Boolean {
             do {
-                val available: Boolean = try {
+                val isAvailable: Boolean = try {
                     if (available()) break
                     false
                 } catch (throwable: Throwable) {
                     return false
                 }
-                return available
+                return isAvailable
             } while (false)
             if (icmpService != null) throw IllegalStateException("")
             icmpService = IcmpServiceJaclib()

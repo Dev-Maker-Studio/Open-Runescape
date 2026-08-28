@@ -15,5 +15,5 @@ abstract class RouteStrategy {
     @JvmField
     var destinationSizeY: Int = 0
 
-    abstract fun canExit(size: Int, x: Int, y: Int, var4: CollisionMap): Boolean
+    abstract fun canExit(size: Int, x: Int, y: Int, clipMap: CollisionMap): Boolean
 }

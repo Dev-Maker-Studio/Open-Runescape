@@ -46,37 +46,37 @@ class IntegratedGraphicsDisplayGL(
         return true
     }
 
-    override fun setFramebuffer(slot: Int, nativeHandle: FrameBuffer?) {
-        val bitFlag = 1 shl slot
-        val renderBuffer = nativeHandle as NativeRenderBuffer?
-        if (nativeHandle == null) {
-            renderBufferFlags = renderBufferFlags and bitFlag.inv()
+    override fun setFramebuffer(slot: Int, frameBuffer: FrameBuffer?) {
+        val slotFlag = 1 shl slot
+        val nativeRenderBuffer = frameBuffer as NativeRenderBuffer?
+        if (frameBuffer == null) {
+            renderBufferFlags = renderBufferFlags and slotFlag.inv()
             colorBuffers[slot] = null
             if (renderBufferFlags == 0) {
                 height = 0
                 width = 0
             }
         } else {
-            if (bitFlag != (renderBufferFlags or bitFlag)) {
-                if (width != renderBuffer!!.getUseWidth() || height != renderBuffer.getUseHeight()) {
+            if (slotFlag != (renderBufferFlags or slotFlag)) {
+                if (width != nativeRenderBuffer!!.getUseWidth() || height != nativeRenderBuffer.getUseHeight()) {
                     throw RuntimeException()
                 }
             } else {
-                height = renderBuffer!!.getUseHeight()
-                width = renderBuffer.getUseWidth()
+                height = nativeRenderBuffer!!.getUseHeight()
+                width = nativeRenderBuffer.getUseWidth()
                 if (this === toolkit.getDisplay()) {
                     toolkit.resetOrthoAndDisplay()
                 }
             }
 
-            renderBufferFlags = renderBufferFlags or bitFlag
-            colorBuffers[slot] = renderBuffer
+            renderBufferFlags = renderBufferFlags or slotFlag
+            colorBuffers[slot] = nativeRenderBuffer
         }
 
         if (this === toolkit.getDisplay()) {
             createColorBuffer(slot)
         } else {
-            occupiedSlots = occupiedSlots or bitFlag
+            occupiedSlots = occupiedSlots or slotFlag
         }
     }
 
@@ -102,18 +102,18 @@ class IntegratedGraphicsDisplayGL(
         return status == GL_FRAMEBUFFER_COMPLETE
     }
 
-    fun bindFrameBuffer(i_3: Int, i_4: Int, bool8: Boolean) {
-        val height = height
+    fun bindFrameBuffer(blitWidth: Int, blitHeight: Int, blitDepth: Boolean) {
+        val srcHeight = height
         val displayHeight = toolkit.getDisplay()!!.getHeight()
-        var flags = 0
-        if (bool8) {
-            flags = flags or 0x100
+        var blitMask = 0
+        if (blitDepth) {
+            blitMask = blitMask or 0x100
         }
 
-        flags = flags or 0x4000
+        blitMask = blitMask or 0x4000
 
         OpenGL.glBindFramebufferEXT(GL_READ_FRAMEBUFFER, handle)
-        OpenGL.glBlitFramebufferEXT(0, height - i_4, i_3, height, 0, displayHeight - i_4, i_3, displayHeight, flags, GL_NEAREST)
+        OpenGL.glBlitFramebufferEXT(0, srcHeight - blitHeight, blitWidth, srcHeight, 0, displayHeight - blitHeight, blitWidth, displayHeight, blitMask, GL_NEAREST)
         OpenGL.glBindFramebufferEXT(GL_READ_FRAMEBUFFER, 0)
     }
 

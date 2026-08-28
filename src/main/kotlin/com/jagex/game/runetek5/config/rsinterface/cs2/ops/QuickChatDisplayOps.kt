@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -134,24 +134,24 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.CHATCAT_GETSUBCATCOUNT -> chatCatGetSubCatCount(exec)
             ClientScriptOpCode.QC_GETMESSAGE -> qcGetMessage(exec)
             ClientScriptOpCode.CHATPHRASE_GETTEXT -> chatPhraseGetText(exec)
-            ClientScriptOpCode.CHATPHRASE_GETAUTORESPONSECOUNT -> method8865(exec)
-            ClientScriptOpCode.CHATPHRASE_GETAUTORESPONSE -> method1362(exec)
+            ClientScriptOpCode.CHATPHRASE_GETAUTORESPONSECOUNT -> chatPhraseGetAutoResponseCount(exec)
+            ClientScriptOpCode.CHATPHRASE_GETAUTORESPONSE -> chatPhraseGetAutoResponse(exec)
             ClientScriptOpCode.QC_SETMESSAGE -> qcSetMessage(exec)
             ClientScriptOpCode.QC_SENDPUBLICMESSAGE -> qcSendPublicMessage(exec)
             ClientScriptOpCode.QC_SENDPRIVATEMESSAGE -> qcSendPrivateMessage(exec)
             ClientScriptOpCode.QC_SENDFRIENDSCHATMESSAGE -> qcSendFriendsChatMessage(exec)
             ClientScriptOpCode.QC_GETSUBHOTKEY -> qcGetSubHotkey(exec)
-            ClientScriptOpCode.CHATCAT_GETPHRASESHORTCUT -> method7826(exec)
-            ClientScriptOpCode.CHATCAT_FINDSUBCATBYSHORTCUT -> method4148(exec)
-            ClientScriptOpCode.CHATCAT_FINDPHRASEBYSHORTCUT -> method1783(exec)
-            ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMAND -> method6304(exec)
-            ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMANDPARAM_ENUM -> method6439(exec)
-            ClientScriptOpCode.QC_SETVALUE -> method4631(exec)
-            ClientScriptOpCode.QC_SETVALUE_ALT -> method1085(exec)
-            ClientScriptOpCode.QC_GETPHRASEVALUE -> method2091(exec)
+            ClientScriptOpCode.CHATCAT_GETPHRASESHORTCUT -> chatCatGetPhraseShortcut(exec)
+            ClientScriptOpCode.CHATCAT_FINDSUBCATBYSHORTCUT -> chatCatFindSubCatByShortcut(exec)
+            ClientScriptOpCode.CHATCAT_FINDPHRASEBYSHORTCUT -> chatCatFindPhraseByShortcut(exec)
+            ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMAND -> chatPhraseGetDynamicCommand(exec)
+            ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMANDPARAM_ENUM -> chatPhraseGetDynamicCommandParamEnum(exec)
+            ClientScriptOpCode.QC_SETVALUE -> qcSetValue(exec)
+            ClientScriptOpCode.QC_SETVALUE_ALT -> qcSetValueAlt(exec)
+            ClientScriptOpCode.QC_GETPHRASEVALUE -> qcGetPhraseValue(exec)
             ClientScriptOpCode.CHATPHRASE_FIND -> chatPhraseFind(exec)
             ClientScriptOpCode.CHATPHRASE_FINDNEXT -> chatPhraseFindnext(exec)
-            ClientScriptOpCode.CHATPHRASE_FINDRESET -> chatPhraseFindrestart()
+            ClientScriptOpCode.instr6601 -> chatPhraseFindrestart()
             ClientScriptOpCode.QC_SENDCLANCHATMESSAGE -> qcSendClanChatMessage(exec)
             ClientScriptOpCode.QC_SENDGUESTCLANCHATMESSAGE -> qcSendGuestClanChatMessage(exec)
             ClientScriptOpCode.KEYHELD_CTRL -> keyHeldCtrl(exec)
@@ -162,74 +162,74 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.WORLDMAP_SETMAP -> worldMapSetMap(exec)
             ClientScriptOpCode.WORLDMAP_GETMAP -> worldMapGetMap(exec)
             ClientScriptOpCode.WORLDMAP_GETMAPNAME -> worldMapGetMapName(exec)
-            ClientScriptOpCode.WORLDMAP_GETCONFIGSIZE -> method8219(exec)
+            ClientScriptOpCode.WORLDMAP_GETCONFIGSIZE -> worldMapGetConfigSize(exec)
             ClientScriptOpCode.WORLDMAP_GETDISPLAYPOSITION -> worldMapGetDisplayPosition(exec)
-            ClientScriptOpCode.WORLDMAP_GETCONFIGORIGIN -> method7276(exec)
+            ClientScriptOpCode.WORLDMAP_GETCONFIGORIGIN -> worldMapGetConfigOrigin(exec)
             ClientScriptOpCode.WORLDMAP_GETSIZE -> worldMapGetSize(exec)
             ClientScriptOpCode.WORLDMAP_LISTELEMENT_START -> worldMapListElementStart(exec)
             ClientScriptOpCode.WORLDMAP_LISTELEMENT_NEXT -> worldMapListElementNext(exec)
-            ClientScriptOpCode.WORLDMAP_JUMPTOSOURCECOORD -> method3556(exec)
-            ClientScriptOpCode.WORLDMAP_COORDINMAP -> method2856(exec)
-            ClientScriptOpCode.WORLDMAP_GETCONFIGZOOM -> method856(exec)
-            ClientScriptOpCode.WORLDMAP_ISLOADED -> method2737(exec)
+            ClientScriptOpCode.WORLDMAP_JUMPTOSOURCECOORD -> worldMapJumpToSourceCoord(exec)
+            ClientScriptOpCode.WORLDMAP_COORDINMAP -> worldMapCoordInMap(exec)
+            ClientScriptOpCode.WORLDMAP_GETCONFIGZOOM -> worldMapGetConfigZoom(exec)
+            ClientScriptOpCode.WORLDMAP_ISLOADED -> worldMapIsLoaded(exec)
             ClientScriptOpCode.WORLDMAP_JUMPTODISPLAYCOORD -> worldMapJumpToDisplayCoord(exec)
-            ClientScriptOpCode.WORLDMAP_GETSOURCEPOSITION -> method7043(exec)
+            ClientScriptOpCode.WORLDMAP_GETSOURCEPOSITION -> worldMapGetSourcePosition(exec)
             ClientScriptOpCode.WORLDMAP_SETMAP_COORD -> worldMapSetMapCoord(exec)
             ClientScriptOpCode.WORLDMAP_GETDISPLAYCOORD -> worldMapGetDisplayCoord(exec)
-            ClientScriptOpCode.WORLDMAP_GETSOURCECOORD -> method12572(exec)
-            ClientScriptOpCode.WORLDMAP_FLASHELEMENT -> method810(exec)
+            ClientScriptOpCode.WORLDMAP_GETSOURCECOORD -> worldMapGetSourceCoord(exec)
+            ClientScriptOpCode.WORLDMAP_FLASHELEMENT -> worldMapFlashElement(exec)
             ClientScriptOpCode.WORLDMAP_SETMAP_COORD_OVERRIDE -> worldMapSetMapCoordOverride(exec)
-            ClientScriptOpCode.WORLDMAP_DISABLEELEMENTS -> method3919(exec)
-            ClientScriptOpCode.WORLDMAP_GETDISABLEELEMENTS -> method11339(exec)
-            ClientScriptOpCode.WORLDMAP_FLASHELEMENTCATEGORY -> method5829(exec)
-            ClientScriptOpCode.WORLDMAP_DISABLEELEMENTCATEGORY -> method12506(exec)
-            ClientScriptOpCode.WORLDMAP_GETDISABLEELEMENTCATEGORY -> method2963(exec)
-            ClientScriptOpCode.WORLDMAP_DISABLEELEMENT -> method14836(exec)
-            ClientScriptOpCode.WORLDMAP_GETDISABLEELEMENT -> method3557(exec)
+            ClientScriptOpCode.WORLDMAP_DISABLEELEMENTS -> worldMapDisableElements(exec)
+            ClientScriptOpCode.WORLDMAP_GETDISABLEELEMENTS -> worldMapGetDisableElements(exec)
+            ClientScriptOpCode.WORLDMAP_FLASHELEMENTCATEGORY -> worldMapFlashElementCategory(exec)
+            ClientScriptOpCode.WORLDMAP_DISABLEELEMENTCATEGORY -> worldMapDisableElementCategory(exec)
+            ClientScriptOpCode.WORLDMAP_GETDISABLEELEMENTCATEGORY -> worldMapGetDisableElementCategory(exec)
+            ClientScriptOpCode.WORLDMAP_DISABLEELEMENT -> worldMapDisableElement(exec)
+            ClientScriptOpCode.WORLDMAP_GETDISABLEELEMENT -> worldMapGetDisableElement(exec)
             ClientScriptOpCode.WORLDMAP_GETCURRENTMAP -> worldMapGetCurrentMap(exec)
-            ClientScriptOpCode.WORLDMAP_FINDNEARESTELEMENT -> method12660(exec)
+            ClientScriptOpCode.WORLDMAP_FINDNEARESTELEMENT -> worldMapFindNearestElement(exec)
             ClientScriptOpCode.WORLDMAP_CLOSEMAP -> worldmapCloseMap()
             ClientScriptOpCode.FULLSCREEN -> fullscreen(exec)
-            ClientScriptOpCode.FULLSCREEN_RESTORE -> method3613()
+            ClientScriptOpCode.FULLSCREEN_RESTORE -> fullscreenRestore()
             ClientScriptOpCode.FULLSCREEN_MODECOUNT -> fullscreenModeCount(exec)
             ClientScriptOpCode.FULLSCREEN_GETMODE -> fullscreenGetMode(exec)
             ClientScriptOpCode.FULLSCREEN_LASTMODE -> fullscreenLastMode(exec)
-            ClientScriptOpCode.DETAIL_GET_WINDOWED_MODE -> method8199(exec)
+            ClientScriptOpCode.DETAIL_GET_WINDOWED_MODE -> detailGetWindowedMode(exec)
             ClientScriptOpCode.CHOOSE_RENDER_TYPE -> chooseRenderType(exec)
-            ClientScriptOpCode.DETAILGET_FIXEDSCREEN -> method3358(exec)
+            ClientScriptOpCode.DETAILGET_FIXEDSCREEN -> detailGetFixedScreen(exec)
             ClientScriptOpCode.DETAIL_SET_SCREENSIZE -> detailScreenSize(exec)
-            ClientScriptOpCode.OPENURL_NOLOGIN -> method14434(exec)
-            ClientScriptOpCode.SETRECOLPALETTE -> method1861(exec)
+            ClientScriptOpCode.OPENURL_NOLOGIN -> openUrlNoLogin(exec)
+            ClientScriptOpCode.SETRECOLPALETTE -> setRecolPalette(exec)
             ClientScriptOpCode.SPLINE_NEW -> splineNew(exec)
             ClientScriptOpCode.SPLINE_ADDPOINT -> splineSetPoint(exec)
             ClientScriptOpCode.SPLINE_LENGTH -> camGetSplineLength(exec)
             ClientScriptOpCode.CLIENT_QUIT -> WindowMode.notifyError()
             ClientScriptOpCode.GETHOSTNAME -> opGetHostName(exec)
-            ClientScriptOpCode.OPENURL_FULLSCREENSAFE -> method8263(exec)
-            ClientScriptOpCode.CONSOLE_PRINT -> method1604(exec)
-            ClientScriptOpCode.SETUP_MENUCHROME -> method8206(exec)
-            ClientScriptOpCode.RESET_CHATMEDIA -> method7277()
+            ClientScriptOpCode.OPENURL_FULLSCREENSAFE -> openUrlFullscreenSafe(exec)
+            ClientScriptOpCode.CONSOLE_PRINT -> consolePrint(exec)
+            ClientScriptOpCode.SETUP_MENUCHROME -> setupMenuChrome(exec)
+            ClientScriptOpCode.RESET_CHATMEDIA -> resetChatMediaAndFont()
             ClientScriptOpCode.SETDEFAULTCURSORS -> setDefaultCursors(exec)
             ClientScriptOpCode.POP_2_INT -> pop2Int(exec)
             ClientScriptOpCode.IF_GETTOP -> ifGettop(exec)
-            ClientScriptOpCode.DOCHEAT -> method584(exec)
-            ClientScriptOpCode.BROWSER_CLOSE -> method2171()
-            ClientScriptOpCode.BROWSER_OPEN -> method587()
+            ClientScriptOpCode.DOCHEAT -> doCheat(exec)
+            ClientScriptOpCode.BROWSER_CLOSE -> browserClose()
+            ClientScriptOpCode.BROWSER_OPEN -> browserOpen()
             ClientScriptOpCode.GETCLIPBOARD -> getClipboard(exec)
-            ClientScriptOpCode.MINIMENU_SETMAXENTRIES -> method7209(exec)
-            ClientScriptOpCode.OPENURL_SHIM -> method12210(exec)
+            ClientScriptOpCode.MINIMENU_SETMAXENTRIES -> miniMenuSetMaxEntries(exec)
+            ClientScriptOpCode.OPENURL_SHIM -> openUrlShim(exec)
             ClientScriptOpCode.IS_APPLET -> opIsApplet(exec)
             ClientScriptOpCode.CHECK_JAVA_VERSION -> checkJavaVersion(exec)
             ClientScriptOpCode.IS_GAMESCREEN_STATE -> isGameScreenState(exec)
-            ClientScriptOpCode.GETPREFERENCEFILE -> method15513(exec)
-            ClientScriptOpCode.OPENDIRECTORYPICKER -> method8718(exec)
-            ClientScriptOpCode.GETDIRECTORYPICKERRESULT -> method7021(exec)
-            ClientScriptOpCode.VALIDATECACHEDIRECTORY -> method13359(exec)
+            ClientScriptOpCode.GETPREFERENCEFILE -> getPreferenceFile(exec)
+            ClientScriptOpCode.OPENDIRECTORYPICKER -> openDirectoryPicker(exec)
+            ClientScriptOpCode.GETDIRECTORYPICKERRESULT -> getDirectoryPickerResult(exec)
+            ClientScriptOpCode.VALIDATECACHEDIRECTORY -> opValidateCacheDirectory(exec)
             ClientScriptOpCode.CAM_MOVETO -> camMoveTo(exec)
             ClientScriptOpCode.CAM_LOOKAT -> camLookat(exec)
-            ClientScriptOpCode.CAM_MOVEALONG -> method1366(exec)
+            ClientScriptOpCode.CAM_MOVEALONG -> camMoveAlong(exec)
             ClientScriptOpCode.CAM_SMOOTHRESET -> camSmoothReset()
-            ClientScriptOpCode.CAM_FORCEANGLE -> method16079(exec)
+            ClientScriptOpCode.CAM_FORCEANGLE -> camForceAngle(exec)
             ClientScriptOpCode.CAM_GETANGLE_XA -> camGetAngleXa(exec)
             ClientScriptOpCode.CAM_GETANGLE_YA -> camGetAngleYa(exec)
             ClientScriptOpCode.CAM_INC_X -> camIncX()
@@ -238,9 +238,9 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.CAM_DEC_Y -> camDecY()
             ClientScriptOpCode.CAM_SETFOLLOWHEIGHT -> camSetFollowHeight(exec)
             ClientScriptOpCode.CAM_GETFOLLOWHEIGHT -> camGetFollowHeight(exec)
-            ClientScriptOpCode.COORD_CLAMPTOSCENE -> method11439(exec)
+            ClientScriptOpCode.COORD_CLAMPTOSCENE -> coordClampToScene(exec)
             ClientScriptOpCode.CAM_RESET -> camReset()
-            ClientScriptOpCode.COORD_CLAMPTOSCENE_ORDEFAULT -> method3038(exec)
+            ClientScriptOpCode.COORD_CLAMPTOSCENE_ORDEFAULT -> coordClampToSceneOrDefault(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by QuickChatDisplayOps")
         }
     }
@@ -251,36 +251,36 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method15513(executor: CS2Executor) {
+    fun getPreferenceFile(executor: CS2Executor) {
         executor.stringStack[++executor.stringStackPtr - 1] = GameShell.getPreferenceFile().toString()
     }
 
     @JvmStatic
-    fun method1366(executor: CS2Executor) {
+    fun camMoveAlong(executor: CS2Executor) {
         executor.intStackPtr -= 6
-        val i_2 = executor.intStack[executor.intStackPtr]
-        if (i_2 >= 2) {
+        val positionPathIndex = executor.intStack[executor.intStackPtr]
+        if (positionPathIndex >= 2) {
             throw RuntimeException()
         } else {
-            Client.cameraPositionPathIndex = i_2
-            val i_3 = executor.intStack[executor.intStackPtr + 1]
-            if (i_3 + 1 >= (Client.cameraSplinePaths[Client.cameraPositionPathIndex]!!.size shr 1)) {
+            Client.cameraPositionPathIndex = positionPathIndex
+            val positionKeyframe = executor.intStack[executor.intStackPtr + 1]
+            if (positionKeyframe + 1 >= (Client.cameraSplinePaths[Client.cameraPositionPathIndex]!!.size shr 1)) {
                 throw RuntimeException()
             } else {
-                Client.cameraPositionKeyframe = i_3
+                Client.cameraPositionKeyframe = positionKeyframe
                 Client.cameraSplineProgress = 0
                 Client.cameraSplineSpeedStart = executor.intStack[executor.intStackPtr + 2]
                 Client.cameraSplineSpeedEnd = executor.intStack[executor.intStackPtr + 3]
-                val i_4 = executor.intStack[executor.intStackPtr + 4]
-                if (i_4 >= 2) {
+                val lookAtPathIndex = executor.intStack[executor.intStackPtr + 4]
+                if (lookAtPathIndex >= 2) {
                     throw RuntimeException()
                 } else {
-                    Client.cameraLookAtPathIndex = i_4
-                    val i_5 = executor.intStack[executor.intStackPtr + 5]
-                    if (i_5 + 1 >= (Client.cameraSplinePaths[Client.cameraLookAtPathIndex]!!.size shr 1)) {
+                    Client.cameraLookAtPathIndex = lookAtPathIndex
+                    val lookAtKeyframe = executor.intStack[executor.intStackPtr + 5]
+                    if (lookAtKeyframe + 1 >= (Client.cameraSplinePaths[Client.cameraLookAtPathIndex]!!.size shr 1)) {
                         throw RuntimeException()
                     } else {
-                        Client.cameraLookAtKeyframe = i_5
+                        Client.cameraLookAtKeyframe = lookAtKeyframe
                         Camera.cameraCalculationType = 3
                         StaticMethods.cameraTargetAbsY = -1
                         PingRequester.cameraTargetAbsX = -1
@@ -292,11 +292,11 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun camSetFollowHeight(executor: CS2Executor) {
-        var value = executor.intStack[--executor.intStackPtr]
-        if (value < 0) {
-            value = 0
+        var followHeight = executor.intStack[--executor.intStackPtr]
+        if (followHeight < 0) {
+            followHeight = 0
         }
-        Client.cameraMaxZoom = value + Client.cameraBaseZoom
+        Client.cameraMaxZoom = followHeight + Client.cameraBaseZoom
     }
 
     @JvmStatic
@@ -305,12 +305,12 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method12572(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
-        if (class282Sub50Sub63 != null) {
-            val flag = class282Sub50Sub63.mapToGameCoords((value shr 14) and 0x3fff, value and 0x3fff, CS2Executor.coordConversionBuffer)
-            if (flag) {
+    fun worldMapGetSourceCoord(executor: CS2Executor) {
+        val displayCoord = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMapDisplay.getStaticElement()
+        if (mapElement != null) {
+            val converted = mapElement.mapToGameCoords((displayCoord shr 14) and 0x3fff, displayCoord and 0x3fff, CS2Executor.coordConversionBuffer)
+            if (converted) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![2]
             } else {
@@ -324,104 +324,104 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method8718(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        executor.filePicker = DirectoryPicker(text!!)
+    fun openDirectoryPicker(executor: CS2Executor) {
+        val dialogTitle: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        executor.filePicker = DirectoryPicker(dialogTitle!!)
     }
 
     @JvmStatic
     fun chatCatGetSubCat(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val class282Sub50Sub144: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(i_2)
-        val i_5 = class282Sub50Sub144!!.subCategories!![i_3]
-        executor.intStack[++executor.intStackPtr - 1] = i_5
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val subCatIndex = executor.intStack[executor.intStackPtr + 1]
+        val category: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId)
+        val subCatId = category!!.subCategories!![subCatIndex]
+        executor.intStack[++executor.intStackPtr - 1] = subCatId
     }
 
     @JvmStatic
-    fun method3556(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
-        if (class282Sub50Sub63 != null) {
-            val flag = class282Sub50Sub63.gameToMapCoordsForPlane((value shr 28) and 0x3, (value shr 14) and 0x3fff, value and 0x3fff, CS2Executor.coordConversionBuffer)
-            if (flag) {
+    fun worldMapJumpToSourceCoord(executor: CS2Executor) {
+        val sourceCoord = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMapDisplay.getStaticElement()
+        if (mapElement != null) {
+            val converted = mapElement.gameToMapCoordsForPlane((sourceCoord shr 28) and 0x3, (sourceCoord shr 14) and 0x3fff, sourceCoord and 0x3fff, CS2Executor.coordConversionBuffer)
+            if (converted) {
                 StaticMethods.setWorldMapScrollTarget(CS2Executor.coordConversionBuffer!![1], CS2Executor.coordConversionBuffer!![2])
             }
         }
     }
 
     @JvmStatic
-    fun method3557(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val node3: Node<*>? = WorldMapSub1.hiddenMecIds.get(value.toLong())
-        executor.intStack[++executor.intStackPtr - 1] = if (node3 != null) 1 else 0
+    fun worldMapGetDisableElement(executor: CS2Executor) {
+        val elementId = executor.intStack[--executor.intStackPtr]
+        val hiddenNode: Node<*>? = WorldMapDisplay.hiddenMecIds.get(elementId.toLong())
+        executor.intStack[++executor.intStackPtr - 1] = if (hiddenNode != null) 1 else 0
     }
 
     @JvmStatic
     fun qcSendClanChatMessage(executor: CS2Executor) {
-        val class1842: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
-        tcpmessage3!!.buffer.writeByte(0)
-        val value = tcpmessage3!!.buffer.currentPosition
-        tcpmessage3!!.buffer.writeByte(2)
-        tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
-        tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - value)
-        class1842!!.queuePacket(tcpmessage3)
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
+        packet!!.buffer.writeByte(0)
+        val payloadStart = packet!!.buffer.currentPosition
+        packet!!.buffer.writeByte(2)
+        packet!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(packet!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
+        packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - payloadStart)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
-    fun method8263(executor: CS2Executor) {
+    fun openUrlFullscreenSafe(executor: CS2Executor) {
         if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
         }
-        val string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val flag = executor.intStack[--executor.intStackPtr] == 1
-        val string_4: String? = ServerEnvironment.getUrl() + string_2
-        Browser.openOpenjs(string_4!!, flag, Client.useBrowserAppletMode)
+        val urlPath: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val loggedIn = executor.intStack[--executor.intStackPtr] == 1
+        val fullUrl: String? = ServerEnvironment.getUrl() + urlPath
+        Browser.openOpenjs(fullUrl!!, loggedIn, Client.useBrowserAppletMode)
     }
 
     @JvmStatic
-    fun method5829(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        WorldMapSub1.highlightCategory(value)
+    fun worldMapFlashElementCategory(executor: CS2Executor) {
+        val categoryId = executor.intStack[--executor.intStackPtr]
+        WorldMapDisplay.highlightCategory(categoryId)
     }
 
     @JvmStatic
-    fun method12660(executor: CS2Executor) {
+    fun worldMapFindNearestElement(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = (i_3 shr 14) and 0x3fff
-        val i_5 = i_3 and 0x3fff
-        val i_6 = WorldMapCategory.findNearestElement(i_2, i_4, i_5)
-        if (i_6 < 0) {
+        val mecId = executor.intStack[executor.intStackPtr]
+        val packedCoord = executor.intStack[executor.intStackPtr + 1]
+        val coordX = (packedCoord shr 14) and 0x3fff
+        val coordY = packedCoord and 0x3fff
+        val nearestCoord = WorldMapCategory.findNearestElement(mecId, coordX, coordY)
+        if (nearestCoord < 0) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = i_6
+            executor.intStack[++executor.intStackPtr - 1] = nearestCoord
         }
     }
 
     @JvmStatic
     fun chatCatGetDesc(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub143: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(value)
-        if (class282Sub50Sub143!!.subCategories == null) {
+        val categoryId = executor.intStack[--executor.intStackPtr]
+        val category: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId)
+        if (category!!.subCategories == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub143!!.subCategories!!.size
+            executor.intStack[++executor.intStackPtr - 1] = category!!.subCategories!!.size
         }
     }
 
     @JvmStatic
-    fun method8199(executor: CS2Executor) {
+    fun detailGetWindowedMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = WindowMode.getWindowMode()
     }
 
     @JvmStatic
-    fun method7021(executor: CS2Executor) {
-        var flag = false
+    fun getDirectoryPickerResult(executor: CS2Executor) {
+        var pickerFinished = false
         var path: String? = ""
         val filePicker = executor.filePicker
         if (filePicker != null && filePicker.fileChoserOpen()) {
@@ -429,39 +429,39 @@ object QuickChatDisplayOps {
             if (directory != null) {
                 path = directory.getPath()
             }
-            flag = true
+            pickerFinished = true
             executor.filePicker = null
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (pickerFinished) 1  else 0
         executor.stringStack[++executor.stringStackPtr - 1] = path
     }
 
     @JvmStatic
     fun fullscreenModeCount(executor: CS2Executor) {
         if (WindowMode.fullScreenSupported) {
-            val arr_2 = WindowMode.getActiveDisplayModeDetails()
-            executor.intStack[++executor.intStackPtr - 1] = arr_2!!.size
+            val displayModes = WindowMode.getActiveDisplayModeDetails()
+            executor.intStack[++executor.intStackPtr - 1] = displayModes!!.size
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
         }
     }
 
     @JvmStatic
-    fun method3358(executor: CS2Executor) {
+    fun detailGetFixedScreen(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.fixedScreen!!.getValue()
     }
 
     @JvmStatic
-    fun method12506(executor: CS2Executor) {
+    fun worldMapDisableElementCategory(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val value = executor.intStack[executor.intStackPtr]
-        val flag = executor.intStack[executor.intStackPtr + 1] == 1
-        var node4: Node<Any?>? = WorldMapSub1.hiddenCategoryIds.get(value.toLong())
-        if (node4 != null && !flag) {
-            node4.unlink()
-        } else if (node4 == null && flag) {
-            node4 = object : Node<Any?>() {}
-            WorldMapSub1.hiddenCategoryIds.put(node4!!, value.toLong())
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val disabled = executor.intStack[executor.intStackPtr + 1] == 1
+        var hiddenNode: Node<Any?>? = WorldMapDisplay.hiddenCategoryIds.get(categoryId.toLong())
+        if (hiddenNode != null && !disabled) {
+            hiddenNode.unlink()
+        } else if (hiddenNode == null && disabled) {
+            hiddenNode = object : Node<Any?>() {}
+            WorldMapDisplay.hiddenCategoryIds.put(hiddenNode!!, categoryId.toLong())
         }
     }
 
@@ -472,43 +472,43 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun chooseRenderType(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (value >= 1 && value <= 2) {
-            WindowMode.requestWindowMode(value, -1, -1, false)
+        val windowMode = executor.intStack[--executor.intStackPtr]
+        if (windowMode >= 1 && windowMode <= 2) {
+            WindowMode.requestWindowMode(windowMode, -1, -1, false)
         }
     }
 
     @JvmStatic
-    fun method3919(executor: CS2Executor) {
-        WorldMapSub1.hideIcons = executor.intStack[--executor.intStackPtr] == 1
+    fun worldMapDisableElements(executor: CS2Executor) {
+        WorldMapDisplay.hideIcons = executor.intStack[--executor.intStackPtr] == 1
     }
 
     @JvmStatic
     fun qcSendFriendsChatMessage(executor: CS2Executor) {
-        val class1842: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
-        tcpmessage3!!.buffer.writeByte(0)
-        val value = tcpmessage3!!.buffer.currentPosition
-        tcpmessage3!!.buffer.writeByte(1)
-        tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
-        tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - value)
-        class1842!!.queuePacket(tcpmessage3)
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
+        packet!!.buffer.writeByte(0)
+        val payloadStart = packet!!.buffer.currentPosition
+        packet!!.buffer.writeByte(1)
+        packet!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(packet!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
+        packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - payloadStart)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
     fun qcGetSubHotkey(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(i_2).subCategoryHotkeys!![i_3].code
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val subCatIndex = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).subCategoryHotkeys!![subCatIndex].code
     }
 
     @JvmStatic
     fun chatPhraseFind(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val flag = executor.intStack[--executor.intStackPtr] == 1
-        QuickchatMessageType.searchQuickchatMessages(text!!, flag)
+        val query: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val isMenuSearch = executor.intStack[--executor.intStackPtr] == 1
+        QuickchatMessageType.searchQuickchatMessages(query!!, isMenuSearch)
         executor.intStack[++executor.intStackPtr - 1] = CS2QueryResults.count
     }
 
@@ -518,35 +518,35 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method2737(executor: CS2Executor) {
+    fun worldMapIsLoaded(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (ComponentMinimap.mapAssetLoadingPercentage == 100) 1 else 0
     }
 
     @JvmStatic
-    fun method1362(executor: CS2Executor) {
+    fun chatPhraseGetAutoResponse(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2).responses!![i_3]
+        val messageId = executor.intStack[executor.intStackPtr]
+        val responseIndex = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId).responses!![responseIndex]
     }
 
     @JvmStatic
     fun chatPhraseGetText(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(value).getPlaceholderText()
+        val messageId = executor.intStack[--executor.intStackPtr]
+        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId).getPlaceholderText()
     }
 
     @JvmStatic
     fun qcSendPublicMessage(executor: CS2Executor) {
-        val class1842: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
-        tcpmessage3!!.buffer.writeByte(0)
-        val value = tcpmessage3!!.buffer.currentPosition
-        tcpmessage3!!.buffer.writeByte(0)
-        tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
-        tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - value)
-        class1842!!.queuePacket(tcpmessage3)
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
+        packet!!.buffer.writeByte(0)
+        val payloadStart = packet!!.buffer.currentPosition
+        packet!!.buffer.writeByte(0)
+        packet!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(packet!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
+        packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - payloadStart)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
@@ -556,14 +556,14 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun worldMapListElementNext(executor: CS2Executor) {
-        val class282Sub362: WorldMapCategory? = WorldMap.getNextActiveCategory()
-        if (class282Sub362 == null) {
+        val category: WorldMapCategory? = WorldMap.getNextActiveCategory()
+        if (category == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub362.mecId
-            val value = (class282Sub362!!.plane shl 28) or class282Sub362.absX + (WorldMap.mapSquareAbsX shl 14) or class282Sub362.absY + WorldMap.mapSquareAbsY
-            executor.intStack[++executor.intStackPtr - 1] = value
+            executor.intStack[++executor.intStackPtr - 1] = category.mecId
+            val coord = (category!!.plane shl 28) or category.absX + (WorldMap.mapSquareAbsX shl 14) or category.absY + WorldMap.mapSquareAbsY
+            executor.intStack[++executor.intStackPtr - 1] = coord
         }
     }
 
@@ -576,41 +576,41 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun camGetSplineLength(executor: CS2Executor) {
-        val value = (Client.cameraSplinePaths!![executor.intStack[--executor.intStackPtr]]!!.size shr 1)
-        executor.intStack[++executor.intStackPtr - 1] = value
+        val keyframeCount = (Client.cameraSplinePaths!![executor.intStack[--executor.intStackPtr]]!!.size shr 1)
+        executor.intStack[++executor.intStackPtr - 1] = keyframeCount
     }
 
     @JvmStatic
     fun camMoveTo(executor: CS2Executor) {
         executor.intStackPtr -= 4
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val i_5 = executor.intStack[executor.intStackPtr + 3]
-        val coordgrid6: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
-        Camera.moveCamera(((i_2 shr 14) and 0x3fff) - coordgrid6!!.x, (i_2 and 0x3fff) - coordgrid6!!.y, (i_3 shl 2), i_4, i_5, false)
+        val coord = executor.intStack[executor.intStackPtr]
+        val height = executor.intStack[executor.intStackPtr + 1]
+        val constantSpeed = executor.intStack[executor.intStackPtr + 2]
+        val variableSpeed = executor.intStack[executor.intStackPtr + 3]
+        val sceneBase: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
+        Camera.moveCamera(((coord shr 14) and 0x3fff) - sceneBase!!.x, (coord and 0x3fff) - sceneBase!!.y, (height shl 2), constantSpeed, variableSpeed, false)
     }
 
     @JvmStatic
-    fun method1783(executor: CS2Executor) {
+    fun chatCatFindPhraseByShortcut(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_3 == -1) {
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val hotkey = executor.intStack[executor.intStackPtr + 1]
+        if (hotkey == -1) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(i_2).messageForHotkey(i_3.toChar())
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).messageForHotkey(hotkey.toChar())
         }
     }
 
     @JvmStatic
     fun opGetHostName(executor: CS2Executor) {
-        var text: String? = null
-        text = PacketDecoder.HOSTNAME_IDENTIFIER!!.getHostName()
-        if (text == null) {
-            text = ""
+        var hostName: String? = null
+        hostName = PacketDecoder.HOSTNAME_IDENTIFIER!!.getHostName()
+        if (hostName == null) {
+            hostName = ""
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = text
+        executor.stringStack[++executor.stringStackPtr - 1] = hostName
     }
 
     @JvmStatic
@@ -621,9 +621,9 @@ object QuickChatDisplayOps {
     @JvmStatic
     fun worldMapSetMapCoordOverride(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        WorldMapSub1.reset(i_2, (i_3 shr 14) and 0x3fff, i_3 and 0x3fff, true)
+        val elementId = executor.intStack[executor.intStackPtr]
+        val coord = executor.intStack[executor.intStackPtr + 1]
+        WorldMapDisplay.reset(elementId, (coord shr 14) and 0x3fff, coord and 0x3fff, true)
     }
 
     @JvmStatic
@@ -637,13 +637,13 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method8219(executor: CS2Executor) {
+    fun worldMapGetConfigSize(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldMapViewWidth
         executor.intStack[++executor.intStackPtr - 1] = ComponentMinimap.mapViewportScale
     }
 
     @JvmStatic
-    fun method3613() {
+    fun fullscreenRestore() {
         if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
         }
@@ -651,11 +651,11 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun fullscreenGetMode(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
+        val modeIndex = executor.intStack[--executor.intStackPtr]
         if (WindowMode.fullScreenSupported) {
-            val arr_3 = WindowMode.getActiveDisplayModeDetails()
-            executor.intStack[++executor.intStackPtr - 1] = arr_3!![value].width
-            executor.intStack[++executor.intStackPtr - 1] = arr_3!![value].height
+            val displayModes = WindowMode.getActiveDisplayModeDetails()
+            executor.intStack[++executor.intStackPtr - 1] = displayModes!![modeIndex].width
+            executor.intStack[++executor.intStackPtr - 1] = displayModes!![modeIndex].height
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -663,25 +663,25 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method11439(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        var i_3 = (i_2 shr 14) and 0x3fff
-        var i_4 = i_2 and 0x3fff
-        val coordgrid5: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
-        i_3 -= coordgrid5!!.x
-        if (i_3 < 0) {
-            i_3 = 0
-        } else if (i_3 >= Resource.mapRegion!!.sceneSizeX) {
-            i_3 = Resource.mapRegion!!.sceneSizeX
+    fun coordClampToScene(executor: CS2Executor) {
+        val packedCoord = executor.intStack[--executor.intStackPtr]
+        var sceneTileX = (packedCoord shr 14) and 0x3fff
+        var sceneTileY = packedCoord and 0x3fff
+        val sceneBase: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
+        sceneTileX -= sceneBase!!.x
+        if (sceneTileX < 0) {
+            sceneTileX = 0
+        } else if (sceneTileX >= Resource.mapRegion!!.sceneSizeX) {
+            sceneTileX = Resource.mapRegion!!.sceneSizeX
         }
-        i_4 -= coordgrid5!!.y
-        if (i_4 < 0) {
-            i_4 = 0
-        } else if (i_4 >= Resource.mapRegion!!.sceneSizeY) {
-            i_4 = Resource.mapRegion!!.sceneSizeY
+        sceneTileY -= sceneBase!!.y
+        if (sceneTileY < 0) {
+            sceneTileY = 0
+        } else if (sceneTileY >= Resource.mapRegion!!.sceneSizeY) {
+            sceneTileY = Resource.mapRegion!!.sceneSizeY
         }
-        Client.cameraTargetAbsX = ((i_3 shl 9)) + 256
-        Client.cameraTargetAbsY = ((i_4 shl 9)) + 256
+        Client.cameraTargetAbsX = ((sceneTileX shl 9)) + 256
+        Client.cameraTargetAbsY = ((sceneTileY shl 9)) + 256
         Camera.cameraCalculationType = 4
         StaticMethods.cameraTargetAbsY = -1
         PingRequester.cameraTargetAbsX = -1
@@ -689,12 +689,12 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun worldMapGetDisplayPosition(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = WorldMapSub1.mapCenterX + WorldMap.mapSquareAbsX
-        executor.intStack[++executor.intStackPtr - 1] = WorldMapSub1.mapCenterY + WorldMap.mapSquareAbsY
+        executor.intStack[++executor.intStackPtr - 1] = WorldMapDisplay.mapCenterX + WorldMap.mapSquareAbsX
+        executor.intStack[++executor.intStackPtr - 1] = WorldMapDisplay.mapCenterY + WorldMap.mapSquareAbsY
     }
 
     @JvmStatic
-    fun method16079(executor: CS2Executor) {
+    fun camForceAngle(executor: CS2Executor) {
         executor.intStackPtr -= 2
         Camera.setAngle(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], 0)
     }
@@ -705,10 +705,10 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method2963(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val node3: Node<Any?>? = WorldMapSub1.hiddenCategoryIds.get(value.toLong())
-        executor.intStack[++executor.intStackPtr - 1] = if (node3 != null) 1 else 0
+    fun worldMapGetDisableElementCategory(executor: CS2Executor) {
+        val categoryId = executor.intStack[--executor.intStackPtr]
+        val hiddenNode: Node<Any?>? = WorldMapDisplay.hiddenCategoryIds.get(categoryId.toLong())
+        executor.intStack[++executor.intStackPtr - 1] = if (hiddenNode != null) 1 else 0
     }
 
     @JvmStatic
@@ -721,21 +721,21 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method2856(executor: CS2Executor) {
+    fun worldMapCoordInMap(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val position = executor.intStack[executor.intStackPtr]
-        val value = executor.intStack[executor.intStackPtr + 1]
-        val class4774: Queue<WorldMapElement>? = WorldMap.getRenderedElements((position shr 14) and 0x3fff, position and 0x3fff)
-        var flag = false
-        var class282Sub50Sub66: WorldMapElement? = class4774?.getNext() as WorldMapElement?
-        while (class282Sub50Sub66 != null) {
-            if (value == class282Sub50Sub66.elementId) {
-                flag = true
+        val packedCoord = executor.intStack[executor.intStackPtr]
+        val elementId = executor.intStack[executor.intStackPtr + 1]
+        val renderedElements: Queue<WorldMapElement>? = WorldMap.getRenderedElements((packedCoord shr 14) and 0x3fff, packedCoord and 0x3fff)
+        var found = false
+        var mapElement: WorldMapElement? = renderedElements?.getNext() as WorldMapElement?
+        while (mapElement != null) {
+            if (elementId == mapElement.elementId) {
+                found = true
                 break
             }
-            class282Sub50Sub66 = class4774?.getDirectNext() as WorldMapElement?
+            mapElement = renderedElements?.getDirectNext() as WorldMapElement?
         }
-        if (flag) {
+        if (found) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -744,48 +744,48 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun worldMapJumpToDisplayCoord(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        StaticMethods.setWorldMapScrollTarget((value shr 14) and 0x3fff, value and 0x3fff)
+        val displayCoord = executor.intStack[--executor.intStackPtr]
+        StaticMethods.setWorldMapScrollTarget((displayCoord shr 14) and 0x3fff, displayCoord and 0x3fff)
     }
 
     @JvmStatic
     fun qcGetMessage(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(i_2).messages!![i_3]
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val messageIndex = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).messages!![messageIndex]
     }
 
     @JvmStatic
-    fun method7276(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMap.poll(value)
-        if (class282Sub50Sub63 == null) {
+    fun worldMapGetConfigOrigin(executor: CS2Executor) {
+        val elementId = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMap.poll(elementId)
+        if (mapElement == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = (class282Sub50Sub63.bitpackedPlacement shr 14) and 0x3fff
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.bitpackedPlacement and 0x3fff
+            executor.intStack[++executor.intStackPtr - 1] = (mapElement.bitpackedPlacement shr 14) and 0x3fff
+            executor.intStack[++executor.intStackPtr - 1] = mapElement.bitpackedPlacement and 0x3fff
         }
     }
 
     @JvmStatic
-    fun method7277() {
+    fun resetChatMediaAndFont() {
         StaticMedia.resetChatMediaAndIcons()
         FontMetrics.useBoldFont = false
     }
 
     @JvmStatic
-    fun method2091(executor: CS2Executor) {
+    fun qcGetPhraseValue(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val quickchatdefinitions5: QuickchatMessageType? = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2)
-        if (quickchatdefinitions5!!.getValueType(i_3)!!.id != 0) {
+        val messageId = executor.intStack[executor.intStackPtr]
+        val valueTypeIndex = executor.intStack[executor.intStackPtr + 1]
+        val configIndex = executor.intStack[executor.intStackPtr + 2]
+        val messageType: QuickchatMessageType? = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId)
+        if (messageType!!.getValueType(valueTypeIndex)!!.id != 0) {
             throw RuntimeException("")
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = quickchatdefinitions5!!.getValueConfig(i_3, i_4)
+            executor.intStack[++executor.intStackPtr - 1] = messageType!!.getValueConfig(valueTypeIndex, configIndex)
         }
     }
 
@@ -800,54 +800,54 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method1085(executor: CS2Executor) {
+    fun qcSetValueAlt(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.currentQuickChatMessage!!.dynamicValues!![i_2] = i_3
+        val valueIndex = executor.intStack[executor.intStackPtr]
+        val dynamicValue = executor.intStack[executor.intStackPtr + 1]
+        executor.currentQuickChatMessage!!.dynamicValues!![valueIndex] = dynamicValue
     }
 
     @JvmStatic
-    fun method2171() {
+    fun browserClose() {
     }
 
     @JvmStatic
-    fun method6439(executor: CS2Executor) {
+    fun chatPhraseGetDynamicCommandParamEnum(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2).getValueType(i_3)!!.id
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        val messageId = executor.intStack[executor.intStackPtr]
+        val valueTypeIndex = executor.intStack[executor.intStackPtr + 1]
+        val valueTypeId = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId).getValueType(valueTypeIndex)!!.id
+        executor.intStack[++executor.intStackPtr - 1] = valueTypeId
     }
 
     @JvmStatic
     fun getClipboard(executor: CS2Executor) {
-        var str2: String? = ""
+        var clipboardText: String? = ""
         if (Console.clipboard != null) {
-            val transferable3: Transferable? = Console.clipboard!!.getContents(null)
-            if (transferable3 != null) {
+            val transferable: Transferable? = Console.clipboard!!.getContents(null)
+            if (transferable != null) {
                 try {
-                    str2 = transferable3.getTransferData(DataFlavor.stringFlavor) as? String
+                    clipboardText = transferable.getTransferData(DataFlavor.stringFlavor) as? String
                 } catch (ignored: Exception) {
                 }
             }
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = str2
+        executor.stringStack[++executor.stringStackPtr - 1] = clipboardText
     }
 
     @JvmStatic
-    fun method584(executor: CS2Executor) {
+    fun doCheat(executor: CS2Executor) {
         CommandExecutor.executeCommand(executor.stringStack[--executor.stringStackPtr] as String, false, false)
     }
 
     @JvmStatic
-    fun method587() {
+    fun browserOpen() {
     }
 
     @JvmStatic
-    fun method6304(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(value).getValueTypeCount()
+    fun chatPhraseGetDynamicCommand(executor: CS2Executor) {
+        val messageId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId).getValueTypeCount()
     }
 
     @JvmStatic
@@ -866,10 +866,10 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun worldMapGetMapName(executor: CS2Executor) {
-        val class282Sub50Sub62: WorldMapElement? = WorldMap.poll(executor.intStack[--executor.intStackPtr])
-        if (class282Sub50Sub62 != null) {
-            if (class282Sub50Sub62.displayName != null) {
-                executor.stringStack[++executor.stringStackPtr - 1] = class282Sub50Sub62.displayName
+        val mapElement: WorldMapElement? = WorldMap.poll(executor.intStack[--executor.intStackPtr])
+        if (mapElement != null) {
+            if (mapElement.displayName != null) {
+                executor.stringStack[++executor.stringStackPtr - 1] = mapElement.displayName
                 return
             }
         }
@@ -879,35 +879,35 @@ object QuickChatDisplayOps {
     @JvmStatic
     fun ifGettop(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
+        val componentHash = executor.intStack[executor.intStackPtr]
+        val slotId = executor.intStack[executor.intStackPtr + 1]
         val stack: IntArray? = executor.intStack
-        val i_5 = ++executor.intStackPtr - 1
-        val b_6 = if (Interface.hasActiveMenuEntry(i_2, i_3)) 1 else 0
-        stack!![i_5] = b_6
+        val stackIndex = ++executor.intStackPtr - 1
+        val hasEntry = if (Interface.hasActiveMenuEntry(componentHash, slotId)) 1 else 0
+        stack!![stackIndex] = hasEntry
     }
 
     @JvmStatic
-    fun method3038(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        if (i_2 == -1) {
-            var i_3 = 16383
-            var i_4 = i_2 and 0x3fff
-            val coordgrid5: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
-            i_3 -= coordgrid5!!.x
-            if (i_3 < 0) {
-                i_3 = 0
-            } else if (i_3 >= Resource.mapRegion!!.sceneSizeX) {
-                i_3 = Resource.mapRegion!!.sceneSizeX
+    fun coordClampToSceneOrDefault(executor: CS2Executor) {
+        val packedCoord = executor.intStack[--executor.intStackPtr]
+        if (packedCoord == -1) {
+            var sceneTileX = 16383
+            var sceneTileY = packedCoord and 0x3fff
+            val sceneBase: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
+            sceneTileX -= sceneBase!!.x
+            if (sceneTileX < 0) {
+                sceneTileX = 0
+            } else if (sceneTileX >= Resource.mapRegion!!.sceneSizeX) {
+                sceneTileX = Resource.mapRegion!!.sceneSizeX
             }
-            i_4 -= coordgrid5!!.y
-            if (i_4 < 0) {
-                i_4 = 0
-            } else if (i_4 >= Resource.mapRegion!!.sceneSizeY) {
-                i_4 = Resource.mapRegion!!.sceneSizeY
+            sceneTileY -= sceneBase!!.y
+            if (sceneTileY < 0) {
+                sceneTileY = 0
+            } else if (sceneTileY >= Resource.mapRegion!!.sceneSizeY) {
+                sceneTileY = Resource.mapRegion!!.sceneSizeY
             }
-            PingRequester.cameraTargetAbsX = ((i_3 shl 9)) + 256
-            StaticMethods.cameraTargetAbsY = ((i_4 shl 9)) + 256
+            PingRequester.cameraTargetAbsX = ((sceneTileX shl 9)) + 256
+            StaticMethods.cameraTargetAbsY = ((sceneTileY shl 9)) + 256
         } else {
             PingRequester.cameraTargetAbsX = -1
             StaticMethods.cameraTargetAbsY = -1
@@ -926,82 +926,82 @@ object QuickChatDisplayOps {
     @JvmStatic
     fun splineSetPoint(executor: CS2Executor) {
         executor.intStackPtr -= 7
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1] shl 1
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val i_5 = executor.intStack[executor.intStackPtr + 3]
-        val i_6 = executor.intStack[executor.intStackPtr + 4]
-        val i_7 = executor.intStack[executor.intStackPtr + 5]
-        val i_8 = executor.intStack[executor.intStackPtr + 6]
-        if (i_2 >= 0 && i_2 < 2 && Client.cameraSplinePaths[i_2] != null && i_3 >= 0 && i_3 < Client.cameraSplinePaths[i_2]!!.size) {
-            Client.cameraSplinePaths[i_2]!![i_3] = intArrayOf(((i_4 shr 14) and 0x3fff) shl 9, i_5 shl 2, ((i_4 and 0x3fff) shl 9), i_8)
-            Client.cameraSplinePaths[i_2]!![i_3 + 1] = intArrayOf(((i_6 shr 14) and 0x3fff) shl 9, i_7 shl 2, (i_6 and 0x3fff) shl 9)
+        val pathIndex = executor.intStack[executor.intStackPtr]
+        val keyframeBase = executor.intStack[executor.intStackPtr + 1] shl 1
+        val posCoord = executor.intStack[executor.intStackPtr + 2]
+        val posHeight = executor.intStack[executor.intStackPtr + 3]
+        val lookAtCoord = executor.intStack[executor.intStackPtr + 4]
+        val lookAtHeight = executor.intStack[executor.intStackPtr + 5]
+        val pitch = executor.intStack[executor.intStackPtr + 6]
+        if (pathIndex >= 0 && pathIndex < 2 && Client.cameraSplinePaths[pathIndex] != null && keyframeBase >= 0 && keyframeBase < Client.cameraSplinePaths[pathIndex]!!.size) {
+            Client.cameraSplinePaths[pathIndex]!![keyframeBase] = intArrayOf(((posCoord shr 14) and 0x3fff) shl 9, posHeight shl 2, ((posCoord and 0x3fff) shl 9), pitch)
+            Client.cameraSplinePaths[pathIndex]!![keyframeBase + 1] = intArrayOf(((lookAtCoord shr 14) and 0x3fff) shl 9, lookAtHeight shl 2, (lookAtCoord and 0x3fff) shl 9)
         }
     }
 
     @JvmStatic
-    fun method810(executor: CS2Executor) {
+    fun worldMapFlashElement(executor: CS2Executor) {
         StaticMethods.selectWorldMapElement(executor.intStack[--executor.intStackPtr])
     }
 
     @JvmStatic
     fun chatCatGetSubCatCount(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub143: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(value)
-        if (class282Sub50Sub143!!.messages == null) {
+        val categoryId = executor.intStack[--executor.intStackPtr]
+        val category: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId)
+        if (category!!.messages == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub143!!.messages!!.size
+            executor.intStack[++executor.intStackPtr - 1] = category!!.messages!!.size
         }
     }
 
     @JvmStatic
     fun qcGetName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(value).name
+        val categoryId = executor.intStack[--executor.intStackPtr]
+        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).name
     }
 
     @JvmStatic
-    fun method7209(executor: CS2Executor) {
+    fun miniMenuSetMaxEntries(executor: CS2Executor) {
         MiniMenu.maxVisibleEntries = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
-    fun method4631(executor: CS2Executor) {
+    fun qcSetValue(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.currentQuickChatMessage!!.dynamicValues!![i_2] = i_3
+        val valueIndex = executor.intStack[executor.intStackPtr]
+        val dynamicValue = executor.intStack[executor.intStackPtr + 1]
+        executor.currentQuickChatMessage!!.dynamicValues!![valueIndex] = dynamicValue
     }
 
     @JvmStatic
     fun qcSendGuestClanChatMessage(executor: CS2Executor) {
-        val class1842: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
-        tcpmessage3!!.buffer.writeByte(0)
-        val value = tcpmessage3!!.buffer.currentPosition
-        tcpmessage3!!.buffer.writeByte(3)
-        tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
-        tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - value)
-        class1842!!.queuePacket(tcpmessage3)
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
+        packet!!.buffer.writeByte(0)
+        val payloadStart = packet!!.buffer.currentPosition
+        packet!!.buffer.writeByte(3)
+        packet!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(packet!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
+        packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - payloadStart)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
-    fun method1604(executor: CS2Executor) {
+    fun consolePrint(executor: CS2Executor) {
         System.out.println(executor.stringStack[--executor.stringStackPtr])
     }
 
     @JvmStatic
     fun worldMapListElementStart(executor: CS2Executor) {
-        val class282Sub362: WorldMapCategory? = WorldMapSub1.getFirstActiveCategory()
-        if (class282Sub362 == null) {
+        val category: WorldMapCategory? = WorldMapDisplay.getFirstActiveCategory()
+        if (category == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub362.mecId
-            val value = (class282Sub362!!.plane shl 28) or class282Sub362.absX + (WorldMap.mapSquareAbsX shl 14) or class282Sub362.absY + WorldMap.mapSquareAbsY
-            executor.intStack[++executor.intStackPtr - 1] = value
+            executor.intStack[++executor.intStackPtr - 1] = category.mecId
+            val coord = (category!!.plane shl 28) or category.absX + (WorldMap.mapSquareAbsX shl 14) or category.absY + WorldMap.mapSquareAbsY
+            executor.intStack[++executor.intStackPtr - 1] = coord
         }
     }
 
@@ -1017,23 +1017,23 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method856(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMap.poll(value)
-        if (class282Sub50Sub63 == null) {
+    fun worldMapGetConfigZoom(executor: CS2Executor) {
+        val elementId = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMap.poll(elementId)
+        if (mapElement == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.defaultZoomLevel
+            executor.intStack[++executor.intStackPtr - 1] = mapElement.defaultZoomLevel
         }
     }
 
     @JvmStatic
     fun worldMapGetDisplayCoord(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
-        if (class282Sub50Sub63 != null) {
-            val flag = class282Sub50Sub63.gameToMapCoordsForPlane((value shr 28) and 0x3, (value shr 14) and 0x3fff, value and 0x3fff, CS2Executor.coordConversionBuffer)
-            if (flag) {
+        val sourceCoord = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMapDisplay.getStaticElement()
+        if (mapElement != null) {
+            val converted = mapElement.gameToMapCoordsForPlane((sourceCoord shr 28) and 0x3, (sourceCoord shr 14) and 0x3fff, sourceCoord and 0x3fff, CS2Executor.coordConversionBuffer)
+            if (converted) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![2]
             } else {
@@ -1048,12 +1048,12 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun worldMapGetMap(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMap.getMapDef((value shr 14) and 0x3fff, value and 0x3fff)
-        if (class282Sub50Sub63 == null) {
+        val coord = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMap.getMapDef((coord shr 14) and 0x3fff, coord and 0x3fff)
+        if (mapElement == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.elementId
+            executor.intStack[++executor.intStackPtr - 1] = mapElement.elementId
         }
     }
 
@@ -1063,10 +1063,10 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method13359(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val flag = ClientStartup.activeClient!!.validateCacheDirectory(File(text))
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+    fun opValidateCacheDirectory(executor: CS2Executor) {
+        val cacheDirectoryPath: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val isValid = ClientStartup.activeClient!!.validateCacheDirectory(File(cacheDirectoryPath))
+        executor.intStack[++executor.intStackPtr - 1] = if (isValid) 1  else 0
     }
 
     @JvmStatic
@@ -1075,7 +1075,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method8206(executor: CS2Executor) {
+    fun setupMenuChrome(executor: CS2Executor) {
         executor.intStackPtr -= 12
         MiniMenu.close()
         StaticMedia.resetChatMedia()
@@ -1110,26 +1110,26 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method8865(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val quickchatdefinitions3: QuickchatMessageType? = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(value)
-        if (quickchatdefinitions3!!.responses == null) {
+    fun chatPhraseGetAutoResponseCount(executor: CS2Executor) {
+        val messageId = executor.intStack[--executor.intStackPtr]
+        val messageType: QuickchatMessageType? = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId)
+        if (messageType!!.responses == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = quickchatdefinitions3!!.responses!!.size
+            executor.intStack[++executor.intStackPtr - 1] = messageType!!.responses!!.size
         }
     }
 
     @JvmStatic
-    fun method7826(executor: CS2Executor) {
+    fun chatCatGetPhraseShortcut(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(i_2).messageHotkeys!![i_3].code
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val messageIndex = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).messageHotkeys!![messageIndex].code
     }
 
     @JvmStatic
-    fun method14434(executor: CS2Executor) {
+    fun openUrlNoLogin(executor: CS2Executor) {
         executor.stringStackPtr -= 2
         PacketEncoder.sendLobbyHyperlink(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, "", executor.intStack[--executor.intStackPtr] == 1, false)
     }
@@ -1141,16 +1141,16 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun qcSendPrivateMessage(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val class1843: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PRIVATE, class1843!!.isaac)
-        tcpmessage4!!.buffer.writeByte(0)
-        val value = tcpmessage4!!.buffer.currentPosition
-        tcpmessage4!!.buffer.writeString(text!!)
-        tcpmessage4!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage4!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
-        tcpmessage4!!.buffer.writeIndex(tcpmessage4!!.buffer.currentPosition - value)
-        class1843!!.queuePacket(tcpmessage4)
+        val recipientName: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PRIVATE, connection!!.isaac)
+        packet!!.buffer.writeByte(0)
+        val payloadStart = packet!!.buffer.currentPosition
+        packet!!.buffer.writeString(recipientName!!)
+        packet!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(packet!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
+        packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - payloadStart)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
@@ -1168,29 +1168,29 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method14836(executor: CS2Executor) {
+    fun worldMapDisableElement(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val value = executor.intStack[executor.intStackPtr]
-        val flag = executor.intStack[executor.intStackPtr + 1] == 1
-        var node4: Node<*>? = WorldMapSub1.hiddenMecIds.get(value.toLong())
-        if (node4 != null && !flag) {
-            node4.unlink()
-        } else if (node4 == null && flag) {
-            node4 = object : Node<Any?>() {}
-            WorldMapSub1.hiddenMecIds.put(node4, value.toLong())
+        val elementId = executor.intStack[executor.intStackPtr]
+        val disabled = executor.intStack[executor.intStackPtr + 1] == 1
+        var hiddenNode: Node<*>? = WorldMapDisplay.hiddenMecIds.get(elementId.toLong())
+        if (hiddenNode != null && !disabled) {
+            hiddenNode.unlink()
+        } else if (hiddenNode == null && disabled) {
+            hiddenNode = object : Node<Any?>() {}
+            WorldMapDisplay.hiddenMecIds.put(hiddenNode, elementId.toLong())
         }
     }
 
     @JvmStatic
     fun worldMapSetMapCoord(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        WorldMapSub1.reset(i_2, (i_3 shr 14) and 0x3fff, i_3 and 0x3fff, false)
+        val elementId = executor.intStack[executor.intStackPtr]
+        val coord = executor.intStack[executor.intStackPtr + 1]
+        WorldMapDisplay.reset(elementId, (coord shr 14) and 0x3fff, coord and 0x3fff, false)
     }
 
     @JvmStatic
-    fun method12210(executor: CS2Executor) {
+    fun openUrlShim(executor: CS2Executor) {
         executor.stringStackPtr -= 3
         PacketEncoder.sendLobbyHyperlink(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, executor.stringStack[executor.stringStackPtr + 2] as String?, executor.intStack[--executor.intStackPtr] == 1, true)
     }
@@ -1203,12 +1203,12 @@ object QuickChatDisplayOps {
     @JvmStatic
     fun camLookat(executor: CS2Executor) {
         executor.intStackPtr -= 4
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val i_5 = executor.intStack[executor.intStackPtr + 3]
-        val coordgrid6: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
-        Camera.lookat(((i_2 shr 14) and 0x3fff) - coordgrid6!!.x, (i_2 and 0x3fff) - coordgrid6!!.y, (i_3 shl 2), i_4, i_5)
+        val coord = executor.intStack[executor.intStackPtr]
+        val height = executor.intStack[executor.intStackPtr + 1]
+        val speed = executor.intStack[executor.intStackPtr + 2]
+        val angle = executor.intStack[executor.intStackPtr + 3]
+        val sceneBase: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
+        Camera.lookat(((coord shr 14) and 0x3fff) - sceneBase!!.x, (coord and 0x3fff) - sceneBase!!.y, (height shl 2), speed, angle)
     }
 
     @JvmStatic
@@ -1221,24 +1221,24 @@ object QuickChatDisplayOps {
 
     @JvmStatic
     fun fullscreenLastMode(executor: CS2Executor) {
-        val i_2 = WindowMode.fullScreenWidth
-        val i_3 = WindowMode.fullScreenHeight
-        var i_4 = -1
+        val width = WindowMode.fullScreenWidth
+        val height = WindowMode.fullScreenHeight
+        var modeIndex = -1
         if (WindowMode.fullScreenSupported) {
-            val arr_5: Array<DisplayModeDetails>? = WindowMode.getActiveDisplayModeDetails()
-            for (i_6 in 0 until arr_5!!.size) {
-                val class4677: DisplayModeDetails? = arr_5[i_6]
-                if (i_2 == class4677!!.width && i_3 == class4677!!.height) {
-                    i_4 = i_6
+            val displayModes: Array<DisplayModeDetails>? = WindowMode.getActiveDisplayModeDetails()
+            for (i in 0 until displayModes!!.size) {
+                val mode: DisplayModeDetails? = displayModes[i]
+                if (width == mode!!.width && height == mode!!.height) {
+                    modeIndex = i
                     break
                 }
             }
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        executor.intStack[++executor.intStackPtr - 1] = modeIndex
     }
 
     @JvmStatic
-    fun method1861(executor: CS2Executor) {
+    fun setRecolPalette(executor: CS2Executor) {
         executor.intStackPtr -= 2
         Client.recolorPalette!![executor.intStack[executor.intStackPtr]] = ColorUtil.rgbToHsl24(executor.intStack[executor.intStackPtr + 1]).toShort()
         TypeLists.OBJ!!.resetModelCache()
@@ -1255,32 +1255,32 @@ object QuickChatDisplayOps {
     @JvmStatic
     fun splineNew(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_2 >= 0 && i_2 < 2) {
-            Client.cameraSplinePaths!![i_2] = Array(4) { IntArray(i_3 shl 1) }
+        val pathIndex = executor.intStack[executor.intStackPtr]
+        val keyframeCount = executor.intStack[executor.intStackPtr + 1]
+        if (pathIndex >= 0 && pathIndex < 2) {
+            Client.cameraSplinePaths!![pathIndex] = Array(4) { IntArray(keyframeCount shl 1) }
         }
     }
 
     @JvmStatic
     fun worldMapGetSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub50Sub63: WorldMapElement? = WorldMap.poll(value)
-        if (class282Sub50Sub63 == null) {
+        val elementId = executor.intStack[--executor.intStackPtr]
+        val mapElement: WorldMapElement? = WorldMap.poll(elementId)
+        if (mapElement == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.boundsMaxX - class282Sub50Sub63.boundsMinX
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.boundsMaxY - class282Sub50Sub63.boundsMinY
+            executor.intStack[++executor.intStackPtr - 1] = mapElement.boundsMaxX - mapElement.boundsMinX
+            executor.intStack[++executor.intStackPtr - 1] = mapElement.boundsMaxY - mapElement.boundsMinY
         }
     }
 
     @JvmStatic
-    fun method7043(executor: CS2Executor) {
-        val class282Sub50Sub62: WorldMapElement? = WorldMapSub1.getStaticElement()
-        if (class282Sub50Sub62 != null) {
-            val flag = class282Sub50Sub62.mapToGameCoords(WorldMap.mapSquareAbsX + WorldMapSub1.mapCenterX, WorldMap.mapSquareAbsY + WorldMapSub1.mapCenterY, CS2Executor.coordConversionBuffer)
-            if (flag) {
+    fun worldMapGetSourcePosition(executor: CS2Executor) {
+        val mapElement: WorldMapElement? = WorldMapDisplay.getStaticElement()
+        if (mapElement != null) {
+            val converted = mapElement.mapToGameCoords(WorldMap.mapSquareAbsX + WorldMapDisplay.mapCenterX, WorldMap.mapSquareAbsY + WorldMapDisplay.mapCenterY, CS2Executor.coordConversionBuffer)
+            if (converted) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![2]
             } else {
@@ -1299,35 +1299,35 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun method11339(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (WorldMapSub1.hideIcons) 1  else 0
+    fun worldMapGetDisableElements(executor: CS2Executor) {
+        executor.intStack[++executor.intStackPtr - 1] = if (WorldMapDisplay.hideIcons) 1  else 0
     }
 
     @JvmStatic
     fun detailScreenSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (value >= 1 && value <= 2) {
-            PreferenceManager.preferences!!.fixedScreen!!.setValue(value)
-            PreferenceManager.preferences!!.fullScreen!!.setValue(value)
+        val windowMode = executor.intStack[--executor.intStackPtr]
+        if (windowMode >= 1 && windowMode <= 2) {
+            PreferenceManager.preferences!!.fixedScreen!!.setValue(windowMode)
+            PreferenceManager.preferences!!.fullScreen!!.setValue(windowMode)
             PreferenceManager.savePreferences()
         }
     }
 
     @JvmStatic
-    fun method4148(executor: CS2Executor) {
+    fun chatCatFindSubCatByShortcut(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_3 == -1) {
+        val categoryId = executor.intStack[executor.intStackPtr]
+        val hotkey = executor.intStack[executor.intStackPtr + 1]
+        if (hotkey == -1) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(i_2).subCategoryForHotkey(i_3.toChar())
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).subCategoryForHotkey(hotkey.toChar())
         }
     }
 
     @JvmStatic
     fun worldMapSetMap(executor: CS2Executor) {
-        WorldMapSub1.reset(executor.intStack[--executor.intStackPtr], -1, -1, false)
+        WorldMapDisplay.reset(executor.intStack[--executor.intStackPtr], -1, -1, false)
     }
 
 }

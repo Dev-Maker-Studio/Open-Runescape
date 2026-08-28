@@ -22,13 +22,13 @@ class BillboardSurfaceGL {
         this.rotation = rotation
     }
 
-    fun copyFrom(class1451: BillboardSurfaceGL) {
-        this.scaleX = class1451.scaleX
-        this.scaleY = class1451.scaleY
-        this.offsetX = class1451.offsetX
-        this.offsetY = class1451.offsetY
-        this.diffuseColor = class1451.diffuseColor
-        this.rotation = class1451.rotation
+    fun copyFrom(source: BillboardSurfaceGL) {
+        this.scaleX = source.scaleX
+        this.scaleY = source.scaleY
+        this.offsetX = source.offsetX
+        this.offsetY = source.offsetY
+        this.diffuseColor = source.diffuseColor
+        this.rotation = source.rotation
     }
 
     fun copy(): BillboardSurfaceGL {

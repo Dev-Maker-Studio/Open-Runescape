@@ -100,7 +100,7 @@ class ParticleProducerType {
     var effectiveVertexUids: IntArray? = null
 
     @JvmField
-    var aBool572: Boolean = true
+    var unusedOpcode26: Boolean = true
 
     @JvmField
     var endSize: Int = -1
@@ -211,11 +211,11 @@ class ParticleProducerType {
                 maximalAngleH = buffer.readUShort().toShort()
                 minimumAngleV = buffer.readUShort().toShort()
                 maximalAngleV = buffer.readUShort().toShort()
-                val scale: Byte = 3
-                minimalAngleH = (minimalAngleH.toInt() shl scale.toInt()).toShort()
-                maximalAngleH = (maximalAngleH.toInt() shl scale.toInt()).toShort()
-                minimumAngleV = (minimumAngleV.toInt() shl scale.toInt()).toShort()
-                maximalAngleV = (maximalAngleV.toInt() shl scale.toInt()).toShort()
+                val angleShift: Byte = 3
+                minimalAngleH = (minimalAngleH.toInt() shl angleShift.toInt()).toShort()
+                maximalAngleH = (maximalAngleH.toInt() shl angleShift.toInt()).toShort()
+                minimumAngleV = (minimumAngleV.toInt() shl angleShift.toInt()).toShort()
+                maximalAngleV = (maximalAngleV.toInt() shl angleShift.toInt()).toShort()
             }
             2 -> {
                 buffer.readUByte()
@@ -248,15 +248,15 @@ class ParticleProducerType {
             9 -> {
                 val count = buffer.readUByte()
                 particleFileIds2 = IntArray(count)
-                for (i_5 in 0 until count) {
-                    particleFileIds2!![i_5] = buffer.readUShort()
+                for (i in 0 until count) {
+                    particleFileIds2!![i] = buffer.readUShort()
                 }
             }
             10 -> {
                 val count = buffer.readUByte()
                 particleFileIds = IntArray(count)
-                for (i_5 in 0 until count) {
-                    particleFileIds!![i_5] = buffer.readUShort()
+                for (i in 0 until count) {
+                    particleFileIds!![i] = buffer.readUShort()
                 }
             }
             12 -> {
@@ -304,12 +304,12 @@ class ParticleProducerType {
             25 -> {
                 val count = buffer.readUByte()
                 effectiveVertexUids = IntArray(count)
-                for (i_5 in 0 until count) {
-                    effectiveVertexUids!![i_5] = buffer.readUShort()
+                for (i in 0 until count) {
+                    effectiveVertexUids!![i] = buffer.readUShort()
                 }
             }
             26 -> {
-                aBool572 = false
+                unusedOpcode26 = false
             }
             27 -> {
                 endSize = buffer.readUShort() shl 12 shl 2
@@ -389,13 +389,13 @@ class ParticleProducerType {
         }
     }
 
-    fun decode(stream: Packet) {
+    fun decode(buffer: Packet) {
         while (true) {
-            val opcode = stream.readUByte()
+            val opcode = buffer.readUByte()
             if (opcode == 0) {
                 return
             }
-            decode(stream, opcode)
+            decode(buffer, opcode)
         }
     }
 

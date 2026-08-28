@@ -6,7 +6,7 @@ import com.jagex.game.runetek5.client.input.keyboard.KeyRecorder
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 
 interface InputSubscriber {
-    fun valid(var1: MouseRecord?, var2: Array<KeyRecord?>?, var3: Int, var4: KeyRecorder?): Boolean
+    fun valid(mouseRecord: MouseRecord?, keyRecords: Array<KeyRecord?>?, keyRecordCount: Int, keyRecorder: KeyRecorder?): Boolean
 
     companion object {
         @JvmStatic

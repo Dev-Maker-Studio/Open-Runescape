@@ -43,7 +43,7 @@ class MixedAudioBuffer(
         return this.samples.size
     }
 
-    override fun getStream(sampleRate: Int, volume: Int, i_3: Int): AreaSoundStream {
-        return MixedAudioStream(this, sampleRate, volume, i_3)
+    override fun getStream(sampleRate: Int, volume: Int, pan: Int): AreaSoundStream {
+        return MixedAudioStream(this, sampleRate, volume, pan)
     }
 }

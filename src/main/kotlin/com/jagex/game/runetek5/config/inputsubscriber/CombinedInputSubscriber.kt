@@ -25,19 +25,19 @@ class CombinedInputSubscriber(
         }
     }
 
-    override fun valid(record: MouseRecord?, records: Array<KeyRecord?>?, i_3: Int, recorder: KeyRecorder?): Boolean {
-        if (record == null) {
+    override fun valid(mouseRecord: MouseRecord?, keyRecords: Array<KeyRecord?>?, keyRecordCount: Int, keyRecorder: KeyRecorder?): Boolean {
+        if (mouseRecord == null) {
             return this.clickType == -1
         }
-        if (this.clickType != record.getClickType()) {
+        if (this.clickType != mouseRecord.getClickType()) {
             return false
         }
-        if (this.minimumClicks > record.getMeta()) {
+        if (this.minimumClicks > mouseRecord.getMeta()) {
             return false
         }
         for (index in this.requiredKeys.indices) {
             val key = this.requiredKeys[index]
-            if (recorder?.held(key) != true) {
+            if (keyRecorder?.held(key) != true) {
                 return false
             }
         }

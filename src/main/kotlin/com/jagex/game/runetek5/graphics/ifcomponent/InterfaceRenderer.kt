@@ -27,7 +27,7 @@ import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.tools.LocalizedText
@@ -112,17 +112,17 @@ object InterfaceRenderer {
 							}
 						}
 
-						val shouldAddSprite = childComponent.clickMask && childComponent.type == ComponentType.SPRITE && childComponent.transparency == 0 && childComponent.skyboxId < 0 && childComponent.containerItemId == -1 && childComponent.videoFileId == -1 && !childComponent.tiling && childComponent.angle2d == 0
+						val spriteHitTest = childComponent.clickMask && childComponent.type == ComponentType.SPRITE && childComponent.transparency == 0 && childComponent.skyboxId < 0 && childComponent.containerItemId == -1 && childComponent.videoFileId == -1 && !childComponent.tiling && childComponent.angle2d == 0
 						var withinBoundaries = false
 						if (mouseX >= clipMinX && mouseY >= clipMinY && mouseX < clipMaxX && mouseY < clipMaxY) {
-							if (shouldAddSprite) {
-								val clickableSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
-								if (clickableSprite != null && clickableSprite.width == childComponent.width && childComponent.height == clickableSprite.height) {
-									val mouseOffsetX = mouseX - componentX
-									val mouseOffsetY = mouseY - componentY
-									if (mouseOffsetY >= 0 && mouseOffsetY < clickableSprite.rowStartX.size) {
-										val sizeX = clickableSprite.rowStartX[mouseOffsetY]
-										if (mouseOffsetX >= sizeX && mouseOffsetX <= sizeX + clickableSprite.rowWidth[mouseOffsetY]) {
+							if (spriteHitTest) {
+								val interactiveSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
+								if (interactiveSprite != null && interactiveSprite.width == childComponent.width && childComponent.height == interactiveSprite.height) {
+									val spriteX = mouseX - componentX
+									val spriteY = mouseY - componentY
+									if (spriteY >= 0 && spriteY < interactiveSprite.rowStartX.size) {
+										val rowStart = interactiveSprite.rowStartX[spriteY]
+										if (spriteX >= rowStart && spriteX <= rowStart + interactiveSprite.rowWidth[spriteY]) {
 											withinBoundaries = true
 										}
 									}
@@ -151,15 +151,15 @@ object InterfaceRenderer {
 						val mouseRecord = Client.MOUSE_MOVEMENTS.getFirst() as? MouseRecord
 
 						if (mouseRecord != null && mouseRecord.getClickType() == 0 && mouseRecord.getX() >= clipMinX && mouseRecord.getY() >= clipMinY && mouseRecord.getX() < clipMaxX && mouseRecord.getY() < clipMaxY) {
-							if (shouldAddSprite) {
+							if (spriteHitTest) {
 								val interactiveSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
 								if (interactiveSprite != null) {
 									if (childComponent.width == interactiveSprite.width && childComponent.height == interactiveSprite.height) {
-										val spriteRelativeX = mouseRecord.getX() - componentX
-										val spriteRelativeY = mouseRecord.getY() - componentY
-										if (spriteRelativeY >= 0 && spriteRelativeY < interactiveSprite.rowStartX.size) {
-											val startX = interactiveSprite.rowStartX[spriteRelativeY]
-											if (spriteRelativeX >= startX && spriteRelativeX <= startX + interactiveSprite.rowWidth[spriteRelativeY]) {
+										val spriteX = mouseRecord.getX() - componentX
+										val spriteY = mouseRecord.getY() - componentY
+										if (spriteY >= 0 && spriteY < interactiveSprite.rowStartX.size) {
+											val rowStart = interactiveSprite.rowStartX[spriteY]
+											if (spriteX >= rowStart && spriteX <= rowStart + interactiveSprite.rowWidth[spriteY]) {
 												clickTriggered = true
 											}
 										}
@@ -178,15 +178,15 @@ object InterfaceRenderer {
 						}
 
 						if (childComponent.hasInteraction && !Console.isOpen()) {
-							for (keyIndex in childComponent.keyTriggeringAction!!.indices) {
+							for (opIndex in childComponent.keyTriggeringAction!!.indices) {
 								var keyTriggered = false
 								var hasAction = false
-								if (childComponent.keyCharCodes!![keyIndex] > 0) {
+								if (childComponent.keyCharCodes!![opIndex] > 0) {
 									for (i in 0 until Client.keyCachePointerPoss) {
-										if (childComponent.keyCharCodes!![keyIndex] == Client.KEYS_PRESSED[i]!!.getCharacter().code) {
+										if (childComponent.keyCharCodes!![opIndex] == Client.KEYS_PRESSED[i]!!.getCharacter().code) {
 											keyTriggered = true
 											val cycles = childComponent.cycles
-											if (cycles == null || cycles[keyIndex] <= Client.cycles) {
+											if (cycles == null || cycles[opIndex] <= Client.cycles) {
 												hasAction = true
 											}
 											break
@@ -194,17 +194,17 @@ object InterfaceRenderer {
 									}
 								}
 
-								if (!keyTriggered && childComponent.keyTriggeringAction!![keyIndex] != null) {
-									for (key in childComponent.keyTriggeringAction!![keyIndex]!!.indices) {
-										if (KeyRecorder.keyRecorder?.held(childComponent.keyTriggeringAction!![keyIndex]!![key].toInt()) == true) {
+								if (!keyTriggered && childComponent.keyTriggeringAction!![opIndex] != null) {
+									for (key in childComponent.keyTriggeringAction!![opIndex]!!.indices) {
+										if (KeyRecorder.keyRecorder?.held(childComponent.keyTriggeringAction!![opIndex]!![key].toInt()) == true) {
 											keyTriggered = true
 											val cycles = childComponent.cycles
-											if (cycles != null && cycles[keyIndex] > Client.cycles) {
+											if (cycles != null && cycles[opIndex] > Client.cycles) {
 												break
 											}
 
-											val clickFunctionMask = childComponent.keyTriggerParams!![keyIndex]!![key]
-											if (clickFunctionMask.toInt() == 0 || (clickFunctionMask.toInt() and 0x8 == 0 || !(KeyRecorder.keyRecorder?.held(86) == true) && !(KeyRecorder.keyRecorder?.held(82) == true) && !(KeyRecorder.keyRecorder?.held(81) == true)) && (clickFunctionMask.toInt() and 0x2 == 0 || KeyRecorder.keyRecorder?.held(86) == true) && (clickFunctionMask.toInt() and 0x1 == 0 || KeyRecorder.keyRecorder?.held(82) == true) && (clickFunctionMask.toInt() and 0x4 == 0 || KeyRecorder.keyRecorder?.held(81) == true)) {
+											val modifierMask = childComponent.keyTriggerParams!![opIndex]!![key]
+											if (modifierMask.toInt() == 0 || (modifierMask.toInt() and 0x8 == 0 || !(KeyRecorder.keyRecorder?.held(86) == true) && !(KeyRecorder.keyRecorder?.held(82) == true) && !(KeyRecorder.keyRecorder?.held(81) == true)) && (modifierMask.toInt() and 0x2 == 0 || KeyRecorder.keyRecorder?.held(86) == true) && (modifierMask.toInt() and 0x1 == 0 || KeyRecorder.keyRecorder?.held(82) == true) && (modifierMask.toInt() and 0x4 == 0 || KeyRecorder.keyRecorder?.held(81) == true)) {
 												hasAction = true
 												break
 											}
@@ -213,12 +213,12 @@ object InterfaceRenderer {
 								}
 
 								if (hasAction) {
-									if (keyIndex < 10) {
-										Interface.ifOptionInteract(keyIndex + 1, childComponent.idHash, childComponent.slotId, "")
-									} else if (keyIndex == 10) {
+									if (opIndex < 10) {
+										Interface.ifOptionInteract(opIndex + 1, childComponent.idHash, childComponent.slotId, "")
+									} else if (opIndex == 10) {
 										InterfaceComponentRenderer.cancelInterfaceSelection()
-										val childEvents = Client.getComponentSettings(childComponent)!!
-										setUseOptionFlags(childComponent, childEvents.getUseOptionFlags(), childEvents.interfaceId)
+										val componentSettings = Client.getComponentSettings(childComponent)!!
+										setUseOptionFlags(childComponent, componentSettings.getUseOptionFlags(), componentSettings.interfaceId)
 										Client.useOnType = Interface.getUseOptionString(childComponent)
 										if (Client.useOnType == null) {
 											Client.useOnType = "Null"
@@ -227,21 +227,21 @@ object InterfaceRenderer {
 										Client.useOnTarget = childComponent.opBase + TextUtils.setTextColor(16777215)
 									}
 
-									val cycleProgress = childComponent.cycleSteps!![keyIndex]
+									val cycleDelay = childComponent.cycleSteps!![opIndex]
 									if (childComponent.cycles == null) {
 										childComponent.cycles = IntArray(childComponent.keyTriggeringAction!!.size)
 									}
 
-									if (cycleProgress != 0) {
-										childComponent.cycles!![keyIndex] = cycleProgress + Client.cycles
+									if (cycleDelay != 0) {
+										childComponent.cycles!![opIndex] = cycleDelay + Client.cycles
 									} else {
-										childComponent.cycles!![keyIndex] = Int.MAX_VALUE
+										childComponent.cycles!![opIndex] = Int.MAX_VALUE
 									}
 								}
 
 								val cycles = childComponent.cycles
 								if (!keyTriggered && cycles != null) {
-									cycles[keyIndex] = 0
+									cycles[opIndex] = 0
 								}
 							}
 						}
@@ -273,14 +273,14 @@ object InterfaceRenderer {
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							var clickTriggeredVar = clickTriggered
-							var leftClickVar = leftClick
+							var clickAllowed = clickTriggered
+							var leftClickAllowed = leftClick
 							if (Client.draggingComponent != null) {
-								clickTriggeredVar = false
-								leftClickVar = false
+								clickAllowed = false
+								leftClickAllowed = false
 							} else if (MiniMenu.isOpen || childComponent.contentType != ComponentContentType.WORLDMAP && Client.menuItemCount > 0) {
-								clickTriggeredVar = false
-								leftClickVar = false
+								clickAllowed = false
+								leftClickAllowed = false
 								withinBoundaries = false
 							}
 
@@ -329,15 +329,15 @@ object InterfaceRenderer {
 								}
 
 								if (childComponent.contentType == ComponentContentType.MINIMAP) {
-									val spriteVar = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
-									if (spriteVar == null || ComponentMinimap.minimapState != 0 && ComponentMinimap.minimapState != 3 || MiniMenu.isOpen || mouseX < clipMinX || mouseY < clipMinY || mouseX >= clipMaxX || mouseY >= clipMaxY) {
+									val interactiveSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
+									if (interactiveSprite == null || ComponentMinimap.minimapState != 0 && ComponentMinimap.minimapState != 3 || MiniMenu.isOpen || mouseX < clipMinX || mouseY < clipMinY || mouseX >= clipMaxX || mouseY >= clipMaxY) {
 										continue
 									}
 
 									var relativeX = mouseX - componentX
 									var relativeY = mouseY - componentY
-									val rowStartX = spriteVar.rowStartX[relativeY]
-									if (relativeX < rowStartX || relativeX > rowStartX + spriteVar.rowWidth[relativeY]) {
+									val rowStart = interactiveSprite.rowStartX[relativeY]
+									if (relativeX < rowStart || relativeX > rowStart + interactiveSprite.rowWidth[relativeY]) {
 										continue
 									}
 
@@ -372,8 +372,8 @@ object InterfaceRenderer {
 									}
 
 									if (Client.interfaceSelectionActive && USE_OPTIONS_FLAGS and 0x40 != 0) {
-										val interfaceComponent = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
-										if (interfaceComponent != null) {
+										val selectedComponent = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
+										if (selectedComponent != null) {
 											MiniMenu.addEntry(Client.useOnType!!, " ->", MiniMenu.useOnCursor, 59, childComponent.containerItemId, 1, mapX, mapY, true, false, (childComponent.slotId or childComponent.idHash).toLong(), true)
 										} else {
 											InterfaceComponentRenderer.cancelInterfaceSelection()
@@ -392,15 +392,15 @@ object InterfaceRenderer {
 								if (childComponent.contentType == ComponentContentType.WORLDMAP) {
 									WorldMap.worldmapComponent = childComponent
 									if (withinBoundaries) {
-										WorldMapSub1.isInteractive = true
+										WorldMapDisplay.isInteractive = true
 									}
 
-									if (clickTriggeredVar) {
+									if (clickAllowed) {
 										val clickX = ((mouseRecord?.getX()?.minus(componentX)?.minus(childComponent.width / 2))?.times(2.0)?.div(WorldMap.mapZoom))?.toInt()
 										val clickY = mouseRecord?.getY()?.minus(componentY)?.minus(childComponent.height / 2)?.let { (-(it) * 2.0 / WorldMap.mapZoom).toInt() }
-										val absX = clickX?.plus(WorldMap.mapSquareAbsX)?.plus(WorldMapSub1.mapCenterX) ?: 0
-										val absY = clickY?.plus(WorldMap.mapSquareAbsY)?.plus(WorldMapSub1.mapCenterY) ?: 0
-										val worldMapElement = WorldMapSub1.getStaticElement()
+										val absX = clickX?.plus(WorldMap.mapSquareAbsX)?.plus(WorldMapDisplay.mapCenterX) ?: 0
+										val absY = clickY?.plus(WorldMap.mapSquareAbsY)?.plus(WorldMapDisplay.mapCenterY) ?: 0
+										val worldMapElement = WorldMapDisplay.getStaticElement()
 										if (worldMapElement == null)
 											continue
 
@@ -425,17 +425,17 @@ object InterfaceRenderer {
 										continue
 									}
 
-									if (leftClickVar && Client.menuItemCount > 0) {
+									if (leftClickAllowed && Client.menuItemCount > 0) {
 										if (Client.menuItemCount == 1 && (Client.mouseX != MouseRecord.recorder?.getMouseX() ?: 0 || Client.mouseY != MouseRecord.recorder?.getMouseY() ?: 0)) {
-											Interface.worldMapDragStartX = WorldMapSub1.mapCenterX
-											worldMapDragStartY = WorldMapSub1.mapCenterY
+											Interface.worldMapDragStartX = WorldMapDisplay.mapCenterX
+											worldMapDragStartY = WorldMapDisplay.mapCenterY
 											Client.menuItemCount = 2
 										}
 
 										if (Client.menuItemCount == 2) {
 											Client.isMapMoving = true
-											WorldMapSub1.setMapCenterX(Interface.worldMapDragStartX + ((Client.mouseX - (MouseRecord.recorder?.getMouseX() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
-											WorldMapSub1.setMapCenterY(worldMapDragStartY - ((Client.mouseY - (MouseRecord.recorder?.getMouseY() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
+											WorldMapDisplay.setMapCenterX(Interface.worldMapDragStartX + ((Client.mouseX - (MouseRecord.recorder?.getMouseX() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
+											WorldMapDisplay.setMapCenterY(worldMapDragStartY - ((Client.mouseY - (MouseRecord.recorder?.getMouseY() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
 										}
 										continue
 									}
@@ -453,8 +453,8 @@ object InterfaceRenderer {
 								}
 
 								if (childComponent.contentType == ComponentContentType.WORLD_MAP_OVERVIEW) {
-									if (leftClickVar) {
-										WorldMapSub1.markDestination(MouseRecord.recorder?.getMouseX() ?: 0 - componentX, MouseRecord.recorder?.getMouseY() ?: 0 - componentY, childComponent.width, childComponent.height)
+									if (leftClickAllowed) {
+										WorldMapDisplay.markDestination(MouseRecord.recorder?.getMouseX() ?: 0 - componentX, MouseRecord.recorder?.getMouseY() ?: 0 - componentY, childComponent.width, childComponent.height)
 									}
 									continue
 								}
@@ -465,7 +465,7 @@ object InterfaceRenderer {
 								}
 							}
 
-							if (!childComponent.isPressed && clickTriggeredVar) {
+							if (!childComponent.isPressed && clickAllowed) {
 								childComponent.isPressed = true
 								if (childComponent.onClick != null) {
 									val hookRequest = HookRequest()
@@ -478,7 +478,7 @@ object InterfaceRenderer {
 								}
 							}
 
-							if (childComponent.isPressed && leftClickVar && childComponent.onClickRepeat != null) {
+							if (childComponent.isPressed && leftClickAllowed && childComponent.onClickRepeat != null) {
 								val hookRequest = HookRequest()
 								hookRequest.hasMousePosition = true
 								hookRequest.source = childComponent
@@ -488,7 +488,7 @@ object InterfaceRenderer {
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (childComponent.isPressed && !leftClickVar) {
+							if (childComponent.isPressed && !leftClickAllowed) {
 								childComponent.isPressed = false
 								if (childComponent.onRelease != null) {
 									val hookRequest = HookRequest()
@@ -501,7 +501,7 @@ object InterfaceRenderer {
 								}
 							}
 
-							if (leftClickVar && childComponent.onHold != null) {
+							if (leftClickAllowed && childComponent.onHold != null) {
 								val hookRequest = HookRequest()
 								hookRequest.hasMousePosition = true
 								hookRequest.source = childComponent
@@ -554,20 +554,20 @@ object InterfaceRenderer {
 								Client.TICK_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							var hookrequest54: HookRequest
+							var filterHookRequest: HookRequest
 							if (childComponent.onKey != null && Client.keyCycle > childComponent.lastKeyCycle) {
 								val keyPressArray = childComponent.keyPressArray
 								if (keyPressArray != null && Client.keyCycle - childComponent.lastKeyCycle <= 32) {
-									label969@ for (keyIndex in childComponent.lastKeyCycle until Client.keyCycle) {
-										val i_25 = Client.recentKeyUpdates[keyIndex and 0x1f]
+									keyLoop@ for (cycle in childComponent.lastKeyCycle until Client.keyCycle) {
+										val keyId = Client.recentKeyUpdates[cycle and 0x1f]
 
-										for (i_26 in keyPressArray.indices) {
-											if (i_25 == keyPressArray[i_26]) {
-												hookrequest54 = HookRequest()
-												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.onKey
-												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
-												break@label969
+										for (j in keyPressArray.indices) {
+											if (keyId == keyPressArray[j]) {
+												filterHookRequest = HookRequest()
+												filterHookRequest.source = childComponent
+												filterHookRequest.params = childComponent.onKey
+												Client.PENDING_HOOK_REQUESTS.addFirst(filterHookRequest)
+												break@keyLoop
 											}
 										}
 									}
@@ -583,16 +583,16 @@ object InterfaceRenderer {
 
 							if (childComponent.onScrollWheel != null && Client.mouseWheelCycle > childComponent.lastMouseWheelCycle) {
 								if (childComponent.mouseWheelArray != null && Client.mouseWheelCycle - childComponent.lastMouseWheelCycle <= 32) {
-									label945@ for (keyIndex in childComponent.lastMouseWheelCycle until Client.mouseWheelCycle) {
-										val i_25 = Client.recentMouseWheels[keyIndex and 0x1f]
+									wheelLoop@ for (cycle in childComponent.lastMouseWheelCycle until Client.mouseWheelCycle) {
+										val wheelId = Client.recentMouseWheels[cycle and 0x1f]
 
-										for (i_26 in childComponent.mouseWheelArray!!.indices) {
-											if (i_25 == childComponent.mouseWheelArray!![i_26]) {
-												hookrequest54 = HookRequest()
-												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.onScrollWheel
-												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
-												break@label945
+										for (j in childComponent.mouseWheelArray!!.indices) {
+											if (wheelId == childComponent.mouseWheelArray!![j]) {
+												filterHookRequest = HookRequest()
+												filterHookRequest.source = childComponent
+												filterHookRequest.params = childComponent.onScrollWheel
+												Client.PENDING_HOOK_REQUESTS.addFirst(filterHookRequest)
+												break@wheelLoop
 											}
 										}
 									}
@@ -608,16 +608,16 @@ object InterfaceRenderer {
 
 							if (childComponent.onVarpTransmit != null && Client.pulseEventConfigsPtr > childComponent.lastVarpTransmitCycle) {
 								if (childComponent.varps != null && Client.pulseEventConfigsPtr - childComponent.lastVarpTransmitCycle <= 32) {
-									label921@ for (keyIndex in childComponent.lastVarpTransmitCycle until Client.pulseEventConfigsPtr) {
-										val i_25 = Client.PULSE_EVENT_CONFIGS_CACHE[keyIndex and 0x1f]
+									varpLoop@ for (cycle in childComponent.lastVarpTransmitCycle until Client.pulseEventConfigsPtr) {
+										val varpId = Client.PULSE_EVENT_CONFIGS_CACHE[cycle and 0x1f]
 
-										for (i_26 in childComponent.varps!!.indices) {
-											if (i_25 == childComponent.varps!![i_26]) {
-												hookrequest54 = HookRequest()
-												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.onVarpTransmit
-												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
-												break@label921
+										for (j in childComponent.varps!!.indices) {
+											if (varpId == childComponent.varps!![j]) {
+												filterHookRequest = HookRequest()
+												filterHookRequest.source = childComponent
+												filterHookRequest.params = childComponent.onVarpTransmit
+												Client.PENDING_HOOK_REQUESTS.addFirst(filterHookRequest)
+												break@varpLoop
 											}
 										}
 									}
@@ -633,16 +633,16 @@ object InterfaceRenderer {
 
 							if (childComponent.mouseLeaveScript != null && Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS > childComponent.lastContainerTransmitCycle) {
 								if (childComponent.mouseLeaveArrayParams != null && Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - childComponent.lastContainerTransmitCycle <= 32) {
-									label897@ for (keyIndex in childComponent.lastContainerTransmitCycle until Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS) {
-										val i_25 = Client.RECENTLY_USED_ITEM_CONTAINERS[keyIndex and 0x1f]
+									containerLoop@ for (cycle in childComponent.lastContainerTransmitCycle until Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS) {
+										val containerId = Client.RECENTLY_USED_ITEM_CONTAINERS[cycle and 0x1f]
 
-										for (i_26 in childComponent.mouseLeaveArrayParams!!.indices) {
-											if (i_25 == childComponent.mouseLeaveArrayParams!![i_26]) {
-												hookrequest54 = HookRequest()
-												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.mouseLeaveScript
-												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
-												break@label897
+										for (j in childComponent.mouseLeaveArrayParams!!.indices) {
+											if (containerId == childComponent.mouseLeaveArrayParams!![j]) {
+												filterHookRequest = HookRequest()
+												filterHookRequest.source = childComponent
+												filterHookRequest.params = childComponent.mouseLeaveScript
+												Client.PENDING_HOOK_REQUESTS.addFirst(filterHookRequest)
+												break@containerLoop
 											}
 										}
 									}
@@ -658,16 +658,16 @@ object InterfaceRenderer {
 
 							if (childComponent.onStatTransmit != null && Client.skillUpdateCycle > childComponent.lastStatTransmitCycle) {
 								if (childComponent.statTransmitFilter != null && Client.skillUpdateCycle - childComponent.lastStatTransmitCycle <= 32) {
-									label873@ for (keyIndex in childComponent.lastStatTransmitCycle until Client.skillUpdateCycle) {
-										val i_25 = Client.recentSkillUpdates[keyIndex and 0x1f]
+									statLoop@ for (cycle in childComponent.lastStatTransmitCycle until Client.skillUpdateCycle) {
+										val statId = Client.recentSkillUpdates[cycle and 0x1f]
 
-										for (i_26 in childComponent.statTransmitFilter!!.indices) {
-											if (i_25 == childComponent.statTransmitFilter!![i_26]) {
-												hookrequest54 = HookRequest()
-												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.onStatTransmit
-												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
-												break@label873
+										for (j in childComponent.statTransmitFilter!!.indices) {
+											if (statId == childComponent.statTransmitFilter!![j]) {
+												filterHookRequest = HookRequest()
+												filterHookRequest.source = childComponent
+												filterHookRequest.params = childComponent.onStatTransmit
+												Client.PENDING_HOOK_REQUESTS.addFirst(filterHookRequest)
+												break@statLoop
 											}
 										}
 									}
@@ -683,16 +683,16 @@ object InterfaceRenderer {
 
 							if (childComponent.onClanVarTransmit != null && Client.CLAN_VAR_COUNTER > childComponent.lastClanVarTransmitCycle) {
 								if (childComponent.clanVarFilter != null && Client.CLAN_VAR_COUNTER - childComponent.lastClanVarTransmitCycle <= 32) {
-									label849@ for (keyIndex in childComponent.lastClanVarTransmitCycle until Client.CLAN_VAR_COUNTER) {
-										val i_25 = Client.CLAN_VAR_KEYS[keyIndex and 0x1f]
+									clanVarLoop@ for (cycle in childComponent.lastClanVarTransmitCycle until Client.CLAN_VAR_COUNTER) {
+										val clanVarId = Client.CLAN_VAR_KEYS[cycle and 0x1f]
 
-										for (i_26 in childComponent.clanVarFilter!!.indices) {
-											if (i_25 == childComponent.clanVarFilter!![i_26]) {
-												hookrequest54 = HookRequest()
-												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.onClanVarTransmit
-												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
-												break@label849
+										for (j in childComponent.clanVarFilter!!.indices) {
+											if (clanVarId == childComponent.clanVarFilter!![j]) {
+												filterHookRequest = HookRequest()
+												filterHookRequest.source = childComponent
+												filterHookRequest.params = childComponent.onClanVarTransmit
+												Client.PENDING_HOOK_REQUESTS.addFirst(filterHookRequest)
+												break@clanVarLoop
 											}
 										}
 									}
@@ -758,12 +758,12 @@ object InterfaceRenderer {
 							childComponent.lastServerTick = Client.serverTick
 							if (childComponent.onKeyType != null) {
 								for (keyIndex in 0 until Client.keyCachePointerPoss) {
-									val hookrequest44 = HookRequest()
-									hookrequest44.source = childComponent
-									hookrequest44.typedKeyCode = Client.KEYS_PRESSED[keyIndex]!!.getCode()
-									hookrequest44.typedKeyChar = Client.KEYS_PRESSED[keyIndex]!!.getCharacter().code
-									hookrequest44.params = childComponent.onKeyType
-									Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest44)
+									val hookRequest = HookRequest()
+									hookRequest.source = childComponent
+									hookRequest.typedKeyCode = Client.KEYS_PRESSED[keyIndex]!!.getCode()
+									hookRequest.typedKeyChar = Client.KEYS_PRESSED[keyIndex]!!.getCharacter().code
+									hookRequest.params = childComponent.onKeyType
+									Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 								}
 							}
 
@@ -819,16 +819,16 @@ object InterfaceRenderer {
 		}
 
 		Client.menuItemCount = 0
-		WorldMapSub1.isInteractive = false
+		WorldMapDisplay.isInteractive = false
 		CommandExecutor.teleportCommandRequested = false
 	}
 
 	@JvmStatic
-	fun updateInterfaceDimensions(itemSlots: Array<Component?>, idHash: Int, width: Int, height: Int, bool4: Boolean) {
-		for (i_6 in itemSlots.indices) {
-			val component = itemSlots[i_6]
+	fun updateInterfaceDimensions(components: Array<Component?>, idHash: Int, width: Int, height: Int, fireResizeHooks: Boolean) {
+		for (i in components.indices) {
+			val component = components[i]
 			if (component != null && component.parentId == idHash) {
-				initSizes(component, width, height, bool4)
+				initSizes(component, width, height, fireResizeHooks)
 				InterfaceComponentRenderer.componentPositionAdjustment(component, width, height)
 				if (component.scrollX > component.scrollWidth - component.width) {
 					component.scrollX = component.scrollWidth - component.width
@@ -843,64 +843,64 @@ object InterfaceRenderer {
 					component.scrollY = 0
 				}
 				if (component.type == ComponentType.CONTAINER) {
-					InterfaceComponentRenderer.updateEntityOnInterface(itemSlots, component, bool4)
+					InterfaceComponentRenderer.updateEntityOnInterface(components, component, fireResizeHooks)
 				}
 			}
 		}
 	}
 
 	@JvmStatic
-	fun updateInterfaceDimensions(interfaceId: Int, width: Int, height: Int, bool3: Boolean) {
+	fun updateInterfaceDimensions(interfaceId: Int, width: Int, height: Int, fireResizeHooks: Boolean) {
 		if (Interface.interfaceLoaded(interfaceId, null)) {
-			updateInterfaceDimensions(Interface.INTERFACES!![interfaceId]!!.components, -1, width, height, bool3)
+			updateInterfaceDimensions(Interface.INTERFACES!![interfaceId]!!.components, -1, width, height, fireResizeHooks)
 		}
 	}
 
 	@JvmStatic
-	fun initSizes(interfaceComponent: Component, i_1: Int, i_2: Int, hookRequest: Boolean) {
-		val width = interfaceComponent.width
-		val height = interfaceComponent.height
-		if (interfaceComponent.aspectWidthType.toInt() == 0) {
-			interfaceComponent.width = interfaceComponent.baseWidth
-		} else if (interfaceComponent.aspectWidthType.toInt() == 1) {
-			interfaceComponent.width = i_1 - interfaceComponent.baseWidth
-		} else if (interfaceComponent.aspectWidthType.toInt() == 2) {
-			interfaceComponent.width = interfaceComponent.baseWidth * i_1 shr 14
+	fun initSizes(component: Component, parentWidth: Int, parentHeight: Int, fireResizeHooks: Boolean) {
+		val width = component.width
+		val height = component.height
+		if (component.aspectWidthType.toInt() == 0) {
+			component.width = component.baseWidth
+		} else if (component.aspectWidthType.toInt() == 1) {
+			component.width = parentWidth - component.baseWidth
+		} else if (component.aspectWidthType.toInt() == 2) {
+			component.width = component.baseWidth * parentWidth shr 14
 		}
-		if (interfaceComponent.aspectHeightType.toInt() == 0) {
-			interfaceComponent.height = interfaceComponent.baseHeight
-		} else if (interfaceComponent.aspectHeightType.toInt() == 1) {
-			interfaceComponent.height = i_2 - interfaceComponent.baseHeight
-		} else if (interfaceComponent.aspectHeightType.toInt() == 2) {
-			interfaceComponent.height = i_2 * interfaceComponent.baseHeight shr 14
+		if (component.aspectHeightType.toInt() == 0) {
+			component.height = component.baseHeight
+		} else if (component.aspectHeightType.toInt() == 1) {
+			component.height = parentHeight - component.baseHeight
+		} else if (component.aspectHeightType.toInt() == 2) {
+			component.height = parentHeight * component.baseHeight shr 14
 		}
-		if (interfaceComponent.aspectWidthType.toInt() == 4) {
-			interfaceComponent.width = interfaceComponent.aspectX * interfaceComponent.height / interfaceComponent.aspectY
+		if (component.aspectWidthType.toInt() == 4) {
+			component.width = component.aspectX * component.height / component.aspectY
 		}
-		if (interfaceComponent.aspectHeightType.toInt() == 4) {
-			interfaceComponent.height = interfaceComponent.width * interfaceComponent.aspectY / interfaceComponent.aspectX
+		if (component.aspectHeightType.toInt() == 4) {
+			component.height = component.width * component.aspectY / component.aspectX
 		}
-		if (Client.DISPLAY_HIDDEN_MENU_OPTIONS && (Client.getComponentSettings(interfaceComponent)!!.settingsHash != 0 || interfaceComponent.type == ComponentType.CONTAINER)) {
-			if (interfaceComponent.height < 5 && interfaceComponent.width < 5) {
-				interfaceComponent.height = 5
-				interfaceComponent.width = 5
+		if (Client.DISPLAY_HIDDEN_MENU_OPTIONS && (Client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
+			if (component.height < 5 && component.width < 5) {
+				component.height = 5
+				component.width = 5
 			} else {
-				if (interfaceComponent.height <= 0) {
-					interfaceComponent.height = 5
+				if (component.height <= 0) {
+					component.height = 5
 				}
-				if (interfaceComponent.width <= 0) {
-					interfaceComponent.width = 5
+				if (component.width <= 0) {
+					component.width = 5
 				}
 			}
 		}
-		if (interfaceComponent.contentType == ComponentContentType.GAME_WINDOW) {
-			Client.GAME_SCREEN_INTERFACE = interfaceComponent
+		if (component.contentType == ComponentContentType.GAME_WINDOW) {
+			Client.GAME_SCREEN_INTERFACE = component
 		}
-		if (hookRequest && interfaceComponent.onResize != null && (width != interfaceComponent.width || height != interfaceComponent.height)) {
-			val hookrequest7 = HookRequest()
-			hookrequest7.source = interfaceComponent
-			hookrequest7.params = interfaceComponent.onResize
-			Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest7)
+		if (fireResizeHooks && component.onResize != null && (width != component.width || height != component.height)) {
+			val resizeHook = HookRequest()
+			resizeHook.source = component
+			resizeHook.params = component.onResize
+			Client.PENDING_HOOK_REQUESTS.addFirst(resizeHook)
 		}
 	}
 
@@ -930,23 +930,23 @@ object InterfaceRenderer {
 	}
 
 	@JvmStatic
-	fun setUseOptionFlags(componentDefs: Component?, flags: Int, interfaceId: Int) {
-		if (componentDefs != null) {
-			if (componentDefs.onTargetEnter != null) {
-				val hookrequest4 = HookRequest()
-				hookrequest4.source = componentDefs
-				hookrequest4.params = componentDefs.onTargetEnter
-				CS2Executor.executeHookInner(hookrequest4)
+	fun setUseOptionFlags(component: Component?, flags: Int, interfaceId: Int) {
+		if (component != null) {
+			if (component.onTargetEnter != null) {
+				val targetEnterHook = HookRequest()
+				targetEnterHook.source = component
+				targetEnterHook.params = component.onTargetEnter
+				CS2Executor.executeHookInner(targetEnterHook)
 			}
 			Client.interfaceSelectionActive = true
-			Client.selectedComponentHash = componentDefs.idHash
-			Client.selectedSlotId = componentDefs.slotId
+			Client.selectedComponentHash = component.idHash
+			Client.selectedSlotId = component.slotId
 			USE_OPTIONS_FLAGS = flags
 			MiniMenu.USE_INTERFACE_ID = interfaceId
-			Client.selectedItemId = componentDefs.containerItemId
-			MiniMenu.useOnCursor = componentDefs.targetOverCursor
-			Client.defaultMenuCursor = componentDefs.targetLeaveCursor
-			Component.redrawComponent(componentDefs)
+			Client.selectedItemId = component.containerItemId
+			MiniMenu.useOnCursor = component.targetOverCursor
+			Client.defaultMenuCursor = component.targetLeaveCursor
+			Component.redrawComponent(component)
 		}
 	}
 

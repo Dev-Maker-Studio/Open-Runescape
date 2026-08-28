@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -128,9 +128,9 @@ object CS2SharedOps {
     fun substring(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStackPtr -= 2
-        val i_3 = executor.intStack[executor.intStackPtr]
-        val i_4 = executor.intStack[executor.intStackPtr + 1]
-        executor.stringStack[++executor.stringStackPtr - 1] = text!!.substring(i_3, i_4)
+        val startIndex = executor.intStack[executor.intStackPtr]
+        val endIndex = executor.intStack[executor.intStackPtr + 1]
+        executor.stringStack[++executor.stringStackPtr - 1] = text!!.substring(startIndex, endIndex)
     }
 
     @JvmStatic
@@ -140,8 +140,8 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method15511(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        component!!.spriteScale = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setModelZoom(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        component!!.spriteScale = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfangleUpdate(component!!.idHash)
@@ -149,9 +149,9 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method4883(component: Component, i_1: Int, i_2: Int) {
+    fun setOpCharSlot(component: Component, opSlot: Int, charCode: Int) {
         if (component!!.keyCharCodes == null) {
-            if (i_2 <= 0) {
+            if (charCode <= 0) {
                 return
             }
             component!!.keyTriggeringAction = Array(11) { ByteArray(0) }
@@ -159,14 +159,14 @@ object CS2SharedOps {
             component!!.cycleSteps = IntArray(11)
             component!!.keyCharCodes = IntArray(11)
         }
-        component!!.keyCharCodes!![i_1] = i_2
-        if (i_2 > 0) {
+        component!!.keyCharCodes!![opSlot] = charCode
+        if (charCode > 0) {
             component!!.hasInteraction = true
         } else {
             component!!.hasInteraction = false
             val keyTriggeringActionArr = component!!.keyTriggeringAction!!
-            for (i_5 in 0 until keyTriggeringActionArr.size) {
-                if (keyTriggeringActionArr[i_5] != null || component!!.keyCharCodes!![i_5] > 0) {
+            for (slot in 0 until keyTriggeringActionArr.size) {
+                if (keyTriggeringActionArr[slot] != null || component!!.keyCharCodes!![slot] > 0) {
                     component!!.hasInteraction = true
                     break
                 }
@@ -175,16 +175,16 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method1852(component: Component, intr: Interface, cs2: CS2Executor) {
-        cs2.intStackPtr -= 2
-        component!!.scrollX = cs2.intStack[cs2.intStackPtr]
+    fun setScrollPos(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        component!!.scrollX = executor.intStack[executor.intStackPtr]
         if (component!!.scrollX > component!!.scrollWidth - component!!.width) {
             component!!.scrollX = component!!.scrollWidth - component!!.width
         }
         if (component!!.scrollX < 0) {
             component!!.scrollX = 0
         }
-        component!!.scrollY = cs2.intStack[cs2.intStackPtr + 1]
+        component!!.scrollY = executor.intStack[executor.intStackPtr + 1]
         if (component!!.scrollY > component!!.scrollHeight - component!!.height) {
             component!!.scrollY = component!!.scrollHeight - component!!.height
         }
@@ -192,148 +192,148 @@ object CS2SharedOps {
             component!!.scrollY = 0
         }
         Component.redrawComponent(component)
-        if (component!!.slotId == -1 && !intr.preventInteraction) {
+        if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfscrollposUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun method6289(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnMouseEnter(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onMouseOver = popParamsDynamic(text, cs2executor2)
+        component!!.onMouseOver = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method7927(component: Component, cs2executor1: CS2Executor) {
-        cs2executor1.intStackPtr -= 2
-        val i_3 = cs2executor1.intStack[cs2executor1.intStackPtr] - 1
-        val i_4 = cs2executor1.intStack[cs2executor1.intStackPtr + 1]
-        if (i_3 >= 0 && i_3 <= 9) {
-            method4883(component!!, i_3, i_4)
+    fun setOpChar(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        val opSlot = executor.intStack[executor.intStackPtr] - 1
+        val charCode = executor.intStack[executor.intStackPtr + 1]
+        if (opSlot >= 0 && opSlot <= 9) {
+            setOpCharSlot(component!!, opSlot, charCode)
         } else {
             throw RuntimeException()
         }
     }
 
     @JvmStatic
-    fun method3078(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnHold(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onHold = popParamsDynamic(text, cs2executor2)
+        component!!.onHold = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method3672(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnMouseRepeat(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onMouseMove = popParamsDynamic(text, cs2executor2)
+        component!!.onMouseMove = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setOnMouseLeave(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        val stack: IntArray? = popIntArrayParam(text, cs2executor2)
-        if (stack != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnMouseLeave(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val triggers: IntArray? = popIntArrayParam(paramTypes, executor)
+        if (triggers != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.mouseLeaveScript = popParamsDynamic(text, cs2executor2)
-        component!!.mouseLeaveArrayParams = stack
+        component!!.mouseLeaveScript = popParamsDynamic(paramTypes, executor)
+        component!!.mouseLeaveArrayParams = triggers
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method7889(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnSubchange(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onSubChange = popParamsDynamic(text, cs2executor2)
+        component!!.onSubChange = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method774(component: Component, cs2executor2: CS2Executor) {
-        component!!.flipHorizontal = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setHFlip(component: Component, executor: CS2Executor) {
+        component!!.flipHorizontal = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun setComponentModelOrigin(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        component!!.originX = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.originY = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
+    fun setComponentModelOrigin(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        component!!.originX = executor.intStack[executor.intStackPtr]
+        component!!.originY = executor.intStack[executor.intStackPtr + 1]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method2874(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnClickRepeat(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onClickRepeat = popParamsDynamic(text, cs2executor2)
+        component!!.onClickRepeat = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method7267(component: Component, cs2executor2: CS2Executor) {
-        component!!.usesOrthogonal = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setModelOrthog(component: Component, executor: CS2Executor) {
+        component!!.usesOrthogonal = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method5009(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnChatTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onChatTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onChatTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method7142(component: Component, cs2executor2: CS2Executor) {
-        component!!.shadow = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setTextShadow(component: Component, executor: CS2Executor) {
+        component!!.shadow = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method6288(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        val stack: IntArray? = popIntArrayParam(text, cs2executor2)
-        if (stack != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnScrollWheel(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val triggers: IntArray? = popIntArrayParam(paramTypes, executor)
+        if (triggers != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onScrollWheel = popParamsDynamic(text, cs2executor2)
-        component!!.mouseWheelArray = stack
+        component!!.onScrollWheel = popParamsDynamic(paramTypes, executor)
+        component!!.mouseWheelArray = triggers
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method2915(component: Component, cs2executor2: CS2Executor) {
-        component!!.spriteShadow = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setGraphicShadow(component: Component, executor: CS2Executor) {
+        component!!.spriteShadow = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method8754(component: Component, cs2executor2: CS2Executor) {
-        component!!.filled = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setFill(component: Component, executor: CS2Executor) {
+        component!!.filled = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun ifSetColor(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        component!!.color = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun ifSetColor(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        component!!.color = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfcolorUpdate(component!!.idHash)
@@ -341,98 +341,98 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method6689(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        val stack: IntArray? = popIntArrayParam(text, cs2executor2)
-        if (stack != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnVarTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val triggers: IntArray? = popIntArrayParam(paramTypes, executor)
+        if (triggers != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onVarpTransmit = popParamsDynamic(text, cs2executor2)
-        component!!.varps = stack
+        component!!.onVarpTransmit = popParamsDynamic(paramTypes, executor)
+        component!!.varps = triggers
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method6690(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnStockTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onStockTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onStockTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method4159(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 4
-        component!!.modelTintRed = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.modelTintGreen = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        component!!.modelTintBlue = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
-        component!!.modelTintScalar = cs2executor2.intStack[cs2executor2.intStackPtr + 3]
+    fun setModelTint(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 4
+        component!!.modelTintRed = executor.intStack[executor.intStackPtr]
+        component!!.modelTintGreen = executor.intStack[executor.intStackPtr + 1]
+        component!!.modelTintBlue = executor.intStack[executor.intStackPtr + 2]
+        component!!.modelTintScalar = executor.intStack[executor.intStackPtr + 3]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method4160(component: Component, cs2executor2: CS2Executor) {
-        component!!.borderThickness = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setOutline(component: Component, executor: CS2Executor) {
+        component!!.borderThickness = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method11221(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnTargetLeave(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onTargetLeave = popParamsDynamic(text, cs2executor2)
+        component!!.onTargetLeave = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method11223(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnMouseExit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onMouseLeaveScript = popParamsDynamic(text, cs2executor2)
+        component!!.onMouseLeaveScript = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method501(component: Component, cs2executor2: CS2Executor) {
-        component!!.tiling = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setTiling(component: Component, executor: CS2Executor) {
+        component!!.tiling = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method502(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        val stack: IntArray? = popIntArrayParam(text, cs2executor2)
-        if (stack != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnInvTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val triggers: IntArray? = popIntArrayParam(paramTypes, executor)
+        if (triggers != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onKey = popParamsDynamic(text, cs2executor2)
-        component!!.keyPressArray = stack
+        component!!.onKey = popParamsDynamic(paramTypes, executor)
+        component!!.keyPressArray = triggers
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method505(component: Component, cs2executor2: CS2Executor) {
-        val value = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        val text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        val attributedefault6: ParamType? = TypeLists.PARAMS!!.list(value)
-        if (!attributedefault6!!.typeName.equals(text!!)) {
-            component!!.setStringParam(value, text)
+    fun setParamString(component: Component, executor: CS2Executor) {
+        val paramId = executor.intStack[--executor.intStackPtr]
+        val stringValue: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (!paramType!!.typeName.equals(stringValue!!)) {
+            component!!.setStringParam(paramId, stringValue)
         } else {
-            component!!.removeParam(value)
+            component!!.removeParam(paramId)
         }
     }
 
     @JvmStatic
-    fun method506(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        component!!.scrollWidth = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.scrollHeight = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
+    fun setScrollSize(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        component!!.scrollWidth = executor.intStack[executor.intStackPtr]
+        component!!.scrollHeight = executor.intStack[executor.intStackPtr + 1]
         Component.redrawComponent(component!!)
         if (component!!.type == ComponentType.CONTAINER) {
             Component.updateEntityLayout(parentInterface, component, false)
@@ -440,79 +440,79 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method2738(parentInterface: Interface, i_1: Int, i_2: Int, i_3: Int, flag: Boolean, cs2executor5: CS2Executor) {
-        if (i_2 == 0) {
+    fun createComponent(parentInterface: Interface, parentComponentIndex: Int, componentTypeId: Int, slotId: Int, useSecondaryHook: Boolean, executor: CS2Executor) {
+        if (componentTypeId == 0) {
             throw RuntimeException()
         } else {
-            val icomponentdefinitions7: Component? = parentInterface.components[i_1]
-            if (icomponentdefinitions7!!.slotChildren == null) {
+            val parentComponent: Component? = parentInterface.components[parentComponentIndex]
+            if (parentComponent!!.slotChildren == null) {
                 @Suppress("UNCHECKED_CAST")
-                icomponentdefinitions7!!.slotChildren = arrayOfNulls<Component>(i_3 + 1) as Array<Component>?
+                parentComponent!!.slotChildren = arrayOfNulls<Component>(slotId + 1) as Array<Component>?
                 @Suppress("UNCHECKED_CAST")
-                icomponentdefinitions7!!.itemSlots = icomponentdefinitions7!!.slotChildren as Array<Component?>?
+                parentComponent!!.itemSlots = parentComponent!!.slotChildren as Array<Component?>?
             }
-            if (icomponentdefinitions7!!.slotChildren!!.size <= i_3) {
+            if (parentComponent!!.slotChildren!!.size <= slotId) {
                 @Suppress("UNCHECKED_CAST")
-                val arr_8: Array<Component>? = arrayOfNulls<Component>(i_3 + 1) as Array<Component>?
-                if (icomponentdefinitions7!!.slotChildren == icomponentdefinitions7!!.itemSlots) {
-                    System.arraycopy(icomponentdefinitions7!!.slotChildren, 0, arr_8, 0, icomponentdefinitions7!!.slotChildren!!.size)
-                    icomponentdefinitions7!!.slotChildren = arr_8
+                val expandedSlotChildren: Array<Component>? = arrayOfNulls<Component>(slotId + 1) as Array<Component>?
+                if (parentComponent!!.slotChildren == parentComponent!!.itemSlots) {
+                    System.arraycopy(parentComponent!!.slotChildren, 0, expandedSlotChildren, 0, parentComponent!!.slotChildren!!.size)
+                    parentComponent!!.slotChildren = expandedSlotChildren
                     @Suppress("UNCHECKED_CAST")
-                    icomponentdefinitions7!!.itemSlots = arr_8 as Array<Component?>?
+                    parentComponent!!.itemSlots = expandedSlotChildren as Array<Component?>?
                 } else {
                     @Suppress("UNCHECKED_CAST")
-                    val arr_11: Array<Component?>? = arrayOfNulls<Component>(i_3 + 1)
-                    for (i_10 in 0 until icomponentdefinitions7!!.slotChildren!!.size) {
-                        arr_8!![i_10] = icomponentdefinitions7!!.slotChildren!![i_10]
-                        arr_11!![i_10] = icomponentdefinitions7!!.itemSlots!![i_10]
+                    val expandedItemSlots: Array<Component?>? = arrayOfNulls<Component>(slotId + 1)
+                    for (slot in 0 until parentComponent!!.slotChildren!!.size) {
+                        expandedSlotChildren!![slot] = parentComponent!!.slotChildren!![slot]
+                        expandedItemSlots!![slot] = parentComponent!!.itemSlots!![slot]
                     }
-                    icomponentdefinitions7!!.slotChildren = arr_8
-                    icomponentdefinitions7!!.itemSlots = arr_11
+                    parentComponent!!.slotChildren = expandedSlotChildren
+                    parentComponent!!.itemSlots = expandedItemSlots
                 }
             }
-            if (i_3 > 0 && icomponentdefinitions7!!.slotChildren!![i_3 - 1] == null) {
-                throw RuntimeException("" + (i_3 - 1))
+            if (slotId > 0 && parentComponent!!.slotChildren!![slotId - 1] == null) {
+                throw RuntimeException("" + (slotId - 1))
             } else {
-                val icomponentdefinitions12: Component? = Component()
-                icomponentdefinitions12!!.type = ComponentType.forId(i_2)
-                icomponentdefinitions12!!.idHash = icomponentdefinitions7!!.idHash
-                icomponentdefinitions12!!.parentId = icomponentdefinitions7!!.idHash
-                icomponentdefinitions12!!.slotId = i_3
-                icomponentdefinitions7!!.slotChildren!![i_3] = icomponentdefinitions12
-                if (icomponentdefinitions7!!.slotChildren != icomponentdefinitions7!!.itemSlots) {
-                    icomponentdefinitions7!!.itemSlots!![i_3] = icomponentdefinitions12
+                val newComponent: Component? = Component()
+                newComponent!!.type = ComponentType.forId(componentTypeId)
+                newComponent!!.idHash = parentComponent!!.idHash
+                newComponent!!.parentId = parentComponent!!.idHash
+                newComponent!!.slotId = slotId
+                parentComponent!!.slotChildren!![slotId] = newComponent
+                if (parentComponent!!.slotChildren != parentComponent!!.itemSlots) {
+                    parentComponent!!.itemSlots!![slotId] = newComponent
                 }
-                var target: CS2Interface? = null
-                if (flag) {
-                    target = cs2executor5.hookedInterface2
+                var hookTarget: CS2Interface? = null
+                if (useSecondaryHook) {
+                    hookTarget = executor.hookedInterface2
                 } else {
-                    target = cs2executor5.hookedInterface1
+                    hookTarget = executor.hookedInterface1
                 }
-                target!!.inter = parentInterface
-                target!!.comp = icomponentdefinitions12
-                Component.redrawComponent(icomponentdefinitions7!!)
+                hookTarget!!.inter = parentInterface
+                hookTarget!!.comp = newComponent
+                Component.redrawComponent(parentComponent!!)
             }
         }
     }
 
     @JvmStatic
-    fun method2741(component: Component, cs2executor2: CS2Executor) {
-        var flag: Boolean = false
-        flag = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
-        component!!.alpha = flag
+    fun setAlpha(component: Component, executor: CS2Executor) {
+        var alphaEnabled: Boolean = false
+        alphaEnabled = executor.intStack[--executor.intStackPtr] == 1
+        component!!.alpha = alphaEnabled
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method8387(component: Component, cs2executor2: CS2Executor) {
-        component!!.dragDeadzone = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setDragDeadZone(component: Component, executor: CS2Executor) {
+        component!!.dragDeadzone = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
-    fun method8390(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        val value = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        if (value != component!!.spriteId) {
-            component!!.spriteId = value
+    fun setGraphic(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        val spriteId = executor.intStack[--executor.intStackPtr]
+        if (spriteId != component!!.spriteId) {
+            component!!.spriteId = spriteId
             Component.redrawComponent(component!!)
         }
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
@@ -521,35 +521,35 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method15256(component: Component, cs2executor2: CS2Executor) {
-        component!!.dragDeadTime = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setDragDeadTime(component: Component, executor: CS2Executor) {
+        component!!.dragDeadTime = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
-    fun method4651(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnKey(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onKeyType = popParamsDynamic(text, cs2executor2)
+        component!!.onKeyType = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method6313(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 4
-        component!!.skyboxId = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.lightPositionX = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        component!!.lightPositionY = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
-        component!!.lightPositionZ = cs2executor2.intStack[cs2executor2.intStackPtr + 3]
+    fun setModelLighting(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 4
+        component!!.skyboxId = executor.intStack[executor.intStackPtr]
+        component!!.lightPositionX = executor.intStack[executor.intStackPtr + 1]
+        component!!.lightPositionY = executor.intStack[executor.intStackPtr + 2]
+        component!!.lightPositionZ = executor.intStack[executor.intStackPtr + 3]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method786(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        val flag = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
-        if (flag != component!!.hidden) {
-            component!!.hidden = flag
+    fun setHide(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        val hidden = executor.intStack[--executor.intStackPtr] == 1
+        if (hidden != component!!.hidden) {
+            component!!.hidden = hidden
             Component.redrawComponent(component!!)
         }
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
@@ -558,41 +558,41 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method789(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
+    fun setVideoSprite(component: Component, parentInterface: Interface, executor: CS2Executor) {
         if (component!!.type == ComponentType.SPRITE) {
-            method5459(component!!, parentInterface!!, cs2executor2)
+            setVideoFileId(component!!, parentInterface!!, executor)
         }
     }
 
     @JvmStatic
-    fun method5017(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnClanSettingsTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onClanSettingsTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onClanSettingsTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method2955(component: Component, cs2executor2: CS2Executor) {
-        component!!.moveOverCursor = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setMouseOverCursor(component: Component, executor: CS2Executor) {
+        component!!.moveOverCursor = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
-    fun method4772(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnMiscTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onMiscTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onMiscTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setTriggerKey(component: Component, i_1: Int, bytes_2: ByteArray?, bytes_3: ByteArray?) {
+    fun setTriggerKey(component: Component, opSlot: Int, keyCodes: ByteArray?, keyModifiers: ByteArray?) {
         if (component!!.keyTriggeringAction == null) {
-            if (bytes_2 == null) {
+            if (keyCodes == null) {
                 return
             }
             component!!.keyTriggeringAction = Array(11) { ByteArray(0) }
@@ -600,34 +600,34 @@ object CS2SharedOps {
             component!!.cycleSteps = IntArray(11)
             component!!.keyCharCodes = IntArray(11)
         }
-        component!!.keyTriggeringAction!![i_1] = bytes_2!!
-        if (bytes_2 != null) {
+        component!!.keyTriggeringAction!![opSlot] = keyCodes!!
+        if (keyCodes != null) {
             component!!.hasInteraction = true
         } else {
             component!!.hasInteraction = false
-            for (i_6 in 0 until component!!.keyTriggeringAction!!.size) {
-                if (component!!.keyTriggeringAction!![i_6] != null || component!!.keyCharCodes!![i_6] > 0) {
+            for (slot in 0 until component!!.keyTriggeringAction!!.size) {
+                if (component!!.keyTriggeringAction!![slot] != null || component!!.keyCharCodes!![slot] > 0) {
                     component!!.hasInteraction = true
                     break
                 }
             }
         }
-        component!!.keyTriggerParams!![i_1] = bytes_3!!
+        component!!.keyTriggerParams!![opSlot] = keyModifiers!!
     }
 
     @JvmStatic
-    fun ifSetNPCHead(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
+    fun ifSetNPCHead(component: Component, parentInterface: Interface, executor: CS2Executor) {
         component!!.mediaType = MediaType.NPC_HEAD
         component!!.npcCustomisation = null
-        component!!.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr]
+        component!!.primaryMediaId = executor.intStack[--executor.intStackPtr]
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun method2960(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        component!!.textAntiMacro = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setTextAntimacro(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        component!!.textAntiMacro = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedClearIftextantimacro(component!!.idHash)
@@ -635,18 +635,18 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method2593(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnDragComplete(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onDragComplete = popParamsDynamic(text, cs2executor2)
+        component!!.onDragComplete = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method13468(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        component!!.clickMask = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setClickmask(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        component!!.clickMask = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfclickmaskUpdate(component!!.idHash)
@@ -654,174 +654,174 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method4136(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnTimer(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onTimer = popParamsDynamic(text, cs2executor2)
+        component!!.onTimer = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setItemIFComp(ifComp: Component, parentInterface: Interface, wearCol: Boolean, renderStack: Component.StackMode, cs2executor4: CS2Executor) {
-        cs2executor4.intStackPtr -= 2
-        val itemId = cs2executor4.intStack[cs2executor4.intStackPtr]
-        val value = cs2executor4.intStack[cs2executor4.intStackPtr + 1]
-        if (ifComp.slotId == -1 && !parentInterface.preventInteraction) {
-            PulseEventQueue.delayedIfitemUpdate(ifComp.idHash)
-            PulseEventQueue.delayedIfangleUpdate(ifComp.idHash)
-            PulseEventQueue.delayedIfoffsetUpdate(ifComp.idHash)
+    fun setItemIFComp(component: Component, parentInterface: Interface, wearCol: Boolean, renderStack: Component.StackMode, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        val itemId = executor.intStack[executor.intStackPtr]
+        val stackSize = executor.intStack[executor.intStackPtr + 1]
+        if (component.slotId == -1 && !parentInterface.preventInteraction) {
+            PulseEventQueue.delayedIfitemUpdate(component.idHash)
+            PulseEventQueue.delayedIfangleUpdate(component.idHash)
+            PulseEventQueue.delayedIfoffsetUpdate(component.idHash)
         }
         if (itemId == -1) {
-            ifComp.mediaType = MediaType.RAW_MODEL
-            ifComp.primaryMediaId = -1
-            ifComp.containerItemId = -1
+            component.mediaType = MediaType.RAW_MODEL
+            component.primaryMediaId = -1
+            component.containerItemId = -1
         } else {
-            ifComp.containerItemId = itemId
-            ifComp.itemStackSize = value
-            ifComp.wearCol = wearCol
-            val itemdefinitions8: ItemType? = TypeLists.OBJ!!.list(itemId)
-            ifComp.spritePitch = itemdefinitions8!!.modelRotationX
-            ifComp.spriteRoll = itemdefinitions8!!.modelRotationY
-            ifComp.spriteYaw = itemdefinitions8!!.modelRotationZ
-            ifComp.offsetX = itemdefinitions8!!.modelOffsetX
-            ifComp.offsetY = itemdefinitions8!!.modelOffsetY
-            ifComp.spriteScale = itemdefinitions8!!.modelZoom
-            ifComp.renderStack = renderStack
-            if (ifComp.aspectWidth > 0) {
-                ifComp.spriteScale = ifComp.spriteScale * 32 / ifComp.aspectWidth
-            } else if (ifComp.baseWidth > 0) {
-                ifComp.spriteScale = ifComp.spriteScale * 32 / ifComp.baseWidth
+            component.containerItemId = itemId
+            component.itemStackSize = stackSize
+            component.wearCol = wearCol
+            val itemType: ItemType? = TypeLists.OBJ!!.list(itemId)
+            component.spritePitch = itemType!!.modelRotationX
+            component.spriteRoll = itemType!!.modelRotationY
+            component.spriteYaw = itemType!!.modelRotationZ
+            component.offsetX = itemType!!.modelOffsetX
+            component.offsetY = itemType!!.modelOffsetY
+            component.spriteScale = itemType!!.modelZoom
+            component.renderStack = renderStack
+            if (component.aspectWidth > 0) {
+                component.spriteScale = component.spriteScale * 32 / component.aspectWidth
+            } else if (component.baseWidth > 0) {
+                component.spriteScale = component.spriteScale * 32 / component.baseWidth
             }
         }
     }
 
     @JvmStatic
-    fun setComponentText(component: Component, intr: Interface, cs2: CS2Executor) {
-        val text: String? = cs2.stringStack[--cs2.stringStackPtr] as String?
+    fun setComponentText(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         if (!text.equals(component!!.text)) {
             component!!.text = text ?: ""
             Component.redrawComponent(component)
         }
-        if (component!!.slotId == -1 && !intr.preventInteraction) {
+        if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIftextUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun setOpBase(component: Component, cs2executor2: CS2Executor) {
-        component!!.opBase = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
+    fun setOpBase(component: Component, executor: CS2Executor) {
+        component!!.opBase = executor.stringStack[--executor.stringStackPtr] as String?
         if (Loader.DEBUG_IF_OPS)
             component!!.opBase += "(opBase)"
     }
 
     @JvmStatic
-    fun method14482(component: Component, cs2executor2: CS2Executor) {
-        val i_4 = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        val i_5 = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        if (i_5 >= 1 && i_5 <= 10) {
-            component!!.addCursor(i_5 - 1, i_4)
+    fun setOpCursor(component: Component, executor: CS2Executor) {
+        val cursorId = executor.intStack[--executor.intStackPtr]
+        val opSlot = executor.intStack[--executor.intStackPtr]
+        if (opSlot >= 1 && opSlot <= 10) {
+            component!!.addCursor(opSlot - 1, cursorId)
         }
     }
 
     @JvmStatic
-    fun method1083(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnDrag(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onDrag = popParamsDynamic(text, cs2executor2)
+        component!!.onDrag = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setComponentTextAlign(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 3
-        component!!.textHorizontalAli = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.textVerticalAli = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        component!!.lineSpacing = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
+    fun setComponentTextAlign(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 3
+        component!!.textHorizontalAli = executor.intStack[executor.intStackPtr]
+        component!!.textVerticalAli = executor.intStack[executor.intStackPtr + 1]
+        component!!.lineSpacing = executor.intStack[executor.intStackPtr + 2]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method2170(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnDialogAbort(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onSubClose = popParamsDynamic(text, cs2executor2)
+        component!!.onSubClose = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method14605(component: Component, cs2executor1: CS2Executor) {
-        val b_3 = 10
-        val value = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        method4883(component!!, b_3, value)
+    fun setOpTChar(component: Component, executor: CS2Executor) {
+        val targetOpSlot = 10
+        val charCode = executor.intStack[--executor.intStackPtr]
+        setOpCharSlot(component!!, targetOpSlot, charCode)
     }
 
     @JvmStatic
-    fun method6186(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
+    fun setVideoText(component: Component, parentInterface: Interface, executor: CS2Executor) {
         if (component!!.type == ComponentType.TEXT) {
-            method5459(component!!, parentInterface!!, cs2executor2)
+            setVideoFileId(component!!, parentInterface!!, executor)
         }
     }
 
     @JvmStatic
-    fun method8310(component: Component, cs2executor2: CS2Executor) {
-        component!!.angle2d = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun set2DAngle(component: Component, executor: CS2Executor) {
+        component!!.angle2d = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method542(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnVarClanTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onClanVarTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onClanVarTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setIfFont(component: Component, intr: Interface, cs2: CS2Executor) {
-        component!!.fontId = cs2.intStack[--cs2.intStackPtr]
+    fun setIfFont(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        component!!.fontId = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component)
-        if (component!!.slotId == -1 && !intr.preventInteraction) {
+        if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIffontUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun method7729(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        component!!.sunRotationX = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.sunRotationY = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
+    fun setModelLightingSunRotation(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        component!!.sunRotationX = executor.intStack[executor.intStackPtr]
+        component!!.sunRotationY = executor.intStack[executor.intStackPtr + 1]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun setComponentPosition(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 4
-        component!!.basePositionX = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.basePositionY = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        var i_4 = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
-        if (i_4 < 0) {
-            i_4 = 0
-        } else if (i_4 > 5) {
-            i_4 = 5
+    fun setComponentPosition(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 4
+        component!!.basePositionX = executor.intStack[executor.intStackPtr]
+        component!!.basePositionY = executor.intStack[executor.intStackPtr + 1]
+        var aspectXType = executor.intStack[executor.intStackPtr + 2]
+        if (aspectXType < 0) {
+            aspectXType = 0
+        } else if (aspectXType > 5) {
+            aspectXType = 5
         }
-        var i_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 3]
-        if (i_5 < 0) {
-            i_5 = 0
-        } else if (i_5 > 5) {
-            i_5 = 5
+        var aspectYType = executor.intStack[executor.intStackPtr + 3]
+        if (aspectYType < 0) {
+            aspectYType = 0
+        } else if (aspectYType > 5) {
+            aspectYType = 5
         }
-        component!!.aspectXType = i_4.toByte()
-        component!!.aspectYType = i_5.toByte()
+        component!!.aspectXType = aspectXType.toByte()
+        component!!.aspectYType = aspectYType.toByte()
         Component.redrawComponent(component!!)
-        method913(parentInterface, component)
+        relayoutAgainstParent(parentInterface, component)
         if (component!!.type == ComponentType.CONTAINER) {
             Component.updateEntityLayout(parentInterface, component, false)
         }
@@ -831,76 +831,76 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method1454(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        val i_4 = cs2executor2.intStack[cs2executor2.intStackPtr]
-        val i_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        val attributedefault6: ParamType? = TypeLists.PARAMS!!.list(i_4)
-        if (i_5 != attributedefault6!!.defaultInt) {
-            component!!.setIntParam(i_4, i_5)
+    fun setParamInt(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        val paramId = executor.intStack[executor.intStackPtr]
+        val value = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (value != paramType!!.defaultInt) {
+            component!!.setIntParam(paramId, value)
         } else {
-            component!!.removeParam(i_4)
+            component!!.removeParam(paramId)
         }
     }
 
     @JvmStatic
-    fun method1455(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 4
-        component!!.primaryMediaId = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.secondaryMediaId = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        if (cs2executor2.intStack[cs2executor2.intStackPtr + 2] == 1) {
+    fun setModelItemContainer(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 4
+        component!!.primaryMediaId = executor.intStack[executor.intStackPtr]
+        component!!.secondaryMediaId = executor.intStack[executor.intStackPtr + 1]
+        if (executor.intStack[executor.intStackPtr + 2] == 1) {
             component!!.mediaType = MediaType.ITEM_CONTAINER_FEMALE
         } else {
             component!!.mediaType = MediaType.ITEM_CONTAINER_MALE
         }
-        component!!.wearCol = cs2executor2.intStack[cs2executor2.intStackPtr + 3] == 1
+        component!!.wearCol = executor.intStack[executor.intStackPtr + 3] == 1
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun method14653(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnCamfinished(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onCamFinished = popParamsDynamic(text, cs2executor2)
+        component!!.onCamFinished = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method12260(icDefs: Component, parentInterface: Interface, executor: CS2Executor) {
+    fun setComponentSize(component: Component, parentInterface: Interface, executor: CS2Executor) {
         executor.intStackPtr -= 4
-        icDefs.baseWidth = executor.intStack[executor.intStackPtr]
-        icDefs.baseHeight = executor.intStack[executor.intStackPtr + 1]
-        icDefs.aspectWidth = 0
-        icDefs.aspectHeight = 0
-        var i_4 = executor.intStack[executor.intStackPtr + 2]
-        if (i_4 < 0) {
-            i_4 = 0
-        } else if (i_4 > 4) {
-            i_4 = 4
+        component.baseWidth = executor.intStack[executor.intStackPtr]
+        component.baseHeight = executor.intStack[executor.intStackPtr + 1]
+        component.aspectWidth = 0
+        component.aspectHeight = 0
+        var aspectWidthType = executor.intStack[executor.intStackPtr + 2]
+        if (aspectWidthType < 0) {
+            aspectWidthType = 0
+        } else if (aspectWidthType > 4) {
+            aspectWidthType = 4
         }
-        var i_5 = executor.intStack[executor.intStackPtr + 3]
-        if (i_5 < 0) {
-            i_5 = 0
-        } else if (i_5 > 4) {
-            i_5 = 4
+        var aspectHeightType = executor.intStack[executor.intStackPtr + 3]
+        if (aspectHeightType < 0) {
+            aspectHeightType = 0
+        } else if (aspectHeightType > 4) {
+            aspectHeightType = 4
         }
-        icDefs.aspectWidthType = i_4.toByte()
-        icDefs.aspectHeightType = i_5.toByte()
-        Component.redrawComponent(icDefs)
-        method913(parentInterface, icDefs)
-        if (icDefs.type == ComponentType.CONTAINER) {
-            Component.updateEntityLayout(parentInterface, icDefs, false)
+        component.aspectWidthType = aspectWidthType.toByte()
+        component.aspectHeightType = aspectHeightType.toByte()
+        Component.redrawComponent(component)
+        relayoutAgainstParent(parentInterface, component)
+        if (component.type == ComponentType.CONTAINER) {
+            Component.updateEntityLayout(parentInterface, component, false)
         }
     }
 
     @JvmStatic
-    fun method7555(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
+    fun setComponentModel(component: Component, parentInterface: Interface, executor: CS2Executor) {
         component!!.mediaType = MediaType.RAW_MODEL
-        component!!.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr]
+        component!!.primaryMediaId = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(component!!.idHash)
@@ -908,68 +908,68 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method6010(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 3
-        val value = cs2executor2.intStack[cs2executor2.intStackPtr]
-        val s_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1].toShort()
-        val s_6 = cs2executor2.intStack[cs2executor2.intStackPtr + 2].toShort()
-        if (value >= 0 && value < 5) {
-            component!!.retexture(value, s_5, s_6)
+    fun setRetex(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 3
+        val retexIndex = executor.intStack[executor.intStackPtr]
+        val srcTexture = executor.intStack[executor.intStackPtr + 1].toShort()
+        val dstTexture = executor.intStack[executor.intStackPtr + 2].toShort()
+        if (retexIndex >= 0 && retexIndex < 5) {
+            component!!.retexture(retexIndex, srcTexture, dstTexture)
             Component.redrawComponent(component!!)
             if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
-                PulseEventQueue.delayedIfretex(component!!.idHash, value)
+                PulseEventQueue.delayedIfretex(component!!.idHash, retexIndex)
             }
         }
     }
 
     @JvmStatic
-    fun method1845(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnResize(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onResize = popParamsDynamic(text, cs2executor2)
+        component!!.onResize = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method3365(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnRelease(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onRelease = popParamsDynamic(text, cs2executor2)
+        component!!.onRelease = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method3366(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnFriendsChatTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onFriendsChatTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onFriendsChatTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setTargetVerb(component: Component, cs2executor2: CS2Executor) {
-        component!!.targetVerb = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
+    fun setTargetVerb(component: Component, executor: CS2Executor) {
+        component!!.targetVerb = executor.stringStack[--executor.stringStackPtr] as String?
         if (Loader.DEBUG_IF_OPS)
             component!!.targetVerb += "(targetVerb)"
     }
 
     @JvmStatic
-    fun method3965(component: Component, cs2executor1: CS2Executor) {
-        val fontmetrics3: FontMetrics? = component!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
-        val i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val i_5 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val i_6 = fontmetrics3!!.getIndexAtPosition(component!!.text, component!!.width, component!!.lineSpacing, i_5, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
-        cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = i_6
+    fun getCharIndexAtPos(component: Component, executor: CS2Executor) {
+        val fontMetrics: FontMetrics? = component!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
+        val y = executor.intStack[--executor.intStackPtr]
+        val x = executor.intStack[--executor.intStackPtr]
+        val charIndex = fontMetrics!!.getIndexAtPosition(component!!.text, component!!.width, component!!.lineSpacing, x, y, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        executor.intStack[++executor.intStackPtr - 1] = charIndex
     }
 
     @JvmStatic
-    fun method3987(component: Component, parentInterface: Interface) {
+    fun setPlayerHeadSelf(component: Component, parentInterface: Interface) {
         component!!.mediaType = MediaType.PLAYER_HEAD
         component!!.primaryMediaId = PlayerUpdate.myPlayerIndex
         component!!.secondaryMediaId = 0
@@ -979,14 +979,14 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun setResumeText(component: Component, cs2executor2: CS2Executor) {
-        component!!.resumeText = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
+    fun setResumeText(component: Component, executor: CS2Executor) {
+        component!!.resumeText = executor.stringStack[--executor.stringStackPtr] as String?
         if (Loader.DEBUG_IF_OPS)
             component!!.resumeText += "(resumeText)"
     }
 
     @JvmStatic
-    fun method12401(component: Component, parentInterface: Interface) {
+    fun setPlayerModelSelf(component: Component, parentInterface: Interface) {
         component!!.mediaType = MediaType.PLAYER_MODEL
         component!!.primaryMediaId = PlayerUpdate.myPlayerIndex
         component!!.secondaryMediaId = 0
@@ -996,20 +996,20 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method14892(component: Component, cs2executor2: CS2Executor) {
-        component!!.lineWidth = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setLineWid(component: Component, executor: CS2Executor) {
+        component!!.lineWidth = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method4276(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 6
-        component!!.offsetX = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.offsetY = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        component!!.spritePitch = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
-        component!!.spriteRoll = cs2executor2.intStack[cs2executor2.intStackPtr + 3]
-        component!!.spriteYaw = cs2executor2.intStack[cs2executor2.intStackPtr + 4]
-        component!!.spriteScale = cs2executor2.intStack[cs2executor2.intStackPtr + 5]
+    fun setModelAngle(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 6
+        component!!.offsetX = executor.intStack[executor.intStackPtr]
+        component!!.offsetY = executor.intStack[executor.intStackPtr + 1]
+        component!!.spritePitch = executor.intStack[executor.intStackPtr + 2]
+        component!!.spriteRoll = executor.intStack[executor.intStackPtr + 3]
+        component!!.spriteYaw = executor.intStack[executor.intStackPtr + 4]
+        component!!.spriteScale = executor.intStack[executor.intStackPtr + 5]
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfangleUpdate(component!!.idHash)
@@ -1018,47 +1018,47 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method4280(component: Component, cs2executor2: CS2Executor) {
-        var flag: Boolean = false
-        flag = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
-        component!!.flipVertical = flag
+    fun setVFlip(component: Component, executor: CS2Executor) {
+        var flipVertical: Boolean = false
+        flipVertical = executor.intStack[--executor.intStackPtr] == 1
+        component!!.flipVertical = flipVertical
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method12630(component: Component) {
+    fun clearScriptHooks(component: Component) {
         component!!.reset()
     }
 
     @JvmStatic
-    fun method5066(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
+    fun setPlayerModel(component: Component, parentInterface: Interface, executor: CS2Executor) {
         component!!.mediaType = MediaType.PLAYER_MODEL
-        component!!.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr]
+        component!!.primaryMediaId = executor.intStack[--executor.intStackPtr]
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun method13450(component: Component, cs2executor2: CS2Executor) {
-        val value = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        component!!.lineDirection = value == 1
+    fun setLineDirection(component: Component, executor: CS2Executor) {
+        val direction = executor.intStack[--executor.intStackPtr]
+        component!!.lineDirection = direction == 1
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method5291(component: Component, cs2executor2: CS2Executor) {
-        val value = cs2executor2.intStack[--cs2executor2.intStackPtr] - 1
-        if (value >= 0 && value <= 9) {
-            component!!.addOptionName(value, cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String)
+    fun setOp(component: Component, executor: CS2Executor) {
+        val opSlot = executor.intStack[--executor.intStackPtr] - 1
+        if (opSlot >= 0 && opSlot <= 9) {
+            component!!.addOptionName(opSlot, executor.stringStack[--executor.stringStackPtr] as String)
         } else {
-            --cs2executor2.stringStackPtr
+            --executor.stringStackPtr
         }
     }
 
     @JvmStatic
-    fun method797(component: Component, intr: Interface, cs2: CS2Executor) {
-        val sequenceId = cs2.intStack[--cs2.intStackPtr]
+    fun setModelAnim(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        val sequenceId = executor.intStack[--executor.intStackPtr]
         if (sequenceId != component!!.animation) {
             if (sequenceId != -1) {
                 if (component!!.animatingSequence == null) {
@@ -1071,32 +1071,32 @@ object CS2SharedOps {
             component!!.animation = sequenceId
             Component.redrawComponent(component)
         }
-        if (component!!.slotId == -1 && !intr.preventInteraction) {
+        if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfanimUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun setTransparency(component: Component, cs2executor2: CS2Executor) {
-        component!!.transparency = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setTransparency(component: Component, executor: CS2Executor) {
+        component!!.transparency = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method5455(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnClanChannelTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onClanChannelTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onClanChannelTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method5459(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        val value = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        if (value != component!!.videoFileId) {
-            component!!.videoFileId = value
+    fun setVideoFileId(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        val videoFileId = executor.intStack[--executor.intStackPtr]
+        if (videoFileId != component!!.videoFileId) {
+            component!!.videoFileId = videoFileId
             Component.redrawComponent(component!!)
         }
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
@@ -1105,224 +1105,224 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun method569(component: Component, cs2executor2: CS2Executor) {
-        component!!.maxTextLines = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setMaxLines(component: Component, executor: CS2Executor) {
+        component!!.maxTextLines = executor.intStack[--executor.intStackPtr]
         Component.redrawComponent(component!!)
     }
 
     @JvmStatic
-    fun method3251(component: Component, cs2executor1: CS2Executor) {
-        if (cs2executor1.hookRequestCount >= 10) {
+    fun callonresize(component: Component, executor: CS2Executor) {
+        if (executor.hookRequestCount >= 10) {
             throw RuntimeException()
         } else {
             if (component!!.onResize != null) {
-                val hookrequest3: HookRequest? = HookRequest()
-                hookrequest3!!.source = component
-                hookrequest3!!.params = component!!.onResize
-                hookrequest3!!.requestId = cs2executor1.hookRequestCount + 1
-                Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest3)
+                val hookRequest: HookRequest? = HookRequest()
+                hookRequest!!.source = component
+                hookRequest!!.params = component!!.onResize
+                hookRequest!!.requestId = executor.hookRequestCount + 1
+                Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
             }
         }
     }
 
     @JvmStatic
-    fun method5001(component: Component, cs2executor1: CS2Executor) {
-        val fontmetrics3: FontMetrics? = component!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
-        val value = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val point5: Point? = fontmetrics3!!.getPositionAtIndex(component!!.text, component!!.width, component!!.lineSpacing, value, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
-        cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5!!.x
-        cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5!!.y
+    fun getCharPosAtIndex(component: Component, executor: CS2Executor) {
+        val fontMetrics: FontMetrics? = component!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
+        val charIndex = executor.intStack[--executor.intStackPtr]
+        val charPosition: Point? = fontMetrics!!.getPositionAtIndex(component!!.text, component!!.width, component!!.lineSpacing, charIndex, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        executor.intStack[++executor.intStackPtr - 1] = charPosition!!.x
+        executor.intStack[++executor.intStackPtr - 1] = charPosition!!.y
     }
 
     @JvmStatic
-    fun method3338(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        val stack: IntArray? = popIntArrayParam(text, cs2executor2)
-        if (stack != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnStatTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val triggers: IntArray? = popIntArrayParam(paramTypes, executor)
+        if (triggers != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onStatTransmit = popParamsDynamic(text, cs2executor2)
-        component!!.statTransmitFilter = stack
+        component!!.onStatTransmit = popParamsDynamic(paramTypes, executor)
+        component!!.statTransmitFilter = triggers
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setComponentAspect(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        component!!.aspectX = cs2executor2.intStack[cs2executor2.intStackPtr]
-        component!!.aspectY = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
+    fun setComponentAspect(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        component!!.aspectX = executor.intStack[executor.intStackPtr]
+        component!!.aspectY = executor.intStack[executor.intStackPtr + 1]
         Component.redrawComponent(component!!)
-        method913(parentInterface, component)
+        relayoutAgainstParent(parentInterface, component)
         if (component!!.type == ComponentType.CONTAINER) {
             Component.updateEntityLayout(parentInterface, component, false)
         }
     }
 
     @JvmStatic
-    fun method913(parentInterface: Interface, icomponentdefinitions1: Component) {
-        val icomponentdefinitions3: Component? = Interface.getSub(parentInterface, icomponentdefinitions1)
-        var i_4: Int = 0
-        var i_5: Int = 0
-        if (icomponentdefinitions3 == null) {
-            i_4 = GameShell.screenCanvasWidth
-            i_5 = GameShell.screenCanvasHeight
+    fun relayoutAgainstParent(parentInterface: Interface, component: Component) {
+        val parentComponent: Component? = Interface.getSub(parentInterface, component)
+        var parentWidth: Int = 0
+        var parentHeight: Int = 0
+        if (parentComponent == null) {
+            parentWidth = GameShell.screenCanvasWidth
+            parentHeight = GameShell.screenCanvasHeight
         } else {
-            i_4 = icomponentdefinitions3!!.width
-            i_5 = icomponentdefinitions3!!.height
+            parentWidth = parentComponent!!.width
+            parentHeight = parentComponent!!.height
         }
-        InterfaceRenderer.initSizes(icomponentdefinitions1!!, i_4, i_5, false)
-        InterfaceComponentRenderer.componentPositionAdjustment(icomponentdefinitions1!!, i_4, i_5)
+        InterfaceRenderer.initSizes(component!!, parentWidth, parentHeight, false)
+        InterfaceComponentRenderer.componentPositionAdjustment(component!!, parentWidth, parentHeight)
     }
 
     @JvmStatic
-    fun setDepthChild(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        val i_4 = cs2executor2.intStack[cs2executor2.intStackPtr]
-        val i_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        if (i_4 == -1 && i_5 == -1) {
+    fun setDepthChild(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        val depthChildIdHash = executor.intStack[executor.intStackPtr]
+        val depthChildSlotId = executor.intStack[executor.intStackPtr + 1]
+        if (depthChildIdHash == -1 && depthChildSlotId == -1) {
             component!!.depthChildOverride = null
         } else {
-            component!!.depthChildOverride = Component.listIcomponent(i_4, i_5)
+            component!!.depthChildOverride = Component.listIcomponent(depthChildIdHash, depthChildSlotId)
         }
     }
 
     @JvmStatic
-    fun method14586(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
-        }
-        component!!.hookParams = popParamsDynamic(text, cs2executor2)
-        component!!.hasScript = true
-    }
-
-    @JvmStatic
-    fun method6045(component: Component, cs2executor2: CS2Executor) {
-        component!!.targetLeaveCursor = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        component!!.targetOverCursor = cs2executor2.intStack[--cs2executor2.intStackPtr]
-    }
-
-    @JvmStatic
-    fun setOnMouseOver(iCompDefs: Component, cs2executor2: CS2Executor) {
-        var paramTypes: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(paramTypes, cs2executor2) != null) {
+    fun setOnOp(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
             paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        iCompDefs.popupScript = popParamsDynamic(paramTypes, cs2executor2)
-        iCompDefs.hasScript = true
-    }
-
-    @JvmStatic
-    fun method869(component: Component, cs2executor2: CS2Executor) {
-        val value: Component.DragType? = Component.DragType.forId(cs2executor2.intStack[--cs2executor2.intStackPtr])
-        if (value != null)
-            component.dragType = value
-    }
-
-    @JvmStatic
-    fun method910(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
-        }
-        component!!.params = popParamsDynamic(text, cs2executor2)
+        component!!.hookParams = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setNoClickThrough(component: Component, cs2executor2: CS2Executor) {
-        component!!.preventClickThrough = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setTargetCursors(component: Component, executor: CS2Executor) {
+        component!!.targetLeaveCursor = executor.intStack[--executor.intStackPtr]
+        component!!.targetOverCursor = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
-    fun method12209(component: Component, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 2
-        val b_4 = 10
-        @Suppress("UNCHECKED_CAST")
-        val bytes_5: ByteArray? = cs2executor2.globalArrays[cs2executor2.intStack[cs2executor2.intStackPtr]] as ByteArray?
-        @Suppress("UNCHECKED_CAST")
-        val bytes_6: ByteArray? = cs2executor2.globalArrays[cs2executor2.intStack[cs2executor2.intStackPtr + 1]] as ByteArray?
-        setTriggerKey(component!!, b_4, bytes_5, bytes_6)
+    fun setOnMouseOver(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
+        }
+        component.popupScript = popParamsDynamic(paramTypes, executor)
+        component.hasScript = true
     }
 
     @JvmStatic
-    fun method1838(component: Component, bytes_1: ByteArray?, bytes_2: ByteArray?, cs2executor3: CS2Executor) {
-        val value = cs2executor3.intStack[--cs2executor3.intStackPtr] - 1
-        if (value >= 0 && value <= 9) {
-            setTriggerKey(component!!, value, bytes_1, bytes_2)
+    fun setDragRenderBehaviour(component: Component, executor: CS2Executor) {
+        val dragType: Component.DragType? = Component.DragType.forId(executor.intStack[--executor.intStackPtr])
+        if (dragType != null)
+            component.dragType = dragType
+    }
+
+    @JvmStatic
+    fun setOnOpt(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
+        }
+        component!!.params = popParamsDynamic(paramTypes, executor)
+        component!!.hasScript = true
+    }
+
+    @JvmStatic
+    fun setNoClickThrough(component: Component, executor: CS2Executor) {
+        component!!.preventClickThrough = executor.intStack[--executor.intStackPtr] == 1
+    }
+
+    @JvmStatic
+    fun setOpTKey(component: Component, executor: CS2Executor) {
+        executor.intStackPtr -= 2
+        val targetOpSlot = 10
+        @Suppress("UNCHECKED_CAST")
+        val keyCodes: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr]] as ByteArray?
+        @Suppress("UNCHECKED_CAST")
+        val keyModifiers: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr + 1]] as ByteArray?
+        setTriggerKey(component!!, targetOpSlot, keyCodes, keyModifiers)
+    }
+
+    @JvmStatic
+    fun setOpKey(component: Component, keyCodes: ByteArray?, keyModifiers: ByteArray?, executor: CS2Executor) {
+        val opSlot = executor.intStack[--executor.intStackPtr] - 1
+        if (opSlot >= 0 && opSlot <= 9) {
+            setTriggerKey(component!!, opSlot, keyCodes, keyModifiers)
         } else {
             throw RuntimeException()
         }
     }
 
     @JvmStatic
-    fun method15409(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnClick(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onClick = popParamsDynamic(text, cs2executor2)
+        component!!.onClick = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method6158(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnFriendTransmit(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onFriendTransmit = popParamsDynamic(text, cs2executor2)
+        component!!.onFriendTransmit = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun method11337(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
+    fun setNpcModel(component: Component, parentInterface: Interface, executor: CS2Executor) {
         component!!.mediaType = MediaType.NPC_MODEL
         component!!.npcCustomisation = null
-        component!!.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr]
+        component!!.primaryMediaId = executor.intStack[--executor.intStackPtr]
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(component!!.idHash)
         }
     }
 
     @JvmStatic
-    fun method15474(component: Component) {
+    fun clearOps(component: Component) {
         component!!.options = null
     }
 
     @JvmStatic
-    fun method1642(component: Component, cs2executor2: CS2Executor) {
-        var text: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
-        if (popIntArrayParam(text, cs2executor2) != null) {
-            text = text!!.substring(0, text!!.length - 1)
+    fun setOnTargetEnter(component: Component, executor: CS2Executor) {
+        var paramTypes: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (popIntArrayParam(paramTypes, executor) != null) {
+            paramTypes = paramTypes!!.substring(0, paramTypes!!.length - 1)
         }
-        component!!.onTargetEnter = popParamsDynamic(text, cs2executor2)
+        component!!.onTargetEnter = popParamsDynamic(paramTypes, executor)
         component!!.hasScript = true
     }
 
     @JvmStatic
-    fun setTargetOpCursor(component: Component, cs2executor2: CS2Executor) {
-        component!!.targetOpCursor = cs2executor2.intStack[--cs2executor2.intStackPtr]
+    fun setTargetOpCursor(component: Component, executor: CS2Executor) {
+        component!!.targetOpCursor = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
-    fun method7667(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        cs2executor2.intStackPtr -= 3
-        val value = cs2executor2.intStack[cs2executor2.intStackPtr]
-        val s_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1].toShort()
-        val s_6 = cs2executor2.intStack[cs2executor2.intStackPtr + 2].toShort()
-        if (value >= 0 && value < 5) {
-            component!!.recolor(value, s_5, s_6)
+    fun setRecol(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        executor.intStackPtr -= 3
+        val recolorIndex = executor.intStack[executor.intStackPtr]
+        val srcColor = executor.intStack[executor.intStackPtr + 1].toShort()
+        val dstColor = executor.intStack[executor.intStackPtr + 2].toShort()
+        if (recolorIndex >= 0 && recolorIndex < 5) {
+            component!!.recolor(recolorIndex, srcColor, dstColor)
             Component.redrawComponent(component!!)
             if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
-                PulseEventQueue.delayedIfrecol(component!!.idHash, value)
+                PulseEventQueue.delayedIfrecol(component!!.idHash, recolorIndex)
             }
         }
     }
 
     @JvmStatic
-    fun method6697(component: Component, parentInterface: Interface, cs2executor2: CS2Executor) {
-        component!!.monospaced = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1
+    fun setFontMono(component: Component, parentInterface: Interface, executor: CS2Executor) {
+        component!!.monospaced = executor.intStack[--executor.intStackPtr] == 1
         Component.redrawComponent(component!!)
         if (component!!.slotId == -1 && !parentInterface.preventInteraction) {
             PulseEventQueue.delayedIfmonospacedUpdate(component!!.idHash)
@@ -1330,18 +1330,18 @@ object CS2SharedOps {
     }
 
     @JvmStatic
-    fun popIntArrayParam(paramTypes: String?, cs2executor1: CS2Executor): IntArray? {
-        var intArr: IntArray? = null
+    fun popIntArrayParam(paramTypes: String?, executor: CS2Executor): IntArray? {
+        var triggers: IntArray? = null
         if (!paramTypes.isNullOrEmpty() && paramTypes[paramTypes.length - 1] == 'Y') {
-            var size = cs2executor1.intStack[--cs2executor1.intStackPtr]
+            var size = executor.intStack[--executor.intStackPtr]
             if (size > 0) {
-                intArr = IntArray(size)
+                triggers = IntArray(size)
                 while (size-- > 0) {
-                    intArr[size] = cs2executor1.intStack[--cs2executor1.intStackPtr]
+                    triggers[size] = executor.intStack[--executor.intStackPtr]
                 }
             }
         }
-        return intArr
+        return triggers
     }
 
     @JvmStatic

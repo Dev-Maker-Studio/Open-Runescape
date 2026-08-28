@@ -41,7 +41,7 @@ object NPCUpdate {
                 if (npcEntity.definitions?.hasSoundEffects() == true) {
                     AmbientSound.unlinkEntitySound(npcEntity)
                 }
-                npcEntity.setDirection(null)
+                npcEntity.setNpcType(null)
                 objectNode.unlink()
                 isUnlinked = true
             }
@@ -203,7 +203,7 @@ object NPCUpdate {
             }
 
             val turnRotations = (bitBuffer.readBits(3) + 4 shl 11) and 0x3fff
-            npcEntity.setDirection(TypeLists.NPC?.list(bitBuffer.readBits(15)))
+            npcEntity.setNpcType(TypeLists.NPC?.list(bitBuffer.readBits(15)))
 
             val offX = if (largeView) {
                 val raw = bitBuffer.readBits(8)
@@ -465,7 +465,7 @@ object NPCUpdate {
                 if (npc.definitions?.hasSoundEffects() == true) {
                     AmbientSound.unlinkEntitySound(npc)
                 }
-                npc.setDirection(TypeLists.NPC?.list(buffer.readBigSmart()))
+                npc.setNpcType(TypeLists.NPC?.list(buffer.readBigSmart()))
                 npc.setSize(npc.definitions?.size ?: 1)
                 npc.turnDirection = (npc.definitions?.turnDirection ?: 0) shl 3
                 if (npc.definitions?.hasSoundEffects() == true) {

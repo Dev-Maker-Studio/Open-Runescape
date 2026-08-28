@@ -240,8 +240,8 @@ open class ModelSM : Model {
     @JvmField
     var renderLock: Boolean = false
 
-    constructor(hardwarerenderer1: SafeModeToolkit) {
-        this.toolkit = hardwarerenderer1
+    constructor(safeModeToolkit: SafeModeToolkit) {
+        this.toolkit = safeModeToolkit
     }
 
     constructor(safeModeToolkit: SafeModeToolkit, mesh: Mesh, mFlags: Int, mAmbient: Int, mContrast: Int, preferenceMask: Int) {
@@ -275,7 +275,7 @@ open class ModelSM : Model {
         val hasPriorities = (this.functionMask and ModelFunctionMask.ALTERS_ALPHA) != 0
         for (faceIndex in 0 until this.numFaces) {
             val face = faces[faceIndex]
-            var material1: MaterialType? = null
+            var faceMaterial: MaterialType? = null
             var billboardLayer = 0
             var materialEffectId: Byte = 0
             var materialEffectParam1: Byte = 0
@@ -304,16 +304,16 @@ open class ModelSM : Model {
             if (mesh.facesMaterial != null) {
                 materialId = mesh.facesMaterial!![face]
                 if (materialId.toInt() != -1) {
-                    material1 = materialProvider!!.getMaterial(materialId.toInt() and 0xffff)
-                    if ((preferenceMask and ModelFunctionMask.DISABLE_TEXTURES) != 0 && material1.detailsOnly) {
+                    faceMaterial = materialProvider!!.getMaterial(materialId.toInt() and 0xffff)
+                    if ((preferenceMask and ModelFunctionMask.DISABLE_TEXTURES) != 0 && faceMaterial.detailsOnly) {
                         materialId = -1
                     } else {
-                        materialEffectId = material1.effectId
-                        materialEffectParam1 = material1.effectParam1
+                        materialEffectId = faceMaterial.effectId
+                        materialEffectParam1 = faceMaterial.effectParam1
                     }
                 }
             }
-            val considerLayers = this.facesAlpha != null && this.facesAlpha!![face].toInt() != 0 || material1 != null && material1.effectCombiner.toInt() == 2
+            val considerLayers = this.facesAlpha != null && this.facesAlpha!![face].toInt() != 0 || faceMaterial != null && faceMaterial.effectCombiner.toInt() == 2
             if ((hasPriorities || considerLayers) && this.facesLayer != null) {
                 billboardLayer += this.facesLayer!![face].toInt() shl 17
             }
@@ -387,41 +387,41 @@ open class ModelSM : Model {
                         val texX = mesh.textureFaceX!![textureIndex]
                         val texY = mesh.textureFaceY!![textureIndex]
                         val texZ = mesh.textureFaceZ!![textureIndex]
-                        val f_28 = this.verticesX!![texX.toInt()].toFloat()
-                        val f_29 = this.verticesY!![texX.toInt()].toFloat()
-                        val f_30 = this.verticesZ!![texX.toInt()].toFloat()
-                        val f_31 = this.verticesX!![texY.toInt()] - f_28
-                        val f_32 = this.verticesY!![texY.toInt()] - f_29
-                        val f_33 = this.verticesZ!![texY.toInt()] - f_30
-                        val f_34 = this.verticesX!![texZ.toInt()] - f_28
-                        val f_35 = this.verticesY!![texZ.toInt()] - f_29
-                        val f_36 = this.verticesZ!![texZ.toInt()] - f_30
-                        val f_37 = this.verticesX!![a.toInt()] - f_28
-                        val f_38 = this.verticesY!![a.toInt()] - f_29
-                        val f_39 = this.verticesZ!![a.toInt()] - f_30
-                        val f_40 = this.verticesX!![b.toInt()] - f_28
-                        val f_41 = this.verticesY!![b.toInt()] - f_29
-                        val f_42 = this.verticesZ!![b.toInt()] - f_30
-                        val f_43 = this.verticesX!![c.toInt()] - f_28
-                        val f_44 = this.verticesY!![c.toInt()] - f_29
-                        val f_45 = this.verticesZ!![c.toInt()] - f_30
-                        val f_46 = f_32 * f_36 - f_33 * f_35
-                        val f_47 = f_33 * f_34 - f_31 * f_36
-                        val f_48 = f_31 * f_35 - f_32 * f_34
-                        var f_49 = f_35 * f_48 - f_36 * f_47
-                        var f_50 = f_36 * f_46 - f_34 * f_48
-                        var f_51 = f_34 * f_47 - f_35 * f_46
-                        var f_52 = 1.0f / (f_49 * f_31 + f_50 * f_32 + f_51 * f_33)
-                        u[0] = (f_49 * f_37 + f_50 * f_38 + f_51 * f_39) * f_52
-                        u[1] = (f_49 * f_40 + f_50 * f_41 + f_51 * f_42) * f_52
-                        u[2] = (f_49 * f_43 + f_50 * f_44 + f_51 * f_45) * f_52
-                        f_49 = f_32 * f_48 - f_33 * f_47
-                        f_50 = f_33 * f_46 - f_31 * f_48
-                        f_51 = f_31 * f_47 - f_32 * f_46
-                        f_52 = 1.0f / (f_49 * f_34 + f_50 * f_35 + f_51 * f_36)
-                        v[0] = (f_49 * f_37 + f_50 * f_38 + f_51 * f_39) * f_52
-                        v[1] = (f_49 * f_40 + f_50 * f_41 + f_51 * f_42) * f_52
-                        v[2] = (f_49 * f_43 + f_50 * f_44 + f_51 * f_45) * f_52
+                        val texOriginX = this.verticesX!![texX.toInt()].toFloat()
+                        val texOriginY = this.verticesY!![texX.toInt()].toFloat()
+                        val texOriginZ = this.verticesZ!![texX.toInt()].toFloat()
+                        val edge1X = this.verticesX!![texY.toInt()] - texOriginX
+                        val edge1Y = this.verticesY!![texY.toInt()] - texOriginY
+                        val edge1Z = this.verticesZ!![texY.toInt()] - texOriginZ
+                        val edge2X = this.verticesX!![texZ.toInt()] - texOriginX
+                        val edge2Y = this.verticesY!![texZ.toInt()] - texOriginY
+                        val edge2Z = this.verticesZ!![texZ.toInt()] - texOriginZ
+                        val aOffX = this.verticesX!![a.toInt()] - texOriginX
+                        val aOffY = this.verticesY!![a.toInt()] - texOriginY
+                        val aOffZ = this.verticesZ!![a.toInt()] - texOriginZ
+                        val bOffX = this.verticesX!![b.toInt()] - texOriginX
+                        val bOffY = this.verticesY!![b.toInt()] - texOriginY
+                        val bOffZ = this.verticesZ!![b.toInt()] - texOriginZ
+                        val cOffX = this.verticesX!![c.toInt()] - texOriginX
+                        val cOffY = this.verticesY!![c.toInt()] - texOriginY
+                        val cOffZ = this.verticesZ!![c.toInt()] - texOriginZ
+                        val crossX = edge1Y * edge2Z - edge1Z * edge2Y
+                        val crossY = edge1Z * edge2X - edge1X * edge2Z
+                        val crossZ = edge1X * edge2Y - edge1Y * edge2X
+                        var basisX = edge2Y * crossZ - edge2Z * crossY
+                        var basisY = edge2Z * crossX - edge2X * crossZ
+                        var basisZ = edge2X * crossY - edge2Y * crossX
+                        var scale = 1.0f / (basisX * edge1X + basisY * edge1Y + basisZ * edge1Z)
+                        u[0] = (basisX * aOffX + basisY * aOffY + basisZ * aOffZ) * scale
+                        u[1] = (basisX * bOffX + basisY * bOffY + basisZ * bOffZ) * scale
+                        u[2] = (basisX * cOffX + basisY * cOffY + basisZ * cOffZ) * scale
+                        basisX = edge1Y * crossZ - edge1Z * crossY
+                        basisY = edge1Z * crossX - edge1X * crossZ
+                        basisZ = edge1X * crossY - edge1Y * crossX
+                        scale = 1.0f / (basisX * edge2X + basisY * edge2Y + basisZ * edge2Z)
+                        v[0] = (basisX * aOffX + basisY * aOffY + basisZ * aOffZ) * scale
+                        v[1] = (basisX * bOffX + basisY * bOffY + basisZ * bOffZ) * scale
+                        v[2] = (basisX * cOffX + basisY * cOffY + basisZ * cOffZ) * scale
                     } else {
                         a = this.facesA!![face]
                         b = this.facesB!![face]
@@ -431,78 +431,78 @@ open class ModelSM : Model {
                         val centerZ = textureMatrix.centerZ!![textureIndex]
                         val matrix = textureMatrix.matrix!![textureIndex]
                         val direction = mesh.texturesDirection!![textureIndex]
-                        val f_30 = mesh.texturesSpeed!![textureIndex] / 256.0f
+                        val speed = mesh.texturesSpeed!![textureIndex] / 256.0f
                         if (textureMapping.toInt() == 1) {
-                            val f_31 = mesh.texturesScaleZ!![textureIndex] / 1024.0f
-                            mapCylindericalUv(this.verticesX!![a.toInt()], this.verticesY!![a.toInt()], this.verticesZ!![a.toInt()], centerX, centerY, centerZ, matrix, f_31, direction.toInt(), f_30, uvTypes)
+                            val offset = mesh.texturesScaleZ!![textureIndex] / 1024.0f
+                            mapCylindericalUv(this.verticesX!![a.toInt()], this.verticesY!![a.toInt()], this.verticesZ!![a.toInt()], centerX, centerY, centerZ, matrix, offset, direction.toInt(), speed, uvTypes)
                             u[0] = uvTypes!![0]
                             v[0] = uvTypes[1]
-                            mapCylindericalUv(this.verticesX!![b.toInt()], this.verticesY!![b.toInt()], this.verticesZ!![b.toInt()], centerX, centerY, centerZ, matrix, f_31, direction.toInt(), f_30, uvTypes)
+                            mapCylindericalUv(this.verticesX!![b.toInt()], this.verticesY!![b.toInt()], this.verticesZ!![b.toInt()], centerX, centerY, centerZ, matrix, offset, direction.toInt(), speed, uvTypes)
                             u[1] = uvTypes[0]
                             v[1] = uvTypes[1]
-                            mapCylindericalUv(this.verticesX!![c.toInt()], this.verticesY!![c.toInt()], this.verticesZ!![c.toInt()], centerX, centerY, centerZ, matrix, f_31, direction.toInt(), f_30, uvTypes)
+                            mapCylindericalUv(this.verticesX!![c.toInt()], this.verticesY!![c.toInt()], this.verticesZ!![c.toInt()], centerX, centerY, centerZ, matrix, offset, direction.toInt(), speed, uvTypes)
                             u[2] = uvTypes[0]
                             v[2] = uvTypes[1]
-                            val f_32 = f_31 / 2.0f
+                            val half = offset / 2.0f
                             if ((direction.toInt() and 0x1) == 0) {
-                                if (u[1] - u[0] > f_32) {
-                                    u[1] -= f_31
-                                } else if (u[0] - u[1] > f_32) {
-                                    u[1] += f_31
+                                if (u[1] - u[0] > half) {
+                                    u[1] -= offset
+                                } else if (u[0] - u[1] > half) {
+                                    u[1] += offset
                                 }
-                                if (u[2] - u[0] > f_32) {
-                                    u[2] -= f_31
-                                } else if (u[0] - u[2] > f_32) {
-                                    u[2] += f_31
+                                if (u[2] - u[0] > half) {
+                                    u[2] -= offset
+                                } else if (u[0] - u[2] > half) {
+                                    u[2] += offset
                                 }
                             } else {
-                                if (v[1] - v[0] > f_32) {
-                                    v[1] -= f_31
-                                } else if (v[0] - v[1] > f_32) {
-                                    v[1] += f_31
+                                if (v[1] - v[0] > half) {
+                                    v[1] -= offset
+                                } else if (v[0] - v[1] > half) {
+                                    v[1] += offset
                                 }
-                                if (v[2] - v[0] > f_32) {
-                                    v[2] -= f_31
-                                } else if (v[0] - v[2] > f_32) {
-                                    v[2] += f_31
+                                if (v[2] - v[0] > half) {
+                                    v[2] -= offset
+                                } else if (v[0] - v[2] > half) {
+                                    v[2] += offset
                                 }
                             }
                         } else if (textureMapping.toInt() == 2) {
-                            val f_31 = mesh.texturesUtrans!![textureIndex] / 256.0f
-                            val f_32 = mesh.texturesVtrans!![textureIndex] / 256.0f
-                            val i_77 = this.verticesX!![b.toInt()] - this.verticesX!![a.toInt()]
-                            val i_78 = this.verticesY!![b.toInt()] - this.verticesY!![a.toInt()]
-                            val i_79 = this.verticesZ!![b.toInt()] - this.verticesZ!![a.toInt()]
-                            val i_80 = this.verticesX!![c.toInt()] - this.verticesX!![a.toInt()]
-                            val i_81 = this.verticesY!![c.toInt()] - this.verticesY!![a.toInt()]
-                            val i_82 = this.verticesZ!![c.toInt()] - this.verticesZ!![a.toInt()]
-                            val i_83 = i_78 * i_82 - i_81 * i_79
-                            val i_84 = i_79 * i_80 - i_82 * i_77
-                            val i_85 = i_77 * i_81 - i_80 * i_78
-                            val f_42 = 64.0f / mesh.texturesScaleX!![textureIndex]
-                            val f_43 = 64.0f / mesh.texturesScaleY!![textureIndex]
-                            val f_44 = 64.0f / mesh.texturesScaleZ!![textureIndex]
-                            val f_45 = (i_83 * matrix!![0] + i_84 * matrix[1] + i_85 * matrix[2]) / f_42
-                            val f_46 = (i_83 * matrix[3] + i_84 * matrix[4] + i_85 * matrix[5]) / f_43
-                            val f_47 = (i_83 * matrix[6] + i_84 * matrix[7] + i_85 * matrix[8]) / f_44
-                            val i_86 = getCubeFace(f_45, f_46, f_47)
-                            mapRectangularUv(this.verticesX!![a.toInt()], this.verticesY!![a.toInt()], this.verticesZ!![a.toInt()], centerX, centerY, centerZ, i_86, matrix, direction.toInt(), f_30, f_31, f_32, uvTypes)
+                            val uTrans = mesh.texturesUtrans!![textureIndex] / 256.0f
+                            val vTrans = mesh.texturesVtrans!![textureIndex] / 256.0f
+                            val edge1X = this.verticesX!![b.toInt()] - this.verticesX!![a.toInt()]
+                            val edge1Y = this.verticesY!![b.toInt()] - this.verticesY!![a.toInt()]
+                            val edge1Z = this.verticesZ!![b.toInt()] - this.verticesZ!![a.toInt()]
+                            val edge2X = this.verticesX!![c.toInt()] - this.verticesX!![a.toInt()]
+                            val edge2Y = this.verticesY!![c.toInt()] - this.verticesY!![a.toInt()]
+                            val edge2Z = this.verticesZ!![c.toInt()] - this.verticesZ!![a.toInt()]
+                            val crossX = edge1Y * edge2Z - edge2Y * edge1Z
+                            val crossY = edge1Z * edge2X - edge2Z * edge1X
+                            val crossZ = edge1X * edge2Y - edge2X * edge1Y
+                            val scaleX = 64.0f / mesh.texturesScaleX!![textureIndex]
+                            val scaleY = 64.0f / mesh.texturesScaleY!![textureIndex]
+                            val scaleZ = 64.0f / mesh.texturesScaleZ!![textureIndex]
+                            val normalX = (crossX * matrix!![0] + crossY * matrix[1] + crossZ * matrix[2]) / scaleX
+                            val normalY = (crossX * matrix[3] + crossY * matrix[4] + crossZ * matrix[5]) / scaleY
+                            val normalZ = (crossX * matrix[6] + crossY * matrix[7] + crossZ * matrix[8]) / scaleZ
+                            val cubeFace = getCubeFace(normalX, normalY, normalZ)
+                            mapRectangularUv(this.verticesX!![a.toInt()], this.verticesY!![a.toInt()], this.verticesZ!![a.toInt()], centerX, centerY, centerZ, cubeFace, matrix, direction.toInt(), speed, uTrans, vTrans, uvTypes)
                             u[0] = uvTypes!![0]
                             v[0] = uvTypes[1]
-                            mapRectangularUv(this.verticesX!![b.toInt()], this.verticesY!![b.toInt()], this.verticesZ!![b.toInt()], centerX, centerY, centerZ, i_86, matrix, direction.toInt(), f_30, f_31, f_32, uvTypes)
+                            mapRectangularUv(this.verticesX!![b.toInt()], this.verticesY!![b.toInt()], this.verticesZ!![b.toInt()], centerX, centerY, centerZ, cubeFace, matrix, direction.toInt(), speed, uTrans, vTrans, uvTypes)
                             u[1] = uvTypes[0]
                             v[1] = uvTypes[1]
-                            mapRectangularUv(this.verticesX!![c.toInt()], this.verticesY!![c.toInt()], this.verticesZ!![c.toInt()], centerX, centerY, centerZ, i_86, matrix, direction.toInt(), f_30, f_31, f_32, uvTypes)
+                            mapRectangularUv(this.verticesX!![c.toInt()], this.verticesY!![c.toInt()], this.verticesZ!![c.toInt()], centerX, centerY, centerZ, cubeFace, matrix, direction.toInt(), speed, uTrans, vTrans, uvTypes)
                             u[2] = uvTypes[0]
                             v[2] = uvTypes[1]
                         } else if (textureMapping.toInt() == 3) {
-                            mapSphericalUv(this.verticesX!![a.toInt()], this.verticesY!![a.toInt()], this.verticesZ!![a.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), f_30, uvTypes)
+                            mapSphericalUv(this.verticesX!![a.toInt()], this.verticesY!![a.toInt()], this.verticesZ!![a.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), speed, uvTypes)
                             u[0] = uvTypes!![0]
                             v[0] = uvTypes[1]
-                            mapSphericalUv(this.verticesX!![b.toInt()], this.verticesY!![b.toInt()], this.verticesZ!![b.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), f_30, uvTypes)
+                            mapSphericalUv(this.verticesX!![b.toInt()], this.verticesY!![b.toInt()], this.verticesZ!![b.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), speed, uvTypes)
                             u[1] = uvTypes[0]
                             v[1] = uvTypes[1]
-                            mapSphericalUv(this.verticesX!![c.toInt()], this.verticesY!![c.toInt()], this.verticesZ!![c.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), f_30, uvTypes)
+                            mapSphericalUv(this.verticesX!![c.toInt()], this.verticesY!![c.toInt()], this.verticesZ!![c.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), speed, uvTypes)
                             u[2] = uvTypes[0]
                             v[2] = uvTypes[1]
                             if ((direction.toInt() and 0x1) == 0) {
@@ -586,8 +586,8 @@ open class ModelSM : Model {
         }
     }
 
-    override fun drawMatrixThreaded(matrix44var1: Matrix43, boundingBox: BoundingBoxPolygon?, rasterizerFunctionMask: Int) {
-        multithreadedDraw(matrix44var1, boundingBox, rasterizerFunctionMask)
+    override fun drawMatrixThreaded(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon?, rasterizerFunctionMask: Int) {
+        multithreadedDraw(projectionMatrix, boundingBox, rasterizerFunctionMask)
     }
 
     fun copyDependencies(resource: ThreadResourceSM) {
@@ -630,8 +630,8 @@ open class ModelSM : Model {
 
     fun calculateNormals() {
         this.vertexNormals = arrayOfNulls(this.maxDepth)
-        for (faceIndex in 0 until this.maxDepth) {
-            this.vertexNormals!![faceIndex] = VertexNormal()
+        for (verticeIndex in 0 until this.maxDepth) {
+            this.vertexNormals!![verticeIndex] = VertexNormal()
         }
         for (faceIndex in 0 until this.numFaces) {
             val a = this.facesA!![faceIndex]
@@ -745,13 +745,13 @@ open class ModelSM : Model {
                     if (renderType.toInt() != 0) {
                         if (renderType.toInt() == 1) {
                             val colorHsl = this.facesColor!![faceIndex].toInt() and 0xffff
-                            val finalAmbient = (colorHsl and 0x7f) * this.ambient shr 7
-                            val signedHsl = ColorUtil.adjustHsv(colorHsl and -128 or finalAmbient)
+                            val ambientLightness = (colorHsl and 0x7f) * this.ambient shr 7
+                            val adjustedHsl = ColorUtil.adjustHsv(colorHsl and -128 or ambientLightness)
                             val faceNormal = this.facesNormal!![faceIndex]!!
-                            val lightness = lightX * faceNormal.x + lightY * faceNormal.y + lightZ * faceNormal.z shr 16
-                            val finalContrast = if (lightness > 256) lowContrast else highContrast
-                            val finalLight = (light shr 1) + (finalContrast * lightness shr 17)
-                            this.facesColourA!![faceIndex] = finalLight shl 17 or ColorUtil.repackHsl(signedHsl.toInt(), finalLight)
+                            val dotProduct = lightX * faceNormal.x + lightY * faceNormal.y + lightZ * faceNormal.z shr 16
+                            val finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                            val lightness = (light shr 1) + (finalContrast * dotProduct shr 17)
+                            this.facesColourA!![faceIndex] = lightness shl 17 or ColorUtil.repackHsl(adjustedHsl.toInt(), lightness)
                             this.facesColourC!![faceIndex] = -1
                         } else if (renderType.toInt() == 3) {
                             this.facesColourA!![faceIndex] = 128
@@ -761,35 +761,35 @@ open class ModelSM : Model {
                         }
                     } else {
                         val colorHsl = this.facesColor!![faceIndex].toInt() and 0xffff
-                        val finalAmbient = (colorHsl and 0x7f) * this.ambient shr 7
-                        val signedHsl = ColorUtil.adjustHsv(colorHsl and -128 or finalAmbient)
+                        val ambientLightness = (colorHsl and 0x7f) * this.ambient shr 7
+                        val adjustedHsl = ColorUtil.adjustHsv(colorHsl and -128 or ambientLightness)
                         var vertexNormal: VertexNormal = if (this.vertexNormalOffsets != null && this.vertexNormalOffsets!![this.facesA!![faceIndex].toInt()] != null) {
                             this.vertexNormalOffsets!![this.facesA!![faceIndex].toInt()]!!
                         } else {
                             this.vertexNormals!![this.facesA!![faceIndex].toInt()]!!
                         }
-                        var lightness = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
-                        var finalContrast = if (lightness > 256) lowContrast else highContrast
-                        var finalLight = (light shr 1) + (finalContrast * lightness shr 17)
-                        this.facesColourA!![faceIndex] = finalLight shl 17 or ColorUtil.repackHsl(signedHsl.toInt(), finalLight)
+                        var dotProduct = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
+                        var finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                        var lightness = (light shr 1) + (finalContrast * dotProduct shr 17)
+                        this.facesColourA!![faceIndex] = lightness shl 17 or ColorUtil.repackHsl(adjustedHsl.toInt(), lightness)
                         vertexNormal = if (this.vertexNormalOffsets != null && this.vertexNormalOffsets!![this.facesB!![faceIndex].toInt()] != null) {
                             this.vertexNormalOffsets!![this.facesB!![faceIndex].toInt()]!!
                         } else {
                             this.vertexNormals!![this.facesB!![faceIndex].toInt()]!!
                         }
-                        lightness = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
-                        finalContrast = if (lightness > 256) lowContrast else highContrast
-                        finalLight = (light shr 1) + (finalContrast * lightness shr 17)
-                        this.facesColourB!![faceIndex] = finalLight shl 17 or ColorUtil.repackHsl(signedHsl.toInt(), finalLight)
+                        dotProduct = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
+                        finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                        lightness = (light shr 1) + (finalContrast * dotProduct shr 17)
+                        this.facesColourB!![faceIndex] = lightness shl 17 or ColorUtil.repackHsl(adjustedHsl.toInt(), lightness)
                         vertexNormal = if (this.vertexNormalOffsets != null && this.vertexNormalOffsets!![this.facesC!![faceIndex].toInt()] != null) {
                             this.vertexNormalOffsets!![this.facesC!![faceIndex].toInt()]!!
                         } else {
                             this.vertexNormals!![this.facesC!![faceIndex].toInt()]!!
                         }
-                        lightness = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
-                        finalContrast = if (lightness > 256) lowContrast else highContrast
-                        finalLight = (light shr 1) + (finalContrast * lightness shr 17)
-                        this.facesColourC!![faceIndex] = finalLight shl 17 or ColorUtil.repackHsl(signedHsl.toInt(), finalLight)
+                        dotProduct = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
+                        finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                        lightness = (light shr 1) + (finalContrast * dotProduct shr 17)
+                        this.facesColourC!![faceIndex] = lightness shl 17 or ColorUtil.repackHsl(adjustedHsl.toInt(), lightness)
                     }
                 } else {
                     val colorHsl = this.facesColor!![faceIndex].toInt() and 0xffff
@@ -797,8 +797,8 @@ open class ModelSM : Model {
                         if (renderType.toInt() == 1) {
                             val faceNormal = this.facesNormal!![faceIndex]!!
                             val dotProduct = lightX * faceNormal.x + lightY * faceNormal.y + lightZ * faceNormal.z shr 16
-                            val contrastFactor = if (dotProduct > 256) lowContrast else highContrast
-                            val lightness = signLight((light shr 2) + (contrastFactor * dotProduct shr 18))
+                            val finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                            val lightness = signLight((light shr 2) + (finalContrast * dotProduct shr 18))
                             this.facesColourA!![faceIndex] = lightness shl 24 or getMaterialColor(colorHsl, materialId, lightness)
                             this.facesColourC!![faceIndex] = -1
                         } else {
@@ -851,12 +851,12 @@ open class ModelSM : Model {
     fun getMaterialColor(hsl: Int, materialId: Short, lightness: Int): Int {
         var color = ColorUtil.hslToRgb!![mixLightness(hsl, lightness)]
         val material = this.toolkit.materialProvider!!.getMaterial(materialId.toInt() and 0xffff)
-        val contrast = material.alpha.toInt() and 0xff
+        val materialAlpha = material.alpha.toInt() and 0xff
         var brightness: Int
-        if (contrast != 0) {
+        if (materialAlpha != 0) {
             brightness = lightness * 131586
-            val transparency = 256 - contrast
-            color = ((brightness and 0xff00ff) * contrast + (color and 0xff00ff) * transparency and -16711936) + (contrast * (brightness and 0xff00) + transparency * (color and 0xff00) and 0xff0000) shr 8
+            val inverseAlpha = 256 - materialAlpha
+            color = ((brightness and 0xff00ff) * materialAlpha + (color and 0xff00ff) * inverseAlpha and -16711936) + (materialAlpha * (brightness and 0xff00) + inverseAlpha * (color and 0xff00) and 0xff0000) shr 8
         }
         brightness = material.brightness.toInt() and 0xff
         if (brightness != 0) {
@@ -921,31 +921,31 @@ open class ModelSM : Model {
         for (faceIndex in 0 until this.numFaces) {
             val faceMaterialId: Short = if (this.facesMaterial != null) this.facesMaterial!![faceIndex] else -1
             if (faceMaterialId.toInt() == -1) {
-                val color = this.facesColor!![faceIndex].toInt() and 0xffff
-                val colorMask = (color and 0x7f) * this.ambient shr 7
-                val adjustedColor = ColorUtil.adjustHsv(color and -128 or colorMask)
-                val lightness: Int
+                val colorHsl = this.facesColor!![faceIndex].toInt() and 0xffff
+                val ambientLightness = (colorHsl and 0x7f) * this.ambient shr 7
+                val adjustedHsl = ColorUtil.adjustHsv(colorHsl and -128 or ambientLightness)
+                val lightnessA: Int
                 if (this.facesColourC!![faceIndex] == -1) {
-                    lightness = this.facesColourA!![faceIndex] and -131072
-                    this.facesColourA!![faceIndex] = lightness or ColorUtil.repackHsl(adjustedColor.toInt(), lightness shr 17)
+                    lightnessA = this.facesColourA!![faceIndex] and -131072
+                    this.facesColourA!![faceIndex] = lightnessA or ColorUtil.repackHsl(adjustedHsl.toInt(), lightnessA shr 17)
                 } else if (this.facesColourC!![faceIndex] != -2) {
-                    lightness = this.facesColourA!![faceIndex] and -131072
-                    this.facesColourA!![faceIndex] = lightness or ColorUtil.repackHsl(adjustedColor.toInt(), lightness shr 17)
+                    lightnessA = this.facesColourA!![faceIndex] and -131072
+                    this.facesColourA!![faceIndex] = lightnessA or ColorUtil.repackHsl(adjustedHsl.toInt(), lightnessA shr 17)
                     val lightnessB = this.facesColourB!![faceIndex] and -131072
-                    this.facesColourB!![faceIndex] = lightnessB or ColorUtil.repackHsl(adjustedColor.toInt(), lightnessB shr 17)
+                    this.facesColourB!![faceIndex] = lightnessB or ColorUtil.repackHsl(adjustedHsl.toInt(), lightnessB shr 17)
                     val lightnessC = this.facesColourC!![faceIndex] and -131072
-                    this.facesColourC!![faceIndex] = lightnessC or ColorUtil.repackHsl(adjustedColor.toInt(), lightnessC shr 17)
+                    this.facesColourC!![faceIndex] = lightnessC or ColorUtil.repackHsl(adjustedHsl.toInt(), lightnessC shr 17)
                 }
             }
         }
         this.appearanceUpdateStage = 2
     }
 
-    fun hasBillboardOnFace(face: Int): Boolean {
-        return this.billboardOnFace != null && this.billboardOnFace!![face] != -1
+    fun hasBillboardOnFace(faceIndex: Int): Boolean {
+        return this.billboardOnFace != null && this.billboardOnFace!![faceIndex] != -1
     }
 
-    fun copy(modelDst: ModelSM, modelSrc: ModelSM, functionMask: Int, expand: Boolean, recalculateBeforeCopy: Boolean): Model {
+    fun copy(modelDst: ModelSM, modelSrc: ModelSM, copyFlags: Int, expand: Boolean, recalculateBeforeCopy: Boolean): Model {
         modelDst.boundsUpdated = this.boundsUpdated
         if (this.boundsUpdated) {
             modelDst.maxX = this.maxX
@@ -963,16 +963,16 @@ open class ModelSM : Model {
         modelDst.maxDepth = this.maxDepth
         modelDst.numFaces = this.numFaces
         modelDst.numBillboards = this.numBillboards
-        if ((functionMask and ModelFunctionMask.ALTERS_ALPHA) != 0) {
+        if ((copyFlags and ModelFunctionMask.ALTERS_ALPHA) != 0) {
             modelDst.accountForPriorities = true
         } else {
             modelDst.accountForPriorities = this.accountForPriorities
         }
         modelDst.textureAnimated = this.textureAnimated
-        val groundAdjustment = ((functionMask and ModelFunctionMask.FULL_DISPLACEMENT) == 7) || ((functionMask and 0x20) != 0)
-        val displacementX = groundAdjustment || (functionMask and ModelFunctionMask.DISPLACE_X) != 0
-        val displacementY = groundAdjustment || (functionMask and ModelFunctionMask.DISPLACE_Y) != 0
-        val displacementZ = groundAdjustment || (functionMask and ModelFunctionMask.DISPLACE_Z) != 0 || (functionMask and ModelFunctionMask.INVERT) != 0
+        val groundAdjustment = ((copyFlags and ModelFunctionMask.FULL_DISPLACEMENT) == 7) || ((copyFlags and 0x20) != 0)
+        val displacementX = groundAdjustment || (copyFlags and ModelFunctionMask.DISPLACE_X) != 0
+        val displacementY = groundAdjustment || (copyFlags and ModelFunctionMask.DISPLACE_Y) != 0
+        val displacementZ = groundAdjustment || (copyFlags and ModelFunctionMask.DISPLACE_Z) != 0 || (copyFlags and ModelFunctionMask.INVERT) != 0
         if (!displacementX && !displacementY && !displacementZ) {
             modelDst.verticesX = this.verticesX
             modelDst.verticesY = this.verticesY
@@ -1012,7 +1012,7 @@ open class ModelSM : Model {
                 modelDst.verticesZ = this.verticesZ
             }
         }
-        if ((functionMask and 0x84080) != 0) {
+        if ((copyFlags and 0x84080) != 0) {
             if (modelSrc.facesColor != null && modelSrc.facesColor!!.size >= this.numFaces) {
                 modelDst.facesColor = modelSrc.facesColor
             } else {
@@ -1023,12 +1023,12 @@ open class ModelSM : Model {
         } else {
             modelDst.facesColor = this.facesColor
         }
-        if ((functionMask and 0x97018) != 0) {
+        if ((copyFlags and 0x97018) != 0) {
             modelDst.appearanceUpdateStage = 0
             modelDst.facesColourC = null
             modelDst.facesColourB = null
             modelDst.facesColourA = null
-        } else if ((functionMask and 0x80) != 0) {
+        } else if ((copyFlags and 0x80) != 0) {
             if (recalculateBeforeCopy) {
                 appearanceUpdateThreaded(false)
             }
@@ -1061,7 +1061,7 @@ open class ModelSM : Model {
             modelDst.facesColourC = this.facesColourC
             modelDst.appearanceUpdateStage = this.appearanceUpdateStage
         }
-        if ((functionMask and ModelFunctionMask.ALTERS_ALPHA) != 0) {
+        if ((copyFlags and ModelFunctionMask.ALTERS_ALPHA) != 0) {
             if (modelSrc.facesAlpha != null && modelSrc.facesAlpha!!.size >= this.numFaces) {
                 modelDst.facesAlpha = modelSrc.facesAlpha
             } else {
@@ -1078,7 +1078,7 @@ open class ModelSM : Model {
         } else {
             modelDst.facesAlpha = this.facesAlpha
         }
-        if ((functionMask and 0x8) == 0 && (functionMask and ModelFunctionMask.INVERT) == 0) {
+        if ((copyFlags and 0x8) == 0 && (copyFlags and ModelFunctionMask.INVERT) == 0) {
             if (recalculateBeforeCopy) {
                 calculateNormalsThreaded()
             }
@@ -1112,7 +1112,7 @@ open class ModelSM : Model {
                 modelDst.facesNormal = null
             }
         }
-        if ((functionMask and ModelFunctionMask.RETEXTURE) != 0) {
+        if ((copyFlags and ModelFunctionMask.RETEXTURE) != 0) {
             if (this.facesMaterial == null) {
                 modelDst.facesMaterial = null
             } else {
@@ -1128,7 +1128,7 @@ open class ModelSM : Model {
         } else {
             modelDst.facesMaterial = this.facesMaterial
         }
-        if ((functionMask and 0x10000) != 0) {
+        if ((copyFlags and 0x10000) != 0) {
             if (this.faceRenderType == null) {
                 modelDst.faceRenderType = null
             } else {
@@ -1145,7 +1145,7 @@ open class ModelSM : Model {
         } else {
             modelDst.faceRenderType = this.faceRenderType
         }
-        if ((functionMask and 0xc580) != 0) {
+        if ((copyFlags and 0xc580) != 0) {
             if (modelSrc.billboardSurfaces != null && modelSrc.billboardSurfaces!!.size >= this.numBillboards) {
                 modelDst.billboardSurfaces = modelSrc.billboardSurfaces
                 for (billboardIndex in 0 until this.numBillboards) {
@@ -1161,7 +1161,7 @@ open class ModelSM : Model {
         } else {
             modelDst.billboardSurfaces = this.billboardSurfaces
         }
-        if (this.uMap != null && (functionMask and ModelFunctionMask.INVERT) != 0) {
+        if (this.uMap != null && (copyFlags and ModelFunctionMask.INVERT) != 0) {
             if (modelSrc.uMap != null && modelSrc.uMap!!.size >= this.numFaces) {
                 modelDst.uMap = modelSrc.uMap
             } else {
@@ -1207,7 +1207,7 @@ open class ModelSM : Model {
         modelDst.effectors = this.effectors
         modelDst.billboardEffects = this.billboardEffects
         modelDst.sortedFaceIndices = this.sortedFaceIndices
-        modelDst.functionMask = functionMask
+        modelDst.functionMask = copyFlags
         return modelDst
     }
 
@@ -1261,14 +1261,14 @@ open class ModelSM : Model {
             val xan = MathUtils.SINE[rotation]
             val zan = MathUtils.COSINE[rotation]
             synchronized(this) {
-                for (currentDepth in 0 until this.maxDepth) {
-                    var tmpX = xan * this.verticesZ!![currentDepth] + zan * this.verticesX!![currentDepth] shr 14
-                    this.verticesZ!![currentDepth] = zan * this.verticesZ!![currentDepth] - xan * this.verticesX!![currentDepth] shr 14
-                    this.verticesX!![currentDepth] = tmpX
-                    if (this.vertexNormals!![currentDepth] != null) {
-                        tmpX = xan * this.vertexNormals!![currentDepth]!!.z + zan * this.vertexNormals!![currentDepth]!!.x shr 14
-                        this.vertexNormals!![currentDepth]!!.z = zan * this.vertexNormals!![currentDepth]!!.z - xan * this.vertexNormals!![currentDepth]!!.x shr 14
-                        this.vertexNormals!![currentDepth]!!.x = tmpX
+                for (verticeIndex in 0 until this.maxDepth) {
+                    var tmpX = xan * this.verticesZ!![verticeIndex] + zan * this.verticesX!![verticeIndex] shr 14
+                    this.verticesZ!![verticeIndex] = zan * this.verticesZ!![verticeIndex] - xan * this.verticesX!![verticeIndex] shr 14
+                    this.verticesX!![verticeIndex] = tmpX
+                    if (this.vertexNormals!![verticeIndex] != null) {
+                        tmpX = xan * this.vertexNormals!![verticeIndex]!!.z + zan * this.vertexNormals!![verticeIndex]!!.x shr 14
+                        this.vertexNormals!![verticeIndex]!!.z = zan * this.vertexNormals!![verticeIndex]!!.z - xan * this.vertexNormals!![verticeIndex]!!.x shr 14
+                        this.vertexNormals!![verticeIndex]!!.x = tmpX
                     }
                 }
                 if (this.facesNormal != null) {
@@ -1280,10 +1280,10 @@ open class ModelSM : Model {
                         }
                     }
                 }
-                for (currentDepth in this.maxDepth until this.numVertices) {
-                    val tmpX = xan * this.verticesZ!![currentDepth] + zan * this.verticesX!![currentDepth] shr 14
-                    this.verticesZ!![currentDepth] = zan * this.verticesZ!![currentDepth] - xan * this.verticesX!![currentDepth] shr 14
-                    this.verticesX!![currentDepth] = tmpX
+                for (verticeIndex in this.maxDepth until this.numVertices) {
+                    val tmpX = xan * this.verticesZ!![verticeIndex] + zan * this.verticesX!![verticeIndex] shr 14
+                    this.verticesZ!![verticeIndex] = zan * this.verticesZ!![verticeIndex] - xan * this.verticesX!![verticeIndex] shr 14
+                    this.verticesX!![verticeIndex] = tmpX
                 }
                 this.appearanceUpdateStage = 0
                 this.boundsUpdated = false
@@ -1325,12 +1325,12 @@ open class ModelSM : Model {
 
     fun rotate180DegWithNormals() {
         synchronized(this) {
-            for (currentDepth in 0 until this.maxDepth) {
-                this.verticesX!![currentDepth] = -this.verticesX!![currentDepth]
-                this.verticesZ!![currentDepth] = -this.verticesZ!![currentDepth]
-                if (this.vertexNormals!![currentDepth] != null) {
-                    this.vertexNormals!![currentDepth]!!.x = -this.vertexNormals!![currentDepth]!!.x
-                    this.vertexNormals!![currentDepth]!!.z = -this.vertexNormals!![currentDepth]!!.z
+            for (verticeIndex in 0 until this.maxDepth) {
+                this.verticesX!![verticeIndex] = -this.verticesX!![verticeIndex]
+                this.verticesZ!![verticeIndex] = -this.verticesZ!![verticeIndex]
+                if (this.vertexNormals!![verticeIndex] != null) {
+                    this.vertexNormals!![verticeIndex]!!.x = -this.vertexNormals!![verticeIndex]!!.x
+                    this.vertexNormals!![verticeIndex]!!.z = -this.vertexNormals!![verticeIndex]!!.z
                 }
             }
             if (this.facesNormal != null) {
@@ -1341,9 +1341,9 @@ open class ModelSM : Model {
                     }
                 }
             }
-            for (currentDepth in this.maxDepth until this.numVertices) {
-                this.verticesX!![currentDepth] = -this.verticesX!![currentDepth]
-                this.verticesZ!![currentDepth] = -this.verticesZ!![currentDepth]
+            for (verticeIndex in this.maxDepth until this.numVertices) {
+                this.verticesX!![verticeIndex] = -this.verticesX!![verticeIndex]
+                this.verticesZ!![verticeIndex] = -this.verticesZ!![verticeIndex]
             }
             this.appearanceUpdateStage = 0
             this.boundsUpdated = false
@@ -1352,14 +1352,14 @@ open class ModelSM : Model {
 
     fun rotate270DegWithNormals() {
         synchronized(this) {
-            for (currentDepth in 0 until this.maxDepth) {
-                var tmpX = this.verticesZ!![currentDepth]
-                this.verticesZ!![currentDepth] = this.verticesX!![currentDepth]
-                this.verticesX!![currentDepth] = -tmpX
-                if (this.vertexNormals!![currentDepth] != null) {
-                    tmpX = this.vertexNormals!![currentDepth]!!.z
-                    this.vertexNormals!![currentDepth]!!.z = this.vertexNormals!![currentDepth]!!.x
-                    this.vertexNormals!![currentDepth]!!.x = -tmpX
+            for (verticeIndex in 0 until this.maxDepth) {
+                var tmpX = this.verticesZ!![verticeIndex]
+                this.verticesZ!![verticeIndex] = this.verticesX!![verticeIndex]
+                this.verticesX!![verticeIndex] = -tmpX
+                if (this.vertexNormals!![verticeIndex] != null) {
+                    tmpX = this.vertexNormals!![verticeIndex]!!.z
+                    this.vertexNormals!![verticeIndex]!!.z = this.vertexNormals!![verticeIndex]!!.x
+                    this.vertexNormals!![verticeIndex]!!.x = -tmpX
                 }
             }
             if (this.facesNormal != null) {
@@ -1371,10 +1371,10 @@ open class ModelSM : Model {
                     }
                 }
             }
-            for (currentDepth in this.maxDepth until this.numVertices) {
-                val tmpX = this.verticesZ!![currentDepth]
-                this.verticesZ!![currentDepth] = this.verticesX!![currentDepth]
-                this.verticesX!![currentDepth] = -tmpX
+            for (verticeIndex in this.maxDepth until this.numVertices) {
+                val tmpX = this.verticesZ!![verticeIndex]
+                this.verticesZ!![verticeIndex] = this.verticesX!![verticeIndex]
+                this.verticesX!![verticeIndex] = -tmpX
             }
             this.appearanceUpdateStage = 0
             this.boundsUpdated = false
@@ -1388,10 +1388,10 @@ open class ModelSM : Model {
             val xan = MathUtils.SINE[rotation]
             val zan = MathUtils.COSINE[rotation]
             synchronized(this) {
-                for (i_5 in 0 until this.numVertices) {
-                    val tmpY = zan * this.verticesY!![i_5] - xan * this.verticesZ!![i_5] shr 14
-                    this.verticesZ!![i_5] = xan * this.verticesY!![i_5] + zan * this.verticesZ!![i_5] shr 14
-                    this.verticesY!![i_5] = tmpY
+                for (verticeIndex in 0 until this.numVertices) {
+                    val tmpY = zan * this.verticesY!![verticeIndex] - xan * this.verticesZ!![verticeIndex] shr 14
+                    this.verticesZ!![verticeIndex] = xan * this.verticesY!![verticeIndex] + zan * this.verticesZ!![verticeIndex] shr 14
+                    this.verticesY!![verticeIndex] = tmpY
                 }
                 invalidate()
             }
@@ -1431,9 +1431,9 @@ open class ModelSM : Model {
                 }
             }
             if (this.vertexNormalOffsets != null) {
-                for (currentDepth in 0 until this.maxDepth) {
-                    if (this.vertexNormalOffsets!![currentDepth] != null) {
-                        this.vertexNormalOffsets!![currentDepth]!!.z = -this.vertexNormalOffsets!![currentDepth]!!.z
+                for (verticeIndex in 0 until this.maxDepth) {
+                    if (this.vertexNormalOffsets!![verticeIndex] != null) {
+                        this.vertexNormalOffsets!![verticeIndex]!!.z = -this.vertexNormalOffsets!![verticeIndex]!!.z
                     }
                 }
             }
@@ -1554,15 +1554,15 @@ open class ModelSM : Model {
         this.boundsUpdated = false
     }
 
-    override fun animatePartialtransform(transformationType: Int, labels: IntArray, x: Int, y: Int, z: Int, rotation: Int, lights: Boolean) {
-        var x1 = x
-        var y1 = y
-        var z1 = z
+    override fun animatePartialtransform(transformationType: Int, labels: IntArray, transformX: Int, transformY: Int, transformZ: Int, rotation: Int, lights: Boolean) {
+        var transX = transformX
+        var transY = transformY
+        var transZ = transformZ
         val labelCount = labels.size
         if (transformationType == 0) {
-            x1 = x1 shl 4
-            y1 = y1 shl 4
-            z1 = z1 shl 4
+            transX = transX shl 4
+            transY = transY shl 4
+            transZ = transZ shl 4
             if (!this.upscaled) {
                 for (verticeIndex in 0 until this.numVertices) {
                     this.verticesX!![verticeIndex] = this.verticesX!![verticeIndex] shl 4
@@ -1576,31 +1576,31 @@ open class ModelSM : Model {
             this.originY = 0
             this.originZ = 0
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < this.vertexGroups!!.size) {
-                    val verticesIndices = this.vertexGroups!![group]!!
-                    for (index in verticesIndices.indices) {
-                        val verticeIndex = verticesIndices[index]
-                        this.originX += this.verticesX!![verticeIndex]
-                        this.originY += this.verticesY!![verticeIndex]
-                        this.originZ += this.verticesZ!![verticeIndex]
+                val label = labels[labelIndex]
+                if (label < this.vertexGroups!!.size) {
+                    val verticeIndices = this.vertexGroups!![label]!!
+                    for (index in verticeIndices.indices) {
+                        val vertice = verticeIndices[index]
+                        this.originX += this.verticesX!![vertice]
+                        this.originY += this.verticesY!![vertice]
+                        this.originZ += this.verticesZ!![vertice]
                         transformationCount++
                     }
                 }
             }
             if (transformationCount > 0) {
-                this.originX = x1 + this.originX / transformationCount
-                this.originY = this.originY / transformationCount + y1
-                this.originZ = z1 + this.originZ / transformationCount
+                this.originX = transX + this.originX / transformationCount
+                this.originY = this.originY / transformationCount + transY
+                this.originZ = transZ + this.originZ / transformationCount
             } else {
-                this.originX = x1
-                this.originY = y1
-                this.originZ = z1
+                this.originX = transX
+                this.originY = transY
+                this.originZ = transZ
             }
         } else if (transformationType == 1) {
-            x1 = x1 shl 4
-            y1 = y1 shl 4
-            z1 = z1 shl 4
+            transX = transX shl 4
+            transY = transY shl 4
+            transZ = transZ shl 4
             if (!this.upscaled) {
                 for (verticeIndex in 0 until this.numVertices) {
                     this.verticesX!![verticeIndex] = this.verticesX!![verticeIndex] shl 4
@@ -1610,45 +1610,45 @@ open class ModelSM : Model {
                 this.upscaled = true
             }
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < this.vertexGroups!!.size) {
-                    val verticeIndices = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < this.vertexGroups!!.size) {
+                    val verticeIndices = this.vertexGroups!![label]!!
                     for (index in verticeIndices.indices) {
-                        val vertex = verticeIndices[index]
-                        this.verticesX!![vertex] += x1
-                        this.verticesY!![vertex] += y1
-                        this.verticesZ!![vertex] += z1
+                        val vertice = verticeIndices[index]
+                        this.verticesX!![vertice] += transX
+                        this.verticesY!![vertice] += transY
+                        this.verticesZ!![vertice] += transZ
                     }
                 }
             }
         } else if (transformationType == 2) {
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < this.vertexGroups!!.size) {
-                    val verticeIndices = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < this.vertexGroups!!.size) {
+                    val verticeIndices = this.vertexGroups!![label]!!
                     if ((rotation and 0x1) == 0) {
                         for (index in verticeIndices.indices) {
                             val vertice = verticeIndices[index]
                             this.verticesX!![vertice] -= this.originX
                             this.verticesY!![vertice] -= this.originY
                             this.verticesZ!![vertice] -= this.originZ
-                            if (z1 != 0) {
-                                val xan = MathUtils.SINE[z1]
-                                val zan = MathUtils.COSINE[z1]
+                            if (transZ != 0) {
+                                val xan = MathUtils.SINE[transZ]
+                                val zan = MathUtils.COSINE[transZ]
                                 val tmpY = xan * this.verticesY!![vertice] + zan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesY!![vertice] = zan * this.verticesY!![vertice] - xan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesX!![vertice] = tmpY
                             }
-                            if (x1 != 0) {
-                                val xan = MathUtils.SINE[x1]
-                                val zan = MathUtils.COSINE[x1]
+                            if (transX != 0) {
+                                val xan = MathUtils.SINE[transX]
+                                val zan = MathUtils.COSINE[transX]
                                 val tmpZ = zan * this.verticesY!![vertice] - xan * this.verticesZ!![vertice] + 16383 shr 14
                                 this.verticesZ!![vertice] = xan * this.verticesY!![vertice] + zan * this.verticesZ!![vertice] + 16383 shr 14
                                 this.verticesY!![vertice] = tmpZ
                             }
-                            if (y1 != 0) {
-                                val xan = MathUtils.SINE[y1]
-                                val zan = MathUtils.COSINE[y1]
+                            if (transY != 0) {
+                                val xan = MathUtils.SINE[transY]
+                                val zan = MathUtils.COSINE[transY]
                                 val tmpZ = xan * this.verticesZ!![vertice] + zan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesZ!![vertice] = zan * this.verticesZ!![vertice] - xan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesX!![vertice] = tmpZ
@@ -1663,23 +1663,23 @@ open class ModelSM : Model {
                             this.verticesX!![vertice] -= this.originX
                             this.verticesY!![vertice] -= this.originY
                             this.verticesZ!![vertice] -= this.originZ
-                            if (x1 != 0) {
-                                val xan = MathUtils.SINE[x1]
-                                val zan = MathUtils.COSINE[x1]
+                            if (transX != 0) {
+                                val xan = MathUtils.SINE[transX]
+                                val zan = MathUtils.COSINE[transX]
                                 val tmpZ = zan * this.verticesY!![vertice] - xan * this.verticesZ!![vertice] + 16383 shr 14
                                 this.verticesZ!![vertice] = xan * this.verticesY!![vertice] + zan * this.verticesZ!![vertice] + 16383 shr 14
                                 this.verticesY!![vertice] = tmpZ
                             }
-                            if (z1 != 0) {
-                                val xan = MathUtils.SINE[z1]
-                                val zan = MathUtils.COSINE[z1]
+                            if (transZ != 0) {
+                                val xan = MathUtils.SINE[transZ]
+                                val zan = MathUtils.COSINE[transZ]
                                 val tmpY = xan * this.verticesY!![vertice] + zan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesY!![vertice] = zan * this.verticesY!![vertice] - xan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesX!![vertice] = tmpY
                             }
-                            if (y1 != 0) {
-                                val xan = MathUtils.SINE[y1]
-                                val zan = MathUtils.COSINE[y1]
+                            if (transY != 0) {
+                                val xan = MathUtils.SINE[transY]
+                                val zan = MathUtils.COSINE[transY]
                                 val tmpZ = xan * this.verticesZ!![vertice] + zan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesZ!![vertice] = zan * this.verticesZ!![vertice] - xan * this.verticesX!![vertice] + 16383 shr 14
                                 this.verticesX!![vertice] = tmpZ
@@ -1693,32 +1693,32 @@ open class ModelSM : Model {
             }
         } else if (transformationType == 3) {
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < this.vertexGroups!!.size) {
-                    val verticeIndices = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < this.vertexGroups!!.size) {
+                    val verticeIndices = this.vertexGroups!![label]!!
                     for (index in verticeIndices.indices) {
-                        val vertex = verticeIndices[index]
-                        this.verticesX!![vertex] -= this.originX
-                        this.verticesY!![vertex] -= this.originY
-                        this.verticesZ!![vertex] -= this.originZ
-                        this.verticesX!![vertex] = x1 * this.verticesX!![vertex] / 128
-                        this.verticesY!![vertex] = y1 * this.verticesY!![vertex] / 128
-                        this.verticesZ!![vertex] = z1 * this.verticesZ!![vertex] / 128
-                        this.verticesX!![vertex] += this.originX
-                        this.verticesY!![vertex] += this.originY
-                        this.verticesZ!![vertex] += this.originZ
+                        val vertice = verticeIndices[index]
+                        this.verticesX!![vertice] -= this.originX
+                        this.verticesY!![vertice] -= this.originY
+                        this.verticesZ!![vertice] -= this.originZ
+                        this.verticesX!![vertice] = transX * this.verticesX!![vertice] / 128
+                        this.verticesY!![vertice] = transY * this.verticesY!![vertice] / 128
+                        this.verticesZ!![vertice] = transZ * this.verticesZ!![vertice] / 128
+                        this.verticesX!![vertice] += this.originX
+                        this.verticesY!![vertice] += this.originY
+                        this.verticesZ!![vertice] += this.originZ
                     }
                 }
             }
         } else if (transformationType == 5) {
             if (this.faceGroups != null && this.facesAlpha != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.faceGroups!!.size) {
-                        val faceIndices = this.faceGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.faceGroups!!.size) {
+                        val faceIndices = this.faceGroups!![label]!!
                         for (index in faceIndices.indices) {
                             val face = faceIndices[index]
-                            var alpha = (this.facesAlpha!![face].toInt() and 0xff) + x1 * 8
+                            var alpha = (this.facesAlpha!![face].toInt() and 0xff) + transX * 8
                             if (alpha < 0) {
                                 alpha = 0
                             } else if (alpha > 255) {
@@ -1748,14 +1748,14 @@ open class ModelSM : Model {
                             var h = faceColorHsl shr 10 and 0x3f
                             var s = faceColorHsl shr 7 and 0x7
                             var l = faceColorHsl and 0x7f
-                            h = x1 + h and 0x3f
-                            s += y1
+                            h = transX + h and 0x3f
+                            s += transY
                             if (s < 0) {
                                 s = 0
                             } else if (s > 7) {
                                 s = 7
                             }
-                            l += z1
+                            l += transZ
                             if (l < 0) {
                                 l = 0
                             } else if (l > 127) {
@@ -1782,8 +1782,8 @@ open class ModelSM : Model {
                         val billboardIndices = this.billboardGroups!![label]!!
                         for (index in billboardIndices.indices) {
                             val surface = this.billboardSurfaces!![billboardIndices[index]]!!
-                            surface.offsetX += x1
-                            surface.offsetY += y1
+                            surface.offsetX += transX
+                            surface.offsetY += transY
                         }
                     }
                 }
@@ -1791,40 +1791,40 @@ open class ModelSM : Model {
         } else if (transformationType == 10) {
             if (this.billboardGroups != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.billboardGroups!!.size) {
-                        val billboardIndices = this.billboardGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.billboardGroups!!.size) {
+                        val billboardIndices = this.billboardGroups!![label]!!
                         for (index in billboardIndices.indices) {
                             val surface = this.billboardSurfaces!![billboardIndices[index]]!!
-                            surface.scaleX = surface.scaleX * x1 / 128.0f
-                            surface.scaleY = surface.scaleY * y1 / 128.0f
+                            surface.scaleX = surface.scaleX * transX / 128.0f
+                            surface.scaleY = surface.scaleY * transY / 128.0f
                         }
                     }
                 }
             }
         } else if (transformationType == 9 && this.billboardGroups != null) {
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < this.billboardGroups!!.size) {
-                    val billboardIndices = this.billboardGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < this.billboardGroups!!.size) {
+                    val billboardIndices = this.billboardGroups!![label]!!
                     for (index in billboardIndices.indices) {
                         val surface = this.billboardSurfaces!![billboardIndices[index]]!!
-                        surface.rotation = x1 + surface.rotation and 0x3fff
+                        surface.rotation = transX + surface.rotation and 0x3fff
                     }
                 }
             }
         }
     }
 
-    override fun animateTransform(transformationType: Int, labels: IntArray, rotationX: Int, rotationY: Int, rotationZ: Int, lights: Boolean, submesh: Int, verticesData: IntArray) {
-        var rotX = rotationX
-        var rotY = rotationY
-        var rotZ = rotationZ
+    override fun animateTransform(transformationType: Int, labels: IntArray, transformX: Int, transformY: Int, transformZ: Int, lights: Boolean, submesh: Int, verticesData: IntArray) {
+        var transX = transformX
+        var transY = transformY
+        var transZ = transformZ
         val labelCount = labels.size
         if (transformationType == 0) {
-            rotX = rotX shl 4
-            rotY = rotY shl 4
-            rotZ = rotZ shl 4
+            transX = transX shl 4
+            transY = transY shl 4
+            transZ = transZ shl 4
             if (!this.upscaled) {
                 for (verticeIndex in 0 until this.numVertices) {
                     this.verticesX!![verticeIndex] = this.verticesX!![verticeIndex] shl 4
@@ -1840,9 +1840,9 @@ open class ModelSM : Model {
             for (labelIndex in 0 until labelCount) {
                 val label = labels[labelIndex]
                 if (label < this.vertexGroups!!.size) {
-                    val vertices = this.vertexGroups!![label]!!
-                    for (verticeIndex in vertices.indices) {
-                        val vertice = vertices[verticeIndex]
+                    val verticeIndices = this.vertexGroups!![label]!!
+                    for (index in verticeIndices.indices) {
+                        val vertice = verticeIndices[index]
                         if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertice].toInt()) != 0) {
                             this.originX += this.verticesX!![vertice]
                             this.originY += this.verticesY!![vertice]
@@ -1853,27 +1853,27 @@ open class ModelSM : Model {
                 }
             }
             if (transformationCount > 0) {
-                this.originX = rotX + this.originX / transformationCount
-                this.originY = this.originY / transformationCount + rotY
-                this.originZ = rotZ + this.originZ / transformationCount
+                this.originX = transX + this.originX / transformationCount
+                this.originY = this.originY / transformationCount + transY
+                this.originZ = transZ + this.originZ / transformationCount
                 this.withinOrigin = true
             } else {
-                this.originX = rotX
-                this.originY = rotY
-                this.originZ = rotZ
+                this.originX = transX
+                this.originY = transY
+                this.originZ = transZ
             }
         } else if (transformationType == 1) {
             if (verticesData.isNotEmpty()) {
-                val transformX = rotZ * verticesData[2] + verticesData[1] * rotY + rotX * verticesData[0] + 8192 shr 14
-                val transformY = rotX * verticesData[3] + verticesData[5] * rotZ + rotY * verticesData[4] + 8192 shr 14
-                val transformZ = rotX * verticesData[6] + verticesData[7] * rotY + rotZ * verticesData[8] + 8192 shr 14
-                rotX = transformX
-                rotY = transformY
-                rotZ = transformZ
+                val rotatedX = transZ * verticesData[2] + verticesData[1] * transY + transX * verticesData[0] + 8192 shr 14
+                val rotatedY = transX * verticesData[3] + verticesData[5] * transZ + transY * verticesData[4] + 8192 shr 14
+                val rotatedZ = transX * verticesData[6] + verticesData[7] * transY + transZ * verticesData[8] + 8192 shr 14
+                transX = rotatedX
+                transY = rotatedY
+                transZ = rotatedZ
             }
-            rotX = rotX shl 4
-            rotY = rotY shl 4
-            rotZ = rotZ shl 4
+            transX = transX shl 4
+            transY = transY shl 4
+            transZ = transZ shl 4
             if (!this.upscaled) {
                 for (verticeIndex in 0 until this.numVertices) {
                     this.verticesX!![verticeIndex] = this.verticesX!![verticeIndex] shl 4
@@ -1883,15 +1883,15 @@ open class ModelSM : Model {
                 this.upscaled = true
             }
             for (labelIndex in 0 until labelCount) {
-                val groups = labels[labelIndex]
-                if (groups < this.vertexGroups!!.size) {
-                    val vertices = this.vertexGroups!![groups]!!
-                    for (vertIndex in vertices.indices) {
-                        val vertice = vertices[vertIndex]
+                val label = labels[labelIndex]
+                if (label < this.vertexGroups!!.size) {
+                    val verticeIndices = this.vertexGroups!![label]!!
+                    for (index in verticeIndices.indices) {
+                        val vertice = verticeIndices[index]
                         if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertice].toInt()) != 0) {
-                            this.verticesX!![vertice] += rotX
-                            this.verticesY!![vertice] += rotY
-                            this.verticesZ!![vertice] += rotZ
+                            this.verticesX!![vertice] += transX
+                            this.verticesY!![vertice] += transY
+                            this.verticesZ!![vertice] += transZ
                         }
                     }
                 }
@@ -1924,54 +1924,54 @@ open class ModelSM : Model {
                     this.originZ = z
                     this.withinOrigin = false
                 }
-                val offsets1 = IntArray(9)
-                val zanX = MathUtils.COSINE[rotX]
-                val xanX = MathUtils.SINE[rotX]
-                val zanY = MathUtils.COSINE[rotY]
-                val xanY = MathUtils.SINE[rotY]
-                val zanZ = MathUtils.COSINE[rotZ]
-                val xanZ = MathUtils.SINE[rotZ]
-                val i_23 = xanX * zanZ + 8192 shr 14
-                val i_24 = xanX * xanZ + 8192 shr 14
-                offsets1[0] = zanY * zanZ + xanY * i_24 + 8192 shr 14
-                offsets1[1] = xanY * i_23 + -zanY * xanZ + 8192 shr 14
-                offsets1[2] = xanY * zanX + 8192 shr 14
-                offsets1[3] = zanX * xanZ + 8192 shr 14
-                offsets1[4] = zanX * zanZ + 8192 shr 14
-                offsets1[5] = -xanX
-                offsets1[6] = zanY * i_24 + -xanY * zanZ + 8192 shr 14
-                offsets1[7] = xanY * xanZ + zanY * i_23 + 8192 shr 14
-                offsets1[8] = zanY * zanX + 8192 shr 14
-                val offsetX = offsets1[2] * -this.originZ + offsets1[0] * -this.originX + offsets1[1] * -this.originY + 8192 shr 14
-                val offsetY = offsets1[5] * -this.originZ + offsets1[4] * -this.originY + offsets1[3] * -this.originX + 8192 shr 14
-                val offsetZ = offsets1[6] * -this.originX + offsets1[8] * -this.originZ + offsets1[7] * -this.originY + 8192 shr 14
+                val rotationMatrix = IntArray(9)
+                val zanX = MathUtils.COSINE[transX]
+                val xanX = MathUtils.SINE[transX]
+                val zanY = MathUtils.COSINE[transY]
+                val xanY = MathUtils.SINE[transY]
+                val zanZ = MathUtils.COSINE[transZ]
+                val xanZ = MathUtils.SINE[transZ]
+                val sinXCosZ = xanX * zanZ + 8192 shr 14
+                val sinXSinZ = xanX * xanZ + 8192 shr 14
+                rotationMatrix[0] = zanY * zanZ + xanY * sinXSinZ + 8192 shr 14
+                rotationMatrix[1] = xanY * sinXCosZ + -zanY * xanZ + 8192 shr 14
+                rotationMatrix[2] = xanY * zanX + 8192 shr 14
+                rotationMatrix[3] = zanX * xanZ + 8192 shr 14
+                rotationMatrix[4] = zanX * zanZ + 8192 shr 14
+                rotationMatrix[5] = -xanX
+                rotationMatrix[6] = zanY * sinXSinZ + -xanY * zanZ + 8192 shr 14
+                rotationMatrix[7] = xanY * xanZ + zanY * sinXCosZ + 8192 shr 14
+                rotationMatrix[8] = zanY * zanX + 8192 shr 14
+                val offsetX = rotationMatrix[2] * -this.originZ + rotationMatrix[0] * -this.originX + rotationMatrix[1] * -this.originY + 8192 shr 14
+                val offsetY = rotationMatrix[5] * -this.originZ + rotationMatrix[4] * -this.originY + rotationMatrix[3] * -this.originX + 8192 shr 14
+                val offsetZ = rotationMatrix[6] * -this.originX + rotationMatrix[8] * -this.originZ + rotationMatrix[7] * -this.originY + 8192 shr 14
                 val offsetOriginX = offsetX + this.originX
                 val offsetOriginY = offsetY + this.originY
                 val offsetOriginZ = offsetZ + this.originZ
-                val offsets2 = IntArray(9)
-                for (x2 in 0..2) {
-                    for (y2 in 0..2) {
-                        var i_34 = 0
-                        for (x in 0..2) {
-                            i_34 += verticesData[x + y2 * 3] * offsets1[x + x2 * 3]
+                val offsetCluster = IntArray(9)
+                for (row in 0..2) {
+                    for (col in 0..2) {
+                        var offset = 0
+                        for (k in 0..2) {
+                            offset += verticesData[k + col * 3] * rotationMatrix[k + row * 3]
                         }
-                        offsets2[y2 + x2 * 3] = i_34 + 8192 shr 14
+                        offsetCluster[col + row * 3] = offset + 8192 shr 14
                     }
                 }
-                var fullOffX = deltaY * offsets1[1] + deltaX * offsets1[0] + deltaZ * offsets1[2] + 8192 shr 14
-                var fullOffY = deltaY * offsets1[4] + deltaX * offsets1[3] + deltaZ * offsets1[5] + 8192 shr 14
-                var fullOffZ = offsets1[6] * deltaX + deltaZ * offsets1[8] + deltaY * offsets1[7] + 8192 shr 14
+                var fullOffX = deltaY * rotationMatrix[1] + deltaX * rotationMatrix[0] + deltaZ * rotationMatrix[2] + 8192 shr 14
+                var fullOffY = deltaY * rotationMatrix[4] + deltaX * rotationMatrix[3] + deltaZ * rotationMatrix[5] + 8192 shr 14
+                var fullOffZ = rotationMatrix[6] * deltaX + deltaZ * rotationMatrix[8] + deltaY * rotationMatrix[7] + 8192 shr 14
                 fullOffX += offsetOriginX
                 fullOffY += offsetOriginY
                 fullOffZ += offsetOriginZ
-                val offsets3 = IntArray(9)
-                for (x3 in 0..2) {
-                    for (y3 in 0..2) {
+                val offsetMatrix = IntArray(9)
+                for (row in 0..2) {
+                    for (col in 0..2) {
                         var offset = 0
-                        for (x2 in 0..2) {
-                            offset += offsets2[y3 + x2 * 3] * verticesData[x2 + x3 * 3]
+                        for (k in 0..2) {
+                            offset += offsetCluster[col + k * 3] * verticesData[k + row * 3]
                         }
-                        offsets3[y3 + x3 * 3] = offset + 8192 shr 14
+                        offsetMatrix[col + row * 3] = offset + 8192 shr 14
                     }
                 }
                 var translateX = fullOffZ * verticesData[2] + fullOffX * verticesData[0] + fullOffY * verticesData[1] + 8192 shr 14
@@ -1987,9 +1987,9 @@ open class ModelSM : Model {
                         for (index in verticeIndices.indices) {
                             val vertice = verticeIndices[index]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertice].toInt()) != 0) {
-                                val x = offsets3[0] * this.verticesX!![vertice] + offsets3[2] * this.verticesZ!![vertice] + offsets3[1] * this.verticesY!![vertice] + 8192 shr 14
-                                val y = offsets3[4] * this.verticesY!![vertice] + offsets3[5] * this.verticesZ!![vertice] + offsets3[3] * this.verticesX!![vertice] + 8192 shr 14
-                                val z = offsets3[6] * this.verticesX!![vertice] + offsets3[7] * this.verticesY!![vertice] + offsets3[8] * this.verticesZ!![vertice] + 8192 shr 14
+                                val x = offsetMatrix[0] * this.verticesX!![vertice] + offsetMatrix[2] * this.verticesZ!![vertice] + offsetMatrix[1] * this.verticesY!![vertice] + 8192 shr 14
+                                val y = offsetMatrix[4] * this.verticesY!![vertice] + offsetMatrix[5] * this.verticesZ!![vertice] + offsetMatrix[3] * this.verticesX!![vertice] + 8192 shr 14
+                                val z = offsetMatrix[6] * this.verticesX!![vertice] + offsetMatrix[7] * this.verticesY!![vertice] + offsetMatrix[8] * this.verticesZ!![vertice] + 8192 shr 14
                                 this.verticesX!![vertice] = x + translateX
                                 this.verticesY!![vertice] = y + translateY
                                 this.verticesZ!![vertice] = z + translateZ
@@ -2001,30 +2001,30 @@ open class ModelSM : Model {
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < this.vertexGroups!!.size) {
-                        val vertices = this.vertexGroups!![label]!!
-                        for (vertIndex in vertices.indices) {
-                            val vertice = vertices[vertIndex]
+                        val verticeIndices = this.vertexGroups!![label]!!
+                        for (index in verticeIndices.indices) {
+                            val vertice = verticeIndices[index]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertice].toInt()) != 0) {
                                 this.verticesX!![vertice] -= this.originX
                                 this.verticesY!![vertice] -= this.originY
                                 this.verticesZ!![vertice] -= this.originZ
-                                if (rotZ != 0) {
-                                    val xan = MathUtils.SINE[rotZ]
-                                    val zan = MathUtils.COSINE[rotZ]
+                                if (transZ != 0) {
+                                    val xan = MathUtils.SINE[transZ]
+                                    val zan = MathUtils.COSINE[transZ]
                                     val tmpY = xan * this.verticesY!![vertice] + zan * this.verticesX!![vertice] + 16383 shr 14
                                     this.verticesY!![vertice] = zan * this.verticesY!![vertice] - xan * this.verticesX!![vertice] + 16383 shr 14
                                     this.verticesX!![vertice] = tmpY
                                 }
-                                if (rotX != 0) {
-                                    val xan = MathUtils.SINE[rotX]
-                                    val zan = MathUtils.COSINE[rotX]
+                                if (transX != 0) {
+                                    val xan = MathUtils.SINE[transX]
+                                    val zan = MathUtils.COSINE[transX]
                                     val tmpZ = zan * this.verticesY!![vertice] - xan * this.verticesZ!![vertice] + 16383 shr 14
                                     this.verticesZ!![vertice] = xan * this.verticesY!![vertice] + zan * this.verticesZ!![vertice] + 16383 shr 14
                                     this.verticesY!![vertice] = tmpZ
                                 }
-                                if (rotY != 0) {
-                                    val xan = MathUtils.SINE[rotY]
-                                    val zan = MathUtils.COSINE[rotY]
+                                if (transY != 0) {
+                                    val xan = MathUtils.SINE[transY]
+                                    val zan = MathUtils.COSINE[transY]
                                     val tmpZ = xan * this.verticesZ!![vertice] + zan * this.verticesX!![vertice] + 16383 shr 14
                                     this.verticesZ!![vertice] = zan * this.verticesZ!![vertice] - xan * this.verticesX!![vertice] + 16383 shr 14
                                     this.verticesX!![vertice] = tmpZ
@@ -2065,50 +2065,50 @@ open class ModelSM : Model {
                     this.originZ = z
                     this.withinOrigin = false
                 }
-                val rotXScaled = rotX shl 15 shr 7
-                val rotYScaled = rotY shl 15 shr 7
-                val rotZScaled = rotZ shl 15 shr 7
-                val offX = rotXScaled * -this.originX + 8192 shr 14
-                val offY = rotYScaled * -this.originY + 8192 shr 14
-                val offZ = rotZScaled * -this.originZ + 8192 shr 14
+                val transXScaled = transX shl 15 shr 7
+                val transYScaled = transY shl 15 shr 7
+                val transZScaled = transZ shl 15 shr 7
+                val offX = transXScaled * -this.originX + 8192 shr 14
+                val offY = transYScaled * -this.originY + 8192 shr 14
+                val offZ = transZScaled * -this.originZ + 8192 shr 14
                 val originXOffset = offX + this.originX
                 val originYOffset = offY + this.originY
                 val originZOffset = offZ + this.originZ
                 val offsetCluster = intArrayOf(
-                    rotXScaled * verticesData[0] + 8192 shr 14, rotXScaled * verticesData[3] + 8192 shr 14,
-                    rotXScaled * verticesData[6] + 8192 shr 14, rotYScaled * verticesData[1] + 8192 shr 14,
-                    rotYScaled * verticesData[4] + 8192 shr 14, rotYScaled * verticesData[7] + 8192 shr 14,
-                    rotZScaled * verticesData[2] + 8192 shr 14, rotZScaled * verticesData[5] + 8192 shr 14,
-                    rotZScaled * verticesData[8] + 8192 shr 14
+                    transXScaled * verticesData[0] + 8192 shr 14, transXScaled * verticesData[3] + 8192 shr 14,
+                    transXScaled * verticesData[6] + 8192 shr 14, transYScaled * verticesData[1] + 8192 shr 14,
+                    transYScaled * verticesData[4] + 8192 shr 14, transYScaled * verticesData[7] + 8192 shr 14,
+                    transZScaled * verticesData[2] + 8192 shr 14, transZScaled * verticesData[5] + 8192 shr 14,
+                    transZScaled * verticesData[8] + 8192 shr 14
                 )
-                var offsetRotX = rotXScaled * deltaX + 8192 shr 14
-                var offsetRotY = rotYScaled * deltaY + 8192 shr 14
-                var offsetRotZ = rotZScaled * deltaZ + 8192 shr 14
-                offsetRotX += originXOffset
-                offsetRotY += originYOffset
-                offsetRotZ += originZOffset
+                var offsetTransX = transXScaled * deltaX + 8192 shr 14
+                var offsetTransY = transYScaled * deltaY + 8192 shr 14
+                var offsetTransZ = transZScaled * deltaZ + 8192 shr 14
+                offsetTransX += originXOffset
+                offsetTransY += originYOffset
+                offsetTransZ += originZOffset
                 val offsetMatrix = IntArray(9)
-                for (w in 0..2) {
-                    for (h in 0..2) {
-                        var off = 0
-                        for (z2 in 0..2) {
-                            off += offsetCluster[h + z2 * 3] * verticesData[z2 + w * 3]
+                for (row in 0..2) {
+                    for (col in 0..2) {
+                        var offset = 0
+                        for (k in 0..2) {
+                            offset += offsetCluster[col + k * 3] * verticesData[k + row * 3]
                         }
-                        offsetMatrix[h + w * 3] = off + 8192 shr 14
+                        offsetMatrix[col + row * 3] = offset + 8192 shr 14
                     }
                 }
-                var finalOffX = offsetRotZ * verticesData[2] + offsetRotX * verticesData[0] + verticesData[1] * offsetRotY + 8192 shr 14
-                var finalOffY = offsetRotX * verticesData[3] + offsetRotY * verticesData[4] + verticesData[5] * offsetRotZ + 8192 shr 14
-                var finalOffZ = offsetRotX * verticesData[6] + offsetRotZ * verticesData[8] + verticesData[7] * offsetRotY + 8192 shr 14
+                var finalOffX = offsetTransZ * verticesData[2] + offsetTransX * verticesData[0] + verticesData[1] * offsetTransY + 8192 shr 14
+                var finalOffY = offsetTransX * verticesData[3] + offsetTransY * verticesData[4] + verticesData[5] * offsetTransZ + 8192 shr 14
+                var finalOffZ = offsetTransX * verticesData[6] + offsetTransZ * verticesData[8] + verticesData[7] * offsetTransY + 8192 shr 14
                 finalOffX += originalX
                 finalOffY += originalY
                 finalOffZ += originalZ
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < this.vertexGroups!!.size) {
-                        val vertices = this.vertexGroups!![label]!!
-                        for (index in vertices.indices) {
-                            val vertice = vertices[index]
+                        val verticeIndices = this.vertexGroups!![label]!!
+                        for (index in verticeIndices.indices) {
+                            val vertice = verticeIndices[index]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertice].toInt()) != 0) {
                                 val x = offsetMatrix[0] * this.verticesX!![vertice] + offsetMatrix[2] * this.verticesZ!![vertice] + offsetMatrix[1] * this.verticesY!![vertice] + 8192 shr 14
                                 val y = offsetMatrix[4] * this.verticesY!![vertice] + offsetMatrix[5] * this.verticesZ!![vertice] + offsetMatrix[3] * this.verticesX!![vertice] + 8192 shr 14
@@ -2122,21 +2122,21 @@ open class ModelSM : Model {
                 }
             } else {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.vertexGroups!!.size) {
-                        val vertices = this.vertexGroups!![group]!!
-                        for (vertIndex in vertices.indices) {
-                            val vertex = vertices[vertIndex]
-                            if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertex].toInt()) != 0) {
-                                this.verticesX!![vertex] -= this.originX
-                                this.verticesY!![vertex] -= this.originY
-                                this.verticesZ!![vertex] -= this.originZ
-                                this.verticesX!![vertex] = rotX * this.verticesX!![vertex] / 128
-                                this.verticesY!![vertex] = rotY * this.verticesY!![vertex] / 128
-                                this.verticesZ!![vertex] = rotZ * this.verticesZ!![vertex] / 128
-                                this.verticesX!![vertex] += this.originX
-                                this.verticesY!![vertex] += this.originY
-                                this.verticesZ!![vertex] += this.originZ
+                    val label = labels[labelIndex]
+                    if (label < this.vertexGroups!!.size) {
+                        val verticeIndices = this.vertexGroups!![label]!!
+                        for (index in verticeIndices.indices) {
+                            val vertice = verticeIndices[index]
+                            if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![vertice].toInt()) != 0) {
+                                this.verticesX!![vertice] -= this.originX
+                                this.verticesY!![vertice] -= this.originY
+                                this.verticesZ!![vertice] -= this.originZ
+                                this.verticesX!![vertice] = transX * this.verticesX!![vertice] / 128
+                                this.verticesY!![vertice] = transY * this.verticesY!![vertice] / 128
+                                this.verticesZ!![vertice] = transZ * this.verticesZ!![vertice] / 128
+                                this.verticesX!![vertice] += this.originX
+                                this.verticesY!![vertice] += this.originY
+                                this.verticesZ!![vertice] += this.originZ
                             }
                         }
                     }
@@ -2147,17 +2147,17 @@ open class ModelSM : Model {
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < this.faceGroups!!.size) {
-                        val vertices = this.faceGroups!![label]!!
-                        for (vertIndex in vertices.indices) {
-                            val vertice = vertices[vertIndex]
-                            if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![vertice].toInt()) != 0) {
-                                var alpha = (this.facesAlpha!![vertice].toInt() and 0xff) + rotX * 8
+                        val faceIndices = this.faceGroups!![label]!!
+                        for (index in faceIndices.indices) {
+                            val face = faceIndices[index]
+                            if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![face].toInt()) != 0) {
+                                var alpha = (this.facesAlpha!![face].toInt() and 0xff) + transX * 8
                                 if (alpha < 0) {
                                     alpha = 0
                                 } else if (alpha > 255) {
                                     alpha = 255
                                 }
-                                this.facesAlpha!![vertice] = alpha.toByte()
+                                this.facesAlpha!![face] = alpha.toByte()
                             }
                         }
                     }
@@ -2175,28 +2175,28 @@ open class ModelSM : Model {
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < this.faceGroups!!.size) {
-                        val faces = this.faceGroups!![label]!!
-                        for (vertIndex in faces.indices) {
-                            val vertice = faces[vertIndex]
-                            if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![vertice].toInt()) != 0) {
-                                val color = this.facesColor!![vertice].toInt() and 0xffff
-                                var h = color shr 10 and 0x3f
-                                var s = color shr 7 and 0x7
-                                var l = color and 0x7f
-                                h = rotX + h and 0x3f
-                                s += rotY
+                        val faceIndices = this.faceGroups!![label]!!
+                        for (index in faceIndices.indices) {
+                            val face = faceIndices[index]
+                            if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![face].toInt()) != 0) {
+                                val faceColorHsl = this.facesColor!![face].toInt() and 0xffff
+                                var h = faceColorHsl shr 10 and 0x3f
+                                var s = faceColorHsl shr 7 and 0x7
+                                var l = faceColorHsl and 0x7f
+                                h = transX + h and 0x3f
+                                s += transY
                                 if (s < 0) {
                                     s = 0
                                 } else if (s > 7) {
                                     s = 7
                                 }
-                                l += rotZ
+                                l += transZ
                                 if (l < 0) {
                                     l = 0
                                 } else if (l > 127) {
                                     l = 127
                                 }
-                                this.facesColor!![vertice] = (h shl 10 or (s shl 7) or l).toShort()
+                                this.facesColor!![face] = (h shl 10 or (s shl 7) or l).toShort()
                             }
                         }
                         this.calculateColors = true
@@ -2215,11 +2215,11 @@ open class ModelSM : Model {
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < this.billboardGroups!!.size) {
-                        val vertices = this.billboardGroups!![label]!!
-                        for (vertIndex in vertices.indices) {
-                            val surface = this.billboardSurfaces!![vertices[vertIndex]]!!
-                            surface.offsetX += rotX
-                            surface.offsetY += rotY
+                        val billboardIndices = this.billboardGroups!![label]!!
+                        for (index in billboardIndices.indices) {
+                            val surface = this.billboardSurfaces!![billboardIndices[index]]!!
+                            surface.offsetX += transX
+                            surface.offsetY += transY
                         }
                     }
                 }
@@ -2229,11 +2229,11 @@ open class ModelSM : Model {
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < this.billboardGroups!!.size) {
-                        val vertices = this.billboardGroups!![label]!!
-                        for (vertIndex in vertices.indices) {
-                            val surface = this.billboardSurfaces!![vertices[vertIndex]]!!
-                            surface.scaleX = surface.scaleX * rotX / 128.0f
-                            surface.scaleY = surface.scaleY * rotY / 128.0f
+                        val billboardIndices = this.billboardGroups!![label]!!
+                        for (index in billboardIndices.indices) {
+                            val surface = this.billboardSurfaces!![billboardIndices[index]]!!
+                            surface.scaleX = surface.scaleX * transX / 128.0f
+                            surface.scaleY = surface.scaleY * transY / 128.0f
                         }
                     }
                 }
@@ -2242,10 +2242,10 @@ open class ModelSM : Model {
             for (labelIndex in 0 until labelCount) {
                 val label = labels[labelIndex]
                 if (label < this.billboardGroups!!.size) {
-                    val vertices = this.billboardGroups!![label]!!
-                    for (vertIndex in vertices.indices) {
-                        val surface = this.billboardSurfaces!![vertices[vertIndex]]!!
-                        surface.rotation = rotX + surface.rotation and 0x3fff
+                    val billboardIndices = this.billboardGroups!![label]!!
+                    for (index in billboardIndices.indices) {
+                        val surface = this.billboardSurfaces!![billboardIndices[index]]!!
+                        surface.rotation = transX + surface.rotation and 0x3fff
                     }
                 }
             }
@@ -2310,16 +2310,16 @@ open class ModelSM : Model {
                 this.verticesZ!![verticeIndex] += this.originZ
             }
         } else if (transformationType == 3) {
-            for (verticesIndex in 0 until this.numVertices) {
-                this.verticesX!![verticesIndex] -= this.originX
-                this.verticesY!![verticesIndex] -= this.originY
-                this.verticesZ!![verticesIndex] -= this.originZ
-                this.verticesX!![verticesIndex] = x * this.verticesX!![verticesIndex] / 128
-                this.verticesY!![verticesIndex] = y * this.verticesY!![verticesIndex] / 128
-                this.verticesZ!![verticesIndex] = z * this.verticesZ!![verticesIndex] / 128
-                this.verticesX!![verticesIndex] += this.originX
-                this.verticesY!![verticesIndex] += this.originY
-                this.verticesZ!![verticesIndex] += this.originZ
+            for (verticeIndex in 0 until this.numVertices) {
+                this.verticesX!![verticeIndex] -= this.originX
+                this.verticesY!![verticeIndex] -= this.originY
+                this.verticesZ!![verticeIndex] -= this.originZ
+                this.verticesX!![verticeIndex] = x * this.verticesX!![verticeIndex] / 128
+                this.verticesY!![verticeIndex] = y * this.verticesY!![verticeIndex] / 128
+                this.verticesZ!![verticeIndex] = z * this.verticesZ!![verticeIndex] / 128
+                this.verticesX!![verticeIndex] += this.originX
+                this.verticesY!![verticeIndex] += this.originY
+                this.verticesZ!![verticeIndex] += this.originZ
             }
         } else if (transformationType == 5) {
             for (faceIndex in 0 until this.numFaces) {
@@ -2332,18 +2332,18 @@ open class ModelSM : Model {
                 this.facesAlpha!![faceIndex] = alpha.toByte()
             }
             if (this.billboardEffects != null) {
-                for (faceIndex in 0 until this.numBillboards) {
-                    val effect = this.billboardEffects!![faceIndex]!!
-                    val surface = this.billboardSurfaces!![faceIndex]!!
+                for (billboardIndex in 0 until this.numBillboards) {
+                    val effect = this.billboardEffects!![billboardIndex]!!
+                    val surface = this.billboardSurfaces!![billboardIndex]!!
                     surface.diffuseColor = surface.diffuseColor and 0xffffff or (255 - (this.facesAlpha!![effect.appliesOnFace].toInt() and 0xff) shl 24)
                 }
             }
         } else if (transformationType == 7) {
             for (faceIndex in 0 until this.numFaces) {
-                val color = this.facesColor!![faceIndex].toInt() and 0xffff
-                var h = color shr 10 and 0x3f
-                var s = color shr 7 and 0x7
-                var l = color and 0x7f
+                val faceColorHsl = this.facesColor!![faceIndex].toInt() and 0xffff
+                var h = faceColorHsl shr 10 and 0x3f
+                var s = faceColorHsl shr 7 and 0x7
+                var l = faceColorHsl and 0x7f
                 h = h + x and 0x3f
                 s += y
                 if (s < 0) {
@@ -2361,43 +2361,43 @@ open class ModelSM : Model {
             }
             this.calculateColors = true
             if (this.billboardEffects != null) {
-                for (faceIndex in 0 until this.numBillboards) {
-                    val effect = this.billboardEffects!![faceIndex]!!
-                    val surface = this.billboardSurfaces!![faceIndex]!!
+                for (billboardIndex in 0 until this.numBillboards) {
+                    val effect = this.billboardEffects!![billboardIndex]!!
+                    val surface = this.billboardSurfaces!![billboardIndex]!!
                     surface.diffuseColor = surface.diffuseColor and 0xffffff.inv() or (ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(this.facesColor!![effect.appliesOnFace].toInt() and 0xffff).toInt() and 0xffff] and 0xffffff)
                 }
             }
         } else if (transformationType == 8) {
-            for (faceIndex in 0 until this.numBillboards) {
-                val surface = this.billboardSurfaces!![faceIndex]!!
+            for (billboardIndex in 0 until this.numBillboards) {
+                val surface = this.billboardSurfaces!![billboardIndex]!!
                 surface.offsetX += x
                 surface.offsetY += y
             }
         } else if (transformationType == 10) {
-            for (faceIndex in 0 until this.numBillboards) {
-                val surface = this.billboardSurfaces!![faceIndex]!!
+            for (billboardIndex in 0 until this.numBillboards) {
+                val surface = this.billboardSurfaces!![billboardIndex]!!
                 surface.scaleX = surface.scaleX * x / 128.0f
                 surface.scaleY = surface.scaleY * y / 128.0f
             }
         } else if (transformationType == 9) {
-            for (faceIndex in 0 until this.numBillboards) {
-                val surface = this.billboardSurfaces!![faceIndex]!!
+            for (billboardIndex in 0 until this.numBillboards) {
+                val surface = this.billboardSurfaces!![billboardIndex]!!
                 surface.rotation = x + surface.rotation and 0x3fff
             }
         }
     }
 
-    fun multithreadedDraw(matrix44var1: Matrix43, renderedEntity: BoundingBoxPolygon?, rasterizerFlags: Int) {
+    fun multithreadedDraw(projectionMatrix: Matrix43, renderedEntity: BoundingBoxPolygon?, rasterizerFlags: Int) {
         if (this.maxDepth >= 1) {
             val resource = this.toolkit.getThreadResource(Thread.currentThread())!!
             val particleMatrix = resource.particleMatrix
-            particleMatrix.fromMatrix(matrix44var1)
-            val matrix446 = this.toolkit.viewMatrix44!!
-            val matrix447 = this.toolkit.modelMatrix!!
+            particleMatrix.fromMatrix(projectionMatrix)
+            val viewMatrix = this.toolkit.viewMatrix44!!
+            val modelMatrix = this.toolkit.modelMatrix!!
             if (!this.boundsUpdated) {
                 calculateBounds()
             }
-            val bool8 = particleMatrix.isIdentity()
+            val isIdentityMatrix = particleMatrix.isIdentity()
             val particleOffsets = resource.particleOffsets
             particleMatrix.scale(0.0f, this.minY.toFloat(), 0.0f, particleOffsets)
             val offsetXA = particleOffsets!![0]
@@ -2407,29 +2407,29 @@ open class ModelSM : Model {
             val offsetXB = particleOffsets[0]
             val offsetYB = particleOffsets[1]
             val offsetZB = particleOffsets[2]
-            var f_18: Float
-            var f_19: Float
-            for (i_16 in 0..5) {
-                val floats_17 = this.toolkit.frustumPlanes!![i_16]
-                f_18 = floats_17[0] * offsetXA + floats_17[1] * offsetYA + floats_17[2] * offsetZA + floats_17[3] + this.size2d
-                f_19 = floats_17[0] * offsetXB + floats_17[1] * offsetYB + floats_17[2] * offsetZB + floats_17[3] + this.size2d
-                if (f_18 < 0.0f && f_19 < 0.0f) {
+            var distMinY: Float
+            var distMaxY: Float
+            for (planeIndex in 0..5) {
+                val plane = this.toolkit.frustumPlanes!![planeIndex]
+                distMinY = plane[0] * offsetXA + plane[1] * offsetYA + plane[2] * offsetZA + plane[3] + this.size2d
+                distMaxY = plane[0] * offsetXB + plane[1] * offsetYB + plane[2] * offsetZB + plane[3] + this.size2d
+                if (distMinY < 0.0f && distMaxY < 0.0f) {
                     return
                 }
             }
-            val nNearFaceA: Float
-            val zNearFaceD: Float
-            if (bool8) {
-                zNearFaceD = matrix446.elements[14]
-                nNearFaceA = matrix446.elements[6]
+            val viewDepthPerY: Float
+            val viewDepthBase: Float
+            if (isIdentityMatrix) {
+                viewDepthBase = viewMatrix.elements[14]
+                viewDepthPerY = viewMatrix.elements[6]
             } else {
-                zNearFaceD = particleMatrix.elements[12] * matrix446.elements[2] + particleMatrix.elements[13] * matrix446.elements[6] + particleMatrix.elements[14] * matrix446.elements[10] + matrix446.elements[14]
-                nNearFaceA = particleMatrix.elements[4] * matrix446.elements[2] + particleMatrix.elements[5] * matrix446.elements[6] + particleMatrix.elements[6] * matrix446.elements[10]
+                viewDepthBase = particleMatrix.elements[12] * viewMatrix.elements[2] + particleMatrix.elements[13] * viewMatrix.elements[6] + particleMatrix.elements[14] * viewMatrix.elements[10] + viewMatrix.elements[14]
+                viewDepthPerY = particleMatrix.elements[4] * viewMatrix.elements[2] + particleMatrix.elements[5] * viewMatrix.elements[6] + particleMatrix.elements[6] * viewMatrix.elements[10]
             }
-            f_18 = zNearFaceD + this.minY * nNearFaceA
-            f_19 = zNearFaceD + this.maxY * nNearFaceA
-            val f_20 = if (f_18 > f_19) f_18 + this.size2d else f_19 + this.size2d
-            val f_21 = matrix447.elements[10] * f_20 + matrix447.elements[14]
+            distMinY = viewDepthBase + this.minY * viewDepthPerY
+            distMaxY = viewDepthBase + this.maxY * viewDepthPerY
+            val furthestDist = if (distMinY > distMaxY) distMinY + this.size2d else distMaxY + this.size2d
+            val fogDepth = modelMatrix.elements[10] * furthestDist + modelMatrix.elements[14]
             if (this.toolkit.executingThreadCount > 1) {
                 synchronized(this) {
                     while (this.renderLock) {
@@ -2460,15 +2460,15 @@ open class ModelSM : Model {
                 val verticeX = this.verticesX!![verticeIndex]
                 val verticeY = this.verticesY!![verticeIndex]
                 val verticeZ = this.verticesZ!![verticeIndex]
-                val matrixX = renderMatrix.elements[0] * verticeX + renderMatrix.elements[4] * verticeY + renderMatrix.elements[8] * verticeZ + renderMatrix.elements[12]
-                val matrixY = renderMatrix.elements[1] * verticeX + renderMatrix.elements[5] * verticeY + renderMatrix.elements[9] * verticeZ + renderMatrix.elements[13]
-                val matrixZ = renderMatrix.elements[2] * verticeX + renderMatrix.elements[6] * verticeY + renderMatrix.elements[10] * verticeZ + renderMatrix.elements[14]
-                val zz = renderMatrix.elements[3] * verticeX + renderMatrix.elements[7] * verticeY + renderMatrix.elements[11] * verticeZ + renderMatrix.elements[15]
-                this.projectedVerticesZ!![verticeIndex] = this.threadResource!!.cachedDepthRangeNear + this.threadResource!!.cachedDepthRangeFar * matrixZ / zz
-                this.projectedVerticesZ2!![verticeIndex] = zz
-                if (matrixZ >= -zz) {
-                    this.projectedVerticesX!![verticeIndex] = (this.threadResource!!.centerX + this.threadResource!!.offsetX * matrixX / zz)
-                    this.projectedVerticesY!![verticeIndex] = (this.threadResource!!.centerY + this.threadResource!!.offsetY * matrixY / zz)
+                val clipX = renderMatrix.elements[0] * verticeX + renderMatrix.elements[4] * verticeY + renderMatrix.elements[8] * verticeZ + renderMatrix.elements[12]
+                val clipY = renderMatrix.elements[1] * verticeX + renderMatrix.elements[5] * verticeY + renderMatrix.elements[9] * verticeZ + renderMatrix.elements[13]
+                val clipZ = renderMatrix.elements[2] * verticeX + renderMatrix.elements[6] * verticeY + renderMatrix.elements[10] * verticeZ + renderMatrix.elements[14]
+                val clipW = renderMatrix.elements[3] * verticeX + renderMatrix.elements[7] * verticeY + renderMatrix.elements[11] * verticeZ + renderMatrix.elements[15]
+                this.projectedVerticesZ!![verticeIndex] = this.threadResource!!.cachedDepthRangeNear + this.threadResource!!.cachedDepthRangeFar * clipZ / clipW
+                this.projectedVerticesZ2!![verticeIndex] = clipW
+                if (clipZ >= -clipW) {
+                    this.projectedVerticesX!![verticeIndex] = (this.threadResource!!.centerX + this.threadResource!!.offsetX * clipX / clipW)
+                    this.projectedVerticesY!![verticeIndex] = (this.threadResource!!.centerY + this.threadResource!!.offsetY * clipY / clipW)
                 } else {
                     this.projectedVerticesX!![verticeIndex] = -5000.0f
                     offscreen = true
@@ -2487,29 +2487,29 @@ open class ModelSM : Model {
                     val avgX = (this.verticesX!![a.toInt()] + this.verticesX!![b.toInt()] + this.verticesX!![c.toInt()]) / 3
                     val avgY = (this.verticesY!![a.toInt()] + this.verticesY!![b.toInt()] + this.verticesY!![c.toInt()]) / 3
                     val avgZ = (this.verticesZ!![a.toInt()] + this.verticesZ!![b.toInt()] + this.verticesZ!![c.toInt()]) / 3
-                    var mX = renderMatrix.elements[0] * avgX + renderMatrix.elements[4] * avgY + renderMatrix.elements[8] * avgZ + renderMatrix.elements[12]
-                    var mY = renderMatrix.elements[1] * avgX + renderMatrix.elements[5] * avgY + renderMatrix.elements[9] * avgZ + renderMatrix.elements[13]
-                    var mZ = renderMatrix.elements[2] * avgX + renderMatrix.elements[6] * avgY + renderMatrix.elements[10] * avgZ + renderMatrix.elements[14]
-                    var mZB2 = renderMatrix.elements[3] * avgX + renderMatrix.elements[7] * avgY + renderMatrix.elements[11] * avgZ + renderMatrix.elements[15]
-                    mZ += matrix447.elements[2] * surface.offsetX + matrix447.elements[6] * surface.offsetY
-                    mZB2 += matrix447.elements[3] * surface.offsetX + matrix447.elements[7] * surface.offsetY
-                    if (mZ > -mZB2) {
-                        mX += matrix447.elements[0] * surface.offsetX + matrix447.elements[4] * surface.offsetY
-                        mY += matrix447.elements[1] * surface.offsetX + matrix447.elements[5] * surface.offsetY
-                        val xx = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * mX / mZB2
-                        val yy = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * mY / mZB2
+                    var clipX = renderMatrix.elements[0] * avgX + renderMatrix.elements[4] * avgY + renderMatrix.elements[8] * avgZ + renderMatrix.elements[12]
+                    var clipY = renderMatrix.elements[1] * avgX + renderMatrix.elements[5] * avgY + renderMatrix.elements[9] * avgZ + renderMatrix.elements[13]
+                    var clipZ = renderMatrix.elements[2] * avgX + renderMatrix.elements[6] * avgY + renderMatrix.elements[10] * avgZ + renderMatrix.elements[14]
+                    var clipW = renderMatrix.elements[3] * avgX + renderMatrix.elements[7] * avgY + renderMatrix.elements[11] * avgZ + renderMatrix.elements[15]
+                    clipZ += modelMatrix.elements[2] * surface.offsetX + modelMatrix.elements[6] * surface.offsetY
+                    clipW += modelMatrix.elements[3] * surface.offsetX + modelMatrix.elements[7] * surface.offsetY
+                    if (clipZ > -clipW) {
+                        clipX += modelMatrix.elements[0] * surface.offsetX + modelMatrix.elements[4] * surface.offsetY
+                        clipY += modelMatrix.elements[1] * surface.offsetX + modelMatrix.elements[5] * surface.offsetY
+                        val screenX = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * clipX / clipW
+                        val screenY = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * clipY / clipW
                         val adjustedSizeX = surface.scaleX * effect.size2d
                         val adjustedSizeY = surface.scaleY * effect.size3d
-                        val adjustX = mX + matrix447.elements[0] * adjustedSizeX + matrix447.elements[4] * adjustedSizeY
-                        val adjustY = mY + matrix447.elements[1] * adjustedSizeX + matrix447.elements[5] * adjustedSizeY
-                        val adjustZB2 = mZB2 + matrix447.elements[3] * adjustedSizeX + matrix447.elements[7] * adjustedSizeY
-                        val otherX = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * adjustX / adjustZB2
-                        val otherY = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * adjustY / adjustZB2
-                        surface.x = xx.toInt()
-                        surface.y = yy.toInt()
-                        surface.z = this.toolkit.depthRangeNear + this.toolkit.depthRangeFar * (mZ - matrix447.elements[10] * effect.distance) / mZB2
-                        surface.size2d = (if (otherX < xx) xx - otherX else otherX - xx).toInt()
-                        surface.size3d = (if (otherY < yy) yy - otherY else otherY - yy).toInt()
+                        val adjustX = clipX + modelMatrix.elements[0] * adjustedSizeX + modelMatrix.elements[4] * adjustedSizeY
+                        val adjustY = clipY + modelMatrix.elements[1] * adjustedSizeX + modelMatrix.elements[5] * adjustedSizeY
+                        val adjustClipW = clipW + modelMatrix.elements[3] * adjustedSizeX + modelMatrix.elements[7] * adjustedSizeY
+                        val edgeScreenX = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * adjustX / adjustClipW
+                        val edgeScreenY = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * adjustY / adjustClipW
+                        surface.x = screenX.toInt()
+                        surface.y = screenY.toInt()
+                        surface.z = this.toolkit.depthRangeNear + this.toolkit.depthRangeFar * (clipZ - modelMatrix.elements[10] * effect.distance) / clipW
+                        surface.size2d = (if (edgeScreenX < screenX) screenX - edgeScreenX else edgeScreenX - screenX).toInt()
+                        surface.size3d = (if (edgeScreenY < screenY) screenY - edgeScreenY else edgeScreenY - screenY).toInt()
                     } else {
                         surface.size3d = 0
                         surface.size2d = 0
@@ -2517,60 +2517,60 @@ open class ModelSM : Model {
                 }
             }
             if (renderedEntity != null) {
-                var bool57 = false
-                var bool58 = true
-                val sizeDeltaX = this.minX + this.maxX shr 1
-                val sizeDeltaZ = this.minZ + this.maxZ shr 1
-                var mY = this.minY
-                var zz = renderMatrix.elements[0] * sizeDeltaX + renderMatrix.elements[4] * mY + renderMatrix.elements[8] * sizeDeltaZ + renderMatrix.elements[12]
-                var f_64 = renderMatrix.elements[1] * sizeDeltaX + renderMatrix.elements[5] * mY + renderMatrix.elements[9] * sizeDeltaZ + renderMatrix.elements[13]
-                var f_33 = renderMatrix.elements[2] * sizeDeltaX + renderMatrix.elements[6] * mY + renderMatrix.elements[10] * sizeDeltaZ + renderMatrix.elements[14]
-                var f_34 = renderMatrix.elements[3] * sizeDeltaX + renderMatrix.elements[7] * mY + renderMatrix.elements[11] * sizeDeltaZ + renderMatrix.elements[15]
-                if (f_33 >= -f_34) {
-                    renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * zz / f_34).toInt()
-                    renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_64 / f_34).toInt()
+                var behindNearPlane = false
+                var visible = true
+                val boundsCenterX = this.minX + this.maxX shr 1
+                val boundsCenterZ = this.minZ + this.maxZ shr 1
+                var boundsY = this.minY
+                var minYClipX = renderMatrix.elements[0] * boundsCenterX + renderMatrix.elements[4] * boundsY + renderMatrix.elements[8] * boundsCenterZ + renderMatrix.elements[12]
+                var minYClipY = renderMatrix.elements[1] * boundsCenterX + renderMatrix.elements[5] * boundsY + renderMatrix.elements[9] * boundsCenterZ + renderMatrix.elements[13]
+                var minYClipZ = renderMatrix.elements[2] * boundsCenterX + renderMatrix.elements[6] * boundsY + renderMatrix.elements[10] * boundsCenterZ + renderMatrix.elements[14]
+                var minYClipW = renderMatrix.elements[3] * boundsCenterX + renderMatrix.elements[7] * boundsY + renderMatrix.elements[11] * boundsCenterZ + renderMatrix.elements[15]
+                if (minYClipZ >= -minYClipW) {
+                    renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * minYClipX / minYClipW).toInt()
+                    renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * minYClipY / minYClipW).toInt()
                 } else {
-                    bool57 = true
+                    behindNearPlane = true
                 }
-                mY = this.maxY
-                val f_35 = renderMatrix.elements[0] * sizeDeltaX + renderMatrix.elements[4] * mY + renderMatrix.elements[8] * sizeDeltaZ + renderMatrix.elements[12]
-                val f_36 = renderMatrix.elements[1] * sizeDeltaX + renderMatrix.elements[5] * mY + renderMatrix.elements[9] * sizeDeltaZ + renderMatrix.elements[13]
-                val f_37 = renderMatrix.elements[2] * sizeDeltaX + renderMatrix.elements[6] * mY + renderMatrix.elements[10] * sizeDeltaZ + renderMatrix.elements[14]
-                val f_38 = renderMatrix.elements[3] * sizeDeltaX + renderMatrix.elements[7] * mY + renderMatrix.elements[11] * sizeDeltaZ + renderMatrix.elements[15]
-                if (f_37 >= -f_38) {
-                    renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_35 / f_38).toInt()
-                    renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_36 / f_38).toInt()
+                boundsY = this.maxY
+                val maxYClipX = renderMatrix.elements[0] * boundsCenterX + renderMatrix.elements[4] * boundsY + renderMatrix.elements[8] * boundsCenterZ + renderMatrix.elements[12]
+                val maxYClipY = renderMatrix.elements[1] * boundsCenterX + renderMatrix.elements[5] * boundsY + renderMatrix.elements[9] * boundsCenterZ + renderMatrix.elements[13]
+                val maxYClipZ = renderMatrix.elements[2] * boundsCenterX + renderMatrix.elements[6] * boundsY + renderMatrix.elements[10] * boundsCenterZ + renderMatrix.elements[14]
+                val maxYClipW = renderMatrix.elements[3] * boundsCenterX + renderMatrix.elements[7] * boundsY + renderMatrix.elements[11] * boundsCenterZ + renderMatrix.elements[15]
+                if (maxYClipZ >= -maxYClipW) {
+                    renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * maxYClipX / maxYClipW).toInt()
+                    renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * maxYClipY / maxYClipW).toInt()
                 } else {
-                    bool57 = true
+                    behindNearPlane = true
                 }
-                if (bool57) {
-                    if (f_33 < -f_34 && f_37 < -f_38) {
-                        bool58 = false
-                    } else if (f_33 < -f_34) {
-                        val f_39 = (f_33 + f_34) / (f_37 + f_38) - 1.0f
-                        val f_40 = zz + f_39 * (f_35 - zz)
-                        val f_41 = f_64 + f_39 * (f_36 - f_64)
-                        val f_42 = f_34 + f_39 * (f_38 - f_34)
-                        renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_40 / f_42).toInt()
-                        renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_41 / f_42).toInt()
-                    } else if (f_37 < -f_38) {
-                        val f_39 = (f_37 + f_38) / (f_33 + f_34) - 1.0f
-                        val f_40 = f_35 + f_39 * (zz - f_35)
-                        val f_41 = f_36 + f_39 * (f_64 - f_36)
-                        val f_42 = f_38 + f_39 * (f_34 - f_38)
-                        renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_40 / f_42).toInt()
-                        renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_41 / f_42).toInt()
+                if (behindNearPlane) {
+                    if (minYClipZ < -minYClipW && maxYClipZ < -maxYClipW) {
+                        visible = false
+                    } else if (minYClipZ < -minYClipW) {
+                        val clipT = (minYClipZ + minYClipW) / (maxYClipZ + maxYClipW) - 1.0f
+                        val clipX = minYClipX + clipT * (maxYClipX - minYClipX)
+                        val clipY = minYClipY + clipT * (maxYClipY - minYClipY)
+                        val clipW = minYClipW + clipT * (maxYClipW - minYClipW)
+                        renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * clipX / clipW).toInt()
+                        renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * clipY / clipW).toInt()
+                    } else if (maxYClipZ < -maxYClipW) {
+                        val clipT = (maxYClipZ + maxYClipW) / (minYClipZ + minYClipW) - 1.0f
+                        val clipX = maxYClipX + clipT * (minYClipX - maxYClipX)
+                        val clipY = maxYClipY + clipT * (minYClipY - maxYClipY)
+                        val clipW = maxYClipW + clipT * (minYClipW - maxYClipW)
+                        renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * clipX / clipW).toInt()
+                        renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * clipY / clipW).toInt()
                     }
                 }
-                if (bool58) {
-                    if (f_33 / f_34 > f_37 / f_38) {
-                        val f_39 = zz + matrix447.elements[0] * this.size2d + matrix447.elements[12]
-                        val f_40 = f_34 + matrix447.elements[3] * this.size2d + matrix447.elements[15]
-                        renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.left + this.toolkit.viewportHalfWidth * f_39 / f_40).toInt()
+                if (visible) {
+                    if (minYClipZ / minYClipW > maxYClipZ / maxYClipW) {
+                        val edgeClipX = minYClipX + modelMatrix.elements[0] * this.size2d + modelMatrix.elements[12]
+                        val edgeClipW = minYClipW + modelMatrix.elements[3] * this.size2d + modelMatrix.elements[15]
+                        renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.left + this.toolkit.viewportHalfWidth * edgeClipX / edgeClipW).toInt()
                     } else {
-                        val f_39 = f_35 + matrix447.elements[0] * this.size2d + matrix447.elements[12]
-                        val f_40 = f_38 + matrix447.elements[3] * this.size2d + matrix447.elements[15]
-                        renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.right + this.toolkit.viewportHalfWidth * f_39 / f_40).toInt()
+                        val edgeClipX = maxYClipX + modelMatrix.elements[0] * this.size2d + modelMatrix.elements[12]
+                        val edgeClipW = maxYClipW + modelMatrix.elements[3] * this.size2d + modelMatrix.elements[15]
+                        renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.right + this.toolkit.viewportHalfWidth * edgeClipX / edgeClipW).toInt()
                     }
                     renderedEntity.positionCalculated = true
                 }
@@ -2579,7 +2579,7 @@ open class ModelSM : Model {
             this.rasterizer!!.smoothEdges = (rasterizerFlags and ModelFunctionMaskGL.SMOOTH_EDGES) == 0
             this.rasterizer!!.blending = false
             try {
-                draw(this.toolkit.colourBuffer != null, this.toolkit.depthBuffer != null, (rasterizerFlags and ModelFunctionMaskGL.TRANSPARENT) != 0, offscreen, this.threadResource!!.fogEnabled && f_21 > this.threadResource!!.fogStartDistance || this.threadResource!!.hasWaterUpdate)
+                draw(this.toolkit.colourBuffer != null, this.toolkit.depthBuffer != null, (rasterizerFlags and ModelFunctionMaskGL.TRANSPARENT) != 0, offscreen, this.threadResource!!.fogEnabled && fogDepth > this.threadResource!!.fogStartDistance || this.threadResource!!.hasWaterUpdate)
             } catch (ex: Exception) {
                 // NOOP
             }
@@ -2616,47 +2616,47 @@ open class ModelSM : Model {
         safeModel.calculateNormalsThreaded()
         renderCycle++
         var cycleCount = 0
-        val vertsX = safeModel.verticesX
-        val depth = safeModel.maxDepth
+        val otherVerticesX = safeModel.verticesX
+        val otherMaxDepth = safeModel.maxDepth
         for (verticeIndex in 0 until this.maxDepth) {
-            val normals = this.vertexNormals!![verticeIndex]!!
-            if (normals.magnitude != 0) {
+            val vertexNormal = this.vertexNormals!![verticeIndex]!!
+            if (vertexNormal.magnitude != 0) {
                 val vertY = this.verticesY!![verticeIndex] - y
                 if (vertY >= safeModel.minY && vertY <= safeModel.maxY) {
                     val vertX = this.verticesX!![verticeIndex] - x
                     if (vertX >= safeModel.minX && vertX <= safeModel.maxX) {
                         val vertZ = this.verticesZ!![verticeIndex] - z
                         if (vertZ >= safeModel.minZ && vertZ <= safeModel.maxZ) {
-                            for (currDepth in 0 until depth) {
-                                val normals2 = safeModel.vertexNormals!![currDepth]!!
-                                if (vertX == vertsX!![currDepth] && vertZ == safeModel.verticesZ!![currDepth] && vertY == safeModel.verticesY!![currDepth] && normals2.magnitude != 0) {
+                            for (otherVerticeIndex in 0 until otherMaxDepth) {
+                                val otherVertexNormal = safeModel.vertexNormals!![otherVerticeIndex]!!
+                                if (vertX == otherVerticesX!![otherVerticeIndex] && vertZ == safeModel.verticesZ!![otherVerticeIndex] && vertY == safeModel.verticesY!![otherVerticeIndex] && otherVertexNormal.magnitude != 0) {
                                     if (this.vertexNormalOffsets == null) {
                                         this.vertexNormalOffsets = arrayOfNulls(this.maxDepth)
                                     }
                                     if (safeModel.vertexNormalOffsets == null) {
-                                        safeModel.vertexNormalOffsets = arrayOfNulls(depth)
+                                        safeModel.vertexNormalOffsets = arrayOfNulls(otherMaxDepth)
                                     }
-                                    var offsets1 = this.vertexNormalOffsets!![verticeIndex]
-                                    if (offsets1 == null) {
-                                        offsets1 = VertexNormal(normals)
-                                        this.vertexNormalOffsets!![verticeIndex] = offsets1
+                                    var normalOffset = this.vertexNormalOffsets!![verticeIndex]
+                                    if (normalOffset == null) {
+                                        normalOffset = VertexNormal(vertexNormal)
+                                        this.vertexNormalOffsets!![verticeIndex] = normalOffset
                                     }
-                                    var offsets2 = safeModel.vertexNormalOffsets!![currDepth]
-                                    if (offsets2 == null) {
-                                        offsets2 = VertexNormal(normals2)
-                                        safeModel.vertexNormalOffsets!![currDepth] = offsets2
+                                    var otherNormalOffset = safeModel.vertexNormalOffsets!![otherVerticeIndex]
+                                    if (otherNormalOffset == null) {
+                                        otherNormalOffset = VertexNormal(otherVertexNormal)
+                                        safeModel.vertexNormalOffsets!![otherVerticeIndex] = otherNormalOffset
                                     }
-                                    offsets1.x += normals2.x
-                                    offsets1.y += normals2.y
-                                    offsets1.z += normals2.z
-                                    offsets1.magnitude += normals2.magnitude
-                                    offsets2.x += normals.x
-                                    offsets2.y += normals.y
-                                    offsets2.z += normals.z
-                                    offsets2.magnitude += normals.magnitude
+                                    normalOffset.x += otherVertexNormal.x
+                                    normalOffset.y += otherVertexNormal.y
+                                    normalOffset.z += otherVertexNormal.z
+                                    normalOffset.magnitude += otherVertexNormal.magnitude
+                                    otherNormalOffset.x += vertexNormal.x
+                                    otherNormalOffset.y += vertexNormal.y
+                                    otherNormalOffset.z += vertexNormal.z
+                                    otherNormalOffset.magnitude += vertexNormal.magnitude
                                     cycleCount++
                                     this.renderCycleByVertex!![verticeIndex] = renderCycle
-                                    this.renderCycleByDepth!![currDepth] = renderCycle
+                                    this.renderCycleByDepth!![otherVerticeIndex] = renderCycle
                                 }
                             }
                         }
@@ -2724,9 +2724,9 @@ open class ModelSM : Model {
                     }
                 }
             } else {
-                for (priorityType in 0 until 12) {
+                for (layer in 0 until 12) {
                     for (faceIndex in 0 until this.numFaces) {
-                        if (priorityType == this.facesLayer!![faceIndex].toInt() && (hasAlpha(faceIndex) || hasBillboardOnFace(faceIndex))) {
+                        if (layer == this.facesLayer!![faceIndex].toInt() && (hasAlpha(faceIndex) || hasBillboardOnFace(faceIndex))) {
                             translateToScreen(colorWrite, depthWrite, transparent, faceIndex, offscreen, allowReduce)
                         }
                     }
@@ -2740,31 +2740,31 @@ open class ModelSM : Model {
             val a = this.facesA!![faceIndex].toInt()
             val b = this.facesB!![faceIndex].toInt()
             val c = this.facesC!![faceIndex].toInt()
-            val matrix448 = this.toolkit.modelMatrix!!
-            val f_9 = matrix448.elements[10]
-            val f_10 = matrix448.elements[14]
-            val f_11 = matrix448.elements[11]
-            val f_12 = matrix448.elements[15]
-            val f_13 = f_10 * f_11 - f_9 * f_12
-            val f_14 = (this.projectedVerticesZ!![a] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
-            val f_15 = (this.projectedVerticesZ!![b] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
-            val f_16 = (this.projectedVerticesZ!![c] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
-            val f_17 = f_14 * f_13 / (f_14 * f_11 - f_9)
-            val f_18 = f_15 * f_13 / (f_15 * f_11 - f_9)
-            val f_19 = f_16 * f_13 / (f_16 * f_11 - f_9)
-            var mixAlphaA = (f_17 - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
+            val modelMatrix = this.toolkit.modelMatrix!!
+            val clipZScale = modelMatrix.elements[10]
+            val clipZOffset = modelMatrix.elements[14]
+            val clipWScale = modelMatrix.elements[11]
+            val clipWOffset = modelMatrix.elements[15]
+            val depthDeterminant = clipZOffset * clipWScale - clipZScale * clipWOffset
+            val depthA = (this.projectedVerticesZ!![a] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
+            val depthB = (this.projectedVerticesZ!![b] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
+            val depthC = (this.projectedVerticesZ!![c] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
+            val viewDistanceA = depthA * depthDeterminant / (depthA * clipWScale - clipZScale)
+            val viewDistanceB = depthB * depthDeterminant / (depthB * clipWScale - clipZScale)
+            val viewDistanceC = depthC * depthDeterminant / (depthC * clipWScale - clipZScale)
+            var mixAlphaA = (viewDistanceA - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
             if (mixAlphaA > 1.0f) {
                 mixAlphaA = 1.0f
             } else if (mixAlphaA < 0.0f) {
                 mixAlphaA = 0.0f
             }
-            var mixAlphaB = (f_18 - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
+            var mixAlphaB = (viewDistanceB - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
             if (mixAlphaB > 1.0f) {
                 mixAlphaB = 1.0f
             } else if (mixAlphaB < 0.0f) {
                 mixAlphaB = 0.0f
             }
-            var mixAlphaC = (f_19 - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
+            var mixAlphaC = (viewDistanceC - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
             if (mixAlphaC > 1.0f) {
                 mixAlphaC = 1.0f
             } else if (mixAlphaC < 0.0f) {
@@ -2781,15 +2781,15 @@ open class ModelSM : Model {
                         this.rasterizer!!.blendingAlpha = this.facesAlpha!![faceIndex].toInt() and 0xff
                     }
                     if (this.facesMaterial != null && this.facesMaterial!![faceIndex].toInt() != -1) {
-                        var transparency = 0xffffff.inv()
+                        var alphaBits = 0xffffff.inv()
                         if (this.facesAlpha != null) {
-                            transparency = 255 - (this.facesAlpha!![faceIndex].toInt() and 0xff) shl 24
+                            alphaBits = 255 - (this.facesAlpha!![faceIndex].toInt() and 0xff) shl 24
                         }
                         if (this.facesColourC!![faceIndex] == -1) {
-                            val faceAColor = transparency or (this.facesColourA!![faceIndex] and 0xffffff)
+                            val faceAColor = alphaBits or (this.facesColourA!![faceIndex] and 0xffffff)
                             this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], faceAColor, faceAColor, faceAColor, this.threadResource!!.fogColor, mixAlphaA * 255.0f, mixAlphaB * 255.0f, mixAlphaC * 255.0f, this.facesMaterial!![faceIndex].toInt())
                         } else {
-                            this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], transparency or (this.facesColourA!![faceIndex] and 0xffffff), transparency or (this.facesColourB!![faceIndex] and 0xffffff), transparency or (this.facesColourC!![faceIndex] and 0xffffff), this.threadResource!!.fogColor, mixAlphaA * 255.0f, mixAlphaB * 255.0f, mixAlphaC * 255.0f, this.facesMaterial!![faceIndex].toInt())
+                            this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], alphaBits or (this.facesColourA!![faceIndex] and 0xffffff), alphaBits or (this.facesColourB!![faceIndex] and 0xffffff), alphaBits or (this.facesColourC!![faceIndex] and 0xffffff), this.threadResource!!.fogColor, mixAlphaA * 255.0f, mixAlphaB * 255.0f, mixAlphaC * 255.0f, this.facesMaterial!![faceIndex].toInt())
                         }
                     } else if (this.facesColourC!![faceIndex] == -1) {
                         this.rasterizer!!.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable!![this.facesColourA!![faceIndex] and 0xffff], this.threadResource!!.fogColor, mixAlphaA * 255.0f), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable!![this.facesColourA!![faceIndex] and 0xffff], this.threadResource!!.fogColor, mixAlphaB * 255.0f), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable!![this.facesColourA!![faceIndex] and 0xffff], this.threadResource!!.fogColor, mixAlphaC * 255.0f))
@@ -2826,15 +2826,15 @@ open class ModelSM : Model {
                 this.rasterizer!!.blendingAlpha = this.facesAlpha!![faceIndex].toInt() and 0xff
             }
             if (this.facesMaterial != null && this.facesMaterial!![faceIndex].toInt() != -1) {
-                var transparency = 0xffffff.inv()
+                var alphaBits = 0xffffff.inv()
                 if (this.facesAlpha != null) {
-                    transparency = 255 - (this.facesAlpha!![faceIndex].toInt() and 0xff) shl 24
+                    alphaBits = 255 - (this.facesAlpha!![faceIndex].toInt() and 0xff) shl 24
                 }
                 if (this.facesColourC!![faceIndex] == -1) {
-                    val finalFaceAColor = transparency or (this.facesColourA!![faceIndex] and 0xffffff)
-                    this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], finalFaceAColor, finalFaceAColor, finalFaceAColor, this.threadResource!!.fogColor, waterAlphaMultiplierA * 255.0f, waterAlphaMultiplierB * 255.0f, waterAlphaMultiplierC * 255.0f, this.facesMaterial!![faceIndex].toInt())
+                    val faceAColor = alphaBits or (this.facesColourA!![faceIndex] and 0xffffff)
+                    this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], faceAColor, faceAColor, faceAColor, this.threadResource!!.fogColor, waterAlphaMultiplierA * 255.0f, waterAlphaMultiplierB * 255.0f, waterAlphaMultiplierC * 255.0f, this.facesMaterial!![faceIndex].toInt())
                 } else {
-                    this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], transparency or (this.facesColourA!![faceIndex] and 0xffffff), transparency or (this.facesColourB!![faceIndex] and 0xffffff), transparency or (this.facesColourC!![faceIndex] and 0xffffff), this.threadResource!!.fogColor, waterAlphaMultiplierA * 255.0f, waterAlphaMultiplierB * 255.0f, waterAlphaMultiplierC * 255.0f, this.facesMaterial!![faceIndex].toInt())
+                    this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], this.projectedVerticesZ2!![a], this.projectedVerticesZ2!![b], this.projectedVerticesZ2!![c], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], alphaBits or (this.facesColourA!![faceIndex] and 0xffffff), alphaBits or (this.facesColourB!![faceIndex] and 0xffffff), alphaBits or (this.facesColourC!![faceIndex] and 0xffffff), this.threadResource!!.fogColor, waterAlphaMultiplierA * 255.0f, waterAlphaMultiplierB * 255.0f, waterAlphaMultiplierC * 255.0f, this.facesMaterial!![faceIndex].toInt())
                 }
             } else if (this.facesColourC!![faceIndex] == -1) {
                 this.rasterizer!!.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a], this.projectedVerticesY!![b], this.projectedVerticesY!![c], this.projectedVerticesX!![a], this.projectedVerticesX!![b], this.projectedVerticesX!![c], this.projectedVerticesZ!![a], this.projectedVerticesZ!![b], this.projectedVerticesZ!![c], ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable!![this.facesColourA!![faceIndex] and 0xffff], this.threadResource!!.fogColor, waterAlphaMultiplierA * 255.0f), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable!![this.facesColourA!![faceIndex] and 0xffff], this.threadResource!!.fogColor, waterAlphaMultiplierB * 255.0f), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable!![this.facesColourA!![faceIndex] and 0xffff], this.threadResource!!.fogColor, waterAlphaMultiplierC * 255.0f))
@@ -2902,10 +2902,10 @@ open class ModelSM : Model {
             val depthA = renderMatrix.elements[2] * x + renderMatrix.elements[6] * y + renderMatrix.elements[10] * z + renderMatrix.elements[14]
             val depthB = renderMatrix.elements[3] * x + renderMatrix.elements[7] * y + renderMatrix.elements[11] * z + renderMatrix.elements[15]
             if (depthA >= -depthB) {
-                val f_31 = renderMatrix.elements[0] * x + renderMatrix.elements[4] * y + renderMatrix.elements[8] * z + renderMatrix.elements[12]
-                val f_32 = renderMatrix.elements[1] * x + renderMatrix.elements[5] * y + renderMatrix.elements[9] * z + renderMatrix.elements[13]
-                val screenPosX = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_31 / depthB).toInt()
-                val screenPosY = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_32 / depthB).toInt()
+                val clipX = renderMatrix.elements[0] * x + renderMatrix.elements[4] * y + renderMatrix.elements[8] * z + renderMatrix.elements[12]
+                val clipY = renderMatrix.elements[1] * x + renderMatrix.elements[5] * y + renderMatrix.elements[9] * z + renderMatrix.elements[13]
+                val screenPosX = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * clipX / depthB).toInt()
+                val screenPosY = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * clipY / depthB).toInt()
                 if (screenPosX < left) {
                     left = screenPosX
                 }
@@ -3023,9 +3023,9 @@ open class ModelSM : Model {
             }
         }
         if (this.billboardEffects != null) {
-            for (index in 0 until this.numBillboards) {
-                val effect = this.billboardEffects!![index]!!
-                val surface = this.billboardSurfaces!![index]!!
+            for (billboardIndex in 0 until this.numBillboards) {
+                val effect = this.billboardEffects!![billboardIndex]!!
+                val surface = this.billboardSurfaces!![billboardIndex]!!
                 surface.diffuseColor = surface.diffuseColor and 0xffffff.inv() or (ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(this.facesColor!![effect.appliesOnFace].toInt()).toInt() and 0xffff] and 0xffffff)
             }
         }
@@ -3077,9 +3077,9 @@ open class ModelSM : Model {
             this.facesColor!![faceIndex] = (h shl 10 or (s shl 7) or l).toShort()
         }
         if (this.billboardEffects != null) {
-            for (faceIndex in 0 until this.numBillboards) {
-                val effect = this.billboardEffects!![faceIndex]!!
-                val surface = this.billboardSurfaces!![faceIndex]!!
+            for (billboardIndex in 0 until this.numBillboards) {
+                val effect = this.billboardEffects!![billboardIndex]!!
+                val surface = this.billboardSurfaces!![billboardIndex]!!
                 surface.diffuseColor = surface.diffuseColor and 0xffffff.inv() or (ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(this.facesColor!![effect.appliesOnFace].toInt() and 0xffff).toInt() and 0xffff] and 0xffffff)
             }
         }
@@ -3129,15 +3129,15 @@ open class ModelSM : Model {
         val b = this.facesB!![faceIndex]
         val c = this.facesC!![faceIndex]
         if (this.facesMaterial != null && this.facesMaterial!![faceIndex].toInt() != -1) {
-            var alpha = 0xffffff.inv()
+            var alphaBits = 0xffffff.inv()
             if (this.facesAlpha != null) {
-                alpha = 255 - (this.facesAlpha!![faceIndex].toInt() and 0xff) shl 24
+                alphaBits = 255 - (this.facesAlpha!![faceIndex].toInt() and 0xff) shl 24
             }
             if (this.facesColourC!![faceIndex] == -1) {
-                val faceAColor = alpha or (this.facesColourA!![faceIndex] and 0xffffff)
+                val faceAColor = alphaBits or (this.facesColourA!![faceIndex] and 0xffffff)
                 this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a.toInt()], this.projectedVerticesY!![b.toInt()], this.projectedVerticesY!![c.toInt()], this.projectedVerticesX!![a.toInt()], this.projectedVerticesX!![b.toInt()], this.projectedVerticesX!![c.toInt()], this.projectedVerticesZ!![a.toInt()], this.projectedVerticesZ!![b.toInt()], this.projectedVerticesZ!![c.toInt()], this.projectedVerticesZ2!![a.toInt()], this.projectedVerticesZ2!![b.toInt()], this.projectedVerticesZ2!![c.toInt()], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], faceAColor, faceAColor, faceAColor, this.threadResource!!.fogColor, 0.0f, 0.0f, 0.0f, this.facesMaterial!![faceIndex].toInt())
             } else {
-                this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a.toInt()], this.projectedVerticesY!![b.toInt()], this.projectedVerticesY!![c.toInt()], this.projectedVerticesX!![a.toInt()], this.projectedVerticesX!![b.toInt()], this.projectedVerticesX!![c.toInt()], this.projectedVerticesZ!![a.toInt()], this.projectedVerticesZ!![b.toInt()], this.projectedVerticesZ!![c.toInt()], this.projectedVerticesZ2!![a.toInt()], this.projectedVerticesZ2!![b.toInt()], this.projectedVerticesZ2!![c.toInt()], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], alpha or (this.facesColourA!![faceIndex] and 0xffffff), alpha or (this.facesColourB!![faceIndex] and 0xffffff), alpha or (this.facesColourC!![faceIndex] and 0xffffff), this.threadResource!!.fogColor, 0.0f, 0.0f, 0.0f, this.facesMaterial!![faceIndex].toInt())
+                this.rasterizer!!.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY!![a.toInt()], this.projectedVerticesY!![b.toInt()], this.projectedVerticesY!![c.toInt()], this.projectedVerticesX!![a.toInt()], this.projectedVerticesX!![b.toInt()], this.projectedVerticesX!![c.toInt()], this.projectedVerticesZ!![a.toInt()], this.projectedVerticesZ!![b.toInt()], this.projectedVerticesZ!![c.toInt()], this.projectedVerticesZ2!![a.toInt()], this.projectedVerticesZ2!![b.toInt()], this.projectedVerticesZ2!![c.toInt()], this.uMap!![faceIndex]!![0], this.uMap!![faceIndex]!![1], this.uMap!![faceIndex]!![2], this.vMap!![faceIndex]!![0], this.vMap!![faceIndex]!![1], this.vMap!![faceIndex]!![2], alphaBits or (this.facesColourA!![faceIndex] and 0xffffff), alphaBits or (this.facesColourB!![faceIndex] and 0xffffff), alphaBits or (this.facesColourC!![faceIndex] and 0xffffff), this.threadResource!!.fogColor, 0.0f, 0.0f, 0.0f, this.facesMaterial!![faceIndex].toInt())
             }
         } else {
             if (this.facesAlpha == null) {
@@ -3162,14 +3162,14 @@ open class ModelSM : Model {
 
     fun rotate90DegWithNormals() {
         synchronized(this) {
-            for (currentDepth in 0 until this.maxDepth) {
-                var tmpX = this.verticesX!![currentDepth]
-                this.verticesX!![currentDepth] = this.verticesZ!![currentDepth]
-                this.verticesZ!![currentDepth] = -tmpX
-                if (this.vertexNormals!![currentDepth] != null) {
-                    tmpX = this.vertexNormals!![currentDepth]!!.x
-                    this.vertexNormals!![currentDepth]!!.x = this.vertexNormals!![currentDepth]!!.z
-                    this.vertexNormals!![currentDepth]!!.z = -tmpX
+            for (verticeIndex in 0 until this.maxDepth) {
+                var tmpX = this.verticesX!![verticeIndex]
+                this.verticesX!![verticeIndex] = this.verticesZ!![verticeIndex]
+                this.verticesZ!![verticeIndex] = -tmpX
+                if (this.vertexNormals!![verticeIndex] != null) {
+                    tmpX = this.vertexNormals!![verticeIndex]!!.x
+                    this.vertexNormals!![verticeIndex]!!.x = this.vertexNormals!![verticeIndex]!!.z
+                    this.vertexNormals!![verticeIndex]!!.z = -tmpX
                 }
             }
             if (this.facesNormal != null) {
@@ -3181,10 +3181,10 @@ open class ModelSM : Model {
                     }
                 }
             }
-            for (currentDepth in this.maxDepth until this.numVertices) {
-                val tmpX = this.verticesX!![currentDepth]
-                this.verticesX!![currentDepth] = this.verticesZ!![currentDepth]
-                this.verticesZ!![currentDepth] = -tmpX
+            for (verticeIndex in this.maxDepth until this.numVertices) {
+                val tmpX = this.verticesX!![verticeIndex]
+                this.verticesX!![verticeIndex] = this.verticesZ!![verticeIndex]
+                this.verticesZ!![verticeIndex] = -tmpX
             }
             this.appearanceUpdateStage = 0
             this.boundsUpdated = false
@@ -3232,23 +3232,23 @@ open class ModelSM : Model {
         return result + (hsl and 0xff80)
     }
 
-    override fun offsetSubmesh(matrix44var1: Matrix43, submeshFlags: Int, updateIdentityMatrix: Boolean) {
+    override fun offsetSubmesh(matrix: Matrix43, submeshFlags: Int, updateIdentityMatrix: Boolean) {
         if (this.verticesSubmeshes != null) {
             val resource = this.toolkit.getThreadResource(Thread.currentThread())!!
-            val matrix44var5 = resource.submeshMatrix43
-            matrix44var5.copyFrom(matrix44var1)
+            val submeshMatrix43 = resource.submeshMatrix43
+            submeshMatrix43.copyFrom(matrix)
             if (updateIdentityMatrix) {
-                matrix44var5.updateIdentitiyMatrix()
+                submeshMatrix43.updateIdentitiyMatrix()
             }
             val submeshMatrix = resource.particleMatrix
-            submeshMatrix.fromMatrix(matrix44var5)
-            val matrix = FloatArray(3)
-            for (currentDepth in 0 until this.maxDepth) {
-                if ((submeshFlags and this.verticesSubmeshes!![currentDepth].toInt()) != 0) {
-                    submeshMatrix.scale(this.verticesX!![currentDepth].toFloat(), this.verticesY!![currentDepth].toFloat(), this.verticesZ!![currentDepth].toFloat(), matrix)
-                    this.verticesX!![currentDepth] = matrix[0].toInt()
-                    this.verticesY!![currentDepth] = matrix[1].toInt()
-                    this.verticesZ!![currentDepth] = matrix[2].toInt()
+            submeshMatrix.fromMatrix(submeshMatrix43)
+            val resultBuffer = FloatArray(3)
+            for (verticeIndex in 0 until this.maxDepth) {
+                if ((submeshFlags and this.verticesSubmeshes!![verticeIndex].toInt()) != 0) {
+                    submeshMatrix.scale(this.verticesX!![verticeIndex].toFloat(), this.verticesY!![verticeIndex].toFloat(), this.verticesZ!![verticeIndex].toFloat(), resultBuffer)
+                    this.verticesX!![verticeIndex] = resultBuffer[0].toInt()
+                    this.verticesY!![verticeIndex] = resultBuffer[1].toInt()
+                    this.verticesZ!![verticeIndex] = resultBuffer[2].toInt()
                 }
             }
         }
@@ -3318,10 +3318,10 @@ open class ModelSM : Model {
                             val tileX = x shr currLevel.tileScale
                             val tileZ = z shr currLevel.tileScale
                             if (tileX >= 0 && tileX < currentHeights.size - 1 && tileZ >= 0 && tileZ < currentHeights[0].size - 1) {
-                                val i_23 = currentHeights[tileX][tileZ] * (currLevel.tileUnits - remainderX) + remainderX * currentHeights[tileX + 1][tileZ] shr currLevel.tileScale
-                                val i_24 = (currLevel.tileUnits - remainderX) * currentHeights[tileX][tileZ + 1] + remainderX * currentHeights[tileX + 1][tileZ + 1] shr currLevel.tileScale
-                                val i_25 = i_23 * (currLevel.tileUnits - remainderZ) + i_24 * remainderZ shr currLevel.tileScale
-                                this.verticesY!![v] = i_25 + this.verticesY!![v] - averageHeight
+                                val height1 = currentHeights[tileX][tileZ] * (currLevel.tileUnits - remainderX) + remainderX * currentHeights[tileX + 1][tileZ] shr currLevel.tileScale
+                                val height2 = (currLevel.tileUnits - remainderX) * currentHeights[tileX][tileZ + 1] + remainderX * currentHeights[tileX + 1][tileZ + 1] shr currLevel.tileScale
+                                val interpolatedHeight = height1 * (currLevel.tileUnits - remainderZ) + height2 * remainderZ shr currLevel.tileScale
+                                this.verticesY!![v] = interpolatedHeight + this.verticesY!![v] - averageHeight
                             }
                         }
                     }
@@ -3331,113 +3331,113 @@ open class ModelSM : Model {
                         }
                         val tileMask = currLevel.tileUnits - 1
                         for (v in 0 until this.maxDepth) {
-                            val i_17 = (this.verticesY!![v] shl 16) / this.minY
-                            if (i_17 < contourModifier) {
-                                val i_18 = sceneX + this.verticesX!![v]
-                                val i_19 = sceneY + this.verticesZ!![v]
-                                val i_20 = i_18 and tileMask
-                                val i_21 = i_19 and tileMask
-                                val i_22 = i_18 shr currLevel.tileScale
-                                val i_23 = i_19 shr currLevel.tileScale
-                                val i_24 = currentHeights[i_22][i_23] * (currLevel.tileUnits - i_20) + i_20 * currentHeights[i_22 + 1][i_23] shr currLevel.tileScale
-                                val i_25 = (currLevel.tileUnits - i_20) * currentHeights[i_22][i_23 + 1] + i_20 * currentHeights[i_22 + 1][i_23 + 1] shr currLevel.tileScale
-                                val i_26 = i_24 * (currLevel.tileUnits - i_21) + i_25 * i_21 shr currLevel.tileScale
-                                this.verticesY!![v] += (i_26 - averageHeight) * (contourModifier - i_17) / contourModifier
+                            val heightRatio = (this.verticesY!![v] shl 16) / this.minY
+                            if (heightRatio < contourModifier) {
+                                val x = sceneX + this.verticesX!![v]
+                                val z = sceneY + this.verticesZ!![v]
+                                val remainderX = x and tileMask
+                                val remainderZ = z and tileMask
+                                val tileX = x shr currLevel.tileScale
+                                val tileZ = z shr currLevel.tileScale
+                                val height1 = currentHeights[tileX][tileZ] * (currLevel.tileUnits - remainderX) + remainderX * currentHeights[tileX + 1][tileZ] shr currLevel.tileScale
+                                val height2 = (currLevel.tileUnits - remainderX) * currentHeights[tileX][tileZ + 1] + remainderX * currentHeights[tileX + 1][tileZ + 1] shr currLevel.tileScale
+                                val interpolatedHeight = height1 * (currLevel.tileUnits - remainderZ) + height2 * remainderZ shr currLevel.tileScale
+                                this.verticesY!![v] += (interpolatedHeight - averageHeight) * (contourModifier - heightRatio) / contourModifier
                             }
                         }
                         for (v in this.maxDepth until this.numVertices) {
-                            val i_17 = (this.verticesY!![v] shl 16) / this.minY
-                            if (i_17 < contourModifier) {
-                                val i_18 = sceneX + this.verticesX!![v]
-                                val i_19 = sceneY + this.verticesZ!![v]
-                                val i_20 = i_18 and tileMask
-                                val i_21 = i_19 and tileMask
-                                val i_22 = i_18 shr currLevel.tileScale
-                                val i_23 = i_19 shr currLevel.tileScale
-                                if (i_22 >= 0 && i_22 < currLevel.width - 1 && i_23 >= 0 && i_23 < currLevel.length - 1) {
-                                    val i_24 = currentHeights[i_22][i_23] * (currLevel.tileUnits - i_20) + i_20 * currentHeights[i_22 + 1][i_23] shr currLevel.tileScale
-                                    val i_25 = (currLevel.tileUnits - i_20) * currentHeights[i_22][i_23 + 1] + i_20 * currentHeights[i_22 + 1][i_23 + 1] shr currLevel.tileScale
-                                    val i_26 = i_24 * (currLevel.tileUnits - i_21) + i_25 * i_21 shr currLevel.tileScale
-                                    this.verticesY!![v] += (i_26 - averageHeight) * (contourModifier - i_17) / contourModifier
+                            val heightRatio = (this.verticesY!![v] shl 16) / this.minY
+                            if (heightRatio < contourModifier) {
+                                val x = sceneX + this.verticesX!![v]
+                                val z = sceneY + this.verticesZ!![v]
+                                val remainderX = x and tileMask
+                                val remainderZ = z and tileMask
+                                val tileX = x shr currLevel.tileScale
+                                val tileZ = z shr currLevel.tileScale
+                                if (tileX >= 0 && tileX < currLevel.width - 1 && tileZ >= 0 && tileZ < currLevel.length - 1) {
+                                    val height1 = currentHeights[tileX][tileZ] * (currLevel.tileUnits - remainderX) + remainderX * currentHeights[tileX + 1][tileZ] shr currLevel.tileScale
+                                    val height2 = (currLevel.tileUnits - remainderX) * currentHeights[tileX][tileZ + 1] + remainderX * currentHeights[tileX + 1][tileZ + 1] shr currLevel.tileScale
+                                    val interpolatedHeight = height1 * (currLevel.tileUnits - remainderZ) + height2 * remainderZ shr currLevel.tileScale
+                                    this.verticesY!![v] += (interpolatedHeight - averageHeight) * (contourModifier - heightRatio) / contourModifier
                                 }
                             }
                         }
                     }
                     3 -> {
-                        val iiii = (contourModifier and 0xff) * 4
-                        val iiii2 = (contourModifier shr 8 and 0xff) * 4
-                        val i_17 = (contourModifier shr 16 and 0xff) shl 6
-                        val i_18 = (contourModifier shr 24 and 0xff) shl 6
-                        if (sceneX - (iiii shr 1) < 0 || sceneX + currLevel.tileUnits + (iiii shr 1) >= currLevel.width shl currLevel.tileScale || sceneY - (iiii2 shr 1) < 0 || currLevel.tileUnits + (iiii2 shr 1) + sceneY >= currLevel.length shl currLevel.tileScale) {
+                        val width = (contourModifier and 0xff) * 4
+                        val length = (contourModifier shr 8 and 0xff) * 4
+                        val xan = (contourModifier shr 16 and 0xff) shl 6
+                        val zan = (contourModifier shr 24 and 0xff) shl 6
+                        if (sceneX - (width shr 1) < 0 || sceneX + currLevel.tileUnits + (width shr 1) >= currLevel.width shl currLevel.tileScale || sceneY - (length shr 1) < 0 || currLevel.tileUnits + (length shr 1) + sceneY >= currLevel.length shl currLevel.tileScale) {
                             return
                         }
-                        hillChange(currLevel, sceneX, averageHeight, sceneY, iiii, iiii2, i_17, i_18)
+                        hillChange(currLevel, sceneX, averageHeight, sceneY, width, length, xan, zan)
                     }
                     4 -> {
                         val tileMask = nextLevel!!.tileUnits - 1
                         val sizeY = this.maxY - this.minY
-                        for (i_17 in 0 until this.maxDepth) {
-                            val i_18 = sceneX + this.verticesX!![i_17]
-                            val i_19 = sceneY + this.verticesZ!![i_17]
-                            val i_20 = i_18 and tileMask
-                            val i_21 = i_19 and tileMask
-                            val i_22 = i_18 shr nextLevel.tileScale
-                            val i_23 = i_19 shr nextLevel.tileScale
-                            val i_24 = i_20 * nextHeights!![i_22 + 1][i_23] + nextHeights[i_22][i_23] * (nextLevel.tileUnits - i_20) shr nextLevel.tileScale
-                            val i_25 = (nextLevel.tileUnits - i_20) * nextHeights[i_22][i_23 + 1] + i_20 * nextHeights[i_22 + 1][i_23 + 1] shr nextLevel.tileScale
-                            val i_26 = (nextLevel.tileUnits - i_21) * i_24 + i_25 * i_21 shr nextLevel.tileScale
-                            this.verticesY!![i_17] += sizeY + (i_26 - averageHeight)
+                        for (v in 0 until this.maxDepth) {
+                            val x = sceneX + this.verticesX!![v]
+                            val z = sceneY + this.verticesZ!![v]
+                            val remainderX = x and tileMask
+                            val remainderZ = z and tileMask
+                            val tileX = x shr nextLevel.tileScale
+                            val tileZ = z shr nextLevel.tileScale
+                            val height1 = remainderX * nextHeights!![tileX + 1][tileZ] + nextHeights[tileX][tileZ] * (nextLevel.tileUnits - remainderX) shr nextLevel.tileScale
+                            val height2 = (nextLevel.tileUnits - remainderX) * nextHeights[tileX][tileZ + 1] + remainderX * nextHeights[tileX + 1][tileZ + 1] shr nextLevel.tileScale
+                            val nextAvgHeight = (nextLevel.tileUnits - remainderZ) * height1 + height2 * remainderZ shr nextLevel.tileScale
+                            this.verticesY!![v] += sizeY + (nextAvgHeight - averageHeight)
                         }
-                        for (i_17 in this.maxDepth until this.numVertices) {
-                            val i_18 = sceneX + this.verticesX!![i_17]
-                            val i_19 = sceneY + this.verticesZ!![i_17]
-                            val i_20 = i_18 and tileMask
-                            val i_21 = i_19 and tileMask
-                            val i_22 = i_18 shr nextLevel.tileScale
-                            val i_23 = i_19 shr nextLevel.tileScale
-                            if (i_22 >= 0 && i_22 < nextLevel.width - 1 && i_23 >= 0 && i_23 < nextLevel.length - 1) {
-                                val i_24 = i_20 * nextHeights!![i_22 + 1][i_23] + nextHeights[i_22][i_23] * (nextLevel.tileUnits - i_20) shr nextLevel.tileScale
-                                val i_25 = (nextLevel.tileUnits - i_20) * nextHeights[i_22][i_23 + 1] + i_20 * nextHeights[i_22 + 1][i_23 + 1] shr nextLevel.tileScale
-                                val i_26 = (nextLevel.tileUnits - i_21) * i_24 + i_25 * i_21 shr nextLevel.tileScale
-                                this.verticesY!![i_17] += sizeY + (i_26 - averageHeight)
+                        for (v in this.maxDepth until this.numVertices) {
+                            val x = sceneX + this.verticesX!![v]
+                            val z = sceneY + this.verticesZ!![v]
+                            val remainderX = x and tileMask
+                            val remainderZ = z and tileMask
+                            val tileX = x shr nextLevel.tileScale
+                            val tileZ = z shr nextLevel.tileScale
+                            if (tileX >= 0 && tileX < nextLevel.width - 1 && tileZ >= 0 && tileZ < nextLevel.length - 1) {
+                                val height1 = remainderX * nextHeights!![tileX + 1][tileZ] + nextHeights[tileX][tileZ] * (nextLevel.tileUnits - remainderX) shr nextLevel.tileScale
+                                val height2 = (nextLevel.tileUnits - remainderX) * nextHeights[tileX][tileZ + 1] + remainderX * nextHeights[tileX + 1][tileZ + 1] shr nextLevel.tileScale
+                                val nextAvgHeight = (nextLevel.tileUnits - remainderZ) * height1 + height2 * remainderZ shr nextLevel.tileScale
+                                this.verticesY!![v] += sizeY + (nextAvgHeight - averageHeight)
                             }
                         }
                     }
                     5 -> {
                         val tileMask = nextLevel!!.tileUnits - 1
                         val sizeY = this.maxY - this.minY
-                        for (i_17 in 0 until this.maxDepth) {
-                            val i_18 = sceneX + this.verticesX!![i_17]
-                            val i_19 = sceneY + this.verticesZ!![i_17]
-                            val i_20 = i_18 and tileMask
-                            val i_21 = i_19 and tileMask
-                            val i_22 = i_18 shr currLevel.tileScale
-                            val i_23 = i_19 shr currLevel.tileScale
-                            var i_24 = currentHeights[i_22][i_23] * (currLevel.tileUnits - i_20) + i_20 * currentHeights[i_22 + 1][i_23] shr currLevel.tileScale
-                            var i_25 = (currLevel.tileUnits - i_20) * currentHeights[i_22][i_23 + 1] + i_20 * currentHeights[i_22 + 1][i_23 + 1] shr currLevel.tileScale
-                            val i_26 = i_24 * (currLevel.tileUnits - i_21) + i_25 * i_21 shr currLevel.tileScale
-                            i_24 = i_20 * nextHeights!![i_22 + 1][i_23] + nextHeights[i_22][i_23] * (nextLevel.tileUnits - i_20) shr nextLevel.tileScale
-                            i_25 = (nextLevel.tileUnits - i_20) * nextHeights[i_22][i_23 + 1] + i_20 * nextHeights[i_22 + 1][i_23 + 1] shr nextLevel.tileScale
-                            val i_27 = (nextLevel.tileUnits - i_21) * i_24 + i_25 * i_21 shr nextLevel.tileScale
-                            val i_28 = i_26 - i_27 - contourModifier
-                            this.verticesY!![i_17] = (i_28 * ((this.verticesY!![i_17] shl 8) / sizeY) shr 8) - (averageHeight - i_26)
+                        for (v in 0 until this.maxDepth) {
+                            val x = sceneX + this.verticesX!![v]
+                            val z = sceneY + this.verticesZ!![v]
+                            val remainderX = x and tileMask
+                            val remainderZ = z and tileMask
+                            val tileX = x shr currLevel.tileScale
+                            val tileZ = z shr currLevel.tileScale
+                            var height1 = currentHeights[tileX][tileZ] * (currLevel.tileUnits - remainderX) + remainderX * currentHeights[tileX + 1][tileZ] shr currLevel.tileScale
+                            var height2 = (currLevel.tileUnits - remainderX) * currentHeights[tileX][tileZ + 1] + remainderX * currentHeights[tileX + 1][tileZ + 1] shr currLevel.tileScale
+                            val currentAvgHeight = height1 * (currLevel.tileUnits - remainderZ) + height2 * remainderZ shr currLevel.tileScale
+                            height1 = remainderX * nextHeights!![tileX + 1][tileZ] + nextHeights[tileX][tileZ] * (nextLevel.tileUnits - remainderX) shr nextLevel.tileScale
+                            height2 = (nextLevel.tileUnits - remainderX) * nextHeights[tileX][tileZ + 1] + remainderX * nextHeights[tileX + 1][tileZ + 1] shr nextLevel.tileScale
+                            val nextAvgHeight = (nextLevel.tileUnits - remainderZ) * height1 + height2 * remainderZ shr nextLevel.tileScale
+                            val delta = currentAvgHeight - nextAvgHeight - contourModifier
+                            this.verticesY!![v] = (delta * ((this.verticesY!![v] shl 8) / sizeY) shr 8) - (averageHeight - currentAvgHeight)
                         }
-                        for (i_17 in this.maxDepth until this.numVertices) {
-                            val i_18 = sceneX + this.verticesX!![i_17]
-                            val i_19 = sceneY + this.verticesZ!![i_17]
-                            val i_20 = i_18 and tileMask
-                            val i_21 = i_19 and tileMask
-                            val i_22 = i_18 shr currLevel.tileScale
-                            val i_23 = i_19 shr currLevel.tileScale
-                            if (i_22 >= 0 && i_22 < currLevel.width - 1 && i_22 < nextLevel.width - 1 && i_23 >= 0 && i_23 < currLevel.length - 1 && i_23 < nextLevel.length - 1) {
-                                var i_24 = currentHeights[i_22][i_23] * (currLevel.tileUnits - i_20) + i_20 * currentHeights[i_22 + 1][i_23] shr currLevel.tileScale
-                                var i_25 = (currLevel.tileUnits - i_20) * currentHeights[i_22][i_23 + 1] + i_20 * currentHeights[i_22 + 1][i_23 + 1] shr currLevel.tileScale
-                                val i_26 = i_24 * (currLevel.tileUnits - i_21) + i_25 * i_21 shr currLevel.tileScale
-                                i_24 = i_20 * nextHeights!![i_22 + 1][i_23] + nextHeights[i_22][i_23] * (nextLevel.tileUnits - i_20) shr nextLevel.tileScale
-                                i_25 = (nextLevel.tileUnits - i_20) * nextHeights[i_22][i_23 + 1] + i_20 * nextHeights[i_22 + 1][i_23 + 1] shr nextLevel.tileScale
-                                val i_27 = (nextLevel.tileUnits - i_21) * i_24 + i_25 * i_21 shr nextLevel.tileScale
-                                val i_28 = i_26 - i_27 - contourModifier
-                                this.verticesY!![i_17] = (i_28 * ((this.verticesY!![i_17] shl 8) / sizeY) shr 8) - (averageHeight - i_26)
+                        for (v in this.maxDepth until this.numVertices) {
+                            val x = sceneX + this.verticesX!![v]
+                            val z = sceneY + this.verticesZ!![v]
+                            val remainderX = x and tileMask
+                            val remainderZ = z and tileMask
+                            val tileX = x shr currLevel.tileScale
+                            val tileZ = z shr currLevel.tileScale
+                            if (tileX >= 0 && tileX < currLevel.width - 1 && tileX < nextLevel.width - 1 && tileZ >= 0 && tileZ < currLevel.length - 1 && tileZ < nextLevel.length - 1) {
+                                var height1 = currentHeights[tileX][tileZ] * (currLevel.tileUnits - remainderX) + remainderX * currentHeights[tileX + 1][tileZ] shr currLevel.tileScale
+                                var height2 = (currLevel.tileUnits - remainderX) * currentHeights[tileX][tileZ + 1] + remainderX * currentHeights[tileX + 1][tileZ + 1] shr currLevel.tileScale
+                                val currentAvgHeight = height1 * (currLevel.tileUnits - remainderZ) + height2 * remainderZ shr currLevel.tileScale
+                                height1 = remainderX * nextHeights!![tileX + 1][tileZ] + nextHeights[tileX][tileZ] * (nextLevel.tileUnits - remainderX) shr nextLevel.tileScale
+                                height2 = (nextLevel.tileUnits - remainderX) * nextHeights[tileX][tileZ + 1] + remainderX * nextHeights[tileX + 1][tileZ + 1] shr nextLevel.tileScale
+                                val nextAvgHeight = (nextLevel.tileUnits - remainderZ) * height1 + height2 * remainderZ shr nextLevel.tileScale
+                                val delta = currentAvgHeight - nextAvgHeight - contourModifier
+                                this.verticesY!![v] = (delta * ((this.verticesY!![v] shl 8) / sizeY) shr 8) - (averageHeight - currentAvgHeight)
                             }
                         }
                     }
@@ -3447,7 +3447,7 @@ open class ModelSM : Model {
         }
     }
 
-    fun translateToScreen(colorWrite: Boolean, depthWrite: Boolean, transparent: Boolean, faceIndex: Int, offscreen: Boolean, reduce: Boolean) {
+    fun translateToScreen(colorWrite: Boolean, depthWrite: Boolean, transparent: Boolean, faceIndex: Int, offscreen: Boolean, allowReduce: Boolean) {
         if (this.facesColourC!![faceIndex] != -2) {
             val a = this.facesA!![faceIndex]
             val b = this.facesB!![faceIndex]
@@ -3461,16 +3461,16 @@ open class ModelSM : Model {
                 val yC = this.projectedVerticesY!![c.toInt()]
                 if (this.billboardOnFace!![faceIndex] != -1 || (xA - xB) * (yC - yB) - (yA - yB) * (xC - xB) > 0.0f) {
                     this.rasterizer!!.clipEdges = xA < 0.0f || xB < 0.0f || xC < 0.0f || xA > this.threadResource!!.clipWidth || xB > this.threadResource!!.clipWidth || xC > this.threadResource!!.clipWidth
-                    if (reduce) {
-                        val billboard = this.billboardOnFace!![faceIndex]
-                        if (billboard == -1 || !this.billboardEffects!![billboard]!!.hasUid) {
+                    if (allowReduce) {
+                        val billboardIndex = this.billboardOnFace!![faceIndex]
+                        if (billboardIndex == -1 || !this.billboardEffects!![billboardIndex]!!.hasUid) {
                             reduce(colorWrite, depthWrite, transparent, faceIndex)
                         }
                     } else {
-                        val billboard = this.billboardOnFace!![faceIndex]
-                        if (billboard != -1) {
-                            val effect = this.billboardEffects!![billboard]!!
-                            val surface = this.billboardSurfaces!![billboard]!!
+                        val billboardIndex = this.billboardOnFace!![faceIndex]
+                        if (billboardIndex != -1) {
+                            val effect = this.billboardEffects!![billboardIndex]!!
+                            val surface = this.billboardSurfaces!![billboardIndex]!!
                             if (!effect.hasUid) {
                                 renderFace(colorWrite, depthWrite, transparent, faceIndex)
                             }
@@ -3578,8 +3578,8 @@ open class ModelSM : Model {
 
     override fun areTexturesCached(): Boolean {
         if (this.facesMaterial != null) {
-            for (materialIndex in this.facesMaterial!!.indices) {
-                if (this.facesMaterial!![materialIndex].toInt() != -1 && !this.toolkit.isMaterialCached(this.facesMaterial!![materialIndex].toInt())) {
+            for (faceIndex in this.facesMaterial!!.indices) {
+                if (this.facesMaterial!![faceIndex].toInt() != -1 && !this.toolkit.isMaterialCached(this.facesMaterial!![faceIndex].toInt())) {
                     return false
                 }
             }

@@ -18,9 +18,9 @@ class OpenGlShader(
         @JvmField val FETCHED_SHADER_PARAMETERS = IntArray(2)
 
         @JvmStatic
-        fun createShader(toolkit: OpenGlToolkit, shaderType: Int, string_2: String): OpenGlShader? {
+        fun createShader(toolkit: OpenGlToolkit, shaderType: Int, source: String): OpenGlShader? {
             val shaderHandle = OpenGL.glCreateShader(shaderType)
-            OpenGL.glShaderSource(shaderHandle, string_2)
+            OpenGL.glShaderSource(shaderHandle, source)
             OpenGL.glCompileShader(shaderHandle)
             OpenGL.glGetShaderiv(shaderHandle, 35713, FETCHED_SHADER_PARAMETERS, 0)
             if (FETCHED_SHADER_PARAMETERS[0] == 0) {

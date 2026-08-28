@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -161,13 +161,13 @@ object DetailCapabilityOps {
             ClientScriptOpCode.GETENTITYOVERHEADIF -> getEntityOverHeadIf(exec)
             ClientScriptOpCode.GET_ENTITY_SAY -> getEntitySay(exec)
             ClientScriptOpCode.GET_DISPLAYNAME_WITHEXTRAS -> getDisplayNameWithExtras(exec)
-            ClientScriptOpCode.CC_LOADENTITYMODEL -> method5814(exec)
+            ClientScriptOpCode.instr6905 -> ccLoadEntityModel(exec)
             ClientScriptOpCode.IF_CREATE -> ifCreate(exec)
             ClientScriptOpCode.GET_NPC_NAME -> getNpcName(exec)
             ClientScriptOpCode.GET_NPC_VISLEVEL -> getNpcVIsLevel(exec)
             ClientScriptOpCode.GET_ENTITY_SCREEN_POSITION -> pushEntityHintPosition(exec)
             ClientScriptOpCode.IF_GET_GAMESCREEN -> ifGetGameScreen(exec)
-            ClientScriptOpCode.GETENTITYICONHEIGHT -> method2867(exec)
+            ClientScriptOpCode.GETENTITYICONHEIGHT -> getEntityIconHeight(exec)
             ClientScriptOpCode.GET_NPC_STAT -> getNpcStat(exec)
             ClientScriptOpCode.IS_NPC_ACTIVE -> isNpcActive(exec)
             ClientScriptOpCode.IS_NPC_VISIBLE -> isNpcVisible(exec)
@@ -188,7 +188,7 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun method2867(executor: CS2Executor) {
+    fun getEntityIconHeight(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = executor.currentEntity!!.getIconHeight()
     }
 
@@ -205,11 +205,11 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun getEntitySay(executor: CS2Executor) {
-        val class1632: HintDetails? = executor.currentEntity!!.getHintDetails()
-        if (class1632 == null) {
+        val hintDetails: HintDetails? = executor.currentEntity!!.getHintDetails()
+        if (hintDetails == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = class1632.getText()
+            executor.stringStack[++executor.stringStackPtr - 1] = hintDetails.getText()
         }
     }
 
@@ -256,10 +256,10 @@ object DetailCapabilityOps {
     @JvmStatic
     fun ifCreate(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        CS2SharedOps.method2738(executor.currentEntity!!.inter!!, i_2 and 0xffff, i_3, i_4, executor.hasIntOperand, executor)
+        val idHash = executor.intStack[executor.intStackPtr]
+        val componentTypeId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        CS2SharedOps.createComponent(executor.currentEntity!!.inter!!, idHash and 0xffff, componentTypeId, slotId, executor.hasIntOperand, executor)
     }
 
     @JvmStatic
@@ -275,12 +275,12 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun bugReport(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
+        val bugType = executor.intStack[--executor.intStackPtr]
         executor.stringStackPtr -= 2
-        val string_3: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_4: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
-        if (string_3!!.length <= 500 && string_4!!.length <= 500) {
-            PacketEncoder.reportBug(value, string_3!!, string_4!!)
+        val title: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val description: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        if (title!!.length <= 500 && description!!.length <= 500) {
+            PacketEncoder.reportBug(bugType, title!!, description!!)
         }
     }
 
@@ -291,28 +291,28 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun isNpcActive(executor: CS2Executor) {
-        val npc2: NpcEntity? = executor.currentEntity as NpcEntity
-        var flag = false
-        var npcdefinitions4: NPCType? = npc2!!.definitions
-        if (npcdefinitions4!!.alternativeIds != null) {
-            npcdefinitions4 = npcdefinitions4!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
+        val npc: NpcEntity? = executor.currentEntity as NpcEntity
+        var visible = false
+        var npcType: NPCType? = npc!!.definitions
+        if (npcType!!.alternativeIds != null) {
+            npcType = npcType!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
         }
-        if (npcdefinitions4 != null) {
-            flag = npcdefinitions4!!.visible
+        if (npcType != null) {
+            visible = npcType!!.visible
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (visible) 1  else 0
     }
 
     @JvmStatic
     fun getNpcVIsLevel(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
+        val componentId = executor.intStack[--executor.intStackPtr]
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {
             target = executor.hookedInterface2
         } else {
             target = executor.hookedInterface1
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (target!!.load(executor.currentEntity!!.inter, value)) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (target!!.load(executor.currentEntity!!.inter, componentId)) 1 else 0
     }
 
     @JvmStatic
@@ -342,12 +342,12 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun getNpcStat(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val npc3: NpcEntity? = executor.currentEntity as NpcEntity
-        val i_4 = npc3!!.getStat(i_2)
-        val i_5 = npc3!!.getCurrentStat(i_2)
-        executor.intStack[++executor.intStackPtr - 1] = i_4
-        executor.intStack[++executor.intStackPtr - 1] = i_5
+        val statIndex = executor.intStack[--executor.intStackPtr]
+        val npc: NpcEntity? = executor.currentEntity as NpcEntity
+        val maxStat = npc!!.getStat(statIndex)
+        val currentStat = npc!!.getCurrentStat(statIndex)
+        executor.intStack[++executor.intStackPtr - 1] = maxStat
+        executor.intStack[++executor.intStackPtr - 1] = currentStat
     }
 
     @JvmStatic
@@ -393,17 +393,17 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun method5814(executor: CS2Executor) {
+    fun ccLoadEntityModel(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
+        val componentId = executor.intStack[executor.intStackPtr]
+        val unusedArg = executor.intStack[executor.intStackPtr + 1]
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {
             target = executor.hookedInterface2
         } else {
             target = executor.hookedInterface1
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (target!!.load(executor.currentEntity!!.inter, i_2)) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (target!!.load(executor.currentEntity!!.inter, componentId)) 1 else 0
     }
 
     @JvmStatic
@@ -477,21 +477,21 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun getNpcName(executor: CS2Executor) {
-        val npc2: NpcEntity? = executor.currentEntity as NpcEntity
-        var text: String? = npc2!!.modifiedName
-        var npcdefinitions4: NPCType? = npc2!!.definitions
-        if (npcdefinitions4!!.alternativeIds != null) {
-            npcdefinitions4 = npcdefinitions4!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
-            if (npcdefinitions4 == null) {
-                text = ""
+        val npc: NpcEntity? = executor.currentEntity as NpcEntity
+        var name: String? = npc!!.modifiedName
+        var npcType: NPCType? = npc!!.definitions
+        if (npcType!!.alternativeIds != null) {
+            npcType = npcType!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
+            if (npcType == null) {
+                name = ""
             } else {
-                text = npcdefinitions4!!.name
+                name = npcType!!.name
             }
         }
-        if (text == null) {
-            text = ""
+        if (name == null) {
+            name = ""
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = text
+        executor.stringStack[++executor.stringStackPtr - 1] = name
     }
 
     @JvmStatic
@@ -502,12 +502,12 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun isNpcVisible(executor: CS2Executor) {
-        val npc2: NpcEntity? = executor.currentEntity as NpcEntity
-        var npcdefinitions3: NPCType? = npc2!!.definitions
-        if (npcdefinitions3!!.alternativeIds != null) {
-            npcdefinitions3 = npcdefinitions3!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
+        val npc: NpcEntity? = executor.currentEntity as NpcEntity
+        var npcType: NPCType? = npc!!.definitions
+        if (npcType!!.alternativeIds != null) {
+            npcType = npcType!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (npcdefinitions3 != null) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (npcType != null) 1 else 0
     }
 
     @JvmStatic
@@ -563,31 +563,31 @@ object DetailCapabilityOps {
 
     @JvmStatic
     fun arraySort(executor: CS2Executor) {
-        val i_2 = executor.intStack[executor.intStackPtr - 3]
-        val i_3 = executor.intStack[executor.intStackPtr - 2]
-        val i_4 = executor.intStack[executor.intStackPtr - 1]
+        val count = executor.intStack[executor.intStackPtr - 3]
+        val keyArrayId = executor.intStack[executor.intStackPtr - 2]
+        val valueArrayId = executor.intStack[executor.intStackPtr - 1]
         executor.intStackPtr -= 3
-        if (i_2 > executor.globalArrayLengths[i_3]) {
+        if (count > executor.globalArrayLengths[keyArrayId]) {
             throw RuntimeException()
-        } else if (i_2 > executor.globalArrayLengths[i_4]) {
+        } else if (count > executor.globalArrayLengths[valueArrayId]) {
             throw RuntimeException()
-        } else if (i_3 == i_4) {
+        } else if (keyArrayId == valueArrayId) {
             throw RuntimeException()
         } else {
-            ArrayUtils.quicksort(executor.globalArrays[i_3], executor.globalArrays[i_4], 0, i_2 - 1)
+            ArrayUtils.quicksort(executor.globalArrays[keyArrayId], executor.globalArrays[valueArrayId], 0, count - 1)
         }
     }
 
     @JvmStatic
-    fun getBoundingBox(transform: SceneGraphEntity, cs2executor: CS2Executor) {
-        var flag = false
+    fun getBoundingBox(sceneObject: SceneGraphEntity, executor: CS2Executor) {
+        var found = false
         var minX = 0
         var minY = 0
         var maxX = 0
         var maxY = 0
-        if (transform!!.boundingBoxPolygons != null) {
-            for (index in 0 until transform!!.boundingBoxPolygons!!.size) {
-                val box: BoundingBoxPolygon? = transform!!.boundingBoxPolygons!![index]
+        if (sceneObject!!.boundingBoxPolygons != null) {
+            for (index in 0 until sceneObject!!.boundingBoxPolygons!!.size) {
+                val box: BoundingBoxPolygon? = sceneObject!!.boundingBoxPolygons!![index]
                 if (box!!.positionCalculated) {
                     var left: Int = 0
                     var right: Int = 0
@@ -607,27 +607,27 @@ object DetailCapabilityOps {
                         bottom = box!!.bottom - box!!.size
                         top = box!!.top + box!!.size
                     }
-                    if (!flag || left < minX) {
+                    if (!found || left < minX) {
                         minX = left
                     }
-                    if (!flag || bottom < minY) {
+                    if (!found || bottom < minY) {
                         minY = bottom
                     }
-                    if (!flag || right > maxX) {
+                    if (!found || right > maxX) {
                         maxX = right
                     }
-                    if (!flag || top > maxY) {
+                    if (!found || top > maxY) {
                         maxY = top
                     }
-                    flag = true
+                    found = true
                 }
             }
         }
-        cs2executor.intStack[++cs2executor.intStackPtr - 1] = if (flag) 1  else 0
-        cs2executor.intStack[++cs2executor.intStackPtr - 1] = minX
-        cs2executor.intStack[++cs2executor.intStackPtr - 1] = minY
-        cs2executor.intStack[++cs2executor.intStackPtr - 1] = maxX
-        cs2executor.intStack[++cs2executor.intStackPtr - 1] = maxY
+        executor.intStack[++executor.intStackPtr - 1] = if (found) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = minX
+        executor.intStack[++executor.intStackPtr - 1] = minY
+        executor.intStack[++executor.intStackPtr - 1] = maxX
+        executor.intStack[++executor.intStackPtr - 1] = maxY
     }
 
 }

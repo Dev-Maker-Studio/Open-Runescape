@@ -46,8 +46,8 @@ class GroundMaterialGL(
         texture2d = GlElementsArrayBuffer(toolkit, null, 1)
     }
 
-    fun appendToNativeStream(i_1: Int) {
-        nativeStream!!.setOffset(i_1 * 4 + 3)
+    fun appendToNativeStream(vertexIndex: Int) {
+        nativeStream!!.setOffset(vertexIndex * 4 + 3)
         nativeStream!!.putByte(-1)
     }
 
@@ -55,23 +55,23 @@ class GroundMaterialGL(
         groundFunctionMask[y * ground.width + x] = groundFunctionMask[y * ground.width + x] or (1 shl faceCount)
     }
 
-    fun writeVertexColor(i_1: Int, color: Int, lightness: Int, colorMultiplier: Float) {
+    fun writeVertexColor(vertexIndex: Int, color: Int, lightness: Int, colorMultiplier: Float) {
         var color = color
         if (materialId != -1) {
             val material = toolkit.materialProvider!!.getMaterial(materialId)
             val contrast = material.alpha.toInt() and 0xff
             if (contrast != 0 && material.effectId.toInt() != 4) {
-                val i_7: Int
+                val lightColor: Int
                 if (lightness < 0) {
-                    i_7 = 0
+                    lightColor = 0
                 } else if (lightness > 127) {
-                    i_7 = 16777215
+                    lightColor = 16777215
                 } else {
-                    i_7 = lightness * 131586
+                    lightColor = lightness * 131586
                 }
 
                 val blendContrast = 256 - contrast
-                color = ((i_7 and 0xff00ff) * contrast + blendContrast * (color and 0xff00ff) and -16711936) + (blendContrast * (color and 0xff00) + contrast * (i_7 and 0xff00) and 0xff0000) shr 8
+                color = ((lightColor and 0xff00ff) * contrast + blendContrast * (color and 0xff00ff) and -16711936) + (blendContrast * (color and 0xff00) + contrast * (lightColor and 0xff00) and 0xff0000) shr 8
             }
 
             var brightness = material.brightness.toInt() and 0xff
@@ -119,19 +119,19 @@ class GroundMaterialGL(
             }
             color = red shl 16 or (green shl 8) or blue
         }
-        nativeStream!!.setOffset(i_1 * 4)
+        nativeStream!!.setOffset(vertexIndex * 4)
         nativeStream!!.putByte(color shr 16)
         nativeStream!!.putByte(color shr 8)
         nativeStream!!.putByte(color)
     }
 
-    fun drawMaterialTriangles(ints_1: IntArray, i_2: Int) {
+    fun drawMaterialTriangles(tileIndices: IntArray, tileCount: Int) {
         // Under the modern toolkit the modern path is the ONLY path — no legacy
         // fixed-function fallback. If the modern pipeline cannot draw (renderer not
         // initialized, no vertex snapshot), the material draws NOTHING and the miss
         // is counted in the [ModernDiag] gate counters (ground=drawn/noPipe/noSnap).
         if (toolkit is ModernGLToolkit) {
-            renderGroundMaterialModern(ints_1, i_2)
+            renderGroundMaterialModern(tileIndices, tileCount)
             return
         }
 
@@ -140,10 +140,10 @@ class GroundMaterialGL(
         val textureBuffer = toolkit.textureBuffer
         textureBuffer.currentPosition = 0
         if (toolkit.bigEndianess) {
-            for (i_5 in 0 until i_2) {
-                val i_6 = ints_1[i_5]
-                val materialsByTriangle = ground.materialIndices[i_6]
-                val functionMask = groundFunctionMask[i_6]
+            for (i in 0 until tileCount) {
+                val tileIndex = tileIndices[i]
+                val materialsByTriangle = ground.materialIndices[tileIndex]
+                val functionMask = groundFunctionMask[tileIndex]
                 if (functionMask != 0 && materialsByTriangle != null) {
                     var loops = 0
                     var verticeCount = 0
@@ -162,10 +162,10 @@ class GroundMaterialGL(
                 }
             }
         } else {
-            for (i_5 in 0 until i_2) {
-                val i_6 = ints_1[i_5]
-                val materialsByTriangle = ground.materialIndices[i_6]
-                val functionMask = groundFunctionMask[i_6]
+            for (i in 0 until tileCount) {
+                val tileIndex = tileIndices[i]
+                val materialsByTriangle = ground.materialIndices[tileIndex]
+                val functionMask = groundFunctionMask[tileIndex]
                 if (functionMask != 0 && materialsByTriangle != null) {
                     var loops = 0
                     var verticeCount = 0
@@ -228,11 +228,11 @@ class GroundMaterialGL(
 
     fun createDataArrayBuffer(totalTiles: Int) {
         nativeStream!!.flush()
-        val pointer = toolkit.createDataArrayBuffer(4, nativeHeapBuffer!!, totalTiles * 4)
-        if (pointer is GlVboArrayBuffer) {
+        val arrayBuffer = toolkit.createDataArrayBuffer(4, nativeHeapBuffer!!, totalTiles * 4)
+        if (arrayBuffer is GlVboArrayBuffer) {
             nativeHeapBuffer!!.deallocateBuffer()
         }
-        arrayBufferPointer = OpenGlArrayDrawBuffer(pointer, GL_UNSIGNED_BYTE, 4, 0)
+        arrayBufferPointer = OpenGlArrayDrawBuffer(arrayBuffer, GL_UNSIGNED_BYTE, 4, 0)
         nativeHeapBuffer = null
         nativeStream = null
     }

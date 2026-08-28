@@ -333,22 +333,22 @@ abstract class AreaSoundStream : PcmStream() {
         } else {
             if (this.loopsRemaining > 0) {
                 if (this.enableLoop) {
-                    label123@ {
+                    run pingPongLoop@ {
                         if (this.sampleRate < 0) {
                             if (this.playbackPosition >= loopStart) {
-                                return@label123
+                                return@pingPongLoop
                             }
 
                             this.playbackPosition = loopStart + loopStart - 1 - this.playbackPosition
                             this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
                             if (--this.loopsRemaining == 0) {
-                                return@label123
+                                return@pingPongLoop
                             }
                         }
 
                         do {
                             if (this.playbackPosition < loopEnd) {
-                                return@label123
+                                return@pingPongLoop
                             }
 
                             this.playbackPosition = loopEnd + loopEnd - 1 - this.playbackPosition
@@ -358,7 +358,7 @@ abstract class AreaSoundStream : PcmStream() {
                             }
 
                             if (this.playbackPosition >= loopStart) {
-                                return@label123
+                                return@pingPongLoop
                             }
 
                             this.playbackPosition = loopStart + loopStart - 1 - this.playbackPosition
@@ -449,7 +449,7 @@ abstract class AreaSoundStream : PcmStream() {
         setVolumeAndPan(getTargetVolume(), pan)
     }
 
-    override abstract fun fill(var1: IntArray, var2: Int, var3: Int)
+    override abstract fun fill(mixBuffer: IntArray, offset: Int, length: Int)
 
     override fun getNextStream(): PcmStream? {
         return null

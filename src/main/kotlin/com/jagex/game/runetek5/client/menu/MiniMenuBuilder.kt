@@ -191,42 +191,42 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     }
 
     val regionBase = Resource.mapRegion?.getBaseCoordinates() ?: return
-    val matrix445 = toolkit.getScratchMatrix()
+    val inverseViewProjection = toolkit.getScratchMatrix()
     toolkit.setModelMatrix(cameraMatrix)
     toolkit.setSunPosition(Camera.sunMatrix)
     toolkit.setClipping(MiniMenu.viewportX, MiniMenu.viewportY, MiniMenu.viewportX + Camera.gameAreaWidth, Camera.gameAreaHeight + MiniMenu.viewportY)
     toolkit.setDrawableArea(MiniMenu.viewportX, MiniMenu.viewportY, Camera.gameAreaWidth, Camera.gameAreaHeight)
-    matrix445.fromMatrix(Camera.sunMatrix)
-    matrix445.multiplyBy(cameraMatrix)
-    matrix445.invert()
+    inverseViewProjection.fromMatrix(Camera.sunMatrix)
+    inverseViewProjection.multiplyBy(cameraMatrix)
+    inverseViewProjection.invert()
 
-    val i_3 = mouseX - MiniMenu.viewportX
-    val i_4 = mouseY - MiniMenu.viewportY
+    val viewportMouseX = mouseX - MiniMenu.viewportX
+    val viewportMouseY = mouseY - MiniMenu.viewportY
 
     if (Resource.mapRegion!!.getScene() != null && (!Client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
         var x = -1
         var y = -1
 
-        val f_10 = 2.0f * i_3 / Camera.gameAreaWidth - 1.0f
-        val f_11 = 2.0f * i_4 / Camera.gameAreaHeight - 1.0f
+        val ndcX = 2.0f * viewportMouseX / Camera.gameAreaWidth - 1.0f
+        val ndcY = 2.0f * viewportMouseY / Camera.gameAreaHeight - 1.0f
 
-        matrix445.scale(f_10, f_11, -1.0f, StaticMethods.unprojectionBuffer)
-        val f_12 = StaticMethods.unprojectionBuffer[0] / StaticMethods.unprojectionBuffer[3]
-        val f_13 = StaticMethods.unprojectionBuffer[1] / StaticMethods.unprojectionBuffer[3]
-        val f_14 = StaticMethods.unprojectionBuffer[2] / StaticMethods.unprojectionBuffer[3]
+        inverseViewProjection.scale(ndcX, ndcY, -1.0f, StaticMethods.unprojectionBuffer)
+        val nearX = StaticMethods.unprojectionBuffer[0] / StaticMethods.unprojectionBuffer[3]
+        val nearY = StaticMethods.unprojectionBuffer[1] / StaticMethods.unprojectionBuffer[3]
+        val nearZ = StaticMethods.unprojectionBuffer[2] / StaticMethods.unprojectionBuffer[3]
 
-        matrix445.scale(f_10, f_11, 1.0f, StaticMethods.unprojectionBuffer)
-        val f_15 = StaticMethods.unprojectionBuffer[0] / StaticMethods.unprojectionBuffer[3]
-        val f_16 = StaticMethods.unprojectionBuffer[1] / StaticMethods.unprojectionBuffer[3]
-        val f_17 = StaticMethods.unprojectionBuffer[2] / StaticMethods.unprojectionBuffer[3]
+        inverseViewProjection.scale(ndcX, ndcY, 1.0f, StaticMethods.unprojectionBuffer)
+        val farX = StaticMethods.unprojectionBuffer[0] / StaticMethods.unprojectionBuffer[3]
+        val farY = StaticMethods.unprojectionBuffer[1] / StaticMethods.unprojectionBuffer[3]
+        val farZ = StaticMethods.unprojectionBuffer[2] / StaticMethods.unprojectionBuffer[3]
 
-        val f_18 = MiniMenu.raycastTerrainIntersection(f_12, f_13, f_14, f_15, f_16, f_17, 4)
+        val rayT = MiniMenu.raycastTerrainIntersection(nearX, nearY, nearZ, farX, farY, farZ, 4)
 
-        if (f_18 > 0.0f) {
-            val f_19 = f_15 - f_12
-            val f_20 = f_17 - f_14
-            val posX = (f_19 * f_18 + f_12).toInt()
-            val posY = (f_18 * f_20 + f_14).toInt()
+        if (rayT > 0.0f) {
+            val rayDx = farX - nearX
+            val rayDz = farZ - nearZ
+            val posX = (rayDx * rayT + nearX).toInt()
+            val posY = (rayT * rayDz + nearZ).toInt()
             x = (posX + (PlayerUpdate.MY_PLAYER!!.getSize() - 1 shl 8)) shr 9
             y = (posY + (PlayerUpdate.MY_PLAYER!!.getSize() - 1 shl 8)) shr 9
             val plane = PlayerUpdate.MY_PLAYER!!.plane
@@ -392,14 +392,14 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                     val npc = npcNode.value as? NpcEntity
                                     val npcDef2 = npc?.definitions
                                     if (npc != null && npcDef2 != null && npc.clientCycles != Client.cycles && entity != npc && npc.isHidden) {
-                                        val vector337 = npc.getAbsolutePosition()?.coords ?: continue
-                                        val i_12 = vector337.x.toInt() - (npcDef2.size - 1 shl 8)
-                                        val i_13 = vector337.z.toInt() - (npcDef2.size - 1 shl 8)
+                                        val npcAbs = npc.getAbsolutePosition()?.coords ?: continue
+                                        val npcStartX = npcAbs.x.toInt() - (npcDef2.size - 1 shl 8)
+                                        val npcStartZ = npcAbs.z.toInt() - (npcDef2.size - 1 shl 8)
 
-                                        if (i_12 >= npcAbsStartX &&
-                                            npcDef2.size <= entityDef.size - (i_12 - npcAbsStartX shr 9) &&
-                                            i_13 >= npcAbsStartZ &&
-                                            npcDef2.size <= entityDef.size - (i_13 - npcAbsStartZ shr 9)) {
+                                        if (npcStartX >= npcAbsStartX &&
+                                            npcDef2.size <= entityDef.size - (npcStartX - npcAbsStartX shr 9) &&
+                                            npcStartZ >= npcAbsStartZ &&
+                                            npcDef2.size <= entityDef.size - (npcStartZ - npcAbsStartZ shr 9)) {
                                             npcHovered(npc, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
                                             npc.clientCycles = Client.cycles
                                         }
@@ -534,12 +534,12 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                     }
 
                     if (Client.interfaceSelectionActive && entity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
-                        val attributedefault62 = if (MiniMenu.USE_INTERFACE_ID != -1) {
+                        val param = if (MiniMenu.USE_INTERFACE_ID != -1) {
                             TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
                         } else null
 
                         if ((USE_OPTIONS_FLAGS and 0x4) != 0 &&
-                            (attributedefault62 == null || loctype.getParamsInt(MiniMenu.USE_INTERFACE_ID, attributedefault62.defaultInt) != attributedefault62.defaultInt)) {
+                            (param == null || loctype.getParamsInt(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
                             MiniMenu.addEntry(
                                 Client.useOnType!!,
                                 "${Client.useOnTarget} -> ${TextUtils.setTextColor(65535)}${loctype.name}",
@@ -708,7 +708,7 @@ fun interfaceComponentHovered(component: Component) {
 }
 
 @JvmName("npcHovered")
-fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
+fun npcHovered(npc: NpcEntity, onDifferentPlane: Boolean) {
     if (MiniMenu.entryCount >= 412) return
 
     var npcType: NPCType? = npc.definitions
@@ -729,13 +729,13 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
             name = "$name${TextUtils.calculateCombatBasedColor(npc.modifiedCbLvl, PlayerUpdate.MY_PLAYER!!.combatLevel)} ($level${npc.modifiedCbLvl})"
         }
 
-        if (Client.interfaceSelectionActive && !samePlaneAsPlayer) {
-            val paramtype = if (MiniMenu.USE_INTERFACE_ID != -1) {
+        if (Client.interfaceSelectionActive && !onDifferentPlane) {
+            val param = if (MiniMenu.USE_INTERFACE_ID != -1) {
                 TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
             } else null
 
             if ((USE_OPTIONS_FLAGS and 0x2) != 0 &&
-                (paramtype == null || npcType.getCs2Value(MiniMenu.USE_INTERFACE_ID, paramtype.defaultInt) != paramtype.defaultInt)) {
+                (param == null || npcType.getCs2Value(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
                 MiniMenu.addEntry(
                     Client.useOnType!!,
                     "${Client.useOnTarget} -> ${TextUtils.setTextColor(16776960)}$name",
@@ -753,7 +753,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
             }
         }
 
-        if (!samePlaneAsPlayer) {
+        if (!onDifferentPlane) {
             var npcOptions = npcType.actions
             if (Client.prefixMinimenuOps) {
                 npcOptions = MiniMenu.prefixWithIndex(npcOptions)

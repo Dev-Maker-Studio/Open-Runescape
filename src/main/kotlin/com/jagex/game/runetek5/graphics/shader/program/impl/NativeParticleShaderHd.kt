@@ -40,14 +40,14 @@ class NativeParticleShaderHd(toolkit: AbstractNativeToolkit) : AbstractParticleS
         return true
     }
 
-    override fun setViewProjectionMatrix(matrix441: Matrix44) {
-        wvpMatrix.copyFrom(matrix441)
+    override fun setViewProjectionMatrix(viewProjectionMatrix: Matrix44) {
+        wvpMatrix.copyFrom(viewProjectionMatrix)
         wvpMatrix.multiplyBy(activeToolkit.frustumClipMatrix)
     }
 
-    override fun drawParticles(i_1: Int) {
+    override fun drawParticles(particleCount: Int) {
         loadProgram()
-        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, 0, i_1 * 4, 0, i_1 * 2)
+        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, 0, particleCount * 4, 0, particleCount * 2)
     }
 
     override fun drawPointSprite() {

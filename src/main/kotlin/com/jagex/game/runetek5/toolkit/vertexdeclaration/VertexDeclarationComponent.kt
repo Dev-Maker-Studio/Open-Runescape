@@ -20,12 +20,12 @@ class VertexDeclarationComponent {
         return this.size
     }
 
-    fun getAction(i_1: Int): VertexDeclarationAction {
-        return VertexDeclarationAction.forType(getSlotIndex(i_1))!!
+    fun getAction(index: Int): VertexDeclarationAction {
+        return VertexDeclarationAction.forType(getSlotIndex(index))!!
     }
 
-    fun getSlotIndex(i_1: Int): Int {
-        return ((this.bitpacked shr (VertexDeclarationAction.BITS_PER_SLOT * i_1)) and 0xf).toInt()
+    fun getSlotIndex(index: Int): Int {
+        return ((this.bitpacked shr (VertexDeclarationAction.BITS_PER_SLOT * index)) and 0xf).toInt()
     }
 
     fun pack(action: VertexDeclarationAction) {

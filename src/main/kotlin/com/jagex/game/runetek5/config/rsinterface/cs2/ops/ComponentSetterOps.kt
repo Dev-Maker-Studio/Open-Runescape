@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -162,8 +162,8 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETMAXLINES -> ccSetMaxLines(exec)
             ClientScriptOpCode.CC_SETPARAM_INT -> ccSetParamInt(exec)
             ClientScriptOpCode.CC_SETPARAM_STRING -> ccSetParamString(exec)
-            ClientScriptOpCode.CC_SETVIDEO_SPRITE -> method6210(exec)
-            ClientScriptOpCode.CC_SETVIDEO_TEXT -> method8344(exec)
+            ClientScriptOpCode.instr6050 -> ccSetVideoSprite(exec)
+            ClientScriptOpCode.instr6051 -> ccSetVideoText(exec)
             ClientScriptOpCode.CC_SETRECOL -> ccSetRecol(exec)
             ClientScriptOpCode.CC_SETRETEX -> ccSetRetex(exec)
             ClientScriptOpCode.CC_SETFONTMONO -> ccSetfontMono(exec)
@@ -176,18 +176,18 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETPLAYERMODEL -> ccSetPlayerModel(exec)
             ClientScriptOpCode.CC_SETOBJECT_NONUM -> ccSetItemNoNum(exec)
             ClientScriptOpCode.CC_SETMODELLIGHTING -> ccSetModelLighting(exec)
-            ClientScriptOpCode.CC_SETMODELLIGHTING_SUNROTATION -> method2567(exec)
+            ClientScriptOpCode.CC_SETMODELLIGHTING_SUNROTATION -> ccSetModelLightingSunRotation(exec)
             ClientScriptOpCode.CC_SETOBJECT_WEARCOL -> ccSetItemWearCol(exec)
             ClientScriptOpCode.CC_SETOBJECT_WEARCOL_NONUM -> ccSetItemWearColNoNum(exec)
-            ClientScriptOpCode.CC_SETMODEL_ITEMCONTAINER -> method6510(exec)
+            ClientScriptOpCode.instr6895 -> ccSetModelItemContainer(exec)
             ClientScriptOpCode.CC_SETPLAYERMODEL_SELF -> ccSetPlayerModelSelf(exec)
             ClientScriptOpCode.CC_SETOBJECT_ALWAYSNUM -> ccSetItemAlwaysNum(exec)
             ClientScriptOpCode.CC_SETOBJECT_WEARCOL_ALWAYSNUM -> ccSetItemWearColAlwaysNum(exec)
             ClientScriptOpCode.CC_SETOP -> ccSetop(exec)
             ClientScriptOpCode.CC_SETDEPTHCHILD -> ccSetDepthChild(exec)
-            ClientScriptOpCode.CC_SETDRAGRENDERBEHAVIOUR -> method2169(exec)
-            ClientScriptOpCode.CC_SETDRAGDEADZONE -> method2965(exec)
-            ClientScriptOpCode.CC_SETDRAGDEADTIME -> method4801(exec)
+            ClientScriptOpCode.CC_SETDRAGRENDERBEHAVIOUR -> ccSetDragRenderBehaviour(exec)
+            ClientScriptOpCode.CC_SETDRAGDEADZONE -> ccSetDragDeadZone(exec)
+            ClientScriptOpCode.CC_SETDRAGDEADTIME -> ccSetDragDeadTime(exec)
             ClientScriptOpCode.CC_SETOPBASE -> ccSetOpBase(exec)
             ClientScriptOpCode.CC_SETTARGETVERB -> ccSetTargetVerb(exec)
             ClientScriptOpCode.CC_CLEAROPS -> ccClearOps(exec)
@@ -200,11 +200,11 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETOPKEY -> ccSetopKey(exec)
             ClientScriptOpCode.CC_SETOPTKEY -> ccSetopTKey(exec)
             ClientScriptOpCode.CC_SETMOUSEOVERCURSOR -> ccSetMouseOverCursor(exec)
-            ClientScriptOpCode.CC_HOOK_MOUSE_PRESS -> method1606(exec)
+            ClientScriptOpCode.CC_SETONCLICK -> ccSetOnClick(exec)
             ClientScriptOpCode.CC_SETONHOLD -> ccSetOnHold(exec)
             ClientScriptOpCode.CC_SETONRELEASE -> ccSetOnRelease(exec)
-            ClientScriptOpCode.CC_HOOK_MOUSE_ENTER -> method8285(exec)
-            ClientScriptOpCode.CC_HOOK_MOUSE_EXIT -> method5008(exec)
+            ClientScriptOpCode.CC_HOOK_MOUSE_ENTER -> ccHookMouseEnter(exec)
+            ClientScriptOpCode.CC_HOOK_MOUSE_EXIT -> ccHookMouseExit(exec)
             ClientScriptOpCode.CC_SETONDRAG -> ccSetOnDrag(exec)
             ClientScriptOpCode.CC_SETONOP -> ccSetOnOp(exec)
             ClientScriptOpCode.CC_SETONVARTRANSMIT -> ccSetOnVarTransmit(exec)
@@ -243,7 +243,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method5017(component!!, executor)
+        CS2SharedOps.setOnClanSettingsTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -259,7 +259,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2960(component!!, parentInterface!!, executor)
+        CS2SharedOps.setTextAntimacro(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -275,7 +275,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method3078(component!!, executor)
+        CS2SharedOps.setOnHold(component!!, executor)
     }
 
     @JvmStatic
@@ -283,7 +283,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4159(component!!, executor)
+        CS2SharedOps.setModelTint(component!!, executor)
     }
 
     @JvmStatic
@@ -299,7 +299,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method13468(component!!, parentInterface!!, executor)
+        CS2SharedOps.setClickmask(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -312,7 +312,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method7142(component!!, executor)
+        CS2SharedOps.setTextShadow(component!!, executor)
     }
 
     @JvmStatic
@@ -320,7 +320,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method5455(component!!, executor)
+        CS2SharedOps.setOnClanChannelTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -328,7 +328,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method7889(component!!, executor)
+        CS2SharedOps.setOnSubchange(component!!, executor)
     }
 
     @JvmStatic
@@ -336,7 +336,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method12630(component!!)
+        CS2SharedOps.clearScriptHooks(component!!)
     }
 
     @JvmStatic
@@ -352,7 +352,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method5291(component!!, executor)
+        CS2SharedOps.setOp(component!!, executor)
     }
 
     @JvmStatic
@@ -360,7 +360,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method3365(component!!, executor)
+        CS2SharedOps.setOnRelease(component!!, executor)
     }
 
     @JvmStatic
@@ -368,15 +368,15 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method11221(component!!, executor)
+        CS2SharedOps.setOnTargetLeave(component!!, executor)
     }
 
     @JvmStatic
-    fun method5008(executor: CS2Executor) {
+    fun ccHookMouseExit(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method11223(component!!, executor)
+        CS2SharedOps.setOnMouseExit(component!!, executor)
     }
 
     @JvmStatic
@@ -392,7 +392,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method5066(component!!, parentInterface!!, executor)
+        CS2SharedOps.setPlayerModel(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -404,11 +404,11 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun method6210(executor: CS2Executor) {
+    fun ccSetVideoSprite(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method789(component!!, parentInterface!!, executor)
+        CS2SharedOps.setVideoSprite(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -416,7 +416,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method506(component!!, parentInterface!!, executor)
+        CS2SharedOps.setScrollSize(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -424,7 +424,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2741(component!!, executor)
+        CS2SharedOps.setAlpha(component!!, executor)
     }
 
     @JvmStatic
@@ -445,7 +445,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method14653(component!!, executor)
+        CS2SharedOps.setOnCamfinished(component!!, executor)
     }
 
     @JvmStatic
@@ -453,13 +453,13 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStackPtr -= 2
-        val i_4 = executor.intStack[executor.intStackPtr]
-        val i_5 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault6: ParamType? = TypeLists.PARAMS!!.list(i_4)
-        if (i_5 != attributedefault6!!.defaultInt) {
-            component!!.setIntParam(i_4, i_5)
+        val paramId = executor.intStack[executor.intStackPtr]
+        val paramValue = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramValue != paramType!!.defaultInt) {
+            component!!.setIntParam(paramId, paramValue)
         } else {
-            component!!.removeParam(i_4)
+            component!!.removeParam(paramId)
         }
     }
 
@@ -468,7 +468,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method14892(component!!, executor)
+        CS2SharedOps.setLineWid(component!!, executor)
     }
 
     @JvmStatic
@@ -481,7 +481,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6010(component!!, parentInterface!!, executor)
+        CS2SharedOps.setRetex(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -489,7 +489,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method8754(component!!, executor)
+        CS2SharedOps.setFill(component!!, executor)
     }
 
     @JvmStatic
@@ -497,7 +497,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2955(component!!, executor)
+        CS2SharedOps.setMouseOverCursor(component!!, executor)
     }
 
     @JvmStatic
@@ -509,11 +509,11 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun method2567(executor: CS2Executor) {
+    fun ccSetModelLightingSunRotation(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method7729(component!!, executor)
+        CS2SharedOps.setModelLightingSunRotation(component!!, executor)
     }
 
     @JvmStatic
@@ -526,7 +526,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method3366(component!!, executor)
+        CS2SharedOps.setOnFriendsChatTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -550,7 +550,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method8390(component!!, parentInterface!!, executor)
+        CS2SharedOps.setGraphic(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -558,23 +558,23 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStackPtr -= 10
-        var bytes_4: ByteArray? = null
-        var bytes_5: ByteArray? = null
+        var keyCodes: ByteArray? = null
+        var keyModifiers: ByteArray? = null
         var value: Int = 0
         while (value < 10 && executor.intStack[value + executor.intStackPtr] >= 0) {
             value += 2
         }
         if (value > 0) {
-            bytes_4 = ByteArray(value / 2)
-            bytes_5 = ByteArray(value / 2)
+            keyCodes = ByteArray(value / 2)
+            keyModifiers = ByteArray(value / 2)
             value -= 2
             while (value >= 0) {
-                bytes_4[value / 2] = executor.intStack[value + executor.intStackPtr].toByte()
-                bytes_5[value / 2] = executor.intStack[value + executor.intStackPtr + 1].toByte()
+                keyCodes[value / 2] = executor.intStack[value + executor.intStackPtr].toByte()
+                keyModifiers[value / 2] = executor.intStack[value + executor.intStackPtr + 1].toByte()
                 value -= 2
             }
         }
-        CS2SharedOps.method1838(component!!, bytes_4, bytes_5, executor)
+        CS2SharedOps.setOpKey(component!!, keyCodes, keyModifiers, executor)
     }
 
     @JvmStatic
@@ -582,7 +582,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method3987(component!!, parentInterface!!)
+        CS2SharedOps.setPlayerHeadSelf(component!!, parentInterface!!)
     }
 
     @JvmStatic
@@ -590,7 +590,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method7555(component!!, parentInterface!!, executor)
+        CS2SharedOps.setComponentModel(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -598,15 +598,15 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method7267(component!!, executor)
+        CS2SharedOps.setModelOrthog(component!!, executor)
     }
 
     @JvmStatic
-    fun method8344(executor: CS2Executor) {
+    fun ccSetVideoText(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6186(component!!, parentInterface!!, executor)
+        CS2SharedOps.setVideoText(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -614,7 +614,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method505(component!!, executor)
+        CS2SharedOps.setParamString(component!!, executor)
     }
 
     @JvmStatic
@@ -627,7 +627,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method14586(component!!, executor)
+        CS2SharedOps.setOnOp(component!!, executor)
     }
 
     @JvmStatic
@@ -640,7 +640,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method5009(component!!, executor)
+        CS2SharedOps.setOnChatTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -648,7 +648,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method774(component!!, executor)
+        CS2SharedOps.setHFlip(component!!, executor)
     }
 
     @JvmStatic
@@ -656,7 +656,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4160(component!!, executor)
+        CS2SharedOps.setOutline(component!!, executor)
     }
 
     @JvmStatic
@@ -664,7 +664,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6313(component!!, executor)
+        CS2SharedOps.setModelLighting(component!!, executor)
     }
 
     @JvmStatic
@@ -672,7 +672,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method910(component!!, executor)
+        CS2SharedOps.setOnOpt(component!!, executor)
     }
 
     @JvmStatic
@@ -684,7 +684,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun method2965(executor: CS2Executor) {
+    fun ccSetDragDeadZone(executor: CS2Executor) {
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {
             target = executor.hookedInterface2
@@ -693,7 +693,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method8387(component!!, executor)
+        CS2SharedOps.setDragDeadZone(component!!, executor)
     }
 
     @JvmStatic
@@ -706,7 +706,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method1642(component!!, executor)
+        CS2SharedOps.setOnTargetEnter(component!!, executor)
     }
 
     @JvmStatic
@@ -714,7 +714,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method3338(component!!, executor)
+        CS2SharedOps.setOnStatTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -722,7 +722,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method797(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelAnim(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -730,7 +730,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method502(component!!, executor)
+        CS2SharedOps.setOnInvTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -743,7 +743,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method786(component!!, parentInterface!!, executor)
+        CS2SharedOps.setHide(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -764,7 +764,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method13450(component!!, executor)
+        CS2SharedOps.setLineDirection(component!!, executor)
     }
 
     @JvmStatic
@@ -793,7 +793,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method12260(component!!, parentInterface!!, executor)
+        CS2SharedOps.setComponentSize(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -801,7 +801,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method1083(component!!, executor)
+        CS2SharedOps.setOnDrag(component!!, executor)
     }
 
     @JvmStatic
@@ -809,15 +809,15 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6158(component!!, executor)
+        CS2SharedOps.setOnFriendTransmit(component!!, executor)
     }
 
     @JvmStatic
-    fun method2169(executor: CS2Executor) {
+    fun ccSetDragRenderBehaviour(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method869(component!!, executor)
+        CS2SharedOps.setDragRenderBehaviour(component!!, executor)
     }
 
     @JvmStatic
@@ -825,7 +825,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method8310(component!!, executor)
+        CS2SharedOps.set2DAngle(component!!, executor)
     }
 
     @JvmStatic
@@ -833,14 +833,14 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method569(component!!, executor)
+        CS2SharedOps.setMaxLines(component!!, executor)
     }
 
     @JvmStatic
     fun ccSetopChar(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        CS2SharedOps.method7927(component!!, executor)
+        CS2SharedOps.setOpChar(component!!, executor)
     }
 
     @JvmStatic
@@ -848,7 +848,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2915(component!!, executor)
+        CS2SharedOps.setGraphicShadow(component!!, executor)
     }
 
     @JvmStatic
@@ -864,7 +864,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6697(component!!, parentInterface!!, executor)
+        CS2SharedOps.setFontMono(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -880,7 +880,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method12209(component!!, executor)
+        CS2SharedOps.setOpTKey(component!!, executor)
     }
 
     @JvmStatic
@@ -896,7 +896,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method1845(component!!, executor)
+        CS2SharedOps.setOnResize(component!!, executor)
     }
 
     @JvmStatic
@@ -904,7 +904,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method542(component!!, executor)
+        CS2SharedOps.setOnVarClanTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -912,7 +912,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method3672(component!!, executor)
+        CS2SharedOps.setOnMouseRepeat(component!!, executor)
     }
 
     @JvmStatic
@@ -920,7 +920,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method14482(component!!, executor)
+        CS2SharedOps.setOpCursor(component!!, executor)
     }
 
     @JvmStatic
@@ -928,7 +928,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method1454(component!!, executor)
+        CS2SharedOps.setParamInt(component!!, executor)
     }
 
     @JvmStatic
@@ -936,7 +936,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method11337(component!!, parentInterface!!, executor)
+        CS2SharedOps.setNpcModel(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -944,15 +944,15 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4276(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelAngle(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
-    fun method1606(executor: CS2Executor) {
+    fun ccSetOnClick(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method15409(component!!, executor)
+        CS2SharedOps.setOnClick(component!!, executor)
     }
 
     @JvmStatic
@@ -960,7 +960,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2593(component!!, executor)
+        CS2SharedOps.setOnDragComplete(component!!, executor)
     }
 
     @JvmStatic
@@ -968,15 +968,15 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4651(component!!, executor)
+        CS2SharedOps.setOnKey(component!!, executor)
     }
 
     @JvmStatic
-    fun method6510(executor: CS2Executor) {
+    fun ccSetModelItemContainer(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method1455(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelItemContainer(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -992,7 +992,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6689(component!!, executor)
+        CS2SharedOps.setOnVarTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -1000,7 +1000,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6690(component!!, executor)
+        CS2SharedOps.setOnStockTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -1008,7 +1008,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4772(component!!, executor)
+        CS2SharedOps.setOnMiscTransmit(component!!, executor)
     }
 
     @JvmStatic
@@ -1033,11 +1033,11 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun method8285(executor: CS2Executor) {
+    fun ccHookMouseEnter(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6289(component!!, executor)
+        CS2SharedOps.setOnMouseEnter(component!!, executor)
     }
 
     @JvmStatic
@@ -1050,7 +1050,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method15474(component!!)
+        CS2SharedOps.clearOps(component!!)
     }
 
     @JvmStatic
@@ -1063,7 +1063,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method12401(component!!, parentInterface!!)
+        CS2SharedOps.setPlayerModelSelf(component!!, parentInterface!!)
     }
 
     @JvmStatic
@@ -1071,7 +1071,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method1852(component!!, parentInterface!!, executor)
+        CS2SharedOps.setScrollPos(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -1079,7 +1079,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method501(component!!, executor)
+        CS2SharedOps.setTiling(component!!, executor)
     }
 
     @JvmStatic
@@ -1087,14 +1087,14 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6288(component!!, executor)
+        CS2SharedOps.setOnScrollWheel(component!!, executor)
     }
 
     @JvmStatic
     fun ccSetopTChar(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        CS2SharedOps.method14605(component!!, executor)
+        CS2SharedOps.setOpTChar(component!!, executor)
     }
 
     @JvmStatic
@@ -1102,7 +1102,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4280(component!!, executor)
+        CS2SharedOps.setVFlip(component!!, executor)
     }
 
     @JvmStatic
@@ -1118,7 +1118,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method7667(component!!, parentInterface!!, executor)
+        CS2SharedOps.setRecol(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -1126,7 +1126,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2170(component!!, executor)
+        CS2SharedOps.setOnDialogAbort(component!!, executor)
     }
 
     @JvmStatic
@@ -1134,7 +1134,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method15511(component!!, parentInterface!!, executor)
+        CS2SharedOps.setModelZoom(component!!, parentInterface!!, executor)
     }
 
     @JvmStatic
@@ -1155,7 +1155,7 @@ object ComponentSetterOps {
         }
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method6045(component!!, executor)
+        CS2SharedOps.setTargetCursors(component!!, executor)
     }
 
     @JvmStatic
@@ -1163,15 +1163,15 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method2874(component!!, executor)
+        CS2SharedOps.setOnClickRepeat(component!!, executor)
     }
 
     @JvmStatic
-    fun method4801(executor: CS2Executor) {
+    fun ccSetDragDeadTime(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method15256(component!!, executor)
+        CS2SharedOps.setDragDeadTime(component!!, executor)
     }
 
     @JvmStatic
@@ -1179,7 +1179,7 @@ object ComponentSetterOps {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        CS2SharedOps.method4136(component!!, executor)
+        CS2SharedOps.setOnTimer(component!!, executor)
     }
 
     @JvmStatic

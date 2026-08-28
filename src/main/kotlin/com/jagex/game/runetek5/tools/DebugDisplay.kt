@@ -131,22 +131,22 @@ object DebugDisplay {
         val firstTraceLine = stackTraceReader.readLine()
         while (true) {
             val stackTraceLine = stackTraceReader.readLine() ?: break
-            val seekJavaVersionPosition = stackTraceLine.indexOf('(')
-            val javaVersionLength = stackTraceLine.indexOf(')', seekJavaVersionPosition + 1)
-            var string_11: String
-            if (seekJavaVersionPosition != -1) {
-                string_11 = stackTraceLine.substring(0, seekJavaVersionPosition)
+            val parenOpen = stackTraceLine.indexOf('(')
+            val parenClose = stackTraceLine.indexOf(')', parenOpen + 1)
+            var frameName: String
+            if (parenOpen != -1) {
+                frameName = stackTraceLine.substring(0, parenOpen)
             } else {
-                string_11 = stackTraceLine
+                frameName = stackTraceLine
             }
-            string_11 = string_11.trim()
-            string_11 = string_11.substring(string_11.lastIndexOf(' ') + 1)
-            string_11 = string_11.substring(string_11.lastIndexOf('\t') + 1)
-            error += string_11
-            if (seekJavaVersionPosition != -1 && javaVersionLength != -1) {
-                val javaVersionStart = stackTraceLine.indexOf(".java:", seekJavaVersionPosition)
-                if (javaVersionStart >= 0) {
-                    error += stackTraceLine.substring(javaVersionStart + 5, javaVersionLength)
+            frameName = frameName.trim()
+            frameName = frameName.substring(frameName.lastIndexOf(' ') + 1)
+            frameName = frameName.substring(frameName.lastIndexOf('\t') + 1)
+            error += frameName
+            if (parenOpen != -1 && parenClose != -1) {
+                val javaSuffixIndex = stackTraceLine.indexOf(".java:", parenOpen)
+                if (javaSuffixIndex >= 0) {
+                    error += stackTraceLine.substring(javaSuffixIndex + 5, parenClose)
                 }
             }
             error += ' '

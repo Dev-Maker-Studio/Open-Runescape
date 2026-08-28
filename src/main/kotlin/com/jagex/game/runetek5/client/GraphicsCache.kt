@@ -11,7 +11,7 @@ import com.jagex.game.runetek5.graphics.hint.HintTrail
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.scene.AsyncMapLoader
 
@@ -65,20 +65,20 @@ object GraphicsCache {
     @JvmStatic
     fun resetWorldmapCaches(preserveStaticElement: Boolean) {
         if (preserveStaticElement && WorldMap.staticElement != null) {
-            WorldMapSub1.pendingMapElementId = WorldMap.staticElement!!.elementId
+            WorldMapDisplay.pendingMapElementId = WorldMap.staticElement!!.elementId
         } else {
-            WorldMapSub1.pendingMapElementId = -1
+            WorldMapDisplay.pendingMapElementId = -1
         }
         WorldMap.staticElement = null
         WorldMapInteraction.MEC_CLICKZONES = null
         ComponentMinimap.mapAssetLoadingPercentage = 0
         WorldMap.worldmapComponent = null
-        WorldMapSub1.reset()
+        WorldMapDisplay.reset()
         WorldMap.worldMapCategories.remove_all()
         WorldMap.staticElements = null
         ComponentMinimap.worldMapOverviewSprite = null
-        WorldMapSub1.scrollTargetX = -1
-        WorldMapSub1.scrollTargetY = -1
+        WorldMapDisplay.scrollTargetX = -1
+        WorldMapDisplay.scrollTargetY = -1
         Resource.helvetica11Font = null
         Resource.helvetica12Font = null
         Resource.helvetica14Font = null

@@ -116,19 +116,19 @@ class StationaryWall(
         }
     }
 
-    override fun removeShadow(graphicalrenderer1: AbstractToolkit) {
-        val class282Sub50Sub174: Shadow?
+    override fun removeShadow(toolkit: AbstractToolkit) {
+        val shadow: Shadow?
         if (cachedShadow == null && hasDynamicShadow) {
-            val class4525 = getTypeResult(graphicalrenderer1, 262144, true)
-            class282Sub50Sub174 = if (class4525 != null) class4525.companionObject as Shadow? else null
+            val typeResult = getTypeResult(toolkit, 262144, true)
+            shadow = if (typeResult != null) typeResult.companionObject as Shadow? else null
         } else {
-            class282Sub50Sub174 = cachedShadow
+            shadow = cachedShadow
             cachedShadow = null
         }
 
         val abs = getAbsolutePosition().coords
-        if (class282Sub50Sub174 != null) {
-            scene!!.removeShadow(class282Sub50Sub174, collisionPlane.toInt(), abs.x.toInt(), abs.z.toInt(), null)
+        if (shadow != null) {
+            scene!!.removeShadow(shadow, collisionPlane.toInt(), abs.x.toInt(), abs.z.toInt(), null)
         }
     }
 
@@ -249,18 +249,18 @@ class StationaryWall(
         return if (model != null) model!!.getMinY() else 0
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, cameraX: Int, cameraY: Int): Boolean {
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         val model = getModel(toolkit, PROJECTION)
         if (model != null) {
             val projectionMatrix = getProjectionMatrix()
-            return model.calculateProjection(cameraX, cameraY, projectionMatrix, false, 0)
+            return model.calculateProjection(mouseX, mouseY, projectionMatrix, false, 0)
         }
         return false
     }
 
     companion object {
         @JvmField
-        var menuHeight: Int = 0
+        var submenuHeight: Int = 0
 
         @JvmField
         val WALL_STRAIGHT_CULLING_BITS = intArrayOf(1, 2, 4, 8)
@@ -269,8 +269,8 @@ class StationaryWall(
         val WALL_CORNER_CULLING_BITS = intArrayOf(16, 32, 64, 128)
 
         @JvmStatic
-        fun getCullingType(type: Int, rotation: Int): Int {
-            return if (type != ObjectShapes.WALL_DIAGONAL_CORNER.shape && type != ObjectShapes.WALL_STRAIGHT_CORNER.shape) {
+        fun getCullingType(shape: Int, rotation: Int): Int {
+            return if (shape != ObjectShapes.WALL_DIAGONAL_CORNER.shape && shape != ObjectShapes.WALL_STRAIGHT_CORNER.shape) {
                 WALL_STRAIGHT_CULLING_BITS[rotation and 0x3]
             } else {
                 WALL_CORNER_CULLING_BITS[rotation and 0x3]

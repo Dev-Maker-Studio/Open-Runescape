@@ -835,7 +835,7 @@ object PacketDecoder {
                     buffer.readString()
                 }
                 val encodedName = buffer.readLong()
-                FriendsChat.FC_NAME = Utils.getStringFromLong(encodedName)
+                FriendsChat.FC_NAME = Utils.nameForLong(encodedName)
                 FriendsChat.FC_MIN_RANK_CAN_KICK = buffer.readByte()
                 val playerCount = buffer.readUByte()
                 if (playerCount != 255) {

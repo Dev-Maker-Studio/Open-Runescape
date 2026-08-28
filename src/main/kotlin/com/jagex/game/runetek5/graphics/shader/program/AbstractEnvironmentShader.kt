@@ -59,15 +59,15 @@ abstract class AbstractEnvironmentShader(
         }
     }
 
-    abstract fun loadUnlitProgram(var1: Boolean)
+    abstract fun loadUnlitProgram(ignoreAlpha: Boolean)
 
-    abstract fun loadSpecularPointlight(var1: Int)
+    abstract fun loadSpecularPointlight(lightCount: Int)
 
-    abstract fun loadPointlightEnvironmentMapping(var1: Int)
+    abstract fun loadPointlightEnvironmentMapping(lightCount: Int)
 
     abstract fun loadUnderwaterGround()
 
-    abstract fun loadWorldViewProjection(var1: Matrix44)
+    abstract fun loadWorldViewProjection(wvpMatrix: Matrix44)
 
-    abstract fun loadStandartPointlight(var1: Int)
+    abstract fun loadStandartPointlight(lightCount: Int)
 }

@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.toolkit
 
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
-import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.graphics.texture.OpenGl2DImageTexture
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
@@ -13,10 +13,10 @@ class SpriteSurfaceGL(
     pixels: ByteArray
 ) : ComponentSurface() {
 
-    @JvmField val surface: OpenGl2DTexture_Sub1
+    @JvmField val surface: OpenGl2DImageTexture
 
     init {
-        this.surface = OpenGl2DTexture_Sub1.createSurface(class505Sub11, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, length, pixels, GLFormat.RGBA)
+        this.surface = OpenGl2DImageTexture.createSurface(class505Sub11, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, length, pixels, GLFormat.RGBA)
         this.surface.setRepeat(false, false)
     }
 

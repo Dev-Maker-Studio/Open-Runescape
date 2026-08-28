@@ -581,7 +581,7 @@ open class Culling(
                 var onScreen = false
                 var tempSceneStartY = sceneStartY
                 while (tempSceneStartY <= sceneEndY) {
-                    if (scene.adjacent_tile_on_screen[sceneX][tempSceneStartY++]) {
+                    if (scene.tileInFrustum[sceneX][tempSceneStartY++]) {
                         onScreen = true
                         break
                     }
@@ -619,7 +619,7 @@ open class Culling(
                 var onScreen = false
                 var tempStartX = startX
                 while (tempStartX <= endX) {
-                    if (scene.adjacent_tile_on_screen[tempStartX++][y]) {
+                    if (scene.tileInFrustum[tempStartX++][y]) {
                         onScreen = true
                         break
                     }
@@ -670,7 +670,7 @@ open class Culling(
                     var onScreen = false
                     CheckOnScreen@ for (x in startX..endX) {
                         for (y in startY..endY) {
-                            if (scene.adjacent_tile_on_screen[x][y]) {
+                            if (scene.tileInFrustum[x][y]) {
                                 onScreen = true
                                 break@CheckOnScreen
                             }
@@ -690,7 +690,7 @@ open class Culling(
             val startX = scene.visibleTiles + (cullingCluster.startX - scene.cameraGridPositionX)
             if (startX in 0..(scene.visibleTiles + scene.visibleTiles)) {
                 val startY = scene.visibleTiles + (cullingCluster.startY - scene.cameraGridPositionY)
-                if (startY in 0..(scene.visibleTiles + scene.visibleTiles) && scene.adjacent_tile_on_screen[startX][startY]) {
+                if (startY in 0..(scene.visibleTiles + scene.visibleTiles) && scene.tileInFrustum[startX][startY]) {
                     var cameraOffsetX = (scene.cameraPositionX - cullingCluster.tileCullingsX[0].toFloat())
                     if (cameraOffsetX < 0.0f) {
                         cameraOffsetX *= -1.0f

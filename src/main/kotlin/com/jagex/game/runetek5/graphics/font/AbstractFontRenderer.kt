@@ -60,100 +60,100 @@ abstract class AbstractFontRenderer(
         }
     }
 
-    fun calibrate(textColor: Int, shadowEffect: Int) {
-        var shadeEff = shadowEffect
+    fun calibrate(textColor: Int, shadowColor: Int) {
+        var shadow = shadowColor
         strikeThroughEffect = -1
         underlineEffect = -1
         colorArgb = textColor
         argbColorEffect = textColor
         justifiedSpaceWidth = 0
         justifiedSpaceAccumulator = 0
-        if (shadeEff == -1) {
-            shadeEff = 0
+        if (shadow == -1) {
+            shadow = 0
         }
-        originalShadowColor = shadeEff
-        Companion.shadingEffect = shadeEff
+        originalShadowColor = shadow
+        shadingEffect = shadow
     }
 
-    fun renderTextAntiMacro(chatText: String?, x: Int, y: Int, maxWidth: Int, maxHeight: Int, textEffectParam1: Int,
-                            textEffectParam2: Int, horizontalAlign: Int, verticalAlign: Int, random: Random, seed: Int, dimensions: IntArray?,
-                            chatIcons: Array<NativeSprite>?, chatScaleHeights: IntArray?): Int {
-        if (chatText == null) {
+    fun renderTextAntiMacro(text: String?, x: Int, y: Int, maxWidth: Int, maxHeight: Int, color: Int,
+                            shadow: Int, horizontalAlign: Int, verticalAlign: Int, random: Random, seed: Int, bounds: IntArray?,
+                            sprites: Array<NativeSprite>?, spriteHeights: IntArray?): Int {
+        if (text == null) {
             return 0
         }
         random.setSeed(seed.toLong())
-        val textColor = 192 + (random.nextInt() and 0x1f)
-        calibrate(textColor shl 24 or (textEffectParam1 and 0xffffff),
-                if (textEffectParam2 == -1) 0 else textColor shl 24 or (textEffectParam2 and 0xffffff))
-        val textLength = chatText.length
-        val glyphWidths = IntArray(textLength)
-        var textWidth = 0
-        for (index in 0 until textLength) {
-            glyphWidths[index] = textWidth
+        val alpha = 192 + (random.nextInt() and 0x1f)
+        calibrate(alpha shl 24 or (color and 0xffffff),
+                if (shadow == -1) 0 else alpha shl 24 or (shadow and 0xffffff))
+        val textLength = text.length
+        val offsetsX = IntArray(textLength)
+        var extraWidth = 0
+        for (i in 0 until textLength) {
+            offsetsX[i] = extraWidth
             if ((random.nextInt() and 0x3) == 0) {
-                textWidth++
+                extraWidth++
             }
         }
         var drawX = x
         var drawY = y + this.fontMetrics.topPadding
-        var plainWidth = -1
+        var lineWidth = -1
         if (verticalAlign == 1) {
             drawY += (maxHeight - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding) / 2
         } else if (verticalAlign == 2) {
             drawY = y + maxHeight - this.fontMetrics.bottomPadding
         }
         if (horizontalAlign == 1) {
-            plainWidth = this.fontMetrics.getWidthNoSprites(chatText) + textWidth
-            drawX = (maxWidth - plainWidth) / 2 + x
+            lineWidth = this.fontMetrics.getWidthNoSprites(text) + extraWidth
+            drawX = (maxWidth - lineWidth) / 2 + x
         } else if (horizontalAlign == 2) {
-            plainWidth = this.fontMetrics.getWidthNoSprites(chatText) + textWidth
-            drawX = x + (maxWidth - plainWidth)
+            lineWidth = this.fontMetrics.getWidthNoSprites(text) + extraWidth
+            drawX = x + (maxWidth - lineWidth)
         }
-        renderLineWithOffsets(chatText, drawX, drawY, chatIcons, chatScaleHeights, glyphWidths, null)
-        if (dimensions != null) {
-            if (plainWidth == -1) {
-                plainWidth = this.fontMetrics.getWidthNoSprites(chatText) + textWidth
+        renderLineWithOffsets(text, drawX, drawY, sprites, spriteHeights, offsetsX, null)
+        if (bounds != null) {
+            if (lineWidth == -1) {
+                lineWidth = this.fontMetrics.getWidthNoSprites(text) + extraWidth
             }
-            dimensions[0] = drawX
-            dimensions[1] = drawY - this.fontMetrics.topPadding
-            dimensions[2] = plainWidth
-            dimensions[3] = this.fontMetrics.bottomPadding + this.fontMetrics.topPadding
+            bounds[0] = drawX
+            bounds[1] = drawY - this.fontMetrics.topPadding
+            bounds[2] = lineWidth
+            bounds[3] = this.fontMetrics.bottomPadding + this.fontMetrics.topPadding
         }
-        return textWidth
+        return extraWidth
     }
 
-    fun updateTextEffects(effectString: String) {
+    fun updateTextEffects(effect: String) {
         try {
-            if (effectString.startsWith("col=")) {
-                argbColorEffect = argbColorEffect and 0xffffff.inv() or (Utils.parse_int(effectString.substring(4)) and 0xffffff)
-            } else if ("/col" == effectString) {
+            if (effect.startsWith("col=")) {
+                argbColorEffect = argbColorEffect and 0xffffff.inv() or (Utils.parse_int(effect.substring(4)) and 0xffffff)
+            } else if ("/col" == effect) {
                 argbColorEffect = argbColorEffect and 0xffffff.inv() or (colorArgb and 0xffffff)
             }
-            if ("argb=" == effectString) {
-                argbColorEffect = Utils.parse_int(effectString.substring(5))
-            } else if ("/argb" == effectString) {
+            if ("argb=" == effect) {
+                argbColorEffect = Utils.parse_int(effect.substring(5))
+            } else if ("/argb" == effect) {
                 argbColorEffect = colorArgb
-            } else if ("str=" == effectString) {
-                strikeThroughEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effectString.substring(4))
-            } else if ("str" == effectString) {
+            } else if ("str=" == effect) {
+                strikeThroughEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(4))
+            } else if ("str" == effect) {
                 strikeThroughEffect = argbColorEffect and 0xffffff.inv() or 0x800000
-            } else if ("/str" == effectString) {
+            } else if ("/str" == effect) {
                 strikeThroughEffect = -1
-            } else if ("u=" == effectString) {
-                underlineEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effectString.substring(2))
-            } else if ("u" == effectString) {
+            } else if ("u=" == effect) {
+                underlineEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(2))
+            } else if ("u" == effect) {
                 underlineEffect = argbColorEffect and 0xffffff.inv()
-            } else if ("/u" == effectString) {
+            } else if ("/u" == effect) {
                 underlineEffect = -1
-            } else if ("shad=-1".equals(effectString, ignoreCase = true)) {
-                Companion.shadingEffect = 0
-            } else if ("shad=" == effectString) {
-                Companion.shadingEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effectString.substring(5))
-            } else if ("shad" == effectString) {
-                Companion.shadingEffect = argbColorEffect and 0xffffff.inv()
-            } else if ("/shad" == effectString) {
-                Companion.shadingEffect = originalShadowColor
-            } else if ("br" == effectString) {
+            } else if ("shad=-1".equals(effect, ignoreCase = true)) {
+                shadingEffect = 0
+            } else if ("shad=" == effect) {
+                shadingEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(5))
+            } else if ("shad" == effect) {
+                shadingEffect = argbColorEffect and 0xffffff.inv()
+            } else if ("/shad" == effect) {
+                shadingEffect = originalShadowColor
+            } else if ("br" == effect) {
                 calibrate(colorArgb, originalShadowColor)
             }
         } catch (exception: Exception) {
@@ -161,25 +161,25 @@ abstract class AbstractFontRenderer(
         }
     }
 
-    fun calculateJustifiedSpacing(string_1: String, i_2: Int) {
-        var i_4 = 0
-        var bool5 = false
-        for (i_6 in 0 until string_1.length) {
-            val var_7 = string_1[i_6]
-            if (var_7 == '<') {
-                bool5 = true
-            } else if (var_7 == '>') {
-                bool5 = false
-            } else if (!bool5 && var_7 == ' ') {
-                ++i_4
+    fun calculateJustifiedSpacing(line: String, width: Int) {
+        var spaceCount = 0
+        var inTag = false
+        for (i in 0 until line.length) {
+            val ch = line[i]
+            if (ch == '<') {
+                inTag = true
+            } else if (ch == '>') {
+                inTag = false
+            } else if (!inTag && ch == ' ') {
+                ++spaceCount
             }
         }
-        if (i_4 > 0) {
-            justifiedSpaceWidth = (i_2 - this.fontMetrics.getWidthNoSprites(string_1) shl 8) / i_4
+        if (spaceCount > 0) {
+            justifiedSpaceWidth = (width - this.fontMetrics.getWidthNoSprites(line) shl 8) / spaceCount
         }
     }
 
-    fun renderLine(text: String, x: Int, y: Int, sprites: Array<NativeSprite>?, spriteHeights: IntArray?, dimensions: ComponentSurface?, shadingEffect: Int, colorEffect: Int) {
+    fun renderLine(text: String, x: Int, y: Int, sprites: Array<NativeSprite>?, spriteHeights: IntArray?, dimensions: ComponentSurface?, surfaceOffsetX: Int, surfaceOffsetY: Int) {
         var currentX = x
         var currentY = y - this.fontMetrics.verticalSpacing
         var tagStart = -1
@@ -191,27 +191,27 @@ abstract class AbstractFontRenderer(
                 tagStart = i
             } else {
                 if (ch == '>' && tagStart != -1) {
-                    val string_15 = text.substring(tagStart + 1, i)
+                    val effect = text.substring(tagStart + 1, i)
                     tagStart = -1
-                    if ("lt" == string_15) {
+                    if ("lt" == effect) {
                         ch = '<'
-                    } else if ("gt" == string_15) {
+                    } else if ("gt" == effect) {
                         ch = '>'
-                    } else if ("nbsp" == string_15) {
+                    } else if ("nbsp" == effect) {
                         ch = 160.toChar()
-                    } else if ("shy" == string_15) {
+                    } else if ("shy" == effect) {
                         ch = 173.toChar()
-                    } else if ("times" == string_15) {
+                    } else if ("times" == effect) {
                         ch = 215.toChar()
-                    } else if ("euro" == string_15) {
+                    } else if ("euro" == effect) {
                         ch = 8364.toChar()
-                    } else if ("copy" == string_15) {
+                    } else if ("copy" == effect) {
                         ch = 169.toChar()
                     } else {
-                        if ("reg" != string_15) {
-                            if (string_15.startsWith("img=")) {
+                        if ("reg" != effect) {
+                            if (effect.startsWith("img=")) {
                                 try {
-                                    val spriteIndex = Utils.parseInt(string_15.substring(4))
+                                    val spriteIndex = Utils.parseInt(effect.substring(4))
                                     val sprite = sprites!![spriteIndex]
                                     val spriteHeight = if (spriteHeights != null) spriteHeights[spriteIndex] else sprite.getSpriteHeight()
                                     if ((argbColorEffect and 0xffffff.inv()) == 0xffffff.inv()) {
@@ -224,7 +224,7 @@ abstract class AbstractFontRenderer(
                                 } catch (ignored: Exception) {
                                 }
                             } else {
-                                updateTextEffects(string_15)
+                                updateTextEffects(effect)
                             }
                             continue
                         }
@@ -237,15 +237,15 @@ abstract class AbstractFontRenderer(
                     }
                     if (ch != ' ') {
                         if (dimensions == null) {
-                            if ((Companion.shadingEffect and 0xffffff.inv()) != 0) {
-                                drawChar(ch.code, currentX + 1, currentY + 1, Companion.shadingEffect, true)
+                            if ((shadingEffect and 0xffffff.inv()) != 0) {
+                                drawChar(ch.code, currentX + 1, currentY + 1, shadingEffect, true)
                             }
                             drawChar(ch.code, currentX, currentY, argbColorEffect, false)
                         } else {
-                            if ((Companion.shadingEffect and 0xffffff.inv()) != 0) {
-                                drawChar(ch.code, currentX + 1, currentY + 1, Companion.shadingEffect, true, dimensions, shadingEffect, colorEffect)
+                            if ((shadingEffect and 0xffffff.inv()) != 0) {
+                                drawChar(ch.code, currentX + 1, currentY + 1, shadingEffect, true, dimensions, surfaceOffsetX, surfaceOffsetY)
                             }
-                            drawChar(ch.code, currentX, currentY, argbColorEffect, false, dimensions, shadingEffect, colorEffect)
+                            drawChar(ch.code, currentX, currentY, argbColorEffect, false, dimensions, surfaceOffsetX, surfaceOffsetY)
                         }
                     } else if (justifiedSpaceWidth > 0) {
                         justifiedSpaceAccumulator += justifiedSpaceWidth
@@ -266,58 +266,58 @@ abstract class AbstractFontRenderer(
         }
     }
 
-    fun renderLineWithOffsets(chatText: String, drawX: Int, drawY: Int, chatIcons: Array<NativeSprite>?, chatScaleHeights: IntArray?, widths: IntArray?, heights: IntArray?) {
-        var currentX = drawX
-        var currentY = drawY - this.fontMetrics.verticalSpacing
-        var beginIndex = -1
-        var i_10 = -1
-        var imageIndex = 0
-        val textLength = chatText.length
-        for (charIndex in 0 until textLength) {
-            var reference = (Utils.byteForChar(chatText[charIndex]).toInt() and 0xff).toChar()
-            if (reference == '<') {
-                beginIndex = charIndex
+    fun renderLineWithOffsets(text: String, x: Int, y: Int, sprites: Array<NativeSprite>?, spriteHeights: IntArray?, offsetsX: IntArray?, offsetsY: IntArray?) {
+        var currentX = x
+        var currentY = y - this.fontMetrics.verticalSpacing
+        var tagStart = -1
+        var prevChar = -1
+        var offsetIndex = 0
+        val textLength = text.length
+        for (i in 0 until textLength) {
+            var ch = (Utils.byteForChar(text[i]).toInt() and 0xff).toChar()
+            if (ch == '<') {
+                tagStart = i
             } else {
-                if (reference == '>' && beginIndex != -1) {
-                    val effect = chatText.substring(beginIndex + 1, charIndex)
-                    beginIndex = -1
+                if (ch == '>' && tagStart != -1) {
+                    val effect = text.substring(tagStart + 1, i)
+                    tagStart = -1
                     if ("lt" == effect) {
-                        reference = '<'
+                        ch = '<'
                     } else if ("gt" == effect) {
-                        reference = '>'
+                        ch = '>'
                     } else if ("nbsp" == effect) {
-                        reference = 160.toChar()
+                        ch = 160.toChar()
                     } else if ("shy" == effect) {
-                        reference = 173.toChar()
+                        ch = 173.toChar()
                     } else if ("times" == effect) {
-                        reference = 215.toChar()
+                        ch = 215.toChar()
                     } else if ("euro" == effect) {
-                        reference = 8364.toChar()
+                        ch = 8364.toChar()
                     } else if ("copy" == effect) {
-                        reference = 169.toChar()
+                        ch = 169.toChar()
                     } else {
                         if ("reg" != effect) {
                             if (effect.startsWith("img=")) {
                                 try {
-                                    val w: Int
-                                    val h: Int
-                                    if (widths != null) {
-                                        w = widths[imageIndex]
+                                    val offsetX: Int
+                                    val offsetY: Int
+                                    if (offsetsX != null) {
+                                        offsetX = offsetsX[offsetIndex]
                                     } else {
-                                        w = 0
+                                        offsetX = 0
                                     }
-                                    if (heights != null) {
-                                        h = heights[imageIndex]
+                                    if (offsetsY != null) {
+                                        offsetY = offsetsY[offsetIndex]
                                     } else {
-                                        h = 0
+                                        offsetY = 0
                                     }
-                                    imageIndex++
-                                    val iconIndex = Utils.parseInt(effect.substring(4))
-                                    val chatIcon = chatIcons!![iconIndex]
-                                    val scaleHeight = if (chatScaleHeights != null) chatScaleHeights[iconIndex] else chatIcon.getSpriteHeight()
-                                    chatIcon.draw(w + currentX, currentY + this.fontMetrics.verticalSpacing - scaleHeight + h, 1, 0, 1)
-                                    currentX += chatIcons[iconIndex].getSpriteWidth()
-                                    i_10 = -1
+                                    offsetIndex++
+                                    val spriteIndex = Utils.parseInt(effect.substring(4))
+                                    val sprite = sprites!![spriteIndex]
+                                    val spriteHeight = if (spriteHeights != null) spriteHeights[spriteIndex] else sprite.getSpriteHeight()
+                                    sprite.draw(offsetX + currentX, currentY + this.fontMetrics.verticalSpacing - spriteHeight + offsetY, 1, 0, 1)
+                                    currentX += sprites[spriteIndex].getSpriteWidth()
+                                    prevChar = -1
                                 } catch (exception: Exception) {
                                     // NOOP
                                 }
@@ -326,37 +326,37 @@ abstract class AbstractFontRenderer(
                             }
                             continue
                         }
-                        reference = 174.toChar()
+                        ch = 174.toChar()
                     }
                 }
-                if (beginIndex == -1) {
-                    if (i_10 != -1) {
-                        currentX += this.fontMetrics.getKerning(i_10, reference)
+                if (tagStart == -1) {
+                    if (prevChar != -1) {
+                        currentX += this.fontMetrics.getKerning(prevChar, ch)
                     }
-                    val w: Int
-                    val h: Int
-                    if (widths != null) {
-                        w = widths[imageIndex]
+                    val offsetX: Int
+                    val offsetY: Int
+                    if (offsetsX != null) {
+                        offsetX = offsetsX[offsetIndex]
                     } else {
-                        w = 0
+                        offsetX = 0
                     }
-                    if (heights != null) {
-                        h = heights[imageIndex]
+                    if (offsetsY != null) {
+                        offsetY = offsetsY[offsetIndex]
                     } else {
-                        h = 0
+                        offsetY = 0
                     }
-                    ++imageIndex
-                    if (reference != ' ') {
+                    ++offsetIndex
+                    if (ch != ' ') {
                         if ((shadingEffect and 0xffffff.inv()) != 0) {
-                            drawChar(reference.code, w + currentX + 1, currentY + h + 1, shadingEffect, true)
+                            drawChar(ch.code, offsetX + currentX + 1, currentY + offsetY + 1, shadingEffect, true)
                         }
-                        drawChar(reference.code, w + currentX, currentY + h, argbColorEffect, false)
+                        drawChar(ch.code, offsetX + currentX, currentY + offsetY, argbColorEffect, false)
                     } else if (justifiedSpaceWidth > 0) {
                         justifiedSpaceAccumulator += justifiedSpaceWidth
                         currentX += justifiedSpaceAccumulator shr 8
                         justifiedSpaceAccumulator = justifiedSpaceAccumulator and 0xff
                     }
-                    val glyphWidth = this.fontMetrics.getGlyphWidth(reference.code)
+                    val glyphWidth = this.fontMetrics.getGlyphWidth(ch.code)
                     if (strikeThroughEffect != -1) {
                         this.toolkit.drawOpaqueHorizontalLine(currentX, currentY + (this.fontMetrics.verticalSpacing * 0.7).toInt(), glyphWidth, strikeThroughEffect)
                     }
@@ -364,18 +364,18 @@ abstract class AbstractFontRenderer(
                         this.toolkit.drawOpaqueHorizontalLine(currentX, currentY + this.fontMetrics.verticalSpacing, glyphWidth, underlineEffect)
                     }
                     currentX += glyphWidth
-                    i_10 = reference.code
+                    prevChar = ch.code
                 }
             }
         }
     }
 
-    abstract fun drawChar(var1: Int, var2: Int, var3: Int, var4: Int, var5: Boolean)
+    abstract fun drawChar(charIndex: Int, drawX: Int, drawY: Int, colorArgb: Int, isShadow: Boolean)
 
-    fun renderText(text: String?, x: Int, y: Int, width: Int, height: Int, textColor: Int, shadowColor: Int, alignment: Int, verticalAlignment: Int, lineSpacing: Int, maxLines: Int, sprites: Array<NativeSprite>?, spriteIndices: IntArray?, dimensions: ComponentSurface?, leftPadding: Int, topPadding: Int): Int {
+    fun renderText(text: String?, x: Int, y: Int, width: Int, height: Int, textColor: Int, shadowColor: Int, horizontalAlign: Int, verticalAlign: Int, lineSpacing: Int, maxLines: Int, sprites: Array<NativeSprite>?, spriteHeights: IntArray?, dimensions: ComponentSurface?, surfaceOffsetX: Int, surfaceOffsetY: Int): Int {
         var currentLineSpacing = lineSpacing
         var maxLinesToShow = maxLines
-        var verticalAlignmentType = verticalAlignment
+        var currentVerticalAlign = verticalAlign
         if (text == null) {
             return 0
         }
@@ -400,37 +400,37 @@ abstract class AbstractFontRenderer(
             LINE_BUFFER[maxLinesToShow - 1] = this.fontMetrics.fitText(LINE_BUFFER[maxLinesToShow - 1]!!, width, sprites as Array<Sprite>?)
             numLines = maxLinesToShow
         }
-        if (verticalAlignmentType == 3 && numLines == 1) {
-            verticalAlignmentType = 1
+        if (currentVerticalAlign == 3 && numLines == 1) {
+            currentVerticalAlign = 1
         }
-        val currentY: Int
-        if (verticalAlignmentType == 0) {
-            currentY = y + this.fontMetrics.topPadding
-        } else if (verticalAlignmentType == 1) {
-            currentY = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / 2 + y + this.fontMetrics.topPadding
-        } else if (verticalAlignmentType == 2) {
-            currentY = y + height - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)
+        val startY: Int
+        if (currentVerticalAlign == 0) {
+            startY = y + this.fontMetrics.topPadding
+        } else if (currentVerticalAlign == 1) {
+            startY = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / 2 + y + this.fontMetrics.topPadding
+        } else if (currentVerticalAlign == 2) {
+            startY = y + height - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)
         } else {
             var lineSpacingToAdd = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / (numLines + 1)
             if (lineSpacingToAdd < 0) {
                 lineSpacingToAdd = 0
             }
-            currentY = y + this.fontMetrics.topPadding + lineSpacingToAdd
+            startY = y + this.fontMetrics.topPadding + lineSpacingToAdd
             currentLineSpacing += lineSpacingToAdd
         }
-        var renderY = currentY
+        var renderY = startY
         for (i in 0 until numLines) {
-            if (alignment == 0) {
-                renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
-            } else if (alignment == 1) {
-                renderLine(LINE_BUFFER[i]!!, x + (width - this.fontMetrics.getWidthNoSprites(LINE_BUFFER[i]!!)) / 2, renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
-            } else if (alignment == 2) {
-                renderLine(LINE_BUFFER[i]!!, x + width - this.fontMetrics.getWidthNoSprites(LINE_BUFFER[i]!!), renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
+            if (horizontalAlign == 0) {
+                renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
+            } else if (horizontalAlign == 1) {
+                renderLine(LINE_BUFFER[i]!!, x + (width - this.fontMetrics.getWidthNoSprites(LINE_BUFFER[i]!!)) / 2, renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
+            } else if (horizontalAlign == 2) {
+                renderLine(LINE_BUFFER[i]!!, x + width - this.fontMetrics.getWidthNoSprites(LINE_BUFFER[i]!!), renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
             } else if (i == numLines - 1) {
-                renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
+                renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
             } else {
                 calculateJustifiedSpacing(LINE_BUFFER[i]!!, width)
-                renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
+                renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
                 justifiedSpaceWidth = 0
             }
             renderY += currentLineSpacing
@@ -438,58 +438,58 @@ abstract class AbstractFontRenderer(
         return numLines
     }
 
-    abstract fun drawChar(var1: Int, var2: Int, var3: Int, var4: Int, var5: Boolean, dimension: ComponentSurface, shadingEffect: Int, colorEffect: Int)
+    abstract fun drawChar(charIndex: Int, drawX: Int, drawY: Int, colorArgb: Int, isShadow: Boolean, dimension: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int)
 
-    fun drawText(text: String?, x: Int, y: Int, width: Int, height: Int, textColor: Int, shadowColor: Int, allignment: Int, verticalAllignment: Int, lineSpacing: Int, sprites: Array<NativeSprite>?, spriteIndices: IntArray?, dimensions: ComponentSurface?, leftPadding: Int, topPadding: Int): Int {
-        return renderText(text, x, y, width, height, textColor, shadowColor, allignment, verticalAllignment, lineSpacing, 0, sprites, spriteIndices, dimensions, leftPadding, topPadding)
+    fun drawText(text: String?, x: Int, y: Int, width: Int, height: Int, textColor: Int, shadowColor: Int, horizontalAlign: Int, verticalAlign: Int, lineSpacing: Int, sprites: Array<NativeSprite>?, spriteHeights: IntArray?, dimensions: ComponentSurface?, surfaceOffsetX: Int, surfaceOffsetY: Int): Int {
+        return renderText(text, x, y, width, height, textColor, shadowColor, horizontalAlign, verticalAlign, lineSpacing, 0, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
     }
 
-    fun renderCenteredShake(text: String?, x: Int, y: Int, color: Int, i_6: Int, i_7: Int) {
+    fun renderCenteredShake(text: String?, x: Int, y: Int, color: Int, shakeSeed: Int, effectProgress: Int) {
         if (text != null) {
             calibrate(color, 0xffffff.inv())
-            var step = 7.0 - i_7 / 8.0
-            if (step < 0.0) {
-                step = 0.0
+            var amplitude = 7.0 - effectProgress / 8.0
+            if (amplitude < 0.0) {
+                amplitude = 0.0
             }
-            val length = text.length
-            val shakeOffsetsY = IntArray(length)
-            for (i in 0 until length) {
-                shakeOffsetsY[i] = (Math.sin(i_6 + i / 1.5) * step).toInt()
+            val textLength = text.length
+            val offsetsY = IntArray(textLength)
+            for (i in 0 until textLength) {
+                offsetsY[i] = (Math.sin(shakeSeed + i / 1.5) * amplitude).toInt()
             }
-            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, shakeOffsetsY)
+            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, offsetsY)
         }
     }
 
-    fun renderAntiMacroText(text: String?, x: Int, y: Int, i_4: Int, random: Random, randomSeed: Int, sprites: Array<NativeSprite>?, scaleHeights: IntArray?): Int {
+    fun renderAntiMacroText(text: String?, x: Int, y: Int, color: Int, random: Random, seed: Int, sprites: Array<NativeSprite>?, spriteHeights: IntArray?): Int {
         if (text == null) {
             return 0
         }
-        random.setSeed(randomSeed.toLong())
-        val color = 192 + (random.nextInt() and 0x1f)
-        calibrate(color shl 24 or (i_4 and 0xffffff), color shl 24)
-        val length = text.length
-        val heights = IntArray(length)
-        var height = 0
-        for (i in 0 until length) {
-            heights[i] = height
+        random.setSeed(seed.toLong())
+        val alpha = 192 + (random.nextInt() and 0x1f)
+        calibrate(alpha shl 24 or (color and 0xffffff), alpha shl 24)
+        val textLength = text.length
+        val offsetsX = IntArray(textLength)
+        var extraWidth = 0
+        for (i in 0 until textLength) {
+            offsetsX[i] = extraWidth
             if ((random.nextInt() and 0x3) == 0) {
-                height++
+                extraWidth++
             }
         }
-        renderLineWithOffsets(text, x, y, sprites, scaleHeights, heights, null)
-        return height
+        renderLineWithOffsets(text, x, y, sprites, spriteHeights, offsetsX, null)
+        return extraWidth
     }
 
     // Only vertical
     fun renderCenteredWave(text: String?, x: Int, y: Int, color: Int, waveSeed: Int) {
         if (text != null) {
             calibrate(color, 0xffffff.inv())
-            val length = text.length
-            val waveOffsetsY = IntArray(length)
-            for (i in 0 until length) {
-                waveOffsetsY[i] = (Math.sin(waveSeed / 5.0 + i / 2.0) * 5.0).toInt()
+            val textLength = text.length
+            val offsetsY = IntArray(textLength)
+            for (i in 0 until textLength) {
+                offsetsY[i] = (Math.sin(waveSeed / 5.0 + i / 2.0) * 5.0).toInt()
             }
-            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, waveOffsetsY)
+            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, offsetsY)
         }
     }
 
@@ -497,14 +497,14 @@ abstract class AbstractFontRenderer(
     fun renderCenteredWave2(text: String?, x: Int, y: Int, color: Int, waveSeed: Int) {
         if (text != null) {
             calibrate(color, 0xffffff.inv())
-            val length = text.length
-            val waveOffsetsX = IntArray(length)
-            val waveOffsetsY = IntArray(length)
-            for (i in 0 until length) {
-                waveOffsetsX[i] = (Math.sin(waveSeed / 5.0 + i / 5.0) * 5.0).toInt()
-                waveOffsetsY[i] = (Math.sin(waveSeed / 5.0 + i / 3.0) * 5.0).toInt()
+            val textLength = text.length
+            val offsetsX = IntArray(textLength)
+            val offsetsY = IntArray(textLength)
+            for (i in 0 until textLength) {
+                offsetsX[i] = (Math.sin(waveSeed / 5.0 + i / 5.0) * 5.0).toInt()
+                offsetsY[i] = (Math.sin(waveSeed / 5.0 + i / 3.0) * 5.0).toInt()
             }
-            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, waveOffsetsX, waveOffsetsY)
+            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, offsetsX, offsetsY)
         }
     }
 }

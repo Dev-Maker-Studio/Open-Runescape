@@ -123,7 +123,7 @@ open class MapLoader(
                             underlayHue!![y] += underlay.hue
                             underlaySaturation!![y] += underlay.saturation
                             underlayLightness!![y] += underlay.lightness
-                            underlayDivider!![y] += underlay.divisor
+                            underlayDivider!![y] += underlay.hueMultiplier
                             underlayCount!![y]++
                         }
                     }
@@ -135,7 +135,7 @@ open class MapLoader(
                             underlayHue!![y] -= underlay.hue
                             underlaySaturation!![y] -= underlay.saturation
                             underlayLightness!![y] -= underlay.lightness
-                            underlayDivider!![y] -= underlay.divisor
+                            underlayDivider!![y] -= underlay.hueMultiplier
                             underlayCount!![y]--
                         }
                     }

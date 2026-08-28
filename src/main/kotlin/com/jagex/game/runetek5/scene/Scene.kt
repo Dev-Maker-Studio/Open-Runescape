@@ -59,13 +59,13 @@ class Scene(
     var visibleToInvertedYnegative: Int = 0
     var visibleToXpositive: Int = 0
     var visibleToYpositive: Int = 0
-    var adjacentTileOnScreen: Array<BooleanArray>
+    var allTilesVisibleFallback: Array<BooleanArray>
     var tileOnScreen: Array<BooleanArray>
-    var adjacent_tile_on_screen: Array<BooleanArray>
-    var anInt2618: Int = 5015
-    var anInt2619: Int = 5040
+    var tileInFrustum: Array<BooleanArray>
+    var priorityRenderedEntityCapacity: Int = 5015
+    var interactiveObjectCapacity: Int = 5040
     var anInt2622: Int = 16
-    var anInt2634: Int = 10072
+    var depthRenderedEntityCapacity: Int = 10072
     var anInt2643: Int = 1
     val renderedGraphNodePosition: FloatArray
     val activeLights: Array<PointLight?>
@@ -84,8 +84,8 @@ class Scene(
     var tileLightUids: Array<Array<LongArray>>?
     var lightSlotOccupant: Array<FlickeringEffect?>?
     var lightSlotAvailable: BooleanArray?
-    val renderObjects3d: Array<SceneGraphEntity?>
-    val renderObjects2d: Array<SceneGraphEntity?>
+    val staticTextureOpaqueEntities: Array<SceneGraphEntity?>
+    val alphaEntities: Array<SceneGraphEntity?>
     val dynamicRenderObjects: Array<SceneGraphEntity?>
 
     /**
@@ -156,8 +156,8 @@ class Scene(
             this.lightSlotAvailable = null
         }
         this.setUnderwater(false)
-        this.renderObjects3d = arrayOfNulls(2)
-        this.renderObjects2d = arrayOfNulls(2)
+        this.staticTextureOpaqueEntities = arrayOfNulls(2)
+        this.alphaEntities = arrayOfNulls(2)
         this.dynamicRenderObjects = arrayOfNulls(2)
         this.depthRenderedEntities = arrayOfNulls(10072)
         this.depthObjectCount = 0
@@ -165,9 +165,9 @@ class Scene(
         this.layeredObjectCount = 0
         this.interactiveObjects = arrayOfNulls(5040)
         this.interactiveObjectCount = 0
-        this.adjacent_tile_on_screen = Array(visibleTiles + visibleTiles + 1) { BooleanArray(visibleTiles + visibleTiles + 1) }
+        this.tileInFrustum = Array(visibleTiles + visibleTiles + 1) { BooleanArray(visibleTiles + visibleTiles + 1) }
         this.tileOnScreen = Array(visibleTiles + visibleTiles + 2) { BooleanArray(visibleTiles + visibleTiles + 2) }
-        this.adjacentTileOnScreen = this.adjacent_tile_on_screen
+        this.allTilesVisibleFallback = this.tileInFrustum
         this.tileVisibility = IntArray(visibleTiles + visibleTiles + 2)
         this.interactiveEntities = InteractiveEntityCache()
         this.tiles = this.surfaceTiles
@@ -191,39 +191,39 @@ class Scene(
         this.regionSizeZ = this.tiles.size
     }
 
-    fun getWall(z: Int, x: Int, y: Int): AbstractWall? {
-        val tile = this.tiles[z][x][y]
+    fun getWall(plane: Int, x: Int, y: Int): AbstractWall? {
+        val tile = this.tiles[plane][x][y]
         return tile?.primaryWall
     }
 
     fun linkBelow(x: Int, y: Int) {
-        val baseFloorTile = this.tiles[0][x][y]
+        val bridgeTile = this.tiles[0][x][y]
         for (plane in 0..2) {
-            val tileNextLvl = this.tiles[plane + 1][x][y]
-            this.tiles[plane][x][y] = tileNextLvl
-            if (tileNextLvl != null) {
-                var wrapper = tileNextLvl.interactives
-                while (wrapper != null) {
-                    val interactive = wrapper.interactiveObject
+            val tileAbove = this.tiles[plane + 1][x][y]
+            this.tiles[plane][x][y] = tileAbove
+            if (tileAbove != null) {
+                var container = tileAbove.interactives
+                while (container != null) {
+                    val interactive = container.interactiveObject
                     if (interactive!!.startX.toInt() == x && y == interactive!!.startZ.toInt()) {
                         interactive.plane = (interactive.plane - 1).toByte()
                     }
-                    wrapper = wrapper.child
+                    container = container.child
                 }
-                if (tileNextLvl.groundDecoration != null) {
-                    tileNextLvl.groundDecoration!!.plane = (tileNextLvl.groundDecoration!!.plane - 1).toByte()
+                if (tileAbove.groundDecoration != null) {
+                    tileAbove.groundDecoration!!.plane = (tileAbove.groundDecoration!!.plane - 1).toByte()
                 }
-                if (tileNextLvl.primaryWall != null) {
-                    tileNextLvl.primaryWall!!.plane = (tileNextLvl.primaryWall!!.plane - 1).toByte()
+                if (tileAbove.primaryWall != null) {
+                    tileAbove.primaryWall!!.plane = (tileAbove.primaryWall!!.plane - 1).toByte()
                 }
-                if (tileNextLvl.secondaryWall != null) {
-                    tileNextLvl.secondaryWall!!.plane = (tileNextLvl.secondaryWall!!.plane - 1).toByte()
+                if (tileAbove.secondaryWall != null) {
+                    tileAbove.secondaryWall!!.plane = (tileAbove.secondaryWall!!.plane - 1).toByte()
                 }
-                if (tileNextLvl.primaryWallDecoration != null) {
-                    tileNextLvl.primaryWallDecoration!!.plane = (tileNextLvl.primaryWallDecoration!!.plane - 1).toByte()
+                if (tileAbove.primaryWallDecoration != null) {
+                    tileAbove.primaryWallDecoration!!.plane = (tileAbove.primaryWallDecoration!!.plane - 1).toByte()
                 }
-                if (tileNextLvl.secondaryWallDecoration != null) {
-                    tileNextLvl.secondaryWallDecoration!!.plane = (tileNextLvl.secondaryWallDecoration!!.plane - 1).toByte()
+                if (tileAbove.secondaryWallDecoration != null) {
+                    tileAbove.secondaryWallDecoration!!.plane = (tileAbove.secondaryWallDecoration!!.plane - 1).toByte()
                 }
             }
         }
@@ -231,27 +231,27 @@ class Scene(
             this.tiles[0][x][y] = Tile(0)
             this.tiles[0][x][y]!!.plane = 1
         }
-        this.tiles[0][x][y]!!.bridge = baseFloorTile
+        this.tiles[0][x][y]!!.bridge = bridgeTile
         this.tiles[3][x][y] = null
     }
 
-    fun loadTiles(z: Int, x: Int, y: Int) {
+    fun loadTiles(plane: Int, x: Int, y: Int) {
         val hasBridge = this.tiles[0][x][y] != null && this.tiles[0][x][y]!!.bridge != null
-        var currentZ = z
-        while (currentZ >= 0) {
-            if (this.tiles[currentZ][x][y] == null) {
-                val tile = Tile(currentZ)
-                this.tiles[currentZ][x][y] = tile
+        var currentPlane = plane
+        while (currentPlane >= 0) {
+            if (this.tiles[currentPlane][x][y] == null) {
+                val tile = Tile(currentPlane)
+                this.tiles[currentPlane][x][y] = tile
                 if (hasBridge) {
                     tile.plane++
                 }
             }
-            --currentZ
+            --currentPlane
         }
     }
 
-    fun setLocalGround(z: Int, ground: Ground?) {
-        this.localHeightmap[z] = ground
+    fun setLocalGround(plane: Int, ground: Ground?) {
+        this.localHeightmap[plane] = ground
     }
 
     fun getScale(x: Int, y: Int): Int {
@@ -266,7 +266,7 @@ class Scene(
         return if (this.opcode22 != null) this.opcode22!![x][y].toInt() and 0xff else 0
     }
 
-    fun addWater(x: Int, y: Int, waterColor: Int, waterScale: Int, waterIntensity: Int, opcode20: Int, opcode21: Int, opcode22: Int) {
+    fun addWater(x: Int, y: Int, waterColor: Int, waterScale: Int, waterIntensity: Int, waterOpcode20: Int, waterOpcode21: Int, waterOpcode22: Int) {
         if (this.colors != null) {
             this.colors!![x][y] = 0xffffff.inv() or waterColor
         }
@@ -277,32 +277,32 @@ class Scene(
             this.intensities!![x][y] = waterIntensity.toByte()
         }
         if (this.opcode20 != null) {
-            this.opcode20!![x][y] = opcode20.toByte()
+            this.opcode20!![x][y] = waterOpcode20.toByte()
         }
         if (this.opcode21 != null) {
-            this.opcode21!![x][y] = opcode21.toByte()
+            this.opcode21!![x][y] = waterOpcode21.toByte()
         }
         if (this.opcode22 != null) {
-            this.opcode22!![x][y] = opcode22.toByte()
+            this.opcode22!![x][y] = waterOpcode22.toByte()
         }
     }
 
-    fun addGroundDecoration(logicHeight: Int, baseX: Int, baseY: Int, groundDecoration: AbstractGroundDecoration?) {
-        val tile = getTile(logicHeight, baseX, baseY)
+    fun addGroundDecoration(plane: Int, baseX: Int, baseY: Int, groundDecoration: AbstractGroundDecoration?) {
+        val tile = getTile(plane, baseX, baseY)
         if (tile != null) {
             tile.groundDecoration = groundDecoration
-            val type = if (this.localHeightmap === this.underwaterHeightmap) 1 else 0
+            val layerIndex = if (this.localHeightmap === this.underwaterHeightmap) 1 else 0
             if (groundDecoration!!.disregardTextureMovement()) {
                 if (groundDecoration.hasAlpha()) {
-                    groundDecoration.child = this.renderObjects2d[type]
-                    this.renderObjects2d[type] = groundDecoration
+                    groundDecoration.child = this.alphaEntities[layerIndex]
+                    this.alphaEntities[layerIndex] = groundDecoration
                 } else {
-                    groundDecoration.child = this.renderObjects3d[type]
-                    this.renderObjects3d[type] = groundDecoration
+                    groundDecoration.child = this.staticTextureOpaqueEntities[layerIndex]
+                    this.staticTextureOpaqueEntities[layerIndex] = groundDecoration
                 }
             } else {
-                groundDecoration.child = this.dynamicRenderObjects[type]
-                this.dynamicRenderObjects[type] = groundDecoration
+                groundDecoration.child = this.dynamicRenderObjects[layerIndex]
+                this.dynamicRenderObjects[layerIndex] = groundDecoration
             }
         }
     }
@@ -312,115 +312,115 @@ class Scene(
         if (tile != null) {
             groundItem!!.setBasePosition(Vector3(((baseX shl this.tileUnits) + this.halfTileOffset).toFloat(), drawHeight.toFloat(), ((baseY shl this.tileUnits) + this.halfTileOffset).toFloat()))
             tile.groundItem = groundItem
-            val type = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
+            val layerIndex = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
             if (groundItem.disregardTextureMovement()) {
                 if (groundItem.hasAlpha()) {
-                    groundItem.child = this.renderObjects2d[type]
-                    this.renderObjects2d[type] = groundItem
+                    groundItem.child = this.alphaEntities[layerIndex]
+                    this.alphaEntities[layerIndex] = groundItem
                 } else {
-                    groundItem.child = this.renderObjects3d[type]
-                    this.renderObjects3d[type] = groundItem
+                    groundItem.child = this.staticTextureOpaqueEntities[layerIndex]
+                    this.staticTextureOpaqueEntities[layerIndex] = groundItem
                 }
             } else {
-                groundItem.child = this.dynamicRenderObjects[type]
-                this.dynamicRenderObjects[type] = groundItem
+                groundItem.child = this.dynamicRenderObjects[layerIndex]
+                this.dynamicRenderObjects[layerIndex] = groundItem
             }
         }
     }
 
 
-    fun addWall(locHeight: Int, baseX: Int, baseY: Int, primaryWall: AbstractWall?, secondaryWall: AbstractWall?) {
-        val tile = getTile(locHeight, baseX, baseY)
+    fun addWall(plane: Int, baseX: Int, baseY: Int, primaryWall: AbstractWall?, secondaryWall: AbstractWall?) {
+        val tile = getTile(plane, baseX, baseY)
         if (tile != null) {
             tile.primaryWall = primaryWall
             tile.secondaryWall = secondaryWall
-            val type = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
+            val layerIndex = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
             if (primaryWall!!.disregardTextureMovement()) {
                 if (primaryWall.hasAlpha()) {
-                    primaryWall.child = this.renderObjects2d[type]
-                    this.renderObjects2d[type] = primaryWall
+                    primaryWall.child = this.alphaEntities[layerIndex]
+                    this.alphaEntities[layerIndex] = primaryWall
                 } else {
-                    primaryWall.child = this.renderObjects3d[type]
-                    this.renderObjects3d[type] = primaryWall
+                    primaryWall.child = this.staticTextureOpaqueEntities[layerIndex]
+                    this.staticTextureOpaqueEntities[layerIndex] = primaryWall
                 }
             } else {
-                primaryWall.child = this.dynamicRenderObjects[type]
-                this.dynamicRenderObjects[type] = primaryWall
+                primaryWall.child = this.dynamicRenderObjects[layerIndex]
+                this.dynamicRenderObjects[layerIndex] = primaryWall
             }
             if (secondaryWall != null) {
                 if (secondaryWall.disregardTextureMovement()) {
                     if (secondaryWall.hasAlpha()) {
-                        secondaryWall.child = this.renderObjects2d[type]
-                        this.renderObjects2d[type] = secondaryWall
+                        secondaryWall.child = this.alphaEntities[layerIndex]
+                        this.alphaEntities[layerIndex] = secondaryWall
                     } else {
-                        secondaryWall.child = this.renderObjects3d[type]
-                        this.renderObjects3d[type] = secondaryWall
+                        secondaryWall.child = this.staticTextureOpaqueEntities[layerIndex]
+                        this.staticTextureOpaqueEntities[layerIndex] = secondaryWall
                     }
                 } else {
-                    secondaryWall.child = this.dynamicRenderObjects[type]
-                    this.dynamicRenderObjects[type] = secondaryWall
+                    secondaryWall.child = this.dynamicRenderObjects[layerIndex]
+                    this.dynamicRenderObjects[layerIndex] = secondaryWall
                 }
             }
         }
     }
 
-    fun addWallDecoration(wallPlane: Int, baseX: Int, baseY: Int, primaryWallDecoration: AbstractWallDecoration?, secondaryWallDecoration: AbstractWallDecoration?) {
-        val tile = getTile(wallPlane, baseX, baseY)
+    fun addWallDecoration(plane: Int, baseX: Int, baseY: Int, primaryWallDecoration: AbstractWallDecoration?, secondaryWallDecoration: AbstractWallDecoration?) {
+        val tile = getTile(plane, baseX, baseY)
         if (tile != null) {
             tile.primaryWallDecoration = primaryWallDecoration
             tile.secondaryWallDecoration = secondaryWallDecoration
-            val renderType = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
+            val layerIndex = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
             if (primaryWallDecoration!!.disregardTextureMovement()) {
                 if (primaryWallDecoration.hasAlpha()) {
-                    primaryWallDecoration.child = this.renderObjects2d[renderType]
-                    this.renderObjects2d[renderType] = primaryWallDecoration
+                    primaryWallDecoration.child = this.alphaEntities[layerIndex]
+                    this.alphaEntities[layerIndex] = primaryWallDecoration
                 } else {
-                    primaryWallDecoration.child = this.renderObjects3d[renderType]
-                    this.renderObjects3d[renderType] = primaryWallDecoration
+                    primaryWallDecoration.child = this.staticTextureOpaqueEntities[layerIndex]
+                    this.staticTextureOpaqueEntities[layerIndex] = primaryWallDecoration
                 }
             } else {
-                primaryWallDecoration.child = this.dynamicRenderObjects[renderType]
-                this.dynamicRenderObjects[renderType] = primaryWallDecoration
+                primaryWallDecoration.child = this.dynamicRenderObjects[layerIndex]
+                this.dynamicRenderObjects[layerIndex] = primaryWallDecoration
             }
             if (secondaryWallDecoration != null) {
                 if (secondaryWallDecoration.disregardTextureMovement()) {
                     if (secondaryWallDecoration.hasAlpha()) {
-                        secondaryWallDecoration.child = this.renderObjects2d[renderType]
-                        this.renderObjects2d[renderType] = secondaryWallDecoration
+                        secondaryWallDecoration.child = this.alphaEntities[layerIndex]
+                        this.alphaEntities[layerIndex] = secondaryWallDecoration
                     } else {
-                        secondaryWallDecoration.child = this.renderObjects3d[renderType]
-                        this.renderObjects3d[renderType] = secondaryWallDecoration
+                        secondaryWallDecoration.child = this.staticTextureOpaqueEntities[layerIndex]
+                        this.staticTextureOpaqueEntities[layerIndex] = secondaryWallDecoration
                     }
                 } else {
-                    secondaryWallDecoration.child = this.dynamicRenderObjects[renderType]
-                    this.dynamicRenderObjects[renderType] = secondaryWallDecoration
+                    secondaryWallDecoration.child = this.dynamicRenderObjects[layerIndex]
+                    this.dynamicRenderObjects[layerIndex] = secondaryWallDecoration
                 }
             }
         }
     }
 
-    fun addInteractive(node: AbstractInteractiveEntity, cached: Boolean): Boolean {
+    fun addInteractive(interactive: AbstractInteractiveEntity, cached: Boolean): Boolean {
         val isUnderwater = this.localHeightmap === this.underwaterHeightmap
         var color = 0
         var scale: Short = 0
         var intensity: Byte = 0
-        node.calculatePosition()
-        if (node.startX >= 0 && node.startZ >= 0 && node.endX < this.sceneDimensionX && node.endZ < this.sceneDimensionY) {
+        interactive.calculatePosition()
+        if (interactive.startX >= 0 && interactive.startZ >= 0 && interactive.endX < this.sceneDimensionX && interactive.endZ < this.sceneDimensionY) {
             var floorOffsetY: Short = 0
-            for (x in node.startX..node.endX) {
-                for (y in node.startZ..node.endZ) {
-                    val tile = getTile(node.plane.toInt(), x, y)
+            for (x in interactive.startX..interactive.endX) {
+                for (y in interactive.startZ..interactive.endZ) {
+                    val tile = getTile(interactive.plane.toInt(), x, y)
                     if (tile != null) {
-                        val wrapper = InteractiveEntityContainer.add(node)
-                        val emptyChild = tile.interactives
-                        if (emptyChild == null) {
-                            tile.interactives = wrapper
+                        val container = InteractiveEntityContainer.add(interactive)
+                        val head = tile.interactives
+                        if (head == null) {
+                            tile.interactives = container
                         } else {
-                            var current = emptyChild
+                            var current = head
                             while (current!!.child != null) {
                                 current = current!!.child!!!!
                             }
-                            current.child = wrapper
+                            current.child = container
                         }
                         if (isUnderwater && (this.colors!![x][y] and 0xffffff.inv()) != 0) {
                             color = this.colors!![x][y]
@@ -434,8 +434,8 @@ class Scene(
                 }
             }
             if (isUnderwater && (color and 0xffffff.inv()) != 0) {
-                for (x in node.startX..node.endX) {
-                    for (y in node.startZ..node.endZ) {
+                for (x in interactive.startX..interactive.endX) {
+                    for (y in interactive.startZ..interactive.endZ) {
                         if ((this.colors!![x][y] and 0xffffff.inv()) == 0) {
                             this.colors!![x][y] = color
                             this.scales!![x][y] = scale
@@ -445,27 +445,27 @@ class Scene(
                 }
             }
             if (cached) {
-                this.interactiveObjects[++this.interactiveObjectCount - 1] = node
-                node.scene = this
+                this.interactiveObjects[++this.interactiveObjectCount - 1] = interactive
+                interactive.scene = this
             } else {
-                val nodePointer = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
-                if (node.disregardTextureMovement()) {
-                    if (node.hasAlpha()) {
-                        node.child = this.renderObjects2d[nodePointer]
-                        this.renderObjects2d[nodePointer] = node
+                val layerIndex = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
+                if (interactive.disregardTextureMovement()) {
+                    if (interactive.hasAlpha()) {
+                        interactive.child = this.alphaEntities[layerIndex]
+                        this.alphaEntities[layerIndex] = interactive
                     } else {
-                        node.child = this.renderObjects3d[nodePointer]
-                        this.renderObjects3d[nodePointer] = node
+                        interactive.child = this.staticTextureOpaqueEntities[layerIndex]
+                        this.staticTextureOpaqueEntities[layerIndex] = interactive
                     }
                 } else {
-                    node.child = this.dynamicRenderObjects[nodePointer]
-                    this.dynamicRenderObjects[nodePointer] = node
+                    interactive.child = this.dynamicRenderObjects[layerIndex]
+                    this.dynamicRenderObjects[layerIndex] = interactive
                 }
             }
             if (cached) {
-                val absolutePosition = Vector3Pool.vector3From(node.getAbsolutePosition().coords)
+                val absolutePosition = Vector3Pool.vector3From(interactive.getAbsolutePosition().coords)
                 absolutePosition.y -= floorOffsetY.toFloat()
-                node.setBasePosition(absolutePosition)
+                interactive.setBasePosition(absolutePosition)
                 absolutePosition.pushVectorStack()
             }
             return true
@@ -473,61 +473,61 @@ class Scene(
         return false
     }
 
-    fun offsetWallDecoration(z: Int, x: Int, y: Int, displacement: Int) {
-        val tile = this.tiles[z][x][y]
+    fun offsetWallDecoration(plane: Int, x: Int, y: Int, displacement: Int) {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
-            val first = tile.primaryWallDecoration
-            val second = tile.secondaryWallDecoration
+            val primaryWallDecoration = tile.primaryWallDecoration
+            val secondaryWallDecoration = tile.secondaryWallDecoration
             /** The upscaling happening below equals to 9 - 7 = 2, to match the model upscaling **/
-            if (first != null) {
-                first.positionX = (displacement * first.positionX / (16 shl this.tileUnits - 7)).toShort()
-                first.positionY = (displacement * first.positionY / (16 shl this.tileUnits - 7)).toShort()
+            if (primaryWallDecoration != null) {
+                primaryWallDecoration.positionX = (displacement * primaryWallDecoration.positionX / (16 shl this.tileUnits - 7)).toShort()
+                primaryWallDecoration.positionY = (displacement * primaryWallDecoration.positionY / (16 shl this.tileUnits - 7)).toShort()
             }
-            if (second != null) {
-                second.positionX = (displacement * second.positionX / (16 shl this.tileUnits - 7)).toShort()
-                second.positionY = (displacement * second.positionY / (16 shl this.tileUnits - 7)).toShort()
+            if (secondaryWallDecoration != null) {
+                secondaryWallDecoration.positionX = (displacement * secondaryWallDecoration.positionX / (16 shl this.tileUnits - 7)).toShort()
+                secondaryWallDecoration.positionY = (displacement * secondaryWallDecoration.positionY / (16 shl this.tileUnits - 7)).toShort()
             }
         }
     }
 
     fun clearInteractives() {
         for (index in 0 until this.interactiveObjectCount) {
-            val inteactive = this.interactiveObjects[index]
-            removeInteractive(inteactive!!, true)
+            val interactive = this.interactiveObjects[index]
+            removeInteractive(interactive!!, true)
             this.interactiveObjects[index] = null
         }
         this.interactiveObjectCount = 0
     }
 
     fun applyShading() {
-        for (z in 0 until this.regionSizeZ) {
+        for (plane in 0 until this.regionSizeZ) {
             for (x in 0 until this.sceneDimensionX) {
                 for (y in 0 until this.sceneDimensionY) {
-                    val tile = this.tiles[z][x][y]
+                    val tile = this.tiles[plane][x][y]
                     if (tile != null) {
                         val primaryWall = tile.primaryWall
                         val secondaryWall = tile.secondaryWall
                         if (primaryWall != null && primaryWall.hasTileShadow()) {
-                            castShadow(primaryWall, z, x, y, 1, 1)
+                            castShadow(primaryWall, plane, x, y, 1, 1)
                             if (secondaryWall != null && secondaryWall.hasTileShadow()) {
-                                castShadow(secondaryWall, z, x, y, 1, 1)
+                                castShadow(secondaryWall, plane, x, y, 1, 1)
                                 secondaryWall.castShadow(primaryWall, 0, 0, 0, false)
                                 secondaryWall.removeTileShadow()
                             }
                             primaryWall.removeTileShadow()
                         }
-                        var interactiveWrapper = tile.interactives
-                        while (interactiveWrapper != null) {
-                            val interactive = interactiveWrapper.interactiveObject
+                        var container = tile.interactives
+                        while (container != null) {
+                            val interactive = container.interactiveObject
                             if (interactive != null && interactive.hasTileShadow()) {
-                                castShadow(interactive, z, x, y, interactive.endX - interactive.startX + 1, interactive.endZ - interactive.startZ + 1)
+                                castShadow(interactive, plane, x, y, interactive.endX - interactive.startX + 1, interactive.endZ - interactive.startZ + 1)
                                 interactive.removeTileShadow()
                             }
-                            interactiveWrapper = interactiveWrapper.child
+                            container = container.child
                         }
                         val groundDecoration = tile.groundDecoration
                         if (groundDecoration != null && groundDecoration.hasTileShadow()) {
-                            castShadow(groundDecoration, z, x, y)
+                            castShadow(groundDecoration, plane, x, y)
                             groundDecoration.removeTileShadow()
                         }
                     }
@@ -536,21 +536,21 @@ class Scene(
         }
     }
 
-    fun removePrimaryWallDecoration(z: Int, x: Int, y: Int): AbstractWallDecoration? {
-        val tile = this.tiles[z][x][y]
+    fun removePrimaryWallDecoration(plane: Int, x: Int, y: Int): AbstractWallDecoration? {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.primaryWallDecoration)
             if (tile.primaryWallDecoration != null) {
-                val wallDecoration = tile.primaryWallDecoration
+                val primaryWallDecoration = tile.primaryWallDecoration
                 tile.primaryWallDecoration = null
-                return wallDecoration
+                return primaryWallDecoration
             }
         }
         return null
     }
 
-    fun removeGroundDecoration(z: Int, x: Int, y: Int): AbstractGroundDecoration? {
-        val tile = this.tiles[z][x][y]
+    fun removeGroundDecoration(plane: Int, x: Int, y: Int): AbstractGroundDecoration? {
+        val tile = this.tiles[plane][x][y]
         if (tile == null) {
             return null
         }
@@ -563,8 +563,8 @@ class Scene(
         return null
     }
 
-    fun removeGroundItem(z: Int, x: Int, y: Int): AbstractGroundItem? {
-        val tile = this.tiles[z][x][y]
+    fun removeGroundItem(plane: Int, x: Int, y: Int): AbstractGroundItem? {
+        val tile = this.tiles[plane][x][y]
         if (tile == null) {
             return null
         }
@@ -579,20 +579,20 @@ class Scene(
             for (y in interactive.startZ..interactive.endZ) {
                 val tile = this.tiles[interactive.plane.toInt()][x][y]
                 if (tile != null) {
-                    var interactives = tile.interactives
-                    var child: InteractiveEntityContainer? = null
-                    while (interactives != null) {
-                        if (interactive === interactives.interactiveObject) {
-                            if (child != null) {
-                                child.child = interactives.child
+                    var container = tile.interactives
+                    var previous: InteractiveEntityContainer? = null
+                    while (container != null) {
+                        if (interactive === container.interactiveObject) {
+                            if (previous != null) {
+                                previous.child = container.child
                             } else {
-                                tile.interactives = interactives.child
+                                tile.interactives = container.child
                             }
-                            interactives.release()
+                            container.release()
                             break
                         }
-                        child = interactives
-                        interactives = interactives.child
+                        previous = container
+                        container = container.child
                     }
                 }
             }
@@ -602,63 +602,63 @@ class Scene(
         }
     }
 
-    fun pushIntoStack(renderedNode: SceneGraphEntity?) {
-        if (renderedNode != null) {
-            renderedNode.detach()
+    fun pushIntoStack(entity: SceneGraphEntity?) {
+        if (entity != null) {
+            entity.detach()
             for (index in 0..1) {
-                var childNode: SceneGraphEntity? = null
-                var primaryNode: SceneGraphEntity? = this.renderObjects3d[index]
-                while (primaryNode != null) {
-                    if (primaryNode === renderedNode) {
-                        if (childNode != null) {
-                            childNode.child = primaryNode.child
+                var previous: SceneGraphEntity? = null
+                var node: SceneGraphEntity? = this.staticTextureOpaqueEntities[index]
+                while (node != null) {
+                    if (node === entity) {
+                        if (previous != null) {
+                            previous.child = node.child
                         } else {
-                            this.renderObjects3d[index] = primaryNode.child
+                            this.staticTextureOpaqueEntities[index] = node.child
                         }
                         return
                     }
-                    childNode = primaryNode
-                    primaryNode = primaryNode.child
+                    previous = node
+                    node = node.child
                 }
-                childNode = null
-                primaryNode = this.renderObjects2d[index]
-                while (primaryNode != null) {
-                    if (primaryNode === renderedNode) {
-                        if (childNode != null) {
-                            childNode.child = primaryNode.child
+                previous = null
+                node = this.alphaEntities[index]
+                while (node != null) {
+                    if (node === entity) {
+                        if (previous != null) {
+                            previous.child = node.child
                         } else {
-                            this.renderObjects2d[index] = primaryNode.child
+                            this.alphaEntities[index] = node.child
                         }
                         return
                     }
-                    childNode = primaryNode
-                    primaryNode = primaryNode.child
+                    previous = node
+                    node = node.child
                 }
-                childNode = null
-                primaryNode = this.dynamicRenderObjects[index]
-                while (primaryNode != null) {
-                    if (primaryNode === renderedNode) {
-                        if (childNode != null) {
-                            childNode.child = primaryNode.child
+                previous = null
+                node = this.dynamicRenderObjects[index]
+                while (node != null) {
+                    if (node === entity) {
+                        if (previous != null) {
+                            previous.child = node.child
                         } else {
-                            this.dynamicRenderObjects[index] = primaryNode.child
+                            this.dynamicRenderObjects[index] = node.child
                         }
                         return
                     }
-                    childNode = primaryNode
-                    primaryNode = primaryNode.child
+                    previous = node
+                    node = node.child
                 }
             }
         }
     }
 
-    fun getSecondaryWall(z: Int, x: Int, y: Int): AbstractWall? {
-        val tile = this.tiles[z][x][y]
+    fun getSecondaryWall(plane: Int, x: Int, y: Int): AbstractWall? {
+        val tile = this.tiles[plane][x][y]
         return tile?.secondaryWall
     }
 
-    fun getInteractiveObject(z: Int, x: Int, y: Int, comparable: ComparableGraphNode?): AbstractInteractiveEntity? {
-        val tile = this.tiles[z][x][y]
+    fun getInteractiveObject(plane: Int, x: Int, y: Int, comparable: ComparableGraphNode?): AbstractInteractiveEntity? {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
             var container = tile.interactives
             while (container != null) {
@@ -672,34 +672,34 @@ class Scene(
         return null
     }
 
-    fun getGroundDecoration(z: Int, x: Int, y: Int): AbstractGroundDecoration? {
-        val tile = this.tiles[z][x][y]
+    fun getGroundDecoration(plane: Int, x: Int, y: Int): AbstractGroundDecoration? {
+        val tile = this.tiles[plane][x][y]
         return if (tile != null && tile.groundDecoration != null) tile.groundDecoration else null
     }
 
-    fun castShadow(graphEntity: SceneGraphEntity, sceneZ: Int, sceneX: Int, sceneY: Int) {
-        if (sceneX < this.sceneDimensionX) {
-            val tile = this.tiles[sceneZ][sceneX + 1][sceneY]
+    fun castShadow(entity: SceneGraphEntity, plane: Int, x: Int, y: Int) {
+        if (x < this.sceneDimensionX) {
+            val tile = this.tiles[plane][x + 1][y]
             if (tile != null && tile.groundDecoration != null && tile.groundDecoration!!.hasTileShadow()) {
-                graphEntity.castShadow((tile.groundDecoration as SceneGraphEntity), this.fullTileDimension, 0, 0, true)
+                entity.castShadow((tile.groundDecoration as SceneGraphEntity), this.fullTileDimension, 0, 0, true)
             }
         }
-        if (sceneY < this.sceneDimensionX) {
-            val tile = this.tiles[sceneZ][sceneX][sceneY + 1]
+        if (y < this.sceneDimensionX) {
+            val tile = this.tiles[plane][x][y + 1]
             if (tile != null && tile.groundDecoration != null && tile.groundDecoration!!.hasTileShadow()) {
-                graphEntity.castShadow((tile.groundDecoration as SceneGraphEntity), 0, 0, this.fullTileDimension, true)
+                entity.castShadow((tile.groundDecoration as SceneGraphEntity), 0, 0, this.fullTileDimension, true)
             }
         }
-        if (sceneX < this.sceneDimensionX && sceneY < this.sceneDimensionY) {
-            val tile = this.tiles[sceneZ][sceneX + 1][sceneY + 1]
+        if (x < this.sceneDimensionX && y < this.sceneDimensionY) {
+            val tile = this.tiles[plane][x + 1][y + 1]
             if (tile != null && tile.groundDecoration != null && tile.groundDecoration!!.hasTileShadow()) {
-                graphEntity.castShadow((tile.groundDecoration as SceneGraphEntity), this.fullTileDimension, 0, this.fullTileDimension, true)
+                entity.castShadow((tile.groundDecoration as SceneGraphEntity), this.fullTileDimension, 0, this.fullTileDimension, true)
             }
         }
-        if (sceneX < this.sceneDimensionX && sceneY > 0) {
-            val tile = this.tiles[sceneZ][sceneX + 1][sceneY - 1]
+        if (x < this.sceneDimensionX && y > 0) {
+            val tile = this.tiles[plane][x + 1][y - 1]
             if (tile != null && tile.groundDecoration != null && tile.groundDecoration!!.hasTileShadow()) {
-                graphEntity.castShadow((tile.groundDecoration as SceneGraphEntity), this.fullTileDimension, 0, -this.fullTileDimension, true)
+                entity.castShadow((tile.groundDecoration as SceneGraphEntity), this.fullTileDimension, 0, -this.fullTileDimension, true)
             }
         }
     }
@@ -708,15 +708,15 @@ class Scene(
      * Adjusts the depth of the object (perspective_z)
      * to prevent the floor rendering over an object
      */
-    fun separateFromFloor(graphNode: SceneGraphEntity) {
+    fun separateFromFloor(entity: SceneGraphEntity) {
         walkNodes++
-        val absolutePosition = graphNode.getAbsolutePosition().coords
-        this.activeToolkit.calculateProjection(absolutePosition.x.toInt().toFloat(), (absolutePosition.y.toInt() + (graphNode.getMinY() shr 1)).toFloat(), absolutePosition.z.toInt().toFloat(), this.renderedGraphNodePosition)
-        graphNode.floorDepth = this.renderedGraphNodePosition[2].toInt()
+        val absolutePosition = entity.getAbsolutePosition().coords
+        this.activeToolkit.calculateProjection(absolutePosition.x.toInt().toFloat(), (absolutePosition.y.toInt() + (entity.getMinY() shr 1)).toFloat(), absolutePosition.z.toInt().toFloat(), this.renderedGraphNodePosition)
+        entity.floorDepth = this.renderedGraphNodePosition[2].toInt()
     }
 
-    fun removePrimaryWall(z: Int, x: Int, y: Int): AbstractWall? {
-        val tile = this.tiles[z][x][y]
+    fun removePrimaryWall(plane: Int, x: Int, y: Int): AbstractWall? {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.primaryWall)
             if (tile.primaryWall != null) {
@@ -732,26 +732,26 @@ class Scene(
      * Determine if the game object on the tile is supposed to be culled or not
      * If the object is culled that DOES NOT mean the tile is culled too, it just means the gameobject is hidden
      */
-    fun hideGameobject(graphNode: SceneGraphEntity, hideInteractives: Boolean, tileSettingBits: Array<Array<ByteArray>>?, locPlane: Int, roofPreference: Byte): Boolean {
+    fun isHidden(entity: SceneGraphEntity, hideInteractives: Boolean, settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte): Boolean {
         if (!this.calculateTilesOnScreen) {
             return false
         }
-        if (graphNode is AbstractInteractiveEntity) {
-            val interactive = graphNode
+        if (entity is AbstractInteractiveEntity) {
+            val interactive = entity
             val endX = interactive.endX
             val endY = interactive.endZ
             val startX = interactive.startX
             val startY = interactive.startZ
             for (x in startX..endX) {
                 for (y in startY..endY) {
-                    if (graphNode.collisionPlane < this.regionSizeZ && x >= this.visibleToXnegative && x < this.visibleToXpositive && y >= this.visibleToYnegative && y < this.visibleToYpositive) {
-                        if ((tileSettingBits == null || graphNode.plane.toInt() < locPlane || roofPreference != tileSettingBits[graphNode.plane.toInt()][x][y])
-                                && graphNode.canRender() && !graphNode.isSoftHidden(this.activeToolkit)) {
+                    if (entity.collisionPlane < this.regionSizeZ && x >= this.visibleToXnegative && x < this.visibleToXpositive && y >= this.visibleToYnegative && y < this.visibleToYpositive) {
+                        if ((settingBits == null || entity.plane.toInt() < lowestRenderedPlane || roofPreference != settingBits[entity.plane.toInt()][x][y])
+                                && entity.canRender() && !entity.isSoftHidden(this.activeToolkit)) {
                             return false
                         }
                         if (!hideInteractives && x >= this.cameraGridPositionX - 16 && x <= this.cameraGridPositionX + 16
                                                && y >= this.cameraGridPositionY - 16 && y <= this.cameraGridPositionY + 16) {
-                            graphNode.particleCycle(this.activeToolkit)
+                            entity.particleCycle(this.activeToolkit)
                         }
                         return true
                     }
@@ -759,22 +759,22 @@ class Scene(
             }
             return true
         } else {
-            val absolutePosition = graphNode.getAbsolutePosition().coords
+            val absolutePosition = entity.getAbsolutePosition().coords
             val sceneX = absolutePosition.x.toInt() shr this.tileUnits
             val sceneY = absolutePosition.z.toInt() shr this.tileUnits
-            if (graphNode.collisionPlane < this.regionSizeZ && sceneX >= this.visibleToXnegative && sceneX < this.visibleToXpositive
+            if (entity.collisionPlane < this.regionSizeZ && sceneX >= this.visibleToXnegative && sceneX < this.visibleToXpositive
                                                            && sceneY >= this.visibleToYnegative && sceneY < this.visibleToYpositive) {
-                val gp = graphNode.plane.toInt()
-                val locByLowPlane = gp < locPlane
-                val locByBits = tileSettingBits != null && !locByLowPlane &&
-                    roofPreference != tileSettingBits[gp][sceneX][sceneY]
-                if ((tileSettingBits == null || locByLowPlane || locByBits)
-                        && graphNode.canRender() && !graphNode.isSoftHidden(this.activeToolkit)) {
+                val entityPlane = entity.plane.toInt()
+                val locByLowPlane = entityPlane < lowestRenderedPlane
+                val locByBits = settingBits != null && !locByLowPlane &&
+                    roofPreference != settingBits[entityPlane][sceneX][sceneY]
+                if ((settingBits == null || locByLowPlane || locByBits)
+                        && entity.canRender() && !entity.isSoftHidden(this.activeToolkit)) {
                     return false
                 }
                 if (!hideInteractives && sceneX >= this.cameraGridPositionX - 16 && sceneX <= this.cameraGridPositionX + 16
                                        && sceneY >= this.cameraGridPositionY - 16 && sceneY <= this.cameraGridPositionY + 16) {
-                    graphNode.particleCycle(this.activeToolkit)
+                    entity.particleCycle(this.activeToolkit)
                 }
                 return true
             }
@@ -782,17 +782,17 @@ class Scene(
         }
     }
 
-    fun renderShadows(shadow: Shadow, highestDisplayedPlane: Int, x: Int, y: Int, shadowedTiles: BooleanArray?): Boolean {
+    fun renderShadows(shadow: Shadow, casterPlane: Int, x: Int, y: Int, shadowedPlanes: BooleanArray?): Boolean {
         var shadowsAdded = false
         if (this.localHeightmap !== this.underwaterHeightmap) {
-            val highestPlaneHeight = this.surfaceHeightmap[highestDisplayedPlane]!!.getAverageHeight(x, y)
-            for (plane in 0..highestDisplayedPlane) {
+            val casterHeight = this.surfaceHeightmap[casterPlane]!!.getAverageHeight(x, y)
+            for (plane in 0..casterPlane) {
                 val ground = this.surfaceHeightmap[plane]
                 if (ground != null) {
-                    val heightDelta = highestPlaneHeight - ground.getAverageHeight(x, y)
-                    if (shadowedTiles != null) {
-                        shadowedTiles[plane] = ground.hasRenderingShadows(shadow, x, heightDelta, y)
-                        if (!shadowedTiles[plane]) {
+                    val heightDelta = casterHeight - ground.getAverageHeight(x, y)
+                    if (shadowedPlanes != null) {
+                        shadowedPlanes[plane] = ground.hasRenderingShadows(shadow, x, heightDelta, y)
+                        if (!shadowedPlanes[plane]) {
                             continue
                         }
                     }
@@ -804,14 +804,14 @@ class Scene(
         return shadowsAdded
     }
 
-    fun removeShadow(shadow: Shadow, maxPlane: Int, x: Int, y: Int, castShadowAtPlane: BooleanArray?) {
+    fun removeShadow(shadow: Shadow, casterPlane: Int, x: Int, y: Int, shadowedPlanes: BooleanArray?) {
         if (this.underwaterHeightmap !== this.localHeightmap) {
-            val averageHeight = this.surfaceHeightmap[maxPlane]!!.getAverageHeight(x, y)
-            for (plane in 0..maxPlane) {
-                if (castShadowAtPlane == null || castShadowAtPlane[plane]) {
+            val casterHeight = this.surfaceHeightmap[casterPlane]!!.getAverageHeight(x, y)
+            for (plane in 0..casterPlane) {
+                if (shadowedPlanes == null || shadowedPlanes[plane]) {
                     val ground = this.surfaceHeightmap[plane]
                     if (ground != null) {
-                        ground.removeShadow(shadow, x, averageHeight - ground.getAverageHeight(x, y), y)
+                        ground.removeShadow(shadow, x, casterHeight - ground.getAverageHeight(x, y), y)
                     }
                 }
             }
@@ -838,15 +838,15 @@ class Scene(
             this.lightSlotOccupant!![this.lightSlot] = positionedLight
             this.lightSlotAvailable!![this.lightSlot] = false
             this.lightSlot++
-            var lightStartZ = positionedLight.level
+            var lightStartPlane = positionedLight.level
             if (positionedLight.growsDownwards) {
-                lightStartZ = 0
+                lightStartPlane = 0
             }
-            var lightEndZ = positionedLight.level
+            var lightEndPlane = positionedLight.level
             if (positionedLight.growsUpwards) {
-                lightEndZ = this.regionSizeZ - 1
+                lightEndPlane = this.regionSizeZ - 1
             }
-            for (z in lightStartZ..lightEndZ) {
+            for (plane in lightStartPlane..lightEndPlane) {
                 var rangeIndex = 0
                 var lightStartY = light!!.getZ() - light!!.getSize2d() + this.halfTileOffset shr this.tileUnits
                 if (lightStartY < 0) {
@@ -868,15 +868,15 @@ class Scene(
                         lightEndX = this.sceneDimensionX - 1
                     }
                     for (x in lightStartX..lightEndX) {
-                        val lightBaseUids = this.tileLightUids!![z][x][y]
+                        val lightBaseUids = this.tileLightUids!![plane][x][y]
                         if ((lightBaseUids and 0xffffL) == 0L) {
-                            this.tileLightUids!![z][x][y] = lightBaseUids or this.lightSlot.toLong()
+                            this.tileLightUids!![plane][x][y] = lightBaseUids or this.lightSlot.toLong()
                         } else if ((lightBaseUids and 0xffff0000L) == 0L) {
-                            this.tileLightUids!![z][x][y] = lightBaseUids or (this.lightSlot.toLong() shl 16)
+                            this.tileLightUids!![plane][x][y] = lightBaseUids or (this.lightSlot.toLong() shl 16)
                         } else if ((lightBaseUids and 0xffff00000000L) == 0L) {
-                            this.tileLightUids!![z][x][y] = lightBaseUids or (this.lightSlot.toLong() shl 32)
+                            this.tileLightUids!![plane][x][y] = lightBaseUids or (this.lightSlot.toLong() shl 32)
                         } else if ((lightBaseUids and -281474976710656L) == 0L) {
-                            this.tileLightUids!![z][x][y] = lightBaseUids or (this.lightSlot.toLong() shl 48)
+                            this.tileLightUids!![plane][x][y] = lightBaseUids or (this.lightSlot.toLong() shl 48)
                         }
                     }
                 }
@@ -889,38 +889,38 @@ class Scene(
         for (slotIndex in 0 until this.lightSlot) {
             if (!this.lightSlotAvailable!![slotIndex]) {
                 val positionedLight = this.lightSlotOccupant!![slotIndex]!!
-                val lightSource = positionedLight.pointLight
-                val z = positionedLight.level
-                val offset = lightSource!!.getSize2d() - this.halfTileOffset
+                val light = positionedLight.pointLight
+                val plane = positionedLight.level
+                val offset = light!!.getSize2d() - this.halfTileOffset
                 val dimension = (offset * 2 shr this.tileUnits) + 1
-                var Y = 0
+                var rangeIndex = 0
                 val lightDisplacement = IntArray(dimension * dimension)
-                val deltaX = lightSource!!.getX() - offset shr this.tileUnits
-                var sceneStartY = lightSource!!.getZ() - offset shr this.tileUnits
-                var sceneEndY = lightSource!!.getZ() + offset shr this.tileUnits
+                val sceneBaseX = light!!.getX() - offset shr this.tileUnits
+                var sceneStartY = light!!.getZ() - offset shr this.tileUnits
+                var sceneEndY = light!!.getZ() + offset shr this.tileUnits
                 if (sceneStartY < 0) {
-                    Y -= sceneStartY
+                    rangeIndex -= sceneStartY
                     sceneStartY = 0
                 }
                 if (sceneEndY >= this.sceneDimensionY) {
                     sceneEndY = this.sceneDimensionY - 1
                 }
                 for (y in sceneStartY..sceneEndY) {
-                    val range = positionedLight.ranges[Y]
-                    val sX = range.toInt() ushr 8
-                    var X = sX + Y * dimension
-                    var sceneStartX = (range.toInt() ushr 8) + deltaX
-                    var sceneX = (range.toInt() and 0xff) + sceneStartX - 1
+                    val range = positionedLight.ranges[rangeIndex]
+                    val rangeStartOffset = range.toInt() ushr 8
+                    var displacementIndex = rangeStartOffset + rangeIndex * dimension
+                    var sceneStartX = (range.toInt() ushr 8) + sceneBaseX
+                    var sceneEndX = (range.toInt() and 0xff) + sceneStartX - 1
                     if (sceneStartX < 0) {
-                        X -= sceneStartX
+                        displacementIndex -= sceneStartX
                         sceneStartX = 0
                     }
-                    if (sceneX >= this.sceneDimensionX) {
-                        sceneX = this.sceneDimensionX - 1
+                    if (sceneEndX >= this.sceneDimensionX) {
+                        sceneEndX = this.sceneDimensionX - 1
                     }
-                    for (x in sceneStartX..sceneX) {
+                    for (x in sceneStartX..sceneEndX) {
                         var displacement: Byte = 1
-                        val interactive = getInteractiveObject(z, x, y, null)
+                        val interactive = getInteractiveObject(plane, x, y, null)
                         if (interactive != null && interactive.rotation.toInt() != 0) {
                             var westWithinScene: Boolean
                             var eastWithinScene: Boolean
@@ -929,16 +929,16 @@ class Scene(
                             var endX: Int
                             if (interactive.rotation.toInt() == 1) {
                                 westWithinScene = x - 1 >= sceneStartX
-                                eastWithinScene = x + 1 <= sceneX
+                                eastWithinScene = x + 1 <= sceneEndX
                                 if (!westWithinScene && y + 1 <= sceneEndY) {
-                                    bitpackedRange = positionedLight.ranges[Y + 1]
-                                    startX = (bitpackedRange.toInt() ushr 8) + deltaX
+                                    bitpackedRange = positionedLight.ranges[rangeIndex + 1]
+                                    startX = (bitpackedRange.toInt() ushr 8) + sceneBaseX
                                     endX = (bitpackedRange.toInt() and 0xff) + startX
                                     westWithinScene = x > startX && x < endX
                                 }
                                 if (!eastWithinScene && y - 1 >= sceneStartY) {
-                                    bitpackedRange = positionedLight.ranges[Y - 1]
-                                    startX = (bitpackedRange.toInt() ushr 8) + deltaX
+                                    bitpackedRange = positionedLight.ranges[rangeIndex - 1]
+                                    startX = (bitpackedRange.toInt() ushr 8) + sceneBaseX
                                     endX = (bitpackedRange.toInt() and 0xff) + startX
                                     eastWithinScene = x > startX && x < endX
                                 }
@@ -949,16 +949,16 @@ class Scene(
                                 }
                             } else {
                                 westWithinScene = x - 1 >= sceneStartX
-                                eastWithinScene = x + 1 <= sceneX
+                                eastWithinScene = x + 1 <= sceneEndX
                                 if (!westWithinScene && y - 1 >= sceneStartY) {
-                                    bitpackedRange = positionedLight.ranges[Y - 1]
-                                    startX = (bitpackedRange.toInt() ushr 8) + deltaX
+                                    bitpackedRange = positionedLight.ranges[rangeIndex - 1]
+                                    startX = (bitpackedRange.toInt() ushr 8) + sceneBaseX
                                     endX = (bitpackedRange.toInt() and 0xff) + startX
                                     westWithinScene = x > startX && x < endX
                                 }
                                 if (!eastWithinScene && y + 1 <= sceneEndY) {
-                                    bitpackedRange = positionedLight.ranges[Y + 1]
-                                    startX = (bitpackedRange.toInt() ushr 8) + deltaX
+                                    bitpackedRange = positionedLight.ranges[rangeIndex + 1]
+                                    startX = (bitpackedRange.toInt() ushr 8) + sceneBaseX
                                     endX = (bitpackedRange.toInt() and 0xff) + startX
                                     eastWithinScene = x > startX && x < endX
                                 }
@@ -969,12 +969,12 @@ class Scene(
                                 }
                             }
                         }
-                        lightDisplacement[X++] = displacement.toInt()
+                        lightDisplacement[displacementIndex++] = displacement.toInt()
                     }
-                    ++Y
+                    ++rangeIndex
                 }
                 this.lightSlotAvailable!![slotIndex] = true
-                this.localHeightmap[z]!!.addLight(lightSource, lightDisplacement)
+                this.localHeightmap[plane]!!.addLight(light, lightDisplacement)
             }
         }
     }
@@ -983,33 +983,33 @@ class Scene(
         return if (this.opcode20 != null) this.opcode20!![x][y].toInt() and 0xff else 0
     }
 
-    fun getGroundItem(z: Int, x: Int, y: Int): AbstractGroundItem? {
-        val tile = this.tiles[z][x][y]
+    fun getGroundItem(plane: Int, x: Int, y: Int): AbstractGroundItem? {
+        val tile = this.tiles[plane][x][y]
         return tile?.groundItem
     }
 
-    fun removeSecondaryWallDecoration(z: Int, x: Int, y: Int): AbstractWallDecoration? {
-        val tile = this.tiles[z][x][y]
+    fun removeSecondaryWallDecoration(plane: Int, x: Int, y: Int): AbstractWallDecoration? {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.secondaryWallDecoration)
             if (tile.secondaryWallDecoration != null) {
-                val wallDecoration = tile.secondaryWallDecoration
+                val secondaryWallDecoration = tile.secondaryWallDecoration
                 tile.secondaryWallDecoration = null
-                return wallDecoration
+                return secondaryWallDecoration
             }
         }
         return null
     }
 
-    fun drawTiles(hideInteratives: Boolean, settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte) {
-        val graphNodeIndex = if (hideInteratives) 1 else 0
+    fun drawTiles(hideInteractives: Boolean, settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte) {
+        val layerIndex = if (hideInteractives) 1 else 0
         this.depthObjectCount = 0
         this.layeredObjectCount = 0
         this.tileDrawCycle++
         val walkT0 = System.nanoTime()
         // Visibility BEFORE projection.
         //
-        // hideGameobject rejects a node whose tiles all fall outside the visible
+        // isHidden rejects a node whose tiles all fall outside the visible
         // window, and does so without side effects — particleCycle only runs for
         // nodes that ARE in range, exactly as before. Roughly three quarters of the
         // scene graph is rejected that way on a typical frame, and every one of them
@@ -1017,50 +1017,50 @@ class Scene(
         // rejected node's floorDepth is left at its previous value, which nothing
         // reads: it is the depth sort key for accepted nodes, and the interaction
         // cache only ever holds nodes that were drawn.
-        var graphNode = this.renderObjects3d[graphNodeIndex]
-        while (graphNode != null) {
-            if (!hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
-                separateFromFloor(graphNode)
-                if (graphNode.floorDepth != -1) {
-                    this.depthRenderedEntities[++this.depthObjectCount - 1] = graphNode
+        var entity = this.staticTextureOpaqueEntities[layerIndex]
+        while (entity != null) {
+            if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                separateFromFloor(entity)
+                if (entity.floorDepth != -1) {
+                    this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
                 }
             }
-            graphNode = graphNode.child
+            entity = entity.child
         }
-        graphNode = this.renderObjects2d[graphNodeIndex]
-        while (graphNode != null) {
-            if (!hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
-                separateFromFloor(graphNode)
-                if (graphNode.floorDepth != -1) {
-                    this.priorityRenderedEntities[++this.layeredObjectCount - 1] = graphNode
+        entity = this.alphaEntities[layerIndex]
+        while (entity != null) {
+            if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                separateFromFloor(entity)
+                if (entity.floorDepth != -1) {
+                    this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
                 }
             }
-            graphNode = graphNode.child
+            entity = entity.child
         }
-        graphNode = this.dynamicRenderObjects[graphNodeIndex]
-        while (graphNode != null) {
-            if (!hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
-                separateFromFloor(graphNode)
-                if (graphNode.floorDepth != -1) {
-                    if (graphNode.hasAlpha()) {
-                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = graphNode
+        entity = this.dynamicRenderObjects[layerIndex]
+        while (entity != null) {
+            if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                separateFromFloor(entity)
+                if (entity.floorDepth != -1) {
+                    if (entity.hasAlpha()) {
+                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
                     } else {
-                        this.depthRenderedEntities[++this.depthObjectCount - 1] = graphNode
+                        this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
                     }
                 }
             }
-            graphNode = graphNode.child
+            entity = entity.child
         }
-        if (!hideInteratives) {
-            for (interactive in 0 until this.interactiveObjectCount) {
-                val entity = this.interactiveObjects[interactive]!!
-                if (!hideGameobject(entity, false, settingBits, lowestRenderedPlane, roofPreference)) {
-                    separateFromFloor(entity)
-                    if (entity.floorDepth != -1) {
-                        if (entity.hasAlpha()) {
-                            this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
+        if (!hideInteractives) {
+            for (index in 0 until this.interactiveObjectCount) {
+                val interactive = this.interactiveObjects[index]!!
+                if (!isHidden(interactive, false, settingBits, lowestRenderedPlane, roofPreference)) {
+                    separateFromFloor(interactive)
+                    if (interactive.floorDepth != -1) {
+                        if (interactive.hasAlpha()) {
+                            this.priorityRenderedEntities[++this.layeredObjectCount - 1] = interactive
                         } else {
-                            this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
+                            this.depthRenderedEntities[++this.depthObjectCount - 1] = interactive
                         }
                     }
                 }
@@ -1077,8 +1077,8 @@ class Scene(
             quicksortBelow(this.depthRenderedEntities, 0, this.depthObjectCount - 1)
             phaseSortNs += System.nanoTime() - sortT0
             val drawT0 = System.nanoTime()
-            for (objectIndex in 0 until this.depthObjectCount) {
-                placeSceneryObjects(this.depthRenderedEntities[objectIndex]!!, this.activeLights)
+            for (index in 0 until this.depthObjectCount) {
+                placeSceneryObjects(this.depthRenderedEntities[index]!!, this.activeLights)
             }
             phaseDrawNs += System.nanoTime() - drawT0
         }
@@ -1086,31 +1086,31 @@ class Scene(
             this.activeToolkit.copyLights(0, null as Array<PointLight>?)
         }
         val floorT0 = System.nanoTime()
-        for (z in 0 until this.regionSizeZ) {
+        for (plane in 0 until this.regionSizeZ) {
             // A plane with no floor to draw does not need its per-tile visibility
             // computed: the only consumer is the renderFloor call below, which would
             // return immediately. tileOnScreen is fully rewritten by whichever plane
             // runs next, so skipping leaves nothing stale behind.
-            val planeGround = this.localHeightmap[z]
+            val planeGround = this.localHeightmap[plane]
             if (planeGround == null || !planeGround.hasRenderableFloor()) {
                 planesSkipped++
                 continue
             }
             planesDrawn++
-            if (z >= lowestRenderedPlane && settingBits != null) {
+            if (plane >= lowestRenderedPlane && settingBits != null) {
                 // These bounds are array indices, and index -> scene tile is
                 // `tileX + visibleToXnegative - visibleToInvertedXnegative`, so the
                 // overflow test has to subtract the inverted offset too. Without it the
                 // window is clamped in scene space while used in index space, leaving the
                 // tiles the camera actually sees untouched -- they then keep the raw
                 // frustum visibility drawScene wrote and render with no roof test at all.
-                var visibleSizeX = this.adjacent_tile_on_screen.size
-                if (this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
-                    visibleSizeX -= this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
+                var visibleSizeX = this.tileInFrustum.size
+                if (this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
+                    visibleSizeX -= this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
                 }
-                var visibleSizeY = this.adjacent_tile_on_screen[0].size
-                if (this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative > this.sceneDimensionY) {
-                    visibleSizeY -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
+                var visibleSizeY = this.tileInFrustum[0].size
+                if (this.tileInFrustum[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative > this.sceneDimensionY) {
+                    visibleSizeY -= this.tileInFrustum[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
                     // Row slices and the index->scene offsets read once per column.
@@ -1121,21 +1121,21 @@ class Scene(
                     val yBase = this.visibleToYnegative - this.visibleToInvertedYnegative
                     val cullingLocal = this.culling
                     for (tileX in this.visibleToInvertedXnegative until visibleSizeX) {
-                        val x = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
+                        val sceneX = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
                         val onScreenRow = this.tileOnScreen[tileX]
-                        val adjacentRow = this.adjacent_tile_on_screen[tileX]
+                        val adjacentRow = this.tileInFrustum[tileX]
                         for (tileY in this.visibleToInvertedYnegative until visibleSizeY) {
                             onScreenRow[tileY] = false
                             if (adjacentRow[tileY]) {
-                                val y = tileY + yBase
-                                var descendingPlane = z
+                                val sceneY = tileY + yBase
+                                var descendingPlane = plane
                                 while (descendingPlane >= 0) {
-                                    val tile = this.tiles[descendingPlane][x][y]
-                                    if (tile != null && tile.plane.toInt() == z) {
+                                    val tile = this.tiles[descendingPlane][sceneX][sceneY]
+                                    if (tile != null && tile.plane.toInt() == plane) {
                                         val byLowPlane = descendingPlane < lowestRenderedPlane
-                                        val byRoofBits = settingBits[descendingPlane][x][y] != roofPreference
+                                        val byRoofBits = settingBits[descendingPlane][sceneX][sceneY] != roofPreference
                                         onScreenRow[tileY] = (byLowPlane || byRoofBits) &&
-                                            !cullingLocal.isTileHidden(z, x, y)
+                                            !cullingLocal.isTileHidden(plane, sceneX, sceneY)
                                         break
                                     }
                                     --descendingPlane
@@ -1144,31 +1144,31 @@ class Scene(
                         }
                     }
                 }
-                this.localHeightmap[z]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, false)
+                this.localHeightmap[plane]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, false)
             } else {
                 // Same index-space clamp as the roof-tested branch above.
-                var adjacentTileRowCount = this.adjacent_tile_on_screen.size
-                if (this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
-                    adjacentTileRowCount -= this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
+                var visibleSizeX = this.tileInFrustum.size
+                if (this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
+                    visibleSizeX -= this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
                 }
-                var adjacentTileColumnCount = this.adjacent_tile_on_screen[0].size
-                if (this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative > this.sceneDimensionY) {
-                    adjacentTileColumnCount -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
+                var visibleSizeY = this.tileInFrustum[0].size
+                if (this.tileInFrustum[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative > this.sceneDimensionY) {
+                    visibleSizeY -= this.tileInFrustum[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
                     val yBase = this.visibleToYnegative - this.visibleToInvertedYnegative
                     val cullingLocal = this.culling
-                    for (tileX in this.visibleToInvertedXnegative until adjacentTileRowCount) {
-                        val adjustedX = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
+                    for (tileX in this.visibleToInvertedXnegative until visibleSizeX) {
+                        val sceneX = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
                         val onScreenRow = this.tileOnScreen[tileX]
-                        val adjacentRow = this.adjacent_tile_on_screen[tileX]
-                        for (tileY in this.visibleToInvertedYnegative until adjacentTileColumnCount) {
+                        val adjacentRow = this.tileInFrustum[tileX]
+                        for (tileY in this.visibleToInvertedYnegative until visibleSizeY) {
                             onScreenRow[tileY] = adjacentRow[tileY] &&
-                                !cullingLocal.isTileHidden(z, adjustedX, tileY + yBase)
+                                !cullingLocal.isTileHidden(plane, sceneX, tileY + yBase)
                         }
                     }
                 }
-                this.localHeightmap[z]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, true)
+                this.localHeightmap[plane]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, true)
             }
         }
         phaseFloorNs += System.nanoTime() - floorT0
@@ -1184,16 +1184,16 @@ class Scene(
         }
     }
 
-    fun drawScene(rotation: Int, cameraX: Int, cameraZ: Int, caneraY: Int, bits: Array<Array<ByteArray>>?,
+    fun drawScene(rotation: Int, cameraX: Int, cameraZ: Int, cameraY: Int, settingBits: Array<Array<ByteArray>>?,
                           visibleBelowDrawheight: IntArray?, visibleAboveX: IntArray?, visibleBelowX: IntArray?,
-                          visibleBelowY: IntArray?, visibleAboveY: IntArray?, nextPlane: Int, roofPreference: Byte,
+                          visibleBelowY: IntArray?, visibleAboveY: IntArray?, lowestRenderedPlane: Int, roofPreference: Byte,
                           disableFlickeringEffects: Boolean) {
         this.culling.drawingScene = true
         this.calculateTilesOnScreen = true
         this.cameraGridPositionX = cameraX shr this.tileUnits
-        this.cameraGridPositionY = caneraY shr this.tileUnits
+        this.cameraGridPositionY = cameraY shr this.tileUnits
         this.cameraPositionX = cameraX
-        this.cameraPositionZ = caneraY
+        this.cameraPositionZ = cameraY
         this.cameraPositionY = cameraZ
         this.visibleToXnegative = this.cameraGridPositionX - this.visibleTiles
         if (this.visibleToXnegative < 0) {
@@ -1217,7 +1217,7 @@ class Scene(
         if (this.visibleToYpositive > this.sceneDimensionY) {
             this.visibleToYpositive = this.sceneDimensionY
         }
-        val unadjustedAdjacentTilesOnScreen = this.adjacent_tile_on_screen
+        val unadjustedAdjacentTilesOnScreen = this.tileInFrustum
         val unadjustedTilesOnScreen = this.tileOnScreen
         // Everything the tile-visibility grid needs, read once. This loop runs over
         // (2*visibleTiles+2)^2 tiles — around eleven thousand — every frame, and each
@@ -1234,21 +1234,21 @@ class Scene(
         val toolkit = this.activeToolkit
         val visibility = this.tileVisibility
         val onScreenGrid = this.tileOnScreen
-        val adjacentGrid = this.adjacent_tile_on_screen
+        val adjacentGrid = this.tileInFrustum
         val topSurface = this.surfaceHeightmap[this.surfaceHeightmap.size - 1]!!
         val lowSurface = this.underwaterHeightmap?.get(0) ?: this.surfaceHeightmap[0]!!
-        for (x in 0 until gridSpan) {
+        for (tileX in 0 until gridSpan) {
             var previousOnScreen = 0
             var currentOnScreen = 0
-            val sceneX = x + originX
+            val sceneX = tileX + originX
             val xInRange = sceneX >= 0 && sceneX < dimX
             val upscaledSceneX = sceneX shl tileUnitsLocal
             // Row slices: the heightmaps and both grids are arrays of rows, so the
             // outer index only has to be resolved once per column of the sweep.
             val topRow = if (xInRange) topSurface.tileHeights[sceneX] else null
             val lowRow = if (xInRange) lowSurface.tileHeights[sceneX] else null
-            val onScreenRow = onScreenGrid[x]
-            val adjacentRow = if (x > 0) adjacentGrid[x - 1] else null
+            val onScreenRow = onScreenGrid[tileX]
+            val adjacentRow = if (tileX > 0) adjacentGrid[tileX - 1] else null
 
             // Clip flags for the whole column in one call. Testing them one at a time
             // meant a virtual dispatch per tile — more expensive than the arithmetic
@@ -1267,15 +1267,15 @@ class Scene(
             var runFirstY = 0
             if (xInRange) {
                 runFirstY = if (originY < 0) -originY else 0
-                var y = runFirstY
-                while (y < gridSpan) {
-                    val sceneY = y + originY
+                var tileY = runFirstY
+                while (tileY < gridSpan) {
+                    val sceneY = tileY + originY
                     if (sceneY >= dimY) break
                     zs[runCount] = sceneY shl tileUnitsLocal
                     lows[runCount] = topRow!![sceneY] - heightBias
                     highs[runCount] = lowRow!![sceneY] + fullTile + heightBias
                     runCount++
-                    y++
+                    tileY++
                 }
                 if (runCount > 0) {
                     walkTiles += runCount.toLong()
@@ -1299,22 +1299,22 @@ class Scene(
                 }
             }
 
-            for (y in 0 until gridSpan) {
-                if (y > 1) {
-                    visibility[y - 2] = previousOnScreen
+            for (tileY in 0 until gridSpan) {
+                if (tileY > 1) {
+                    visibility[tileY - 2] = previousOnScreen
                 }
                 previousOnScreen = currentOnScreen
-                val runIndex = y - runFirstY
+                val runIndex = tileY - runFirstY
                 if (runIndex in 0 until runCount) {
                     currentOnScreen = flags[runIndex]
-                    onScreenRow[y] = currentOnScreen == 0
+                    onScreenRow[tileY] = currentOnScreen == 0
                 } else {
                     currentOnScreen = -1
-                    onScreenRow[y] = false
+                    onScreenRow[tileY] = false
                 }
-                if (adjacentRow != null && y > 0) {
-                    val isOnscreen = visibility[y - 1] and visibility[y] and previousOnScreen and currentOnScreen
-                    adjacentRow[y - 1] = isOnscreen == 0
+                if (adjacentRow != null && tileY > 0) {
+                    val isOnscreen = visibility[tileY - 1] and visibility[tileY] and previousOnScreen and currentOnScreen
+                    adjacentRow[tileY - 1] = isOnscreen == 0
                 }
             }
             visibility[gridSpan - 2] = previousOnScreen
@@ -1326,81 +1326,81 @@ class Scene(
         this.culling.visibleBelowY = visibleBelowY
         this.culling.visibleAboveY = visibleAboveY
         val cullT0 = System.nanoTime()
-        this.culling.processCulling(this.activeToolkit, nextPlane)
+        this.culling.processCulling(this.activeToolkit, lowestRenderedPlane)
         phaseCullNs += System.nanoTime() - cullT0
         ParticleSystemManager.processParticleCycle(this, this.activeToolkit)
         if (!this.interactiveEntities.removeDuplicates) {
             val interactivesIterator = this.interactiveEntities.entities.iterator()
             while (interactivesIterator.hasNext()) {
-                val reference = interactivesIterator.next()
+                val entityReference = interactivesIterator.next()
                 interactivesIterator.remove()
-                RenderedEntityCache.clear(reference)
+                RenderedEntityCache.clear(entityReference)
             }
         }
         if (this.copyLights) {
-            for (slot in 0 until this.lightSlot) {
-                this.lightSlotOccupant!![slot]!!.applyEffect(rotation, disableFlickeringEffects)
+            for (slotIndex in 0 until this.lightSlot) {
+                this.lightSlotOccupant!![slotIndex]!!.applyEffect(rotation, disableFlickeringEffects)
             }
         }
         if (this.waterTiles != null) {
             setUnderwater(true)
             this.activeToolkit.addWater(WaterTile())
-            drawTiles(true, bits, nextPlane, roofPreference)
+            drawTiles(true, settingBits, lowestRenderedPlane, roofPreference)
             this.activeToolkit.onTilesDrawn()
             setUnderwater(false)
         }
         val tilesT0 = System.nanoTime()
-        drawTiles(false, bits, nextPlane, roofPreference)
+        drawTiles(false, settingBits, lowestRenderedPlane, roofPreference)
         phaseTilesNs += System.nanoTime() - tilesT0
         phaseSamples++
         if (!this.calculateTilesOnScreen) {
-            this.adjacent_tile_on_screen = unadjustedAdjacentTilesOnScreen
+            this.tileInFrustum = unadjustedAdjacentTilesOnScreen
             this.tileOnScreen = unadjustedTilesOnScreen
         }
     }
 
-    fun castShadow(rendered: SceneGraphEntity, lowestZ: Int, startX: Int, startY: Int, width: Int, length: Int) {
+    fun castShadow(entity: SceneGraphEntity, basePlane: Int, startX: Int, startY: Int, width: Int, length: Int) {
         var isSamePlane = true
         val lowestX = startX
         val highestX = startX + width
         val lowestY = startY - 1
         val highestY = startY + length
-        for (z in lowestZ..lowestZ + 1) {
-            if (z != this.regionSizeZ) {
+        for (plane in basePlane..basePlane + 1) {
+            if (plane != this.regionSizeZ) {
                 for (x in lowestX..highestX) {
                     if (x >= 0 && x < this.sceneDimensionX) {
                         for (y in lowestY..highestY) {
                             if (y >= 0 && y < this.sceneDimensionY && (!isSamePlane || x >= highestX || y >= highestY || y < startY && startX != x)) {
-                                val tile = this.tiles[z][x][y]
+                                val tile = this.tiles[plane][x][y]
                                 if (tile != null) {
-                                    val tileheightDifference =
-                                            (this.localHeightmap[z]!!.getHeight(x, y) + this.localHeightmap[z]!!.getHeight(1 + x, y)
-                                            + this.localHeightmap[z]!!.getHeight(x, 1 + y) + this.localHeightmap[z]!!.getHeight(1 + x, 1 + y)) / 4 -
-                                            (this.localHeightmap[lowestZ]!!.getHeight(startX, startY) + this.localHeightmap[lowestZ]!!.getHeight(startX + 1, startY)
-                                            + this.localHeightmap[lowestZ]!!.getHeight(startX, startY + 1) + this.localHeightmap[lowestZ]!!.getHeight(startX + 1, startY + 1)) / 4
+                                    val heightDelta =
+                                            (this.localHeightmap[plane]!!.getHeight(x, y) + this.localHeightmap[plane]!!.getHeight(1 + x, y)
+                                            + this.localHeightmap[plane]!!.getHeight(x, 1 + y) + this.localHeightmap[plane]!!.getHeight(1 + x, 1 + y)) / 4 -
+                                            (this.localHeightmap[basePlane]!!.getHeight(startX, startY) + this.localHeightmap[basePlane]!!.getHeight(startX + 1, startY)
+                                            + this.localHeightmap[basePlane]!!.getHeight(startX, startY + 1) + this.localHeightmap[basePlane]!!.getHeight(startX + 1, startY + 1)) / 4
                                     val primaryWall = tile.primaryWall
                                     val secondaryWall = tile.secondaryWall
                                     if (primaryWall != null && primaryWall.hasTileShadow()) {
-                                        rendered.castShadow(primaryWall,
-                                                (x - startX) * this.fullTileDimension + (1 - width) * this.halfTileOffset, tileheightDifference,
+                                        entity.castShadow(primaryWall,
+                                                (x - startX) * this.fullTileDimension + (1 - width) * this.halfTileOffset, heightDelta,
                                                 (y - startY) * this.fullTileDimension + (1 - length) * this.halfTileOffset, isSamePlane)
                                     }
                                     if (secondaryWall != null && secondaryWall.hasTileShadow()) {
-                                        rendered.castShadow(secondaryWall,
-                                                (x - startX) * this.fullTileDimension + (1 - width) * this.halfTileOffset, tileheightDifference,
+                                        entity.castShadow(secondaryWall,
+                                                (x - startX) * this.fullTileDimension + (1 - width) * this.halfTileOffset, heightDelta,
                                                 (y - startY) * this.fullTileDimension + (1 - length) * this.halfTileOffset, isSamePlane)
                                     }
-                                    var interactives = tile.interactives
-                                    while (interactives != null) {
-                                        val interactive = interactives.interactiveObject
+                                    var container = tile.interactives
+                                    while (container != null) {
+                                        val interactive = container.interactiveObject
                                         if (interactive != null && interactive.hasTileShadow() && (x == interactive.startX.toInt() || lowestX == x) && (y == interactive.startZ.toInt() || lowestY == y)) {
                                             val sizeX = interactive.endX - interactive.startX + 1
                                             val sizeZ = interactive.endZ - interactive.startZ + 1
-                                            rendered.castShadow(interactive,
-                                                    this.fullTileDimension * (interactive.startX - startX) + this.halfTileOffset * (sizeX - width), tileheightDifference,
+                                            entity.castShadow(interactive,
+                                                    this.fullTileDimension * (interactive.startX - startX) + this.halfTileOffset * (sizeX - width), heightDelta,
                                                     this.fullTileDimension * (interactive.startZ - startY) + this.halfTileOffset * (sizeZ - length), isSamePlane)
                                         }
-                                        interactives = interactives.child
+                                        container = container.child
                                     }
                                 }
                             }
@@ -1423,14 +1423,14 @@ class Scene(
         return this.tiles[plane][x][y]
     }
 
-    fun removeSecondaryWall(z: Int, x: Int, y: Int): AbstractWall? {
-        val tile = this.tiles[z][x][y]
+    fun removeSecondaryWall(plane: Int, x: Int, y: Int): AbstractWall? {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.secondaryWall)
             if (tile.secondaryWall != null) {
-                val wall = tile.secondaryWall
+                val secondaryWall = tile.secondaryWall
                 tile.secondaryWall = null
-                return wall
+                return secondaryWall
             }
         }
         return null
@@ -1451,13 +1451,13 @@ class Scene(
      * comparison. The depths do not change during the sort, so this is exact; it just
      * turns ~26k pointer chases into one pass of [count] plus int compares.
      */
-    private fun extractSortKeys(graphNodes: Array<SceneGraphEntity?>, count: Int): IntArray {
+    private fun extractSortKeys(entities: Array<SceneGraphEntity?>, count: Int): IntArray {
         var keys = sortKeys
         if (keys.size < count) {
             keys = IntArray(count * 2)
             sortKeys = keys
         }
-        for (i in 0 until count) keys[i] = graphNodes[i]!!.floorDepth
+        for (i in 0 until count) keys[i] = entities[i]!!.floorDepth
         return keys
     }
 
@@ -1472,84 +1472,84 @@ class Scene(
     private var columnScratchHigh = IntArray(0)
     private var columnScratchOut = IntArray(0)
 
-    fun quicksortBelow(graphNodes: Array<SceneGraphEntity?>, startPosition: Int, endPosition: Int) {
-        quicksortBelow(graphNodes, extractSortKeys(graphNodes, endPosition + 1), startPosition, endPosition)
+    fun quicksortBelow(entities: Array<SceneGraphEntity?>, startPosition: Int, endPosition: Int) {
+        quicksortBelow(entities, extractSortKeys(entities, endPosition + 1), startPosition, endPosition)
     }
 
     private fun quicksortBelow(
-        graphNodes: Array<SceneGraphEntity?>, keys: IntArray, startPosition: Int, endPosition: Int
+        entities: Array<SceneGraphEntity?>, keys: IntArray, startPosition: Int, endPosition: Int
     ) {
         if (startPosition < endPosition) {
             val center = (endPosition + startPosition) / 2
             var curPosition = startPosition
-            val graphNode = graphNodes[center]
+            val pivotEntity = entities[center]
             val pivotKey = keys[center]
-            graphNodes[center] = graphNodes[endPosition]
+            entities[center] = entities[endPosition]
             keys[center] = keys[endPosition]
-            graphNodes[endPosition] = graphNode
+            entities[endPosition] = pivotEntity
             keys[endPosition] = pivotKey
             val offset = pivotKey
             for (index in startPosition until endPosition) {
                 if (keys[index] < (index and 0x1) + offset) {
-                    val node = graphNodes[index]
+                    val entity = entities[index]
                     val key = keys[index]
-                    graphNodes[index] = graphNodes[curPosition]
+                    entities[index] = entities[curPosition]
                     keys[index] = keys[curPosition]
-                    graphNodes[curPosition] = node
+                    entities[curPosition] = entity
                     keys[curPosition] = key
                     curPosition++
                 }
             }
-            graphNodes[endPosition] = graphNodes[curPosition]
+            entities[endPosition] = entities[curPosition]
             keys[endPosition] = keys[curPosition]
-            graphNodes[curPosition] = graphNode
+            entities[curPosition] = pivotEntity
             keys[curPosition] = pivotKey
-            quicksortBelow(graphNodes, keys, startPosition, curPosition - 1)
-            quicksortBelow(graphNodes, keys, curPosition + 1, endPosition)
+            quicksortBelow(entities, keys, startPosition, curPosition - 1)
+            quicksortBelow(entities, keys, curPosition + 1, endPosition)
         }
     }
 
-    fun quicksortAbove(graphNodes: Array<SceneGraphEntity?>, startPosition: Int, endPosition: Int) {
-        quicksortAbove(graphNodes, extractSortKeys(graphNodes, endPosition + 1), startPosition, endPosition)
+    fun quicksortAbove(entities: Array<SceneGraphEntity?>, startPosition: Int, endPosition: Int) {
+        quicksortAbove(entities, extractSortKeys(entities, endPosition + 1), startPosition, endPosition)
     }
 
     private fun quicksortAbove(
-        graphNodes: Array<SceneGraphEntity?>, keys: IntArray, startPosition: Int, endPosition: Int
+        entities: Array<SceneGraphEntity?>, keys: IntArray, startPosition: Int, endPosition: Int
     ) {
         if (startPosition < endPosition) {
             val center = (endPosition + startPosition) / 2
             var curPosition = startPosition
-            val graphNode = graphNodes[center]
+            val pivotEntity = entities[center]
             val pivotKey = keys[center]
-            graphNodes[center] = graphNodes[endPosition]
+            entities[center] = entities[endPosition]
             keys[center] = keys[endPosition]
-            graphNodes[endPosition] = graphNode
+            entities[endPosition] = pivotEntity
             keys[endPosition] = pivotKey
             val offset = pivotKey
             for (index in startPosition until endPosition) {
                 if (keys[index] > (index and 0x1) + offset) {
-                    val node = graphNodes[index]
+                    val entity = entities[index]
                     val key = keys[index]
-                    graphNodes[index] = graphNodes[curPosition]
+                    entities[index] = entities[curPosition]
                     keys[index] = keys[curPosition]
-                    graphNodes[curPosition] = node
+                    entities[curPosition] = entity
                     keys[curPosition] = key
                     curPosition++
                 }
             }
-            graphNodes[endPosition] = graphNodes[curPosition]
+            entities[endPosition] = entities[curPosition]
             keys[endPosition] = keys[curPosition]
-            graphNodes[curPosition] = graphNode
+            entities[curPosition] = pivotEntity
             keys[curPosition] = pivotKey
-            quicksortAbove(graphNodes, keys, startPosition, curPosition - 1)
-            quicksortAbove(graphNodes, keys, curPosition + 1, endPosition)
+            quicksortAbove(entities, keys, startPosition, curPosition - 1)
+            quicksortAbove(entities, keys, curPosition + 1, endPosition)
         }
     }
 
     fun addHdShadow(renderUpToPlane: Int) {
         var shadow: Shadow? = null
-        for (z in 1 until renderUpToPlane) {
-            val ground = this.surfaceHeightmap[z]
+        for (plane in 1 until renderUpToPlane) {
+            val ground = this.surfaceHeightmap[plane]
             if (ground != null) {
                 for (y in 0 until this.sceneDimensionY) {
                     for (x in 0 until this.sceneDimensionX) {
@@ -1557,17 +1557,17 @@ class Scene(
                         if (shadow != null) {
                             val scaledX = x shl this.tileUnits
                             val scaledY = y shl this.tileUnits
-                            var maxZ = z - 1
-                            while (maxZ >= 0) {
-                                val nextGround = this.surfaceHeightmap[maxZ]
-                                if (nextGround != null) {
-                                    val heightSw = ground.getHeight(x, y) - nextGround.getHeight(x, y)
-                                    val heightSe = ground.getHeight(x + 1, y) - nextGround.getHeight(x + 1, y)
-                                    val heightNe = ground.getHeight(x + 1, y + 1) - nextGround.getHeight(x + 1, y + 1)
-                                    val heightNw = ground.getHeight(x, y + 1) - nextGround.getHeight(x, y + 1)
-                                    nextGround.addShadow(shadow, scaledX, (heightNw + heightNe + heightSe + heightSw) / 4, scaledY)
+                            var lowerPlane = plane - 1
+                            while (lowerPlane >= 0) {
+                                val lowerGround = this.surfaceHeightmap[lowerPlane]
+                                if (lowerGround != null) {
+                                    val heightSw = ground.getHeight(x, y) - lowerGround.getHeight(x, y)
+                                    val heightSe = ground.getHeight(x + 1, y) - lowerGround.getHeight(x + 1, y)
+                                    val heightNe = ground.getHeight(x + 1, y + 1) - lowerGround.getHeight(x + 1, y + 1)
+                                    val heightNw = ground.getHeight(x, y + 1) - lowerGround.getHeight(x, y + 1)
+                                    lowerGround.addShadow(shadow, scaledX, (heightNw + heightNe + heightSe + heightSw) / 4, scaledY)
                                 }
-                                --maxZ
+                                --lowerPlane
                             }
                         }
                     }
@@ -1576,8 +1576,8 @@ class Scene(
         }
     }
 
-    fun getInteractiveObjects(z: Int, x: Int, y: Int): InteractiveEntityContainer? {
-        val tile = this.tiles[z][x][y]
+    fun getInteractiveObjects(plane: Int, x: Int, y: Int): InteractiveEntityContainer? {
+        val tile = this.tiles[plane][x][y]
         return tile?.interactives
     }
 
@@ -1590,27 +1590,27 @@ class Scene(
         // this is a per-entity, per-frame walk of the tile's light uids plus four
         // glLightfv/glLightf calls, all discarded.
         if (this.copyLights && this.activeToolkit.usesFixedFunctionLights()) {
-            val activeLights = entity.getActiveLights(lights)
-            this.activeToolkit.copyLights(activeLights, lights as Array<PointLight>)
+            val lightCount = entity.getActiveLights(lights)
+            this.activeToolkit.copyLights(lightCount, lights as Array<PointLight>)
         }
         if (this.underwaterHeightmap === this.localHeightmap) {
             val absolutePosition = entity.getAbsolutePosition().coords
-            val startX: Int
-            val startY: Int
+            val sceneX: Int
+            val sceneY: Int
             if (entity is AbstractInteractiveEntity) {
-                startX = entity.startX.toInt()
-                startY = entity.startZ.toInt()
+                sceneX = entity.startX.toInt()
+                sceneY = entity.startZ.toInt()
             } else {
-                startX = absolutePosition.x.toInt() shr this.tileUnits
-                startY = absolutePosition.z.toInt() shr this.tileUnits
+                sceneX = absolutePosition.x.toInt() shr this.tileUnits
+                sceneY = absolutePosition.z.toInt() shr this.tileUnits
             }
             val waterTile = WaterTile()
-            waterTile.color = getColor(startX, startY)
-            waterTile.scale = getScale(startX, startY)
-            waterTile.intensity = getIntensity(startX, startY)
-            waterTile.floOpcode20 = getWaterOpcode20(startX, startY)
-            waterTile.floUnusedOpcode21 = unusedOpcode21(startX, startY)
-            waterTile.floUnusedOpcode22 = unusedOpcode22(startX, startY)
+            waterTile.color = getColor(sceneX, sceneY)
+            waterTile.scale = getScale(sceneX, sceneY)
+            waterTile.intensity = getIntensity(sceneX, sceneY)
+            waterTile.floOpcode20 = getWaterOpcode20(sceneX, sceneY)
+            waterTile.floUnusedOpcode21 = unusedOpcode21(sceneX, sceneY)
+            waterTile.floUnusedOpcode22 = unusedOpcode22(sceneX, sceneY)
             this.activeToolkit.addWaterTile(this.surfaceHeightmap[0]!!.getAverageHeight(absolutePosition.x.toInt(), absolutePosition.z.toInt()), waterTile)
         }
         val entityReference = entity.draw(this.activeToolkit)
@@ -1624,22 +1624,22 @@ class Scene(
         }
     }
 
-    fun getPrimaryWallDecoration(z: Int, x: Int, y: Int): AbstractWallDecoration? {
-        val tile = this.tiles[z][x][y]
+    fun getPrimaryWallDecoration(plane: Int, x: Int, y: Int): AbstractWallDecoration? {
+        val tile = this.tiles[plane][x][y]
         return tile?.primaryWallDecoration
     }
 
-    fun removeInteractiveOnCondition(z: Int, x: Int, y: Int, comparable: ComparableGraphNode?): AbstractInteractiveEntity? {
-        val tile = this.tiles[z][x][y]
+    fun removeInteractiveOnCondition(plane: Int, x: Int, y: Int, comparable: ComparableGraphNode?): AbstractInteractiveEntity? {
+        val tile = this.tiles[plane][x][y]
         if (tile != null) {
-            var interactives = tile.interactives
-            while (interactives != null) {
-                val interactive = interactives.interactiveObject
+            var container = tile.interactives
+            while (container != null) {
+                val interactive = container.interactiveObject
                 if ((comparable == null || comparable.matches(interactive!!)) && x == interactive!!.startX.toInt() && y == interactive!!.startZ.toInt()) {
                     removeInteractive(interactive, false)
                     return interactive
                 }
-                interactives = interactives.child
+                container = container.child
             }
         }
         return null

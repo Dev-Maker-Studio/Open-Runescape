@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontMetrics
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
-import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.graphics.texture.OpenGl2DImageTexture
 import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
@@ -72,7 +72,7 @@ class ModernFontRenderer(
 
     init {
         // Build the glyph atlas texture using the legacy texture creation path.
-        // This creates an OpenGl2DTexture_Sub1 that we only need the GL handle from.
+        // This creates an OpenGl2DImageTexture that we only need the GL handle from.
         //
         // The atlas is a 16x16 grid of character cells. Each cell is maxDimension x maxDimension
         // pixels, where maxDimension is the largest width or height across all 256 characters.
@@ -91,10 +91,10 @@ class ModernFontRenderer(
         //   - isPlain=true: single-channel alpha stored in ByteArray (RGBA format with alpha-only data)
         //   - isPlain=false: ARGB pixels stored in IntArray
         //
-        // Both paths produce an OpenGl2DTexture_Sub1. We use the legacy creation to ensure
+        // Both paths produce an OpenGl2DImageTexture. We use the legacy creation to ensure
         // the texture is identical to what FontRendererGL would create.
 
-        val texture: OpenGl2DTexture_Sub1
+        val texture: OpenGl2DImageTexture
         if (isPlain) {
             // WHITE-RGB + alpha atlas (NOT the legacy alpha-only surface). Legacy draws
             // plain glyphs with combine REPLACE(rgb from GL_PREVIOUS = primary color) +
@@ -131,7 +131,7 @@ class ModernFontRenderer(
                     }
                 }
             }
-            texture = OpenGl2DTexture_Sub1.createFromPixels(toolkit, atlasSize, atlasSize, pixels, 0, 0)
+            texture = OpenGl2DImageTexture.createFromPixels(toolkit, atlasSize, atlasSize, pixels, 0, 0)
         } else {
             val pixels = IntArray(atlasSize * atlasSize)
             for (charIndex in 0 until 256) {
@@ -167,7 +167,7 @@ class ModernFontRenderer(
                     }
                 }
             }
-            texture = OpenGl2DTexture_Sub1.createFromPixels(toolkit, atlasSize, atlasSize, pixels, 0, 0)
+            texture = OpenGl2DImageTexture.createFromPixels(toolkit, atlasSize, atlasSize, pixels, 0, 0)
         }
 
         texture.setLinearTextureFilter(false)

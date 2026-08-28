@@ -10,8 +10,8 @@ class WallObjectStrategy : RouteStrategy() {
     @JvmField
     var locShape: ObjectShapes? = null
 
-    override fun canExit(size: Int, x: Int, y: Int, var4: CollisionMap): Boolean {
-        return var4.canReachLoc(
+    override fun canExit(size: Int, x: Int, y: Int, clipMap: CollisionMap): Boolean {
+        return clipMap.canReachLoc(
             size, x, y,
             super.destinationX, super.destinationY,
             locShape!!.getValue(), rotation

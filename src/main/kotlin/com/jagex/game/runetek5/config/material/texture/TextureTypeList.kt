@@ -101,7 +101,7 @@ object TextureTypeList {
             34 -> TextureOpPerlinNoise()
             35 -> TextureOpMonochromeEdgeDetector()
             36 -> TextureOpTexture()
-            37 -> TextureOp37()
+            37 -> TextureOpDiagonalWaves()
             38 -> TextureOpLineNoise()
             39 -> TextureOpSprite()
             else -> throw IllegalArgumentException("Unknown texture operation type: $type")

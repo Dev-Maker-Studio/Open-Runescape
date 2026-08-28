@@ -25,7 +25,7 @@ class BuildAreaPreference : Preference {
         return BuildArea.ORIGINAL_SIZE.id
     }
 
-    override fun canModify(i_1: Int): Int {
+    override fun canModify(value: Int): Int {
         return 1
     }
 

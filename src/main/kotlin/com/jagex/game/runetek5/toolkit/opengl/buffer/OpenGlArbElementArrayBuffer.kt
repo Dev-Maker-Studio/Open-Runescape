@@ -32,8 +32,8 @@ class OpenGlArbElementArrayBuffer(
         super.destroy()
     }
 
-    override fun getDataStorePointer(offset: Int, i_2: Int): Long {
-        return super.getDataStorePointer(offset, i_2)
+    override fun getDataStorePointer(offset: Int, unused: Int): Long {
+        return super.getDataStorePointer(offset, unused)
     }
 
     override fun upload(offset: Int, size: Int, dataPointer: Long): Boolean {

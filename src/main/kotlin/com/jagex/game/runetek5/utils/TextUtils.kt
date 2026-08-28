@@ -54,11 +54,11 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun matches(findRaw: String?, findFormatted: String?, currentRaw: String?, currentFormatted: String?, b4: Byte): Boolean {
+    fun matches(findRaw: String?, findFormatted: String?, currentRaw: String?, currentFormatted: String?, garbageValue: Byte): Boolean {
         if (findRaw != null) {
             if (currentRaw != null) {
                 if (!findRaw.startsWith("#")) {
-                    if (b4 >= -1) {
+                    if (garbageValue >= -1) {
                         throw IllegalStateException()
                     }
                     if (!currentRaw.startsWith("#")) {
@@ -67,7 +67,7 @@ object TextUtils {
                 }
                 return findRaw == currentRaw
             }
-            if (b4 >= -1) {
+            if (garbageValue >= -1) {
                 throw IllegalStateException()
             }
         }
@@ -76,28 +76,28 @@ object TextUtils {
 
     @JvmStatic
     fun decodeUidName(uid: Long): String? {
-        var long0 = uid
-        if (long0 > 0L && long0 < 6582952005840035281L) {
-            if (long0 % 37L == 0L) {
+        var remaining = uid
+        if (remaining > 0L && remaining < 6582952005840035281L) {
+            if (remaining % 37L == 0L) {
                 return null
             } else {
                 var length = 0
-                var temp = long0
+                var temp = remaining
                 while (temp != 0L) {
                     length++
                     temp /= 37L
                 }
                 val stringBuilder = StringBuilder(length)
-                while (long0 != 0L) {
-                    val long4 = long0
-                    long0 /= 37L
-                    var char6 = Utils.aCharArray5825[(long4 - 37L * long0).toInt()]
-                    if (char6 == '_') {
+                while (remaining != 0L) {
+                    val previous = remaining
+                    remaining /= 37L
+                    var ch = Utils.BASE37_ALPHABET[(previous - 37L * remaining).toInt()]
+                    if (ch == '_') {
                         val lastIndex = stringBuilder.length - 1
                         stringBuilder.setCharAt(lastIndex, Character.toUpperCase(stringBuilder[lastIndex]))
-                        char6 = '\u00a0'
+                        ch = '\u00a0'
                     }
-                    stringBuilder.append(char6)
+                    stringBuilder.append(ch)
                 }
                 stringBuilder.reverse()
                 stringBuilder.setCharAt(0, Character.toUpperCase(stringBuilder[0]))
@@ -145,51 +145,51 @@ object TextUtils {
         val length2 = str2.length
         var index1 = 0
         var index2 = 0
-        var var8: Char = 0.toChar()
-        var var9: Char = 0.toChar()
+        var pending1: Char = 0.toChar()
+        var pending2: Char = 0.toChar()
 
-        while (index1 - var8.code < length1 || index2 - var9.code < length2) {
-            if (index1 - var8.code >= length1) {
+        while (index1 - pending1.code < length1 || index2 - pending2.code < length2) {
+            if (index1 - pending1.code >= length1) {
                 return -1
             }
-            if (index2 - var9.code >= length2) {
+            if (index2 - pending2.code >= length2) {
                 return 1
             }
-            val var10 = if (var8.code != 0) var8 else str1[index1++]
-            val var15 = if (var9.code != 0) var9 else str2[index2++]
+            val c1 = if (pending1.code != 0) pending1 else str1[index1++]
+            val c2 = if (pending2.code != 0) pending2 else str2[index2++]
 
-            var8 = Utils.getLigatureReplacement(var10)
-            var9 = Utils.getLigatureReplacement(var15)
-            val char10 = stripDiacritics(var10, language)
-            val char15 = stripDiacritics(var15, language)
+            pending1 = Utils.getLigatureReplacement(c1)
+            pending2 = Utils.getLigatureReplacement(c2)
+            val stripped1 = stripDiacritics(c1, language)
+            val stripped2 = stripDiacritics(c2, language)
 
-            if (char10 != char15 && Character.toUpperCase(char10) != Character.toUpperCase(char15)) {
-                val lower10 = Character.toLowerCase(char10)
-                val lower15 = Character.toLowerCase(char15)
-                if (lower15 != lower10) {
-                    return Utils.getCollationKey(lower10) - Utils.getCollationKey(lower15)
+            if (stripped1 != stripped2 && Character.toUpperCase(stripped1) != Character.toUpperCase(stripped2)) {
+                val lower1 = Character.toLowerCase(stripped1)
+                val lower2 = Character.toLowerCase(stripped2)
+                if (lower2 != lower1) {
+                    return Utils.getCollationKey(lower1) - Utils.getCollationKey(lower2)
                 }
             }
         }
 
         val minLength = minOf(length1, length2)
-        for (i18 in 0 until minLength) {
-            val i6: Int
-            val i7: Int
+        for (i in 0 until minLength) {
+            val idx1: Int
+            val idx2: Int
             if (language == Language.FRENCH) {
-                i6 = length1 - 1 - i18
-                i7 = length2 - 1 - i18
+                idx1 = length1 - 1 - i
+                idx2 = length2 - 1 - i
             } else {
-                i7 = i18
-                i6 = i18
+                idx2 = i
+                idx1 = i
             }
-            val var17 = str1[i6]
-            val var13 = str2[i7]
-            if (var13 != var17 && Character.toUpperCase(var17) != Character.toUpperCase(var13)) {
-                val lower17 = Character.toLowerCase(var17)
-                val lower13 = Character.toLowerCase(var13)
-                if (lower17 != lower13) {
-                    return Utils.getCollationKey(lower17) - Utils.getCollationKey(lower13)
+            val c1 = str1[idx1]
+            val c2 = str2[idx2]
+            if (c2 != c1 && Character.toUpperCase(c1) != Character.toUpperCase(c2)) {
+                val lower1 = Character.toLowerCase(c1)
+                val lower2 = Character.toLowerCase(c2)
+                if (lower1 != lower2) {
+                    return Utils.getCollationKey(lower1) - Utils.getCollationKey(lower2)
                 }
             }
         }
@@ -198,11 +198,11 @@ object TextUtils {
         if (lengthDiff != 0) {
             return lengthDiff
         } else {
-            for (i19 in 0 until minLength) {
-                val var13 = str1[i19]
-                val var14 = str2[i19]
-                if (var13 != var14) {
-                    return Utils.getCollationKey(var13) - Utils.getCollationKey(var14)
+            for (i in 0 until minLength) {
+                val c1 = str1[i]
+                val c2 = str2[i]
+                if (c1 != c2) {
+                    return Utils.getCollationKey(c1) - Utils.getCollationKey(c2)
                 }
             }
             return 0
@@ -299,8 +299,8 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun isValidCp1252Byte(b0: Byte): Boolean {
-        val value = b0.toInt() and 0xff
+    fun isValidCp1252Byte(b: Byte): Boolean {
+        val value = b.toInt() and 0xff
         return value != 0 && (value < 128 || value >= 160 || Utils.UNICODE_TABLE[value - 128].code != 0)
     }
 
@@ -367,8 +367,8 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun calculateCombatBasedColor(i0: Int, i1: Int): String {
-        val diff = i1 - i0
+    fun calculateCombatBasedColor(targetCombatLevel: Int, myCombatLevel: Int): String {
+        val diff = myCombatLevel - targetCombatLevel
         return when {
             diff < -9 -> setTextColor(16711680)
             diff < -6 -> setTextColor(16723968)

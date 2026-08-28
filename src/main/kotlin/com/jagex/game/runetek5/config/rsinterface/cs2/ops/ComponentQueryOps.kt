@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -152,8 +152,8 @@ object ComponentQueryOps {
             ClientScriptOpCode.CC_GET2DANGLE -> ccGetAngle2D(exec)
             ClientScriptOpCode.CC_GETMODEL -> ccGetModel(exec)
             ClientScriptOpCode.CC_GETFONTGRAPHIC -> ccGetFontGraphic(exec)
-            ClientScriptOpCode.CC_GETGRAPHICDIMENSIONS -> method7676(exec)
-            ClientScriptOpCode.CC_GETFONTMETRICS -> method8154(exec)
+            ClientScriptOpCode.CC_GETGRAPHICDIMENSIONS -> ccGetGraphicDimensions(exec)
+            ClientScriptOpCode.CC_GETFONTMETRICS -> ccGetFontMetrics(exec)
             ClientScriptOpCode.CC_CONTAINERITEMID -> ccContainerItemId(exec)
             ClientScriptOpCode.CC_GETITEMSTACKSIZE -> ccGetItemStackSize(exec)
             ClientScriptOpCode.CC_GETSLOTID -> ccGetSlotId(exec)
@@ -250,7 +250,7 @@ object ComponentQueryOps {
     fun ccGetCharPosAtIndex(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        CS2SharedOps.method5001(component!!, executor)
+        CS2SharedOps.getCharPosAtIndex(component!!, executor)
     }
 
     @JvmStatic
@@ -276,7 +276,7 @@ object ComponentQueryOps {
             target = executor.hookedInterface1
         }
         val component: Component? = target!!.comp
-        CS2SharedOps.method3965(component!!, executor)
+        CS2SharedOps.getCharIndexAtPos(component!!, executor)
     }
 
     @JvmStatic
@@ -310,18 +310,18 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun method7676(executor: CS2Executor) {
+    fun ccGetGraphicDimensions(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        var i_4 = -1
-        var i_5 = -1
-        val class1196: InteractiveComponentSprite? = component!!.addInteractiveSprite(Renderers.activeToolkit!!)
-        if (class1196 != null) {
-            i_4 = class1196.width
-            i_5 = class1196.height
+        var spriteWidth = -1
+        var spriteHeight = -1
+        val sprite: InteractiveComponentSprite? = component!!.addInteractiveSprite(Renderers.activeToolkit!!)
+        if (sprite != null) {
+            spriteWidth = sprite.width
+            spriteHeight = sprite.height
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
-        executor.intStack[++executor.intStackPtr - 1] = i_5
+        executor.intStack[++executor.intStackPtr - 1] = spriteWidth
+        executor.intStack[++executor.intStackPtr - 1] = spriteHeight
     }
 
     @JvmStatic
@@ -403,7 +403,7 @@ object ComponentQueryOps {
     fun ccCallonresize(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        CS2SharedOps.method3251(component!!, executor)
+        CS2SharedOps.callonresize(component!!, executor)
     }
 
     @JvmStatic
@@ -444,7 +444,7 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun method8154(executor: CS2Executor) {
+    fun ccGetFontMetrics(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.fontId

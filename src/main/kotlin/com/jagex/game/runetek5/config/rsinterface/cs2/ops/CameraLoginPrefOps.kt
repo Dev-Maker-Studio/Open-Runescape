@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -129,42 +129,42 @@ object CameraLoginPrefOps {
         when (operation) {
             ClientScriptOpCode.CAM_MODEISFOLLOWPLAYER -> camModeIsFollowPlayer(exec)
             ClientScriptOpCode.LOGIN_REQUEST -> loginRequest(exec)
-            ClientScriptOpCode.LOGIN_CONTINUE -> method6695()
+            ClientScriptOpCode.LOGIN_CONTINUE -> loginContinue()
             ClientScriptOpCode.LOGIN_RESETREPLY -> loginResetReply()
             ClientScriptOpCode.SEND_VERIFY_EMAIL_PACKET -> sendVerifyEmailPacket(exec)
             ClientScriptOpCode.SEND_SIGNUP_FORM_PACKET -> sendSignupFormPacket(exec)
             ClientScriptOpCode.LOGIN_STARTGAME -> loginStartGame()
             ClientScriptOpCode.CREATE_CREATEREQUEST -> createCreateRequest(exec)
-            ClientScriptOpCode.LOGIN_REPLY_WORLD_ALT -> loginReplyWorld(exec)
+            ClientScriptOpCode.instr6699 -> loginReplyWorldAlt(exec)
             ClientScriptOpCode.LOGIN_QUEUE_POSITION -> loginGetQueuePosition(exec)
             ClientScriptOpCode.CREATE_GET_EMAIL -> createGetEmail(exec)
             ClientScriptOpCode.CREATE_EMAIL_VALIDATE_REPLY -> createEmailValidateReply(exec)
             ClientScriptOpCode.CREATE_REPLY -> createReply(exec)
             ClientScriptOpCode.LOGIN_REPLY -> loginReply(exec)
             ClientScriptOpCode.LOGIN_RETURNTOLOGINSCREEN -> loginReturnToLoginScreen()
-            ClientScriptOpCode.LOGIN_REPLY_WORLD -> method301(exec)
+            ClientScriptOpCode.LOGIN_REPLY_WORLD -> loginReplyWorld(exec)
             ClientScriptOpCode.LOGIN_SWITCHWORLD -> loginSwitchWorld(exec)
             ClientScriptOpCode.LOGOUT -> opLogout()
-            ClientScriptOpCode.LOGIN_REPLY_LOBBY -> method6285(exec)
-            ClientScriptOpCode.HAS_BASE64URL -> method2825(exec)
-            ClientScriptOpCode.GETMACHINEUID -> method12597(exec)
-            ClientScriptOpCode.CREATE_UNDER13 -> method453(exec)
-            ClientScriptOpCode.CREATE_STEP_REACHED -> method6280()
-            ClientScriptOpCode.LOGIN_DISCONNECT_REPLY -> method3119(exec)
-            ClientScriptOpCode.LOGIN_INPROGRESS -> method14669(exec)
-            ClientScriptOpCode.LOGIN_HANDSHAKE_CODE -> method2153(exec)
+            ClientScriptOpCode.LOGIN_REPLY_LOBBY -> loginReplyLobby(exec)
+            ClientScriptOpCode.HAS_BASE64URL -> hasBase64Url(exec)
+            ClientScriptOpCode.GETMACHINEUID -> getMachineUid(exec)
+            ClientScriptOpCode.CREATE_UNDER13 -> createUnder13(exec)
+            ClientScriptOpCode.CREATE_STEP_REACHED -> createStepReached()
+            ClientScriptOpCode.LOGIN_DISCONNECT_REPLY -> loginDisconnectReply(exec)
+            ClientScriptOpCode.LOGIN_INPROGRESS -> loginInProgress(exec)
+            ClientScriptOpCode.LOGIN_HANDSHAKE_CODE -> loginHandshakeCode(exec)
             ClientScriptOpCode.LOGIN_CANCEL -> loginCancel()
-            ClientScriptOpCode.LOGIN_REQUEST_SOCIAL_NETWORK -> method6169(exec)
+            ClientScriptOpCode.LOGIN_REQUEST_SOCIAL_NETWORK -> loginRequestSocialNetwork(exec)
             ClientScriptOpCode.LOGIN_SWITCHTOWORLD -> loginSwitchToWorld(exec)
             ClientScriptOpCode.LOGIN_REPLY_EXTRAINFO -> loginReplyExtraInfo(exec)
             ClientScriptOpCode.GETCUSTOMSTRINGPARAM -> getCustomStringParam(exec)
-            ClientScriptOpCode.DETAIL_BRIGHTNESS -> method5047(exec)
+            ClientScriptOpCode.DETAIL_BRIGHTNESS -> detailBrightness(exec)
             ClientScriptOpCode.DETAIL_REMOVEROOFS_OPTION -> detailRemoveRoofsOption(exec)
             ClientScriptOpCode.DETAIL_GROUNDDECOR_ON -> detailGrounddecorOn(exec)
             ClientScriptOpCode.DETAIL_IDLEANIMS_MANY -> detailIdleAnimsMany(exec)
-            ClientScriptOpCode.DETAIL_FLICKERING_ON -> method2568(exec)
+            ClientScriptOpCode.DETAIL_FLICKERING_ON -> detailFlickeringOn(exec)
             ClientScriptOpCode.DETAIL_SPOTSHADOWS_ON -> detailSpotshadowsOn(exec)
-            ClientScriptOpCode.DETAIL_SCENERYSHADOWS -> method3611(exec)
+            ClientScriptOpCode.DETAIL_SCENERYSHADOWS -> detailSceneryShadows(exec)
             ClientScriptOpCode.DETAIL_LIGHTDETAIL_HIGH -> detailLightDetailHigh(exec)
             ClientScriptOpCode.DETAIL_WATERDETAIL_HIGH -> detailWaterDetailHigh(exec)
             ClientScriptOpCode.DETAIL_FOG_ON -> detailFog(exec)
@@ -186,17 +186,17 @@ object CameraLoginPrefOps {
             ClientScriptOpCode.DETAIL_CPU -> detailCpu(exec)
             ClientScriptOpCode.DETAIL_TEXTURES -> detailTextures(exec)
             ClientScriptOpCode.DETAIL_MAXSCREENSIZE -> detailMaxScreenSize(exec)
-            ClientScriptOpCode.DETAIL_VOICEOVERVOLUME -> method3200(exec)
+            ClientScriptOpCode.DETAIL_VOICEOVERVOLUME -> detailVoiceOverVolume(exec)
             ClientScriptOpCode.DETAIL_LOGINVOL -> detailLoginVol(exec)
-            ClientScriptOpCode.DETAIL_GAMETIPSTARTSTAGEPREFERENCE -> method1586(exec)
+            ClientScriptOpCode.DETAIL_GAMETIPSTARTSTAGEPREFERENCE -> detailGametipStartStagePreference(exec)
             ClientScriptOpCode.DETAIL_SKYBOXES -> detailSkyboxes(exec)
-            ClientScriptOpCode.DETAILGET_BRIGHTNESS -> method8156(exec)
+            ClientScriptOpCode.DETAILGET_BRIGHTNESS -> detailGetBrightness(exec)
             ClientScriptOpCode.DETAILGET_REMOVEROOFS_OPTION -> detailGetRemoveRoofsOption(exec)
             ClientScriptOpCode.DETAILGET_GROUNDDECOR_ON -> detailGetGrounddecorOn(exec)
             ClientScriptOpCode.DETAILGET_IDLEANIMS -> detailGetIdleAnims(exec)
-            ClientScriptOpCode.DETAILGET_FLICKERING_ON -> method12560(exec)
+            ClientScriptOpCode.DETAILGET_FLICKERING_ON -> detailGetFlickeringOn(exec)
             ClientScriptOpCode.DETAILGET_SPOTSHADOWS_ON -> detailGetSpotshadowsOn(exec)
-            ClientScriptOpCode.DETAILGET_SCENERYSHADOWS -> method6675(exec)
+            ClientScriptOpCode.DETAILGET_SCENERYSHADOWS -> detailGetSceneryShadows(exec)
             ClientScriptOpCode.DETAILGET_LIGHTDETAIL_HIGH -> detailGetLightDetailHigh(exec)
             ClientScriptOpCode.DETAILGET_WATERDETAIL_HIGH -> getWaterPreference(exec)
             ClientScriptOpCode.DETAILGET_FOG_ON -> pushFogPreference(exec)
@@ -204,7 +204,7 @@ object CameraLoginPrefOps {
             ClientScriptOpCode.DETAILGET_STEREO -> detailGetStereo(exec)
             ClientScriptOpCode.DETAILGET_SOUNDEFFECTVOLUME -> detailGetSoundEffectVolume(exec)
             ClientScriptOpCode.DETAILGET_MUSICVOL -> detailGetMusicVolume(exec)
-            ClientScriptOpCode.DETAILGET_AMBIENTSOUNDVOLUME -> method13404(exec)
+            ClientScriptOpCode.DETAILGET_AMBIENTSOUNDVOLUME -> detailGetAmbientSoundVolume(exec)
             ClientScriptOpCode.DETAILGET_PARTICLES -> detailGetParticles(exec)
             ClientScriptOpCode.DETAILGET_ANTIALIASING -> detailGetAntialiasing(exec)
             ClientScriptOpCode.DETAILGET_MAPSIZE -> detailGetMapSize(exec)
@@ -216,44 +216,44 @@ object CameraLoginPrefOps {
             ClientScriptOpCode.DETAILGET_TOOLKIT -> detailGetToolkit(exec)
             ClientScriptOpCode.DETAILGET_CPU -> detailGetCpu(exec)
             ClientScriptOpCode.DETAILGET_TEXTURING -> detailGetTexturing(exec)
-            ClientScriptOpCode.DETAILGET_CPUUSAGE -> method2549(exec)
+            ClientScriptOpCode.DETAILGET_CPUUSAGE -> detailGetCpuUsage(exec)
             ClientScriptOpCode.DETAILGET_MAXSCREENSIZE -> detailGetMaxScreenSize(exec)
-            ClientScriptOpCode.DETAILGET_VOICEOVERVOLUME -> method5734(exec)
+            ClientScriptOpCode.DETAILGET_VOICEOVERVOLUME -> detailGetVoiceOverVolume(exec)
             ClientScriptOpCode.DETAILGET_SOUNDLEVEL -> detailGetSoundLevel(exec)
-            ClientScriptOpCode.DETAIL_GET_FORCED_SAFEMODE -> method6238(exec)
-            ClientScriptOpCode.DETAILGET_GAMETIPSTARTSTAGEPREFERENCE -> method4324(exec)
+            ClientScriptOpCode.DETAIL_GET_FORCED_SAFEMODE -> detailGetForcedSafeMode(exec)
+            ClientScriptOpCode.DETAILGET_GAMETIPSTARTSTAGEPREFERENCE -> detailGetGameTipStartStagePreference(exec)
             ClientScriptOpCode.DETAILGET_DEFAULTTOOLKIT -> detailGetDefaultToolkit(exec)
             ClientScriptOpCode.DETAIL_GET_TOOLKIT_DEFAULT -> detailGetToolkitDefault(exec)
-            ClientScriptOpCode.DETAIL_GET_STARTUP_SAFEMODE -> method745(exec)
+            ClientScriptOpCode.DETAIL_GET_STARTUP_SAFEMODE -> detailGetStartupSafemode(exec)
             ClientScriptOpCode.DETAILGET_SKYBOXES -> detailGetSkyboxes(exec)
-            ClientScriptOpCode.VIEWPORT_SETFOV -> method1643(exec)
-            ClientScriptOpCode.VIEWPORT_SETZOOM -> method1815(exec)
-            ClientScriptOpCode.VIEWPORT_CLAMPFOV -> method15404(exec)
-            ClientScriptOpCode.VIEWPORT_GETEFFECTIVESIZE -> method4882(exec)
-            ClientScriptOpCode.VIEWPORT_GETZOOM -> method4973(exec)
-            ClientScriptOpCode.VIEWPORT_GETFOV -> method2587(exec)
+            ClientScriptOpCode.VIEWPORT_SETFOV -> viewportSetFov(exec)
+            ClientScriptOpCode.VIEWPORT_SETZOOM -> viewportSetZoom(exec)
+            ClientScriptOpCode.VIEWPORT_CLAMPFOV -> viewportClampFov(exec)
+            ClientScriptOpCode.VIEWPORT_GETEFFECTIVESIZE -> viewportGetEffectiveSize(exec)
+            ClientScriptOpCode.VIEWPORT_GETZOOM -> viewportGetZoom(exec)
+            ClientScriptOpCode.VIEWPORT_GETFOV -> viewportGetFov(exec)
             ClientScriptOpCode.DATE_MINUTES -> dateMinutes(exec)
             ClientScriptOpCode.DATE_RUNEDAY -> dateRuneday(exec)
             ClientScriptOpCode.DATE_RUNEDAY_FROMDATE -> dateRunedayFromdate(exec)
             ClientScriptOpCode.DATE_YEAR -> dateYear(exec)
-            ClientScriptOpCode.DATE_ISLEAPYEAR -> method1479(exec)
+            ClientScriptOpCode.DATE_ISLEAPYEAR -> dateIsLeapYear(exec)
             ClientScriptOpCode.DATE_RUNEDAY_TODATE -> dateRunedayToDate(exec)
             ClientScriptOpCode.DATE_MINUTES_FROMRUNEDAY -> dateMinutesFromRuneday(exec)
             ClientScriptOpCode.WORLDLIST_FETCH -> worldlistFetch(exec)
             ClientScriptOpCode.WORLDLIST_START -> worldlistStart(exec)
             ClientScriptOpCode.WORLDLIST_NEXT -> worldlistNext(exec)
             ClientScriptOpCode.SETGAMEHOST -> opSetGameHost(exec)
-            ClientScriptOpCode.WORLDLIST_SPECIFIC -> method1387(exec)
+            ClientScriptOpCode.WORLDLIST_SPECIFIC -> worldlistSpecific(exec)
             ClientScriptOpCode.WORLDLIST_SORT -> worldlistSort(exec)
-            ClientScriptOpCode.PREPAREGAMEHOST -> method5816()
+            ClientScriptOpCode.PREPAREGAMEHOST -> prepareGameHost()
             else -> throw IllegalStateException("opcode $operation is not handled by CameraLoginPrefOps")
         }
     }
 
     @JvmStatic
     fun detailParticles(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        PreferenceManager.preferences!!.particles!!.setValue(value)
+        val particles = executor.intStack[--executor.intStackPtr]
+        PreferenceManager.preferences!!.particles!!.setValue(particles)
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
     }
@@ -264,13 +264,13 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method1586(executor: CS2Executor) {
-        var value = executor.intStack[--executor.intStackPtr]
-        if (value > 255 || value < 0) {
-            value = 0
+    fun detailGametipStartStagePreference(executor: CS2Executor) {
+        var stage = executor.intStack[--executor.intStackPtr]
+        if (stage > 255 || stage < 0) {
+            stage = 0
         }
-        if (value != PreferenceManager.preferences!!.gametipStartStagePreference!!.getValue()) {
-            PreferenceManager.preferences!!.gametipStartStagePreference!!.setValue(value)
+        if (stage != PreferenceManager.preferences!!.gametipStartStagePreference!!.getValue()) {
+            PreferenceManager.preferences!!.gametipStartStagePreference!!.setValue(stage)
             PreferenceManager.savePreferences()
             Client.preferencesSavedOnServer = false
         }
@@ -282,7 +282,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method6280() {
+    fun createStepReached() {
         Client.hasJustCreatedAccount = true
     }
 
@@ -297,7 +297,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method4882(executor: CS2Executor) {
+    fun viewportGetEffectiveSize(executor: CS2Executor) {
         AbstractToolkit.calculateGameArea(0, 0, Client.GAME_SCREEN_INTERFACE!!.width, Client.GAME_SCREEN_INTERFACE!!.height, false)
         executor.intStack[++executor.intStackPtr - 1] = Client.gameAreaWidth
         executor.intStack[++executor.intStackPtr - 1] = Client.gameAreaHeight
@@ -322,7 +322,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method745(executor: CS2Executor) {
+    fun detailGetStartupSafemode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Client.safemodeForcedDuringStartup) 1  else 0
     }
 
@@ -337,13 +337,13 @@ object CameraLoginPrefOps {
     @JvmStatic
     fun loginRequest(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
-        LoginManager.directLogin(string_2!!, string_3!!)
+        val username: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val password: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        LoginManager.directLogin(username!!, password!!)
     }
 
     @JvmStatic
-    fun method6675(executor: CS2Executor) {
+    fun detailGetSceneryShadows(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.sceneryShadows!!.getValue()
     }
 
@@ -376,10 +376,10 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun opSetGameHost(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val world = executor.intStack[--executor.intStackPtr]
+        val host: String? = executor.stringStack[--executor.stringStackPtr] as String?
         if (Client.gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress()) {
-            executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.setGameHost(value, text!!)) 1 else 0
+            executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.setGameHost(world, host!!)) 1 else 0
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
         }
@@ -391,23 +391,23 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method6285(executor: CS2Executor) {
+    fun loginReplyLobby(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lobbyLoginResponse
     }
 
     @JvmStatic
-    fun method1387(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class217Sub13: WorldDescriptor? = WorldDescriptor.getWorld(value)
-        if (class217Sub13 != null) {
-            executor.intStack[++executor.intStackPtr - 1] = class217Sub13!!.flags
-            executor.stringStack[++executor.stringStackPtr - 1] = class217Sub13!!.unknown
-            val class2134: WorldMeta? = class217Sub13!!.getWorld()
-            executor.intStack[++executor.intStackPtr - 1] = class2134!!.countryId
-            executor.stringStack[++executor.stringStackPtr - 1] = class2134!!.activity
-            executor.intStack[++executor.intStackPtr - 1] = class217Sub13!!.playerCount
-            executor.intStack[++executor.intStackPtr - 1] = class217Sub13!!.ping
-            executor.stringStack[++executor.stringStackPtr - 1] = class217Sub13!!.ipAddress
+    fun worldlistSpecific(executor: CS2Executor) {
+        val worldNumber = executor.intStack[--executor.intStackPtr]
+        val descriptor: WorldDescriptor? = WorldDescriptor.getWorld(worldNumber)
+        if (descriptor != null) {
+            executor.intStack[++executor.intStackPtr - 1] = descriptor!!.flags
+            executor.stringStack[++executor.stringStackPtr - 1] = descriptor!!.unknown
+            val world: WorldMeta? = descriptor!!.getWorld()
+            executor.intStack[++executor.intStackPtr - 1] = world!!.countryId
+            executor.stringStack[++executor.stringStackPtr - 1] = world!!.activity
+            executor.intStack[++executor.intStackPtr - 1] = descriptor!!.playerCount
+            executor.intStack[++executor.intStackPtr - 1] = descriptor!!.ping
+            executor.stringStack[++executor.stringStackPtr - 1] = descriptor!!.ipAddress
         } else {
             executor.intStack[++executor.intStackPtr - 1] = -1
             executor.stringStack[++executor.stringStackPtr - 1] = ""
@@ -420,7 +420,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method12560(executor: CS2Executor) {
+    fun detailGetFlickeringOn(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (PreferenceManager.preferences!!.flickeringEffects!!.getValue() == 1) 1 else 0
     }
 
@@ -440,13 +440,13 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method6695() {
+    fun loginContinue() {
         LoginManager.confirmLoginContinue()
     }
 
     @JvmStatic
     fun createGetEmail(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = method2598()!!.getValue()
+        executor.intStack[++executor.intStackPtr - 1] = currentCreateAccountRequest()!!.getValue()
     }
 
     @JvmStatic
@@ -466,20 +466,20 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method1479(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        var flag = true
-        if (value < 0) {
-            flag = (value + 1) % 4 == 0
-        } else if (value < 1582) {
-            flag = value % 4 == 0
-        } else if (value % 4 != 0) {
-            flag = false
-        } else if (value % 100 != 0) {
-        } else if (value % 400 != 0) {
-            flag = false
+    fun dateIsLeapYear(executor: CS2Executor) {
+        val year = executor.intStack[--executor.intStackPtr]
+        var isLeapYear = true
+        if (year < 0) {
+            isLeapYear = (year + 1) % 4 == 0
+        } else if (year < 1582) {
+            isLeapYear = year % 4 == 0
+        } else if (year % 4 != 0) {
+            isLeapYear = false
+        } else if (year % 100 != 0) {
+        } else if (year % 400 != 0) {
+            isLeapYear = false
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (isLeapYear) 1  else 0
     }
 
     @JvmStatic
@@ -488,12 +488,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method5734(executor: CS2Executor) {
+    fun detailGetVoiceOverVolume(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.voiceOverVolume!!.getValue()
     }
 
     @JvmStatic
-    fun method2568(executor: CS2Executor) {
+    fun detailFlickeringOn(executor: CS2Executor) {
         PreferenceManager.preferences!!.flickeringEffects!!.setValue(if (executor.intStack[--executor.intStackPtr] == 1) 1 else 0)
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
@@ -517,34 +517,34 @@ object CameraLoginPrefOps {
     @JvmStatic
     fun dateRunedayFromdate(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val longValue = CalenderUtil.getGmtNoon(i_2, i_3, i_4)
-        var i_7 = StaticMethods.millisToJagexDays(longValue)
-        if (i_4 < 1970) {
-            --i_7
+        val day = executor.intStack[executor.intStackPtr]
+        val month = executor.intStack[executor.intStackPtr + 1]
+        val year = executor.intStack[executor.intStackPtr + 2]
+        val noonMillis = CalenderUtil.getGmtNoon(day, month, year)
+        var runeday = StaticMethods.millisToJagexDays(noonMillis)
+        if (year < 1970) {
+            --runeday
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_7
+        executor.intStack[++executor.intStackPtr - 1] = runeday
     }
 
     @JvmStatic
-    fun method6169(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        LoginManager.snLogin(value)
+    fun loginRequestSocialNetwork(executor: CS2Executor) {
+        val worldId = executor.intStack[--executor.intStackPtr]
+        LoginManager.snLogin(worldId)
     }
 
     @JvmStatic
-    fun method301(executor: CS2Executor) {
+    fun loginReplyWorld(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldLoginResponse
     }
 
     @JvmStatic
     fun loginSwitchWorld(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
-        LoginManager.switchWorldAndLogin(string_2!!, string_3!!)
+        val username: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val password: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        LoginManager.switchWorldAndLogin(username!!, password!!)
     }
 
     @JvmStatic
@@ -567,19 +567,19 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun loginSwitchToWorld(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        StaticMethods.switchToWorldLogin(value)
+        val worldId = executor.intStack[--executor.intStackPtr]
+        StaticMethods.switchToWorldLogin(worldId)
     }
 
     @JvmStatic
     fun detailRemoveRoofsOptionOverride(executor: CS2Executor) {
-        val value = PreferenceManager.preferences!!.removeRoofs!!.getValue()
-        PreferenceManager.preferences!!.removeRoofsOptionOverride!!.setValue(if (executor.intStack[--executor.intStackPtr] == 1) 0 else value)
+        val removeRoofs = PreferenceManager.preferences!!.removeRoofs!!.getValue()
+        PreferenceManager.preferences!!.removeRoofsOptionOverride!!.setValue(if (executor.intStack[--executor.intStackPtr] == 1) 0 else removeRoofs)
         Scene.setRoofOverride()
     }
 
     @JvmStatic
-    fun method3611(executor: CS2Executor) {
+    fun detailSceneryShadows(executor: CS2Executor) {
         PreferenceManager.preferences!!.sceneryShadows!!.setValue(executor.intStack[--executor.intStackPtr])
         Resource.mapRegion!!.reload()
         PreferenceManager.savePreferences()
@@ -595,9 +595,9 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun dateRunedayToDate(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val stack: IntArray? = CalenderUtil.getLocalDdmmyyyy(value)
-        ArrayUtils.arrayCopy(stack!!, 0, executor.intStack, executor.intStackPtr, 3)
+        val runeday = executor.intStack[--executor.intStackPtr]
+        val ddmmyyyy: IntArray? = CalenderUtil.getLocalDdmmyyyy(runeday)
+        ArrayUtils.arrayCopy(ddmmyyyy!!, 0, executor.intStack, executor.intStackPtr, 3)
         executor.intStackPtr += 3
     }
 
@@ -615,7 +615,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method2587(executor: CS2Executor) {
+    fun viewportGetFov(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = Client.viewportFovMin.toInt()
         executor.intStack[++executor.intStackPtr - 1] = Client.viewportFovMax.toInt()
     }
@@ -627,9 +627,9 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun detailRemoveRoofsOption(executor: CS2Executor) {
-        val flag = executor.intStack[--executor.intStackPtr] == 1
-        PreferenceManager.preferences!!.removeRoofs!!.setValue(if (flag) 2  else 1)
-        PreferenceManager.preferences!!.removeRoofsOptionOverride!!.setValue(if (flag) 2  else 1)
+        val removeRoofs = executor.intStack[--executor.intStackPtr] == 1
+        PreferenceManager.preferences!!.removeRoofs!!.setValue(if (removeRoofs) 2  else 1)
+        PreferenceManager.preferences!!.removeRoofsOptionOverride!!.setValue(if (removeRoofs) 2  else 1)
         Scene.setRoofOverride()
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
@@ -646,28 +646,28 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method2549(executor: CS2Executor) {
+    fun detailGetCpuUsage(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = DisplayModeDetails.getProfilingPerformance(PreferenceManager.preferences!!.activeToolkit!!.getValue(), 200)
     }
 
     @JvmStatic
     fun detailMusicVol(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val i_3 = PreferenceManager.preferences!!.musicVolume!!.getValue()
-        if (i_2 != i_3) {
+        val volume = executor.intStack[--executor.intStackPtr]
+        val currentVolume = PreferenceManager.preferences!!.musicVolume!!.getValue()
+        if (volume != currentVolume) {
             if (GameState.isRenderingScene(Client.gameState)) {
-                if (i_3 == 0 && AreaSoundPlayer.currentMusicArchive != -1) {
-                    AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
+                if (currentVolume == 0 && AreaSoundPlayer.currentMusicArchive != -1) {
+                    AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, volume)
                     SongPlayer.resetChannelVolumes()
                     SoundEffectPlayer.soundJinglePlaying = false
-                } else if (i_2 == 0) {
+                } else if (volume == 0) {
                 	SoundResourceManager.discardSongData()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else {
-                    SoundEffectPlayer.setMusicVolume(i_2)
+                    SoundEffectPlayer.setMusicVolume(volume)
                 }
             }
-            PreferenceManager.preferences!!.musicVolume!!.setValue(i_2)
+            PreferenceManager.preferences!!.musicVolume!!.setValue(volume)
             PreferenceManager.savePreferences()
             Client.preferencesSavedOnServer = false
         }
@@ -682,7 +682,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method2825(executor: CS2Executor) {
+    fun hasBase64Url(executor: CS2Executor) {
         if (Client.base64Url != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
@@ -691,9 +691,9 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method5047(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        PreferenceManager.preferences!!.brightness!!.setValue(value)
+    fun detailBrightness(executor: CS2Executor) {
+        val brightness = executor.intStack[--executor.intStackPtr]
+        PreferenceManager.preferences!!.brightness!!.setValue(brightness)
         Resource.mapRegion!!.reload()
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
@@ -716,22 +716,22 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun detailLoginVol(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val i_3 = PreferenceManager.preferences!!.soundLevel!!.getValue()
-        if (i_3 != i_2 && AreaSoundPlayer.titlescreenMusicArchive == AreaSoundPlayer.currentMusicArchive) {
+        val volume = executor.intStack[--executor.intStackPtr]
+        val currentVolume = PreferenceManager.preferences!!.soundLevel!!.getValue()
+        if (currentVolume != volume && AreaSoundPlayer.titlescreenMusicArchive == AreaSoundPlayer.currentMusicArchive) {
             if (!GameState.isRenderingScene(Client.gameState)) {
-                if (i_3 == 0) {
-                    AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
+                if (currentVolume == 0) {
+                    AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, volume)
                     SongPlayer.resetChannelVolumes()
                     SoundEffectPlayer.soundJinglePlaying = false
-                } else if (i_2 == 0) {
+                } else if (volume == 0) {
                 	SoundResourceManager.discardSongData()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else {
-                    SoundEffectPlayer.setMusicVolume(i_2)
+                    SoundEffectPlayer.setMusicVolume(volume)
                 }
             }
-            PreferenceManager.preferences!!.soundLevel!!.setValue(i_2)
+            PreferenceManager.preferences!!.soundLevel!!.setValue(volume)
             PreferenceManager.savePreferences()
             Client.preferencesSavedOnServer = false
         }
@@ -751,9 +751,9 @@ object CameraLoginPrefOps {
                 executor.intStack[++executor.intStackPtr - 1] = 1
             } else {
                 WorldConnection.requestingWorldList = true
-                val tcpmessage2: TcpPacket? = PacketEncoder.createPacket(ClientProt.REQUEST_WORLD_LIST, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-                tcpmessage2!!.buffer.writeInt(StaticMethods.WORLD_LIST_VERSION)
-                Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage2)
+                val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.REQUEST_WORLD_LIST, Client.LOBBY_CONNECTION_CONTEXT.isaac)
+                packet!!.buffer.writeInt(StaticMethods.WORLD_LIST_VERSION)
+                Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
                 executor.intStack[++executor.intStackPtr - 1] = 0
             }
         } else {
@@ -762,7 +762,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method3200(executor: CS2Executor) {
+    fun detailVoiceOverVolume(executor: CS2Executor) {
         PreferenceManager.preferences!!.voiceOverVolume!!.setValue(executor.intStack[--executor.intStackPtr])
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
@@ -774,12 +774,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginReplyWorld(executor: CS2Executor) {
+    fun loginReplyWorldAlt(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldLoginResponse
     }
 
     @JvmStatic
-    fun method1815(executor: CS2Executor) {
+    fun viewportSetZoom(executor: CS2Executor) {
         executor.intStackPtr -= 2
         Client.cameraZoomMin = executor.intStack[executor.intStackPtr].toShort()
         if (Client.cameraZoomMin <= 0) {
@@ -799,50 +799,50 @@ object CameraLoginPrefOps {
     @JvmStatic
     fun worldlistSort(executor: CS2Executor) {
         executor.intStackPtr -= 4
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val bool3 = executor.intStack[executor.intStackPtr + 1] == 1
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val bool5 = executor.intStack[executor.intStackPtr + 3] == 1
-        WorldConnection.sortAndClearPings(i_2, bool3, i_4, bool5)
+        val sortMode = executor.intStack[executor.intStackPtr]
+        val ascending = executor.intStack[executor.intStackPtr + 1] == 1
+        val filterMode = executor.intStack[executor.intStackPtr + 2]
+        val filterEnabled = executor.intStack[executor.intStackPtr + 3] == 1
+        WorldConnection.sortAndClearPings(sortMode, ascending, filterMode, filterEnabled)
     }
 
     @JvmStatic
     fun setBloom(executor: CS2Executor) {
-        var enabled = executor.intStack[--executor.intStackPtr]
-        if (enabled < 0 || enabled > 1) {
-            enabled = 0
+        var bloom = executor.intStack[--executor.intStackPtr]
+        if (bloom < 0 || bloom > 1) {
+            bloom = 0
         }
-        PreferenceManager.setBloom(enabled == 1)
+        PreferenceManager.setBloom(bloom == 1)
     }
 
     @JvmStatic
-    fun method5816() {
+    fun prepareGameHost() {
         LoginManager.prepareHost()
     }
 
     @JvmStatic
-    fun method2153(executor: CS2Executor) {
+    fun loginHandshakeCode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.loginHandshakeCode
     }
 
     @JvmStatic
     fun dateMinutesFromRuneday(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = (CalenderUtil.convertDaysToMilliseconds(value) / 60000L).toInt()
+        val runeday = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = (CalenderUtil.convertDaysToMilliseconds(runeday) / 60000L).toInt()
     }
 
     @JvmStatic
-    fun method6238(executor: CS2Executor) {
+    fun detailGetForcedSafeMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Client.isForcedSafemode) 1  else 0
     }
 
     @JvmStatic
     fun detailToolkit(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val value = executor.intStack[executor.intStackPtr]
-        val flag = executor.intStack[executor.intStackPtr + 1] == 1
-        PreferenceManager.preferences!!.toolkit!!.setValue(value)
-        if (!flag) {
+        val toolkitId = executor.intStack[executor.intStackPtr]
+        val keepGraphicsPreset = executor.intStack[executor.intStackPtr + 1] == 1
+        PreferenceManager.preferences!!.toolkit!!.setValue(toolkitId)
+        if (!keepGraphicsPreset) {
             PreferenceManager.preferences!!.graphics!!.setValue(0)
         }
         PreferenceManager.savePreferences()
@@ -850,7 +850,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method12597(executor: CS2Executor) {
+    fun getMachineUid(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = (Client.machineUid shr 32).toInt()
         executor.intStack[++executor.intStackPtr - 1] = Client.machineUid.toInt()
     }
@@ -861,7 +861,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method15404(executor: CS2Executor) {
+    fun viewportClampFov(executor: CS2Executor) {
         executor.intStackPtr -= 4
         Client.fovScaleMin = executor.intStack[executor.intStackPtr].toShort()
         if (Client.fovScaleMin <= 0) {
@@ -887,8 +887,8 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun sendVerifyEmailPacket(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        PacketEncoder.sendCheckEmailPacket(text)
+        val email: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        PacketEncoder.sendCheckEmailPacket(email)
     }
 
     @JvmStatic
@@ -917,7 +917,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method4324(executor: CS2Executor) {
+    fun detailGetGameTipStartStagePreference(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.gametipStartStagePreference!!.getValue()
     }
 
@@ -974,21 +974,21 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun detailSkyboxes(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (value != PreferenceManager.preferences!!.skyboxes!!.getValue()) {
-            PreferenceManager.preferences!!.skyboxes!!.setValue(value)
+        val skyboxes = executor.intStack[--executor.intStackPtr]
+        if (skyboxes != PreferenceManager.preferences!!.skyboxes!!.getValue()) {
+            PreferenceManager.preferences!!.skyboxes!!.setValue(skyboxes)
             PreferenceManager.savePreferences()
             Client.preferencesSavedOnServer = false
         }
     }
 
     @JvmStatic
-    fun method453(executor: CS2Executor) {
+    fun createUnder13(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Client.hasJustCreatedAccount) 1  else 0
     }
 
     @JvmStatic
-    fun method3119(executor: CS2Executor) {
+    fun loginDisconnectReply(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectResponse
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectArg2
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectArg1
@@ -1018,7 +1018,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method4973(executor: CS2Executor) {
+    fun viewportGetZoom(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = Client.cameraZoomMin.toInt()
         executor.intStack[++executor.intStackPtr - 1] = Client.cameraZoomMax.toInt()
     }
@@ -1044,11 +1044,11 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun changeRender(executor: CS2Executor) {
-        var value = executor.intStack[--executor.intStackPtr]
-        if (value < 0 || value > 5) {
-            value = 2
+        var toolkitId = executor.intStack[--executor.intStackPtr]
+        if (toolkitId < 0 || toolkitId > 5) {
+            toolkitId = 2
         }
-        Client.loadAssets(value, false)
+        Client.loadAssets(toolkitId, false)
     }
 
     @JvmStatic
@@ -1060,7 +1060,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method14669(executor: CS2Executor) {
+    fun loginInProgress(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.isLoginInProgress()) 1  else 0
     }
 
@@ -1119,7 +1119,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method1643(executor: CS2Executor) {
+    fun viewportSetFov(executor: CS2Executor) {
         executor.intStackPtr -= 2
         Client.viewportFovMin = executor.intStack[executor.intStackPtr].toShort()
         if (Client.viewportFovMin <= 0) {
@@ -1132,25 +1132,25 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun method13404(executor: CS2Executor) {
+    fun detailGetAmbientSoundVolume(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.ambientSoundVolume!!.getValue()
     }
 
     @JvmStatic
-    fun method8156(executor: CS2Executor) {
+    fun detailGetBrightness(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.brightness!!.getValue()
     }
 
     @JvmStatic
     fun detailGetGrounddecorOn(executor: CS2Executor) {
-        val stack: IntArray? = executor.intStack
-        val value = ++executor.intStackPtr - 1
-        val b_4 = if (PreferenceManager.preferences!!.groundDecoration!!.getValue() == 1) 1 else 0
-        stack!![value] = b_4
+        val intStack: IntArray? = executor.intStack
+        val index = ++executor.intStackPtr - 1
+        val enabled = if (PreferenceManager.preferences!!.groundDecoration!!.getValue() == 1) 1 else 0
+        intStack!![index] = enabled
     }
 
     @JvmStatic
-    fun method2598(): CreateAccountRequest? {
+    fun currentCreateAccountRequest(): CreateAccountRequest? {
         return if (AccountCreationStage.currentRequest == null) CreateAccountRequest.NOT_STARTED else AccountCreationStage.currentRequest
     }
 

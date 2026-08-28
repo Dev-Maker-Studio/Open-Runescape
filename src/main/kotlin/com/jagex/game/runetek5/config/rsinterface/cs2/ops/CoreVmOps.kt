@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -187,45 +187,45 @@ object CoreVmOps {
 
     @JvmStatic
     fun loadClanVarbit(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr]
-        val class4053: ClanVarType? = TypeLists.CLAN_VAR!!.list(i_2)
-        if (class4053!!.aChar4832.code != 1) {
+        val clanVarId = executor.intOpValues!![executor.instrPtr]
+        val clanVarType: ClanVarType? = TypeLists.CLAN_VAR!!.list(clanVarId)
+        if (clanVarType!!.typeChar.code != 1) {
             executor.intStack[++executor.intStackPtr - 1] = 0
             return
         }
-        val integer4: Int? = ClanVarTypeList.CLAN_VARS!![class4053!!.baseVar] as Int?
-        if (integer4 == null) {
+        val packed: Int? = ClanVarTypeList.CLAN_VARS!![clanVarType!!.baseVar] as Int?
+        if (packed == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            val i_5 = if (class4053!!.endBit == 31) -1 else ((1 shl (class4053!!.endBit + 1)) - 1)
-            executor.intStack[++executor.intStackPtr - 1] = (integer4!!.toInt() and i_5) ushr class4053!!.startBit
+            val mask = if (clanVarType!!.endBit == 31) -1 else ((1 shl (clanVarType!!.endBit + 1)) - 1)
+            executor.intStack[++executor.intStackPtr - 1] = (packed!!.toInt() and mask) ushr clanVarType!!.startBit
         }
     }
 
     @JvmStatic
     fun loadClanSettingVarLong(executor: CS2Executor) {
         val value = executor.intOpValues!![executor.instrPtr]
-        val long_3: Long? = executor.currentClanSettings!!.getLongVar((Client.CURRENT_GAME!!.id shl 16) or value)
-        var long_4: Long = 0L
-        if (long_3 == null) {
-            long_4 = -1L
+        val longValue: Long? = executor.currentClanSettings!!.getLongVar((Client.CURRENT_GAME!!.id shl 16) or value)
+        var result: Long = 0L
+        if (longValue == null) {
+            result = -1L
         } else {
-            long_4 = long_3
+            result = longValue
         }
-        executor.longStack[++executor.longStackPtr - 1] = long_4
+        executor.longStack[++executor.longStackPtr - 1] = result
     }
 
     @JvmStatic
     fun loadClanSettingVarString(executor: CS2Executor) {
         val value = executor.intOpValues!![executor.instrPtr]
-        val string_3: String? = executor.currentClanSettings!!.getStringVar((Client.CURRENT_GAME!!.id shl 16) or value)
-        var string_4: String? = null
-        if (string_3 == null) {
-            string_4 = ""
+        val stringValue: String? = executor.currentClanSettings!!.getStringVar((Client.CURRENT_GAME!!.id shl 16) or value)
+        var result: String? = null
+        if (stringValue == null) {
+            result = ""
         } else {
-            string_4 = string_3
+            result = stringValue
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = string_4
+        executor.stringStack[++executor.stringStackPtr - 1] = result
     }
 
     @JvmStatic
@@ -235,10 +235,10 @@ object CoreVmOps {
 
     @JvmStatic
     fun arrayLoad(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr]
-        val i_3 = executor.intStack[--executor.intStackPtr]
-        if (i_3 >= 0 && i_3 < executor.globalArrayLengths[i_2]) {
-            executor.intStack[++executor.intStackPtr - 1] = executor.globalArrays[i_2][i_3]
+        val arrayId = executor.intOpValues!![executor.instrPtr]
+        val index = executor.intStack[--executor.intStackPtr]
+        if (index >= 0 && index < executor.globalArrayLengths[arrayId]) {
+            executor.intStack[++executor.intStackPtr - 1] = executor.globalArrays[arrayId][index]
         } else {
             throw RuntimeException()
         }
@@ -271,7 +271,7 @@ object CoreVmOps {
         val value = executor.intOpValues!![executor.instrPtr]
         VarcTypeList.VARC_INT!![value] = executor.intStack[--executor.intStackPtr]
         PulseEventQueue.delayedClientvarcUpdate(value)
-        Client.clientIsActive = Client.clientIsActive or VarcTypeList.VARC_BOOL!![value]
+        Client.clientIsActive = Client.clientIsActive or VarcTypeList.VARC_PERSISTENT!![value]
     }
 
     @JvmStatic
@@ -373,19 +373,19 @@ object CoreVmOps {
 
     @JvmStatic
     fun loadClanSettingVarbit(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr]
-        val class5373: ClanVarSettingsType? = TypeLists.CLAN_VAR_SETTINGS!!.list(i_2)
-        if (class5373 == null) {
+        val settingId = executor.intOpValues!![executor.instrPtr]
+        val clanVarSettingsType: ClanVarSettingsType? = TypeLists.CLAN_VAR_SETTINGS!!.list(settingId)
+        if (clanVarSettingsType == null) {
             throw RuntimeException()
         } else {
-            val integer4: Int? = executor.currentClanSettings!!.getVariableBitfield((Client.CURRENT_GAME!!.id shl 16) or class5373!!.baseVar, class5373!!.startBit, class5373!!.endBit)
-            var i_5: Int = 0
-            if (integer4 == null) {
-                i_5 = 0
+            val bitValue: Int? = executor.currentClanSettings!!.getVariableBitfield((Client.CURRENT_GAME!!.id shl 16) or clanVarSettingsType!!.baseVar, clanVarSettingsType!!.startBit, clanVarSettingsType!!.endBit)
+            var value: Int = 0
+            if (bitValue == null) {
+                value = 0
             } else {
-                i_5 = integer4
+                value = bitValue
             }
-            executor.intStack[++executor.intStackPtr - 1] = i_5
+            executor.intStack[++executor.intStackPtr - 1] = value
         }
     }
 
@@ -411,17 +411,17 @@ object CoreVmOps {
 
     @JvmStatic
     fun arrayNew(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr] shr 16
-        val i_3 = executor.intOpValues!![executor.instrPtr] and 0xffff
-        val i_4 = executor.intStack[--executor.intStackPtr]
-        if (i_4 >= 0 && i_4 <= 5000) {
-            executor.globalArrayLengths[i_2] = i_4
-            var b_5 = -1
-            if (i_3 == 105) {
-                b_5 = 0
+        val arrayId = executor.intOpValues!![executor.instrPtr] shr 16
+        val typeCharCode = executor.intOpValues!![executor.instrPtr] and 0xffff
+        val length = executor.intStack[--executor.intStackPtr]
+        if (length >= 0 && length <= 5000) {
+            executor.globalArrayLengths[arrayId] = length
+            var defaultValue = -1
+            if (typeCharCode == 105) {
+                defaultValue = 0
             }
-            for (i_6 in 0 until i_4) {
-                executor.globalArrays[i_2][i_6] = b_5
+            for (i in 0 until length) {
+                executor.globalArrays[arrayId][i] = defaultValue
             }
         } else {
             throw RuntimeException()
@@ -445,66 +445,66 @@ object CoreVmOps {
     @JvmStatic
     fun returnInstr(executor: CS2Executor) {
         if (executor.returnValuesPtr != 0) {
-            val class5092: CS2CallFrame? = executor.returnValues[--executor.returnValuesPtr]
-            executor.current = class5092!!.savedScript
+            val frame: CS2CallFrame? = executor.returnValues[--executor.returnValuesPtr]
+            executor.current = frame!!.savedScript
             executor.operations = executor.current!!.operations
             executor.intOpValues = executor.current!!.intOpValues
-            executor.instrPtr = class5092!!.savedInstrPtr
-            executor.intLocals = class5092!!.savedIntLocals
-            executor.objectLocals = class5092!!.savedStringLocals
-            executor.longLocals = class5092!!.savedLongLocals
+            executor.instrPtr = frame!!.savedInstrPtr
+            executor.intLocals = frame!!.savedIntLocals
+            executor.objectLocals = frame!!.savedStringLocals
+            executor.longLocals = frame!!.savedLongLocals
         }
     }
 
     @JvmStatic
     fun switchInstr(executor: CS2Executor) {
-        val iterablenodemap2: IterableNodeMap<IntNode>? = executor.current!!.switchMaps!![executor.intOpValues!![executor.instrPtr]]
-        val class282Sub383: IntNode? = iterablenodemap2?.get(executor.intStack[--executor.intStackPtr].toLong())
-        if (class282Sub383 != null) {
-            executor.instrPtr += class282Sub383.value
+        val switchMap: IterableNodeMap<IntNode>? = executor.current!!.switchMaps!![executor.intOpValues!![executor.instrPtr]]
+        val caseNode: IntNode? = switchMap?.get(executor.intStack[--executor.intStackPtr].toLong())
+        if (caseNode != null) {
+            executor.instrPtr += caseNode.value
         }
     }
 
     @JvmStatic
     fun callCS2Script(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr]
-        val cs2script3: CS2Script? = CS2Script.getCs2Script(i_2)
-        if (cs2script3 == null) {
+        val scriptId = executor.intOpValues!![executor.instrPtr]
+        val script: CS2Script? = CS2Script.getCs2Script(scriptId)
+        if (script == null) {
             throw RuntimeException()
         } else {
-            val stack: IntArray? = IntArray(cs2script3!!.intLocalsCount)
-            val arr_5: Array<Any?>? = arrayOfNulls<Any>(cs2script3!!.stringLocalsCount)
-            val longs_6: LongArray? = LongArray(cs2script3!!.longLocalsCount)
-            val i_7: Int = 0
-            for (i_7 in 0 until cs2script3!!.intArgsCount) {
-                stack!![i_7] = executor.intStack[i_7 + (executor.intStackPtr - cs2script3!!.intArgsCount)]
+            val stack: IntArray? = IntArray(script!!.intLocalsCount)
+            val stringLocals: Array<Any?>? = arrayOfNulls<Any>(script!!.stringLocalsCount)
+            val longLocals: LongArray? = LongArray(script!!.longLocalsCount)
+            val i: Int = 0
+            for (i in 0 until script!!.intArgsCount) {
+                stack!![i] = executor.intStack[i + (executor.intStackPtr - script!!.intArgsCount)]
             }
-            for (i_7 in 0 until cs2script3!!.stringArgsCount) {
-                arr_5!![i_7] = executor.stringStack[i_7 + (executor.stringStackPtr - cs2script3!!.stringArgsCount)]
+            for (i in 0 until script!!.stringArgsCount) {
+                stringLocals!![i] = executor.stringStack[i + (executor.stringStackPtr - script!!.stringArgsCount)]
             }
-            for (i_7 in 0 until cs2script3!!.longArgsCount) {
-                longs_6!![i_7] = executor.longStack[i_7 + (executor.longStackPtr - cs2script3!!.longArgsCount)]
+            for (i in 0 until script!!.longArgsCount) {
+                longLocals!![i] = executor.longStack[i + (executor.longStackPtr - script!!.longArgsCount)]
             }
-            executor.intStackPtr -= cs2script3!!.intArgsCount
-            executor.stringStackPtr -= cs2script3!!.stringArgsCount
-            executor.longStackPtr -= cs2script3!!.longArgsCount
-            val class5098: CS2CallFrame? = CS2CallFrame()
-            class5098!!.savedScript = executor.current
-            class5098!!.savedInstrPtr = executor.instrPtr
-            class5098!!.savedIntLocals = executor.intLocals
-            class5098!!.savedStringLocals = executor.objectLocals
-            class5098!!.savedLongLocals = executor.longLocals
+            executor.intStackPtr -= script!!.intArgsCount
+            executor.stringStackPtr -= script!!.stringArgsCount
+            executor.longStackPtr -= script!!.longArgsCount
+            val frame: CS2CallFrame? = CS2CallFrame()
+            frame!!.savedScript = executor.current
+            frame!!.savedInstrPtr = executor.instrPtr
+            frame!!.savedIntLocals = executor.intLocals
+            frame!!.savedStringLocals = executor.objectLocals
+            frame!!.savedLongLocals = executor.longLocals
             if (executor.returnValuesPtr >= executor.returnValues!!.size) {
                 throw RuntimeException()
             } else {
-                executor.returnValues[++executor.returnValuesPtr - 1] = class5098
-                executor.current = cs2script3
+                executor.returnValues[++executor.returnValuesPtr - 1] = frame
+                executor.current = script
                 executor.operations = executor.current!!.operations
                 executor.intOpValues = executor.current!!.intOpValues
                 executor.instrPtr = -1
                 executor.intLocals = stack
-                executor.objectLocals = arr_5
-                executor.longLocals = longs_6
+                executor.objectLocals = stringLocals
+                executor.longLocals = longLocals
             }
         }
     }
@@ -516,11 +516,11 @@ object CoreVmOps {
 
     @JvmStatic
     fun arrayStore(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr]
+        val arrayId = executor.intOpValues!![executor.instrPtr]
         executor.intStackPtr -= 2
-        val i_3 = executor.intStack[executor.intStackPtr]
-        if (i_3 >= 0 && i_3 < executor.globalArrayLengths[i_2]) {
-            executor.globalArrays[i_2][i_3] = executor.intStack[executor.intStackPtr + 1]
+        val index = executor.intStack[executor.intStackPtr]
+        if (index >= 0 && index < executor.globalArrayLengths[arrayId]) {
+            executor.globalArrays[arrayId][index] = executor.intStack[executor.intStackPtr + 1]
         } else {
             throw RuntimeException()
         }
@@ -539,39 +539,39 @@ object CoreVmOps {
 
     @JvmStatic
     fun loadClanSettingVar(executor: CS2Executor) {
-        val i_2 = executor.intOpValues!![executor.instrPtr]
-        val class5373: ClanVarSettingsType? = TypeLists.CLAN_VAR_SETTINGS!!.list(i_2)
-        if (class5373 == null) {
+        val settingId = executor.intOpValues!![executor.instrPtr]
+        val clanVarSettingsType: ClanVarSettingsType? = TypeLists.CLAN_VAR_SETTINGS!!.list(settingId)
+        if (clanVarSettingsType == null) {
             throw RuntimeException()
         } else {
-            val integer4: Int? = executor.currentClanSettings!!.getIntVar((Client.CURRENT_GAME!!.id shl 16) or i_2)
-            var i_5: Int = 0
-            if (integer4 == null) {
-                if (class5373!!.aChar7096.code != 105 && class5373!!.aChar7096.code != 49) {
-                    i_5 = -1
+            val intValue: Int? = executor.currentClanSettings!!.getIntVar((Client.CURRENT_GAME!!.id shl 16) or settingId)
+            var value: Int = 0
+            if (intValue == null) {
+                if (clanVarSettingsType!!.typeChar.code != 105 && clanVarSettingsType!!.typeChar.code != 49) {
+                    value = -1
                 } else {
-                    i_5 = 0
+                    value = 0
                 }
             } else {
-                i_5 = integer4
+                value = intValue
             }
-            executor.intStack[++executor.intStackPtr - 1] = i_5
+            executor.intStack[++executor.intStackPtr - 1] = value
         }
     }
 
     @JvmStatic
     fun loadClanVar(executor: CS2Executor) {
         val param = executor.intOpValues!![executor.instrPtr]
-        val integer3: Int? = ClanVarTypeList.CLAN_VARS!![param] as Int?
-        if (integer3 == null) {
-            val clanvarType: ClanVarType? = TypeLists.CLAN_VAR!!.list(param)
-            if (clanvarType!!.aChar4832.code != 105 && clanvarType!!.aChar4832.code != 49) {
+        val intValue: Int? = ClanVarTypeList.CLAN_VARS!![param] as Int?
+        if (intValue == null) {
+            val clanVarType: ClanVarType? = TypeLists.CLAN_VAR!!.list(param)
+            if (clanVarType!!.typeChar.code != 105 && clanVarType!!.typeChar.code != 49) {
                 executor.intStack[++executor.intStackPtr - 1] = -1
             } else {
                 executor.intStack[++executor.intStackPtr - 1] = 0
             }
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = integer3
+            executor.intStack[++executor.intStackPtr - 1] = intValue
         }
     }
 

@@ -20,7 +20,7 @@ import com.jagex.game.runetek5.sound.SoundResourceManager
 import com.jagex.game.runetek5.sound.jagtheora.AudioBufferStream
 import com.jagex.game.runetek5.sound.jagtheora.MidiPcmStream
 import com.jagex.game.runetek5.sound.jagtheora.MixedAudioStream
-import com.jagex.game.runetek5.sound.jagtheora.PcmStreamScheduler
+import com.jagex.game.runetek5.sound.jagtheora.PcmStreamMixer
 import com.jagex.game.runetek5.sound.jagtheora.PcmStream
 import com.jagex.game.runetek5.sound.player.PcmPlayer
 import com.jagex.game.runetek5.sound.player.PcmPlayerManager
@@ -85,7 +85,7 @@ object SoundEffectPlayer {
 	                    if (soundEffect != null) {
 	                        sound.ambientSoundVolume -= 512
 	                        if (sound.ambientSoundVolume <= 0) {
-	                            AmbientSound.gameSounds!!.unlink(soundEffect as PcmStream)
+	                            AmbientSound.gameSounds!!.removeSubStream(soundEffect as PcmStream)
 	                            sound.soundEffect = null
 	                            replay = true
 	                        }
@@ -94,7 +94,7 @@ object SoundEffectPlayer {
 	                    }
 	                    if (replay) {
 	                        sound.ambientSoundVolume = npc!!.ambientSoundVolume
-	                        sound.aNodeSub26Sub1Sub18082 = null
+	                        sound.soundEffectBuffer = null
 	                        sound.instrumentEffect = null
 	                        sound.soundEffectId = soundEffectId
 	                        sound.instrumentSoundEffect = npc!!.instrumentSoundEffect
@@ -143,7 +143,7 @@ object SoundEffectPlayer {
 	                if (soundEffect != null) {
 	                    playerSound.ambientSoundVolume -= 512
 	                    if (playerSound.ambientSoundVolume <= 0) {
-	                        AmbientSound.gameSounds!!.unlink(soundEffect as PcmStream)
+	                        AmbientSound.gameSounds!!.removeSubStream(soundEffect as PcmStream)
 	                        playerSound.soundEffect = null
 	                        replay = true
 	                    }
@@ -152,7 +152,7 @@ object SoundEffectPlayer {
 	                }
 	                if (replay) {
 	                    playerSound.ambientSoundVolume = playerSound.playerEntity!!.ambientSoundVolume
-	                    playerSound.aNodeSub26Sub1Sub18082 = null
+	                    playerSound.soundEffectBuffer = null
 	                    playerSound.instrumentEffect = null
 	                    playerSound.soundEffectId = soundEffectId
 	                    playerSound.instrumentSoundEffect = playerSound.playerEntity!!.instrumentSoundEffect
@@ -233,11 +233,11 @@ object SoundEffectPlayer {
 	                            ambientSound.instrumentEffect = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.soundEffectId)
 	                        }
 	                        if (ambientSound.instrumentEffect != null) {
-	                            if (ambientSound.aNodeSub26Sub1Sub18082 == null) {
-	                                ambientSound.aNodeSub26Sub1Sub18082 = ambientSound.instrumentEffect!!.getAudioBuffer()
+	                            if (ambientSound.soundEffectBuffer == null) {
+	                                ambientSound.soundEffectBuffer = ambientSound.instrumentEffect!!.getAudioBuffer()
 	                            }
-	                            if (ambientSound.aNodeSub26Sub1Sub18082 != null) {
-	                                audioStream = ambientSound.aNodeSub26Sub1Sub18082!!.getStream(sampleRate, volume shl 6, panValue) as AudioBufferStream
+	                            if (ambientSound.soundEffectBuffer != null) {
+	                                audioStream = ambientSound.soundEffectBuffer!!.getStream(sampleRate, volume shl 6, panValue) as AudioBufferStream
 	                                audioStream.setNumLoops(-1)
 	                                AmbientSound.gameSounds!!.addSubStream(audioStream)
 	                                ambientSound.soundEffect = audioStream
@@ -258,25 +258,25 @@ object SoundEffectPlayer {
 	                ambientSound.soundEffect!!.setVolume(volume)
 	                ambientSound.soundEffect!!.setPanPosition(panValue)
 	            }
-	            if (ambientSound.aNodeSub15Sub58096 == null) {
-	                if (ambientSound.ambientSoundGroupIds != null && run { ambientSound.step -= step; ambientSound.step <= 0 }) {
+	            if (ambientSound.ambientSoundGroupStream == null) {
+	                if (ambientSound.ambientSoundGroupIds != null && run { ambientSound.stepsUntilNextSound -= step; ambientSound.stepsUntilNextSound <= 0 }) {
 	                    val groupSampleRate = if (ambientSound.minDelay == 256 && ambientSound.maxDelay == 256)
 	                    	256 else (Math.random() * (ambientSound.minDelay - ambientSound.maxDelay)).toInt() + ambientSound.maxDelay
 	                    if (ambientSound.instrumentAmbientSound) {
-	                        if (ambientSound.aNodeSub188087 == null) {
+	                        if (ambientSound.ambientSoundInstrument == null) {
 	                            val randomIndex = (Math.random() * ambientSound.ambientSoundGroupIds!!.size).toInt()
-	                            ambientSound.aNodeSub188087 = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.ambientSoundGroupIds!![randomIndex])
+	                            ambientSound.ambientSoundInstrument = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.ambientSoundGroupIds!![randomIndex])
 	                        }
-	                        if (ambientSound.aNodeSub188087 != null) {
-	                            if (ambientSound.aNodeSub26Sub1Sub18106 == null) {
-	                                ambientSound.aNodeSub26Sub1Sub18106 = ambientSound.aNodeSub188087!!.getAudioBuffer()
+	                        if (ambientSound.ambientSoundInstrument != null) {
+	                            if (ambientSound.soundGroupBuffer == null) {
+	                                ambientSound.soundGroupBuffer = ambientSound.ambientSoundInstrument!!.getAudioBuffer()
 	                            }
-	                            if (ambientSound.aNodeSub26Sub1Sub18106 != null) {
-	                                audioStream = ambientSound.aNodeSub26Sub1Sub18106!!.getStream(groupSampleRate, volume shl 6, panValue) as AudioBufferStream
+	                            if (ambientSound.soundGroupBuffer != null) {
+	                                audioStream = ambientSound.soundGroupBuffer!!.getStream(groupSampleRate, volume shl 6, panValue) as AudioBufferStream
 	                                audioStream.setNumLoops(0)
 	                                AmbientSound.gameSounds!!.addSubStream(audioStream)
-	                                ambientSound.aNodeSub15Sub58096 = audioStream
-	                                ambientSound.step = ambientSound.soundMinStep + (Math.random() * (ambientSound.soundMaxStep - ambientSound.soundMinStep)).toInt()
+	                                ambientSound.ambientSoundGroupStream = audioStream
+	                                ambientSound.stepsUntilNextSound = ambientSound.soundMinStep + (Math.random() * (ambientSound.soundMaxStep - ambientSound.soundMinStep)).toInt()
 	                            }
 	                        }
 	                    } else {
@@ -287,34 +287,34 @@ object SoundEffectPlayer {
 	                            soundEffectStream = mixedAudioNode.getStream(groupSampleRate, volume shl 6, panValue) as MixedAudioStream
 	                            soundEffectStream.setNumLoops(0)
 	                            AmbientSound.gameSounds!!.addSubStream(soundEffectStream)
-	                            ambientSound.aNodeSub15Sub58096 = soundEffectStream
-	                            ambientSound.step = ambientSound.soundMinStep + (Math.random() * (ambientSound.soundMaxStep - ambientSound.soundMinStep)).toInt()
+	                            ambientSound.ambientSoundGroupStream = soundEffectStream
+	                            ambientSound.stepsUntilNextSound = ambientSound.soundMinStep + (Math.random() * (ambientSound.soundMaxStep - ambientSound.soundMinStep)).toInt()
 	                        }
 	                    }
 	                }
 	            } else {
-	                ambientSound.aNodeSub15Sub58096!!.setVolume(volume)
-	                ambientSound.aNodeSub15Sub58096!!.setPanPosition(panValue)
-	                if (!ambientSound.aNodeSub15Sub58096!!.linked()) {
-	                    ambientSound.aNodeSub15Sub58096 = null
-	                    ambientSound.aNodeSub188087 = null
-	                    ambientSound.aNodeSub26Sub1Sub18106 = null
+	                ambientSound.ambientSoundGroupStream!!.setVolume(volume)
+	                ambientSound.ambientSoundGroupStream!!.setPanPosition(panValue)
+	                if (!ambientSound.ambientSoundGroupStream!!.linked()) {
+	                    ambientSound.ambientSoundGroupStream = null
+	                    ambientSound.ambientSoundInstrument = null
+	                    ambientSound.soundGroupBuffer = null
 	                }
 	            }
 	        } else {
 	            val soundEffect = ambientSound.soundEffect
 	            if (soundEffect != null) {
-	                AmbientSound.gameSounds!!.unlink(soundEffect as PcmStream)
+	                AmbientSound.gameSounds!!.removeSubStream(soundEffect as PcmStream)
 	                ambientSound.soundEffect = null
-	                ambientSound.aNodeSub26Sub1Sub18082 = null
+	                ambientSound.soundEffectBuffer = null
 	                ambientSound.instrumentEffect = null
 	            }
-	            val groupSoundEffect = ambientSound.aNodeSub15Sub58096
+	            val groupSoundEffect = ambientSound.ambientSoundGroupStream
 	            if (groupSoundEffect != null) {
-	                AmbientSound.gameSounds!!.unlink(groupSoundEffect as PcmStream)
-	                ambientSound.aNodeSub15Sub58096 = null
-	                ambientSound.aNodeSub188087 = null
-	                ambientSound.aNodeSub26Sub1Sub18106 = null
+	                AmbientSound.gameSounds!!.removeSubStream(groupSoundEffect as PcmStream)
+	                ambientSound.ambientSoundGroupStream = null
+	                ambientSound.ambientSoundInstrument = null
+	                ambientSound.soundGroupBuffer = null
 	            }
 	        }
 	    }
@@ -427,7 +427,7 @@ object SoundEffectPlayer {
 	    jinglePlayer = PcmPlayerManager.start(0, 22050)
 	    setJingleStream(getStream(null))
 	    soundEffectPlayer = PcmPlayerManager.start(1, 2048)
-	    AmbientSound.gameSounds = PcmStreamScheduler()
+	    AmbientSound.gameSounds = PcmStreamMixer()
 	    soundEffectPlayer!!.currentPcmStream = AmbientSound.gameSounds
 	    resampler = Resampler(22050, PcmPlayerManager.sampleRate)
 	    SongPlayer.resetChannelVolumes()

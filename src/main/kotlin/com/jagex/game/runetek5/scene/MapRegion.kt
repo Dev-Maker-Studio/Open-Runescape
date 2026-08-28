@@ -877,7 +877,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
         }
 
-        WorldMapSub1.reset()
+        WorldMapDisplay.reset()
         if (this.debugRegionLoadtime) {
             Console.writeLine((Utils.time() - this.debugRegionLoadtimeStart).toString())
             this.debugRegionLoadtime = false
@@ -1097,12 +1097,12 @@ class MapRegion(var asyncMaploading: Boolean) {
                         if (hasUpdate) {
                             Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = npcEntity!!.playerIndex
                         } else {
-                            npcEntity!!.setDirection(null)
+                            npcEntity!!.setNpcType(null)
                             objectNode.unlink()
                             copyExisting = true
                         }
                     } else {
-                        npcEntity!!.setDirection(null)
+                        npcEntity!!.setNpcType(null)
                         objectNode.unlink()
                         copyExisting = true
                     }
@@ -1369,7 +1369,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                         Client.NPC_ARRAY[++Client.npcCount - 1] = npcEntityObjectNode
                         Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = slot
                         npcEntity.lastUpdate = Client.cycles
-                        npcEntity.setDirection(npcType)
+                        npcEntity.setNpcType(npcType)
                         npcEntity.setSize(npcEntity.definitions!!.size)
                         npcEntity.turnDirection = npcEntity.definitions!!.turnDirection shl 3
                         npcEntity.turn(npcEntity.definitions!!.respawnDirection!!.getRotation().getValue() shl 11 and 0x3fff, true)

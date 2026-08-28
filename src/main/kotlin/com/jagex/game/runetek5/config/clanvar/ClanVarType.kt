@@ -4,14 +4,14 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
 class ClanVarType {
-    @JvmField var aChar4832: Char = 0.toChar()
+    @JvmField var typeChar: Char = 0.toChar()
     @JvmField var baseVar: Int = 0
     @JvmField var startBit: Int = 0
     @JvmField var endBit: Int = 0
 
     fun decodeOpcode(buffer: Packet, opcode: Int) {
         if (opcode == 1) {
-            aChar4832 = Utils.cp1252ToChar(buffer.readByte())
+            typeChar = Utils.cp1252ToChar(buffer.readByte())
         } else if (opcode == 3) {
             baseVar = buffer.readUShort()
             startBit = buffer.readUByte()

@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.midi.instrument.MusicSample
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
-import com.jagex.game.runetek5.sound.jagtheora.PcmStreamScheduler
+import com.jagex.game.runetek5.sound.jagtheora.PcmStreamMixer
 import com.jagex.game.runetek5.vardomain.VarProviders
 import com.jagex.game.runetek5.sound.jagtheora.AreaSoundStream
 import com.jagex.game.runetek5.sound.jagtheora.AudioBuffer
@@ -28,7 +28,7 @@ class AmbientSound : Node<AmbientSound>() {
     var absEndX: Int = 0
 
     @JvmField
-    var step: Int = 0
+    var stepsUntilNextSound: Int = 0
 
     @JvmField
     var npcEntity: NpcEntity? = null
@@ -37,19 +37,19 @@ class AmbientSound : Node<AmbientSound>() {
     var playerEntity: PlayerEntity? = null
 
     @JvmField
-    var aNodeSub188087: MusicSample? = null
+    var ambientSoundInstrument: MusicSample? = null
 
     @JvmField
     var hasTransformation: Boolean = false
 
     @JvmField
-    var aNodeSub15Sub58096: AreaSoundStream? = null
+    var ambientSoundGroupStream: AreaSoundStream? = null
 
     @JvmField
     var emittingLoc: ObjectType? = null
 
     @JvmField
-    var aNodeSub26Sub1Sub18106: AudioBuffer? = null
+    var soundGroupBuffer: AudioBuffer? = null
 
     @JvmField
     var absStartX: Int = 0
@@ -91,7 +91,7 @@ class AmbientSound : Node<AmbientSound>() {
     var soundEffect: AreaSoundStream? = null
 
     @JvmField
-    var aNodeSub26Sub1Sub18082: AudioBuffer? = null
+    var soundEffectBuffer: AudioBuffer? = null
 
     @JvmField
     var instrumentEffect: MusicSample? = null
@@ -166,9 +166,9 @@ class AmbientSound : Node<AmbientSound>() {
         if (currentEffect != soundEffectId || currentTransformState != instrumentSoundEffect) {
             val effect = soundEffect
             if (effect != null) {
-                gameSounds!!.unlink(effect)
+                gameSounds!!.removeSubStream(effect)
                 soundEffect = null
-                aNodeSub26Sub1Sub18082 = null
+                soundEffectBuffer = null
                 instrumentEffect = null
             }
         }
@@ -195,7 +195,7 @@ class AmbientSound : Node<AmbientSound>() {
         val PLAYER_AMBIENT_SOUNDS: IterableNodeMap<AmbientSound> = IterableNodeMap(16)
 
         @JvmField
-        var gameSounds: PcmStreamScheduler? = null
+        var gameSounds: PcmStreamMixer? = null
 
         @JvmStatic
         fun update() {
@@ -222,7 +222,7 @@ class AmbientSound : Node<AmbientSound>() {
                 if (ambientSound.npcEntity == entity) {
                     val effect = ambientSound.soundEffect
                     if (effect != null) {
-                        gameSounds!!.unlink(effect)
+                        gameSounds!!.removeSubStream(effect)
                         ambientSound.soundEffect = null
                     }
                     ambientSound.unlink()
@@ -239,13 +239,13 @@ class AmbientSound : Node<AmbientSound>() {
                 if (z == soundNode.plane && soundNode.absStartX == x shl 9 && y shl 9 == soundNode.absStartY && soundNode.emittingLoc!!.id == locType.id) {
                     val effect = soundNode.soundEffect
                     if (effect != null) {
-                        gameSounds!!.unlink(effect)
+                        gameSounds!!.removeSubStream(effect)
                         soundNode.soundEffect = null
                     }
-                    val effect2 = soundNode.aNodeSub15Sub58096
+                    val effect2 = soundNode.ambientSoundGroupStream
                     if (effect2 != null) {
-                        gameSounds!!.unlink(effect2)
-                        soundNode.aNodeSub15Sub58096 = null
+                        gameSounds!!.removeSubStream(effect2)
+                        soundNode.ambientSoundGroupStream = null
                     }
                     soundNode.unlink()
                     break
@@ -260,13 +260,13 @@ class AmbientSound : Node<AmbientSound>() {
             while (ambientSound != null) {
                 val effect = ambientSound.soundEffect
                 if (effect != null) {
-                    gameSounds!!.unlink(effect)
+                    gameSounds!!.removeSubStream(effect)
                     ambientSound.soundEffect = null
                 }
-                val effect2 = ambientSound.aNodeSub15Sub58096
+                val effect2 = ambientSound.ambientSoundGroupStream
                 if (effect2 != null) {
-                    gameSounds!!.unlink(effect2)
-                    ambientSound.aNodeSub15Sub58096 = null
+                    gameSounds!!.removeSubStream(effect2)
+                    ambientSound.ambientSoundGroupStream = null
                 }
                 ambientSound.unlink()
                 ambientSound = LOC_AMBIENT_SOUNDS.next() as AmbientSound?
@@ -276,7 +276,7 @@ class AmbientSound : Node<AmbientSound>() {
                 while (ambientSound != null) {
                     val effect = ambientSound.soundEffect
                     if (effect != null) {
-                        gameSounds!!.unlink(effect)
+                        gameSounds!!.removeSubStream(effect)
                         ambientSound.soundEffect = null
                     }
                     ambientSound.unlink()
@@ -286,7 +286,7 @@ class AmbientSound : Node<AmbientSound>() {
                 while (ambientSound != null) {
                     val effect = ambientSound.soundEffect
                     if (effect != null) {
-                        gameSounds!!.unlink(effect)
+                        gameSounds!!.removeSubStream(effect)
                         ambientSound.soundEffect = null
                     }
                     ambientSound.unlink()
@@ -301,7 +301,7 @@ class AmbientSound : Node<AmbientSound>() {
             if (ambientSound != null) {
                 val effect = ambientSound.soundEffect
                 if (effect != null) {
-                    gameSounds!!.unlink(effect)
+                    gameSounds!!.removeSubStream(effect)
                     ambientSound.soundEffect = null
                 }
                 ambientSound.unlink()
@@ -348,7 +348,7 @@ class AmbientSound : Node<AmbientSound>() {
                     soundEffectNode.load()
                 }
                 if (soundEffectNode.ambientSoundGroupIds != null) {
-                    soundEffectNode.step = soundEffectNode.soundMinStep + (Math.random() * (soundEffectNode.soundMaxStep - soundEffectNode.soundMinStep)).toInt()
+                    soundEffectNode.stepsUntilNextSound = soundEffectNode.soundMinStep + (Math.random() * (soundEffectNode.soundMaxStep - soundEffectNode.soundMinStep)).toInt()
                 }
                 val deferredSounds = DEFERRED_LOC_SOUNDS.get()
                 if (deferredSounds != null) {

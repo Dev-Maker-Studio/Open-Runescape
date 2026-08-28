@@ -304,7 +304,7 @@ data class MaterialUniforms(
  *
  * These IDs correspond to the indices in EffectManagerGL.materialEffects[]:
  *   0 = none
- *   1 = MaterialEffect1GL    (cube map specular highlights via normal maps)
+ *   1 = CubeMapSpecularEffect    (cube map specular highlights via normal maps)
  *   2 = LappingWaterEffect   (animated lapping water with Perlin noise)
  *   3 = StillWaterEffect     (still water with edge blending)
  *   4 = RipplingWaterEffect  (white rippling waves)
@@ -312,7 +312,7 @@ data class MaterialUniforms(
  *   6 = HideLightsEffect     (disables lighting for bright surfaces)
  *   7 = ReflectingTextureEffect (environment map reflections)
  *   8 = ReflectiveRipplingWaterEffect (HD reflective water)
- *   9 = MaterialEffect9GL    (HD water with wave breaking and specular)
+ *   9 = BreakingWaterEffect    (HD water with wave breaking and specular)
  */
 enum class EffectType(val id: Int) {
     NONE(0),

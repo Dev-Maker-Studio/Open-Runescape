@@ -10,7 +10,7 @@ import com.jagex.game.runetek5.math.Vector4
 import com.jagex.game.runetek5.toolkit.AbstractNativeToolkit
 import com.jagex.game.runetek5.toolkit.companion.PrimitiveDrawMode
 
-class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: NativeWaterTexture) : NativeWaterShader(class505Sub21) {
+class NativeEvtWaterMapper(nativeToolkit: AbstractNativeToolkit, waterTexture: NativeWaterTexture) : NativeWaterShader(nativeToolkit) {
 
     @JvmField var startIndex = 0
     @JvmField var effectParam1 = 0
@@ -45,9 +45,9 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
 
     init {
         Matrix44()
-        nativeWaterTexture = class492
+        nativeWaterTexture = waterTexture
         renderSea = true
-        if (class505Sub21.supportsArbVertexShader() && class505Sub21.supportsArbFragmentShader()) {
+        if (nativeToolkit.supportsArbVertexShader() && nativeToolkit.supportsArbFragmentShader()) {
             loadShaderWithAttributes("EnvMappedWater")
         }
     }
@@ -73,11 +73,11 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
         return true
     }
 
-    override fun loadTextureMatrix(matrix441: Matrix44) {
-        val matrix = Matrix44()
-        matrix.setDiagonal(textureScale, textureScale, 1.0f, 1.0f)
-        matrix.setProduct(matrix441, matrix)
-        super.loadTextureMatrix(matrix)
+    override fun loadTextureMatrix(textureMatrix: Matrix44) {
+        val scaledMatrix = Matrix44()
+        scaledMatrix.setDiagonal(textureScale, textureScale, 1.0f, 1.0f)
+        scaledMatrix.setProduct(textureMatrix, scaledMatrix)
+        super.loadTextureMatrix(scaledMatrix)
     }
 
     override fun loadLights(dummy: Boolean) {
@@ -90,15 +90,15 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
 
     fun updateWaterParameters() {
         textureScale = 2.4414062E-4f
-        val z = 256
-        val w = 0.3f
-        val y = 0.4f
-        val x = 0.1f
+        val breakWaterDepth = 256
+        val breakWaterOffset = 0.3f
+        val waveIntensityHigh = 0.4f
+        val waveIntensityLow = 0.1f
         val waveExponent = 5
         textureCoordinateMatrix.setDiagonal(textureScale, textureScale, textureScale, textureScale)
         sunDirectionAndExponentVector.set(-toolkit.sunPosition[0], -toolkit.sunPosition[1], -toolkit.sunPosition[2], 32.0f)
         sunColorAndWaveExponentVector.set(toolkit.baseLightColorRed, toolkit.baseLightColorGreen, toolkit.baseLightColorBlue, waveExponent.toFloat())
-        waveIntensityAndBreakWaterDepthAndOffsetVector.set(x, y, z.toFloat(), w)
+        waveIntensityAndBreakWaterDepthAndOffsetVector.set(waveIntensityLow, waveIntensityHigh, breakWaterDepth.toFloat(), breakWaterOffset)
     }
 
     fun renderWater() {

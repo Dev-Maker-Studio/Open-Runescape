@@ -88,7 +88,7 @@ abstract class Model {
 
     abstract fun copy(copyType: Byte, functionMask: Int, recalculateBeforeCopy: Boolean): Model?
 
-    abstract fun offsetSubmesh(var1: Matrix43, functionMask: Int, var3: Boolean)
+    abstract fun offsetSubmesh(matrix: Matrix43, functionMask: Int, updateIdentityMatrix: Boolean)
 
     abstract fun updateParticlePosition(projectionMatrix: Matrix43)
 
@@ -693,18 +693,18 @@ abstract class Model {
      * *****************************************************************
      */
 
-    protected open fun mapCylindericalUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, matrix: FloatArray?, offset: Float, direction: Int, f_10: Float, uv: FloatArray?) {
+    protected open fun mapCylindericalUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, matrix: FloatArray?, offset: Float, direction: Int, speedOffset: Float, uv: FloatArray?) {
         var vX = verticeX - centerX
         var vY = verticeY - centerY
         var vZ = verticeZ - centerZ
         val y = vX * matrix!![0] + vY * matrix[1] + vZ * matrix[2]
-        val f_13 = vX * matrix[3] + vY * matrix[4] + vZ * matrix[5]
+        val height = vX * matrix[3] + vY * matrix[4] + vZ * matrix[5]
         val x = vX * matrix[6] + vY * matrix[7] + vZ * matrix[8]
         var u = atan2(y, x) / 6.2831855f + 0.5f
         if (offset != 1.0f) {
             u *= offset
         }
-        var v = f_13 + 0.5f + f_10
+        var v = height + 0.5f + speedOffset
         val tmp: Float
         when (direction) {
             1 -> {
@@ -726,16 +726,16 @@ abstract class Model {
         uv[1] = v
     }
 
-    protected open fun mapSphericalUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, matrix: FloatArray?, direction: Int, f_9: Float, uv: FloatArray?) {
+    protected open fun mapSphericalUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, matrix: FloatArray?, direction: Int, speedOffset: Float, uv: FloatArray?) {
         var vX = verticeX - centerX
         var vY = verticeY - centerY
         var vZ = verticeZ - centerZ
-        val f_11 = vX * matrix!![0] + vY * matrix[1] + vZ * matrix[2]
-        val f_12 = vX * matrix[3] + vY * matrix[4] + vZ * matrix[5]
-        val f_13 = vX * matrix[6] + vY * matrix[7] + vZ * matrix[8]
-        val f_14 = sqrt(f_11 * f_11 + f_12 * f_12 + f_13 * f_13)
-        var u = atan2(f_11, f_13) / 6.2831855f + 0.5f
-        var v = asin(f_12 / f_14) / 3.1415927f + 0.5f + f_9
+        val tx = vX * matrix!![0] + vY * matrix[1] + vZ * matrix[2]
+        val ty = vX * matrix[3] + vY * matrix[4] + vZ * matrix[5]
+        val tz = vX * matrix[6] + vY * matrix[7] + vZ * matrix[8]
+        val dist = sqrt(tx * tx + ty * ty + tz * tz)
+        var u = atan2(tx, tz) / 6.2831855f + 0.5f
+        var v = asin(ty / dist) / 3.1415927f + 0.5f + speedOffset
         val tmp: Float
         when (direction) {
             1 -> {
@@ -757,39 +757,39 @@ abstract class Model {
         uv[1] = v
     }
 
-    protected open fun mapRectangularUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, type: Int, matrix: FloatArray?, direction: Int, f_10: Float, f_11: Float, f_12: Float, uv: FloatArray?) {
+    protected open fun mapRectangularUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, type: Int, matrix: FloatArray?, direction: Int, speedOffset: Float, uTrans: Float, vTrans: Float, uv: FloatArray?) {
         var vX = verticeX - centerX
         var vY = verticeY - centerY
         var vZ = verticeZ - centerZ
-        val f_14 = vX * matrix!![0] + vY * matrix[1] + vZ * matrix[2]
-        val f_15 = vX * matrix[3] + vY * matrix[4] + vZ * matrix[5]
-        val f_16 = vX * matrix[6] + vY * matrix[7] + vZ * matrix[8]
+        val tx = vX * matrix!![0] + vY * matrix[1] + vZ * matrix[2]
+        val ty = vX * matrix[3] + vY * matrix[4] + vZ * matrix[5]
+        val tz = vX * matrix[6] + vY * matrix[7] + vZ * matrix[8]
         var u: Float
         var v: Float
         when (type) {
             0 -> {
-                u = f_14 + f_10 + 0.5f
-                v = -f_16 + f_12 + 0.5f
+                u = tx + speedOffset + 0.5f
+                v = -tz + vTrans + 0.5f
             }
             1 -> {
-                u = f_14 + f_10 + 0.5f
-                v = f_16 + f_12 + 0.5f
+                u = tx + speedOffset + 0.5f
+                v = tz + vTrans + 0.5f
             }
             2 -> {
-                u = -f_14 + f_10 + 0.5f
-                v = -f_15 + f_11 + 0.5f
+                u = -tx + speedOffset + 0.5f
+                v = -ty + uTrans + 0.5f
             }
             3 -> {
-                u = f_14 + f_10 + 0.5f
-                v = -f_15 + f_11 + 0.5f
+                u = tx + speedOffset + 0.5f
+                v = -ty + uTrans + 0.5f
             }
             4 -> {
-                u = f_16 + f_12 + 0.5f
-                v = -f_15 + f_11 + 0.5f
+                u = tz + vTrans + 0.5f
+                v = -ty + uTrans + 0.5f
             }
             else -> {
-                u = -f_16 + f_12 + 0.5f
-                v = -f_15 + f_11 + 0.5f
+                u = -tz + vTrans + 0.5f
+                v = -ty + uTrans + 0.5f
             }
         }
         val tmp: Float
@@ -813,11 +813,11 @@ abstract class Model {
         uv[1] = v
     }
 
-    protected open fun getCubeFace(f_1: Float, f_2: Float, f_3: Float): Int {
-        val f_4 = if (f_1 < 0.0f) -f_1 else f_1
-        val f_5 = if (f_2 < 0.0f) -f_2 else f_2
-        val f_6 = if (f_3 < 0.0f) -f_3 else f_3
-        return if (f_5 > f_4 && f_5 > f_6) (if (f_2 > 0.0f) 0 else 1) else (if (f_6 > f_4 && f_6 > f_5) (if (f_3 > 0.0f) 2 else 3) else (if (f_1 > 0.0f) 4 else 5))
+    protected open fun getCubeFace(nx: Float, ny: Float, nz: Float): Int {
+        val ax = if (nx < 0.0f) -nx else nx
+        val ay = if (ny < 0.0f) -ny else ny
+        val az = if (nz < 0.0f) -nz else nz
+        return if (ay > ax && ay > az) (if (ny > 0.0f) 0 else 1) else (if (az > ax && az > ay) (if (nz > 0.0f) 2 else 3) else (if (nx > 0.0f) 4 else 5))
     }
 
     /**

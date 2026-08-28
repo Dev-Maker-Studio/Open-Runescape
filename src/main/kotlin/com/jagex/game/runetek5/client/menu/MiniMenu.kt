@@ -123,7 +123,7 @@ object MiniMenu {
 
             maxEntryWidth += 8
             val submenuHeight = coloredEntry.queueSize * entryRowHeight + 21
-            StationaryWall.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + entryRowHeight * coloredEntry.queueSize
+            StationaryWall.submenuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + entryRowHeight * coloredEntry.queueSize
             entryWidth = StaticMethods.menuOpenX + menuWidth
             if (maxEntryWidth + entryWidth > GameShell.screenCanvasWidth) {
                 entryWidth = StaticMethods.menuOpenX - maxEntryWidth
@@ -220,7 +220,7 @@ object MiniMenu {
         } else {
             val clickType = menuEntry.clickType
             when {
-                Mouse.method539(clickType) -> 1
+                Mouse.isClicktypeComponent(clickType) -> 1
                 Mouse.isClicktypeObj(clickType) -> 2
                 Mouse.isClicktypeLoc(clickType) -> 3
                 Mouse.isClicktypeNpc(clickType) -> 4
@@ -255,7 +255,7 @@ object MiniMenu {
     fun removeMatchingEntries() {
         var menuEntry: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
         while (menuEntry != null) {
-            if (Mouse.method539(menuEntry.clickType)) {
+            if (Mouse.isClicktypeComponent(menuEntry.clickType)) {
                 removeEntry(menuEntry)
             }
             menuEntry = entryList.next() as? MiniMenuEntry
@@ -540,7 +540,7 @@ object MiniMenu {
                 coloredEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (activeSubmenu != null) {
-                AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, fillColor)
+                AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.submenuHeight, fillColor)
                 minimenuHeader!!.renderPlain(activeSubmenu!!.tagStart, submenuX + 3, submenuY + 14, fillColor, -1)
                 entryIndex = 0
                 entry = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
@@ -723,7 +723,7 @@ object MiniMenu {
     fun closeSubmenu() {
         if (activeSubmenu != null) {
             activeSubmenu = null
-            InterfaceComponentRenderer.inboundsComponentToTop(submenuX, submenuY, submenuWidth, StationaryWall.menuHeight)
+            InterfaceComponentRenderer.inboundsComponentToTop(submenuX, submenuY, submenuWidth, StationaryWall.submenuHeight)
         }
 
     }
@@ -797,7 +797,7 @@ object MiniMenu {
                 currentColoredEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (activeSubmenu != null) {
-                NativeSprite.drawLoadingBarBackground(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, headerSize, fontRenderer, fontMetrics, activeSubmenu!!.tagStart)
+                NativeSprite.drawLoadingBarBackground(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.submenuHeight, headerSize, fontRenderer, fontMetrics, activeSubmenu!!.tagStart)
                 entryIndex = 0
                 entry = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (entry != null) {
@@ -808,7 +808,7 @@ object MiniMenu {
                     ++entryIndex
                     entry = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
-                StaticMethods.drawMenuBorderSprites(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, headerSize)
+                StaticMethods.drawMenuBorderSprites(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.submenuHeight, headerSize)
             }
         }
         StaticMethods.drawMenuBorderSprites(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, headerSize)

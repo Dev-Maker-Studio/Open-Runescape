@@ -348,12 +348,12 @@ object ClientStartup {
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.DISCARD_UNPACKED) {
             VarcTypeList.VARC_INT = IntArray(TypeLists.VARC!!.size)
-            VarcTypeList.VARC_BOOL = BooleanArray(TypeLists.VARC!!.size)
+            VarcTypeList.VARC_PERSISTENT = BooleanArray(TypeLists.VARC!!.size)
             VarcTypeList.VARC_STRING = Array<String?>(TypeLists.VARC_STRING!!.size) { null }
 
             for (varcId in 0 until TypeLists.VARC!!.size) {
                 if (TypeLists.VARC!!.list(varcId).persistenceType == 0) {
-                    VarcTypeList.VARC_BOOL!![varcId] = true
+                    VarcTypeList.VARC_PERSISTENT!![varcId] = true
                     Client.VARCS_BOOLS_LOADED++
                 }
 

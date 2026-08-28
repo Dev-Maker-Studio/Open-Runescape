@@ -17,7 +17,7 @@ object Mouse {
     }
 
     @JvmStatic
-    fun method539(clickType: Int): Boolean {
+    fun isClicktypeComponent(clickType: Int): Boolean {
         return clickType == 57 || clickType == 58 || clickType == 1007 || clickType == 25 || clickType == 30
     }
 }

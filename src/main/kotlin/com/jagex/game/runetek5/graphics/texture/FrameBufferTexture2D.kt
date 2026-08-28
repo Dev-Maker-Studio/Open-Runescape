@@ -20,7 +20,7 @@ class FrameBufferTexture2D(
     override fun deallocate() {
     }
 
-    override fun generateTextureFramebuffer(i_1: Int) {
-        OpenGL.glFramebufferTexture2DEXT(GL_FRAMEBUFFER, i_1, this.mipmapTextureSampler.textureTarget, this.mipmapTextureSampler.texture, this.mipmapLevel)
+    override fun generateTextureFramebuffer(attachmentPoint: Int) {
+        OpenGL.glFramebufferTexture2DEXT(GL_FRAMEBUFFER, attachmentPoint, this.mipmapTextureSampler.textureTarget, this.mipmapTextureSampler.texture, this.mipmapLevel)
     }
 }

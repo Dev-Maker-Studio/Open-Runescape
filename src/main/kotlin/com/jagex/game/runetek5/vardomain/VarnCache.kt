@@ -36,7 +36,7 @@ class VarnCache {
         }
 
         val varnType = TypeLists.VARN!!.list(varnId)
-        return if (varnType.character.code != 105) -1 else 0
+        return if (varnType.typeChar.code != 105) -1 else 0
     }
 
     /**

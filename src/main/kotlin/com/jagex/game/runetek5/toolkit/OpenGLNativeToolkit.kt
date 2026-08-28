@@ -33,7 +33,7 @@ import com.jagex.game.runetek5.buffer.NativeMemoryGL
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.imageproducer.DelegatingDisplay
 import com.jagex.game.runetek5.imageproducer.DirectDisplay
-import com.jagex.game.runetek5.imageproducer.ImageProducerGL2
+import com.jagex.game.runetek5.imageproducer.ImageProducerGL
 import jaclib.memory.heap.NativeHeap
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.math.Matrix44
@@ -281,7 +281,7 @@ open class OpenGLNativeToolkit(
                 }
 
                 // ImageProducer initialization - type mismatch, needs investigation
-                // addImageProducer(canvas, ImageProducerGL2(this, canvas, contextHandle))
+                // addImageProducer(canvas, ImageProducerGL(this, canvas, contextHandle))
                 setActiveCanvas(canvas)
                 generateNativeHeapBuffer(GL_QUERY_BUFFER_BARRIER_BIT, false)
                 generateNativeHeapBuffer(GL_QUERY_BUFFER_BARRIER_BIT, false)
@@ -1061,7 +1061,7 @@ open class OpenGLNativeToolkit(
                 return MipmapRectangleTextureSampler(this, format, width, height, pixels!!)
             }
             val sampler2d = MipmapTextureSampler2D(this, format, GLActionFormat.PIXEL_FORMAT, MathUtils.nextPowerOfTwo(width), MathUtils.nextPowerOfTwo(height))
-            sampler2d.method52(0, 0, width, height, pixels!!, format, 0, 0)
+            sampler2d.updateSubImageByte(0, 0, width, height, pixels!!, format, 0, 0)
             return sampler2d
         }
         return MipmapTextureSampler2D(this, format, width, height, mipmapped, pixels!!)
@@ -1127,7 +1127,7 @@ open class OpenGLNativeToolkit(
                 MipmapRectangleTextureSampler(this, width, height, pixels, borderWidth, borderHeight)
             } else {
                 val sampler2d = MipmapTextureSampler2D(this, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, MathUtils.nextPowerOfTwo(width), MathUtils.nextPowerOfTwo(height))
-                sampler2d.method48(0, 0, width, height, pixels, borderWidth, borderHeight)
+                sampler2d.updateTextureRegion(0, 0, width, height, pixels, borderWidth, borderHeight)
                 sampler2d
             }
         } else {

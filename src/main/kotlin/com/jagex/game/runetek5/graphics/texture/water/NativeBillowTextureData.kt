@@ -10,10 +10,10 @@ internal class NativeBillowTextureData : BillowNoiseGenerator() {
         return data!!
     }
 
-    override fun writeSample(i_1: Int, b_2: Byte) {
-        var i_3 = i_1 * 2
-        var processedByte = (((b_2.toInt() and 0xff) shr 1) + 127).toByte()
-        data!![i_3++] = processedByte
-        data!![i_3] = processedByte
+    override fun writeSample(index: Int, value: Byte) {
+        var offset = index * 2
+        var processedByte = (((value.toInt() and 0xff) shr 1) + 127).toByte()
+        data!![offset++] = processedByte
+        data!![offset] = processedByte
     }
 }

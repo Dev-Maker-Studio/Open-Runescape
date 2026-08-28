@@ -45,10 +45,10 @@ class GlParticleRenderer {
 
     fun drawParticles(toolkit: OpenGlToolkit, particleWrapper: ParticleWrapper) {
         disableLights(toolkit)
-        val vertexZNearA = toolkit.viewMatrix44.elements[2]
-        val vertexZNearB = toolkit.viewMatrix44.elements[6]
-        val vertexZNearC = toolkit.viewMatrix44.elements[10]
-        val vertexZNearD = toolkit.viewMatrix44.elements[14]
+        val vertexZA = toolkit.viewMatrix44.elements[2]
+        val vertexZB = toolkit.viewMatrix44.elements[6]
+        val vertexZC = toolkit.viewMatrix44.elements[10]
+        val vertexZD = toolkit.viewMatrix44.elements[14]
 
         try {
             var totalParticles = 0
@@ -59,7 +59,7 @@ class GlParticleRenderer {
             var particle = tree.child
             while (particle != tree) {
                 val particleEntity = particle as PointEntity
-                val depth = (vertexZNearA * (particleEntity.x shr 12) + vertexZNearB * (particleEntity.y shr 12) + vertexZNearC * (particleEntity.z shr 12) + vertexZNearD).toInt()
+                val depth = (vertexZA * (particleEntity.x shr 12) + vertexZB * (particleEntity.y shr 12) + vertexZC * (particleEntity.z shr 12) + vertexZD).toInt()
                 if (depth > maxDepth) {
                     maxDepth = depth
                 }
@@ -73,12 +73,12 @@ class GlParticleRenderer {
             }
 
             var depthRange = maxDepth - minDepth
-            val i_20: Int
+            val depthShift: Int
             if (depthRange + 2 > 1600) {
-                i_20 = 1 + BufferUtils.ilog(depthRange) - this.depthBucketShiftBits
-                depthRange = (depthRange shr i_20) + 2
+                depthShift = 1 + BufferUtils.ilog(depthRange) - this.depthBucketShiftBits
+                depthRange = (depthRange shr depthShift) + 2
             } else {
-                i_20 = 0
+                depthShift = 0
                 depthRange += 2
             }
 
@@ -91,12 +91,12 @@ class GlParticleRenderer {
             while (particles != tree) {
                 this.overflowBucketCount = 0
 
-                for (i_17 in 0 until depthRange) {
-                    this.depthBucketCounts[i_17] = 0
+                for (i in 0 until depthRange) {
+                    this.depthBucketCounts[i] = 0
                 }
 
-                for (i_17 in 0 until 64) {
-                    this.overflowBucketSizes[i_17] = 0
+                for (i in 0 until 64) {
+                    this.overflowBucketSizes[i] = 0
                 }
 
                 while (particles != tree) {
@@ -112,7 +112,7 @@ class GlParticleRenderer {
                         break
                     }
 
-                    val depth = this.particleDepths[particlePtr++] - minDepth shr i_20
+                    val depth = this.particleDepths[particlePtr++] - minDepth shr depthShift
                     if (depth < 1600) {
                         if (this.depthBucketCounts[depth] < 64) {
                             this.depthBucketEntities[depth][this.depthBucketCounts[depth]++] = particleEntity
@@ -126,11 +126,11 @@ class GlParticleRenderer {
                                 this.depthBucketCounts[depth] += 1 + this.overflowBucketCount++
                             }
 
-                            val arr_10000 = this.overflowBucketEntities[this.depthBucketCounts[depth] - 64 - 1]
-                            val i_10002 = this.depthBucketCounts[depth] - 64 - 1
-                            val i_10004 = this.overflowBucketSizes[this.depthBucketCounts[depth] - 64 - 1]
-                            this.overflowBucketSizes[i_10002] = this.overflowBucketSizes[this.depthBucketCounts[depth] - 64 - 1] + 1
-                            arr_10000[i_10004] = particleEntity
+                            val overflowBucket = this.overflowBucketEntities[this.depthBucketCounts[depth] - 64 - 1]
+                            val overflowBucketIndex = this.depthBucketCounts[depth] - 64 - 1
+                            val overflowSlot = this.overflowBucketSizes[this.depthBucketCounts[depth] - 64 - 1]
+                            this.overflowBucketSizes[overflowBucketIndex] = this.overflowBucketSizes[this.depthBucketCounts[depth] - 64 - 1] + 1
+                            overflowBucket[overflowSlot] = particleEntity
                         }
                     }
                     particles = particles.child
@@ -183,11 +183,11 @@ class GlParticleRenderer {
         val offZ2 = vertexYC - vertexXC
         this.textureBuffer.currentPosition = 0
         if (toolkit.bigEndianess) {
-            for (i_18 in depthRange - 1 downTo 0) {
-                val i_19 = Math.min(64, this.depthBucketCounts[i_18])
-                if (i_19 > 0) {
-                    for (i_20 in i_19 - 1 downTo 0) {
-                        val pointEntity = this.depthBucketEntities[i_18][i_20]!!
+            for (bucket in depthRange - 1 downTo 0) {
+                val count = Math.min(64, this.depthBucketCounts[bucket])
+                if (count > 0) {
+                    for (i in count - 1 downTo 0) {
+                        val pointEntity = this.depthBucketEntities[bucket][i]!!
                         val color = pointEntity.colorArgb
                         val red = (color shr 16).toByte()
                         val green = (color shr 8).toByte()
@@ -235,20 +235,20 @@ class GlParticleRenderer {
                         this.textureBuffer.writeByte(alpha.toInt())
                     }
 
-                    if (this.depthBucketCounts[i_18] > 64) {
-                        val i_20 = this.depthBucketCounts[i_18] - 64 - 1
+                    if (this.depthBucketCounts[bucket] > 64) {
+                        val overflowBucketIndex = this.depthBucketCounts[bucket] - 64 - 1
 
-                        for (i_21 in this.overflowBucketSizes[i_20] - 1 downTo 0) {
-                            val entity = this.overflowBucketEntities[i_20][i_21]!!
-                            val color = entity.colorArgb
+                        for (overflowSlot in this.overflowBucketSizes[overflowBucketIndex] - 1 downTo 0) {
+                            val pointEntity = this.overflowBucketEntities[overflowBucketIndex][overflowSlot]!!
+                            val color = pointEntity.colorArgb
                             val red = (color shr 16).toByte()
                             val green = (color shr 8).toByte()
                             val blue = color.toByte()
                             val alpha = (color ushr 24).toByte()
-                            val x = (entity.x shr 12).toFloat()
-                            val y = (entity.y shr 12).toFloat()
-                            val z = (entity.z shr 12).toFloat()
-                            val size = entity.size shr 12
+                            val x = (pointEntity.x shr 12).toFloat()
+                            val y = (pointEntity.y shr 12).toFloat()
+                            val z = (pointEntity.z shr 12).toFloat()
+                            val size = pointEntity.size shr 12
                             this.textureBuffer.writeFloatBigEndian(0.0F)
                             this.textureBuffer.writeFloatBigEndian(0.0F)
                             this.textureBuffer.writeFloatBigEndian(x + offX1 * (-size))
@@ -290,11 +290,11 @@ class GlParticleRenderer {
                 }
             }
         } else {
-            for (i_18 in depthRange - 1 downTo 0) {
-                val i_19 = Math.min(64, this.depthBucketCounts[i_18])
-                if (i_19 > 0) {
-                    for (i_20 in i_19 - 1 downTo 0) {
-                        val pointEntity = this.depthBucketEntities[i_18][i_20]!!
+            for (bucket in depthRange - 1 downTo 0) {
+                val count = Math.min(64, this.depthBucketCounts[bucket])
+                if (count > 0) {
+                    for (i in count - 1 downTo 0) {
+                        val pointEntity = this.depthBucketEntities[bucket][i]!!
                         val color = pointEntity.colorArgb
                         val red = (color shr 16).toByte()
                         val green = (color shr 8).toByte()
@@ -342,20 +342,20 @@ class GlParticleRenderer {
                         this.textureBuffer.writeByte(alpha.toInt())
                     }
 
-                    if (this.depthBucketCounts[i_18] > 64) {
-                        val main = this.depthBucketCounts[i_18] - 64 - 1
+                    if (this.depthBucketCounts[bucket] > 64) {
+                        val overflowBucketIndex = this.depthBucketCounts[bucket] - 64 - 1
 
-                        for (sub in this.overflowBucketSizes[main] - 1 downTo 0) {
-                            val entity = this.overflowBucketEntities[main][sub]!!
-                            val color = entity.colorArgb
+                        for (overflowSlot in this.overflowBucketSizes[overflowBucketIndex] - 1 downTo 0) {
+                            val pointEntity = this.overflowBucketEntities[overflowBucketIndex][overflowSlot]!!
+                            val color = pointEntity.colorArgb
                             val red = (color shr 16).toByte()
                             val green = (color shr 8).toByte()
                             val blue = color.toByte()
                             val alpha = (color ushr 24).toByte()
-                            val x = (entity.x shr 12).toFloat()
-                            val y = (entity.y shr 12).toFloat()
-                            val z = (entity.z shr 12).toFloat()
-                            val size = entity.size shr 12
+                            val x = (pointEntity.x shr 12).toFloat()
+                            val y = (pointEntity.y shr 12).toFloat()
+                            val z = (pointEntity.z shr 12).toFloat()
+                            val size = pointEntity.size shr 12
                             this.textureBuffer.writeFloatLittleEndian(0.0F)
                             this.textureBuffer.writeFloatLittleEndian(0.0F)
                             this.textureBuffer.writeFloatLittleEndian(x + offX1 * (-size))

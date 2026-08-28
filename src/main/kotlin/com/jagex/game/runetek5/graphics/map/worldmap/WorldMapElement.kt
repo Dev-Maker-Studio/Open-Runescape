@@ -17,7 +17,7 @@ class WorldMapElement(
     color: Int,
     @JvmField var shouldRender: Boolean,
     defaultZoomLevel: Int,
-    i_8: Int
+    mapsizeId: Int
 ) : CacheableNode() {
 
     @JvmField var defaultZoomLevel: Int = -1
@@ -35,44 +35,44 @@ class WorldMapElement(
             this.defaultZoomLevel = 0
         }
 
-        MapSize.get(i_8)
+        MapSize.get(mapsizeId)
         this.worldMapPlacements = NodeCollection()
     }
 
-    fun mapToGameCoords(i_1: Int, i_2: Int, position: IntArray): Boolean {
-        var class282Sub285: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
-        while (class282Sub285 != null) {
-            if (class282Sub285.withinMapBounds(i_1, i_2)) {
-                class282Sub285.mapToGameCoords(i_1, i_2, position)
+    fun mapToGameCoords(mapX: Int, mapY: Int, position: IntArray): Boolean {
+        var placement: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
+        while (placement != null) {
+            if (placement.withinMapBounds(mapX, mapY)) {
+                placement.mapToGameCoords(mapX, mapY, position)
                 return true
             }
-            class282Sub285 = worldMapPlacements.next() as WorldMapPlacement?
+            placement = worldMapPlacements.next() as WorldMapPlacement?
         }
 
         return false
     }
 
     fun gameToMapCoords(x: Int, y: Int, cacheInto: IntArray): Boolean {
-        var class282Sub285: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
-        while (class282Sub285 != null) {
-            if (class282Sub285.withinBounds(x, y)) {
-                class282Sub285.cache(x, y, cacheInto)
+        var placement: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
+        while (placement != null) {
+            if (placement.withinBounds(x, y)) {
+                placement.cache(x, y, cacheInto)
                 return true
             }
-            class282Sub285 = worldMapPlacements.next() as WorldMapPlacement?
+            placement = worldMapPlacements.next() as WorldMapPlacement?
         }
 
         return false
     }
 
     fun gameToMapCoordsForPlane(plane: Int, x: Int, y: Int, cacheInto: IntArray): Boolean {
-        var worldmapPlacement: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
-        while (worldmapPlacement != null) {
-            if (worldmapPlacement.withinPlaneBounds(plane, x, y)) {
-                worldmapPlacement.cache(x, y, cacheInto)
+        var placement: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
+        while (placement != null) {
+            if (placement.withinPlaneBounds(plane, x, y)) {
+                placement.cache(x, y, cacheInto)
                 return true
             }
-            worldmapPlacement = worldMapPlacements.next() as WorldMapPlacement?
+            placement = worldMapPlacements.next() as WorldMapPlacement?
         }
 
         return false
@@ -84,24 +84,24 @@ class WorldMapElement(
         boundsMinY = 12800
         boundsMaxY = 0
 
-        var class282Sub282: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
-        while (class282Sub282 != null) {
-            if (class282Sub282.mapMinX < boundsMinX) {
-                boundsMinX = class282Sub282.mapMinX
+        var placement: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
+        while (placement != null) {
+            if (placement.mapMinX < boundsMinX) {
+                boundsMinX = placement.mapMinX
             }
 
-            if (class282Sub282.mapMaxX > boundsMaxX) {
-                boundsMaxX = class282Sub282.mapMaxX
+            if (placement.mapMaxX > boundsMaxX) {
+                boundsMaxX = placement.mapMaxX
             }
 
-            if (class282Sub282.mapMinY < boundsMinY) {
-                boundsMinY = class282Sub282.mapMinY
+            if (placement.mapMinY < boundsMinY) {
+                boundsMinY = placement.mapMinY
             }
 
-            if (class282Sub282.mapMaxY > boundsMaxY) {
-                boundsMaxY = class282Sub282.mapMaxY
+            if (placement.mapMaxY > boundsMaxY) {
+                boundsMaxY = placement.mapMaxY
             }
-            class282Sub282 = worldMapPlacements.next() as WorldMapPlacement?
+            placement = worldMapPlacements.next() as WorldMapPlacement?
         }
     }
 
@@ -159,16 +159,16 @@ class WorldMapElement(
             lineCount: Int,
             x: Int,
             y: Int,
-            i_6: Int,
+            maxTextWidth: Int,
             font: HelveticaFont
         ) {
-            val rectX = x - i_6 / 2 - 5
+            val rectX = x - maxTextWidth / 2 - 5
             val rectY = y + 2
             if (mectype.backgroundColor != 0) {
                 toolkit.clearPixels(
                     rectX,
                     rectY,
-                    i_6 + 10,
+                    maxTextWidth + 10,
                     y + lineCount * font.getLineHeight() - rectY + 1,
                     mectype.backgroundColor
                 )
@@ -177,7 +177,7 @@ class WorldMapElement(
                 toolkit.drawOpaqueRectangle(
                     rectX,
                     rectY,
-                    i_6 + 10,
+                    maxTextWidth + 10,
                     y + lineCount * font.getLineHeight() - rectY + 1,
                     mectype.outlineColor
                 )
@@ -188,7 +188,7 @@ class WorldMapElement(
             }
             var currentY = y
             for (line in 0 until lineCount) {
-                val lineText = WorldMapSub1.RENDERED_WORLDMAP_AREA_NAMELINES[line]
+                val lineText = WorldMapDisplay.RENDERED_WORLDMAP_AREA_NAMELINES[line]
                 if (lineText != null) {
                     val areaNameLine = if (line < lineCount - 1) {
                         // If not the last line of the area name strip the <br> tag

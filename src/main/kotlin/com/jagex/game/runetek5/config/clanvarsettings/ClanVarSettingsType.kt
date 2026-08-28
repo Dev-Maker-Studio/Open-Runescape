@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
 class ClanVarSettingsType {
-    @JvmField var aChar7096: Char = 0.toChar()
+    @JvmField var typeChar: Char = 0.toChar()
     @JvmField var baseVar: Int = 0
     @JvmField var startBit: Int = 0
     @JvmField var endBit: Int = 0
@@ -21,7 +21,7 @@ class ClanVarSettingsType {
 
     fun decode(buffer: Packet, opcode: Int) {
         when (opcode) {
-            1 -> this.aChar7096 = Utils.cp1252ToChar(buffer.readByte())
+            1 -> this.typeChar = Utils.cp1252ToChar(buffer.readByte())
             2 -> {
                 this.baseVar = buffer.readUShort()
                 this.startBit = buffer.readUByte()

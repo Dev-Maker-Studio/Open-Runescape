@@ -38,6 +38,6 @@ abstract class AbstractGroundDecoration(
 
     override fun canRender(): Boolean {
         val absolutePosition = getAbsolutePosition().coords
-        return super.scene!!.adjacent_tile_on_screen[(absolutePosition.x.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionX + super.scene!!.visibleTiles][(absolutePosition.z.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionY + super.scene!!.visibleTiles]
+        return super.scene!!.tileInFrustum[(absolutePosition.x.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionX + super.scene!!.visibleTiles][(absolutePosition.z.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionY + super.scene!!.visibleTiles]
     }
 }

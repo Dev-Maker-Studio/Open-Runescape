@@ -8,7 +8,7 @@ class SolidLoadingBar(
     spriteResource: Js5ResourceProvider,
     fontResource: Js5ResourceProvider,
     class350Sub23: ColorLoadingBarElement
-) : LBC(spriteResource, fontResource, class350Sub23) {
+) : AbstractLoadingBar(spriteResource, fontResource, class350Sub23) {
 
     override fun drawBackground(x: Int, y: Int) {
         val width = loadPercentDecimalFullout() * super.anchoredElement.width / 10000

@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -128,14 +128,14 @@ object WorldMapUserDetailOps {
     fun dispatch(operation: ClientScriptOpCode, exec: CS2Executor) {
         when (operation) {
             ClientScriptOpCode.WORLDLIST_PINGWORLDS -> setPingWorlds(exec)
-            ClientScriptOpCode.WORLDLIST_SPECIFIC_THISWORLD -> method3039(exec)
+            ClientScriptOpCode.WORLDLIST_SPECIFIC_THISWORLD -> worldlistSpecificThisWorld(exec)
             ClientScriptOpCode.IF_DEBUG_GETOPENIFCOUNT -> ifDebugGetOpenIfCount(exec)
             ClientScriptOpCode.IF_DEBUG_GETOPENIFID -> ifDebugGetOpenIfId(exec)
             ClientScriptOpCode.IF_DEBUG_GETNAME -> ifDebugGetName(exec)
             ClientScriptOpCode.IF_DEBUG_GETCOMCOUNT -> ifDebugGetComCount(exec)
             ClientScriptOpCode.IF_DEBUG_GETCOMNAME -> ifDebugGetComName(exec)
             ClientScriptOpCode.IF_DEBUG_GETSERVERTRIGGERS -> ifDebugGetServerTriggers(exec)
-            ClientScriptOpCode.NOOP -> method7187()
+            ClientScriptOpCode.instr6386 -> noop()
             ClientScriptOpCode.IF_DEBUG_BUTTON1 -> ifButton1(exec)
             ClientScriptOpCode.IF_DEBUG_BUTTON2 -> ifButton2(exec)
             ClientScriptOpCode.IF_DEBUG_BUTTON3 -> ifButton3(exec)
@@ -180,28 +180,28 @@ object WorldMapUserDetailOps {
             ClientScriptOpCode.SOUND_VORBIS_PRELOAD -> soundVorbisPreload(exec)
             ClientScriptOpCode.SOUND_VORBIS_STOP -> soundVorbisStop(exec)
             ClientScriptOpCode.SOUND_VORBIS_PLAY -> soundVorbisPlay(exec)
-            ClientScriptOpCode.VIDEOADVERT_ISSUPPORTED -> videoAdvertHasFinished(exec)
-            ClientScriptOpCode.BROWSER_AGECHECK -> method3170(exec)
-            ClientScriptOpCode.BROWSER_REFRESH -> method7962()
-            ClientScriptOpCode.BROWSER_FOCUS -> method14839()
-            ClientScriptOpCode.BROWSER_ISSUPPORTED -> method15406(exec)
-            ClientScriptOpCode.BROWSER_ISPAGEOPEN -> method572(exec)
-            ClientScriptOpCode.BROWSER_HASPLUGIN -> method6350(exec)
-            ClientScriptOpCode.BROWSER_SETPAGE -> method2597(exec)
+            ClientScriptOpCode.instr6863 -> videoAdvertHasFinished(exec)
+            ClientScriptOpCode.BROWSER_AGECHECK -> browserAgeCheck(exec)
+            ClientScriptOpCode.BROWSER_REFRESH -> browserRefresh()
+            ClientScriptOpCode.BROWSER_FOCUS -> browserFocus()
+            ClientScriptOpCode.BROWSER_ISSUPPORTED -> browserIsSupported(exec)
+            ClientScriptOpCode.BROWSER_ISPAGEOPEN -> browserIsPageOpen(exec)
+            ClientScriptOpCode.BROWSER_HASPLUGIN -> browserHasPlugin(exec)
+            ClientScriptOpCode.BROWSER_SETPAGE -> browserSetPage(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by WorldMapUserDetailOps")
         }
     }
 
     @JvmStatic
-    fun method2597(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
+    fun browserSetPage(executor: CS2Executor) {
+        val pageUrl: String? = executor.stringStack[--executor.stringStackPtr] as String?
     }
 
     @JvmStatic
     fun mecSprite(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val worldmapareadefs3: MECType? = TypeLists.MEC!!.list(value)
-        executor.intStack[++executor.intStackPtr - 1] = worldmapareadefs3!!.defaultIconArchive
+        val mecId = executor.intStack[--executor.intStackPtr]
+        val mecType: MECType? = TypeLists.MEC!!.list(mecId)
+        executor.intStack[++executor.intStackPtr - 1] = mecType!!.defaultIconArchive
     }
 
     @JvmStatic
@@ -213,38 +213,38 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton4(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(4, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(4, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
     fun enterDisplaymode(executor: CS2Executor) {
-        val hraphicsPreference = GameShell.calculateGraphics()
+        val graphicsPreference = GameShell.calculateGraphics()
         CS2Interpreter.lastEnteredGraphicsMode = PreferenceManager.preferences!!.activeToolkit!!.getValue()
         executor.intStack[++executor.intStackPtr - 1] = CS2Interpreter.lastEnteredGraphicsMode
-        executor.intStack[++executor.intStackPtr - 1] = hraphicsPreference
+        executor.intStack[++executor.intStackPtr - 1] = graphicsPreference
         Resource.mapRegion!!.reload()
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
     }
 
     @JvmStatic
-    fun method3170(executor: CS2Executor) {
-        val flag = false
-        val param = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+    fun browserAgeCheck(executor: CS2Executor) {
+        val ageCheckPassed = false
+        val age = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = if (ageCheckPassed) 1  else 0
     }
 
     @JvmStatic
     fun mecText(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val worldmapareadefs3: MECType? = TypeLists.MEC!!.list(value)
-        if (worldmapareadefs3!!.areaName == null) {
+        val mecId = executor.intStack[--executor.intStackPtr]
+        val mecType: MECType? = TypeLists.MEC!!.list(mecId)
+        if (mecType!!.areaName == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = worldmapareadefs3!!.areaName
+            executor.stringStack[++executor.stringStackPtr - 1] = mecType!!.areaName
         }
     }
 
@@ -266,15 +266,15 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun soundVorbisPreload(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        var i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_2 != -1) {
-            if (i_3 > 255) {
-                i_3 = 255
-            } else if (i_3 < 0) {
-                i_3 = 0
+        val fileId = executor.intStack[executor.intStackPtr]
+        var priority = executor.intStack[executor.intStackPtr + 1]
+        if (fileId != -1) {
+            if (priority > 255) {
+                priority = 255
+            } else if (priority < 0) {
+                priority = 0
             }
-            VorbisSoundManager.preloadVorbisSound(i_2, i_3, false)
+            VorbisSoundManager.preloadVorbisSound(fileId, priority, false)
         }
     }
 
@@ -284,23 +284,23 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun method6350(executor: CS2Executor) {
-        val flag = false
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+    fun browserHasPlugin(executor: CS2Executor) {
+        val hasPlugin = false
+        val pluginName: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        executor.intStack[++executor.intStackPtr - 1] = if (hasPlugin) 1  else 0
     }
 
     @JvmStatic
     fun ifDebugGetName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (Interface.INTERFACES!![value] == null) {
+        val interfaceId = executor.intStack[--executor.intStackPtr]
+        if (Interface.INTERFACES!![interfaceId] == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         } else {
-            val text: String? = Interface.INTERFACES!![value]!!.components!![0]!!.name
-            if (text == null) {
+            val name: String? = Interface.INTERFACES!![interfaceId]!!.components!![0]!!.name
+            if (name == null) {
                 executor.stringStack[++executor.stringStackPtr - 1] = ""
             } else {
-                executor.stringStack[++executor.stringStackPtr - 1] = text.substring(0, text.indexOf(58.toChar()))
+                executor.stringStack[++executor.stringStackPtr - 1] = name.substring(0, name.indexOf(58.toChar()))
             }
         }
     }
@@ -308,27 +308,27 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton2(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(2, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(2, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
     fun ifDebugGetComCount(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (Interface.INTERFACES!![value] == null) {
+        val interfaceId = executor.intStack[--executor.intStackPtr]
+        if (Interface.INTERFACES!![interfaceId] == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = Interface.INTERFACES!![value]!!.components!!.size
+            executor.intStack[++executor.intStackPtr - 1] = Interface.INTERFACES!![interfaceId]!!.components!!.size
         }
     }
 
     @JvmStatic
     fun soundVorbisStop(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (value != -1) {
-            StaticMethods.stopVorbisStream(value)
+        val fileId = executor.intStack[--executor.intStackPtr]
+        if (fileId != -1) {
+            StaticMethods.stopVorbisStream(fileId)
         }
     }
 
@@ -343,28 +343,28 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun getWorldMapParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.MEC!!.list(i_2).getStringParameter(i_3, attributedefault4!!.typeName!!)
+        val mecId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.MEC!!.list(mecId).getStringParameter(paramId, paramType!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.MEC!!.list(i_2).getIntParameter(i_3, attributedefault4!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.MEC!!.list(mecId).getIntParameter(paramId, paramType!!.defaultInt)
         }
     }
 
     @JvmStatic
-    fun method572(executor: CS2Executor) {
-        val flag = true
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+    fun browserIsPageOpen(executor: CS2Executor) {
+        val isPageOpen = true
+        val pageUrl: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        executor.intStack[++executor.intStackPtr - 1] = if (isPageOpen) 1  else 0
     }
 
     @JvmStatic
     fun mecCategory(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val worldmapareadefs3: MECType? = TypeLists.MEC!!.list(value)
-        executor.intStack[++executor.intStackPtr - 1] = worldmapareadefs3!!.categoryId
+        val mecId = executor.intStack[--executor.intStackPtr]
+        val mecType: MECType? = TypeLists.MEC!!.list(mecId)
+        executor.intStack[++executor.intStackPtr - 1] = mecType!!.categoryId
     }
 
     @JvmStatic
@@ -379,9 +379,9 @@ object WorldMapUserDetailOps {
 
     @JvmStatic
     fun mecTextSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val worldmapareadefs3: MECType? = TypeLists.MEC!!.list(value)
-        executor.intStack[++executor.intStackPtr - 1] = worldmapareadefs3!!.baseTextzoom
+        val mecId = executor.intStack[--executor.intStackPtr]
+        val mecType: MECType? = TypeLists.MEC!!.list(mecId)
+        executor.intStack[++executor.intStackPtr - 1] = mecType!!.baseTextzoom
     }
 
     @JvmStatic
@@ -392,14 +392,14 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButtonT(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val component: Component? = Component.listIcomponent((i_2 shl 16) or i_3, i_4)
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        val component: Component? = Component.listIcomponent((interfaceId shl 16) or componentId, slotId)
         InterfaceComponentRenderer.cancelInterfaceSelection()
         assert(component != null)
-        val class282Sub106: IFEvents? = Client.getComponentSettings(component!!)
-        InterfaceRenderer.setUseOptionFlags(component, class282Sub106!!.getUseOptionFlags(), class282Sub106.interfaceId)
+        val targetParams: IFEvents? = Client.getComponentSettings(component!!)
+        InterfaceRenderer.setUseOptionFlags(component, targetParams!!.getUseOptionFlags(), targetParams.interfaceId)
     }
 
     @JvmStatic
@@ -416,10 +416,10 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton10(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(10, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(10, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
@@ -440,27 +440,27 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton1(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(1, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(1, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
     fun soundVorbisPlay(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        if (value != -1) {
-            StaticMethods.setVorbisSound(value)
+        val fileId = executor.intStack[--executor.intStackPtr]
+        if (fileId != -1) {
+            StaticMethods.setVorbisSound(fileId)
         }
     }
 
     @JvmStatic
     fun ifDebugGetOpenIfCount(executor: CS2Executor) {
-        var value = Client.OPEN_INTERFACES!!.size()
+        var count = Client.OPEN_INTERFACES!!.size()
         if (Client.BASE_WINDOW_ID != -1) {
-            ++value
+            ++count
         }
-        executor.intStack[++executor.intStackPtr - 1] = value
+        executor.intStack[++executor.intStackPtr - 1] = count
     }
 
     @JvmStatic
@@ -471,12 +471,12 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifDebugGetServerTriggers(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (Interface.INTERFACES!![i_2] == null) {
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        if (Interface.INTERFACES!![interfaceId] == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = Interface.INTERFACES!![i_2]!!.components!![i_3]!!.serverTriggers
+            executor.intStack[++executor.intStackPtr - 1] = Interface.INTERFACES!![interfaceId]!!.components!![componentId]!!.serverTriggers
         }
     }
 
@@ -503,19 +503,19 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton9(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(9, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(9, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
     fun ifButton5(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(5, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(5, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
@@ -537,18 +537,18 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun method3039(executor: CS2Executor) {
-        val class217Sub12: WorldDescriptor? = WorldDescriptor.get_world()
-        executor.intStack[++executor.intStackPtr - 1] = if (class217Sub12 == null) 0 else class217Sub12!!.flags
+    fun worldlistSpecificThisWorld(executor: CS2Executor) {
+        val world: WorldDescriptor? = WorldDescriptor.get_world()
+        executor.intStack[++executor.intStackPtr - 1] = if (world == null) 0 else world!!.flags
     }
 
     @JvmStatic
     fun ifButton8(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(8, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(8, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
@@ -559,16 +559,16 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifDebugGetComName(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (Interface.INTERFACES!![i_2] == null) {
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        if (Interface.INTERFACES!![interfaceId] == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         } else {
-            val text: String? = Interface.INTERFACES!![i_2]!!.components!![i_3]!!.name
-            if (text == null) {
+            val name: String? = Interface.INTERFACES!![interfaceId]!!.components!![componentId]!!.name
+            if (name == null) {
                 executor.stringStack[++executor.stringStackPtr - 1] = ""
             } else {
-                executor.stringStack[++executor.stringStackPtr - 1] = text
+                executor.stringStack[++executor.stringStackPtr - 1] = name
             }
         }
     }
@@ -576,27 +576,27 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton6(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(6, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(6, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
     fun ifDebugGetOpenIfId(executor: CS2Executor) {
-        var value = executor.intStack[--executor.intStackPtr]
+        var index = executor.intStack[--executor.intStackPtr]
         if (Client.BASE_WINDOW_ID != -1) {
-            if (value == 0) {
+            if (index == 0) {
                 executor.intStack[++executor.intStackPtr - 1] = Client.BASE_WINDOW_ID
                 return
             }
-            --value
+            --index
         }
-        var class282Sub443: SubInterface? = Client.OPEN_INTERFACES!!.first()
-        while (value-- > 0) {
-            class282Sub443 = Client.OPEN_INTERFACES!!.next()
+        var subInterface: SubInterface? = Client.OPEN_INTERFACES!!.first()
+        while (index-- > 0) {
+            subInterface = Client.OPEN_INTERFACES!!.next()
         }
-        executor.intStack[++executor.intStackPtr - 1] = class282Sub443!!.subInterfaceId
+        executor.intStack[++executor.intStackPtr - 1] = subInterface!!.subInterfaceId
     }
 
     @JvmStatic
@@ -610,11 +610,11 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun method7962() {
+    fun browserRefresh() {
     }
 
     @JvmStatic
-    fun method7187() {
+    fun noop() {
     }
 
     @JvmStatic
@@ -628,34 +628,34 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun method14839() {
+    fun browserFocus() {
     }
 
     @JvmStatic
     fun userDetailLobbyLastLoginAddress(executor: CS2Executor) {
-        var text: String? = null
+        var hostName: String? = null
         if (PacketDecoder.HOSTNAME_IDENTIFIER != null) {
-            text = PacketDecoder.HOSTNAME_IDENTIFIER!!.getHostName()
+            hostName = PacketDecoder.HOSTNAME_IDENTIFIER!!.getHostName()
         }
-        if (text == null) {
-            text = ""
+        if (hostName == null) {
+            hostName = ""
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = text
+        executor.stringStack[++executor.stringStackPtr - 1] = hostName
     }
 
     @JvmStatic
     fun ifButton3(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(3, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(3, (interfaceId shl 16) or componentId, slotId, "")
     }
 
     @JvmStatic
-    fun method15406(executor: CS2Executor) {
-        val flag = true
-        executor.intStack[++executor.intStackPtr - 1] = if (flag) 1  else 0
+    fun browserIsSupported(executor: CS2Executor) {
+        val isSupported = true
+        executor.intStack[++executor.intStackPtr - 1] = if (isSupported) 1  else 0
     }
 
     @JvmStatic
@@ -666,10 +666,10 @@ object WorldMapUserDetailOps {
     @JvmStatic
     fun ifButton7(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Interface.ifOptionInteract(7, (i_2 shl 16) or i_3, i_4, "")
+        val interfaceId = executor.intStack[executor.intStackPtr]
+        val componentId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Interface.ifOptionInteract(7, (interfaceId shl 16) or componentId, slotId, "")
     }
 
 }

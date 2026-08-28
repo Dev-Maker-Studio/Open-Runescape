@@ -14,7 +14,7 @@ internal class PerlinWaterTextureGenerator {
          * Generates a single octave layer of noise with multiple frequencies
          */
         @JvmStatic
-        fun generateOctave(layer: Int, noiseGen: NoiseGenerator, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: ByteArray, offset: Int) {
+        fun generateNoiseLayer(layer: Int, noiseGen: NoiseGenerator, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: ByteArray, offset: Int) {
             val octaveSize = 16384
             val tempBuffer = FloatArray(octaveSize)
 
@@ -50,7 +50,6 @@ internal class PerlinWaterTextureGenerator {
          * Generates a complete water texture using Perlin noise
          */
         @JvmStatic
-        @JvmName("method4782")
         fun generatePerlinWaterTexture(noiseGen: NoiseGenerator): ByteArray {
             val textureData = ByteArray(262144)
             generatePerlinWaterTextureLayers(noiseGen, textureData, 0)
@@ -61,11 +60,10 @@ internal class PerlinWaterTextureGenerator {
          * Generates all layers of the water texture
          */
         @JvmStatic
-        @JvmName("method4783")
         fun generatePerlinWaterTextureLayers(noiseGen: NoiseGenerator, output: ByteArray, startOffset: Int) {
             var offset = startOffset
             for (layer in 0 until 16) {
-                generateOctave(layer, noiseGen, 4.0f, 4.0f, 16.0f, 0.5f, output, offset)
+                generateNoiseLayer(layer, noiseGen, 4.0f, 4.0f, 16.0f, 0.5f, output, offset)
                 offset += 16384
             }
         }

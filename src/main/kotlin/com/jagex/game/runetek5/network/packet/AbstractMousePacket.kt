@@ -52,7 +52,7 @@ abstract class AbstractMousePacket {
         if (canSubmit()) {
             var packet: TcpPacket? = null
             var startOffset = 0
-            var i_4 = 0
+            var remainderMillis = 0
             var count = 0
             val recordIterator = nodeCollection.iterator()
 
@@ -84,42 +84,42 @@ abstract class AbstractMousePacket {
                             packet.buffer.writeByte(0)
                             startOffset = packet.buffer.currentPosition
                             packet.buffer.currentPosition += 2
-                            i_4 = 0
+                            remainderMillis = 0
                             count = 0
                         }
                         val mouseDeltaX: Int
                         val mouseDeltaY: Int
-                        val i_12: Int
+                        val cycleDelta: Int
                         if (lastUpdate != -1L) {
                             mouseDeltaX = mouseX - lastMouseX
                             mouseDeltaY = mouseY - lastMouseY
-                            i_12 = ((record.getTime() - lastUpdate) / 20L).toInt()
-                            i_4 = (i_4 + (record.getTime() - lastUpdate) % 20L).toInt()
+                            cycleDelta = ((record.getTime() - lastUpdate) / 20L).toInt()
+                            remainderMillis = (remainderMillis + (record.getTime() - lastUpdate) % 20L).toInt()
                         } else {
                             mouseDeltaX = mouseX
                             mouseDeltaY = mouseY
-                            i_12 = Int.MAX_VALUE
+                            cycleDelta = Int.MAX_VALUE
                         }
                         lastMouseX = mouseX
                         lastMouseY = mouseY
-                        if (i_12 < 8 && mouseDeltaX >= -32 && mouseDeltaX <= 31 && mouseDeltaY >= -32 && mouseDeltaY <= 31) {
+                        if (cycleDelta < 8 && mouseDeltaX >= -32 && mouseDeltaX <= 31 && mouseDeltaY >= -32 && mouseDeltaY <= 31) {
                             val adjustedDeltaX = mouseDeltaX + 32
                             val adjustedDeltaY = mouseDeltaY + 32
-                            packet.buffer.writeShort((i_12 shl 12) + adjustedDeltaY + (adjustedDeltaX shl 6))
-                        } else if (i_12 < 32 && mouseDeltaX >= -128 && mouseDeltaX <= 127 && mouseDeltaY >= -128 && mouseDeltaY <= 127) {
+                            packet.buffer.writeShort((cycleDelta shl 12) + adjustedDeltaY + (adjustedDeltaX shl 6))
+                        } else if (cycleDelta < 32 && mouseDeltaX >= -128 && mouseDeltaX <= 127 && mouseDeltaY >= -128 && mouseDeltaY <= 127) {
                             val adjustedDeltaX = mouseDeltaX + 128
                             val adjustedDeltaY = mouseDeltaY + 128
-                            packet.buffer.writeByte(i_12 + 128)
+                            packet.buffer.writeByte(cycleDelta + 128)
                             packet.buffer.writeShort(adjustedDeltaY + (adjustedDeltaX shl 8))
-                        } else if (i_12 < 32) {
-                            packet.buffer.writeByte(i_12 + 192)
+                        } else if (cycleDelta < 32) {
+                            packet.buffer.writeByte(cycleDelta + 192)
                             if (mouseX != -1 && mouseY != -1) {
                                 packet.buffer.writeInt(mouseX or (mouseY shl 16))
                             } else {
                                 packet.buffer.writeInt(Int.MIN_VALUE)
                             }
                         } else {
-                            packet.buffer.writeShort((i_12 and 0x1fff) + 57344)
+                            packet.buffer.writeShort((cycleDelta and 0x1fff) + 57344)
                             if (mouseX != -1 && mouseY != -1) {
                                 packet.buffer.writeInt(mouseX or (mouseY shl 16))
                             } else {
@@ -137,8 +137,8 @@ abstract class AbstractMousePacket {
                 packet.buffer.writeIndex(packet.buffer.currentPosition - startOffset)
                 val positionBeforeWriting = packet.buffer.currentPosition
                 packet.buffer.currentPosition = startOffset
-                packet.buffer.writeByte(i_4 / count)
-                packet.buffer.writeByte(i_4 % count)
+                packet.buffer.writeByte(remainderMillis / count)
+                packet.buffer.writeByte(remainderMillis % count)
                 packet.buffer.currentPosition = positionBeforeWriting
                 Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
             }

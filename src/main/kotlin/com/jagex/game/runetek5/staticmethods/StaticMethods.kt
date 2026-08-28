@@ -31,7 +31,7 @@ import com.jagex.game.runetek5.graphics.hint.HintRenderer
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
@@ -178,20 +178,20 @@ object StaticMethods {
         Component.drawInterface(Client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
         if (InterfaceComponentRenderer.deferredDragComponents != null) {
             val components = InterfaceComponentRenderer.deferredDragComponents
-            val hash = -1412584499
-            val originX: Int = 0
-            val originY: Int = 0
-            val width = GameShell.screenCanvasWidth
-            val height = GameShell.screenCanvasHeight * -969250379
+            val dragParentId = -1412584499
+            val clipLeft: Int = 0
+            val clipTop: Int = 0
+            val clipRight = GameShell.screenCanvasWidth
+            val clipBottom = GameShell.screenCanvasHeight * -969250379
             val dragOffsetX = InterfaceComponentRenderer.deferredDragOffsetX
             val dragOffsetY = InterfaceComponentRenderer.deferredDragOffsetY
-            val excludeComponentRef: Int = if (Client.selectedComponent == Client.frameComponent) {
+            val cacheReference: Int = if (Client.selectedComponent == Client.frameComponent) {
                 -1
             } else {
                 Client.selectedComponent!!.cacheReference
             }
 
-            InterfaceComponentRenderer.drawComponents(components!!, hash, originX, originY, width, height, dragOffsetX, dragOffsetY, excludeComponentRef, true)
+            InterfaceComponentRenderer.drawComponents(components!!, dragParentId, clipLeft, clipTop, clipRight, clipBottom, dragOffsetX, dragOffsetY, cacheReference, true)
             InterfaceComponentRenderer.deferredDragComponents = null
         }
     }
@@ -208,18 +208,18 @@ object StaticMethods {
         var byteIndex = offset
         val endIndex = length + offset
         while (byteIndex < endIndex) {
-            val byte1 = data[byteIndex++].toInt() and 0xff
-            val codePoint: Int = if (byte1 < 128) {
-                if (byte1 == 0) {
+            val leadByte = data[byteIndex++].toInt() and 0xff
+            val codePoint: Int = if (leadByte < 128) {
+                if (leadByte == 0) {
                     65533
                 } else {
-                    byte1
+                    leadByte
                 }
-            } else if (byte1 < 192) {
+            } else if (leadByte < 192) {
                 65533
-            } else if (byte1 < 224) {
+            } else if (leadByte < 224) {
                 if (byteIndex < endIndex && (data[byteIndex].toInt() and 0xc0) == 128) {
-                    val temp = (byte1 and 0x1f) shl 6 or (data[byteIndex++].toInt() and 0x3f)
+                    val temp = (leadByte and 0x1f) shl 6 or (data[byteIndex++].toInt() and 0x3f)
                     if (temp < 128) {
                         65533
                     } else {
@@ -228,9 +228,9 @@ object StaticMethods {
                 } else {
                     65533
                 }
-            } else if (byte1 < 240) {
+            } else if (leadByte < 240) {
                 if (byteIndex + 1 < endIndex && (data[byteIndex].toInt() and 0xc0) == 128 && (data[byteIndex + 1].toInt() and 0xc0) == 128) {
-                    val temp = (byte1 and 0xf) shl 12 or ((data[byteIndex++].toInt() and 0x3f) shl 6) or (data[byteIndex++].toInt() and 0x3f)
+                    val temp = (leadByte and 0xf) shl 12 or ((data[byteIndex++].toInt() and 0x3f) shl 6) or (data[byteIndex++].toInt() and 0x3f)
                     if (temp < 2048) {
                         65533
                     } else {
@@ -239,7 +239,7 @@ object StaticMethods {
                 } else {
                     65533
                 }
-            } else if (byte1 < 248) {
+            } else if (leadByte < 248) {
                 if (byteIndex + 2 < endIndex && (data[byteIndex].toInt() and 0xc0) == 128 && (data[byteIndex + 1].toInt() and 0xc0) == 128 && (data[byteIndex + 2].toInt() and 0xc0) == 128) {
                     byteIndex++
                     byteIndex++
@@ -284,10 +284,10 @@ object StaticMethods {
             spriteType!!.flipHorizontal()
             StaticMedia.menuRightSideBorderSprite = toolkit.generateSprite(spriteType, true)
             menuTopBorderSprite = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES, menuTopBorderSpriteId, 0), true)
-            val class9111 = SpriteType.listSingle(Resource.SPRITES, menuCornerSpriteId, 0)
-            menuBottomLeftCornerSprite = toolkit.generateSprite(class9111, true)
-            class9111!!.flipHorizontal()
-            menuBottomRightCornerSprite = toolkit.generateSprite(class9111, true)
+            val cornerSpriteType = SpriteType.listSingle(Resource.SPRITES, menuCornerSpriteId, 0)
+            menuBottomLeftCornerSprite = toolkit.generateSprite(cornerSpriteType, true)
+            cornerSpriteType!!.flipHorizontal()
+            menuBottomRightCornerSprite = toolkit.generateSprite(cornerSpriteType, true)
         }
         if (menuTopBorderSprite != null && StaticMedia.menuLeftSideBorderSprite != null && menuBottomLeftCornerSprite != null) {
             val topBorderCount = (width - menuBottomLeftCornerSprite!!.getWidth() * 2) / menuTopBorderSprite!!.getWidth()
@@ -351,10 +351,10 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun setupOrthoProjection(matrix: Matrix44, centerX: Float, centerY: Float, nearPlane: Float, farPlane: Float, width: Int, length: Int) {
+    fun setupOrthoProjection(matrix: Matrix44, centerX: Float, centerY: Float, focalX: Float, focalY: Float, width: Int, height: Int) {
         val viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
         val viewRangeStart = Resource.mapRegion!!.viewRangeStart
-        matrix.setPerspective(centerX, centerY, nearPlane, farPlane, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), length.toFloat())
+        matrix.setPerspective(centerX, centerY, focalX, focalY, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), height.toFloat())
     }
 
     @JvmStatic
@@ -364,8 +364,8 @@ object StaticMethods {
 
     @JvmStatic
     fun selectWorldMapElement(elementId: Int) {
-        WorldMapSub1.someMecId = elementId
-        WorldMapSub1.highlightedCategoryId = -1
+        WorldMapDisplay.someMecId = elementId
+        WorldMapDisplay.highlightedCategoryId = -1
         JSObjectManager.highlightFlashCycles = 3
         ServerEnvironment.flashCycleCounter = 100
     }
@@ -425,8 +425,8 @@ object StaticMethods {
 
     @JvmStatic
     fun setWorldMapScrollTarget(targetX: Int, targetY: Int) {
-        WorldMapSub1.scrollTargetX = targetX - WorldMap.mapSquareAbsX
-        WorldMapSub1.scrollTargetY = targetY - WorldMap.mapSquareAbsY
+        WorldMapDisplay.scrollTargetX = targetX - WorldMap.mapSquareAbsX
+        WorldMapDisplay.scrollTargetY = targetY - WorldMap.mapSquareAbsY
     }
 
     @JvmStatic
@@ -582,15 +582,15 @@ object StaticMethods {
             if (menuX < 0) {
                 menuX = 0
             }
-            entryWidth = mouseY
+            var menuY = mouseY
             if (mouseY + menuHeight > GameShell.screenCanvasHeight * -969250379) {
-                entryWidth = GameShell.screenCanvasHeight * -969250379 - menuHeight
+                menuY = GameShell.screenCanvasHeight * -969250379 - menuHeight
             }
-            if (entryWidth < 0) {
-                entryWidth = 0
+            if (menuY < 0) {
+                menuY = 0
             }
             menuOpenX = menuX
-            menuOpenY = entryWidth
+            menuOpenY = menuY
             MiniMenu.menuWidth = menuWidth
             NativeSprite.alphaJitter = (Math.random() * 24.0).toInt()
             MiniMenu.isOpen = true
@@ -599,7 +599,7 @@ object StaticMethods {
 
     @JvmStatic
     fun decodeFriendchatName(input: CharSequence): String {
-        var decoded = TextUtils.decodeUidName(Utils.charseqTouid(input))
+        var decoded = TextUtils.decodeUidName(Utils.nameToLong(input))
         if (decoded == null) {
             decoded = ""
         }
@@ -624,29 +624,29 @@ object StaticMethods {
 
     @JvmStatic
     fun resetAllVorbisStreams() {
-        var vorbis = INDEX36_FILE_CACHE.first()
-        while (vorbis != null) {
-            stopVorbisStream(vorbis.fileId)
-            vorbis = INDEX36_FILE_CACHE.next()
+        var vorbisNode = INDEX36_FILE_CACHE.first()
+        while (vorbisNode != null) {
+            stopVorbisStream(vorbisNode.fileId)
+            vorbisNode = INDEX36_FILE_CACHE.next()
         }
     }
 
     @JvmStatic
     fun setVorbisSound(fileId: Int) {
-        val vorbis = INDEX36_FILE_CACHE.get(fileId.toLong())
-        if (vorbis != null) {
-            vorbis.isPaused = !vorbis.isPaused
-            vorbis.vfReference!!.togglePause(vorbis.isPaused)
+        val vorbisNode = INDEX36_FILE_CACHE.get(fileId.toLong())
+        if (vorbisNode != null) {
+            vorbisNode.isPaused = !vorbisNode.isPaused
+            vorbisNode.vfReference!!.togglePause(vorbisNode.isPaused)
         }
     }
 
     @JvmStatic
     fun stopVorbisStream(fileId: Int) {
-        val varbisNode = INDEX36_FILE_CACHE.get(fileId.toLong())
-        if (varbisNode != null) {
-            varbisNode.vfReference!!.shutdown()
-            SoundTrigger.playVorbis(varbisNode.fileId, varbisNode.sendPacket)
-            varbisNode.unlink()
+        val vorbisNode = INDEX36_FILE_CACHE.get(fileId.toLong())
+        if (vorbisNode != null) {
+            vorbisNode.vfReference!!.shutdown()
+            SoundTrigger.playVorbis(vorbisNode.fileId, vorbisNode.sendPacket)
+            vorbisNode.unlink()
         }
     }
 

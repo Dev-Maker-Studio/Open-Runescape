@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.tools.Hashing
  * @author Steven - 11/10/2023
  *
  */
-class Js5MasterIndex(data: ByteArray, crcCheck: Int, whirlpool: ByteArray?) {
+class Js5MasterIndex(tablePayload: ByteArray, expectedCrc: Int, expectedWhirlpool: ByteArray?) {
 
     @JvmField var revision: Int = 0
 
@@ -44,22 +44,22 @@ class Js5MasterIndex(data: ByteArray, crcCheck: Int, whirlpool: ByteArray?) {
     @JvmField var headerWhirlpool: ByteArray? = null
 
     init {
-        headerCrc = Hashing.getCrc32(data, data.size)
-        if (crcCheck != headerCrc) {
+        headerCrc = Hashing.getCrc32(tablePayload, tablePayload.size)
+        if (expectedCrc != headerCrc) {
             throw RuntimeException()
         }
-        if (whirlpool != null) {
-            if (whirlpool.size != 64) {
+        if (expectedWhirlpool != null) {
+            if (expectedWhirlpool.size != 64) {
                 throw RuntimeException()
             }
-            headerWhirlpool = Whirlpool.calculateDigest(data, 0, data.size)
+            headerWhirlpool = Whirlpool.calculateDigest(tablePayload, 0, tablePayload.size)
             for (i in 0 until 64) {
-                if (whirlpool[i] != headerWhirlpool!![i]) {
+                if (expectedWhirlpool[i] != headerWhirlpool!![i]) {
                     throw RuntimeException()
                 }
             }
         }
-        decodeTable(data)
+        decodeTable(tablePayload)
     }
 
     fun decodeTable(tablePayload: ByteArray) {
@@ -83,19 +83,19 @@ class Js5MasterIndex(data: ByteArray, crcCheck: Int, whirlpool: ByteArray?) {
             var lastArchiveId = -1
             validArchiveIds = IntArray(validArchiveCount)
             if (protocol >= 7) {
-                for (archiveIndex in 0 until validArchiveCount) {
+                for (index in 0 until validArchiveCount) {
                     offset += stream.readUBigSmart()
-                    validArchiveIds[archiveIndex] = offset
-                    if (validArchiveIds[archiveIndex] > lastArchiveId) {
-                        lastArchiveId = validArchiveIds[archiveIndex]
+                    validArchiveIds[index] = offset
+                    if (validArchiveIds[index] > lastArchiveId) {
+                        lastArchiveId = validArchiveIds[index]
                     }
                 }
             } else {
-                for (archiveIndex in 0 until validArchiveCount) {
+                for (index in 0 until validArchiveCount) {
                     offset += stream.readUShort()
-                    validArchiveIds[archiveIndex] = offset
-                    if (validArchiveIds[archiveIndex] > lastArchiveId) {
-                        lastArchiveId = validArchiveIds[archiveIndex]
+                    validArchiveIds[index] = offset
+                    if (validArchiveIds[index] > lastArchiveId) {
+                        lastArchiveId = validArchiveIds[index]
                     }
                 }
             }
@@ -110,16 +110,16 @@ class Js5MasterIndex(data: ByteArray, crcCheck: Int, whirlpool: ByteArray?) {
             fileCounts = IntArray(archiveCount)
             if (named) {
                 nameHashes = IntArray(archiveCount)
-                for (index in 0 until archiveCount) {
-                    nameHashes!![index] = -1
+                for (archiveId in 0 until archiveCount) {
+                    nameHashes!![archiveId] = -1
                 }
                 for (index in 0 until validArchiveCount) {
                     nameHashes!![validArchiveIds[index]] = stream.readInt()
                 }
                 archiveNames = NamedFileReference(nameHashes!!)
             }
-            for (i_9 in 0 until validArchiveCount) {
-                crcs[validArchiveIds[i_9]] = stream.readInt()
+            for (index in 0 until validArchiveCount) {
+                crcs[validArchiveIds[index]] = stream.readInt()
             }
             if (hasWhirlpool) {
                 for (index in 0 until validArchiveCount) {
@@ -185,8 +185,8 @@ class Js5MasterIndex(data: ByteArray, crcCheck: Int, whirlpool: ByteArray?) {
                     val archiveId = validArchiveIds[index]
                     val fileCount = archiveFileCount[archiveId]
                     fileNameHashes!![archiveId] = IntArray(fileCounts[archiveId])
-                    for (file in 0 until fileCounts[archiveId]) {
-                        fileNameHashes!![archiveId]!![file] = -1
+                    for (fileId in 0 until fileCounts[archiveId]) {
+                        fileNameHashes!![archiveId]!![fileId] = -1
                     }
                     for (archiveFileIndex in 0 until fileCount) {
                         val fileId: Int

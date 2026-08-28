@@ -10,5 +10,5 @@ import com.jagex.game.runetek5.toolkit.companion.Binding
 interface NativeToolkitBuffer : NativeBuffer, Binding {
     override fun deallocate()
 
-    fun create(var1: Int)
+    fun create(size: Int)
 }

@@ -50,17 +50,17 @@ class NativeFilterBloomShader(
         type: Int,
         display: DirectDisplay,
         compositeSampler: NativeTextureSampler,
-        interface65: NativeTextureSampler
+        sceneSampler: NativeTextureSampler
     ) {
-        val f_6 = nativeToolkit.getPixelOffset()
+        val pixelOffset = nativeToolkit.getPixelOffset()
         val displayWidth = display.getWidth().toFloat()
         val displayHeight = display.getHeight().toFloat()
         var sampler = compositeSampler
-        val floats_10 = floatArrayOf(-1.0f, 1.0f, 0.0f, 0.0f, -1.0f, -3.0f, 0.0f, 2.0f, 3.0f, 1.0f, 2.0f, 0.0f)
+        val posAndTexCoordData = floatArrayOf(-1.0f, 1.0f, 0.0f, 0.0f, -1.0f, -3.0f, 0.0f, 2.0f, 3.0f, 1.0f, 2.0f, 0.0f)
         var effectWidth = displayWidth.toInt()
         var effectHeight = displayHeight.toInt()
-        var i_13 = effectWidth
-        var i_14 = effectHeight
+        var srcWidth = effectWidth
+        var srcHeight = effectHeight
 
         when (type) {
             0 -> {
@@ -72,8 +72,8 @@ class NativeFilterBloomShader(
             1 -> {
                 effectWidth = 256
                 effectHeight = 256
-                i_13 = effectWidth
-                i_14 = effectHeight
+                srcWidth = effectWidth
+                srcHeight = effectHeight
                 filterBloomShader!!.loadProgram(blur!!)
                 filterBloomShader!!.setActiveMapping()
                 filterBloomShader!!.unform2f(sampleSize!!, baseBlur / displayWidth, 0.0f)
@@ -81,35 +81,35 @@ class NativeFilterBloomShader(
             2 -> {
                 effectWidth = 256
                 effectHeight = 256
-                i_13 = effectWidth
-                i_14 = effectHeight
+                srcWidth = effectWidth
+                srcHeight = effectHeight
                 filterBloomShader!!.loadProgram(blur!!)
                 filterBloomShader!!.setActiveMapping()
                 filterBloomShader!!.unform2f(sampleSize!!, 0.0f, baseBlur / displayHeight)
             }
             3 -> {
                 filterBloomShader!!.loadProgram(composite!!)
-                sampler = interface65
+                sampler = sceneSampler
                 filterBloomShader!!.loadTextureSampler(bloomTex1!!, 1, compositeSampler)
                 filterBloomShader!!.setActiveMapping()
             }
         }
 
-        val f_15 = effectWidth / displayWidth
-        val f_16 = effectHeight / displayHeight
-        val f_17 = i_13 / displayWidth
-        val f_18 = i_14 / displayHeight
-        floats_10[8] = (floats_10[8] + 1.0f) * f_15 - 1.0f
-        floats_10[5] = (floats_10[5] - 1.0f) * f_16 + 1.0f
-        floats_10[10] *= f_17
-        floats_10[7] *= f_18
-        filterBloomShader!!.uploadUniform4fv(posAndTexCoords!!, floats_10)
+        val posScaleX = effectWidth / displayWidth
+        val posScaleY = effectHeight / displayHeight
+        val texScaleU = srcWidth / displayWidth
+        val texScaleV = srcHeight / displayHeight
+        posAndTexCoordData[8] = (posAndTexCoordData[8] + 1.0f) * posScaleX - 1.0f
+        posAndTexCoordData[5] = (posAndTexCoordData[5] - 1.0f) * posScaleY + 1.0f
+        posAndTexCoordData[10] *= texScaleU
+        posAndTexCoordData[7] *= texScaleV
+        filterBloomShader!!.uploadUniform4fv(posAndTexCoords!!, posAndTexCoordData)
         filterBloomShader!!.loadTextureSampler(sceneTex!!, 0, sampler)
         filterBloomShader!!.loadRgbaColorAttribute(params!!, red, green, blue, 0.0f)
         filterBloomShader!!.loadRgbaColorAttribute(
             pixelOffsetAndBloomScale!!,
-            f_6 / displayWidth,
-            f_6 / displayHeight,
+            pixelOffset / displayWidth,
+            pixelOffset / displayHeight,
             256.0f / displayWidth,
             256.0f / displayHeight
         )
@@ -144,9 +144,9 @@ class NativeFilterBloomShader(
                     blur = filterBloomShader!!.getShaderMapping("blur")
                     composite = filterBloomShader!!.getShaderMapping("composite")
                     techDefault = filterBloomShader!!.getShaderMapping("techDefault")
-                } catch (exceptionSub2Sub22: ShaderAttributeLoadingException) {
+                } catch (e: ShaderAttributeLoadingException) {
                     return false
-                } catch (exceptionSub2Sub13: MappedShaderCreationException) {
+                } catch (e: MappedShaderCreationException) {
                     return false
                 }
 

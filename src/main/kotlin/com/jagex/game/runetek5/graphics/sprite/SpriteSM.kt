@@ -36,29 +36,29 @@ abstract class SpriteSM(
         return imageHeight
     }
 
-    abstract fun drawAffineTransformed(var1: Int, var2: Int)
+    abstract fun drawAffineTransformed(combineMode: Int, blendMode: Int)
 
     override fun getSpriteHeight(): Int {
         return offsetY + imageHeight + trimBottom
     }
 
-    override abstract fun draw(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int)
+    override abstract fun draw(x: Int, y: Int, combineMode: Int, colorArgb: Int, blendMode: Int)
 
-    override abstract fun drawWithSurface(var1: Int, var2: Int, var3: ComponentSurface, var4: Int, var5: Int)
+    override abstract fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int)
 
     abstract fun drawParticle(
         colorWrite: Boolean,
-        depthWrite: Boolean,
+        depthTest: Boolean,
         transparent: Boolean,
-        var4: Int,
-        var5: Int,
-        var6: Float,
-        var7: Int,
-        var8: Int,
-        blendType: Int,
-        color: Int,
-        type: Int,
-        var13: Boolean
+        x: Int,
+        y: Int,
+        depth: Float,
+        width: Int,
+        height: Int,
+        combineMode: Int,
+        colorArgb: Int,
+        blendMode: Int,
+        depthWrite: Boolean
     )
 
     override fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
@@ -284,7 +284,7 @@ abstract class SpriteSM(
         return offsetX + imageWidth + trimRight
     }
 
-    abstract fun drawMasked(var1: IntArray, var2: IntArray, var3: Int, var4: Int)
+    abstract fun drawMasked(rowStartX: IntArray, rowWidth: IntArray, maskOffsetX: Int, maskOffsetY: Int)
 
     override fun cacheSizeInto(sizeOut: IntArray) {
         sizeOut[0] = offsetX
@@ -293,7 +293,7 @@ abstract class SpriteSM(
         sizeOut[3] = trimBottom
     }
 
-    override abstract fun drawColoredCircle(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, colorArgb: Int, blendMode: Int)
+    override abstract fun drawColoredCircle(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int)
 
     override fun drawAffineMasked(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
         if (toolkit.hasBeenShutdown()) {

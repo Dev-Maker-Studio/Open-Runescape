@@ -9,21 +9,21 @@ import jaggl.OpenGL
 
 class OpenGlCubeTextureGenerator(
     @JvmField val openglToolkit: OpenGlToolkit,
-    i_2: Int
+    largestMaterialSize: Int
 ) : AbstractOpenGlCubeTextureGenerator() {
 
     @JvmField val cubeTexture: OpenGlArbCubeMapTexture = OpenGlArbCubeMapTexture(
         openglToolkit,
         GLFormat.HDR,
         GLActionFormat.PIXEL_FORMAT,
-        i_2
+        largestMaterialSize
     )
 
     override fun getCubeTexture(): OpenGlArbCubeMapTexture {
         return cubeTexture
     }
 
-    fun drawQuad(class137Sub21: OpenGlArbCubeMapTexture, class137Sub22: OpenGlArbCubeMapTexture, alpha: Float): Boolean {
+    fun drawQuad(cubeTextureA: OpenGlArbCubeMapTexture, cubeTextureB: OpenGlArbCubeMapTexture, alpha: Float): Boolean {
         var framebuffersReady = true
         val display = openglToolkit.integratedGraphicsImageProducer!!
         openglToolkit.getClipping(CLIPPINGS)
@@ -44,15 +44,15 @@ class OpenGlCubeTextureGenerator(
         openglToolkit.activateTexture(1)
         openglToolkit.updatePointSizeRange(0.0f, 0.0f, 0.0f, alpha)
         openglToolkit.loadTextureCombineMode(GL_INTERPOLATE, GL_INTERPOLATE)
-        openglToolkit.setActiveTexture(class137Sub22)
+        openglToolkit.setActiveTexture(cubeTextureB)
         openglToolkit.activateTexture(0)
         openglToolkit.loadTextureCombineMode(1)
-        openglToolkit.setActiveTexture(class137Sub21)
+        openglToolkit.setActiveTexture(cubeTextureA)
         openglToolkit.setDisplay(display)
 
         for (index in 0 until 6) {
-            val side = index + GL_TEXTURE_CUBE_MAP_POSITIVE_X
-            display.setFramebuffer(0, cubeTexture.getAttachableTexture(side))
+            val cubeFace = index + GL_TEXTURE_CUBE_MAP_POSITIVE_X
+            display.setFramebuffer(0, cubeTexture.getAttachableTexture(cubeFace))
             display.drawBuffer(0)
             if (!display.isFramebufferComplete()) {
                 framebuffersReady = false
@@ -60,7 +60,7 @@ class OpenGlCubeTextureGenerator(
             }
 
             OpenGL.glBegin(GL_QUADS)
-            when (side) {
+            when (cubeFace) {
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X -> {
                     OpenGL.glTexCoord3i(65535, 65534, 65534)
                     OpenGL.glMultiTexCoord3i(33985, 65535, 65534, 65534)

@@ -10,10 +10,10 @@ internal class GLWaveTextureData : WaveNoiseGenerator() {
         return textureData!!
     }
 
-    override fun set(i_1: Int, b_2: Byte) {
-        var i_3 = i_1 * 2
-        val i_4 = b_2.toInt() and 0xff
-        textureData!![i_3++] = (i_4 * 3 shr 5).toByte()
-        textureData!![i_3] = (i_4 * 3 shr 5).toByte()
+    override fun set(index: Int, value: Byte) {
+        var offset = index * 2
+        val level = value.toInt() and 0xff
+        textureData!![offset++] = (level * 3 shr 5).toByte()
+        textureData!![offset] = (level * 3 shr 5).toByte()
     }
 }

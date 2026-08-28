@@ -158,45 +158,45 @@ object Camera {
     }
 
     @JvmStatic
-    fun updateOrbitTargetCamera(long_0: Long) {
-        val i_2 = Client.cameraTargetAbsX
-        val i_3 = Client.cameraTargetAbsY
-        var i_4: Int
-        var i_5: Int
-        if (i_2 != cameraBaseX) {
-            i_4 = i_2 - cameraBaseX
-            i_5 = (i_4 * long_0 / 320L).toInt()
-            if (i_4 > 0) {
-                if (i_5 == 0) {
-                    i_5 = 1
-                } else if (i_5 > i_4) {
-                    i_5 = i_4
+    fun updateOrbitTargetCamera(multiplier: Long) {
+        val targetX = Client.cameraTargetAbsX
+        val targetY = Client.cameraTargetAbsY
+        var offsetFromCamera: Int
+        var offset: Int
+        if (targetX != cameraBaseX) {
+            offsetFromCamera = targetX - cameraBaseX
+            offset = (offsetFromCamera * multiplier / 320L).toInt()
+            if (offsetFromCamera > 0) {
+                if (offset == 0) {
+                    offset = 1
+                } else if (offset > offsetFromCamera) {
+                    offset = offsetFromCamera
                 }
-            } else if (i_5 == 0) {
-                i_5 = -1
-            } else if (i_5 < i_4) {
-                i_5 = i_4
+            } else if (offset == 0) {
+                offset = -1
+            } else if (offset < offsetFromCamera) {
+                offset = offsetFromCamera
             }
-            cameraBaseX += i_5
+            cameraBaseX += offset
         }
-        if (i_3 != cameraBaseY) {
-            i_4 = i_3 - cameraBaseY
-            i_5 = (i_4 * long_0 / 320L).toInt()
-            if (i_4 > 0) {
-                if (i_5 == 0) {
-                    i_5 = 1
-                } else if (i_5 > i_4) {
-                    i_5 = i_4
+        if (targetY != cameraBaseY) {
+            offsetFromCamera = targetY - cameraBaseY
+            offset = (offsetFromCamera * multiplier / 320L).toInt()
+            if (offsetFromCamera > 0) {
+                if (offset == 0) {
+                    offset = 1
+                } else if (offset > offsetFromCamera) {
+                    offset = offsetFromCamera
                 }
-            } else if (i_5 == 0) {
-                i_5 = -1
-            } else if (i_5 < i_4) {
-                i_5 = i_4
+            } else if (offset == 0) {
+                offset = -1
+            } else if (offset < offsetFromCamera) {
+                offset = offsetFromCamera
             }
-            cameraBaseY += i_5
+            cameraBaseY += offset
         }
-        camAngleY += 8.0f * (Client.cameraYawVelocity * long_0 / 40.0f)
-        camAngleX += 8.0f * (long_0 * Client.cameraPitchVelocity / 40.0f)
+        camAngleY += 8.0f * (Client.cameraYawVelocity * multiplier / 40.0f)
+        camAngleX += 8.0f * (multiplier * Client.cameraPitchVelocity / 40.0f)
         processCamera()
     }
 
@@ -246,9 +246,9 @@ object Camera {
     }
 
     @JvmStatic
-    fun updateSmoothTransitionCamera(i_0: Int) {
-        val i_2 = Client.cycles - Client.lastCameraSmoothCycle
-        if (i_2 >= 100) {
+    fun updateSmoothTransitionCamera(areaHeight: Int) {
+        val cyclesSinceSmooth = Client.cycles - Client.lastCameraSmoothCycle
+        if (cyclesSinceSmooth >= 100) {
             cameraCalculationType = 2
             StaticMethods.cameraTargetAbsY = -1
             PingRequester.cameraTargetAbsX = -1
@@ -260,41 +260,41 @@ object Camera {
             if (Client.CAM_SHAKING[4] && Client.CUSTOM_LOWEST_YAW[4] + 128 > yaw) {
                 yaw = Client.CUSTOM_LOWEST_YAW[4] + 128
             }
-            val i_4 = (camAngleY.toInt() + cameraRandomisationA) and 0x3fff
+            val roll = (camAngleY.toInt() + cameraRandomisationA) and 0x3fff
             val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
             setCameraPosition(
                 cameraBaseX, MapRegion.tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(),
                     PlayerUpdate.MY_PLAYER_PLANE
-                ) - 200, cameraBaseY, yaw, i_4, (yaw shr 3) * 3 + 600 shl 2, i_0
+                ) - 200, cameraBaseY, yaw, roll, (yaw shr 3) * 3 + 600 shl 2, areaHeight
             )
-            val f_6 = 1.0f - (100 - i_2) * (100 - i_2) * (100 - i_2) / 1000000.0f
-            cameraPositionAbsoluteX = (transitionStartX + f_6 * (cameraPositionAbsoluteX - transitionStartX)).toInt()
-            cameraPositionAbsoluteZ = (transitionStartZ + f_6 * (cameraPositionAbsoluteZ - transitionStartZ)).toInt()
-            cameraPositionAbsoluteY = ((cameraPositionAbsoluteY - transitionStartY) * f_6 + transitionStartY).toInt()
-            cameraYaw = (transitionStartYaw + f_6 * (cameraYaw - transitionStartYaw)).toInt()
-            var i_7 = cameraRoll - transitionStartRoll
-            if (i_7 > 8192) {
-                i_7 -= 16384
-            } else if (i_7 < -8192) {
-                i_7 += 16384
+            val progress = 1.0f - (100 - cyclesSinceSmooth) * (100 - cyclesSinceSmooth) * (100 - cyclesSinceSmooth) / 1000000.0f
+            cameraPositionAbsoluteX = (transitionStartX + progress * (cameraPositionAbsoluteX - transitionStartX)).toInt()
+            cameraPositionAbsoluteZ = (transitionStartZ + progress * (cameraPositionAbsoluteZ - transitionStartZ)).toInt()
+            cameraPositionAbsoluteY = ((cameraPositionAbsoluteY - transitionStartY) * progress + transitionStartY).toInt()
+            cameraYaw = (transitionStartYaw + progress * (cameraYaw - transitionStartYaw)).toInt()
+            var rollDelta = cameraRoll - transitionStartRoll
+            if (rollDelta > 8192) {
+                rollDelta -= 16384
+            } else if (rollDelta < -8192) {
+                rollDelta += 16384
             }
-            cameraRoll = (transitionStartRoll + f_6 * i_7).toInt()
+            cameraRoll = (transitionStartRoll + progress * rollDelta).toInt()
             cameraRoll = cameraRoll and 0x3fff
         }
     }
 
     @JvmStatic
-    fun setCameraPosition(x: Int, z: Int, y: Int, yaw: Int, pitch: Int, baseDeltaY: Int, gameAreaHeight: Int) {
-        var gameAreaHeightDelta = gameAreaHeight - 334
-        if (gameAreaHeightDelta < 0) {
-            gameAreaHeightDelta = 0
-        } else if (gameAreaHeightDelta > 100) {
-            gameAreaHeightDelta = 100
+    fun setCameraPosition(x: Int, z: Int, y: Int, yaw: Int, roll: Int, baseDeltaY: Int, areaHeight: Int) {
+        var areaHeightDelta = areaHeight - 334
+        if (areaHeightDelta < 0) {
+            areaHeightDelta = 0
+        } else if (areaHeightDelta > 100) {
+            areaHeightDelta = 100
         }
-        val zoomModifier = (Client.cameraZoomMax - Client.cameraZoomMin) * gameAreaHeightDelta / 100 + Client.cameraZoomMin
+        val zoomModifier = (Client.cameraZoomMax - Client.cameraZoomMin) * areaHeightDelta / 100 + Client.cameraZoomMin
         var baseDeltaYAdjusted = baseDeltaY * zoomModifier shr 8
         val rotationX = 16384 - yaw and 0x3fff
-        val rotationZ = 16384 - pitch and 0x3fff
+        val rotationZ = 16384 - roll and 0x3fff
         var deltaX = 0
         var deltaZ = 0
         var deltaY = baseDeltaYAdjusted
@@ -310,32 +310,32 @@ object Camera {
         cameraPositionAbsoluteZ = z - deltaZ
         cameraPositionAbsoluteY = y - deltaY
         cameraYaw = yaw
-        cameraRoll = pitch
+        cameraRoll = roll
         cameraPitch = 0
     }
 
     @JvmStatic
-    fun storeViewProjectionMatrix(matrix440: Matrix44) {
-        StaticMethods.storedViewProjectionMatrix.copyFrom(matrix440)
+    fun storeViewProjectionMatrix(srcViewProjectionMatrix: Matrix44) {
+        StaticMethods.storedViewProjectionMatrix.copyFrom(srcViewProjectionMatrix)
     }
 
     @JvmStatic
-    fun lookat(eyeX: Int, eyeY: Int, i_2: Int, speed: Int, angle: Int) {
+    fun lookat(eyeX: Int, eyeY: Int, heightOffset: Int, speed: Int, angle: Int) {
         lookX = eyeX
         lookY = eyeY
-        lookAtHeightOffset = i_2
+        lookAtHeightOffset = heightOffset
         moveCameraSpeed = speed
         moveCameraAngle = angle
         if (moveCameraAngle >= 100) {
-            val eyeAbsX = lookX * 512 + 256
-            val eyeAbsY = lookY * 512 + 256
-            val eyeAbsZ = MapRegion.tileheightForAbsolutePosition(eyeAbsX, eyeAbsY, PlayerUpdate.MY_PLAYER_PLANE) - lookAtHeightOffset
-            val cameraDeltaX = eyeAbsX - cameraPositionAbsoluteX
-            val cameraDeltaZ = eyeAbsZ - cameraPositionAbsoluteZ
-            val cameraDeltaY = eyeAbsY - cameraPositionAbsoluteY
-            val i_12 = sqrt((cameraDeltaX * cameraDeltaX + cameraDeltaY * cameraDeltaY).toDouble()).toInt()
-            cameraYaw = (atan2(cameraDeltaZ.toDouble(), i_12.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-            cameraRoll = (atan2(cameraDeltaX.toDouble(), cameraDeltaY.toDouble()) * -2607.5945876176133).toInt() and 0x3fff
+            val lookAbsX = lookX * 512 + 256
+            val lookAbsY = lookY * 512 + 256
+            val lookAbsZ = MapRegion.tileheightForAbsolutePosition(lookAbsX, lookAbsY, PlayerUpdate.MY_PLAYER_PLANE) - lookAtHeightOffset
+            val deltaX = lookAbsX - cameraPositionAbsoluteX
+            val deltaZ = lookAbsZ - cameraPositionAbsoluteZ
+            val deltaY = lookAbsY - cameraPositionAbsoluteY
+            val horizontalDistance = sqrt((deltaX * deltaX + deltaY * deltaY).toDouble()).toInt()
+            cameraYaw = (atan2(deltaZ.toDouble(), horizontalDistance.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+            cameraRoll = (atan2(deltaX.toDouble(), deltaY.toDouble()) * -2607.5945876176133).toInt() and 0x3fff
             cameraPitch = 0
             if (cameraYaw < 1024) {
                 cameraYaw = 1024
@@ -353,7 +353,7 @@ object Camera {
     fun calculateCameraPosition() {
         val absoluteX = cameraMovementLocalX * 512 + 256
         val absoluteY = cameraMovementLocalY * 512 + 256
-        val cameraGroundOffset = MapRegion.tileheightForAbsolutePosition(absoluteX, absoluteY, PlayerUpdate.MY_PLAYER_PLANE) - cameraMovementZ
+        val absoluteZ = MapRegion.tileheightForAbsolutePosition(absoluteX, absoluteY, PlayerUpdate.MY_PLAYER_PLANE) - cameraMovementZ
         if (cameraVariableMoveSpeed >= 100) {
             cameraPositionAbsoluteX = cameraMovementLocalX * 512 + 256
             cameraPositionAbsoluteY = cameraMovementLocalY * 512 + 256
@@ -371,16 +371,16 @@ object Camera {
                     cameraPositionAbsoluteX = absoluteX
                 }
             }
-            if (cameraPositionAbsoluteZ < cameraGroundOffset) {
-                cameraPositionAbsoluteZ = (cameraGroundOffset - cameraPositionAbsoluteZ) * cameraVariableMoveSpeed / 1000 + cameraPositionAbsoluteZ + cameraConstantMoveSpeed
-                if (cameraPositionAbsoluteZ > cameraGroundOffset) {
-                    cameraPositionAbsoluteZ = cameraGroundOffset
+            if (cameraPositionAbsoluteZ < absoluteZ) {
+                cameraPositionAbsoluteZ = (absoluteZ - cameraPositionAbsoluteZ) * cameraVariableMoveSpeed / 1000 + cameraPositionAbsoluteZ + cameraConstantMoveSpeed
+                if (cameraPositionAbsoluteZ > absoluteZ) {
+                    cameraPositionAbsoluteZ = absoluteZ
                 }
             }
-            if (cameraPositionAbsoluteZ > cameraGroundOffset) {
-                cameraPositionAbsoluteZ -= cameraVariableMoveSpeed * (cameraPositionAbsoluteZ - cameraGroundOffset) / 1000 + cameraConstantMoveSpeed
-                if (cameraPositionAbsoluteZ < cameraGroundOffset) {
-                    cameraPositionAbsoluteZ = cameraGroundOffset
+            if (cameraPositionAbsoluteZ > absoluteZ) {
+                cameraPositionAbsoluteZ -= cameraVariableMoveSpeed * (cameraPositionAbsoluteZ - absoluteZ) / 1000 + cameraConstantMoveSpeed
+                if (cameraPositionAbsoluteZ < absoluteZ) {
+                    cameraPositionAbsoluteZ = absoluteZ
                 }
             }
             if (cameraPositionAbsoluteY < absoluteY) {
@@ -398,13 +398,13 @@ object Camera {
         }
         val lookAbsX = lookX * 512 + 256
         val lookAbsY = lookY * 512 + 256
-        val lookGroundOffset = MapRegion.tileheightForAbsolutePosition(lookAbsX, lookAbsY, PlayerUpdate.MY_PLAYER_PLANE) - lookAtHeightOffset
-        val widthDelta = lookAbsX - cameraPositionAbsoluteX
-        val heightDelta = lookGroundOffset - cameraPositionAbsoluteZ
-        val lengthDelta = lookAbsY - cameraPositionAbsoluteY
-        val i_7 = sqrt((lengthDelta * lengthDelta + widthDelta * widthDelta).toDouble()).toInt()
-        var yaw = (atan2(heightDelta.toDouble(), i_7.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-        val roll = (atan2(widthDelta.toDouble(), lengthDelta.toDouble()) * -2607.5945876176133).toInt() and 0x3fff
+        val lookAbsZ = MapRegion.tileheightForAbsolutePosition(lookAbsX, lookAbsY, PlayerUpdate.MY_PLAYER_PLANE) - lookAtHeightOffset
+        val deltaX = lookAbsX - cameraPositionAbsoluteX
+        val deltaZ = lookAbsZ - cameraPositionAbsoluteZ
+        val deltaY = lookAbsY - cameraPositionAbsoluteY
+        val horizontalDistance = sqrt((deltaY * deltaY + deltaX * deltaX).toDouble()).toInt()
+        var yaw = (atan2(deltaZ.toDouble(), horizontalDistance.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+        val roll = (atan2(deltaX.toDouble(), deltaY.toDouble()) * -2607.5945876176133).toInt() and 0x3fff
         if (yaw < 1024) {
             yaw = 1024
         }
@@ -423,30 +423,30 @@ object Camera {
                 cameraYaw = yaw
             }
         }
-        var clampedRoll = roll - cameraRoll
-        if (clampedRoll > 8192) {
-            clampedRoll -= 16384
+        var rollDelta = roll - cameraRoll
+        if (rollDelta > 8192) {
+            rollDelta -= 16384
         }
-        if (clampedRoll < -8192) {
-            clampedRoll += 16384
+        if (rollDelta < -8192) {
+            rollDelta += 16384
         }
-        clampedRoll = clampedRoll shr 3
-        if (clampedRoll > 0) {
-            cameraRoll += clampedRoll * moveCameraAngle / 1000 + moveCameraSpeed shl 3
+        rollDelta = rollDelta shr 3
+        if (rollDelta > 0) {
+            cameraRoll += rollDelta * moveCameraAngle / 1000 + moveCameraSpeed shl 3
             cameraRoll = cameraRoll and 0x3fff
         }
-        if (clampedRoll < 0) {
-            cameraRoll -= moveCameraSpeed - clampedRoll * moveCameraAngle / 1000 shl 3
+        if (rollDelta < 0) {
+            cameraRoll -= moveCameraSpeed - rollDelta * moveCameraAngle / 1000 shl 3
             cameraRoll = cameraRoll and 0x3fff
         }
-        var clampedAdjustedRoll = roll - cameraRoll
-        if (clampedAdjustedRoll > 8192) {
-            clampedAdjustedRoll -= 16384
+        var remainingRollDelta = roll - cameraRoll
+        if (remainingRollDelta > 8192) {
+            remainingRollDelta -= 16384
         }
-        if (clampedAdjustedRoll < -8192) {
-            clampedAdjustedRoll += 16384
+        if (remainingRollDelta < -8192) {
+            remainingRollDelta += 16384
         }
-        if (clampedAdjustedRoll < 0 && clampedRoll > 0 || clampedAdjustedRoll > 0 && clampedRoll < 0) {
+        if (remainingRollDelta < 0 && rollDelta > 0 || remainingRollDelta > 0 && rollDelta < 0) {
             cameraRoll = roll
         }
         cameraPitch = 0
@@ -455,8 +455,8 @@ object Camera {
     @JvmStatic
     fun calculateCutsceneCameraPosition() {
         if (Client.cameraPositionPathIndex != -1 && Client.cameraLookAtPathIndex != -1) {
-            val i_1 = ((Client.cameraSplineSpeedEnd - Client.cameraSplineSpeedStart) * Client.cameraSplineProgress shr 16) + Client.cameraSplineSpeedStart
-            Client.cameraSplineProgress += i_1
+            val splineSpeed = ((Client.cameraSplineSpeedEnd - Client.cameraSplineSpeedStart) * Client.cameraSplineProgress shr 16) + Client.cameraSplineSpeedStart
+            Client.cameraSplineProgress += splineSpeed
             if (Client.cameraSplineProgress >= 65535) {
                 Client.cameraSplineProgress = 65535
                 Client.cutsceneCameraCompleted = !Client.cutsceneCameraPreviouslyCompleted
@@ -465,42 +465,42 @@ object Camera {
                 Client.cutsceneCameraCompleted = false
                 Client.cutsceneCameraPreviouslyCompleted = false
             }
-            val f_2 = Client.cameraSplineProgress / 65535.0f
+            val progress = Client.cameraSplineProgress / 65535.0f
             val from = FloatArray(3)
-            val i_4 = Client.cameraPositionKeyframe * 2
+            val positionKeyframeIndex = Client.cameraPositionKeyframe * 2
             for (dir in 0 until 3) {
-                val i_17 = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4]!![dir] * 3
-                val i_7 = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4 + 1]!![dir] * 3
-                val i_8 = (Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4 + 2]!![dir] - (Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4 + 3]!![dir] - Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4 + 2]!![dir])) * 3
-                val i_9 = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4]!![dir]
-                val i_10 = i_7 - i_17
-                val i_18 = i_17 - i_7 * 2 + i_8
-                val i_12 = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4 + 2]!![dir] - i_9 + i_7 - i_8
-                from[dir] = i_9 + ((i_12 * f_2 + i_18) * f_2 + i_10) * f_2
+                val ctrl0 = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex]!![dir] * 3
+                val ctrl1 = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex + 1]!![dir] * 3
+                val ctrl2 = (Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex + 2]!![dir] - (Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex + 3]!![dir] - Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex + 2]!![dir])) * 3
+                val start = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex]!![dir]
+                val coeffLinear = ctrl1 - ctrl0
+                val coeffQuad = ctrl0 - ctrl1 * 2 + ctrl2
+                val coeffCubic = Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex + 2]!![dir] - start + ctrl1 - ctrl2
+                from[dir] = start + ((coeffCubic * progress + coeffQuad) * progress + coeffLinear) * progress
             }
             val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
             cameraPositionAbsoluteX = from[0].toInt() - baseCoords.x * 512
             cameraPositionAbsoluteZ = from[1].toInt() * -1
             cameraPositionAbsoluteY = from[2].toInt() - baseCoords.y * 512
             val to = FloatArray(3)
-            val i_7 = Client.cameraLookAtKeyframe * 2
+            val lookAtKeyframeIndex = Client.cameraLookAtKeyframe * 2
             for (dir in 0 until 3) {
-                val i_9 = Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7]!![dir] * 3
-                val i_10 = Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7 + 1]!![dir] * 3
-                val i_18 = (Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7 + 2]!![dir] - (Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7 + 3]!![dir] - Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7 + 2]!![dir])) * 3
-                val i_12 = Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7]!![dir]
-                val i_13 = i_10 - i_9
-                val i_14 = i_9 - i_10 * 2 + i_18
-                val i_15 = i_10 + (Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![i_7 + 2]!![dir] - i_12) - i_18
-                to[dir] = f_2 * ((i_14 + f_2 * i_15) * f_2 + i_13) + i_12
+                val ctrl0 = Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex]!![dir] * 3
+                val ctrl1 = Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex + 1]!![dir] * 3
+                val ctrl2 = (Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex + 2]!![dir] - (Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex + 3]!![dir] - Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex + 2]!![dir])) * 3
+                val start = Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex]!![dir]
+                val coeffLinear = ctrl1 - ctrl0
+                val coeffQuad = ctrl0 - ctrl1 * 2 + ctrl2
+                val coeffCubic = ctrl1 + (Client.cameraSplinePaths!![Client.cameraLookAtPathIndex]!![lookAtKeyframeIndex + 2]!![dir] - start) - ctrl2
+                to[dir] = progress * ((coeffQuad + progress * coeffCubic) * progress + coeffLinear) + start
             }
             val deltaX = to[0] - from[0]
             val deltaZ = -1.0f * (to[1] - from[1])
             val deltaY = to[2] - from[2]
-            val d_11 = sqrt((deltaY * deltaY + deltaX * deltaX).toDouble())
-            cameraYaw = (atan2(deltaZ.toDouble(), d_11) * 2607.5945876176133).toInt() and 0x3fff
+            val horizontalDistance = sqrt((deltaY * deltaY + deltaX * deltaX).toDouble())
+            cameraYaw = (atan2(deltaZ.toDouble(), horizontalDistance) * 2607.5945876176133).toInt() and 0x3fff
             cameraRoll = (-atan2(deltaX.toDouble(), deltaY.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-            cameraPitch = ((Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4 + 2]!![3] - Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4]!![3]) * Client.cameraSplineProgress shr 16) + Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![i_4]!![3]
+            cameraPitch = ((Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex + 2]!![3] - Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex]!![3]) * Client.cameraSplineProgress shr 16) + Client.cameraSplinePaths!![Client.cameraPositionPathIndex]!![positionKeyframeIndex]!![3]
         }
     }
 

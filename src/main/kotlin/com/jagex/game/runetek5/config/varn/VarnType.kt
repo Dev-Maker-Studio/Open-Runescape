@@ -11,11 +11,11 @@ import com.jagex.game.runetek5.utils.Utils
 class VarnType {
 
     @JvmField
-    var character: Char = '\u0000'
+    var typeChar: Char = '\u0000'
 
     fun decode(buffer: Packet, opcode: Int) {
         if (opcode == 1) {
-            character = Utils.cp1252ToChar(buffer.readByte())
+            typeChar = Utils.cp1252ToChar(buffer.readByte())
         }
     }
 

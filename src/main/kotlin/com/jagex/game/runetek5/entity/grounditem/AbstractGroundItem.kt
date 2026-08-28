@@ -29,7 +29,7 @@ abstract class AbstractGroundItem(
         val absolute = getAbsolutePosition().coords
         val tileX = (absolute.x.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionX + super.scene!!.visibleTiles
         val tileZ = (absolute.z.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionY + super.scene!!.visibleTiles
-        return super.scene!!.adjacent_tile_on_screen[tileX][tileZ]
+        return super.scene!!.tileInFrustum[tileX][tileZ]
     }
 
     override fun hasTileShadow(): Boolean {

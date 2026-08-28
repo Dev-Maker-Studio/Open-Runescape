@@ -44,36 +44,36 @@ class WorldMapPlacement(
 
     /**
      * Checks if the given world map coordinates are within this placement's bounds
-     * @param i_1 World map X coordinate
-     * @param i_2 World map Y coordinate
+     * @param mapX World map X coordinate
+     * @param mapY World map Y coordinate
      * @return true if coordinates are within world map bounds
      */
-    fun withinMapBounds(i_1: Int, i_2: Int): Boolean {
-        return i_1 >= this.mapMinX && i_1 <= this.mapMaxX && i_2 >= this.mapMinY && i_2 <= this.mapMaxY
+    fun withinMapBounds(mapX: Int, mapY: Int): Boolean {
+        return mapX >= this.mapMinX && mapX <= this.mapMaxX && mapY >= this.mapMinY && mapY <= this.mapMaxY
     }
 
     /**
      * Converts world map coordinates to game coordinates
-     * @param i_1 World map X coordinate
-     * @param i_2 World map Y coordinate
+     * @param mapX World map X coordinate
+     * @param mapY World map Y coordinate
      * @param position Output array [plane, gameX, gameY]
      */
-    fun mapToGameCoords(i_1: Int, i_2: Int, position: IntArray) {
+    fun mapToGameCoords(mapX: Int, mapY: Int, position: IntArray) {
         position[0] = this.plane
-        position[1] = this.startX - this.mapMinX + i_1
-        position[2] = this.startY - this.mapMinY + i_2
+        position[1] = this.startX - this.mapMinX + mapX
+        position[2] = this.startY - this.mapMinY + mapY
     }
 
     /**
      * Converts game coordinates to world map coordinates
-     * @param offsetX Game world X offset
-     * @param offsetY Game world Y offset
+     * @param gameX Game world X coordinate
+     * @param gameY Game world Y coordinate
      * @param position Output array [0, worldMapX, worldMapY]
      */
-    fun cache(offsetX: Int, offsetY: Int, position: IntArray) {
+    fun cache(gameX: Int, gameY: Int, position: IntArray) {
         position[0] = 0
-        position[1] = this.mapMinX - this.startX + offsetX
-        position[2] = this.mapMinY - this.startY + offsetY
+        position[1] = this.mapMinX - this.startX + gameX
+        position[2] = this.mapMinY - this.startY + gameY
     }
 
     /**

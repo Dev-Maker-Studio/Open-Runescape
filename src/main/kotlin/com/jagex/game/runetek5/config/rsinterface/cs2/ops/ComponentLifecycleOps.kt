@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -147,11 +147,11 @@ object ComponentLifecycleOps {
     }
 
     @JvmStatic
-    fun ccSetFront(bool: Boolean, executor: CS2Executor) {
+    fun ccSetFront(toFront: Boolean, executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
-        if (bool) {
+        if (toFront) {
             Interface.moveComponentToFront(parentInterface!!, component)
         } else {
             Interface.moveComponentToBack(parentInterface!!, component)
@@ -159,11 +159,11 @@ object ComponentLifecycleOps {
     }
 
     @JvmStatic
-    fun ifSetFront(bool: Boolean, executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        val parentInterface: Interface? = Interface.INTERFACES!![(value shr 16)]
-        if (bool) {
+    fun ifSetFront(toFront: Boolean, executor: CS2Executor) {
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
+        if (toFront) {
             Interface.moveComponentToFront(parentInterface!!, component)
         } else {
             Interface.moveComponentToBack(parentInterface!!, component)
@@ -174,45 +174,45 @@ object ComponentLifecycleOps {
     @JvmStatic
     fun ccSetChildSlot(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val ifComp = executor.intStack[executor.intStackPtr]
+        val idHash = executor.intStack[executor.intStackPtr]
         val slotId = executor.intStack[executor.intStackPtr + 1]
-        var inter: CS2Interface? = null
+        var target: CS2Interface? = null
         if (executor.hasIntOperand) {
-            inter = executor.hookedInterface2
+            target = executor.hookedInterface2
         } else {
-            inter = executor.hookedInterface1
+            target = executor.hookedInterface1
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (slotId != -1 && inter!!.setChild(ifComp, slotId)) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (slotId != -1 && target!!.setChild(idHash, slotId)) 1 else 0
     }
 
     @JvmStatic
     fun setItem(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
+        val slot = executor.intStack[executor.intStackPtr]
+        val itemId = executor.intStack[executor.intStackPtr + 1]
         val playerAppearance = PlayerUpdate.MY_PLAYER!!.playerAppearance
         if (playerAppearance != null) {
-            playerAppearance!!.addAppearanceItem(i_2, i_3, TypeLists.OBJ!!)
+            playerAppearance!!.addAppearanceItem(slot, itemId, TypeLists.OBJ!!)
         }
     }
 
     @JvmStatic
     fun setBaseIdentiKit(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
+        val bodyPart = executor.intStack[executor.intStackPtr]
+        val idkId = executor.intStack[executor.intStackPtr + 1]
         val playerAppearance = PlayerUpdate.MY_PLAYER!!.playerAppearance
         if (playerAppearance != null) {
-            val i_4: Int = 0
-            for (i_4 in 0 until CS2Interpreter.MALE_IDKIT_SLOTS.size) {
-                if (CS2Interpreter.MALE_IDKIT_SLOTS[i_4] == i_2) {
-                    playerAppearance!!.addAppearanceIdentity(i_4, i_3, TypeLists.IDK!!)
+            val unusedSlot: Int = 0
+            for (slot in 0 until CS2Interpreter.MALE_IDKIT_SLOTS.size) {
+                if (CS2Interpreter.MALE_IDKIT_SLOTS[slot] == bodyPart) {
+                    playerAppearance!!.addAppearanceIdentity(slot, idkId, TypeLists.IDK!!)
                     return
                 }
             }
-            for (i_4 in 0 until CS2Interpreter.FEMALE_IDKIT_SLOTS.size) {
-                if (CS2Interpreter.FEMALE_IDKIT_SLOTS[i_4] == i_2) {
-                    playerAppearance!!.addAppearanceIdentity(i_4, i_3, TypeLists.IDK!!)
+            for (slot in 0 until CS2Interpreter.FEMALE_IDKIT_SLOTS.size) {
+                if (CS2Interpreter.FEMALE_IDKIT_SLOTS[slot] == bodyPart) {
+                    playerAppearance!!.addAppearanceIdentity(slot, idkId, TypeLists.IDK!!)
                     break
                 }
             }
@@ -222,18 +222,18 @@ object ComponentLifecycleOps {
     @JvmStatic
     fun ccCreate(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        Component.fromHash(i_2)
-        CS2SharedOps.method2738(Interface.INTERFACES!![i_2 ushr 16]!!, i_2 and 0xffff, i_3, i_4, executor.hasIntOperand, executor)
+        val idHash = executor.intStack[executor.intStackPtr]
+        val componentTypeId = executor.intStack[executor.intStackPtr + 1]
+        val slotId = executor.intStack[executor.intStackPtr + 2]
+        Component.fromHash(idHash)
+        CS2SharedOps.createComponent(Interface.INTERFACES!![idHash ushr 16]!!, idHash and 0xffff, componentTypeId, slotId, executor.hasIntOperand, executor)
     }
 
     @JvmStatic
     fun ifResumePauseButton(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
-        method6942(component!!)
+        val idHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(idHash)
+        resumePauseButton(component!!)
     }
 
     @JvmStatic
@@ -262,41 +262,41 @@ object ComponentLifecycleOps {
     fun ccResumePauseButton(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        method6942(component!!)
+        resumePauseButton(component!!)
     }
 
     @JvmStatic
     fun setGender(executor: CS2Executor) {
-        val flag = executor.intStack[--executor.intStackPtr] != 0
+        val female = executor.intStack[--executor.intStackPtr] != 0
         if (PlayerUpdate.MY_PLAYER!!.playerAppearance != null) {
-            PlayerUpdate.MY_PLAYER!!.playerAppearance!!.changeGender(flag)
+            PlayerUpdate.MY_PLAYER!!.playerAppearance!!.changeGender(female)
         }
     }
 
     @JvmStatic
     fun setBaseColor(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
+        val slot = executor.intStack[executor.intStackPtr]
+        val color = executor.intStack[executor.intStackPtr + 1]
         if (PlayerUpdate.MY_PLAYER!!.playerAppearance != null) {
-            PlayerUpdate.MY_PLAYER!!.playerAppearance!!.recolor(i_2, i_3)
+            PlayerUpdate.MY_PLAYER!!.playerAppearance!!.recolor(slot, color)
         }
     }
 
     @JvmStatic
     fun ccSetChild(executor: CS2Executor) {
-        val ifComp = executor.intStack[--executor.intStackPtr]
+        val idHash = executor.intStack[--executor.intStackPtr]
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {
             target = executor.hookedInterface2
         } else {
             target = executor.hookedInterface1
         }
-        executor.intStack[++executor.intStackPtr - 1] = if (target!!.setChild(ifComp, -1)) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (target!!.setChild(idHash, -1)) 1 else 0
     }
 
     @JvmStatic
-    fun method6942(component: Component) {
+    fun resumePauseButton(component: Component) {
         if (Client.getComponentSettings(component)!!.continueOptionEnabled() && Client.activeDialogueContinue == null) {
             PacketEncoder.continueInterfacePressed(component!!.idHash, component!!.slotId)
             Client.activeDialogueContinue = Component.listIcomponent(component!!.idHash, component!!.slotId)

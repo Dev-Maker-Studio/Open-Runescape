@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.graphics.map.worldmap.ClickzoneMEC
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.trigger.ClientTriggerType
 import com.jagex.game.runetek5.utils.BufferUtils
 
@@ -37,7 +37,7 @@ object WorldMapTrigger {
             if (WorldMap.mapZoom > WorldMap.requestedMapZoom) {
                 WorldMap.mapZoom = WorldMap.requestedMapZoom
             }
-            WorldMapSub1.clampMapCenter()
+            WorldMapDisplay.clampMapCenter()
             WorldMap.halfZoomLevel = WorldMap.mapZoom.toInt() shr 1
             WorldMap.tileShapePatterns = BufferUtils.generateBytePatterns(WorldMap.halfZoomLevel)
         } else if (WorldMap.mapZoom > WorldMap.requestedMapZoom) {
@@ -45,26 +45,26 @@ object WorldMapTrigger {
             if (WorldMap.mapZoom < WorldMap.requestedMapZoom) {
                 WorldMap.mapZoom = WorldMap.requestedMapZoom
             }
-            WorldMapSub1.clampMapCenter()
+            WorldMapDisplay.clampMapCenter()
             WorldMap.halfZoomLevel = WorldMap.mapZoom.toInt() shr 1
             WorldMap.tileShapePatterns = BufferUtils.generateBytePatterns(WorldMap.halfZoomLevel)
         }
-        if (WorldMapSub1.scrollTargetX != -1 && WorldMapSub1.scrollTargetY != -1) {
-            var i_3 = WorldMapSub1.scrollTargetX - WorldMapSub1.mapCenterX
-            if (i_3 < 2 || i_3 > 2) {
-                i_3 /= 8
+        if (WorldMapDisplay.scrollTargetX != -1 && WorldMapDisplay.scrollTargetY != -1) {
+            var dx = WorldMapDisplay.scrollTargetX - WorldMapDisplay.mapCenterX
+            if (dx < 2 || dx > 2) {
+                dx /= 8
             }
-            var i_4 = WorldMapSub1.scrollTargetY - WorldMapSub1.mapCenterY
-            if (i_4 < 2 || i_4 > 2) {
-                i_4 /= 8
+            var dy = WorldMapDisplay.scrollTargetY - WorldMapDisplay.mapCenterY
+            if (dy < 2 || dy > 2) {
+                dy /= 8
             }
-            WorldMapSub1.mapCenterX += i_3
-            WorldMapSub1.mapCenterY += i_4
-            if (i_3 == 0 && i_4 == 0) {
-                WorldMapSub1.scrollTargetX = -1
-                WorldMapSub1.scrollTargetY = -1
+            WorldMapDisplay.mapCenterX += dx
+            WorldMapDisplay.mapCenterY += dy
+            if (dx == 0 && dy == 0) {
+                WorldMapDisplay.scrollTargetX = -1
+                WorldMapDisplay.scrollTargetY = -1
             }
-            WorldMapSub1.clampMapCenter()
+            WorldMapDisplay.clampMapCenter()
         }
         if (JSObjectManager.highlightFlashCycles > 0) {
             if (--ServerEnvironment.flashCycleCounter == 0) {
@@ -72,11 +72,11 @@ object WorldMapTrigger {
                 ServerEnvironment.flashCycleCounter = 100
             }
         } else {
-            WorldMapSub1.someMecId = -1
-            WorldMapSub1.highlightedCategoryId = -1
+            WorldMapDisplay.someMecId = -1
+            WorldMapDisplay.highlightedCategoryId = -1
         }
         val clickzones = WorldMapInteraction.MEC_CLICKZONES
-        if (WorldMapSub1.isInteractive && clickzones != null) {
+        if (WorldMapDisplay.isInteractive && clickzones != null) {
             var mecClickzone = clickzones.getFirst() as ClickzoneMEC?
             while (mecClickzone != null) {
                 val mec = WorldMap.MECTYPE_LIST!!.list(mecClickzone.category.mecId)

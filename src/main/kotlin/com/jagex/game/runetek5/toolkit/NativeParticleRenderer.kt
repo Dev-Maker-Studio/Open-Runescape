@@ -12,7 +12,7 @@ import com.jagex.game.runetek5.utils.BufferUtils
  * Native particle renderer.
  * Note: Previously named DirectXParticleRenderer (incorrectly), used by both OpenGL and DirectX.
  */
-class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
+class NativeParticleRenderer(nativeToolkit: AbstractNativeToolkit) {
 
     var overflowBucketCount: Int = 0
     var maxParticlesPerBucket: Int = 64
@@ -37,51 +37,51 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         depthBucketEntities = Array(1600) { arrayOfNulls(64) }
         pointEntities = Array(64) { arrayOfNulls(768) }
         overflowBucketCount = 0
-        vertexDeclaration = class505Sub21.createVertexDeclaration(arrayOf(
+        vertexDeclaration = nativeToolkit.createVertexDeclaration(arrayOf(
             VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR, VertexDeclarationAction.TEXCOORD)),
             VertexDeclarationComponent(VertexDeclarationAction.NORMAL_POINTER_ACTION)
         ))
-        dynamicVertexStream = class505Sub21.createStream(true)
-        staticNormalStream = class505Sub21.createStream(false)
+        dynamicVertexStream = nativeToolkit.createStream(true)
+        staticNormalStream = nativeToolkit.createStream(false)
         staticNormalStream.create(393168, 12)
-        indexBuffer = class505Sub21.createIndexBuffer(false)
+        indexBuffer = nativeToolkit.createIndexBuffer(false)
         indexBuffer.create(49146)
-        val bytebuffer2 = class505Sub21.directBuffer
-        bytebuffer2.clear()
+        val directBuffer = nativeToolkit.directBuffer
+        directBuffer.clear()
 
-        var i_3: Int = 0
-        while (i_3 < 8191) {
-            val i_4 = i_3 * 4
-            bytebuffer2.putShort(i_4.toShort())
-            bytebuffer2.putShort((i_4 + 1).toShort())
-            bytebuffer2.putShort((i_4 + 2).toShort())
-            bytebuffer2.putShort((i_4 + 2).toShort())
-            bytebuffer2.putShort((i_4 + 3).toShort())
-            bytebuffer2.putShort(i_4.toShort())
-            i_3++
+        var i: Int = 0
+        while (i < 8191) {
+            val vertexBase = i * 4
+            directBuffer.putShort(vertexBase.toShort())
+            directBuffer.putShort((vertexBase + 1).toShort())
+            directBuffer.putShort((vertexBase + 2).toShort())
+            directBuffer.putShort((vertexBase + 2).toShort())
+            directBuffer.putShort((vertexBase + 3).toShort())
+            directBuffer.putShort(vertexBase.toShort())
+            i++
         }
 
-        indexBuffer.upload(0, bytebuffer2.position(), class505Sub21.directBufferAddress)
-        bytebuffer2.clear()
+        indexBuffer.upload(0, directBuffer.position(), nativeToolkit.directBufferAddress)
+        directBuffer.clear()
 
-        i_3 = 0
-        while (i_3 < 8191) {
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(-1.0f)
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(-1.0f)
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(-1.0f)
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(0.0f)
-            bytebuffer2.putFloat(-1.0f)
-            bytebuffer2.putFloat(0.0f)
-            i_3++
+        i = 0
+        while (i < 8191) {
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(-1.0f)
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(-1.0f)
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(-1.0f)
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(0.0f)
+            directBuffer.putFloat(-1.0f)
+            directBuffer.putFloat(0.0f)
+            i++
         }
 
-        staticNormalStream.upload(0, bytebuffer2.position(), class505Sub21.directBufferAddress)
+        staticNormalStream.upload(0, directBuffer.position(), nativeToolkit.directBufferAddress)
     }
 
     fun resetVertexStream() {
@@ -95,112 +95,112 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
     fun render(nativeToolkit: AbstractNativeToolkit, particleWrapper: ParticleWrapper) {
         nativeToolkit.setDepthBuffering(false)
         currentLightIntensity = nativeToolkit.lightIntensity
-        val zNearA = nativeToolkit.particleMatrix.elements[2]
-        val zNearB = nativeToolkit.particleMatrix.elements[6]
-        val zNearC = nativeToolkit.particleMatrix.elements[10]
-        val zNearD = nativeToolkit.particleMatrix.elements[14]
-        var i_7 = 0
-        var i_8 = Int.MAX_VALUE
-        var i_9 = 0
+        val zA = nativeToolkit.particleMatrix.elements[2]
+        val zB = nativeToolkit.particleMatrix.elements[6]
+        val zC = nativeToolkit.particleMatrix.elements[10]
+        val zD = nativeToolkit.particleMatrix.elements[14]
+        var depthIndex = 0
+        var minDepth = Int.MAX_VALUE
+        var maxDepth = 0
         val particleTree = particleWrapper.particleBinaryTree.current
 
         var particleNode = particleTree.child
         while (particleNode !== particleTree) {
             val pointEntity = particleNode as PointEntity
-            val i_22 = (zNearA * (pointEntity.x shr 12) + zNearB * (pointEntity.y shr 12) + zNearC * (pointEntity.z shr 12) + zNearD).toInt()
-            if (i_22 > i_9) {
-                i_9 = i_22
+            val depth = (zA * (pointEntity.x shr 12) + zB * (pointEntity.y shr 12) + zC * (pointEntity.z shr 12) + zD).toInt()
+            if (depth > maxDepth) {
+                maxDepth = depth
             }
 
-            if (i_22 < i_8) {
-                i_8 = i_22
+            if (depth < minDepth) {
+                minDepth = depth
             }
 
-            depthValues[i_7++] = i_22
+            depthValues[depthIndex++] = depth
             particleNode = particleNode.child
         }
 
-        var i_20 = i_9 - i_8
-        val i_12: Int
-        if (i_20 + 2 > 1600) {
-            i_12 = 1 + BufferUtils.ilog(i_20) - depthBucketBits
-            i_20 = (i_20 shr i_12) + 2
+        var bucketCount = maxDepth - minDepth
+        val depthShift: Int
+        if (bucketCount + 2 > 1600) {
+            depthShift = 1 + BufferUtils.ilog(bucketCount) - depthBucketBits
+            bucketCount = (bucketCount shr depthShift) + 2
         } else {
-            i_12 = 0
-            i_20 += 2
+            depthShift = 0
+            bucketCount += 2
         }
 
-        var child = particleTree.child
-        i_7 = 0
+        var batchNode = particleTree.child
+        depthIndex = 0
         nativeToolkit.bindIndexBuffer(indexBuffer)
-        val class10314 = nativeToolkit.abstractParticleShader!!
-        class10314.setViewProjectionMatrix(AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX)
-        class10314.textureCoordinateMatrix.identity()
-        class10314.diffuseColor = -1
+        val particleShader = nativeToolkit.abstractParticleShader!!
+        particleShader.setViewProjectionMatrix(AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX)
+        particleShader.textureCoordinateMatrix.identity()
+        particleShader.diffuseColor = -1
         var materialId = -2
         var hasLightAdjustment = true
 
-        var hasAdjustments = true
-        while (child !== particleTree) {
+        var startNewBatch = true
+        while (batchNode !== particleTree) {
             overflowBucketCount = 0
 
-            var i_18 = 0
-            while (i_18 < i_20) {
-                pointEntityIndices[i_18] = 0
-                i_18++
+            var i = 0
+            while (i < bucketCount) {
+                pointEntityIndices[i] = 0
+                i++
             }
 
-            i_18 = 0
-            while (i_18 < 64) {
-                overflowBucketSizes[i_18] = 0
-                i_18++
+            i = 0
+            while (i < 64) {
+                overflowBucketSizes[i] = 0
+                i++
             }
 
-            while (child !== particleTree) {
-                val pointEntity = child as PointEntity
-                if (hasAdjustments) {
+            while (batchNode !== particleTree) {
+                val pointEntity = batchNode as PointEntity
+                if (startNewBatch) {
                     materialId = pointEntity.materialId
                     hasLightAdjustment = pointEntity.lightIntensityAdjustment
-                    hasAdjustments = false
+                    startNewBatch = false
                 }
 
-                if (i_7 > 0 && (materialId != pointEntity.materialId || hasLightAdjustment != pointEntity.lightIntensityAdjustment)) {
-                    hasAdjustments = true
+                if (depthIndex > 0 && (materialId != pointEntity.materialId || hasLightAdjustment != pointEntity.lightIntensityAdjustment)) {
+                    startNewBatch = true
                     break
                 }
 
-                val i_19 = (depthValues[i_7++] - i_8) shr i_12
-                if (i_19 < 1600) {
-                    if (pointEntityIndices[i_19] < 64) {
-                        depthBucketEntities[i_19][pointEntityIndices[i_19]++] = pointEntity
+                val bucketIndex = (depthValues[depthIndex++] - minDepth) shr depthShift
+                if (bucketIndex < 1600) {
+                    if (pointEntityIndices[bucketIndex] < 64) {
+                        depthBucketEntities[bucketIndex][pointEntityIndices[bucketIndex]++] = pointEntity
                     } else {
-                        if (pointEntityIndices[i_19] == 64) {
+                        if (pointEntityIndices[bucketIndex] == 64) {
                             if (overflowBucketCount == 64) {
-                                child = child.child
+                                batchNode = batchNode.child
                                 continue
                             }
 
-                            pointEntityIndices[i_19] += 1 + overflowBucketCount++
+                            pointEntityIndices[bucketIndex] += 1 + overflowBucketCount++
                         }
 
-                        val arr_10000 = pointEntities[pointEntityIndices[i_19] - 64 - 1]
-                        val i_10002 = pointEntityIndices[i_19] - 64 - 1
-                        val i_10004 = overflowBucketSizes[pointEntityIndices[i_19] - 64 - 1]
-                        overflowBucketSizes[i_10002] = overflowBucketSizes[pointEntityIndices[i_19] - 64 - 1] + 1
-                        arr_10000[i_10004] = pointEntity
+                        val overflowBucket = pointEntities[pointEntityIndices[bucketIndex] - 64 - 1]
+                        val overflowBucketIndex = pointEntityIndices[bucketIndex] - 64 - 1
+                        val overflowSlot = overflowBucketSizes[pointEntityIndices[bucketIndex] - 64 - 1]
+                        overflowBucketSizes[overflowBucketIndex] = overflowBucketSizes[pointEntityIndices[bucketIndex] - 64 - 1] + 1
+                        overflowBucket[overflowSlot] = pointEntity
                     }
                 }
-                child = child.child
+                batchNode = batchNode.child
             }
 
-            class10314.diffuseSampler = nativeToolkit.materialCache!!.getTextureSampler(if (materialId >= 0) materialId else -1)
+            particleShader.diffuseSampler = nativeToolkit.materialCache!!.getTextureSampler(if (materialId >= 0) materialId else -1)
             if (hasLightAdjustment && nativeToolkit.lightIntensity != currentLightIntensity) {
                 nativeToolkit.updateSun(currentLightIntensity)
             } else if (nativeToolkit.lightIntensity != 1.0f) {
                 nativeToolkit.updateSun(1.0f)
             }
 
-            renderBatch(nativeToolkit, i_20)
+            renderBatch(nativeToolkit, bucketCount)
         }
 
         if (nativeToolkit.lightIntensity != currentLightIntensity) {
@@ -210,8 +210,8 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         nativeToolkit.setDepthBuffering(true)
     }
 
-    fun renderBatch(nativeToolkit: AbstractNativeToolkit, i_2: Int) {
-        var i_3 = 0
+    fun renderBatch(nativeToolkit: AbstractNativeToolkit, bucketCount: Int) {
+        var particleCount = 0
         val particleMatrix = nativeToolkit.particleMatrix
         val xA = particleMatrix.elements[0]
         val xB = particleMatrix.elements[4]
@@ -224,31 +224,31 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         val scaleZA = xC + yC
         val scaleXB = xA - yA
         val scaleYB = xB - yB
-        val scakeZB = xC - yC
+        val scaleZB = xC - yC
         val scaleXC = yA - xA
         val scaleYC = yB - xB
         val scaleZC = yC - xC
         val directBuffer = nativeToolkit.directBuffer
         directBuffer.clear()
 
-        for (i_21 in (i_2 - 1) downTo 0) {
-            val i_22 = Math.min(64, pointEntityIndices[i_21])
-            if (i_22 > 0) {
-                var i_23: Int = i_22 - 1
-                while (i_23 >= 0) {
-                    val pointEntity = depthBucketEntities[i_21][i_23]!!
-                    val colorRgba = pointEntity.colorArgb
-                    val red = (colorRgba shr 16).toByte()
-                    val green = (colorRgba shr 8).toByte()
-                    val blue = colorRgba.toByte()
-                    val alpha = (colorRgba ushr 24).toByte()
-                    val downscaledX = (pointEntity.x shr 12).toFloat()
-                    val downscaledY = (pointEntity.y shr 12).toFloat()
-                    val downscaledZ = (pointEntity.z shr 12).toFloat()
-                    val downscaledSize = (pointEntity.size shr 12).toFloat()
-                    directBuffer.putFloat(downscaledX + scaleXA * (-downscaledSize))
-                    directBuffer.putFloat(downscaledY + scaleYA * (-downscaledSize))
-                    directBuffer.putFloat(downscaledZ + scaleZA * (-downscaledSize))
+        for (bucketIndex in (bucketCount - 1) downTo 0) {
+            val bucketSize = Math.min(64, pointEntityIndices[bucketIndex])
+            if (bucketSize > 0) {
+                var index: Int = bucketSize - 1
+                while (index >= 0) {
+                    val pointEntity = depthBucketEntities[bucketIndex][index]!!
+                    val colorArgb = pointEntity.colorArgb
+                    val red = (colorArgb shr 16).toByte()
+                    val green = (colorArgb shr 8).toByte()
+                    val blue = colorArgb.toByte()
+                    val alpha = (colorArgb ushr 24).toByte()
+                    val x = (pointEntity.x shr 12).toFloat()
+                    val y = (pointEntity.y shr 12).toFloat()
+                    val z = (pointEntity.z shr 12).toFloat()
+                    val size = (pointEntity.size shr 12).toFloat()
+                    directBuffer.putFloat(x + scaleXA * (-size))
+                    directBuffer.putFloat(y + scaleYA * (-size))
+                    directBuffer.putFloat(z + scaleZA * (-size))
                     if (nativeToolkit.endiannessType == 0) {
                         directBuffer.put(blue)
                         directBuffer.put(green)
@@ -263,9 +263,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                     directBuffer.putFloat(0.0f)
                     directBuffer.putFloat(0.0f)
-                    directBuffer.putFloat(downscaledX + scaleXC * downscaledSize)
-                    directBuffer.putFloat(downscaledY + scaleYC * downscaledSize)
-                    directBuffer.putFloat(downscaledZ + scaleZC * downscaledSize)
+                    directBuffer.putFloat(x + scaleXC * size)
+                    directBuffer.putFloat(y + scaleYC * size)
+                    directBuffer.putFloat(z + scaleZC * size)
                     if (nativeToolkit.endiannessType == 0) {
                         directBuffer.put(blue)
                         directBuffer.put(green)
@@ -280,9 +280,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                     directBuffer.putFloat(0.0f)
                     directBuffer.putFloat(1.0f)
-                    directBuffer.putFloat(downscaledX + scaleXA * downscaledSize)
-                    directBuffer.putFloat(downscaledY + scaleYA * downscaledSize)
-                    directBuffer.putFloat(downscaledZ + scaleZA * downscaledSize)
+                    directBuffer.putFloat(x + scaleXA * size)
+                    directBuffer.putFloat(y + scaleYA * size)
+                    directBuffer.putFloat(z + scaleZA * size)
                     if (nativeToolkit.endiannessType == 0) {
                         directBuffer.put(blue)
                         directBuffer.put(green)
@@ -297,9 +297,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                     directBuffer.putFloat(1.0f)
                     directBuffer.putFloat(1.0f)
-                    directBuffer.putFloat(downscaledX + scaleXB * downscaledSize)
-                    directBuffer.putFloat(downscaledY + scaleYB * downscaledSize)
-                    directBuffer.putFloat(downscaledZ + scakeZB * downscaledSize)
+                    directBuffer.putFloat(x + scaleXB * size)
+                    directBuffer.putFloat(y + scaleYB * size)
+                    directBuffer.putFloat(z + scaleZB * size)
                     if (nativeToolkit.endiannessType == 0) {
                         directBuffer.put(blue)
                         directBuffer.put(green)
@@ -314,28 +314,28 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                     directBuffer.putFloat(1.0f)
                     directBuffer.putFloat(0.0f)
-                    ++i_3
-                    --i_23
+                    ++particleCount
+                    --index
                 }
 
-                if (pointEntityIndices[i_21] > 64) {
-                    i_23 = pointEntityIndices[i_21] - 64 - 1
+                if (pointEntityIndices[bucketIndex] > 64) {
+                    index = pointEntityIndices[bucketIndex] - 64 - 1
 
-                    var i_24 = overflowBucketSizes[i_23] - 1
-                    while (i_24 >= 0) {
-                        val pointEntity = pointEntities[i_23][i_24]!!
-                        val color = pointEntity.colorArgb
-                        val red = (color shr 16).toByte()
-                        val green = (color shr 8).toByte()
-                        val blue = color.toByte()
-                        val alpha = (color ushr 24).toByte()
-                        val downscaledX = (pointEntity.x shr 12).toFloat()
-                        val downscaledY = (pointEntity.y shr 12).toFloat()
-                        val downscaledZ = (pointEntity.z shr 12).toFloat()
-                        val downscaledSize = (pointEntity.size shr 12).toFloat()
-                        directBuffer.putFloat(downscaledX + scaleXA * (-downscaledSize))
-                        directBuffer.putFloat(downscaledY + scaleYA * (-downscaledSize))
-                        directBuffer.putFloat(downscaledZ + scaleZA * (-downscaledSize))
+                    var overflowSlot = overflowBucketSizes[index] - 1
+                    while (overflowSlot >= 0) {
+                        val pointEntity = pointEntities[index][overflowSlot]!!
+                        val colorArgb = pointEntity.colorArgb
+                        val red = (colorArgb shr 16).toByte()
+                        val green = (colorArgb shr 8).toByte()
+                        val blue = colorArgb.toByte()
+                        val alpha = (colorArgb ushr 24).toByte()
+                        val x = (pointEntity.x shr 12).toFloat()
+                        val y = (pointEntity.y shr 12).toFloat()
+                        val z = (pointEntity.z shr 12).toFloat()
+                        val size = (pointEntity.size shr 12).toFloat()
+                        directBuffer.putFloat(x + scaleXA * (-size))
+                        directBuffer.putFloat(y + scaleYA * (-size))
+                        directBuffer.putFloat(z + scaleZA * (-size))
                         if (nativeToolkit.endiannessType == 0) {
                             directBuffer.put(blue)
                             directBuffer.put(green)
@@ -350,9 +350,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                         directBuffer.putFloat(0.0f)
                         directBuffer.putFloat(0.0f)
-                        directBuffer.putFloat(downscaledX + scaleXC * downscaledSize)
-                        directBuffer.putFloat(downscaledY + scaleYC * downscaledSize)
-                        directBuffer.putFloat(downscaledZ + scaleZC * downscaledSize)
+                        directBuffer.putFloat(x + scaleXC * size)
+                        directBuffer.putFloat(y + scaleYC * size)
+                        directBuffer.putFloat(z + scaleZC * size)
                         if (nativeToolkit.endiannessType == 0) {
                             directBuffer.put(blue)
                             directBuffer.put(green)
@@ -367,9 +367,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                         directBuffer.putFloat(0.0f)
                         directBuffer.putFloat(1.0f)
-                        directBuffer.putFloat(downscaledX + scaleXA * downscaledSize)
-                        directBuffer.putFloat(downscaledY + scaleYA * downscaledSize)
-                        directBuffer.putFloat(downscaledZ + scaleZA * downscaledSize)
+                        directBuffer.putFloat(x + scaleXA * size)
+                        directBuffer.putFloat(y + scaleYA * size)
+                        directBuffer.putFloat(z + scaleZA * size)
                         if (nativeToolkit.endiannessType == 0) {
                             directBuffer.put(blue)
                             directBuffer.put(green)
@@ -384,9 +384,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                         directBuffer.putFloat(1.0f)
                         directBuffer.putFloat(1.0f)
-                        directBuffer.putFloat(downscaledX + scaleXB * downscaledSize)
-                        directBuffer.putFloat(downscaledY + scaleYB * downscaledSize)
-                        directBuffer.putFloat(downscaledZ + scakeZB * downscaledSize)
+                        directBuffer.putFloat(x + scaleXB * size)
+                        directBuffer.putFloat(y + scaleYB * size)
+                        directBuffer.putFloat(z + scaleZB * size)
                         if (nativeToolkit.endiannessType == 0) {
                             directBuffer.put(blue)
                             directBuffer.put(green)
@@ -401,8 +401,8 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
                         directBuffer.putFloat(1.0f)
                         directBuffer.putFloat(0.0f)
-                        ++i_3
-                        --i_24
+                        ++particleCount
+                        --overflowSlot
                     }
                 }
             }
@@ -413,7 +413,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         nativeToolkit.setStreamSource(1, staticNormalStream)
         nativeToolkit.setVertexDeclaration(vertexDeclaration)
         val particleShader = nativeToolkit.abstractParticleShader!!
-        particleShader.drawParticles(i_3)
+        particleShader.drawParticles(particleCount)
     }
 
     companion object {

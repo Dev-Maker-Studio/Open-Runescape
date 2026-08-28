@@ -10,8 +10,8 @@ import com.jagex.game.runetek5.toolkit.companion.TextureCombineMode
 
 class NativeParticleShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractParticleShader(nativeToolkit) {
 
-    override fun setViewProjectionMatrix(matrix441: Matrix44) {
-        super.activeToolkit.setMatrixTransform(matrix441, super.activeToolkit.particleMatrix, super.activeToolkit.projectionMatrix)
+    override fun setViewProjectionMatrix(viewProjectionMatrix: Matrix44) {
+        super.activeToolkit.setMatrixTransform(viewProjectionMatrix, super.activeToolkit.particleMatrix, super.activeToolkit.projectionMatrix)
     }
 
     override fun drawPointSprite() {
@@ -22,11 +22,11 @@ class NativeParticleShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractPar
         super.activeToolkit.drawQuadTriangleFan()
     }
 
-    override fun drawParticles(i_1: Int) {
+    override fun drawParticles(particleCount: Int) {
         super.activeToolkit.setTextureRgbStageState(1, TextureStageState.PRIMARY_COLOR)
         super.activeToolkit.setTextureAlphaStageState(1, TextureStageState.PRIMARY_COLOR)
         loadTextureState()
-        super.activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, 0, i_1 * 4, 0, i_1 * 2)
+        super.activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, 0, particleCount * 4, 0, particleCount * 2)
     }
 
     fun loadTextureState() {

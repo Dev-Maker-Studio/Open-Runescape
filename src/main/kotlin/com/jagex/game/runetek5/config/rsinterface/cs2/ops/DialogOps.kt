@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -176,30 +176,30 @@ object DialogOps {
     @JvmStatic
     fun resumeCountDialog(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        var value = 0
+        var count = 0
         if (Utils.isWrongJava(text!!)) {
-            value = Utils.parseInt(text!!)
+            count = Utils.parseInt(text!!)
         }
-        val tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_COUNTDIALOG, Client.connectionContext!!.isaac)
-        tcpmessage4!!.buffer.writeInt(value)
-        Client.connectionContext!!.queuePacket(tcpmessage4)
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_COUNTDIALOG, Client.connectionContext!!.isaac)
+        packet!!.buffer.writeInt(count)
+        Client.connectionContext!!.queuePacket(packet)
     }
 
     @JvmStatic
     fun resumeClanForumQFCDialog(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_CLANFORUMQFCDIALOG, Client.connectionContext!!.isaac)
-        tcpmessage3!!.buffer.writeByte(text!!.length + 1)
-        tcpmessage3!!.buffer.writeString(text!!)
-        Client.connectionContext!!.queuePacket(tcpmessage3)
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_CLANFORUMQFCDIALOG, Client.connectionContext!!.isaac)
+        packet!!.buffer.writeByte(text!!.length + 1)
+        packet!!.buffer.writeString(text!!)
+        Client.connectionContext!!.queuePacket(packet)
     }
 
     @JvmStatic
     fun ifOpenSubClient(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        Interface.openSub(i_2, SubInterface(i_3, 3), null, true)
+        val parentId = executor.intStack[executor.intStackPtr]
+        val subInterfaceId = executor.intStack[executor.intStackPtr + 1]
+        Interface.openSub(parentId, SubInterface(subInterfaceId, 3), null, true)
     }
 
     @JvmStatic
@@ -211,18 +211,18 @@ object DialogOps {
     @JvmStatic
     fun ifCloseSubClient(executor: CS2Executor) {
         --executor.intStackPtr
-        val value = executor.intStack[executor.intStackPtr]
-        val class282Sub443: SubInterface? = Client.OPEN_INTERFACES!!.get(value.toLong())
-        if (class282Sub443 != null && class282Sub443.overlay == 3) {
-            Interface.closeChildInterface(class282Sub443, true, true)
+        val parentId = executor.intStack[executor.intStackPtr]
+        val subInterface: SubInterface? = Client.OPEN_INTERFACES!!.get(parentId.toLong())
+        if (subInterface != null && subInterface.overlay == 3) {
+            Interface.closeChildInterface(subInterface, true, true)
         }
     }
 
     @JvmStatic
     fun opplayer(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        PacketEncoder.sendPlayerOperation(value, text)
+        val operationId = executor.intStack[--executor.intStackPtr]
+        val playerName: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        PacketEncoder.sendPlayerOperation(operationId, playerName)
     }
 
     @JvmStatic
@@ -245,11 +245,11 @@ object DialogOps {
     @JvmStatic
     fun loadMessagebox(executor: CS2Executor) {
         executor.intStackPtr -= 11
-        val anchorX = AnchorX.values()
-        val anchorY = AnchorY.values()
+        val anchorXValues = AnchorX.values()
+        val anchorYValues = AnchorY.values()
         MessageBox.initialize(
-        		anchorX[executor.intStack[executor.intStackPtr]],
-        		anchorY[executor.intStack[executor.intStackPtr + 1]],
+        		anchorXValues[executor.intStack[executor.intStackPtr]],
+        		anchorYValues[executor.intStack[executor.intStackPtr + 1]],
         		executor.intStack[executor.intStackPtr + 2], 
         		executor.intStack[executor.intStackPtr + 3], 
         		executor.intStack[executor.intStackPtr + 4], 
@@ -279,19 +279,19 @@ object DialogOps {
     @JvmStatic
     fun resumeStringDialog(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.connectionContext!!.isaac)
-        tcpmessage3!!.buffer.writeByte(text!!.length + 1)
-        tcpmessage3!!.buffer.writeString(text!!)
-        Client.connectionContext!!.queuePacket(tcpmessage3)
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.connectionContext!!.isaac)
+        packet!!.buffer.writeByte(text!!.length + 1)
+        packet!!.buffer.writeString(text!!)
+        Client.connectionContext!!.queuePacket(packet)
     }
 
     @JvmStatic
     fun resumeNamedDialog(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_NAMEDIALOG, Client.connectionContext!!.isaac)
-        tcpmessage3!!.buffer.writeByte(text!!.length + 1)
-        tcpmessage3!!.buffer.writeString(text!!)
-        Client.connectionContext!!.queuePacket(tcpmessage3)
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_NAMEDIALOG, Client.connectionContext!!.isaac)
+        packet!!.buffer.writeByte(text!!.length + 1)
+        packet!!.buffer.writeString(text!!)
+        Client.connectionContext!!.queuePacket(packet)
     }
 
     @JvmStatic
@@ -315,28 +315,28 @@ object DialogOps {
     @JvmStatic
     fun ccDragPickup(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
+        val offsetX = executor.intStack[executor.intStackPtr]
+        val offsetY = executor.intStack[executor.intStackPtr + 1]
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
-        InterfaceRenderer.startDragging(target!!.comp!!, i_2, i_3)
+        InterfaceRenderer.startDragging(target!!.comp!!, offsetX, offsetY)
     }
 
     @JvmStatic
     fun ifDragPickup(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val component: Component? = Component.fromHash(i_4)
-        InterfaceRenderer.startDragging(component!!, i_2, i_3)
+        val offsetX = executor.intStack[executor.intStackPtr]
+        val offsetY = executor.intStack[executor.intStackPtr + 1]
+        val componentHash = executor.intStack[executor.intStackPtr + 2]
+        val component: Component? = Component.fromHash(componentHash)
+        InterfaceRenderer.startDragging(component!!, offsetX, offsetY)
     }
 
     @JvmStatic
     fun resumeObjdialog(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.GRAND_EXCHANGE_ITEM_SELECT, Client.connectionContext!!.isaac)
-        tcpmessage3!!.buffer.writeShort(value)
-        Client.connectionContext!!.queuePacket(tcpmessage3)
+        val obj = executor.intStack[--executor.intStackPtr]
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.GRAND_EXCHANGE_ITEM_SELECT, Client.connectionContext!!.isaac)
+        packet!!.buffer.writeShort(obj)
+        Client.connectionContext!!.queuePacket(packet)
     }
 
     @JvmStatic
@@ -347,10 +347,10 @@ object DialogOps {
 
     @JvmStatic
     fun resumeHSLDialog(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_HSLDIALOG, Client.connectionContext!!.isaac)
-        tcpmessage3!!.buffer.writeShort(value)
-        Client.connectionContext!!.queuePacket(tcpmessage3)
+        val hsl = executor.intStack[--executor.intStackPtr]
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_HSLDIALOG, Client.connectionContext!!.isaac)
+        packet!!.buffer.writeShort(hsl)
+        Client.connectionContext!!.queuePacket(packet)
     }
 
     @JvmStatic

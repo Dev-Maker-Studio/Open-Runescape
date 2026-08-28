@@ -85,25 +85,25 @@ object InterfaceComponentRenderer {
 
     @JvmStatic
     fun drawObjSprite(toolkit: AbstractToolkit, component: Component) {
-        val created = TypeLists.OBJ!!.createNativeSprite(toolkit, component.containerItemId, component.itemStackSize, component.borderThickness, -0x1000000 or component.spriteShadow, component.renderStack, if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null) == null
-        if (created) {
+        val spriteMissing = TypeLists.OBJ!!.createNativeSprite(toolkit, component.containerItemId, component.itemStackSize, component.borderThickness, -0x1000000 or component.spriteShadow, component.renderStack, if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null) == null
+        if (spriteMissing) {
             Component.ITEMS.addFirst(Item(component.containerItemId, component.itemStackSize, component.borderThickness, -0x1000000 or component.spriteShadow, component.renderStack, component.wearCol))
             Component.redrawComponent(component)
         }
     }
 
     @JvmStatic
-    fun drawComponents(components: Array<Component?>, i_1: Int, clippingLeft: Int, clippingTop: Int, clippingRight: Int, clippingBottom: Int, offsetX: Int, offsetY: Int, i_8: Int, bool9: Boolean) {
+    fun drawComponents(components: Array<Component?>, parentId: Int, clippingLeft: Int, clippingTop: Int, clippingRight: Int, clippingBottom: Int, offsetX: Int, offsetY: Int, parentCacheReference: Int, isTopLevelLayer: Boolean) {
         Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
         for (componentIndex in components.indices) {
             val component = components[componentIndex]
-            if (component != null && (component.parentId == i_1 || i_1 == -1412584499 && component === Client.draggingComponent)) {
+            if (component != null && (component.parentId == parentId || parentId == -1412584499 && component === Client.draggingComponent)) {
                 val componentReference: Int
-                if (i_8 == -1) {
+                if (parentCacheReference == -1) {
                     Client.INTERFACE_BG_COMPONENTS[Client.componentBackgroundCount]!!.setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
                     componentReference = ++Client.componentBackgroundCount - 1
                 } else {
-                    componentReference = i_8
+                    componentReference = parentCacheReference
                 }
                 component.cacheReference = componentReference
                 component.lastRenderedCycle = Client.cycles
@@ -120,7 +120,7 @@ object InterfaceComponentRenderer {
                     val startX: Int
                     val startY: Int
                     if (component === Client.draggingComponent) {
-                        if (i_1 != -1412584499 && (component.dragType == Component.DragType.UNK_2 || component.dragType == Component.DragType.UNK_0 || Client.getComponentSettings(component)!!.ignoresDepthFlags())) {
+                        if (parentId != -1412584499 && (component.dragType == Component.DragType.UNK_2 || component.dragType == Component.DragType.UNK_0 || Client.getComponentSettings(component)!!.ignoresDepthFlags())) {
                             deferredDragComponents = components
                             deferredDragOffsetX = offsetX
                             deferredDragOffsetY = offsetY
@@ -165,14 +165,14 @@ object InterfaceComponentRenderer {
                         endX = clippingRight
                         endY = clippingBottom
                     } else {
-                        var lineStartX = startX + component.width
-                        var lineStartY = startY + component.height
+                        var rightX = startX + component.width
+                        var bottomY = startY + component.height
                         if (component.type == ComponentType.LINE) {
-                            lineStartX++
-                            lineStartY++
+                            rightX++
+                            bottomY++
                         }
-                        endX = Math.min(lineStartX, clippingRight)
-                        endY = Math.min(lineStartY, clippingBottom)
+                        endX = Math.min(rightX, clippingRight)
+                        endY = Math.min(bottomY, clippingBottom)
                     }
                     val clipStartX = if (component.type == ComponentType.TYPE_2) clippingLeft else Math.max(startX, clippingLeft)
                     val clipStartY = if (component.type == ComponentType.TYPE_2) clippingTop else Math.max(startY, clippingTop)
@@ -236,10 +236,10 @@ object InterfaceComponentRenderer {
                             if (component.contentType == CUTSCENE_FADE && Renderers.activeToolkit!!.bloomEnabled()) {
                                 Renderers.activeToolkit!!.beginBloomCapture(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
                             }
-                            drawComponents(components, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
+                            drawComponents(components, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, isTopLevelLayer)
                             val itemSlots = component.itemSlots
                             if (itemSlots != null) {
-                                drawComponents(itemSlots, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
+                                drawComponents(itemSlots, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, isTopLevelLayer)
                             }
                             val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong())
                             if (subInterface != null) {
@@ -289,31 +289,31 @@ object InterfaceComponentRenderer {
                                     }
                                 } else {
                                     var color = component.color
-                                    var itemDisplayText = component.text
+                                    var displayText = component.text
                                     if (component.containerItemId != -1) {
                                         val objType = TypeLists.OBJ!!.list(component.containerItemId)
-                                        itemDisplayText = objType!!.name
-                                        if (itemDisplayText == null) {
-                                            itemDisplayText = "null"
+                                        displayText = objType!!.name
+                                        if (displayText == null) {
+                                            displayText = "null"
                                         }
                                         if ((objType.stackable == 1 || component.itemStackSize != 1) && component.itemStackSize != -1) {
-                                            itemDisplayText = TextUtils.setTextColor(16748608) + itemDisplayText + "</col>" + " x" + TextUtils.formatStackSize(component.itemStackSize)
+                                            displayText = TextUtils.setTextColor(16748608) + displayText + "</col>" + " x" + TextUtils.formatStackSize(component.itemStackSize)
                                         }
                                     }
                                     if (component.videoFileId != -1) {
-                                        itemDisplayText = SoundResourceManager.getVideoSubtitleText(component.videoFileId)!!
+                                        displayText = SoundResourceManager.getVideoSubtitleText(component.videoFileId)!!
                                     }
                                     if (component === Client.activeDialogueContinue) {
-                                        itemDisplayText = LocalizedText.PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!)
+                                        displayText = LocalizedText.PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!)
                                         color = component.color
                                     }
                                     if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.expandClipping(startX, startY, startX + component.width, startY + component.height)
                                     }
                                     if (component.textAntiMacro) {
-                                        fontRenderer.renderTextAntiMacro(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.nameIconSprites, null)
+                                        fontRenderer.renderTextAntiMacro(displayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.nameIconSprites, null)
                                     } else {
-                                        fontRenderer.renderText(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, component.lineSpacing, component.maxTextLines, StaticMedia.nameIconSprites, null, null, 0, 0)
+                                        fontRenderer.renderText(displayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, component.lineSpacing, component.maxTextLines, StaticMedia.nameIconSprites, null, null, 0, 0)
                                     }
                                     if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
@@ -339,14 +339,14 @@ object InterfaceComponentRenderer {
                                         if (component.tiling) {
                                             Renderers.activeToolkit!!.expandClipping(startX, startY, startX + component.width, startY + component.height)
                                             if (component.angle2d != 0) {
-                                                val height = (spriteWidth - 1 + component.width) / spriteWidth
-                                                val i_39 = (spriteHeight - 1 + component.height) / spriteHeight
-                                                for (i_27 in 0 until height) {
-                                                    for (i_28 in 0 until i_39) {
+                                                val tileCols = (spriteWidth - 1 + component.width) / spriteWidth
+                                                val tileRows = (spriteHeight - 1 + component.height) / spriteHeight
+                                                for (tileCol in 0 until tileCols) {
+                                                    for (tileRow in 0 until tileRows) {
                                                         if (component.color != 0) {
-                                                            sprite.drawRotatedCenterColored((startX + i_27 * spriteWidth) + spriteWidth / 2.0f, spriteHeight / 2.0f + (startY + spriteHeight * i_28), 4096, component.angle2d, drawColor)
+                                                            sprite.drawRotatedCenterColored((startX + tileCol * spriteWidth) + spriteWidth / 2.0f, spriteHeight / 2.0f + (startY + spriteHeight * tileRow), 4096, component.angle2d, drawColor)
                                                         } else {
-                                                            sprite.drawRotatedCenter((startX + spriteWidth * i_27) + spriteWidth / 2.0f, (startY + spriteHeight * i_28) + spriteHeight / 2.0f, 4096, component.angle2d)
+                                                            sprite.drawRotatedCenter((startX + spriteWidth * tileCol) + spriteWidth / 2.0f, (startY + spriteHeight * tileRow) + spriteHeight / 2.0f, 4096, component.angle2d)
                                                         }
                                                     }
                                                 }
@@ -382,23 +382,23 @@ object InterfaceComponentRenderer {
                                 if (component.modelTintScalar != 0) {
                                     functionMask = functionMask or 0x80000
                                 }
-                                var centerY = 0
+                                var centerOffsetY = 0
                                 if (component.containerItemId != -1) {
                                     val objType = TypeLists.OBJ!!.list(component.containerItemId)
                                     if (objType != null) {
                                         val stackAltType = objType.getStackSizeAlt(component.itemStackSize)
                                         renderedMediaModel = stackAltType.getAnimatedModel(Renderers.activeToolkit!!, functionMask, 1, if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null, component.animatingSequence, 0, 0, 0, 0)
                                         if (renderedMediaModel != null) {
-                                            centerY = -renderedMediaModel.getMinY() shr 1
+                                            centerOffsetY = -renderedMediaModel.getMinY() shr 1
                                         } else {
                                             Component.redrawComponent(component)
                                         }
                                     }
                                 } else if (component.mediaType == MediaType.PLAYER_HEAD) {
-                                    val lineHeight = component.primaryMediaId
-                                    if (lineHeight >= 0 && lineHeight < 2048) {
-                                        val player = PlayerUpdate.players[lineHeight]
-                                        if (player != null && (lineHeight == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
+                                    val playerIndex = component.primaryMediaId
+                                    if (playerIndex >= 0 && playerIndex < 2048) {
+                                        val player = PlayerUpdate.players[playerIndex]
+                                        if (player != null && (playerIndex == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
                                             val toolkit = Renderers.activeToolkit
                                             renderedMediaModel = component.getAnimatedMediaModel(toolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, player.playerAppearance)
                                             if (renderedMediaModel == null && Component.missingMedia) {
@@ -407,10 +407,10 @@ object InterfaceComponentRenderer {
                                         }
                                     }
                                 } else if (component.mediaType == MediaType.PLAYER_MODEL) {
-                                    val target = component.primaryMediaId
-                                    if (target >= 0 && target < 2048) {
-                                        val player = PlayerUpdate.players[target]
-                                        if (player != null && (target == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
+                                    val playerIndex = component.primaryMediaId
+                                    if (playerIndex >= 0 && playerIndex < 2048) {
+                                        val player = PlayerUpdate.players[playerIndex]
+                                        if (player != null && (playerIndex == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
                                             renderedMediaModel = player.playerAppearance!!.getBodyModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, null, null, null, 0, TypeLists.EQUIPMENT_DEFAULTS!!)
                                         }
                                     }
@@ -433,42 +433,42 @@ object InterfaceComponentRenderer {
                                     if (component.modelTintScalar != 0) {
                                         renderedMediaModel.tint(component.modelTintRed, component.modelTintGreen, component.modelTintBlue, component.modelTintScalar)
                                     }
-                                    val width: Int
-                                    val height: Int
+                                    val focalX: Int
+                                    val focalY: Int
                                     if (component.aspectWidth > 0) {
-                                        width = (component.width shl 9) / component.aspectWidth
+                                        focalX = (component.width shl 9) / component.aspectWidth
                                     } else {
-                                        width = 512
+                                        focalX = 512
                                     }
                                     if (component.aspectHeight > 0) {
-                                        height = (component.height shl 9) / component.aspectHeight
+                                        focalY = (component.height shl 9) / component.aspectHeight
                                     } else {
-                                        height = 512
+                                        focalY = 512
                                     }
-                                    val i_39 = component.width / 2 + startX
-                                    val i_27 = component.height / 2 + startY
-                                    var modelX = i_39
-                                    var modelY = i_27
+                                    val componentCenterX = component.width / 2 + startX
+                                    val componentCenterY = component.height / 2 + startY
+                                    var modelX = componentCenterX
+                                    var modelY = componentCenterY
                                     if (!component.hasOrigin) {
-                                        modelX += width * component.originX shr 9
-                                        modelY += height * component.originY shr 9
+                                        modelX += focalX * component.originX shr 9
+                                        modelY += focalY * component.originY shr 9
                                     }
                                     Client.SUN_MATRIX.reset()
                                     Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
-                                    val matrix44 = Renderers.activeToolkit!!.getScratchMatrix()
+                                    val perspectiveMatrix = Renderers.activeToolkit!!.getScratchMatrix()
                                     val viewRangeStart = Resource.mapRegion!!.viewRangeStart
                                     var viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
                                     viewRangeEnd += component.spriteScale
                                     if (component.usesOrthogonal) {
                                         if (component.hasOrigin) {
-                                            matrix44!!.setPerspectiveFromViewport(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), component.spriteScale.toFloat())
+                                            perspectiveMatrix!!.setPerspectiveFromViewport(modelX.toFloat(), modelY.toFloat(), focalX.toFloat(), focalY.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), component.spriteScale.toFloat())
                                         } else {
-                                            matrix44!!.setPerspectiveFromViewport(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), (component.spriteScale shl 2).toFloat())
+                                            perspectiveMatrix!!.setPerspectiveFromViewport(modelX.toFloat(), modelY.toFloat(), focalX.toFloat(), focalY.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), (component.spriteScale shl 2).toFloat())
                                         }
                                     } else {
-                                        matrix44!!.setPerspective(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat())
+                                        perspectiveMatrix!!.setPerspective(modelX.toFloat(), modelY.toFloat(), focalX.toFloat(), focalY.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat())
                                     }
-                                    Renderers.activeToolkit!!.setModelMatrix(matrix44)
+                                    Renderers.activeToolkit!!.setModelMatrix(perspectiveMatrix)
                                     Renderers.activeToolkit!!.applyClearFlags(2, 0)
                                     if (component.priorityRender) {
                                         Renderers.activeToolkit!!.setDepthBuffering(false)
@@ -479,11 +479,11 @@ object InterfaceComponentRenderer {
                                         Client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 0.0f, 1.0f, MathUtils.getTheta(component.spriteYaw))
                                         Client.INTERFACE_MODEL_MATRIX.translate(component.originX.toFloat(), component.originY.toFloat(), component.originZ.toFloat())
                                     } else {
-                                        val i_31 = MathUtils.SINE[component.spritePitch shl 3] * (component.spriteScale shl 2) shr 14
-                                        val i_32 = MathUtils.COSINE[component.spritePitch shl 3] * (component.spriteScale shl 2) shr 14
+                                        val pitchOffsetY = MathUtils.SINE[component.spritePitch shl 3] * (component.spriteScale shl 2) shr 14
+                                        val pitchOffsetZ = MathUtils.COSINE[component.spritePitch shl 3] * (component.spriteScale shl 2) shr 14
                                         Client.INTERFACE_MODEL_MATRIX.rotateMatrix(0.0f, 0.0f, 1.0f, MathUtils.getTheta(-component.spriteYaw shl 3))
                                         Client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 1.0f, 0.0f, MathUtils.getTheta(component.spriteRoll shl 3))
-                                        Client.INTERFACE_MODEL_MATRIX.translate((component.offsetX shl 2).toFloat(), (i_31 + centerY + (component.offsetY shl 2)).toFloat(), (i_32 + (component.offsetY shl 2)).toFloat())
+                                        Client.INTERFACE_MODEL_MATRIX.translate((component.offsetX shl 2).toFloat(), (pitchOffsetY + centerOffsetY + (component.offsetY shl 2)).toFloat(), (pitchOffsetZ + (component.offsetY shl 2)).toFloat())
                                         Client.INTERFACE_MODEL_MATRIX.rotate(1.0f, 0.0f, 0.0f, MathUtils.getTheta(component.spritePitch shl 3))
                                     }
                                     val toolkit = Renderers.activeToolkit
@@ -505,23 +505,23 @@ object InterfaceComponentRenderer {
                             } else if (component.type == ComponentType.LINE) {
                                 val lineStartX: Int
                                 val lineStartY: Int
-                                val lineWidth: Int
-                                val lineHeight: Int
+                                val lineEndX: Int
+                                val lineEndY: Int
                                 if (component.lineDirection) {
                                     lineStartX = startX
                                     lineStartY = startY + component.height
-                                    lineWidth = startX + component.width
-                                    lineHeight = startY
+                                    lineEndX = startX + component.width
+                                    lineEndY = startY
                                 } else {
                                     lineStartX = startX
                                     lineStartY = startY
-                                    lineWidth = startX + component.width
-                                    lineHeight = startY + component.height
+                                    lineEndX = startX + component.width
+                                    lineEndY = startY + component.height
                                 }
                                 if (component.lineWidth == 1) {
-                                    Renderers.activeToolkit!!.drawTransparentLine(lineStartX, lineStartY, lineWidth, lineHeight, component.color, 0)
+                                    Renderers.activeToolkit!!.drawTransparentLine(lineStartX, lineStartY, lineEndX, lineEndY, component.color, 0)
                                 } else {
-                                    Renderers.activeToolkit!!.drawThickLine(lineStartX, lineStartY, lineWidth, lineHeight, component.color, component.lineWidth, 0)
+                                    Renderers.activeToolkit!!.drawThickLine(lineStartX, lineStartY, lineEndX, lineEndY, component.color, component.lineWidth, 0)
                                 }
                             }
                         }
@@ -532,112 +532,112 @@ object InterfaceComponentRenderer {
     }
 
     @JvmStatic
-    fun updateEntityOnInterface(components: Array<Component?>, component: Component, bool2: Boolean) {
+    fun updateEntityOnInterface(components: Array<Component?>, component: Component, fireResizeHooks: Boolean) {
         val componentWidth = if (component.scrollWidth != 0) component.scrollWidth else component.width
         val componentHeight = if (component.scrollHeight != 0) component.scrollHeight else component.height
-        InterfaceRenderer.updateInterfaceDimensions(components, component.idHash, componentWidth, componentHeight, bool2)
+        InterfaceRenderer.updateInterfaceDimensions(components, component.idHash, componentWidth, componentHeight, fireResizeHooks)
         val itemSlots = component.itemSlots
         if (itemSlots != null) {
-            InterfaceRenderer.updateInterfaceDimensions(itemSlots, component.idHash, componentWidth, componentHeight, bool2)
+            InterfaceRenderer.updateInterfaceDimensions(itemSlots, component.idHash, componentWidth, componentHeight, fireResizeHooks)
         }
         val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong())
         if (subInterface != null) {
-            InterfaceRenderer.updateInterfaceDimensions(subInterface.subInterfaceId, componentWidth, componentHeight, bool2)
+            InterfaceRenderer.updateInterfaceDimensions(subInterface.subInterfaceId, componentWidth, componentHeight, fireResizeHooks)
         }
         if (component === Client.GAME_SCREEN_INTERFACE) {
-            val playerIndiceCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
+            val playerCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
             val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
-            for (index in 0 until playerIndiceCount) {
+            for (index in 0 until playerCount) {
                 val playerEntity = PlayerUpdate.players[playerIndices[index]]
                 if (playerEntity != null) {
-                    playerEntity.updateInterfaceDisplay(componentWidth, componentHeight, bool2)
+                    playerEntity.updateInterfaceDisplay(componentWidth, componentHeight, fireResizeHooks)
                 }
             }
             for (npcUpdateIndex in 0 until Client.NPC_UPDATE_INDEX) {
                 val updateKey = Client.NPC_UPDATE_INDICES[npcUpdateIndex]
                 val npcObjectNode = Client.NPC_MAP.get(updateKey.toLong())
                 if (npcObjectNode != null) {
-                    (npcObjectNode.value as PathingEntity).updateInterfaceDisplay(componentWidth, componentHeight, bool2)
+                    (npcObjectNode.value as PathingEntity).updateInterfaceDisplay(componentWidth, componentHeight, fireResizeHooks)
                 }
             }
         }
     }
 
     @JvmStatic
-    fun componentPositionAdjustment(component: Component, x: Int, y: Int) {
+    fun componentPositionAdjustment(component: Component, parentWidth: Int, parentHeight: Int) {
         if (component.aspectXType.toInt() == 0) {
             component.x = component.basePositionX
         } else if (component.aspectXType.toInt() == 1) {
-            component.x = component.basePositionX + (x - component.width) / 2
+            component.x = component.basePositionX + (parentWidth - component.width) / 2
         } else if (component.aspectXType.toInt() == 2) {
-            component.x = x - component.width - component.basePositionX
+            component.x = parentWidth - component.width - component.basePositionX
         } else if (component.aspectXType.toInt() == 3) {
-            component.x = component.basePositionX * x shr 14
+            component.x = component.basePositionX * parentWidth shr 14
         } else if (component.aspectXType.toInt() == 4) {
-            component.x = (x - component.width) / 2 + (component.basePositionX * x shr 14)
+            component.x = (parentWidth - component.width) / 2 + (component.basePositionX * parentWidth shr 14)
         } else {
-            component.x = x - component.width - (component.basePositionX * x shr 14)
+            component.x = parentWidth - component.width - (component.basePositionX * parentWidth shr 14)
         }
         if (component.aspectYType.toInt() == 0) {
             component.y = component.basePositionY
         } else if (component.aspectYType.toInt() == 1) {
-            component.y = (y - component.height) / 2 + component.basePositionY
+            component.y = (parentHeight - component.height) / 2 + component.basePositionY
         } else if (component.aspectYType.toInt() == 2) {
-            component.y = y - component.height - component.basePositionY
+            component.y = parentHeight - component.height - component.basePositionY
         } else if (component.aspectYType.toInt() == 3) {
-            component.y = y * component.basePositionY shr 14
+            component.y = parentHeight * component.basePositionY shr 14
         } else if (component.aspectYType.toInt() == 4) {
-            component.y = (y - component.height) / 2 + (y * component.basePositionY shr 14)
+            component.y = (parentHeight - component.height) / 2 + (parentHeight * component.basePositionY shr 14)
         } else {
-            component.y = y - component.height - (y * component.basePositionY shr 14)
+            component.y = parentHeight - component.height - (parentHeight * component.basePositionY shr 14)
         }
         if (Client.DISPLAY_HIDDEN_MENU_OPTIONS && (Client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
             if (component.x < 0) {
                 component.x = 0
-            } else if (component.x + component.width > x) {
-                component.x = x - component.width
+            } else if (component.x + component.width > parentWidth) {
+                component.x = parentWidth - component.width
             }
             if (component.y < 0) {
                 component.y = 0
-            } else if (component.height + component.y > y) {
-                component.y = y - component.height
+            } else if (component.height + component.y > parentHeight) {
+                component.y = parentHeight - component.height
             }
         }
     }
 
     @JvmStatic
-    fun drawMinimapText(component: Component, dimension: ComponentSurface?, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, string_7: String?, fontRenderer: AbstractFontRenderer?, fontmetrics9: FontMetrics?, i_10: Int) {
+    fun drawMinimapText(component: Component, dimension: ComponentSurface?, clipLeft: Int, clipTop: Int, offsetX: Int, offsetZ: Int, iconHeight: Int, text: String?, fontRenderer: AbstractFontRenderer?, fontMetrics: FontMetrics?, color: Int) {
         val angle: Int
         if (Camera.cameraCalculationType == 4) {
             angle = Camera.camAngleY.toInt() and 0x3fff
         } else {
             angle = Camera.camAngleY.toInt() + Client.minimapRotation and 0x3fff
         }
-        val i_13 = Math.max(component.width / 2, component.height / 2) + 10
-        val i_14 = i_5 * i_5 + i_4 * i_4
-        if (i_14 <= i_13 * i_13) {
+        val maxDistance = Math.max(component.width / 2, component.height / 2) + 10
+        val distanceSq = offsetZ * offsetZ + offsetX * offsetX
+        if (distanceSq <= maxDistance * maxDistance) {
             var sin = MathUtils.SINE[angle]
             var cos = MathUtils.COSINE[angle]
             if (Camera.cameraCalculationType != 4) {
                 sin = sin * 256 / (Client.minimapZoom + 256)
                 cos = cos * 256 / (Client.minimapZoom + 256)
             }
-            val i_17 = cos * i_4 + i_5 * sin shr 14
-            val i_18 = i_5 * cos - sin * i_4 shr 14
-            val i_19 = fontmetrics9!!.getTextWidthMultiline(string_7!!, 100, null)
-            val i_20 = fontmetrics9.getTextHeightMultiline(string_7, 100, 0, null)
-            var textX = i_17 - i_19 / 2
-            if (textX >= -component.width && textX <= component.width && i_18 >= -component.height && i_18 <= component.height) {
-                fontRenderer!!.drawText(string_7, textX + component.width / 2 + i_2, i_3 + component.height / 2 - i_18 - i_6 - i_20, i_19, 50, i_10, 0, 1, 0, 0, null, null, dimension, i_2, i_3)
+            val mapX = cos * offsetX + offsetZ * sin shr 14
+            val mapY = offsetZ * cos - sin * offsetX shr 14
+            val textWidth = fontMetrics!!.getTextWidthMultiline(text!!, 100, null)
+            val textHeight = fontMetrics.getTextHeightMultiline(text, 100, 0, null)
+            var textX = mapX - textWidth / 2
+            if (textX >= -component.width && textX <= component.width && mapY >= -component.height && mapY <= component.height) {
+                fontRenderer!!.drawText(text, textX + component.width / 2 + clipLeft, clipTop + component.height / 2 - mapY - iconHeight - textHeight, textWidth, 50, color, 0, 1, 0, 0, null, null, dimension, clipLeft, clipTop)
             }
         }
     }
 
     @JvmStatic
-    fun inboundsComponentToTop(x: Int, y: Int, offsetX: Int, offsetY: Int) {
+    fun inboundsComponentToTop(x: Int, y: Int, width: Int, height: Int) {
         for (index in 0 until Client.componentBackgroundCount) {
             val rectangle = Client.INTERFACE_BG_COMPONENTS[index] ?: continue
-            if (rectangle.x + rectangle.width > x && rectangle.x < x + offsetX && rectangle.height + rectangle.y > y && rectangle.y < offsetY + y) {
+            if (rectangle.x + rectangle.width > x && rectangle.x < x + width && rectangle.height + rectangle.y > y && rectangle.y < height + y) {
                 Client.IS_COMPONENT_ON_TOP[index] = true
             }
         }

@@ -18,8 +18,8 @@ class OpenGlAttachableCubeMapTexture(
         return this.cubeMapTexture.largestMaterialSize
     }
 
-    override fun getFrameRenderBuffer(i_1: Int) {
-        OpenGL.glFramebufferTexture2DEXT(36160, i_1, this.cubeFaceTarget, this.cubeMapTexture.activeHandle, this.mipmapLevel)
+    override fun getFrameRenderBuffer(attachment: Int) {
+        OpenGL.glFramebufferTexture2DEXT(36160, attachment, this.cubeFaceTarget, this.cubeMapTexture.activeHandle, this.mipmapLevel)
     }
 
     override fun deallocate() {

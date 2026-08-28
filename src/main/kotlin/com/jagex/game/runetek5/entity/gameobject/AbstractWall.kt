@@ -42,7 +42,7 @@ abstract class AbstractWall(
         val absolute = getAbsolutePosition().coords
         val tileX = (absolute.x.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionX + scene!!.visibleTiles
         val tileZ = (absolute.z.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionY + scene!!.visibleTiles
-        return scene!!.adjacent_tile_on_screen[tileX][tileZ]
+        return scene!!.tileInFrustum[tileX][tileZ]
     }
 
     override fun getActiveLights(cacheInto: Array<PointLight?>): Int {

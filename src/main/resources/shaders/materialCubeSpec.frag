@@ -1,9 +1,9 @@
 #version 330 core
 
 // Cube Map Specular Fragment Shader
-// Replaces MaterialEffect1GL (effect index 1)
+// Replaces CubeMapSpecularEffect (effect index 1)
 //
-// Legacy behavior in MaterialEffect1GL:
+// Legacy behavior in CubeMapSpecularEffect:
 //   - GL_NORMAL_MAP texgen generates cube map coords from surface normal
 //   - Cube map contains pre-computed specular power falloff at 3 exponents:
 //     cubeMapTextures[0]: pow(n, 96) * scale  (sharp specular)

@@ -4,13 +4,13 @@ import com.jagex.game.runetek5.graphics.sprite.IItemRenderer
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 
 class DirectSpriteRenderNode(
-    interface181: IItemRenderer,
-    @JvmField val anObject10381: NativeSprite,
-    i_3: Int
-) : SpriteRenderNode(interface181, i_3) {
+    itemRenderer: IItemRenderer,
+    @JvmField val nativeSprite: NativeSprite,
+    size: Int
+) : SpriteRenderNode(itemRenderer, size) {
 
     override fun createNativeSprite(): NativeSprite {
-        return anObject10381
+        return nativeSprite
     }
 
     override fun hasSoftReference(): Boolean {

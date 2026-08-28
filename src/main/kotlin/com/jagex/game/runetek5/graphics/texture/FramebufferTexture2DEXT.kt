@@ -17,8 +17,8 @@ class FramebufferTexture2DEXT(
         return this.texture2d.length
     }
 
-    override fun getFrameRenderBuffer(i_1: Int) {
-        OpenGL.glFramebufferTexture2DEXT(36160, i_1, this.texture2d.textureTarget, this.texture2d.activeHandle, this.mipmapLevel)
+    override fun getFrameRenderBuffer(attachment: Int) {
+        OpenGL.glFramebufferTexture2DEXT(36160, attachment, this.texture2d.textureTarget, this.texture2d.activeHandle, this.mipmapLevel)
     }
 
     override fun deallocate() {

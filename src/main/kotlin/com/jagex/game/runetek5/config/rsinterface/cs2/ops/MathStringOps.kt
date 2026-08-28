@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -185,44 +185,44 @@ object MathStringOps {
     @JvmStatic
     fun stringIndexOfString(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        val text: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val search: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
         val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = string_2!!.indexOf(string_3!!, value)
+        executor.intStack[++executor.intStackPtr - 1] = text!!.indexOf(search!!, value)
     }
 
     @JvmStatic
     fun scale(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val long_2 = executor.intStack[executor.intStackPtr]
-        val long_4 = executor.intStack[executor.intStackPtr + 1]
-        val long_6 = executor.intStack[executor.intStackPtr + 2]
-        executor.intStack[++executor.intStackPtr - 1] = (long_6.toLong() * long_2.toLong() / long_4.toLong()).toInt()
+        val numerator = executor.intStack[executor.intStackPtr]
+        val denominator = executor.intStack[executor.intStackPtr + 1]
+        val value = executor.intStack[executor.intStackPtr + 2]
+        executor.intStack[++executor.intStackPtr - 1] = (value.toLong() * numerator.toLong() / denominator.toLong()).toInt()
     }
 
     @JvmStatic
     fun multiply(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_3 * i_2
+        val lhs = executor.intStack[executor.intStackPtr]
+        val rhs = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = rhs * lhs
     }
 
     @JvmStatic
     fun addPercent(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val long_2 = executor.intStack[executor.intStackPtr]
-        val long_4 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = (long_2 + long_2.toLong() * long_4.toLong() / 100L).toInt()
+        val value = executor.intStack[executor.intStackPtr]
+        val percent = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = (value + value.toLong() * percent.toLong() / 100L).toInt()
     }
 
     @JvmStatic
     fun stringwidth(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         val value = executor.intStack[--executor.intStackPtr]
-        val fontmetrics4: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, value)
-        assert(fontmetrics4 != null)
-        executor.intStack[++executor.intStackPtr - 1] = fontmetrics4!!.getTextWidth(text, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        val fontMetrics: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, value)
+        assert(fontMetrics != null)
+        executor.intStack[++executor.intStackPtr - 1] = fontMetrics!!.getTextWidth(text, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
     }
 
     @JvmStatic
@@ -244,9 +244,9 @@ object MathStringOps {
     @JvmStatic
     fun min(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = Math.min(i_2, i_3)
+        val a = executor.intStack[executor.intStackPtr]
+        val b = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = Math.min(a, b)
     }
 
     @JvmStatic
@@ -264,9 +264,9 @@ object MathStringOps {
     @JvmStatic
     fun strAppend(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
-        executor.stringStack[++executor.stringStackPtr - 1] = string_2 + string_3
+        val text: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val suffix: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        executor.stringStack[++executor.stringStackPtr - 1] = text + suffix
     }
 
     @JvmStatic
@@ -280,9 +280,9 @@ object MathStringOps {
     fun stringIndexOfChar(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStackPtr -= 2
-        val i_3 = executor.intStack[executor.intStackPtr]
-        val i_4 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = text!!.indexOf(i_3.toChar(), i_4)
+        val charCode = executor.intStack[executor.intStackPtr]
+        val fromIndex = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = text!!.indexOf(charCode.toChar(), fromIndex)
     }
 
     @JvmStatic
@@ -301,31 +301,31 @@ object MathStringOps {
     fun paraWidth(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStackPtr -= 2
-        val i_3 = executor.intStack[executor.intStackPtr]
-        val i_4 = executor.intStack[executor.intStackPtr + 1]
-        val fontmetrics5: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, i_4)
-        assert(fontmetrics5 != null)
-        executor.intStack[++executor.intStackPtr - 1] = fontmetrics5!!.getTextWidthMultiline(text!!, i_3, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        val width = executor.intStack[executor.intStackPtr]
+        val fontId = executor.intStack[executor.intStackPtr + 1]
+        val fontMetrics: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, fontId)
+        assert(fontMetrics != null)
+        executor.intStack[++executor.intStackPtr - 1] = fontMetrics!!.getTextWidthMultiline(text!!, width, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
     }
 
     @JvmStatic
     fun pow(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_2 == 0) {
+        val base = executor.intStack[executor.intStackPtr]
+        val exponent = executor.intStack[executor.intStackPtr + 1]
+        if (base == 0) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = Math.pow(i_2.toDouble(), i_3.toDouble()).toInt()
+            executor.intStack[++executor.intStackPtr - 1] = Math.pow(base.toDouble(), exponent.toDouble()).toInt()
         }
     }
 
     @JvmStatic
     fun bitOr(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 or i_3
+        val lhs = executor.intStack[executor.intStackPtr]
+        val rhs = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = lhs or rhs
     }
 
     @JvmStatic
@@ -343,9 +343,9 @@ object MathStringOps {
     @JvmStatic
     fun divide(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 / i_3
+        val dividend = executor.intStack[executor.intStackPtr]
+        val divisor = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = dividend / divisor
     }
 
     @JvmStatic
@@ -356,9 +356,9 @@ object MathStringOps {
     @JvmStatic
     fun subtract(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 - i_3
+        val lhs = executor.intStack[executor.intStackPtr]
+        val rhs = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = lhs - rhs
     }
 
     @JvmStatic
@@ -371,19 +371,19 @@ object MathStringOps {
     @JvmStatic
     fun removetags(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val stringbuilder3: StringBuilder? = StringBuilder(text!!.length)
+        val builder: StringBuilder? = StringBuilder(text!!.length)
         var flag = false
         for (value in 0 until text!!.length) {
-            val var_6: Char = text!![value]
-            if (var_6 == '<') {
+            val ch: Char = text!![value]
+            if (ch == '<') {
                 flag = true
-            } else if (var_6 == '>') {
+            } else if (ch == '>') {
                 flag = false
             } else if (!flag) {
-                stringbuilder3!!.append(var_6)
+                builder!!.append(ch)
             }
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = stringbuilder3!!.toString()
+        executor.stringStack[++executor.stringStackPtr - 1] = builder!!.toString()
     }
 
     @JvmStatic
@@ -400,25 +400,25 @@ object MathStringOps {
     @JvmStatic
     fun bitFlagged(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = if ((i_2 and (1 shl i_3)) != 0) 1 else 0
+        val flags = executor.intStack[executor.intStackPtr]
+        val bit = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = if ((flags and (1 shl bit)) != 0) 1 else 0
     }
 
     @JvmStatic
     fun bitAnd(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 and i_3
+        val lhs = executor.intStack[executor.intStackPtr]
+        val rhs = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = lhs and rhs
     }
 
     @JvmStatic
     fun setBit(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 or (1 shl i_3)
+        val flags = executor.intStack[executor.intStackPtr]
+        val bit = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = flags or (1 shl bit)
     }
 
     @JvmStatic
@@ -442,12 +442,12 @@ object MathStringOps {
     @JvmStatic
     fun textSwitch(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        val trueText: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val falseText: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
         if (executor.intStack[--executor.intStackPtr] == 1) {
-            executor.stringStack[++executor.stringStackPtr - 1] = string_2
+            executor.stringStack[++executor.stringStackPtr - 1] = trueText
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = string_3
+            executor.stringStack[++executor.stringStackPtr - 1] = falseText
         }
     }
 
@@ -461,19 +461,19 @@ object MathStringOps {
     fun paraheight(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStackPtr -= 2
-        val i_3 = executor.intStack[executor.intStackPtr]
-        val i_4 = executor.intStack[executor.intStackPtr + 1]
-        val fontmetrics5: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, i_4)
-        assert(fontmetrics5 != null)
-        executor.intStack[++executor.intStackPtr - 1] = fontmetrics5!!.getLineCount(text!!, i_3, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        val width = executor.intStack[executor.intStackPtr]
+        val fontId = executor.intStack[executor.intStackPtr + 1]
+        val fontMetrics: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, fontId)
+        assert(fontMetrics != null)
+        executor.intStack[++executor.intStackPtr - 1] = fontMetrics!!.getLineCount(text!!, width, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
     }
 
     @JvmStatic
     fun modulo(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 % i_3
+        val dividend = executor.intStack[executor.intStackPtr]
+        val divisor = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = dividend % divisor
     }
 
     @JvmStatic
@@ -484,14 +484,14 @@ object MathStringOps {
     @JvmStatic
     fun powInverse(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_2 == 0) {
+        val base = executor.intStack[executor.intStackPtr]
+        val root = executor.intStack[executor.intStackPtr + 1]
+        if (base == 0) {
             executor.intStack[++executor.intStackPtr - 1] = 0
-        } else if (i_3 == 0) {
+        } else if (root == 0) {
             executor.intStack[++executor.intStackPtr - 1] = Integer.MAX_VALUE
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = Math.pow(i_2.toDouble(), 1.0 / i_3).toInt()
+            executor.intStack[++executor.intStackPtr - 1] = Math.pow(base.toDouble(), 1.0 / root).toInt()
         }
     }
 
@@ -516,42 +516,42 @@ object MathStringOps {
     @JvmStatic
     fun randSoundPitch(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        if (i_2 > 700 || i_3 > 700) {
+        val pitchDown = executor.intStack[executor.intStackPtr]
+        val pitchUp = executor.intStack[executor.intStackPtr + 1]
+        if (pitchDown > 700 || pitchUp > 700) {
             executor.intStack[++executor.intStackPtr - 1] = 256
             return
         }
-        val d_4 = (Math.random() * (i_3 + i_2) - i_2 + 800.0) / 100.0
-        executor.intStack[++executor.intStackPtr - 1] = (Math.pow(2.0, d_4) + 0.5).toInt()
+        val octaves = (Math.random() * (pitchUp + pitchDown) - pitchDown + 800.0) / 100.0
+        executor.intStack[++executor.intStackPtr - 1] = (Math.pow(2.0, octaves) + 0.5).toInt()
     }
 
     @JvmStatic
     fun textGender(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        val maleText: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val femaleText: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
         if (PlayerUpdate.MY_PLAYER!!.playerAppearance != null && PlayerUpdate.MY_PLAYER!!.playerAppearance!!.female) {
-            executor.stringStack[++executor.stringStackPtr - 1] = string_3
+            executor.stringStack[++executor.stringStackPtr - 1] = femaleText
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = string_2
+            executor.stringStack[++executor.stringStackPtr - 1] = maleText
         }
     }
 
     @JvmStatic
     fun clearBit(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 and -1 - ((1 shl i_3))
+        val flags = executor.intStack[executor.intStackPtr]
+        val bit = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = flags and -1 - ((1 shl bit))
     }
 
     @JvmStatic
     fun add(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = i_2 + i_3
+        val lhs = executor.intStack[executor.intStackPtr]
+        val rhs = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = lhs + rhs
     }
 
     @JvmStatic
@@ -581,9 +581,9 @@ object MathStringOps {
     @JvmStatic
     fun max(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.intStack[++executor.intStackPtr - 1] = Math.max(i_2, i_3)
+        val a = executor.intStack[executor.intStackPtr]
+        val b = executor.intStack[executor.intStackPtr + 1]
+        executor.intStack[++executor.intStackPtr - 1] = Math.max(a, b)
     }
 
 }

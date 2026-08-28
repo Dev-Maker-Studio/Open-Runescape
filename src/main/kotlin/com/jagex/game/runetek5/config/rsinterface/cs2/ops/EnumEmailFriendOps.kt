@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -182,22 +182,22 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun enumGetReverseCount(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        if (i_3 == -1) {
+        val valueTypeChar = executor.intStack[executor.intStackPtr]
+        val enumId = executor.intStack[executor.intStackPtr + 1]
+        val value = executor.intStack[executor.intStackPtr + 2]
+        if (enumId == -1) {
             throw RuntimeException()
         } else {
-            val enumdefinitions5: EnumType? = TypeLists.ENUM!!.list(i_3)
-            if (i_2 != enumdefinitions5!!.valueType.code) {
+            val enumType: EnumType? = TypeLists.ENUM!!.list(enumId)
+            if (valueTypeChar != enumType!!.valueType.code) {
                 throw RuntimeException()
             } else {
-                val stack: IntArray? = enumdefinitions5!!.getValueReferences(i_4)
-                var i_7 = 0
+                val stack: IntArray? = enumType!!.getValueReferences(value)
+                var count = 0
                 if (stack != null) {
-                    i_7 = stack!!.size
+                    count = stack!!.size
                 }
-                executor.intStack[++executor.intStackPtr - 1] = i_7
+                executor.intStack[++executor.intStackPtr - 1] = count
             }
         }
     }
@@ -207,24 +207,24 @@ object EnumEmailFriendOps {
         --executor.stringStackPtr
         executor.intStackPtr -= 3
         val text: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val bool3 = executor.intStack[executor.intStackPtr] == 1
-        val bool4 = executor.intStack[executor.intStackPtr + 1] == 1
-        val bool5 = executor.intStack[executor.intStackPtr + 2] == 1
-        val tcpmessage6: TcpPacket? = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_ADD_NEW_ADDRESS, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-        tcpmessage6!!.buffer.writeShort(TextUtils.getLength(text!!) + 1)
-        tcpmessage6!!.buffer.writeString(text!!)
+        val flagBit0 = executor.intStack[executor.intStackPtr] == 1
+        val flagBit1 = executor.intStack[executor.intStackPtr + 1] == 1
+        val flagBit2 = executor.intStack[executor.intStackPtr + 2] == 1
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_ADD_NEW_ADDRESS, Client.LOBBY_CONNECTION_CONTEXT.isaac)
+        packet!!.buffer.writeShort(TextUtils.getLength(text!!) + 1)
+        packet!!.buffer.writeString(text!!)
         var value = 0
-        if (bool3) {
+        if (flagBit0) {
             value = value or 0x1
         }
-        if (bool4) {
+        if (flagBit1) {
             value = value or 0x2
         }
-        if (bool5) {
+        if (flagBit2) {
             value = value or 0x4
         }
-        tcpmessage6!!.buffer.writeByte(value)
-        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage6)
+        packet!!.buffer.writeByte(value)
+        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic
@@ -235,19 +235,19 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun enumLookup(executor: CS2Executor) {
         executor.intStackPtr -= 4
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val i_5 = executor.intStack[executor.intStackPtr + 3]
-        val enumDefinitions: EnumType? = TypeLists.ENUM!!.list(i_4)
-        if (i_2 == enumDefinitions!!.keyType.code && i_3 == enumDefinitions!!.valueType.code) {
-            if (i_3 == 's'.code) {
-                executor.stringStack[++executor.stringStackPtr - 1] = enumDefinitions!!.getStringValue(i_5)
+        val keyTypeChar = executor.intStack[executor.intStackPtr]
+        val valueTypeChar = executor.intStack[executor.intStackPtr + 1]
+        val enumId = executor.intStack[executor.intStackPtr + 2]
+        val key = executor.intStack[executor.intStackPtr + 3]
+        val enumDefinitions: EnumType? = TypeLists.ENUM!!.list(enumId)
+        if (keyTypeChar == enumDefinitions!!.keyType.code && valueTypeChar == enumDefinitions!!.valueType.code) {
+            if (valueTypeChar == 's'.code) {
+                executor.stringStack[++executor.stringStackPtr - 1] = enumDefinitions!!.getStringValue(key)
             } else {
-                executor.intStack[++executor.intStackPtr - 1] = enumDefinitions!!.getIntValue(i_5)
+                executor.intStack[++executor.intStackPtr - 1] = enumDefinitions!!.getIntValue(key)
             }
         } else {
-            throw RuntimeException("$i_4 $i_5")
+            throw RuntimeException("$enumId $key")
         }
     }
 
@@ -287,21 +287,21 @@ object EnumEmailFriendOps {
 
     @JvmStatic
     fun enumGetReverseCountString(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
+        val enumId = executor.intStack[--executor.intStackPtr]
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (i_2 == -1) {
+        if (enumId == -1) {
             throw RuntimeException()
         } else {
-            val enumdefinitions4: EnumType? = TypeLists.ENUM!!.list(i_2)
-            if (enumdefinitions4!!.valueType.code != 115) {
+            val enumType: EnumType? = TypeLists.ENUM!!.list(enumId)
+            if (enumType!!.valueType.code != 115) {
                 throw RuntimeException()
             } else {
-                val stack: IntArray? = enumdefinitions4!!.getValueReferences(text!!)
-                var i_6 = 0
+                val stack: IntArray? = enumType!!.getValueReferences(text!!)
+                var count = 0
                 if (stack != null) {
-                    i_6 = stack!!.size
+                    count = stack!!.size
                 }
-                executor.intStack[++executor.intStackPtr - 1] = i_6
+                executor.intStack[++executor.intStackPtr - 1] = count
             }
         }
     }
@@ -319,17 +319,17 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun enumHasOutput(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        if (i_3 == -1) {
+        val valueTypeChar = executor.intStack[executor.intStackPtr]
+        val enumId = executor.intStack[executor.intStackPtr + 1]
+        val key = executor.intStack[executor.intStackPtr + 2]
+        if (enumId == -1) {
             throw RuntimeException()
         } else {
-            val enumdefinitions5: EnumType? = TypeLists.ENUM!!.list(i_3)
-            if (i_2 != enumdefinitions5!!.valueType.code) {
+            val enumType: EnumType? = TypeLists.ENUM!!.list(enumId)
+            if (valueTypeChar != enumType!!.valueType.code) {
                 throw RuntimeException()
             } else {
-                executor.intStack[++executor.intStackPtr - 1] = if (enumdefinitions5!!.containsKey(i_4)) 1  else 0
+                executor.intStack[++executor.intStackPtr - 1] = if (enumType!!.containsKey(key)) 1  else 0
             }
         }
     }
@@ -348,10 +348,10 @@ object EnumEmailFriendOps {
     fun ignoreGetName(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendList.LOADED != 0 && value < IgnoreList.IGNORE_COUNT) {
-            val class103: Ignore? = IgnoreList.IGNORED[value]
-            executor.stringStack[++executor.stringStackPtr - 1] = class103!!.unfilteredUsername
-            if (class103!!.displayName != null) {
-                executor.stringStack[++executor.stringStackPtr - 1] = class103!!.displayName
+            val ignore: Ignore? = IgnoreList.IGNORED[value]
+            executor.stringStack[++executor.stringStackPtr - 1] = ignore!!.unfilteredUsername
+            if (ignore!!.displayName != null) {
+                executor.stringStack[++executor.stringStackPtr - 1] = ignore!!.displayName
             } else {
                 executor.stringStack[++executor.stringStackPtr - 1] = ""
             }
@@ -390,10 +390,10 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun enumString(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val enumdefinitions4: EnumType? = TypeLists.ENUM!!.list(i_2)
-        executor.stringStack[++executor.stringStackPtr - 1] = enumdefinitions4!!.getStringValue(i_3)
+        val enumId = executor.intStack[executor.intStackPtr]
+        val key = executor.intStack[executor.intStackPtr + 1]
+        val enumType: EnumType? = TypeLists.ENUM!!.list(enumId)
+        executor.stringStack[++executor.stringStackPtr - 1] = enumType!!.getStringValue(key)
     }
 
     @JvmStatic
@@ -415,10 +415,10 @@ object EnumEmailFriendOps {
     fun friendGetName(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendList.LOADED == 2 && value < FriendList.FRIEND_COUNT) {
-            val class63: Friend? = FriendList.FRIENDS[value]
-            executor.stringStack[++executor.stringStackPtr - 1] = class63!!.displayName
-            if (class63!!.previousDisplayName != null) {
-                executor.stringStack[++executor.stringStackPtr - 1] = class63!!.previousDisplayName
+            val friend: Friend? = FriendList.FRIENDS[value]
+            executor.stringStack[++executor.stringStackPtr - 1] = friend!!.displayName
+            if (friend!!.previousDisplayName != null) {
+                executor.stringStack[++executor.stringStackPtr - 1] = friend!!.previousDisplayName
             } else {
                 executor.stringStack[++executor.stringStackPtr - 1] = ""
             }
@@ -447,10 +447,10 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun emailValidationSubmitCode(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_SUBMIT_CODE, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-        tcpmessage3!!.buffer.writeByte(TextUtils.getLength(text!!))
-        tcpmessage3!!.buffer.writeString(text!!)
-        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3)
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_SUBMIT_CODE, Client.LOBBY_CONNECTION_CONTEXT.isaac)
+        packet!!.buffer.writeByte(TextUtils.getLength(text!!))
+        packet!!.buffer.writeString(text!!)
+        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic
@@ -488,8 +488,8 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun getEnumSize(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
-        val enumdefinitions3: EnumType? = TypeLists.ENUM!!.list(value)
-        executor.intStack[++executor.intStackPtr - 1] = enumdefinitions3!!.getSize()
+        val enumType: EnumType? = TypeLists.ENUM!!.list(value)
+        executor.intStack[++executor.intStackPtr - 1] = enumType!!.getSize()
     }
 
     @JvmStatic
@@ -545,23 +545,23 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun enumGetReverseIndex(executor: CS2Executor) {
         executor.intStackPtr -= 5
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        val i_5 = executor.intStack[executor.intStackPtr + 3]
-        val i_6 = executor.intStack[executor.intStackPtr + 4]
-        if (i_4 == -1) {
+        val valueTypeChar = executor.intStack[executor.intStackPtr]
+        val keyTypeChar = executor.intStack[executor.intStackPtr + 1]
+        val enumId = executor.intStack[executor.intStackPtr + 2]
+        val value = executor.intStack[executor.intStackPtr + 3]
+        val index = executor.intStack[executor.intStackPtr + 4]
+        if (enumId == -1) {
             throw RuntimeException()
         } else {
-            val enumdefinitions7: EnumType? = TypeLists.ENUM!!.list(i_4)
-            if (i_3 != enumdefinitions7!!.keyType.code) {
+            val enumType: EnumType? = TypeLists.ENUM!!.list(enumId)
+            if (keyTypeChar != enumType!!.keyType.code) {
                 throw RuntimeException()
-            } else if (i_2 != enumdefinitions7!!.valueType.code) {
+            } else if (valueTypeChar != enumType!!.valueType.code) {
                 throw RuntimeException()
             } else {
-                val stack: IntArray? = enumdefinitions7!!.getValueReferences(i_5)
-                if (i_6 >= 0 && stack != null && stack!!.size > i_6) {
-                    executor.intStack[++executor.intStackPtr - 1] = stack!![i_6]
+                val stack: IntArray? = enumType!!.getValueReferences(value)
+                if (index >= 0 && stack != null && stack!!.size > index) {
+                    executor.intStack[++executor.intStackPtr - 1] = stack!![index]
                 } else {
                     throw RuntimeException()
                 }
@@ -606,11 +606,11 @@ object EnumEmailFriendOps {
         if (value == -1) {
             throw RuntimeException()
         } else {
-            val enumdefinitions4: EnumType? = TypeLists.ENUM!!.list(value)
-            if (enumdefinitions4!!.valueType.code != 's'.code) {
+            val enumType: EnumType? = TypeLists.ENUM!!.list(value)
+            if (enumType!!.valueType.code != 's'.code) {
                 throw RuntimeException()
             } else {
-                executor.intStack[++executor.intStackPtr - 1] = if (enumdefinitions4!!.containsKey(text!!)) 1  else 0
+                executor.intStack[++executor.intStackPtr - 1] = if (enumType!!.containsKey(text!!)) 1  else 0
             }
         }
     }
@@ -618,22 +618,22 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun enumGetReverseIndexString(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
+        val keyTypeChar = executor.intStack[executor.intStackPtr]
+        val enumId = executor.intStack[executor.intStackPtr + 1]
+        val index = executor.intStack[executor.intStackPtr + 2]
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (i_3 == -1) {
+        if (enumId == -1) {
             throw RuntimeException()
         } else {
-            val enumdefinitions6: EnumType? = TypeLists.ENUM!!.list(i_3)
-            if (i_2 != enumdefinitions6!!.keyType.code) {
+            val enumType: EnumType? = TypeLists.ENUM!!.list(enumId)
+            if (keyTypeChar != enumType!!.keyType.code) {
                 throw RuntimeException()
-            } else if (enumdefinitions6!!.valueType.code != 115) {
+            } else if (enumType!!.valueType.code != 115) {
                 throw RuntimeException()
             } else {
-                val stack: IntArray? = enumdefinitions6!!.getValueReferences(text!!)
-                if (i_4 >= 0 && stack != null && stack!!.size > i_4) {
-                    executor.intStack[++executor.intStackPtr - 1] = stack!![i_4]
+                val stack: IntArray? = enumType!!.getValueReferences(text!!)
+                if (index >= 0 && stack != null && stack!!.size > index) {
+                    executor.intStack[++executor.intStackPtr - 1] = stack!![index]
                 } else {
                     throw RuntimeException()
                 }
@@ -643,13 +643,13 @@ object EnumEmailFriendOps {
 
     @JvmStatic
     fun emailValidationChangeAddress(executor: CS2Executor) {
-        val string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        val tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_CHANGE_ADDRESS, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-        tcpmessage4!!.buffer.writeShort(TextUtils.getLength(string_2!!) + TextUtils.getLength(string_3!!))
-        tcpmessage4!!.buffer.writeString(string_2!!)
-        tcpmessage4!!.buffer.writeString(string_3!!)
-        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage4)
+        val emailAddress: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val confirmEmailAddress: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_CHANGE_ADDRESS, Client.LOBBY_CONNECTION_CONTEXT.isaac)
+        packet!!.buffer.writeShort(TextUtils.getLength(emailAddress!!) + TextUtils.getLength(confirmEmailAddress!!))
+        packet!!.buffer.writeString(emailAddress!!)
+        packet!!.buffer.writeString(confirmEmailAddress!!)
+        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic

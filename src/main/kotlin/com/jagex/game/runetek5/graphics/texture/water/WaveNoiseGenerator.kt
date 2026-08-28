@@ -24,8 +24,8 @@ internal open class WaveNoiseGenerator : WaterTextureGenerator(8, 8, 8) {
         displacementFactor = velocity
     }
 
-    override fun update(i_1: Int, i_2: Int) {
-        if (i_1 != 0) {
+    override fun update(octave: Int, noise: Int) {
+        if (octave != 0) {
             intensity = displacement * initialIntensity shr 12
             if (intensity < 0) {
                 intensity = 0
@@ -33,13 +33,13 @@ internal open class WaveNoiseGenerator : WaterTextureGenerator(8, 8, 8) {
                 intensity = 4096
             }
 
-            displacement = attenuationFactor - if (i_2 < 0) -i_2 else i_2
+            displacement = attenuationFactor - if (noise < 0) -noise else noise
             displacement = displacement * displacement shr 12
             displacement = displacement * intensity shr 12
             attenuation += displacement * velocity shr 12
             velocity = velocity * displacementFactor shr 12
         } else {
-            displacement = attenuationFactor - if (i_2 < 0) -i_2 else i_2
+            displacement = attenuationFactor - if (noise < 0) -noise else noise
             displacement = displacement * displacement shr 12
             intensity = 4096
             attenuation = displacement

@@ -21,31 +21,31 @@ class WorldMapCategory(
 
     companion object {
         @JvmStatic
-        fun findNearestElement(i_0: Int, i_1: Int, i_2: Int): Int {
+        fun findNearestElement(mecId: Int, coordX: Int, coordY: Int): Int {
             if (ComponentMinimap.mapAssetLoadingPercentage < 100) {
                 return -2
             } else {
-                var i_4 = -2
-                var i_5 = Int.MAX_VALUE
-                val i_6 = i_1 - WorldMap.mapSquareAbsX
-                val i_7 = i_2 - WorldMap.mapSquareAbsY
+                var nearestCoord = -2
+                var nearestDistSq = Int.MAX_VALUE
+                val localX = coordX - WorldMap.mapSquareAbsX
+                val localY = coordY - WorldMap.mapSquareAbsY
 
-                var class282Sub368 = WorldMap.worldMapCategories.getFirst() as WorldMapCategory?
-                while (class282Sub368 != null) {
-                    if (i_0 == class282Sub368.mecId) {
-                        val i_9 = class282Sub368.absX
-                        val i_10 = class282Sub368.absY
-                        val i_11 = i_9 + WorldMap.mapSquareAbsX shl 14 or (i_10 + WorldMap.mapSquareAbsY)
-                        val i_12 = (i_6 - i_9) * (i_6 - i_9) + (i_7 - i_10) * (i_7 - i_10)
-                        if (i_4 < 0 || i_12 < i_5) {
-                            i_4 = i_11
-                            i_5 = i_12
+                var category = WorldMap.worldMapCategories.getFirst() as WorldMapCategory?
+                while (category != null) {
+                    if (mecId == category.mecId) {
+                        val categoryX = category.absX
+                        val categoryY = category.absY
+                        val coord = categoryX + WorldMap.mapSquareAbsX shl 14 or (categoryY + WorldMap.mapSquareAbsY)
+                        val distSq = (localX - categoryX) * (localX - categoryX) + (localY - categoryY) * (localY - categoryY)
+                        if (nearestCoord < 0 || distSq < nearestDistSq) {
+                            nearestCoord = coord
+                            nearestDistSq = distSq
                         }
                     }
-                    class282Sub368 = WorldMap.worldMapCategories.next() as WorldMapCategory?
+                    category = WorldMap.worldMapCategories.next() as WorldMapCategory?
                 }
 
-                return i_4
+                return nearestCoord
             }
         }
     }

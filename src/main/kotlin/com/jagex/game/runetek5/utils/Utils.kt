@@ -151,7 +151,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun getStringFromLong(encoded: Long): String? {
+    fun nameForLong(encoded: Long): String? {
         var remaining = encoded
         if (remaining > 0L && remaining < 6582952005840035281L) {
             if (remaining % 37L == 0L) {
@@ -167,7 +167,7 @@ object Utils {
                 while (remaining != 0L) {
                     val previous = remaining
                     remaining /= 37L
-                    builder.append(aCharArray5825[(previous - 37L * remaining).toInt()])
+                    builder.append(BASE37_ALPHABET[(previous - 37L * remaining).toInt()])
                 }
                 return builder.reverse().toString()
             }
@@ -254,7 +254,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun charseqTouid(text: CharSequence): Long {
+    fun nameToLong(text: CharSequence): Long {
         var uid = 0L
         val len = text.length
         for (i in 0 until len) {
@@ -535,7 +535,7 @@ object Utils {
     }
 
     @JvmField
-    val aCharArray5825 = charArrayOf('_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+    val BASE37_ALPHABET = charArrayOf('_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 
     @JvmStatic
     fun parse_int(text: CharSequence): Int {

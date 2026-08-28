@@ -4,5 +4,5 @@ import com.jagex.game.runetek5.framebuffer.FrameBuffer
 import com.jagex.game.runetek5.framebuffer.RenderBuffer
 
 interface TextureFramebufferGenerator : FrameBuffer, RenderBuffer {
-    fun generateTextureFramebuffer(var1: Int)
+    fun generateTextureFramebuffer(attachmentPoint: Int)
 }

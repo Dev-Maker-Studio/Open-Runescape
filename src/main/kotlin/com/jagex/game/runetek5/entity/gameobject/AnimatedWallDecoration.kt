@@ -17,10 +17,10 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 class AnimatedWallDecoration(
     scene: Scene,
     toolkit: AbstractToolkit,
-    loctypelist: ObjectTypeList,
-    loctype: ObjectType,
-    h: Int,
-    logicHeight: Int,
+    locTypeList: ObjectTypeList,
+    locType: ObjectType,
+    plane: Int,
+    collisionPlane: Int,
     x: Int,
     y: Int,
     z: Int,
@@ -30,7 +30,7 @@ class AnimatedWallDecoration(
     type: Int,
     rotation: Int,
     sequenceId: Int
-) : AbstractWallDecoration(scene, x, y, z, h, logicHeight, posX, posY), GameObject {
+) : AbstractWallDecoration(scene, x, y, z, plane, collisionPlane, posX, posY), GameObject {
 
     @JvmField val wallDecoration: AnimatedGameObject
     @JvmField var hasTransparency = true
@@ -40,23 +40,23 @@ class AnimatedWallDecoration(
     init {
         wallDecoration = AnimatedGameObject(
             toolkit,
-            loctypelist,
-            loctype,
+            locTypeList,
+            locType,
             type,
             rotation,
-            plane.toInt(),
-            logicHeight,
+            this.plane.toInt(),
+            collisionPlane,
             this,
             overlayHidden,
             sequenceId
         )
-        interactive = loctype.hasActions != 0 && !overlayHidden
+        interactive = locType.hasActions != 0 && !overlayHidden
         setupBoundingBox(1)
     }
 
 
-    override fun addShadow(graphicalrenderer1: AbstractToolkit) {
-        wallDecoration.getAnimatedShadowedModel(graphicalrenderer1)
+    override fun addShadow(toolkit: AbstractToolkit) {
+        wallDecoration.getAnimatedShadowedModel(toolkit)
     }
 
     override fun hasAlpha(): Boolean {
@@ -64,7 +64,7 @@ class AnimatedWallDecoration(
     }
 
 
-    override fun getAxisAlignedBoundingBox(graphicalrenderer1: AbstractToolkit): Silhouette? {
+    override fun getAxisAlignedBoundingBox(toolkit: AbstractToolkit): Silhouette? {
         return axisAlignedBoundingBox
     }
 
@@ -73,8 +73,8 @@ class AnimatedWallDecoration(
         return wallDecoration.getNegativeMinY()
     }
 
-    fun addCustomisation(class4761: ObjectTypeCustomisation) {
-        wallDecoration.addCustomisation(class4761)
+    fun addCustomisation(customisation: ObjectTypeCustomisation) {
+        wallDecoration.addCustomisation(customisation)
     }
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
@@ -103,14 +103,14 @@ class AnimatedWallDecoration(
         return renderedEntity
     }
 
-    override fun particleCycle(graphicalrenderer1: AbstractToolkit) {
-        val meshrasterizer3 = wallDecoration.getAnimatedModel(graphicalrenderer1, 262144, false, true)
-        if (meshrasterizer3 != null) {
+    override fun particleCycle(toolkit: AbstractToolkit) {
+        val model = wallDecoration.getAnimatedModel(toolkit, 262144, false, true)
+        if (model != null) {
             val projectionMatrix = getProjectionMatrix()
-            val absPosition = getAbsolutePosition()
-            val tileX = (absPosition.coords.x.toInt() shr 9)
-            val tileZ = (absPosition.coords.z.toInt() shr 9)
-            wallDecoration.animateParticles(graphicalrenderer1, meshrasterizer3, projectionMatrix, false)
+            val abs = getAbsolutePosition()
+            val tileX = (abs.coords.x.toInt() shr 9)
+            val tileZ = (abs.coords.z.toInt() shr 9)
+            wallDecoration.animateParticles(toolkit, model, projectionMatrix, false)
         }
     }
 
@@ -130,7 +130,7 @@ class AnimatedWallDecoration(
         return wallDecoration.hasRenderingShadow()
     }
 
-    override fun removeShadow(graphicalrenderer1: AbstractToolkit) {
+    override fun removeShadow(toolkit: AbstractToolkit) {
         wallDecoration.removeShadow()
     }
 

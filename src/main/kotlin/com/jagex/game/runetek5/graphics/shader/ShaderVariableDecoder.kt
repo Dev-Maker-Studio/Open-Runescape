@@ -95,19 +95,19 @@ class ShaderVariableDecoder {
     @JvmField var secondaryShaderAttributeName: String? = null
 
     fun decode(shaderBuffer: ShaderBuffer) {
-        val mainEntryCount = shaderBuffer.getEntryCount()
-        variableType = ShaderVariableType.getAll()[mainEntryCount]
+        val variableTypeId = shaderBuffer.getEntryCount()
+        variableType = ShaderVariableType.getAll()[variableTypeId]
         if (variableType == ShaderVariableType.ARRAY) {
-            val i_4 = shaderBuffer.getEntryCount()
-            elementType = ShaderVariableType.getAll()[i_4]
+            val elementTypeId = shaderBuffer.getEntryCount()
+            elementType = ShaderVariableType.getAll()[elementTypeId]
             arraySize = shaderBuffer.getEntryCount()
         }
         primaryShaderAttributeName = shaderBuffer.readString()
         secondaryShaderAttributeName = shaderBuffer.readString()
-        val count = shaderBuffer.getEntryCount()
-        mappingProgramIndices = IntArray(count)
-        mappingSlotIndices = IntArray(count)
-        for (index in 0 until count) {
+        val mappingCount = shaderBuffer.getEntryCount()
+        mappingProgramIndices = IntArray(mappingCount)
+        mappingSlotIndices = IntArray(mappingCount)
+        for (index in 0 until mappingCount) {
             mappingProgramIndices!![index] = shaderBuffer.getEntryCount()
             mappingSlotIndices!![index] = shaderBuffer.getEntryCount()
         }

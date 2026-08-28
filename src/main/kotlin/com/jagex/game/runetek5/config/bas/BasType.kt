@@ -105,7 +105,7 @@ class BasType {
     @JvmField
     var basTypeList: BasTypeList? = null
     @JvmField
-    var totalCache: Int = 0
+    var randomStandChanceTotal: Int = 0
     @JvmField
     var matrices: Array<Matrix43?>? = null
 
@@ -178,7 +178,7 @@ class BasType {
                     this.randomStandSequences!![index] = buffer.readBigSmart()
                     val chance = buffer.readUByte()
                     this.randomStandSequenceChances!![index] = chance
-                    this.totalCache += chance
+                    this.randomStandChanceTotal += chance
                 }
             }
             53 -> this.rendersShadow = false
@@ -190,8 +190,8 @@ class BasType {
                 if (this.turnAngleAdjustment == null) {
                     this.turnAngleAdjustment = IntArray(this.basTypeList!!.equipmentDefaults.customizableObjSlots!!.size)
                 }
-                val i_4 = buffer.readUByte()
-                this.turnAngleAdjustment!![i_4] = buffer.readUShort()
+                val slot = buffer.readUByte()
+                this.turnAngleAdjustment!![slot] = buffer.readUShort()
             }
             56 -> {
                 if (this.projectionOffset == null) {
@@ -213,7 +213,7 @@ class BasType {
         if (this.randomStandSequences == null) {
             return -1
         }
-        var chance = (Math.random() * this.totalCache).toInt()
+        var chance = (Math.random() * this.randomStandChanceTotal).toInt()
         var sequenceIndex = 0
         while (chance >= this.randomStandSequenceChances!![sequenceIndex]) {
             chance -= this.randomStandSequenceChances!![sequenceIndex]
@@ -280,13 +280,13 @@ class BasType {
         return this.matrices
     }
 
-    fun decode(stream: Packet) {
+    fun decode(buffer: Packet) {
         while (true) {
-            val opcode = stream.readUByte()
+            val opcode = buffer.readUByte()
             if (opcode == 0) {
                 return
             }
-            decode(stream, opcode)
+            decode(buffer, opcode)
         }
     }
 

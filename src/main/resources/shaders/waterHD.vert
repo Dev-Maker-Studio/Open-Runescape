@@ -1,7 +1,7 @@
 #version 330 core
 
 // HD Water Vertex Shader
-// Replaces both ReflectiveRipplingWaterEffect (effect 8) and MaterialEffect9GL (effect 9)
+// Replaces both ReflectiveRipplingWaterEffect (effect 8) and BreakingWaterEffect (effect 9)
 //
 // Both legacy effects use the same vertex shader structure:
 //   - gl_ModelViewMatrix * gl_Vertex for view-space position

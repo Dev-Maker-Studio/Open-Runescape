@@ -14,144 +14,144 @@ class MaterialTypeList(
 
     val textureTypeCache = CacheableNodeQueue(256)
     val numMaterials: Int
-    val textures: Array<MaterialType?>
+    val materials: Array<MaterialType?>
 
     init {
         val materialBuffer = Packet(materialResource.getFile(0, 0)!!)
         numMaterials = materialBuffer.readUShort()
-        textures = arrayOfNulls(numMaterials)
+        materials = arrayOfNulls(numMaterials)
 
         for (index in 0 until numMaterials) {
             if (materialBuffer.readUByte() == 1) {
-                textures[index] = MaterialType()
+                materials[index] = MaterialType()
             }
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.detailsOnly = materialBuffer.readUByte() == 0
+            materials[index]?.detailsOnly = materialBuffer.readUByte() == 0
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.isSmall = materialBuffer.readUByte() == 1
+            materials[index]?.isSmall = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.skipTriangles = materialBuffer.readUByte() == 1
+            materials[index]?.skipTriangles = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.brightness = materialBuffer.readByte()
+            materials[index]?.brightness = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.alpha = materialBuffer.readByte()
+            materials[index]?.alpha = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.effectId = materialBuffer.readByte()
+            materials[index]?.effectId = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.effectParam1 = materialBuffer.readByte()
+            materials[index]?.effectParam1 = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.colorHsl = materialBuffer.readUShort().toShort()
+            materials[index]?.colorHsl = materialBuffer.readUShort().toShort()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.textureSpeedU = materialBuffer.readByte()
+            materials[index]?.textureSpeedU = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.textureSpeedV = materialBuffer.readByte()
+            materials[index]?.textureSpeedV = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.aBool2087 = materialBuffer.readUByte() == 1
+            materials[index]?.aBool2087 = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.isBrickTile = materialBuffer.readUByte() == 1
+            materials[index]?.isBrickTile = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.mipmapping = materialBuffer.readByte()
+            materials[index]?.mipmapping = materialBuffer.readByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.repeatS = materialBuffer.readUByte() == 1
+            materials[index]?.repeatS = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.repeatT = materialBuffer.readUByte() == 1
+            materials[index]?.repeatT = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.hdr = materialBuffer.readUByte() == 1
+            materials[index]?.hdr = materialBuffer.readUByte() == 1
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.combineMode = materialBuffer.readUByte()
+            materials[index]?.combineMode = materialBuffer.readUByte()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.effectParam2 = materialBuffer.readInt()
+            materials[index]?.effectParam2 = materialBuffer.readInt()
         }
 
         for (index in 0 until numMaterials) {
-            textures[index]?.effectCombiner = materialBuffer.readUByte()
+            materials[index]?.effectCombiner = materialBuffer.readUByte()
         }
     }
 
-    fun getTextureType(textureId: Int): TextureType? {
-        val cachedTextureType = textureTypeCache.get(textureId.toLong()) as? TextureType
+    fun getTextureType(materialId: Int): TextureType? {
+        val cachedTextureType = textureTypeCache.get(materialId.toLong()) as? TextureType
         if (cachedTextureType != null) {
             return cachedTextureType
         }
 
-        val data = textureResource.getFile(textureId) ?: return null
+        val data = textureResource.getFile(materialId) ?: return null
         val textureType = TextureType(Packet(data))
-        textureTypeCache.put(textureType, textureId.toLong())
+        textureTypeCache.put(textureType, materialId.toLong())
         return textureType
     }
 
     override fun getSize(): Int = numMaterials
 
-    override fun getMaterial(textureId: Int): MaterialType {
-        return textures[textureId] ?: throw RuntimeException("Material not found: $textureId")
+    override fun getMaterial(materialId: Int): MaterialType {
+        return materials[materialId] ?: throw RuntimeException("Material not found: $materialId")
     }
 
     override fun cycle() {
         // Empty implementation
     }
 
-    override fun getPixelsArgb(textureId: Int, width: Int, height: Int): IntArray {
-        val textureType = getTextureType(textureId)
-            ?: throw RuntimeException("Texture type not found: $textureId")
+    override fun getPixelsArgb(materialId: Int, width: Int, height: Int): IntArray {
+        val textureType = getTextureType(materialId)
+            ?: throw RuntimeException("Texture type not found: $materialId")
         return textureType.getPixelsArgb(
             spriteResource,
             this,
             width,
             height,
-            textures[textureId]?.isBrickTile ?: false
+            materials[materialId]?.isBrickTile ?: false
         )
     }
 
-    override fun getPixelsHdr(textureId: Int, width: Int, height: Int): FloatArray {
-        val textureType = getTextureType(textureId)
-            ?: throw RuntimeException("Texture type not found: $textureId")
+    override fun getPixelsHdr(materialId: Int, width: Int, height: Int): FloatArray {
+        val textureType = getTextureType(materialId)
+            ?: throw RuntimeException("Texture type not found: $materialId")
         return textureType.getPixelsHdr(
             spriteResource,
             this,
             width,
             height,
-            textures[textureId]?.isBrickTile ?: false
+            materials[materialId]?.isBrickTile ?: false
         )
     }
 
-    override fun isCached(textureId: Int): Boolean {
-        val textureType = getTextureType(textureId) ?: return false
+    override fun isCached(materialId: Int): Boolean {
+        val textureType = getTextureType(materialId) ?: return false
         return textureType.isCached(spriteResource, this)
     }
 
@@ -159,7 +159,7 @@ class MaterialTypeList(
         materialId: Int,
         brightness: Float,
         width: Int,
-        length: Int,
+        height: Int,
         readReversed: Boolean
     ): IntArray {
         val textureType = getTextureType(materialId)
@@ -169,9 +169,9 @@ class MaterialTypeList(
             this,
             brightness.toDouble(),
             width,
-            length,
+            height,
             readReversed,
-            textures[materialId]?.isBrickTile ?: false
+            materials[materialId]?.isBrickTile ?: false
         )
     }
 

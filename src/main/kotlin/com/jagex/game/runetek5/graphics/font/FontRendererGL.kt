@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.graphics.font
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
-import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.graphics.texture.OpenGl2DImageTexture
 import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
@@ -15,11 +15,11 @@ import jaggl.OpenGL
 
 class FontRendererGL(
     override val toolkit: OpenGlToolkit,
-    fontmetrics2: FontMetrics,
+    fontMetrics: FontMetrics,
     characterSprites: Array<SpriteType>,
-    bool4: Boolean
-) : AbstractFontRenderer(toolkit, fontmetrics2) {
-    @JvmField val texture: OpenGl2DTexture_Sub1
+    isAlphaOnly: Boolean
+) : AbstractFontRenderer(toolkit, fontMetrics) {
+    @JvmField val texture: OpenGl2DImageTexture
     @JvmField val isAlphaOnlyTexture: Boolean
     @JvmField val listUtils: GlListUtils
 
@@ -45,46 +45,46 @@ class FontRendererGL(
             }
         }
 
-        val size = maxDimension * 16
-        if (bool4) {
-            val pixels = ByteArray(size * size)
+        val atlasSize = maxDimension * 16
+        if (isAlphaOnly) {
+            val pixels = ByteArray(atlasSize * atlasSize)
 
             for (charIndex in 0 until 256) {
                 val charSprite = characterSprites[charIndex]
-                val i_26 = charSprite.height
-                val i_11 = charSprite.width
-                val i_12 = maxDimension * (charIndex % 16)
-                val i_13 = charIndex / 16 * maxDimension
-                var i_14 = i_12 + i_13 * size
-                var i_15 = 0
-                val bytes_27: ByteArray
+                val height = charSprite.height
+                val width = charSprite.width
+                val atlasX = maxDimension * (charIndex % 16)
+                val atlasY = charIndex / 16 * maxDimension
+                var dstIndex = atlasX + atlasY * atlasSize
+                var srcIndex = 0
+                val srcBytes: ByteArray
                 if (charSprite.alpha == null) {
-                    bytes_27 = charSprite.pixels
+                    srcBytes = charSprite.pixels
 
-                    for (i_17 in 0 until i_26) {
-                        for (i_18 in 0 until i_11) {
-                            pixels[i_14++] = (if (bytes_27[i_15++] == 0.toByte()) 0 else -1).toByte()
+                    for (y in 0 until height) {
+                        for (x in 0 until width) {
+                            pixels[dstIndex++] = (if (srcBytes[srcIndex++] == 0.toByte()) 0 else -1).toByte()
                         }
 
-                        i_14 += size - i_11
+                        dstIndex += atlasSize - width
                     }
                 } else {
-                    bytes_27 = charSprite.alpha!!
+                    srcBytes = charSprite.alpha!!
 
-                    for (i_17 in 0 until i_26) {
-                        for (i_18 in 0 until i_11) {
-                            pixels[i_14++] = bytes_27[i_15++]
+                    for (y in 0 until height) {
+                        for (x in 0 until width) {
+                            pixels[dstIndex++] = srcBytes[srcIndex++]
                         }
 
-                        i_14 += size - i_11
+                        dstIndex += atlasSize - width
                     }
                 }
             }
 
-            this.texture = OpenGl2DTexture_Sub1.createSurface(toolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, size, size, pixels, GLFormat.RGBA)
+            this.texture = OpenGl2DImageTexture.createSurface(toolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, atlasSize, atlasSize, pixels, GLFormat.RGBA)
             this.isAlphaOnlyTexture = true
         } else {
-            val pixels = IntArray(size * size)
+            val pixels = IntArray(atlasSize * atlasSize)
 
             for (charIndex in 0 until 256) {
                 val charSprite = characterSprites[charIndex]
@@ -93,64 +93,64 @@ class FontRendererGL(
                 val charPixels = charSprite.pixels
                 val height = charSprite.height
                 val width = charSprite.width
-                val i_15 = maxDimension * (charIndex % 16)
-                val i_16 = charIndex / 16 * maxDimension
-                var i_17 = i_15 + i_16 * size
-                var pixel = 0
+                val atlasX = maxDimension * (charIndex % 16)
+                val atlasY = charIndex / 16 * maxDimension
+                var dstIndex = atlasX + atlasY * atlasSize
+                var srcIndex = 0
                 if (alpha != null) {
                     for (y in 0 until height) {
                         for (x in 0 until width) {
-                            pixels[i_17++] = alpha[pixel].toInt() shl 24 or palette[charPixels[pixel++].toInt() and 0xff]
+                            pixels[dstIndex++] = alpha[srcIndex].toInt() shl 24 or palette[charPixels[srcIndex++].toInt() and 0xff]
                         }
 
-                        i_17 += size - width
+                        dstIndex += atlasSize - width
                     }
                 } else {
                     for (y in 0 until height) {
                         for (x in 0 until width) {
-                            val charPixel = charPixels[pixel++]
+                            val charPixel = charPixels[srcIndex++]
                             if (charPixel != 0.toByte()) {
-                                pixels[i_17++] = 0xffffff.inv() or palette[charPixel.toInt() and 0xff]
+                                pixels[dstIndex++] = 0xffffff.inv() or palette[charPixel.toInt() and 0xff]
                             } else {
-                                i_17++
+                                dstIndex++
                             }
                         }
 
-                        i_17 += size - width
+                        dstIndex += atlasSize - width
                     }
                 }
             }
 
-            this.texture = OpenGl2DTexture_Sub1.createFromPixels(toolkit, size, size, pixels, 0, 0)
+            this.texture = OpenGl2DImageTexture.createFromPixels(toolkit, atlasSize, atlasSize, pixels, 0, 0)
             this.isAlphaOnlyTexture = false
         }
 
         this.texture.setLinearTextureFilter(false)
         this.listUtils = GlListUtils(256)
-        val f_22 = this.texture.s / this.texture.singleWidth
-        val f_30 = this.texture.t / this.texture.singleLength
+        val texelScaleS = this.texture.s / this.texture.singleWidth
+        val texelScaleT = this.texture.t / this.texture.singleLength
 
-        for (spriteIndex in 0 until 256) {
-            val spriteType = characterSprites[spriteIndex]
-            val height = spriteType.height
-            val width = spriteType.width
-            val minY = spriteType.minY
-            val minX = spriteType.minX
-            val f_32 = (maxDimension * (spriteIndex % 16)).toFloat()
-            val f_33 = (spriteIndex / 16 * maxDimension).toFloat()
-            val f_34 = f_32 * f_22
-            val f_35 = f_33 * f_30
-            val f_36 = (f_32 + width) * f_22
-            val f_37 = (f_33 + height) * f_30
-            this.listUtils.newList(spriteIndex)
+        for (charIndex in 0 until 256) {
+            val charSprite = characterSprites[charIndex]
+            val height = charSprite.height
+            val width = charSprite.width
+            val minY = charSprite.minY
+            val minX = charSprite.minX
+            val atlasX = (maxDimension * (charIndex % 16)).toFloat()
+            val atlasY = (charIndex / 16 * maxDimension).toFloat()
+            val u0 = atlasX * texelScaleS
+            val v0 = atlasY * texelScaleT
+            val u1 = (atlasX + width) * texelScaleS
+            val v1 = (atlasY + height) * texelScaleT
+            this.listUtils.newList(charIndex)
             OpenGL.glBegin(GL_QUADS)
-            OpenGL.glTexCoord2f(f_34, this.texture.t - f_35)
+            OpenGL.glTexCoord2f(u0, this.texture.t - v0)
             OpenGL.glVertex2i(minX, minY)
-            OpenGL.glTexCoord2f(f_34, this.texture.t - f_37)
+            OpenGL.glTexCoord2f(u0, this.texture.t - v1)
             OpenGL.glVertex2i(minX, minY + height)
-            OpenGL.glTexCoord2f(f_36, this.texture.t - f_37)
+            OpenGL.glTexCoord2f(u1, this.texture.t - v1)
             OpenGL.glVertex2i(minX + width, minY + height)
-            OpenGL.glTexCoord2f(f_36, this.texture.t - f_35)
+            OpenGL.glTexCoord2f(u1, this.texture.t - v0)
             OpenGL.glVertex2i(minX + width, minY)
             OpenGL.glEnd()
             this.listUtils.endList()
@@ -158,7 +158,7 @@ class FontRendererGL(
 
     }
 
-    override fun drawChar(charToDraw: Int, translateX: Int, translateY: Int, colorArgb: Int, bool5: Boolean, surface: ComponentSurface, i_7: Int, i_8: Int) {
+    override fun drawChar(charIndex: Int, translateX: Int, translateY: Int, colorArgb: Int, isShadow: Boolean, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
         // Legacy display-list glyph rendering is forbidden under ModernGLToolkit
         // (standalone modern renderer). This only triggers for fonts created before
         // the modern renderer's lazy init; counted in [ModernDiag] legacySkips.
@@ -168,10 +168,10 @@ class FontRendererGL(
             return
         }
         val spriteSurface = surface as SpriteSurfaceGL
-        val class137Sub1Sub110 = spriteSurface.surface
+        val surfaceTexture = spriteSurface.surface
         this.toolkit.setupTextRendering()
         this.toolkit.setActiveTexture(this.texture)
-        if (!this.isAlphaOnlyTexture && !bool5) {
+        if (!this.isAlphaOnlyTexture && !isShadow) {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_REPLACE)
             this.toolkit.restoreGlyphCombinerSource()
         } else {
@@ -181,24 +181,24 @@ class FontRendererGL(
         }
 
         this.toolkit.activateTexture(1)
-        this.toolkit.setActiveTexture(class137Sub1Sub110)
+        this.toolkit.setActiveTexture(surfaceTexture)
         this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
         this.toolkit.setTexture(0, GL_PREVIOUS, GL_SRC_COLOR)
         OpenGL.glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
         OpenGL.glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
-        val f_11 = class137Sub1Sub110.s / class137Sub1Sub110.singleWidth
-        val f_12 = class137Sub1Sub110.t / class137Sub1Sub110.singleLength
-        this.texGenPlaneS[0] = f_11
-        this.texGenPlaneS[3] = (-i_7) * f_11
-        this.texGenPlaneT[1] = f_12
-        this.texGenPlaneT[3] = (-i_8) * f_12
+        val texelScaleS = surfaceTexture.s / surfaceTexture.singleWidth
+        val texelScaleT = surfaceTexture.t / surfaceTexture.singleLength
+        this.texGenPlaneS[0] = texelScaleS
+        this.texGenPlaneS[3] = (-surfaceOffsetX) * texelScaleS
+        this.texGenPlaneT[1] = texelScaleT
+        this.texGenPlaneT[3] = (-surfaceOffsetY) * texelScaleT
         OpenGL.glTexGenfv(GL_S, GL_EYE_PLANE, this.texGenPlaneS, 0)
         OpenGL.glTexGenfv(GL_T, GL_EYE_PLANE, this.texGenPlaneT, 0)
         OpenGL.glEnable(GL_TEXTURE_GEN_S)
         OpenGL.glEnable(GL_TEXTURE_GEN_T)
         this.toolkit.setGlyphColor(colorArgb)
         OpenGL.glTranslatef(translateX.toFloat(), translateY.toFloat(), 0.0F)
-        this.listUtils.callList(charToDraw)
+        this.listUtils.callList(charIndex)
         OpenGL.glLoadIdentity()
         OpenGL.glDisable(GL_TEXTURE_GEN_S)
         OpenGL.glDisable(GL_TEXTURE_GEN_T)
@@ -208,7 +208,7 @@ class FontRendererGL(
         this.toolkit.activateTexture(0)
     }
 
-    override fun drawChar(character: Int, translateX: Int, translateY: Int, colorArgb: Int, bool5: Boolean) {
+    override fun drawChar(charIndex: Int, translateX: Int, translateY: Int, colorArgb: Int, isShadow: Boolean) {
         // Legacy display-list glyph rendering is forbidden under ModernGLToolkit
         // (standalone modern renderer). This only triggers for fonts created before
         // the modern renderer's lazy init; counted in [ModernDiag] legacySkips.
@@ -219,7 +219,7 @@ class FontRendererGL(
         }
         this.toolkit.setupTextRendering()
         this.toolkit.setActiveTexture(this.texture)
-        if (!this.isAlphaOnlyTexture && !bool5) {
+        if (!this.isAlphaOnlyTexture && !isShadow) {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_REPLACE)
             this.toolkit.restoreGlyphCombinerSource()
         } else {
@@ -230,7 +230,7 @@ class FontRendererGL(
 
         this.toolkit.setGlyphColor(colorArgb)
         OpenGL.glTranslatef(translateX.toFloat(), translateY.toFloat(), 0.0F)
-        this.listUtils.callList(character)
+        this.listUtils.callList(charIndex)
         OpenGL.glLoadIdentity()
     }
 }

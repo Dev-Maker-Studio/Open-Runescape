@@ -39,14 +39,14 @@ abstract class ShaderAttribute protected constructor(decoder: ShaderVariableDeco
     }
 
     override fun toString(): String {
-        var string_1 = this.variableType.toString() + " " + this.primaryShaderAttributeName
+        var text = this.variableType.toString() + " " + this.primaryShaderAttributeName
         if (this.secondaryShaderAttributeName != null && this.secondaryShaderAttributeName.isNotEmpty()) {
-            string_1 = "$string_1 : ${this.secondaryShaderAttributeName}"
+            text = "$text : ${this.secondaryShaderAttributeName}"
         }
-        return string_1
+        return text
     }
 
     abstract fun getUniformLocation(slot: Int): Int
 
-    abstract fun loadUniformLocation(var1: Int): Boolean
+    abstract fun loadUniformLocation(activeInSlot: Int): Boolean
 }

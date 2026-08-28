@@ -163,15 +163,15 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
             var textureIndex = 0
             var colorAttachmentSlot = 1
 
-            var prev: PostProcessEffect?
-            var tail = effectsList.getTail() as PostProcessEffect?
-            while (tail != null) {
-                prev = effectsList.getPrevious() as PostProcessEffect?
-                val numTexturedFaces = tail.getTexturedFaces()
+            var prevEffect: PostProcessEffect?
+            var effect = effectsList.getTail() as PostProcessEffect?
+            while (effect != null) {
+                prevEffect = effectsList.getPrevious() as PostProcessEffect?
+                val numTexturedFaces = effect.getTexturedFaces()
 
                 for (face in 0 until numTexturedFaces) {
-                    textures2d?.get(textureIndex)?.let { tail.draw(it) }
-                    if (prev == null && face == numTexturedFaces - 1) {
+                    textures2d?.get(textureIndex)?.let { effect.draw(it) }
+                    if (prevEffect == null && face == numTexturedFaces - 1) {
                         activeToolkit.resizeDisplay(resolveDisplay!!)
                         activeToolkit.setViewportOffset(0, 0)
                         OpenGL.glBegin(7)
@@ -205,27 +205,27 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                     }
                     OpenGL.glEnd()
 
-                    tail.resetTexture()
+                    effect.resetTexture()
                     colorAttachmentSlot = colorAttachmentSlot + 1 and 0x1
                     textureIndex = textureIndex + 1 and 0x1
                 }
 
-                tail = prev
+                effect = prevEffect
             }
 
             isCompositionPending = false
         }
     }
 
-    fun prepareForRendering(s: Int, t: Int): Boolean {
+    fun prepareForRendering(width: Int, height: Int): Boolean {
         if (activeDisplay != null && !effectsList.isEmpty()) {
-            if (s != this.s || t != this.t) {
-                this.s = s
-                this.t = t
-                var node5: Any? = effectsList.getTail()
-                while (node5 !== effectsList.head) {
-                    (node5 as PostProcessEffect).calculateMipmaps(this.s, this.t)
-                    node5 = (node5 as? Node<*>)?.next
+            if (width != this.s || height != this.t) {
+                this.s = width
+                this.t = height
+                var effect: Any? = effectsList.getTail()
+                while (effect !== effectsList.head) {
+                    (effect as PostProcessEffect).calculateMipmaps(this.s, this.t)
+                    effect = (effect as? Node<*>)?.next
                 }
                 pixelFormatSet = true
                 isDepthBufferDirty = true
@@ -235,7 +235,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                 vertexCoordinateX = 0
                 vertexCoordinateY = 0
                 isCompositionPending = true
-                activeToolkit.setViewportOffset(-vertexCoordinateX, t + vertexCoordinateY - activeToolkit.getDisplay()!!.getHeight())
+                activeToolkit.setViewportOffset(-vertexCoordinateX, height + vertexCoordinateY - activeToolkit.getDisplay()!!.getHeight())
                 activeToolkit.setDisplay(activeDisplay!!)
                 activeToolkit.applyClearFlags(3, 0)
                 activeDisplay!!.drawBuffer(0)
@@ -246,10 +246,10 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         return false
     }
 
-    fun removeEffect(class282Sub51: PostProcessEffect) {
-        class282Sub51.isActive = false
-        class282Sub51.destroy()
-        class282Sub51.unlink()
+    fun removeEffect(effect: PostProcessEffect) {
+        effect.isActive = false
+        effect.destroy()
+        effect.unlink()
         recalculateFormat()
     }
 
@@ -258,15 +258,15 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         var loadTexture = false
         var pixelFormat = GLActionFormat.PIXEL_FORMAT
 
-        var node = effectsList.getTail() as PostProcessEffect?
-        while (node != null) {
-            val class767 = node.getFormat()
-            if (class767.bytesPerEntry > pixelFormat.bytesPerEntry) {
-                pixelFormat = class767
+        var effect = effectsList.getTail() as PostProcessEffect?
+        while (effect != null) {
+            val effectFormat = effect.getFormat()
+            if (effectFormat.bytesPerEntry > pixelFormat.bytesPerEntry) {
+                pixelFormat = effectFormat
             }
-            loadTexture = loadTexture or node.loadTexture()
-            texturedFaces += node.getTexturedFaces()
-            node = effectsList.getPrevious() as PostProcessEffect?
+            loadTexture = loadTexture or effect.loadTexture()
+            texturedFaces += effect.getTexturedFaces()
+            effect = effectsList.getPrevious() as PostProcessEffect?
         }
 
         if (pixelFormat != format) {
@@ -299,10 +299,10 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         textures2d = null
         hdrRenderBuffer = null
         if (!effectsList.isEmpty()) {
-            var node1: Any? = effectsList.getTail()
-            while (node1 !== effectsList.head) {
-                (node1 as PostProcessEffect).destroy()
-                node1 = (node1 as? Node<*>)?.next
+            var effect: Any? = effectsList.getTail()
+            while (effect !== effectsList.head) {
+                (effect as PostProcessEffect).destroy()
+                effect = (effect as? Node<*>)?.next
             }
         }
 
@@ -310,20 +310,20 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         s = 1
     }
 
-    fun addEffect(node: PostProcessEffect): Boolean {
+    fun addEffect(effect: PostProcessEffect): Boolean {
         if (activeDisplay != null) {
-            if (node.displayPresent() || node.createShaders()) {
-                effectsList.insertTail(node)
+            if (effect.displayPresent() || effect.createShaders()) {
+                effectsList.insertTail(effect)
                 recalculateFormat()
                 if (rebuildFramebuffers()) {
                     if (s != -1 && t != -1) {
-                        node.calculateMipmaps(s, t)
+                        effect.calculateMipmaps(s, t)
                     }
-                    node.isActive = true
+                    effect.isActive = true
                     return true
                 }
             }
-            removeEffect(node)
+            removeEffect(effect)
         }
         return false
     }

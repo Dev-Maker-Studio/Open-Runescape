@@ -17,18 +17,18 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
 
     constructor(
         toolkit: OpenGLNativeToolkit,
-        class1502: GLFormat,
+        format: GLFormat,
         width: Int,
         height: Int,
-        floats_5: FloatArray
-    ) : super(toolkit, GL_TEXTURE_RECTANGLE, class1502, GLActionFormat.FLOAT_32_ARB, width * height, false) {
+        pixels: FloatArray
+    ) : super(toolkit, GL_TEXTURE_RECTANGLE, format, GLActionFormat.FLOAT_32_ARB, width * height, false) {
         this.width = width
         this.height = height
         activeToolkit.setTextureSampler(this)
         OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
         OpenGL.glTexImage2Df(
             textureTarget, 0, OpenGLNativeToolkit.texture2dInternalFormat(pixelFormat, pixelActionFormat),
-            width, height, 0, OpenGLNativeToolkit.texture2dFormat(pixelFormat), 5126, floats_5, 0
+            width, height, 0, OpenGLNativeToolkit.texture2dFormat(pixelFormat), 5126, pixels, 0
         )
         OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
     }
@@ -54,15 +54,15 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
         toolkit: OpenGLNativeToolkit,
         width: Int,
         height: Int,
-        ints_4: IntArray,
-        i_5: Int,
-        i_6: Int
+        pixels: IntArray,
+        offset: Int,
+        rowLength: Int
     ) : super(toolkit, GL_TEXTURE_RECTANGLE, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, height * width, false) {
         this.width = width
         this.height = height
         activeToolkit.setTextureSampler(this)
-        OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, i_6)
-        OpenGL.glTexImage2Di(textureTarget, 0, GL_RGBA, width, height, 0, GL_BGRA, activeToolkit.pixelType, ints_4, i_5 * 4)
+        OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength)
+        OpenGL.glTexImage2Di(textureTarget, 0, GL_RGBA, width, height, 0, GL_BGRA, activeToolkit.pixelType, pixels, offset * 4)
         OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
     }
 
@@ -86,8 +86,8 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
         OpenGL.glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
     }
 
-    override fun method47(f_1: Float): Float {
-        return f_1
+    override fun toTextureCoordS(x: Float): Float {
+        return x
     }
 
     override fun getTextureWidth(): Int {
@@ -98,28 +98,28 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
         return height
     }
 
-    override fun method62(f_1: Float): Float {
-        return f_1
+    override fun toTextureCoordT(y: Float): Float {
+        return y
     }
 
-    override fun method48(i_1: Int, i_2: Int, i_3: Int, i_4: Int, data: IntArray, offset: Int, rows: Int) {
-        var rowLength = rows
-        if (rowLength == 0) {
-            rowLength = i_3
+    override fun updateTextureRegion(offsetX: Int, offsetY: Int, regionWidth: Int, regionHeight: Int, pixels: IntArray, offset: Int, rowLength: Int) {
+        var effectiveRowLength = rowLength
+        if (effectiveRowLength == 0) {
+            effectiveRowLength = regionWidth
         }
 
         activeToolkit.setTextureSampler(this)
-        if (i_3 != rowLength) {
-            OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength)
+        if (regionWidth != effectiveRowLength) {
+            OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, effectiveRowLength)
         }
 
-        OpenGL.glTexSubImage2Di(textureTarget, 0, i_1, i_2, i_3, i_4, GL_BGRA, activeToolkit.pixelType, data, offset)
-        if (i_3 != rowLength) {
+        OpenGL.glTexSubImage2Di(textureTarget, 0, offsetX, offsetY, regionWidth, regionHeight, GL_BGRA, activeToolkit.pixelType, pixels, offset)
+        if (regionWidth != effectiveRowLength) {
             OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
         }
     }
 
-    override fun method46(): Boolean {
+    override fun supportsTextureRepeat(): Boolean {
         return false
     }
 
@@ -127,20 +127,20 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
         // NOOP
     }
 
-    override fun method52(offsetX: Int, offsetY: Int, width: Int, height: Int, data: ByteArray, class1506: GLFormat, offset: Int, i_8: Int) {
-        var i_81 = i_8
-        if (i_81 == 0) {
-            i_81 = width
+    override fun updateSubImageByte(offsetX: Int, offsetY: Int, regionWidth: Int, regionHeight: Int, data: ByteArray, format: GLFormat, offset: Int, rowLength: Int) {
+        var effectiveRowLength = rowLength
+        if (effectiveRowLength == 0) {
+            effectiveRowLength = regionWidth
         }
 
         activeToolkit.setTextureSampler(this)
         OpenGL.glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        if (width != i_81) {
-            OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, i_81)
+        if (regionWidth != effectiveRowLength) {
+            OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, effectiveRowLength)
         }
 
-        OpenGL.glTexSubImage2Dub(textureTarget, 0, offsetX, offsetY, width, height, OpenGLNativeToolkit.texture2dFormat(class1506), GL_UNSIGNED_BYTE, data, offset)
-        if (width != i_81) {
+        OpenGL.glTexSubImage2Dub(textureTarget, 0, offsetX, offsetY, regionWidth, regionHeight, OpenGLNativeToolkit.texture2dFormat(format), GL_UNSIGNED_BYTE, data, offset)
+        if (regionWidth != effectiveRowLength) {
             OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
         }
 
@@ -163,15 +163,15 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
         super.deallocate()
     }
 
-    override fun method53(length: Int, i_4: Int, dest: IntArray) {
+    override fun readPixels(destWidth: Int, destHeight: Int, dest: IntArray) {
         val src = IntArray(width * height)
         activeToolkit.setTextureSampler(this)
         OpenGL.glGetTexImagei(textureTarget, 0, GL_BGRA, GL_UNSIGNED_BYTE, src, 0)
 
-        for (i_8 in 0 until i_4) {
-            val srcPos = width * ((i_4 - 1) - i_8)
-            val dstPos = length * i_8
-            System.arraycopy(src, srcPos, dest, dstPos, length)
+        for (row in 0 until destHeight) {
+            val srcPos = width * ((destHeight - 1) - row)
+            val dstPos = destWidth * row
+            System.arraycopy(src, srcPos, dest, dstPos, destWidth)
         }
     }
 

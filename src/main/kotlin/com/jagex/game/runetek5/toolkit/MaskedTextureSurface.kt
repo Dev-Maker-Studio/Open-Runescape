@@ -8,9 +8,6 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 
 /**
  * A component surface that wraps a native texture sampler, used for masked or custom-shaped textures.
- *
- * Note: This class would be better named MaskedTextureSurface, but is kept as MaskedTextureSurface
- * for Java compatibility throughout the codebase.
  */
 class MaskedTextureSurface : ComponentSurface {
 
@@ -55,7 +52,6 @@ class MaskedTextureSurface : ComponentSurface {
          * @return A new MaskedTextureSurface with the specified mask pattern
          */
         @JvmStatic
-        @JvmName("method13769")
         fun createFromRowMask(
             nativeToolkit: AbstractNativeToolkit,
             width: Int,

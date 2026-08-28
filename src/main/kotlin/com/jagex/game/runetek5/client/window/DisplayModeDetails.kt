@@ -25,26 +25,26 @@ class DisplayModeDetails {
     companion object {
         @JvmStatic
         fun forWindowMode(windowMode: WindowMode): Array<DisplayModeDetails> {
-            val displayMode = windowMode.getDisplayModes()
-            val displayModeDetails = Array(displayMode.size shr 2) { DisplayModeDetails() }
+            val modeData = windowMode.getDisplayModes()
+            val displayModeDetails = Array(modeData.size shr 2) { DisplayModeDetails() }
             for (index in displayModeDetails.indices) {
-                val instance = displayModeDetails[index]
-                instance.width = displayMode[index shl 2]
-                instance.height = displayMode[(index shl 2) + 1]
-                instance.bitDepth = displayMode[(index shl 2) + 2]
-                instance.refreshRate = displayMode[(index shl 2) + 3]
+                val details = displayModeDetails[index]
+                details.width = modeData[index shl 2]
+                details.height = modeData[(index shl 2) + 1]
+                details.bitDepth = modeData[(index shl 2) + 2]
+                details.refreshRate = modeData[(index shl 2) + 3]
             }
             return displayModeDetails
         }
 
         @JvmStatic
-        fun getProfilingPerformance(toolkitValue: Int, profilingTime: Int): Int {
+        fun getProfilingPerformance(toolkitId: Int, profilingTime: Int): Int {
             if (Client.ENTITY_DEFAULTS!!.profilingMesh == -1) {
                 return 1
             }
-            if (toolkitValue != PreferenceManager.preferences!!.activeToolkit!!.getValue()) {
-                Client.loadAssets(toolkitValue, LocalizedText.PROFILING.translate(Client.CURRENT_LANGUAGE!!), true)
-                if (PreferenceManager.preferences!!.activeToolkit!!.getValue() != toolkitValue) {
+            if (toolkitId != PreferenceManager.preferences!!.activeToolkit!!.getValue()) {
+                Client.loadAssets(toolkitId, LocalizedText.PROFILING.translate(Client.CURRENT_LANGUAGE!!), true)
+                if (PreferenceManager.preferences!!.activeToolkit!!.getValue() != toolkitId) {
                     return -1
                 }
             }
@@ -73,14 +73,14 @@ class DisplayModeDetails {
                 Renderers.activeToolkit!!.applyLighting(16777215, 0.5f, 0.5f, 20.0f, -50.0f, 30.0f)
                 val profilingModel = Renderers.activeToolkit!!.createModel(profilingMesh!!, 2048, 64, 64, 768)
                 var modelsDrawn = 0
-                Draw@ for (loops in 0 until 500) {
+                Draw@ for (i in 0 until 500) {
                     Renderers.activeToolkit!!.applyClearFlags(3, 0)
-                    for (i_12 in 15 downTo 0) {
-                        for (i_13 in 0..i_12) {
+                    for (row in 15 downTo 0) {
+                        for (col in 0..row) {
                             Client.INTERFACE_MODEL_MATRIX.setViewPosition(
-                                512.0f * (i_13 - i_12 / 2.0f),
+                                512.0f * (col - row / 2.0f),
                                 0.0f,
-                                ((i_12 + 1) * 512).toFloat()
+                                ((row + 1) * 512).toFloat()
                             )
                             profilingModel!!.drawMatrixThreaded(
                                 Client.INTERFACE_MODEL_MATRIX,

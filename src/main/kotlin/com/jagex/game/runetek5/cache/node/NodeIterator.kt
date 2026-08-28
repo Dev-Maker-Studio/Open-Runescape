@@ -18,7 +18,6 @@ class NodeIterator(collection: NodeCollection) : MutableIterator<Node<*>?> {
      * Gets the next node and resets to the beginning
      * @return The next node in the collection
      */
-    @JvmName("method7683")
     fun nextAndReset(): Node<*>? {
         reset()
         return next()
@@ -44,7 +43,6 @@ class NodeIterator(collection: NodeCollection) : MutableIterator<Node<*>?> {
      * Reinitializes the iterator with a new collection
      * @param collection The new collection to iterate
      */
-    @JvmName("method7684")
     fun reinitialize(collection: NodeCollection) {
         this.collection = collection
         this.current = collection.tail.next

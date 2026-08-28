@@ -243,7 +243,7 @@ class ModelGL : Model {
 
     /** Built geometry kept past a colour mutation, for verification only. */
     @JvmField
-    var modernBuiltShadow: com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder.BuiltModel? = null
+    var modernBuiltShadow: ModernModelBuilder.BuiltModel? = null
 
     /** Bumped by colour-only mutations; geometry stays valid (see invalidateModernBuilt). */
     @JvmField
@@ -596,15 +596,15 @@ class ModelGL : Model {
         val hasTransitions = (this.functionMask and 0x100) != 0
 
         var currentFace: Int
-        var billboardMainUid: Int
+        var uidHigh: Int
         var material: MaterialType
-        var billboardMaterialId: Short
-        var appliesOnFace: Int
+        var faceMaterialId: Short
+        var uidLow: Int
 
         for (triangleIndex in 0 until this.numFaces) {
             currentFace = faces[triangleIndex]
-            var billboardMaterial: MaterialType? = null
-            billboardMainUid = 0
+            var faceMaterial: MaterialType? = null
+            uidHigh = 0
             var renderFlags: Byte = 0
             var effectId: Byte = 0
             var effectParam1: Byte = 0
@@ -612,10 +612,10 @@ class ModelGL : Model {
             if (mesh.billboards != null) {
                 var hasUid = false
 
-                for (texturedFace in mesh.billboards!!.indices) {
-                    val vertexNormal = mesh.billboards!![texturedFace]
-                    if (currentFace == vertexNormal.appliesOnFace) {
-                        val billboardType = BillboardTypeList.list(vertexNormal.billboardId)
+                for (billboardIndex in mesh.billboards!!.indices) {
+                    val billboard = mesh.billboards!![billboardIndex]
+                    if (currentFace == billboard.appliesOnFace) {
+                        val billboardType = BillboardTypeList.list(billboard.billboardId)
                         if (billboardType.hasUid) {
                             hasUid = true
                         }
@@ -636,41 +636,41 @@ class ModelGL : Model {
                 }
             }
 
-            billboardMaterialId = -1
+            faceMaterialId = -1
 
             if (mesh.facesMaterial != null) {
-                billboardMaterialId = mesh.facesMaterial!![currentFace]
-                if (billboardMaterialId.toInt() != -1) {
-                    billboardMaterial = materialProvider.getMaterial(billboardMaterialId.toInt() and 0xffff)
-                    if ((this.preferenceFlags and 0x40) != 0 && billboardMaterial.detailsOnly) {
-                        billboardMaterialId = -1
-                        billboardMaterial = null
+                faceMaterialId = mesh.facesMaterial!![currentFace]
+                if (faceMaterialId.toInt() != -1) {
+                    faceMaterial = materialProvider.getMaterial(faceMaterialId.toInt() and 0xffff)
+                    if ((this.preferenceFlags and 0x40) != 0 && faceMaterial.detailsOnly) {
+                        faceMaterialId = -1
+                        faceMaterial = null
                     } else {
-                        effectId = billboardMaterial.effectId
-                        effectParam1 = billboardMaterial.effectParam1
-                        if (billboardMaterial.textureSpeedU.toInt() != 0 || billboardMaterial.textureSpeedV.toInt() != 0) {
+                        effectId = faceMaterial.effectId
+                        effectParam1 = faceMaterial.effectParam1
+                        if (faceMaterial.textureSpeedU.toInt() != 0 || faceMaterial.textureSpeedV.toInt() != 0) {
                             this.textureAnimating = true
                         }
                     }
                 }
             }
 
-            val alphaTransition = mesh.facesAlpha != null && mesh.facesAlpha!![currentFace].toInt() != 0 || billboardMaterial != null && billboardMaterial.effectCombiner.toInt() != 0
+            val alphaTransition = mesh.facesAlpha != null && mesh.facesAlpha!![currentFace].toInt() != 0 || faceMaterial != null && faceMaterial.effectCombiner.toInt() != 0
             if ((hasTransitions || alphaTransition) && mesh.facesLayer != null) {
-                billboardMainUid += mesh.facesLayer!![currentFace].toInt() shl 17
+                uidHigh += mesh.facesLayer!![currentFace].toInt() shl 17
             }
 
             if (alphaTransition) {
-                billboardMainUid += 65536
+                uidHigh += 65536
             }
 
-            billboardMainUid += (effectId.toInt() and 0xff) shl 8
-            billboardMainUid += effectParam1.toInt() and 0xff
-            appliesOnFace = renderFlags + ((billboardMaterialId.toInt() and 0xffff) shl 16)
-            appliesOnFace += triangleIndex and 0xffff
-            billboardUids[triangleIndex] = (billboardMainUid.toLong() shl 32) + appliesOnFace
+            uidHigh += (effectId.toInt() and 0xff) shl 8
+            uidHigh += effectParam1.toInt() and 0xff
+            uidLow = renderFlags + ((faceMaterialId.toInt() and 0xffff) shl 16)
+            uidLow += triangleIndex and 0xffff
+            billboardUids[triangleIndex] = (uidHigh.toLong() shl 32) + uidLow
             this.hasAlphaTransition = this.hasAlphaTransition or alphaTransition
-            this.textureAnimating = this.textureAnimating or (billboardMaterial != null && (billboardMaterial.textureSpeedU.toInt() != 0 || billboardMaterial.textureSpeedV.toInt() != 0))
+            this.textureAnimating = this.textureAnimating or (faceMaterial != null && (faceMaterial.textureSpeedU.toInt() != 0 || faceMaterial.textureSpeedV.toInt() != 0))
         }
 
         Model.addBillboard(billboardUids, faces)
@@ -689,36 +689,34 @@ class ModelGL : Model {
         this.emissiveTriangles = mesh.particleEmitters
         this.effectiveVertices = mesh.particleEffectors
 
-        var triangleIndex: Int
-
         if (mesh.billboards != null) {
             this.billboardCount = mesh.billboards!!.size
             this.billboardEffects = arrayOfNulls(this.billboardCount)
             this.billboardSurfaces = arrayOfNulls(this.billboardCount)
 
-            currentFace = 0
-            while (currentFace < this.billboardCount) {
-                val billboard = mesh.billboards!![currentFace]
+            var billboardIndex = 0
+            while (billboardIndex < this.billboardCount) {
+                val billboard = mesh.billboards!![billboardIndex]
                 val billboardType = BillboardTypeList.list(billboard.billboardId)
-                appliesOnFace = -1
+                var effectFaceIndex = -1
 
-                triangleIndex = 0
-                while (triangleIndex < this.numFaces) {
-                    if (billboard.appliesOnFace == faces[triangleIndex]) {
-                        appliesOnFace = triangleIndex
+                var faceIndex = 0
+                while (faceIndex < this.numFaces) {
+                    if (billboard.appliesOnFace == faces[faceIndex]) {
+                        effectFaceIndex = faceIndex
                         break
                     }
-                    triangleIndex++
+                    faceIndex++
                 }
 
-                if (appliesOnFace == -1) {
+                if (effectFaceIndex == -1) {
                     throw RuntimeException()
                 }
 
-                triangleIndex = ColorUtil.hslToRgb!![mesh.facesColor!![billboard.appliesOnFace].toInt() and 0xffff] and 0xffffff
-                triangleIndex = triangleIndex or ((255 - (if (mesh.facesAlpha != null) mesh.facesAlpha!![billboard.appliesOnFace].toInt() else 0)) shl 24)
-                this.billboardEffects!![currentFace] = BillboardEffectGL(
-                    appliesOnFace,
+                var diffuseColor = ColorUtil.hslToRgb!![mesh.facesColor!![billboard.appliesOnFace].toInt() and 0xffff] and 0xffffff
+                diffuseColor = diffuseColor or ((255 - (if (mesh.facesAlpha != null) mesh.facesAlpha!![billboard.appliesOnFace].toInt() else 0)) shl 24)
+                this.billboardEffects!![billboardIndex] = BillboardEffectGL(
+                    effectFaceIndex,
                     mesh.facesA!![billboard.appliesOnFace].toInt(),
                     mesh.facesB!![billboard.appliesOnFace].toInt(),
                     mesh.facesC!![billboard.appliesOnFace].toInt(),
@@ -729,18 +727,18 @@ class ModelGL : Model {
                     billboardType.stationary,
                     billboard.distance
                 )
-                this.billboardSurfaces!![currentFace] = BillboardSurfaceGL(triangleIndex)
-                currentFace++
+                this.billboardSurfaces!![billboardIndex] = BillboardSurfaceGL(diffuseColor)
+                billboardIndex++
             }
         }
 
-        currentFace = this.numFaces * 3
-        this.normalsX = ShortArray(currentFace)
-        this.normalsY = ShortArray(currentFace)
-        this.normalsZ = ShortArray(currentFace)
-        this.magnitudes = ByteArray(currentFace)
-        this.textureU = FloatArray(currentFace)
-        this.textureV = FloatArray(currentFace)
+        val normalCapacity = this.numFaces * 3
+        this.normalsX = ShortArray(normalCapacity)
+        this.normalsY = ShortArray(normalCapacity)
+        this.normalsZ = ShortArray(normalCapacity)
+        this.magnitudes = ByteArray(normalCapacity)
+        this.textureU = FloatArray(normalCapacity)
+        this.textureV = FloatArray(normalCapacity)
         this.facesColor = ShortArray(this.numFaces)
         this.facesAlpha = ByteArray(this.numFaces)
         this.facesA = ShortArray(this.numFaces)
@@ -754,43 +752,39 @@ class ModelGL : Model {
 
         this.ambient = ambient.toShort()
         this.contrast = contrast.toShort()
-        this.vertexNormalIndices = ShortArray(currentFace)
-        normalsUid = LongArray(currentFace)
+        this.vertexNormalIndices = ShortArray(normalCapacity)
+        normalsUid = LongArray(normalCapacity)
         var normalSlotOffset = 0
 
-        billboardMainUid = 0
-        while (billboardMainUid < mesh.maxDepth) {
-            appliesOnFace = this.triangles!![billboardMainUid]
-            this.triangles!![billboardMainUid] = normalSlotOffset
-            normalSlotOffset += appliesOnFace
-            vertexNormals[billboardMainUid] = VertexNormalGL()
-            billboardMainUid++
+        var vertexIndex = 0
+        while (vertexIndex < mesh.maxDepth) {
+            val triangleCount = this.triangles!![vertexIndex]
+            this.triangles!![vertexIndex] = normalSlotOffset
+            normalSlotOffset += triangleCount
+            vertexNormals[vertexIndex] = VertexNormalGL()
+            vertexIndex++
         }
 
         this.triangles!![mesh.maxDepth] = normalSlotOffset
         val transformMatrix = generateTextureMatrix(mesh, faces, this.numFaces)
         val faceNormals = arrayOfNulls<FaceNormalGL>(mesh.numFaces)
         // UV scratch is local: constructions run concurrently across threads.
-        val uvTypes = FloatArray(2)
-
-        var alphaAmt: Int
-        var deltaY: Int
-        var lastMaterial: Short
+        val uv = FloatArray(2)
 
         for (faceTriangleIndex in 0 until mesh.numFaces) {
-            lastMaterial = mesh.facesA!![faceTriangleIndex]
-            billboardMaterialId = mesh.facesB!![faceTriangleIndex]
-            val materialId = mesh.facesC!![faceTriangleIndex]
-            alphaAmt = this.verticesX!![billboardMaterialId.toInt()] - this.verticesX!![lastMaterial.toInt()]
-            deltaY = this.verticesY!![billboardMaterialId.toInt()] - this.verticesY!![lastMaterial.toInt()]
-            var deltaZ1 = this.verticesZ!![billboardMaterialId.toInt()] - this.verticesZ!![lastMaterial.toInt()]
-            var deltaX2 = this.verticesX!![materialId.toInt()] - this.verticesX!![lastMaterial.toInt()]
-            var deltaY2 = this.verticesY!![materialId.toInt()] - this.verticesY!![lastMaterial.toInt()]
-            var deltaZ2 = this.verticesZ!![materialId.toInt()] - this.verticesZ!![lastMaterial.toInt()]
-            var x = deltaY * deltaZ2 - deltaY2 * deltaZ1
-            var y = deltaZ1 * deltaX2 - deltaZ2 * alphaAmt
+            val faceA = mesh.facesA!![faceTriangleIndex]
+            val faceB = mesh.facesB!![faceTriangleIndex]
+            val faceC = mesh.facesC!![faceTriangleIndex]
+            val deltaX1 = this.verticesX!![faceB.toInt()] - this.verticesX!![faceA.toInt()]
+            val deltaY1 = this.verticesY!![faceB.toInt()] - this.verticesY!![faceA.toInt()]
+            var deltaZ1 = this.verticesZ!![faceB.toInt()] - this.verticesZ!![faceA.toInt()]
+            var deltaX2 = this.verticesX!![faceC.toInt()] - this.verticesX!![faceA.toInt()]
+            var deltaY2 = this.verticesY!![faceC.toInt()] - this.verticesY!![faceA.toInt()]
+            var deltaZ2 = this.verticesZ!![faceC.toInt()] - this.verticesZ!![faceA.toInt()]
+            var x = deltaY1 * deltaZ2 - deltaY2 * deltaZ1
+            var y = deltaZ1 * deltaX2 - deltaZ2 * deltaX1
 
-            var z = alphaAmt * deltaY2 - deltaX2 * deltaY
+            var z = deltaX1 * deltaY2 - deltaX2 * deltaY1
             while (x > 8192 || y > 8192 || z > 8192 || x < -8192 || y < -8192 || z < -8192) {
                 x = x shr 1
                 y = y shr 1
@@ -808,17 +802,17 @@ class ModelGL : Model {
 
             val faceRenderType: Byte = if (mesh.faceRenderType == null) 0 else mesh.faceRenderType!![faceTriangleIndex]
             if (faceRenderType.toInt() == 0) {
-                var vertexNormal = vertexNormals[lastMaterial.toInt()]!!
+                var vertexNormal = vertexNormals[faceA.toInt()]!!
                 vertexNormal.x += x
                 vertexNormal.y += y
                 vertexNormal.z += z
                 vertexNormal.magnitude++
-                vertexNormal = vertexNormals[billboardMaterialId.toInt()]!!
+                vertexNormal = vertexNormals[faceB.toInt()]!!
                 vertexNormal.x += x
                 vertexNormal.y += y
                 vertexNormal.z += z
                 vertexNormal.magnitude++
-                vertexNormal = vertexNormals[materialId.toInt()]!!
+                vertexNormal = vertexNormals[faceC.toInt()]!!
                 vertexNormal.x += x
                 vertexNormal.y += y
                 vertexNormal.z += z
@@ -842,7 +836,7 @@ class ModelGL : Model {
                 mesh.facesTexture!![faceIndex].toInt()
             }
 
-            alphaAmt = if (mesh.facesAlpha == null) {
+            val alphaAmt = if (mesh.facesAlpha == null) {
                 0
             } else {
                 mesh.facesAlpha!![faceIndex].toInt() and 0xff
@@ -933,15 +927,15 @@ class ModelGL : Model {
 
                         if (renderType.toInt() == 1) {
                             val cylindricalScale = mesh.texturesScaleZ!![texFace] / 1024.0f
-                            mapCylindericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uvTypes)
-                            aU = uvTypes[0]
-                            aV = uvTypes[1]
-                            mapCylindericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uvTypes)
-                            bU = uvTypes[0]
-                            bV = uvTypes[1]
-                            mapCylindericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uvTypes)
-                            cU = uvTypes[0]
-                            cV = uvTypes[1]
+                            mapCylindericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uv)
+                            aU = uv[0]
+                            aV = uv[1]
+                            mapCylindericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uv)
+                            bU = uv[0]
+                            bV = uv[1]
+                            mapCylindericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uv)
+                            cU = uv[0]
+                            cV = uv[1]
                             val halfCylindricalScale = cylindricalScale / 2.0f
 
                             if ((direction.toInt() and 0x1) == 0) {
@@ -996,25 +990,25 @@ class ModelGL : Model {
                             val projectedNormalY = (crossX * matrix[3] + crossY * matrix[4] + crossZ * matrix[5]) / scaleFactorY
                             val projectedNormalZ = (crossX * matrix[6] + crossY * matrix[7] + crossZ * matrix[8]) / scaleFactorZ
                             cubeFaceIndex = getCubeFace(projectedNormalX, projectedNormalY, projectedNormalZ)
-                            mapRectangularUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uvTypes)
-                            aU = uvTypes[0]
-                            aV = uvTypes[1]
-                            mapRectangularUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uvTypes)
-                            bU = uvTypes[0]
-                            bV = uvTypes[1]
-                            mapRectangularUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uvTypes)
-                            cU = uvTypes[0]
-                            cV = uvTypes[1]
+                            mapRectangularUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uv)
+                            aU = uv[0]
+                            aV = uv[1]
+                            mapRectangularUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uv)
+                            bU = uv[0]
+                            bV = uv[1]
+                            mapRectangularUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uv)
+                            cU = uv[0]
+                            cV = uv[1]
                         } else if (renderType.toInt() == 3) {
-                            mapSphericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uvTypes)
-                            aU = uvTypes[0]
-                            aV = uvTypes[1]
-                            mapSphericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uvTypes)
-                            bU = uvTypes[0]
-                            bV = uvTypes[1]
-                            mapSphericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uvTypes)
-                            cU = uvTypes[0]
-                            cV = uvTypes[1]
+                            mapSphericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uv)
+                            aU = uv[0]
+                            aV = uv[1]
+                            mapSphericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uv)
+                            bU = uv[0]
+                            bV = uv[1]
+                            mapSphericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uv)
+                            cU = uv[0]
+                            cV = uv[1]
 
                             if ((direction.toInt() and 0x1) == 0) {
                                 if (bU - aU > 0.5f) {
@@ -1091,30 +1085,30 @@ class ModelGL : Model {
             this.facesMaterial!![faceTriangleIndex] = materialId
         }
 
-        triangleIndex = 0
+        var batchIndex = 0
+        var lastMaterial: Short = -10000
+
+        for (face in 0 until this.renderedFaceCount) {
+            val materialId = this.facesMaterial!![face]
+            if (materialId != lastMaterial) {
+                batchIndex++
+                lastMaterial = materialId
+            }
+        }
+
+        this.materialBatchOffsets = IntArray(batchIndex + 1)
+        batchIndex = 0
         lastMaterial = -10000
 
         for (face in 0 until this.renderedFaceCount) {
             val materialId = this.facesMaterial!![face]
             if (materialId != lastMaterial) {
-                triangleIndex++
+                this.materialBatchOffsets!![batchIndex++] = face
                 lastMaterial = materialId
             }
         }
 
-        this.materialBatchOffsets = IntArray(triangleIndex + 1)
-        triangleIndex = 0
-        lastMaterial = -10000
-
-        for (face in 0 until this.renderedFaceCount) {
-            val materialId = this.facesMaterial!![face]
-            if (materialId != lastMaterial) {
-                this.materialBatchOffsets!![triangleIndex++] = face
-                lastMaterial = materialId
-            }
-        }
-
-        this.materialBatchOffsets!![triangleIndex] = this.renderedFaceCount
+        this.materialBatchOffsets!![batchIndex] = this.renderedFaceCount
         normalsUid = null
         this.normalsX = clone(this.normalsX!!, this.numNormals)
         this.normalsY = clone(this.normalsY!!, this.numNormals)
@@ -1135,27 +1129,27 @@ class ModelGL : Model {
             var maxGroupIndex = 0
             val groupCounts = IntArray(256)
 
-            for (faceAlphaAmt in 0 until this.numFaces) {
-                deltaY = mesh.faceGroups!![faces[faceAlphaAmt]]
-                if (deltaY >= 0) {
-                    ++groupCounts[deltaY]
-                    if (deltaY > maxGroupIndex) {
-                        maxGroupIndex = deltaY
+            for (face in 0 until this.numFaces) {
+                val group = mesh.faceGroups!![faces[face]]
+                if (group >= 0) {
+                    ++groupCounts[group]
+                    if (group > maxGroupIndex) {
+                        maxGroupIndex = group
                     }
                 }
             }
 
             this.faceGroups = arrayOfNulls(maxGroupIndex + 1)
 
-            for (faceAlphaAmt in 0..maxGroupIndex) {
-                this.faceGroups!![faceAlphaAmt] = IntArray(groupCounts[faceAlphaAmt])
-                groupCounts[faceAlphaAmt] = 0
+            for (group in 0..maxGroupIndex) {
+                this.faceGroups!![group] = IntArray(groupCounts[group])
+                groupCounts[group] = 0
             }
 
-            for (faceAlphaAmt in 0 until this.numFaces) {
-                deltaY = mesh.faceGroups!![faces[faceAlphaAmt]]
-                if (deltaY >= 0) {
-                    this.faceGroups!![deltaY]!![groupCounts[deltaY]++] = faceAlphaAmt
+            for (face in 0 until this.numFaces) {
+                val group = mesh.faceGroups!![faces[face]]
+                if (group >= 0) {
+                    this.faceGroups!![group]!![groupCounts[group]++] = face
                 }
             }
         }
@@ -1190,14 +1184,14 @@ class ModelGL : Model {
         return (this.numNormals++).toShort()
     }
 
-    fun projectShadow(shadowgl: ShadowGL) {
+    fun projectShadow(shadow: ShadowGL) {
         val scratch = this.toolkit.projectionScratch(this.numNormals)
         val projectedVerticesX = scratch.verticesX
         val projectedVerticesY = scratch.verticesY
 
         for (v in 0 until this.maxDepth) {
-            val x = ((this.verticesX!![v] - (this.toolkit.shadowOffsetX * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startX
-            val y = ((this.verticesZ!![v] - (this.toolkit.shadowOffsetZ * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startY
+            val x = ((this.verticesX!![v] - (this.toolkit.shadowOffsetX * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadow.startX
+            val y = ((this.verticesZ!![v] - (this.toolkit.shadowOffsetZ * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadow.startY
             val triStart = this.triangles!![v]
             val triEnd = this.triangles!![v + 1]
 
@@ -1223,7 +1217,7 @@ class ModelGL : Model {
             val yB = projectedVerticesY[faceB]
             val yC = projectedVerticesY[faceC]
             if ((xA - xB) * (yB - yC) - (yB - yA) * (xC - xB) > 0) {
-                shadowgl.markShadedTriangle(yA, yB, yC, xA, xB, xC)
+                shadow.markShadedTriangle(yA, yB, yC, xA, xB, xC)
             }
         }
     }
@@ -1784,7 +1778,6 @@ class ModelGL : Model {
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
-        var unusedVar: Int
         var tmp: Int
 
         for (v in 0 until this.maxDepth) {
@@ -1828,16 +1821,16 @@ class ModelGL : Model {
                 }
 
                 val glElementsBuffer = modelElements.openglElementsBuffer
-                val intArray = this.materialBatchOffsets
+                val materialBatchOffsetsLocal = this.materialBatchOffsets
                 val facesMaterialLocal = this.facesMaterial
-                if (glElementsBuffer != null && intArray != null && facesMaterialLocal != null) {
+                if (glElementsBuffer != null && materialBatchOffsetsLocal != null && facesMaterialLocal != null) {
                     this.toolkit.setLightingEnabled(this.normalsBuffer != null)
                     this.toolkit.toggleDrawingClientstates(this.vertexBuffer, this.normalsBuffer, this.colorsBuffer, this.textureCoordinatesBuffer)
-                    val batchCount = intArray.size - 1
+                    val batchCount = materialBatchOffsetsLocal.size - 1
 
                     for (batchIndex in 0 until batchCount) {
-                        val batchStart = intArray[batchIndex]
-                        val batchEnd = intArray[batchIndex + 1]
+                        val batchStart = materialBatchOffsetsLocal[batchIndex]
+                        val batchEnd = materialBatchOffsetsLocal[batchIndex + 1]
                         var materialId = facesMaterialLocal[batchStart].toInt() and 0xffff
                         if (materialId == 65535) {
                             materialId = -1
@@ -2019,23 +2012,23 @@ class ModelGL : Model {
                 val verticesYLocal = this.verticesY
                 val verticesZLocal = this.verticesZ
                 val trianglesLocal = this.triangles
-                val shortArrayLocal = this.vertexNormalIndices
+                val vertexNormalIndicesLocal = this.vertexNormalIndices
 
                 if (verticesXLocal == null || verticesYLocal == null || verticesZLocal == null ||
-                    trianglesLocal == null || shortArrayLocal == null) {
+                    trianglesLocal == null || vertexNormalIndicesLocal == null) {
                     return
                 }
 
                 if (this.toolkit.bigEndianess) {
-                    for (vertice in 0 until this.maxDepth) {
-                        val vertexX = Stream.floatToRawIntBits(verticesXLocal[vertice].toFloat())
-                        val vertexY = Stream.floatToRawIntBits(verticesYLocal[vertice].toFloat())
-                        val vertexZ = Stream.floatToRawIntBits(verticesZLocal[vertice].toFloat())
-                        val triStart = trianglesLocal[vertice]
-                        val triEnd = trianglesLocal[vertice + 1]
+                    for (v in 0 until this.maxDepth) {
+                        val vertexX = Stream.floatToRawIntBits(verticesXLocal[v].toFloat())
+                        val vertexY = Stream.floatToRawIntBits(verticesYLocal[v].toFloat())
+                        val vertexZ = Stream.floatToRawIntBits(verticesZLocal[v].toFloat())
+                        val triStart = trianglesLocal[v]
+                        val triEnd = trianglesLocal[v + 1]
 
                         for (triIdx in triStart until triEnd) {
-                            val normalIdx = shortArrayLocal[triIdx] - 1
+                            val normalIdx = vertexNormalIndicesLocal[triIdx] - 1
                             if (normalIdx == -1) {
                                 break
                             }
@@ -2055,7 +2048,7 @@ class ModelGL : Model {
                         val triEnd = trianglesLocal[v + 1]
 
                         for (triIdx in triStart until triEnd) {
-                            val normalIdx = (shortArrayLocal[triIdx].toInt() and 0xffff) - 1
+                            val normalIdx = (vertexNormalIndicesLocal[triIdx].toInt() and 0xffff) - 1
                             if (normalIdx == -1) {
                                 break
                             }
@@ -2090,12 +2083,12 @@ class ModelGL : Model {
                 }
 
                 if (normalsBufferLocal == null) {
-                    val normalsClass = this.mergedNormals
-                    if (normalsClass != null) {
-                        normalsXArr = normalsClass.normalsX
-                        normalsYArr = normalsClass.normalsY
-                        normalsZArr = normalsClass.normalsZ
-                        magnitudesArr = normalsClass.magnitude
+                    val mergedNormalsLocal = this.mergedNormals
+                    if (mergedNormalsLocal != null) {
+                        normalsXArr = mergedNormalsLocal.normalsX
+                        normalsYArr = mergedNormalsLocal.normalsY
+                        normalsZArr = mergedNormalsLocal.normalsZ
+                        magnitudesArr = mergedNormalsLocal.magnitude
                     } else {
                         normalsXArr = this.normalsX
                         normalsYArr = this.normalsY
@@ -2230,25 +2223,25 @@ class ModelGL : Model {
                         bitBuffer.writeByte(255 - (facesAlphaLocal[faceIdx].toInt() and 0xff))
                     }
                 } else {
-                    for (vertice in 0 until this.numFaces) {
-                        val vvvv = hslToRgb(facesColorLocal[vertice], facesMaterialLocal[vertice], this.ambient, facesAlphaLocal[vertice])
-                        bitBuffer.currentPosition = colorsOffset + entrySize * (facesALocal[vertice].toInt() and 0xffff)
-                        bitBuffer.writeInt(vvvv)
-                        bitBuffer.currentPosition = colorsOffset + entrySize * (facesBLocal[vertice].toInt() and 0xffff)
-                        bitBuffer.writeInt(vvvv)
-                        bitBuffer.currentPosition = colorsOffset + entrySize * (facesCLocal[vertice].toInt() and 0xffff)
-                        bitBuffer.writeInt(vvvv)
+                    for (faceIdx in 0 until this.numFaces) {
+                        val rgbColor = hslToRgb(facesColorLocal[faceIdx], facesMaterialLocal[faceIdx], this.ambient, facesAlphaLocal[faceIdx])
+                        bitBuffer.currentPosition = colorsOffset + entrySize * (facesALocal[faceIdx].toInt() and 0xffff)
+                        bitBuffer.writeInt(rgbColor)
+                        bitBuffer.currentPosition = colorsOffset + entrySize * (facesBLocal[faceIdx].toInt() and 0xffff)
+                        bitBuffer.writeInt(rgbColor)
+                        bitBuffer.currentPosition = colorsOffset + entrySize * (facesCLocal[faceIdx].toInt() and 0xffff)
+                        bitBuffer.writeInt(rgbColor)
                     }
                 }
             }
 
             if (hasNormals) {
-                val normalsClass = this.mergedNormals
-                if (normalsClass != null) {
-                    normalsXArr = normalsClass.normalsX
-                    normalsYArr = normalsClass.normalsY
-                    normalsZArr = normalsClass.normalsZ
-                    magnitudesArr = normalsClass.magnitude
+                val mergedNormalsLocal = this.mergedNormals
+                if (mergedNormalsLocal != null) {
+                    normalsXArr = mergedNormalsLocal.normalsX
+                    normalsYArr = mergedNormalsLocal.normalsY
+                    normalsZArr = mergedNormalsLocal.normalsZ
+                    magnitudesArr = mergedNormalsLocal.magnitude
                 } else {
                     normalsXArr = this.normalsX
                     normalsYArr = this.normalsY
@@ -2264,33 +2257,33 @@ class ModelGL : Model {
                 sunY = 3.0f / (this.contrast / 2 + this.contrast)
                 bitBuffer.currentPosition = normalsOffset
                 if (this.toolkit.bigEndianess) {
-                    for (triIdx in 0 until this.numNormals) {
-                        val normalIdx = magnitudesArr[triIdx].toInt() and 0xff
-                        if (normalIdx == 0) {
-                            bitBuffer.writeFloatBigEndian(normalsXArr[triIdx] * sunY)
-                            bitBuffer.writeFloatBigEndian(normalsYArr[triIdx] * sunY)
-                            bitBuffer.writeFloatBigEndian(normalsZArr[triIdx] * sunY)
+                    for (n in 0 until this.numNormals) {
+                        val magnitude = magnitudesArr[n].toInt() and 0xff
+                        if (magnitude == 0) {
+                            bitBuffer.writeFloatBigEndian(normalsXArr[n] * sunY)
+                            bitBuffer.writeFloatBigEndian(normalsYArr[n] * sunY)
+                            bitBuffer.writeFloatBigEndian(normalsZArr[n] * sunY)
                         } else {
-                            normalScale = sunX / normalIdx
-                            bitBuffer.writeFloatBigEndian(normalsXArr[triIdx] * normalScale)
-                            bitBuffer.writeFloatBigEndian(normalsYArr[triIdx] * normalScale)
-                            bitBuffer.writeFloatBigEndian(normalsZArr[triIdx] * normalScale)
+                            normalScale = sunX / magnitude
+                            bitBuffer.writeFloatBigEndian(normalsXArr[n] * normalScale)
+                            bitBuffer.writeFloatBigEndian(normalsYArr[n] * normalScale)
+                            bitBuffer.writeFloatBigEndian(normalsZArr[n] * normalScale)
                         }
 
                         bitBuffer.currentPosition += entrySize - 12
                     }
                 } else {
-                    for (triIdx in 0 until this.numNormals) {
-                        val normalIdx = magnitudesArr[triIdx].toInt() and 0xff
-                        if (normalIdx == 0) {
-                            bitBuffer.writeFloatLittleEndian(normalsXArr[triIdx] * sunY)
-                            bitBuffer.writeFloatLittleEndian(normalsYArr[triIdx] * sunY)
-                            bitBuffer.writeFloatLittleEndian(normalsZArr[triIdx] * sunY)
+                    for (n in 0 until this.numNormals) {
+                        val magnitude = magnitudesArr[n].toInt() and 0xff
+                        if (magnitude == 0) {
+                            bitBuffer.writeFloatLittleEndian(normalsXArr[n] * sunY)
+                            bitBuffer.writeFloatLittleEndian(normalsYArr[n] * sunY)
+                            bitBuffer.writeFloatLittleEndian(normalsZArr[n] * sunY)
                         } else {
-                            normalScale = sunX / normalIdx
-                            bitBuffer.writeFloatLittleEndian(normalsXArr[triIdx] * normalScale)
-                            bitBuffer.writeFloatLittleEndian(normalsYArr[triIdx] * normalScale)
-                            bitBuffer.writeFloatLittleEndian(normalsZArr[triIdx] * normalScale)
+                            normalScale = sunX / magnitude
+                            bitBuffer.writeFloatLittleEndian(normalsXArr[n] * normalScale)
+                            bitBuffer.writeFloatLittleEndian(normalsYArr[n] * normalScale)
+                            bitBuffer.writeFloatLittleEndian(normalsZArr[n] * normalScale)
                         }
 
                         bitBuffer.currentPosition += entrySize - 12
@@ -2307,15 +2300,15 @@ class ModelGL : Model {
 
                 bitBuffer.currentPosition = texturesOffset
                 if (this.toolkit.bigEndianess) {
-                    for (vertice in 0 until this.numNormals) {
-                        bitBuffer.writeFloatBigEndian(textureULocal[vertice])
-                        bitBuffer.writeFloatBigEndian(textureVLocal[vertice])
+                    for (n in 0 until this.numNormals) {
+                        bitBuffer.writeFloatBigEndian(textureULocal[n])
+                        bitBuffer.writeFloatBigEndian(textureVLocal[n])
                         bitBuffer.currentPosition += entrySize - 8
                     }
                 } else {
-                    for (vertice in 0 until this.numNormals) {
-                        bitBuffer.writeFloatLittleEndian(textureULocal[vertice])
-                        bitBuffer.writeFloatLittleEndian(textureVLocal[vertice])
+                    for (n in 0 until this.numNormals) {
+                        bitBuffer.writeFloatLittleEndian(textureULocal[n])
+                        bitBuffer.writeFloatLittleEndian(textureVLocal[n])
                         bitBuffer.currentPosition += entrySize - 8
                     }
                 }
@@ -2391,9 +2384,9 @@ class ModelGL : Model {
     }
 
     override fun calculateProjection(camX: Int, camY: Int, modelMatrix: Matrix43, notRendered: Boolean, sizeShift: Int): Boolean {
-        val matrix446 = this.toolkit.tempModelMatrix
-        matrix446.fromMatrix(modelMatrix)
-        matrix446.multiplyBy(this.toolkit.viewProjectionMatrix)
+        val mvpMatrix = this.toolkit.tempModelMatrix
+        mvpMatrix.fromMatrix(modelMatrix)
+        mvpMatrix.multiplyBy(this.toolkit.viewProjectionMatrix)
         var isInView = false
         var screenMinX = Int.MAX_VALUE
         var screenMaxX = Int.MIN_VALUE
@@ -2444,11 +2437,11 @@ class ModelGL : Model {
             val cornerX = matrixX[cornerIdx]
             val cornerY = matrixY[cornerIdx]
             val cornerZ = matrixZ[cornerIdx]
-            val clipZ = matrix446.elements!![2] * cornerX + matrix446.elements!![6] * cornerY + matrix446.elements!![10] * cornerZ + matrix446.elements!![14]
-            val clipW = matrix446.elements!![3] * cornerX + matrix446.elements!![7] * cornerY + matrix446.elements!![11] * cornerZ + matrix446.elements!![15]
+            val clipZ = mvpMatrix.elements!![2] * cornerX + mvpMatrix.elements!![6] * cornerY + mvpMatrix.elements!![10] * cornerZ + mvpMatrix.elements!![14]
+            val clipW = mvpMatrix.elements!![3] * cornerX + mvpMatrix.elements!![7] * cornerY + mvpMatrix.elements!![11] * cornerZ + mvpMatrix.elements!![15]
             if (clipZ >= -clipW) {
-                val clipX = matrix446.elements!![0] * cornerX + matrix446.elements!![4] * cornerY + matrix446.elements!![8] * cornerZ + matrix446.elements!![12]
-                val clipY = matrix446.elements!![1] * cornerX + matrix446.elements!![5] * cornerY + matrix446.elements!![9] * cornerZ + matrix446.elements!![13]
+                val clipX = mvpMatrix.elements!![0] * cornerX + mvpMatrix.elements!![4] * cornerY + mvpMatrix.elements!![8] * cornerZ + mvpMatrix.elements!![12]
+                val clipY = mvpMatrix.elements!![1] * cornerX + mvpMatrix.elements!![5] * cornerY + mvpMatrix.elements!![9] * cornerZ + mvpMatrix.elements!![13]
                 val screenX = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX / clipW).toInt()
                 val screenY = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY / clipW).toInt()
                 if (screenX < screenMinX) {
@@ -2484,11 +2477,11 @@ class ModelGL : Model {
                 val vx = this.verticesX!![vertIdx]
                 val vy = this.verticesY!![vertIdx]
                 val vz = this.verticesZ!![vertIdx]
-                val clipZ = matrix446.elements!![2] * vx + matrix446.elements!![6] * vy + matrix446.elements!![10] * vz + matrix446.elements!![14]
-                val clipW = matrix446.elements!![3] * vx + matrix446.elements!![7] * vy + matrix446.elements!![11] * vz + matrix446.elements!![15]
+                val clipZ = mvpMatrix.elements!![2] * vx + mvpMatrix.elements!![6] * vy + mvpMatrix.elements!![10] * vz + mvpMatrix.elements!![14]
+                val clipW = mvpMatrix.elements!![3] * vx + mvpMatrix.elements!![7] * vy + mvpMatrix.elements!![11] * vz + mvpMatrix.elements!![15]
                 if (clipZ >= -clipW) {
-                    val clipX = matrix446.elements!![0] * vx + matrix446.elements!![4] * vy + matrix446.elements!![8] * vz + matrix446.elements!![12]
-                    val clipY = matrix446.elements!![1] * vx + matrix446.elements!![5] * vy + matrix446.elements!![9] * vz + matrix446.elements!![13]
+                    val clipX = mvpMatrix.elements!![0] * vx + mvpMatrix.elements!![4] * vy + mvpMatrix.elements!![8] * vz + mvpMatrix.elements!![12]
+                    val clipY = mvpMatrix.elements!![1] * vx + mvpMatrix.elements!![5] * vy + mvpMatrix.elements!![9] * vz + mvpMatrix.elements!![13]
                     val triStart = this.triangles!![vertIdx]
                     val triEnd = this.triangles!![vertIdx + 1]
 
@@ -2558,22 +2551,22 @@ class ModelGL : Model {
         }
 
         if (this.numNormals != 0) {
-            val matrix444 = this.toolkit.currentModelMatrix
-            val matrix445 = this.toolkit.tempModelMatrix
-            val matrix446 = this.toolkit.tempProjectionMatrix
-            matrix445.fromMatrix(projectionMatrix)
-            matrix446.copyFrom(matrix445)
-            matrix446.multiplyBy(this.toolkit.viewProjectionMatrix)
+            val currentModelMatrix = this.toolkit.currentModelMatrix
+            val modelMatrix = this.toolkit.tempModelMatrix
+            val mvpMatrix = this.toolkit.tempProjectionMatrix
+            modelMatrix.fromMatrix(projectionMatrix)
+            mvpMatrix.copyFrom(modelMatrix)
+            mvpMatrix.multiplyBy(this.toolkit.viewProjectionMatrix)
             if (!this.boundsCalculated) {
                 calculateBounds()
             }
 
             val scaleBuffer = this.toolkit.lightParameterBuffer
-            matrix445.scale(0.0f, this.minY.toFloat(), 0.0f, scaleBuffer)
+            modelMatrix.scale(0.0f, this.minY.toFloat(), 0.0f, scaleBuffer)
             val minWorldX = scaleBuffer[0]
             val minWorldY = scaleBuffer[1]
             val minWorldZ = scaleBuffer[2]
-            matrix445.scale(0.0f, this.maxY.toFloat(), 0.0f, scaleBuffer)
+            modelMatrix.scale(0.0f, this.maxY.toFloat(), 0.0f, scaleBuffer)
             val maxWorldX = scaleBuffer[0]
             val maxWorldY = scaleBuffer[1]
             val maxWorldZ = scaleBuffer[2]
@@ -2593,10 +2586,10 @@ class ModelGL : Model {
                 val centerModelX = (this.minX + this.maxX) shr 1
                 val centerModelZ = (this.minZ + this.maxZ) shr 1
                 var modelY = this.minY
-                var clipMinX = matrix446.elements!![0] * centerModelX + matrix446.elements!![4] * modelY + matrix446.elements!![8] * centerModelZ + matrix446.elements!![12]
-                var clipMinY = matrix446.elements!![1] * centerModelX + matrix446.elements!![5] * modelY + matrix446.elements!![9] * centerModelZ + matrix446.elements!![13]
-                var clipMinZ = matrix446.elements!![2] * centerModelX + matrix446.elements!![6] * modelY + matrix446.elements!![10] * centerModelZ + matrix446.elements!![14]
-                var clipMinW = matrix446.elements!![3] * centerModelX + matrix446.elements!![7] * modelY + matrix446.elements!![11] * centerModelZ + matrix446.elements!![15]
+                var clipMinX = mvpMatrix.elements!![0] * centerModelX + mvpMatrix.elements!![4] * modelY + mvpMatrix.elements!![8] * centerModelZ + mvpMatrix.elements!![12]
+                var clipMinY = mvpMatrix.elements!![1] * centerModelX + mvpMatrix.elements!![5] * modelY + mvpMatrix.elements!![9] * centerModelZ + mvpMatrix.elements!![13]
+                var clipMinZ = mvpMatrix.elements!![2] * centerModelX + mvpMatrix.elements!![6] * modelY + mvpMatrix.elements!![10] * centerModelZ + mvpMatrix.elements!![14]
+                var clipMinW = mvpMatrix.elements!![3] * centerModelX + mvpMatrix.elements!![7] * modelY + mvpMatrix.elements!![11] * centerModelZ + mvpMatrix.elements!![15]
                 if (clipMinZ >= -clipMinW) {
                     boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipMinX / clipMinW).toInt()
                     boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipMinY / clipMinW).toInt()
@@ -2605,10 +2598,10 @@ class ModelGL : Model {
                 }
 
                 modelY = this.maxY
-                val clipMaxX = matrix446.elements!![0] * centerModelX + matrix446.elements!![4] * modelY + matrix446.elements!![8] * centerModelZ + matrix446.elements!![12]
-                val clipMaxY = matrix446.elements!![1] * centerModelX + matrix446.elements!![5] * modelY + matrix446.elements!![9] * centerModelZ + matrix446.elements!![13]
-                val clipMaxZ = matrix446.elements!![2] * centerModelX + matrix446.elements!![6] * modelY + matrix446.elements!![10] * centerModelZ + matrix446.elements!![14]
-                val clipMaxW = matrix446.elements!![3] * centerModelX + matrix446.elements!![7] * modelY + matrix446.elements!![11] * centerModelZ + matrix446.elements!![15]
+                val clipMaxX = mvpMatrix.elements!![0] * centerModelX + mvpMatrix.elements!![4] * modelY + mvpMatrix.elements!![8] * centerModelZ + mvpMatrix.elements!![12]
+                val clipMaxY = mvpMatrix.elements!![1] * centerModelX + mvpMatrix.elements!![5] * modelY + mvpMatrix.elements!![9] * centerModelZ + mvpMatrix.elements!![13]
+                val clipMaxZ = mvpMatrix.elements!![2] * centerModelX + mvpMatrix.elements!![6] * modelY + mvpMatrix.elements!![10] * centerModelZ + mvpMatrix.elements!![14]
+                val clipMaxW = mvpMatrix.elements!![3] * centerModelX + mvpMatrix.elements!![7] * modelY + mvpMatrix.elements!![11] * centerModelZ + mvpMatrix.elements!![15]
                 if (clipMaxZ >= -clipMaxW) {
                     boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipMaxX / clipMaxW).toInt()
                     boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipMaxY / clipMaxW).toInt()
@@ -2644,12 +2637,12 @@ class ModelGL : Model {
 
                 if (isVisible) {
                     if (clipMinZ / clipMinW > clipMaxZ / clipMaxW) {
-                        interpFactor = clipMinX + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
-                        interpX = clipMinW + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
+                        interpFactor = clipMinX + currentModelMatrix.elements!![0] * this.size2d + currentModelMatrix.elements!![12]
+                        interpX = clipMinW + currentModelMatrix.elements!![3] * this.size2d + currentModelMatrix.elements!![15]
                         boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpFactor / interpX).toInt()
                     } else {
-                        interpFactor = clipMaxX + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
-                        interpX = clipMaxW + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
+                        interpFactor = clipMaxX + currentModelMatrix.elements!![0] * this.size2d + currentModelMatrix.elements!![12]
+                        interpX = clipMaxW + currentModelMatrix.elements!![3] * this.size2d + currentModelMatrix.elements!![15]
                         boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpFactor / interpX).toInt()
                     }
 
@@ -2658,11 +2651,11 @@ class ModelGL : Model {
             }
 
             this.toolkit.setupMatrixRendering()
-            this.toolkit.multiMatrix(matrix445)
+            this.toolkit.multiMatrix(modelMatrix)
             drawOpaqueFaces()
             this.toolkit.popMatrix()
-            matrix445.multiplyBy(this.toolkit.viewMatrix44)
-            drawBillboards(matrix445)
+            modelMatrix.multiplyBy(this.toolkit.viewMatrix44)
+            drawBillboards(modelMatrix)
             if ((rasterizerFunctionMask and 0x2) != 0) {
                 OpenGL.glPolygonMode(1032, 6914)  // Reset GL_FRONT_AND_BACK to GL_FILL
             }
@@ -2715,14 +2708,14 @@ class ModelGL : Model {
             boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY2 / clipW2).toInt()
         }
 
-        val mm = this.toolkit.currentModelMatrix.elements!!
+        val currentModelElements = this.toolkit.currentModelMatrix.elements!!
         if (clipZ1 / clipW1 > clipZ2 / clipW2) {
-            val interpX = clipX1 + mm[0] * this.size2d + mm[12]
-            val interpW = clipW1 + mm[3] * this.size2d + mm[15]
+            val interpX = clipX1 + currentModelElements[0] * this.size2d + currentModelElements[12]
+            val interpW = clipW1 + currentModelElements[3] * this.size2d + currentModelElements[15]
             boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
         } else {
-            val interpX = clipX2 + mm[0] * this.size2d + mm[12]
-            val interpW = clipW2 + mm[3] * this.size2d + mm[15]
+            val interpX = clipX2 + currentModelElements[0] * this.size2d + currentModelElements[12]
+            val interpW = clipW2 + currentModelElements[3] * this.size2d + currentModelElements[15]
             boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
         }
 
@@ -3205,21 +3198,21 @@ class ModelGL : Model {
         }
     }
 
-    override fun offsetSubmesh(var1: Matrix43, functionMask: Int, var3: Boolean) {
+    override fun offsetSubmesh(matrix: Matrix43, functionMask: Int, updateIdentityMatrix: Boolean) {
         invalidateModernContent()
         invalidateModernBuilt(9)
         if (this.verticesSubmeshes != null) {
-            var matrix44var4 = var1
-            if (var3) {
-                matrix44var4 = this.toolkit.inverseSunMatrix43
-                matrix44var4.updateMatrix(var1)
+            var submeshMatrix = matrix
+            if (updateIdentityMatrix) {
+                submeshMatrix = this.toolkit.inverseSunMatrix43
+                submeshMatrix.updateMatrix(matrix)
             }
 
             val resultBuffer = FloatArray(3)
 
             for (vertexIdx in 0 until this.maxDepth) {
                 if ((functionMask and this.verticesSubmeshes!![vertexIdx].toInt()) != 0) {
-                    matrix44var4.calculatePerspective(this.verticesX!![vertexIdx].toFloat(), this.verticesY!![vertexIdx].toFloat(), this.verticesZ!![vertexIdx].toFloat(), resultBuffer)
+                    submeshMatrix.calculatePerspective(this.verticesX!![vertexIdx].toFloat(), this.verticesY!![vertexIdx].toFloat(), this.verticesZ!![vertexIdx].toFloat(), resultBuffer)
                     this.verticesX!![vertexIdx] = resultBuffer[0].toInt()
                     this.verticesY!![vertexIdx] = resultBuffer[1].toInt()
                     this.verticesZ!![vertexIdx] = resultBuffer[2].toInt()
@@ -3416,29 +3409,29 @@ class ModelGL : Model {
             x = x shl 4
             y = y shl 4
             z = z shl 4
-            var translateCount = 0
+            var originVertexCount = 0
             originX = 0
             originY = 0
             originZ = 0
 
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < (this.vertexGroups?.size ?: 0)) {
-                    val vertexGroup = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < (this.vertexGroups?.size ?: 0)) {
+                    val vertexGroup = this.vertexGroups!![label]!!
                     for (i in vertexGroup.indices) {
                         val v = vertexGroup[i]
                         originX += this.verticesX!![v]
                         originY += this.verticesY!![v]
                         originZ += this.verticesZ!![v]
-                        translateCount++
+                        originVertexCount++
                     }
                 }
             }
 
-            if (translateCount > 0) {
-                originX = x + originX / translateCount
-                originY = y + originY / translateCount
-                originZ = z + originZ / translateCount
+            if (originVertexCount > 0) {
+                originX = x + originX / originVertexCount
+                originY = y + originY / originVertexCount
+                originZ = z + originZ / originVertexCount
             } else {
                 originX = x
                 originY = y
@@ -3450,9 +3443,9 @@ class ModelGL : Model {
             z = z shl 4
 
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < (this.vertexGroups?.size ?: 0)) {
-                    val vertexGroup = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < (this.vertexGroups?.size ?: 0)) {
+                    val vertexGroup = this.vertexGroups!![label]!!
                     for (i in vertexGroup.indices) {
                         val v = vertexGroup[i]
                         this.verticesX!![v] += x
@@ -3463,9 +3456,9 @@ class ModelGL : Model {
             }
         } else if (transformationType == 2) {
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < (this.vertexGroups?.size ?: 0)) {
-                    val vertexGroup = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < (this.vertexGroups?.size ?: 0)) {
+                    val vertexGroup = this.vertexGroups!![label]!!
                     if ((rotation and 0x1) == 0) {
                         for (i in vertexGroup.indices) {
                             val v = vertexGroup[i]
@@ -3534,9 +3527,9 @@ class ModelGL : Model {
 
             if (lights) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < (this.vertexGroups?.size ?: 0)) {
-                        val vertexGroup = this.vertexGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < (this.vertexGroups?.size ?: 0)) {
+                        val vertexGroup = this.vertexGroups!![label]!!
                         for (i in vertexGroup.indices) {
                             val v = vertexGroup[i]
                             val triStart = this.triangles!![v]
@@ -3579,9 +3572,9 @@ class ModelGL : Model {
             }
         } else if (transformationType == 3) {
             for (labelIndex in 0 until labelCount) {
-                val group = labels[labelIndex]
-                if (group < (this.vertexGroups?.size ?: 0)) {
-                    val vertexGroup = this.vertexGroups!![group]!!
+                val label = labels[labelIndex]
+                if (label < (this.vertexGroups?.size ?: 0)) {
+                    val vertexGroup = this.vertexGroups!![label]!!
                     for (i in vertexGroup.indices) {
                         val v = vertexGroup[i]
                         this.verticesX!![v] -= originX
@@ -3599,9 +3592,9 @@ class ModelGL : Model {
         } else if (transformationType == 5) {
             if (this.faceGroups != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.faceGroups!!.size) {
-                        val faceGroup = this.faceGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.faceGroups!!.size) {
+                        val faceGroup = this.faceGroups!![label]!!
                         for (i in faceGroup.indices) {
                             val face = faceGroup[i]
                             var alpha = (this.facesAlpha!![face].toInt() and 0xff) + x * 8
@@ -3625,9 +3618,9 @@ class ModelGL : Model {
         } else if (transformationType == 7) {
             if (this.faceGroups != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.faceGroups!!.size) {
-                        val faceGroup = this.faceGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.faceGroups!!.size) {
+                        val faceGroup = this.faceGroups!![label]!!
                         for (i in faceGroup.indices) {
                             val face = faceGroup[i]
                             val hsl = this.facesColor!![face].toInt() and 0xffff
@@ -3659,9 +3652,9 @@ class ModelGL : Model {
         } else if (transformationType == 8) {
             if (this.billboardGroups != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.billboardGroups!!.size) {
-                        val billboardGroup = this.billboardGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.billboardGroups!!.size) {
+                        val billboardGroup = this.billboardGroups!![label]!!
                         for (i in billboardGroup.indices) {
                             val surface = this.billboardSurfaces!![billboardGroup[i]]!!
                             surface.offsetX += x
@@ -3673,9 +3666,9 @@ class ModelGL : Model {
         } else if (transformationType == 9) {
             if (this.billboardGroups != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.billboardGroups!!.size) {
-                        val billboardGroup = this.billboardGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.billboardGroups!!.size) {
+                        val billboardGroup = this.billboardGroups!![label]!!
                         for (i in billboardGroup.indices) {
                             val surface = this.billboardSurfaces!![billboardGroup[i]]!!
                             surface.rotation = (x + surface.rotation) and 0x3fff
@@ -3686,9 +3679,9 @@ class ModelGL : Model {
         } else if (transformationType == 10) {
             if (this.billboardGroups != null) {
                 for (labelIndex in 0 until labelCount) {
-                    val group = labels[labelIndex]
-                    if (group < this.billboardGroups!!.size) {
-                        val billboardGroup = this.billboardGroups!![group]!!
+                    val label = labels[labelIndex]
+                    if (label < this.billboardGroups!!.size) {
+                        val billboardGroup = this.billboardGroups!![label]!!
                         for (i in billboardGroup.indices) {
                             val surface = this.billboardSurfaces!![billboardGroup[i]]!!
                             surface.scaleX = (x * surface.scaleX) shr 7
@@ -3700,72 +3693,72 @@ class ModelGL : Model {
         }
     }
 
-    override fun animateTransform(transformationType: Int, labels: IntArray, rotationX: Int, rotationY: Int, rotationZ: Int, lights: Boolean, submesh: Int, verticesData: IntArray) {
+    override fun animateTransform(transformationType: Int, labels: IntArray, xIn: Int, yIn: Int, zIn: Int, lights: Boolean, submesh: Int, verticesData: IntArray) {
         invalidateModernContent()
-        var paramX = rotationX
-        var paramY = rotationY
-        var paramZ = rotationZ
-        val numLabels = labels.size
+        var x = xIn
+        var y = yIn
+        var z = zIn
+        val labelCount = labels.size
 
         if (transformationType == 0) {
-            paramX = paramX shl 4
-            paramY = paramY shl 4
-            paramZ = paramZ shl 4
-            var count = 0
+            x = x shl 4
+            y = y shl 4
+            z = z shl 4
+            var originVertexCount = 0
             originX = 0
             originY = 0
             originZ = 0
 
-            for (labelIdx in 0 until numLabels) {
-                val label = labels[labelIdx]
+            for (labelIndex in 0 until labelCount) {
+                val label = labels[labelIndex]
                 if (label < (this.vertexGroups?.size ?: 0)) {
-                    val group = this.vertexGroups!![label]!!
-                    for (i in group.indices) {
-                        val v = group[i]
+                    val vertexGroup = this.vertexGroups!![label]!!
+                    for (i in vertexGroup.indices) {
+                        val v = vertexGroup[i]
                         if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
                             originX += this.verticesX!![v]
                             originY += this.verticesY!![v]
                             originZ += this.verticesZ!![v]
-                            count++
+                            originVertexCount++
                         }
                     }
                 }
             }
 
-            if (count > 0) {
-                originX = paramX + originX / count
-                originY = paramY + originY / count
-                originZ = paramZ + originZ / count
+            if (originVertexCount > 0) {
+                originX = x + originX / originVertexCount
+                originY = y + originY / originVertexCount
+                originZ = z + originZ / originVertexCount
                 withinOrigin = true
             } else {
-                originX = paramX
-                originY = paramY
-                originZ = paramZ
+                originX = x
+                originY = y
+                originZ = z
             }
         } else if (transformationType == 1) {
             if (verticesData != null) {
-                var transformedX = ((paramZ * verticesData[2] + verticesData[1] * paramY + paramX * verticesData[0] + 8192) shr 14)
-                var transformedY = ((paramX * verticesData[3] + paramZ * verticesData[5] + paramY * verticesData[4] + 8192) shr 14)
-                var transformedZ = ((paramX * verticesData[6] + verticesData[7] * paramY + paramZ * verticesData[8] + 8192) shr 14)
-                paramX = transformedX
-                paramY = transformedY
-                paramZ = transformedZ
+                var transformedX = ((z * verticesData[2] + verticesData[1] * y + x * verticesData[0] + 8192) shr 14)
+                var transformedY = ((x * verticesData[3] + z * verticesData[5] + y * verticesData[4] + 8192) shr 14)
+                var transformedZ = ((x * verticesData[6] + verticesData[7] * y + z * verticesData[8] + 8192) shr 14)
+                x = transformedX
+                y = transformedY
+                z = transformedZ
             }
 
-            paramX = paramX shl 4
-            paramY = paramY shl 4
-            paramZ = paramZ shl 4
+            x = x shl 4
+            y = y shl 4
+            z = z shl 4
 
-            for (labelIdx in 0 until numLabels) {
-                val label = labels[labelIdx]
+            for (labelIndex in 0 until labelCount) {
+                val label = labels[labelIndex]
                 if (label < (this.vertexGroups?.size ?: 0)) {
-                    val group = this.vertexGroups!![label]!!
-                    for (i in group.indices) {
-                        val v = group[i]
+                    val vertexGroup = this.vertexGroups!![label]!!
+                    for (i in vertexGroup.indices) {
+                        val v = vertexGroup[i]
                         if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
-                            this.verticesX!![v] += paramX
-                            this.verticesY!![v] += paramY
-                            this.verticesZ!![v] += paramZ
+                            this.verticesX!![v] += x
+                            this.verticesY!![v] += y
+                            this.verticesZ!![v] += z
                         }
                     }
                 }
@@ -3792,12 +3785,12 @@ class ModelGL : Model {
                 }
 
                 val rotationMatrix = this.animScratchMatrixA ?: IntArray(9).also { this.animScratchMatrixA = it }
-                val cosX = MathUtils.COSINE[paramX]
-                val sinX = MathUtils.SINE[paramX]
-                val cosY = MathUtils.COSINE[paramY]
-                val sinY = MathUtils.SINE[paramY]
-                val cosZ = MathUtils.COSINE[paramZ]
-                val sinZ = MathUtils.SINE[paramZ]
+                val cosX = MathUtils.COSINE[x]
+                val sinX = MathUtils.SINE[x]
+                val cosY = MathUtils.COSINE[y]
+                val sinY = MathUtils.SINE[y]
+                val cosZ = MathUtils.COSINE[z]
+                val sinZ = MathUtils.SINE[z]
                 val sinXcosZ = ((sinX * cosZ + 8192) shr 14)
                 val sinXsinZ = ((sinX * sinZ + 8192) shr 14)
                 rotationMatrix[0] = ((cosY * cosZ + sinY * sinXsinZ + 8192) shr 14)
@@ -3852,12 +3845,12 @@ class ModelGL : Model {
                 finalTranslateY += parentOriginY
                 finalTranslateZ += parentOriginZ
 
-                for (labelIdx in 0 until numLabels) {
-                    val label = labels[labelIdx]
+                for (labelIndex in 0 until labelCount) {
+                    val label = labels[labelIndex]
                     if (label < (this.vertexGroups?.size ?: 0)) {
-                        val group = this.vertexGroups!![label]!!
-                        for (i in group.indices) {
-                            val v = group[i]
+                        val vertexGroup = this.vertexGroups!![label]!!
+                        for (i in vertexGroup.indices) {
+                            val v = vertexGroup[i]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
                                 var newX = ((finalMatrix[0] * this.verticesX!![v] + finalMatrix[2] * this.verticesZ!![v] + finalMatrix[1] * this.verticesY!![v] + 8192) shr 14)
                                 var newY = ((finalMatrix[4] * this.verticesY!![v] + finalMatrix[5] * this.verticesZ!![v] + finalMatrix[3] * this.verticesX!![v] + 8192) shr 14)
@@ -3874,33 +3867,33 @@ class ModelGL : Model {
                 }
             } else {
                 // No verticesData - simple rotation
-                for (labelIdx in 0 until numLabels) {
-                    val label = labels[labelIdx]
+                for (labelIndex in 0 until labelCount) {
+                    val label = labels[labelIndex]
                     if (label < (this.vertexGroups?.size ?: 0)) {
-                        val group = this.vertexGroups!![label]!!
-                        for (i in group.indices) {
-                            val v = group[i]
+                        val vertexGroup = this.vertexGroups!![label]!!
+                        for (i in vertexGroup.indices) {
+                            val v = vertexGroup[i]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
                                 this.verticesX!![v] -= originX
                                 this.verticesY!![v] -= originY
                                 this.verticesZ!![v] -= originZ
-                                if (paramZ != 0) {
-                                    val sin = MathUtils.SINE[paramZ]
-                                    val cos = MathUtils.COSINE[paramZ]
+                                if (z != 0) {
+                                    val sin = MathUtils.SINE[z]
+                                    val cos = MathUtils.COSINE[z]
                                     val tmp = ((sin * this.verticesY!![v] + cos * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesY!![v] = ((cos * this.verticesY!![v] - sin * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesX!![v] = tmp
                                 }
-                                if (paramX != 0) {
-                                    val sin = MathUtils.SINE[paramX]
-                                    val cos = MathUtils.COSINE[paramX]
+                                if (x != 0) {
+                                    val sin = MathUtils.SINE[x]
+                                    val cos = MathUtils.COSINE[x]
                                     val tmp = ((cos * this.verticesY!![v] - sin * this.verticesZ!![v] + 16383) shr 14)
                                     this.verticesZ!![v] = ((sin * this.verticesY!![v] + cos * this.verticesZ!![v] + 16383) shr 14)
                                     this.verticesY!![v] = tmp
                                 }
-                                if (paramY != 0) {
-                                    val sin = MathUtils.SINE[paramY]
-                                    val cos = MathUtils.COSINE[paramY]
+                                if (y != 0) {
+                                    val sin = MathUtils.SINE[y]
+                                    val cos = MathUtils.COSINE[y]
                                     val tmp = ((sin * this.verticesZ!![v] + cos * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesZ!![v] = ((cos * this.verticesZ!![v] - sin * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesX!![v] = tmp
@@ -3914,35 +3907,35 @@ class ModelGL : Model {
                 }
 
                 if (lights) {
-                    for (labelIdx in 0 until numLabels) {
-                        val label = labels[labelIdx]
+                    for (labelIndex in 0 until labelCount) {
+                        val label = labels[labelIndex]
                         if (label < (this.vertexGroups?.size ?: 0)) {
-                            val group = this.vertexGroups!![label]!!
-                            for (i in group.indices) {
-                                val v = group[i]
+                            val vertexGroup = this.vertexGroups!![label]!!
+                            for (i in vertexGroup.indices) {
+                                val v = vertexGroup[i]
                                 if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
                                     val triStart = this.triangles!![v]
                                     val triEnd = this.triangles!![v + 1]
                                     for (triIdx in triStart until triEnd) {
                                         val normalIdx = this.vertexNormalIndices!![triIdx].toInt() - 1
                                         if (normalIdx == -1) break
-                                        if (paramZ != 0) {
-                                            val sin = MathUtils.SINE[paramZ]
-                                            val cos = MathUtils.COSINE[paramZ]
+                                        if (z != 0) {
+                                            val sin = MathUtils.SINE[z]
+                                            val cos = MathUtils.COSINE[z]
                                             val tmp = ((this.normalsY!![normalIdx] * sin + this.normalsX!![normalIdx] * cos + 16383) shr 14)
                                             this.normalsY!![normalIdx] = (((this.normalsY!![normalIdx] * cos - this.normalsX!![normalIdx] * sin + 16383) shr 14)).toShort()
                                             this.normalsX!![normalIdx] = tmp.toShort()
                                         }
-                                        if (paramX != 0) {
-                                            val sin = MathUtils.SINE[paramX]
-                                            val cos = MathUtils.COSINE[paramX]
+                                        if (x != 0) {
+                                            val sin = MathUtils.SINE[x]
+                                            val cos = MathUtils.COSINE[x]
                                             val tmp = ((this.normalsY!![normalIdx] * cos - this.normalsZ!![normalIdx] * sin + 16383) shr 14)
                                             this.normalsZ!![normalIdx] = (((this.normalsY!![normalIdx] * sin + this.normalsZ!![normalIdx] * cos + 16383) shr 14)).toShort()
                                             this.normalsY!![normalIdx] = tmp.toShort()
                                         }
-                                        if (paramY != 0) {
-                                            val sin = MathUtils.SINE[paramY]
-                                            val cos = MathUtils.COSINE[paramY]
+                                        if (y != 0) {
+                                            val sin = MathUtils.SINE[y]
+                                            val cos = MathUtils.COSINE[y]
                                             val tmp = ((this.normalsZ!![normalIdx] * sin + this.normalsX!![normalIdx] * cos + 16383) shr 14)
                                             this.normalsZ!![normalIdx] = (((this.normalsZ!![normalIdx] * cos - this.normalsX!![normalIdx] * sin + 16383) shr 14)).toShort()
                                             this.normalsX!![normalIdx] = tmp.toShort()
@@ -3982,9 +3975,9 @@ class ModelGL : Model {
                     withinOrigin = false
                 }
 
-                val scaleX = (paramX shl 15) shr 7
-                val scaleY = (paramY shl 15) shr 7
-                val scaleZ = (paramZ shl 15) shr 7
+                val scaleX = (x shl 15) shr 7
+                val scaleY = (y shl 15) shr 7
+                val scaleZ = (z shl 15) shr 7
                 val scaledInvOriginX = ((scaleX * -originX + 8192) shr 14)
                 val scaledInvOriginY = ((scaleY * -originY + 8192) shr 14)
                 val scaledInvOriginZ = ((scaleZ * -originZ + 8192) shr 14)
@@ -4026,12 +4019,12 @@ class ModelGL : Model {
                 finalTranslateY += parentOriginY
                 finalTranslateZ += parentOriginZ
 
-                for (labelIdx in 0 until numLabels) {
-                    val label = labels[labelIdx]
+                for (labelIndex in 0 until labelCount) {
+                    val label = labels[labelIndex]
                     if (label < (this.vertexGroups?.size ?: 0)) {
-                        val group = this.vertexGroups!![label]!!
-                        for (i in group.indices) {
-                            val v = group[i]
+                        val vertexGroup = this.vertexGroups!![label]!!
+                        for (i in vertexGroup.indices) {
+                            val v = vertexGroup[i]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
                                 var newX = ((combinedScaleMatrix[0] * this.verticesX!![v] + combinedScaleMatrix[2] * this.verticesZ!![v] + combinedScaleMatrix[1] * this.verticesY!![v] + 8192) shr 14)
                                 var newY = ((combinedScaleMatrix[4] * this.verticesY!![v] + combinedScaleMatrix[5] * this.verticesZ!![v] + combinedScaleMatrix[3] * this.verticesX!![v] + 8192) shr 14)
@@ -4048,19 +4041,19 @@ class ModelGL : Model {
                 }
             } else {
                 // No verticesData - simple scale
-                for (labelIdx in 0 until numLabels) {
-                    val label = labels[labelIdx]
+                for (labelIndex in 0 until labelCount) {
+                    val label = labels[labelIndex]
                     if (label < (this.vertexGroups?.size ?: 0)) {
-                        val group = this.vertexGroups!![label]!!
-                        for (i in group.indices) {
-                            val v = group[i]
+                        val vertexGroup = this.vertexGroups!![label]!!
+                        for (i in vertexGroup.indices) {
+                            val v = vertexGroup[i]
                             if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
                                 this.verticesX!![v] -= originX
                                 this.verticesY!![v] -= originY
                                 this.verticesZ!![v] -= originZ
-                                this.verticesX!![v] = (paramX * this.verticesX!![v]) shr 7
-                                this.verticesY!![v] = (paramY * this.verticesY!![v]) shr 7
-                                this.verticesZ!![v] = (paramZ * this.verticesZ!![v]) shr 7
+                                this.verticesX!![v] = (x * this.verticesX!![v]) shr 7
+                                this.verticesY!![v] = (y * this.verticesY!![v]) shr 7
+                                this.verticesZ!![v] = (z * this.verticesZ!![v]) shr 7
                                 this.verticesX!![v] += originX
                                 this.verticesY!![v] += originY
                                 this.verticesZ!![v] += originZ
@@ -4074,14 +4067,14 @@ class ModelGL : Model {
             if (transformationType == 5) {
                 // Alpha transform
                 if (this.faceGroups != null) {
-                    for (labelIdx in 0 until numLabels) {
-                        val label = labels[labelIdx]
+                    for (labelIndex in 0 until labelCount) {
+                        val label = labels[labelIndex]
                         if (label < this.faceGroups!!.size) {
-                            val group = this.faceGroups!![label]!!
-                            for (i in group.indices) {
-                                val face = group[i]
+                            val faceGroup = this.faceGroups!![label]!!
+                            for (i in faceGroup.indices) {
+                                val face = faceGroup[i]
                                 if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![face].toInt()) != 0) {
-                                    var alpha = (this.facesAlpha!![face].toInt() and 0xff) + paramX * 8
+                                    var alpha = (this.facesAlpha!![face].toInt() and 0xff) + x * 8
                                     if (alpha < 0) alpha = 0
                                     else if (alpha > 255) alpha = 255
                                     this.facesAlpha!![face] = alpha.toByte()
@@ -4104,22 +4097,22 @@ class ModelGL : Model {
             } else if (transformationType == 7) {
                 // Color transform
                 if (this.faceGroups != null) {
-                    for (labelIdx in 0 until numLabels) {
-                        val label = labels[labelIdx]
+                    for (labelIndex in 0 until labelCount) {
+                        val label = labels[labelIndex]
                         if (label < this.faceGroups!!.size) {
-                            val group = this.faceGroups!![label]!!
-                            for (i in group.indices) {
-                                val face = group[i]
+                            val faceGroup = this.faceGroups!![label]!!
+                            for (i in faceGroup.indices) {
+                                val face = faceGroup[i]
                                 if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![face].toInt()) != 0) {
                                     val hsl = this.facesColor!![face].toInt() and 0xffff
                                     var h = (hsl shr 10) and 0x3f
                                     var s = (hsl shr 7) and 0x7
                                     var l = hsl and 0x7f
-                                    h = (paramX + h) and 0x3f
-                                    s += paramY / 4
+                                    h = (x + h) and 0x3f
+                                    s += y / 4
                                     if (s < 0) s = 0
                                     else if (s > 7) s = 7
-                                    l += paramZ
+                                    l += z
                                     if (l < 0) l = 0
                                     else if (l > 127) l = 127
                                     this.facesColor!![face] = ((h shl 10) or (s shl 7) or l).toShort()
@@ -4143,14 +4136,14 @@ class ModelGL : Model {
                 if (transformationType == 8) {
                     // Billboard offset transform
                     if (this.billboardGroups != null) {
-                        for (labelIdx in 0 until numLabels) {
-                            val label = labels[labelIdx]
+                        for (labelIndex in 0 until labelCount) {
+                            val label = labels[labelIndex]
                             if (label < this.billboardGroups!!.size) {
-                                val group = this.billboardGroups!![label]!!
-                                for (i in group.indices) {
-                                    val surface = this.billboardSurfaces!![group[i]]!!
-                                    surface.offsetX += paramX
-                                    surface.offsetY += paramY
+                                val billboardGroup = this.billboardGroups!![label]!!
+                                for (i in billboardGroup.indices) {
+                                    val surface = this.billboardSurfaces!![billboardGroup[i]]!!
+                                    surface.offsetX += x
+                                    surface.offsetY += y
                                 }
                             }
                         }
@@ -4158,27 +4151,27 @@ class ModelGL : Model {
                 } else if (transformationType == 10) {
                     // Billboard scale transform
                     if (this.billboardGroups != null) {
-                        for (labelIdx in 0 until numLabels) {
-                            val label = labels[labelIdx]
+                        for (labelIndex in 0 until labelCount) {
+                            val label = labels[labelIndex]
                             if (label < this.billboardGroups!!.size) {
-                                val group = this.billboardGroups!![label]!!
-                                for (i in group.indices) {
-                                    val surface = this.billboardSurfaces!![group[i]]!!
-                                    surface.scaleX = (paramX * surface.scaleX) shr 7
-                                    surface.scaleY = (paramY * surface.scaleY) shr 7
+                                val billboardGroup = this.billboardGroups!![label]!!
+                                for (i in billboardGroup.indices) {
+                                    val surface = this.billboardSurfaces!![billboardGroup[i]]!!
+                                    surface.scaleX = (x * surface.scaleX) shr 7
+                                    surface.scaleY = (y * surface.scaleY) shr 7
                                 }
                             }
                         }
                     }
                 } else if (transformationType == 9 && this.billboardGroups != null) {
                     // Billboard rotation transform
-                    for (labelIdx in 0 until numLabels) {
-                        val label = labels[labelIdx]
+                    for (labelIndex in 0 until labelCount) {
+                        val label = labels[labelIndex]
                         if (label < this.billboardGroups!!.size) {
-                            val group = this.billboardGroups!![label]!!
-                            for (i in group.indices) {
-                                val surface = this.billboardSurfaces!![group[i]]!!
-                                surface.rotation = (paramX + surface.rotation) and 0x3fff
+                            val billboardGroup = this.billboardGroups!![label]!!
+                            for (i in billboardGroup.indices) {
+                                val surface = this.billboardSurfaces!![billboardGroup[i]]!!
+                                surface.rotation = (x + surface.rotation) and 0x3fff
                             }
                         }
                     }
@@ -4190,7 +4183,7 @@ class ModelGL : Model {
     override fun animateShadowtransform(transformType: Int, x: Int, y: Int, z: Int) {
         invalidateModernContent()
         if (transformType == 0) {
-            var transformCount = 0
+            var originVertexCount = 0
             originX = 0
             originY = 0
             originZ = 0
@@ -4198,12 +4191,12 @@ class ModelGL : Model {
                 originX += this.verticesX!![v]
                 originY += this.verticesY!![v]
                 originZ += this.verticesZ!![v]
-                transformCount++
+                originVertexCount++
             }
-            if (transformCount > 0) {
-                originX = x + originX / transformCount
-                originY = y + originY / transformCount
-                originZ = z + originZ / transformCount
+            if (originVertexCount > 0) {
+                originX = x + originX / originVertexCount
+                originY = y + originY / originVertexCount
+                originZ = z + originZ / originVertexCount
             } else {
                 originX = x
                 originY = y
@@ -4401,24 +4394,24 @@ class ModelGL : Model {
         invalidateModernContent()
         // Per-tile hillskew reshapes vertices; not matrix-representable.
         invalidateModernBuilt(13)
-        val sin = MathUtils.SINE[xan]
-        val cos = MathUtils.COSINE[xan]
-        val sin2 = MathUtils.SINE[zan]
-        val cos2 = MathUtils.COSINE[zan]
+        val sinX = MathUtils.SINE[xan]
+        val cosX = MathUtils.COSINE[xan]
+        val sinZ = MathUtils.SINE[zan]
+        val cosZ = MathUtils.COSINE[zan]
 
         for (v in 0 until this.maxDepth) {
             var x = this.verticesX!![v]
             var y = this.verticesY!![v]
             var z = this.verticesZ!![v]
             if (xan != 0) {
-                val tmp = (y * cos - z * sin) shr 14
-                z = (y * sin + z * cos) shr 14
+                val tmp = (y * cosX - z * sinX) shr 14
+                z = (y * sinX + z * cosX) shr 14
                 y = tmp
             }
 
             if (zan != 0) {
-                val tmp = (z * sin2 + x * cos2) shr 14
-                z = (z * cos2 - x * sin2) shr 14
+                val tmp = (z * sinZ + x * cosZ) shr 14
+                z = (z * cosZ - x * sinZ) shr 14
                 x = tmp
             }
 

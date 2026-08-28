@@ -306,15 +306,15 @@ END
 
     fun activate() {
         if (this.bound) {
-            val f_1 = glToolkit.fogFarDistance
-            val f_2 = glToolkit.fogMinimumStartPosition
-            val f_3 = f_1 - (f_1 - f_2) * 0.125F
-            val f_4 = f_1 - (f_1 - f_2) * 0.25F
+            val fogFar = glToolkit.fogFarDistance
+            val fogNear = glToolkit.fogMinimumStartPosition
+            val depthFadeStart = fogFar - (fogFar - fogNear) * 0.125F
+            val blendFadeStart = fogFar - (fogFar - fogNear) * 0.25F
             OpenGL.glProgramLocalParameter4fARB(
                 GL_VERTEX_PROGRAM_ARB,
                 0,
-                f_4,
-                f_3,
+                blendFadeStart,
+                depthFadeStart,
                 256.0F / glToolkit.waterTile!!.scale,
                 glToolkit.waterTile!!.intensity / 255.0F
             )
@@ -344,7 +344,7 @@ END
         }
     }
 
-    override fun applyEffectParams(param1: Int, param2: Int) {
+    override fun applyEffectParams(effectParam1: Int, effectParam2: Int) {
         // NOOP
     }
 

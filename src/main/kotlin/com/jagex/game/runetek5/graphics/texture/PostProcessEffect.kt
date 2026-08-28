@@ -10,7 +10,7 @@ abstract class PostProcessEffect(
 
     @JvmField var isActive: Boolean = false
 
-    abstract fun draw(var2: OpenGl2DTexture)
+    abstract fun draw(texture: OpenGl2DTexture)
 
     abstract fun destroy()
 

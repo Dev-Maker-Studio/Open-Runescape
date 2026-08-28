@@ -11,41 +11,41 @@ class NodeCollection {
         (tail as Node<Any>).previous = tail
     }
 
-    fun addFirst(node1: Node<*>) {
-        if (node1.previous != null) {
-            node1.unlink()
+    fun addFirst(node: Node<*>) {
+        if (node.previous != null) {
+            node.unlink()
         }
-        (node1 as Node<Any>).previous = tail.previous as Node<Any>
-        (node1 as Node<Any>).next = tail as Node<Any>
-        (node1.previous as Node<Any>).next = node1
-        (node1.next as Node<Any>).previous = node1
+        (node as Node<Any>).previous = tail.previous as Node<Any>
+        (node as Node<Any>).next = tail as Node<Any>
+        (node.previous as Node<Any>).next = node
+        (node.next as Node<Any>).previous = node
     }
 
     fun popHead(): Node<*>? {
-        val node2 = tail.next
-        return if (node2 == tail) {
+        val node = tail.next
+        return if (node == tail) {
             null
         } else {
-            node2!!.unlink()
-            node2
+            node!!.unlink()
+            node
         }
     }
 
-    fun spliceInto(nodecollection1: NodeCollection, node2: Node<*>?) {
-        val node4 = tail.previous
-        (tail as Node<Any>).previous = (node2 as Node<Any>).previous
-        (node2.previous as Node<Any>).next = tail
-        if (node2 != tail) {
-            (node2 as Node<Any>).previous = nodecollection1.tail.previous as Node<Any>
-            (node2.previous as Node<Any>).next = node2
-            (node4 as Node<Any>).next = nodecollection1.tail as Node<Any>
-            (nodecollection1.tail as Node<Any>).previous = node4
+    fun spliceInto(destination: NodeCollection, from: Node<*>?) {
+        val last = tail.previous
+        (tail as Node<Any>).previous = (from as Node<Any>).previous
+        (from.previous as Node<Any>).next = tail
+        if (from != tail) {
+            (from as Node<Any>).previous = destination.tail.previous as Node<Any>
+            (from.previous as Node<Any>).next = from
+            (last as Node<Any>).next = destination.tail as Node<Any>
+            (destination.tail as Node<Any>).previous = last
         }
     }
 
-    fun transferAllTo(nodecollection1: NodeCollection) {
+    fun transferAllTo(destination: NodeCollection) {
         if (tail.next != tail) {
-            spliceInto(nodecollection1, tail.next)
+            spliceInto(destination, tail.next)
         }
     }
 
@@ -58,46 +58,46 @@ class NodeCollection {
     }
 
     fun getLast(): Node<*>? {
-        val node3 = tail.previous
-        return if (node3 == tail) {
+        val node = tail.previous
+        return if (node == tail) {
             current = null
             null
         } else {
-            current = node3!!.previous
-            node3
+            current = node!!.previous
+            node
         }
     }
 
     fun next(): Node<*>? {
-        val node2 = current
-        return if (node2 == tail) {
+        val node = current
+        return if (node == tail) {
             current = null
             null
         } else {
-            current = node2!!.next
-            node2
+            current = node!!.next
+            node
         }
     }
 
     fun getNext(): Node<*>? {
-        val node2 = current
-        return if (node2 == tail) {
+        val node = current
+        return if (node == tail) {
             current = null
             null
         } else {
-            current = node2!!.previous
-            node2
+            current = node!!.previous
+            node
         }
     }
 
     fun size(): Int {
-        var i_2 = 0
-        var node3 = tail.next
-        while (node3 != tail) {
-            ++i_2
-            node3 = node3!!.next
+        var n = 0
+        var node = tail.next
+        while (node != tail) {
+            ++n
+            node = node!!.next
         }
-        return i_2
+        return n
     }
 
     fun add(element: Node<*>): Boolean {
@@ -106,14 +106,14 @@ class NodeCollection {
     }
 
     fun toNodeArray(): Array<Node<*>?> {
-        val arr_2 = arrayOfNulls<Node<*>>(size())
-        var i_3 = 0
-        var node4 = tail.next
-        while (node4 != tail) {
-            arr_2[i_3++] = node4
-            node4 = node4!!.next
+        val nodes = arrayOfNulls<Node<*>>(size())
+        var i = 0
+        var node = tail.next
+        while (node != tail) {
+            nodes[i++] = node
+            node = node!!.next
         }
-        return arr_2
+        return nodes
     }
 
     fun clear() {
@@ -132,14 +132,14 @@ class NodeCollection {
         return toNodeArray() as Array<Any>
     }
 
-    fun <T> toArray(arr_1: Array<T>): Array<T> {
-        var i_2 = 0
-        var node3 = tail.next
-        while (node3 != tail) {
-            (arr_1 as Array<Node<*>?>)[i_2++] = node3
-            node3 = node3!!.next
+    fun <T> toArray(array: Array<T>): Array<T> {
+        var i = 0
+        var node = tail.next
+        while (node != tail) {
+            (array as Array<Node<*>?>)[i++] = node
+            node = node!!.next
         }
-        return arr_1
+        return array
     }
 
     fun containsAll(elements: Collection<Node<*>>): Boolean {
@@ -167,13 +167,13 @@ class NodeCollection {
     }
 
     fun getFirstNode(): Node<*>? {
-        val node3 = tail.next
-        return if (node3 == tail) {
+        val node = tail.next
+        return if (node == tail) {
             current = null
             null
         } else {
-            current = node3!!.next
-            node3
+            current = node!!.next
+            node
         }
     }
 
@@ -185,14 +185,14 @@ class NodeCollection {
         return getFirstNode()
     }
 
-    fun addLast(node1: Node<*>) {
-        if (node1.previous != null) {
-            node1.unlink()
+    fun addLast(node: Node<*>) {
+        if (node.previous != null) {
+            node.unlink()
         }
-        (node1 as Node<Any>).previous = tail as Node<Any>
-        (node1 as Node<Any>).next = tail.next as Node<Any>
-        (node1.previous as Node<Any>).next = node1
-        (node1.next as Node<Any>).previous = node1
+        (node as Node<Any>).previous = tail as Node<Any>
+        (node as Node<Any>).next = tail.next as Node<Any>
+        (node.previous as Node<Any>).next = node
+        (node.next as Node<Any>).previous = node
     }
 
     fun remove_all() {

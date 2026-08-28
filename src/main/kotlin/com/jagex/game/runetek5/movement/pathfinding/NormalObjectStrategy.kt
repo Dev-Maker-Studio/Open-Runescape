@@ -10,8 +10,8 @@ class NormalObjectStrategy : RouteStrategy() {
     @JvmField
     var locShape: ObjectShapes? = null
 
-    override fun canExit(size: Int, x: Int, y: Int, var4: CollisionMap): Boolean {
-        return var4.canReachLoc(
+    override fun canExit(size: Int, x: Int, y: Int, clipMap: CollisionMap): Boolean {
+        return clipMap.canReachLoc(
             x, y, size,
             super.destinationX, super.destinationY,
             locShape!!.getValue(), rotation

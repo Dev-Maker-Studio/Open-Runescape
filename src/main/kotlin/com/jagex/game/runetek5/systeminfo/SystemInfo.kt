@@ -81,52 +81,52 @@ class SystemInfo : Node<SystemInfo>() {
             javaVendor.lowercase().indexOf("apple") != -1 -> 3
             else -> 4
         }
-        var minorVerIndex = if (javaVersion.startsWith("1.")) 2 else 0
-        var update = 0
-        var var_4: Char
+        var versionPos = if (javaVersion.startsWith("1.")) 2 else 0
+        var versionPart = 0
+        var ch: Char
         try {
-            while (minorVerIndex < javaVersion.length) {
-                var_4 = javaVersion[minorVerIndex]
-                if (var_4 < '0' || var_4 > '9') {
+            while (versionPos < javaVersion.length) {
+                ch = javaVersion[versionPos]
+                if (ch < '0' || ch > '9') {
                     break
                 }
-                update = var_4.code - 48 + update * 10
-                ++minorVerIndex
+                versionPart = ch.code - 48 + versionPart * 10
+                ++versionPos
             }
         } catch (exception: Exception) {
             // NOOP
         }
-        javaBuild = update
-        minorVerIndex = javaVersion.indexOf('.', 2) + 1
-        update = 0
+        javaBuild = versionPart
+        versionPos = javaVersion.indexOf('.', 2) + 1
+        versionPart = 0
         try {
-            while (minorVerIndex < javaVersion.length) {
-                var_4 = javaVersion[minorVerIndex]
-                if (var_4 < '0' || var_4 > '9') {
+            while (versionPos < javaVersion.length) {
+                ch = javaVersion[versionPos]
+                if (ch < '0' || ch > '9') {
                     break
                 }
-                update = var_4.code - 48 + update * 10
-                ++minorVerIndex
+                versionPart = ch.code - 48 + versionPart * 10
+                ++versionPos
             }
         } catch (exception: Exception) {
             // NOOP
         }
-        javaSubBuild = update
-        minorVerIndex = javaVersion.indexOf('_', 4) + 1
-        update = 0
+        javaSubBuild = versionPart
+        versionPos = javaVersion.indexOf('_', 4) + 1
+        versionPart = 0
         try {
-            while (minorVerIndex < javaVersion.length) {
-                var_4 = javaVersion[minorVerIndex]
-                if (var_4 < '0' || var_4 > '9') {
+            while (versionPos < javaVersion.length) {
+                ch = javaVersion[versionPos]
+                if (ch < '0' || ch > '9') {
                     break
                 }
-                update = var_4.code - 48 + update * 10
-                ++minorVerIndex
+                versionPart = ch.code - 48 + versionPart * 10
+                ++versionPos
             }
         } catch (exception: Exception) {
             // NOOP
         }
-        javaUpdate = update
+        javaUpdate = versionPart
         idk = false
         maxMem = GameShell.maxMemory
         processors = if (javaBuild > 3) {
@@ -143,68 +143,68 @@ class SystemInfo : Node<SystemInfo>() {
             }
             val rawCpuInfo = HardwareInfo.getRawCPUInfo()
             if (rawCpuInfo != null && rawCpuInfo.size % 5 == 0) {
-                val hashmap6 = HashMap<Int, RawCpuInfo>()
-                for (i_7 in 0 until rawCpuInfo.size / 5) {
-                    val i_8 = rawCpuInfo[i_7 * 5]
-                    val i_9 = rawCpuInfo[i_7 * 5 + 1]
-                    val i_10 = rawCpuInfo[i_7 * 5 + 2]
-                    val i_11 = rawCpuInfo[i_7 * 5 + 3]
-                    val i_12 = rawCpuInfo[i_7 * 5 + 4]
-                    val class43013 = RawCpuInfo(i_8, i_9, i_10, i_11, i_12)
-                    hashmap6[i_8] = class43013
+                val cpuidByLeaf = HashMap<Int, RawCpuInfo>()
+                for (i in 0 until rawCpuInfo.size / 5) {
+                    val leaf = rawCpuInfo[i * 5]
+                    val eax = rawCpuInfo[i * 5 + 1]
+                    val ebx = rawCpuInfo[i * 5 + 2]
+                    val ecx = rawCpuInfo[i * 5 + 3]
+                    val edx = rawCpuInfo[i * 5 + 4]
+                    val cpuidResult = RawCpuInfo(leaf, eax, ebx, ecx, edx)
+                    cpuidByLeaf[leaf] = cpuidResult
                 }
-                val class43015 = hashmap6[0]
-                if (class43015 != null) {
-                    val rsbytebuffer16 = Packet(13)
-                    rsbytebuffer16.writeIntLittle(class43015.resultEBX)
-                    rsbytebuffer16.writeIntLittle(class43015.resultEDX)
-                    rsbytebuffer16.writeIntLittle(class43015.resultECX)
-                    rsbytebuffer16.currentPosition = 0
-                    cpuType = rsbytebuffer16.readString()
+                val vendorLeaf = cpuidByLeaf[0]
+                if (vendorLeaf != null) {
+                    val vendorBuffer = Packet(13)
+                    vendorBuffer.writeIntLittle(vendorLeaf.resultEBX)
+                    vendorBuffer.writeIntLittle(vendorLeaf.resultEDX)
+                    vendorBuffer.writeIntLittle(vendorLeaf.resultECX)
+                    vendorBuffer.currentPosition = 0
+                    cpuType = vendorBuffer.readString()
                 }
-                val class43027 = hashmap6[1]
-                if (class43027 != null) {
-                    cpuModelInfo = class43027.resultEAX
-                    val i_9 = class43027.resultEBX
-                    cpuFamilyId = i_9 shr 16 and 0xff
-                    cpuFeatureFlags[0] = class43027.resultECX
-                    cpuFeatureFlags[1] = class43027.resultEDX
+                val featureLeaf = cpuidByLeaf[1]
+                if (featureLeaf != null) {
+                    cpuModelInfo = featureLeaf.resultEAX
+                    val ebx = featureLeaf.resultEBX
+                    cpuFamilyId = ebx shr 16 and 0xff
+                    cpuFeatureFlags[0] = featureLeaf.resultECX
+                    cpuFeatureFlags[1] = featureLeaf.resultEDX
                 }
-                val class43017 = hashmap6[-2147483647]
-                if (class43017 != null) {
-                    cpuFeatureFlags[2] = class43017.resultEDX
+                val extendedLeaf = cpuidByLeaf[-2147483647]
+                if (extendedLeaf != null) {
+                    cpuFeatureFlags[2] = extendedLeaf.resultEDX
                 }
-                val rsbytebuffer18 = Packet(49)
-                for (i_11 in -2147483646..-2147483644) {
-                    val class43019 = hashmap6[i_11]
-                    if (class43019 != null) {
-                        rsbytebuffer18.writeIntLittle(class43019.resultEAX)
-                        rsbytebuffer18.writeIntLittle(class43019.resultEBX)
-                        rsbytebuffer18.writeIntLittle(class43019.resultECX)
-                        rsbytebuffer18.writeIntLittle(class43019.resultEDX)
+                val brandBuffer = Packet(49)
+                for (leaf in -2147483646..-2147483644) {
+                    val brandLeaf = cpuidByLeaf[leaf]
+                    if (brandLeaf != null) {
+                        brandBuffer.writeIntLittle(brandLeaf.resultEAX)
+                        brandBuffer.writeIntLittle(brandLeaf.resultEBX)
+                        brandBuffer.writeIntLittle(brandLeaf.resultECX)
+                        brandBuffer.writeIntLittle(brandLeaf.resultEDX)
                     }
                 }
-                rsbytebuffer18.currentPosition = 0
-                cpuData = rsbytebuffer18.readString()
+                brandBuffer.currentPosition = 0
+                cpuData = brandBuffer.readString()
             }
-            val dxdiagDisplaydeviceProps = HardwareInfo.getDXDiagDisplayDevicesProps()
-            if (dxdiagDisplaydeviceProps != null && dxdiagDisplaydeviceProps.isNotEmpty() && dxdiagDisplaydeviceProps[0] != null) {
-                var i_7 = 0
-                while (i_7 < dxdiagDisplaydeviceProps[0].size) {
-                    if ("szDescription".equals(dxdiagDisplaydeviceProps[0][i_7], ignoreCase = true)) {
-                        gpuModel = dxdiagDisplaydeviceProps[0][i_7 + 1]
-                    } else if ("szDriverDateEnglish".equals(dxdiagDisplaydeviceProps[0][i_7], ignoreCase = true)) {
-                        val string_28 = dxdiagDisplaydeviceProps[0][i_7 + 1]
+            val dxdiagDisplayDeviceProps = HardwareInfo.getDXDiagDisplayDevicesProps()
+            if (dxdiagDisplayDeviceProps != null && dxdiagDisplayDeviceProps.isNotEmpty() && dxdiagDisplayDeviceProps[0] != null) {
+                var i = 0
+                while (i < dxdiagDisplayDeviceProps[0].size) {
+                    if ("szDescription".equals(dxdiagDisplayDeviceProps[0][i], ignoreCase = true)) {
+                        gpuModel = dxdiagDisplayDeviceProps[0][i + 1]
+                    } else if ("szDriverDateEnglish".equals(dxdiagDisplayDeviceProps[0][i], ignoreCase = true)) {
+                        val driverDate = dxdiagDisplayDeviceProps[0][i + 1]
                         try {
-                            val i_9 = string_28.indexOf('/')
-                            val i_10 = string_28.indexOf('/', i_9 + 1)
-                            dxDriverMonth = string_28.substring(0, i_9).toInt()
-                            dxDriverYear = string_28.substring(i_10 + 1, string_28.indexOf(' ', i_10)).toInt()
+                            val firstSlash = driverDate.indexOf('/')
+                            val secondSlash = driverDate.indexOf('/', firstSlash + 1)
+                            dxDriverMonth = driverDate.substring(0, firstSlash).toInt()
+                            dxDriverYear = driverDate.substring(secondSlash + 1, driverDate.indexOf(' ', secondSlash)).toInt()
                         } catch (exception: Exception) {
                             // NOOP
                         }
                     }
-                    i_7 += 2
+                    i += 2
                 }
             }
             val dxdiagSystemProps = HardwareInfo.getDXDiagSystemProps()
@@ -246,14 +246,14 @@ class SystemInfo : Node<SystemInfo>() {
     }
 
     fun encode(): Int {
-        val b_2: Byte = 38
-        var i_3 = b_2.toInt() + Utils.stringLengthPlus2(gpuModel)
-        i_3 += Utils.stringLengthPlus2(gpuDriverVersion)
-        i_3 += Utils.stringLengthPlus2(dwDirectxVersion)
-        i_3 += Utils.stringLengthPlus2(dxLetterVersion)
-        i_3 += Utils.stringLengthPlus2(cpuType)
-        i_3 += Utils.stringLengthPlus2(cpuData)
-        return i_3
+        val baseLength: Byte = 38
+        var length = baseLength.toInt() + Utils.stringLengthPlus2(gpuModel)
+        length += Utils.stringLengthPlus2(gpuDriverVersion)
+        length += Utils.stringLengthPlus2(dwDirectxVersion)
+        length += Utils.stringLengthPlus2(dxLetterVersion)
+        length += Utils.stringLengthPlus2(cpuType)
+        length += Utils.stringLengthPlus2(cpuData)
+        return length
     }
 
     fun truncateStrings() {
@@ -295,8 +295,8 @@ class SystemInfo : Node<SystemInfo>() {
         machineInfoBuffer.writeJagString(cpuData ?: "")
         machineInfoBuffer.writeByte(cpuCores)
         machineInfoBuffer.writeByte(cpuFamilyId)
-        for (i_3 in cpuFeatureFlags.indices) {
-            machineInfoBuffer.writeInt(cpuFeatureFlags[i_3])
+        for (i in cpuFeatureFlags.indices) {
+            machineInfoBuffer.writeInt(cpuFeatureFlags[i])
         }
         machineInfoBuffer.writeInt(cpuModelInfo)
     }
@@ -332,73 +332,73 @@ class SystemInfo : Node<SystemInfo>() {
         var OS_ARCH: String = ""
 
         @JvmStatic
-        fun getCacheCompletionPercent(percentage: Long, i_2: Int, bool3: Boolean, language: Language): String {
-            var prefix: Char = 44.toChar()
-            var postfix: Char = 46.toChar()
+        fun getCacheCompletionPercent(percentage: Long, decimalPlaces: Int, groupDigits: Boolean, language: Language): String {
+            var decimalSeparator: Char = 44.toChar()
+            var groupSeparator: Char = 46.toChar()
             if (language == Language.ENGLISH) {
-                prefix = 46.toChar()
-                postfix = 44.toChar()
+                decimalSeparator = 46.toChar()
+                groupSeparator = 44.toChar()
             }
             if (language == Language.FRENCH) {
-                postfix = 160.toChar()
+                groupSeparator = 160.toChar()
             }
-            var invert = false
+            var negative = false
             var mutablePercentage = percentage
             if (mutablePercentage < 0L) {
-                invert = true
+                negative = true
                 mutablePercentage = -mutablePercentage
             }
-            val progressionStringbuilder = StringBuilder(26)
-            var i_10: Int
-            var i_11: Int
-            if (i_2 > 0) {
-                for (i_10 in 0 until i_2) {
-                    i_11 = mutablePercentage.toInt()
+            val builder = StringBuilder(26)
+            var digitsSinceSeparator: Int
+            var remaining: Int
+            if (decimalPlaces > 0) {
+                for (i in 0 until decimalPlaces) {
+                    remaining = mutablePercentage.toInt()
                     mutablePercentage /= 10L
-                    progressionStringbuilder.append((i_11 + 48 - mutablePercentage.toInt() * 10).toChar())
+                    builder.append((remaining + 48 - mutablePercentage.toInt() * 10).toChar())
                 }
-                progressionStringbuilder.append(prefix)
+                builder.append(decimalSeparator)
             }
-            i_10 = 0
+            digitsSinceSeparator = 0
             while (true) {
-                i_11 = mutablePercentage.toInt()
+                remaining = mutablePercentage.toInt()
                 mutablePercentage /= 10L
-                progressionStringbuilder.append((i_11 + 48 - mutablePercentage.toInt() * 10).toChar())
+                builder.append((remaining + 48 - mutablePercentage.toInt() * 10).toChar())
                 if (mutablePercentage == 0L) {
-                    if (invert) {
-                        progressionStringbuilder.append('-')
+                    if (negative) {
+                        builder.append('-')
                     }
-                    return progressionStringbuilder.reverse().toString()
+                    return builder.reverse().toString()
                 }
-                if (bool3) {
-                    ++i_10
-                    if (i_10 % 3 == 0) {
-                        progressionStringbuilder.append(postfix)
+                if (groupDigits) {
+                    ++digitsSinceSeparator
+                    if (digitsSinceSeparator % 3 == 0) {
+                        builder.append(groupSeparator)
                     }
                 }
             }
         }
 
         @JvmStatic
-        fun drawDebugInformation(x: Int, y: Int, inter: Component) {
-            val currDrawX = inter.width + x
-            var currDrawY = y + 15
+        fun drawDebugInformation(x: Int, y: Int, component: Component) {
+            val drawX = component.width + x
+            var drawY = y + 15
             if (Client.DRAW_DEBUG) {
                 var fpsColor = -256
                 if (GameShell.FPS < 20) {
                     fpsColor = -65536
                 }
-                FontManager.debugOverlayFont!!.renderLeftAligned("Fps:" + GameShell.FPS, currDrawX, currDrawY, fpsColor, -1)
-                currDrawY += 15
+                FontManager.debugOverlayFont!!.renderLeftAligned("Fps:" + GameShell.FPS, drawX, drawY, fpsColor, -1)
+                drawY += 15
                 val runtime = Runtime.getRuntime()
                 val totalMem = runtime.totalMemory() / 1024L
-                val freeMem = totalMem - runtime.freeMemory() / 1024L
+                val usedMem = totalMem - runtime.freeMemory() / 1024L
                 var memColor = -256
-                if (freeMem > 262144L) {
+                if (usedMem > 262144L) {
                     memColor = -65536
                 }
-                FontManager.debugOverlayFont!!.renderLeftAligned("Mem:$freeMem/${totalMem}k", currDrawX, currDrawY, memColor, -1)
-                currDrawY += 15
+                FontManager.debugOverlayFont!!.renderLeftAligned("Mem:$usedMem/${totalMem}k", drawX, drawY, memColor, -1)
+                drawY += 15
                 val gamePing = Client.GAME_CONNECTION_CONTEXT!!.pinger.getPing()
                 var gamePingStr = "N/A"
                 if (gamePing != -1L) {
@@ -407,8 +407,8 @@ class SystemInfo : Node<SystemInfo>() {
                         gamePingStr = TextUtils.setTextColor(16711680) + gamePingStr + TextUtils.setTextColor(16776960)
                     }
                 }
-                FontManager.debugOverlayFont!!.renderLeftAligned("Game: In:" + Client.GAME_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + Client.GAME_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + gamePingStr, currDrawX, currDrawY, -256, -1)
-                currDrawY += 15
+                FontManager.debugOverlayFont!!.renderLeftAligned("Game: In:" + Client.GAME_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + Client.GAME_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + gamePingStr, drawX, drawY, -256, -1)
+                drawY += 15
                 val lobbyPing = Client.LOBBY_CONNECTION_CONTEXT!!.pinger.getPing()
                 var lobbyPingStr = "N/A"
                 if (lobbyPing != -1L) {
@@ -417,11 +417,11 @@ class SystemInfo : Node<SystemInfo>() {
                         lobbyPingStr = TextUtils.setTextColor(16711680) + lobbyPingStr + TextUtils.setTextColor(16776960)
                     }
                 }
-                FontManager.debugOverlayFont!!.renderLeftAligned("Lobby: In:" + Client.LOBBY_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + Client.LOBBY_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + lobbyPingStr, currDrawX, currDrawY, -256, -1)
-                currDrawY += 15
-                val i_19 = Renderers.activeToolkit!!.getOffheap() / 1024
-                FontManager.debugOverlayFont!!.renderLeftAligned("Offheap:${i_19}k", currDrawX, currDrawY, if (i_19 > 65536) -65536 else -256, -1)
-                currDrawY += 15
+                FontManager.debugOverlayFont!!.renderLeftAligned("Lobby: In:" + Client.LOBBY_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + Client.LOBBY_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + lobbyPingStr, drawX, drawY, -256, -1)
+                drawY += 15
+                val offheapKb = Renderers.activeToolkit!!.getOffheap() / 1024
+                FontManager.debugOverlayFont!!.renderLeftAligned("Offheap:${offheapKb}k", drawX, drawY, if (offheapKb > 65536) -65536 else -256, -1)
+                drawY += 15
                 var totalArchives = 0
                 var filesReceived = 0
                 var currentFiles = 0
@@ -433,11 +433,11 @@ class SystemInfo : Node<SystemInfo>() {
                         currentFiles += workers[index]!!.currentRequestId()
                     }
                 }
-                val completion = currentFiles * 100 / totalArchives
-                val i_24 = filesReceived * 10000 / totalArchives
-                val cacheCompletion = "Cache:" + getCacheCompletionPercent(i_24.toLong(), 2, true, Language.ENGLISH) + "% (" + completion + "%)"
-                Renderers.FONT_RENDERER!!.renderLeftAligned(cacheCompletion, currDrawX, currDrawY, -256, -1)
-                currDrawY += 12
+                val requestPercent = currentFiles * 100 / totalArchives
+                val cachePercentHundredths = filesReceived * 10000 / totalArchives
+                val cacheCompletion = "Cache:" + getCacheCompletionPercent(cachePercentHundredths.toLong(), 2, true, Language.ENGLISH) + "% (" + requestPercent + "%)"
+                Renderers.FONT_RENDERER!!.renderLeftAligned(cacheCompletion, drawX, drawY, -256, -1)
+                drawY += 12
             }
         }
     }

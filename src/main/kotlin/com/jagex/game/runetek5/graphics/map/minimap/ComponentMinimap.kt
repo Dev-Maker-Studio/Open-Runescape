@@ -190,39 +190,39 @@ object ComponentMinimap {
                 val absX: Int
                 val absY: Int
                 val rotation: Int
-                val i_11: Int
+                val zoom: Int
                 if (Camera.cameraCalculationType == 4) {
                     absX = Client.cameraTargetAbsX
                     absY = Client.cameraTargetAbsY
                     rotation = (-Camera.camAngleY).toInt() and 0x3fff
-                    i_11 = 4096
+                    zoom = 4096
                 } else {
-                    val vector322: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
-                    absX = vector322.x.toInt()
-                    absY = vector322.z.toInt()
+                    val playerCoords: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
+                    absX = playerCoords.x.toInt()
+                    absY = playerCoords.z.toInt()
                     rotation = (-Camera.camAngleY).toInt() + Client.minimapRotation and 0x3fff
-                    i_11 = 4096 - Client.minimapZoom * 16
+                    zoom = 4096 - Client.minimapZoom * 16
                 }
 
-                val i_12 = absX / 128 + 48
-                val i_13 = 48 + Resource.mapRegion!!.sceneSizeY * 4 - absY / 128
-                minimapBackground!!.rotate(clipLeft + component.width / 2.0F, clipTop + component.height / 2.0F, i_12.toFloat(), i_13.toFloat(), i_11, rotation shl 2, dimension, clipLeft, clipTop)
+                val pivotX = absX / 128 + 48
+                val pivotY = 48 + Resource.mapRegion!!.sceneSizeY * 4 - absY / 128
+                minimapBackground!!.rotate(clipLeft + component.width / 2.0F, clipTop + component.height / 2.0F, pivotX.toFloat(), pivotY.toFloat(), zoom, rotation shl 2, dimension, clipLeft, clipTop)
                 val staticElements: StaticElements = Resource.mapRegion!!.getStaticElements()
 
-                var class282Sub3815: IntNode? = MapRegion.staticElementsAwaitingDrawing.getFirst() as? IntNode
-                while (class282Sub3815 != null) {
-                    val index = class282Sub3815.value
+                var staticElementNode: IntNode? = MapRegion.staticElementsAwaitingDrawing.getFirst() as? IntNode
+                while (staticElementNode != null) {
+                    val index = staticElementNode.value
                     val sceneX = (staticElements.bitpackedPlacement[index] shr 14 and 0x3fff) - baseCoordinates.x
                     val sceneY = (staticElements.bitpackedPlacement[index] and 0x3fff) - baseCoordinates.y
-                    val i_19 = sceneX * 4 + 2 - absX / 128
-                    val i_20 = sceneY * 4 + 2 - absY / 128
-                    drawMec(toolkit, dimension, component, clipLeft, clipTop, i_19, i_20, staticElements.mapCategoryIds[index])
-                    class282Sub3815 = MapRegion.staticElementsAwaitingDrawing.next() as? IntNode
+                    val offsetX = sceneX * 4 + 2 - absX / 128
+                    val offsetY = sceneY * 4 + 2 - absY / 128
+                    drawMec(toolkit, dimension, component, clipLeft, clipTop, offsetX, offsetY, staticElements.mapCategoryIds[index])
+                    staticElementNode = MapRegion.staticElementsAwaitingDrawing.next() as? IntNode
                 }
 
                 for (index in 0 until minimapLocCount) {
-                    val i_16 = minimapLocSceneX[index] * 4 + 2 - absX / 128
-                    val i_17 = minimapLocSceneY[index] * 4 + 2 - absY / 128
+                    val offsetX = minimapLocSceneX[index] * 4 + 2 - absX / 128
+                    val offsetY = minimapLocSceneY[index] * 4 + 2 - absY / 128
                     var locType: ObjectType = Resource.mapRegion!!.getLoctypeList().list(minimapLocId[index])
                     if (locType.alternativeIds != null) {
                         locType = locType.getMultiLoc(VarProviders.PLAYER_VAR_PROVIDER) ?: continue
@@ -231,17 +231,17 @@ object ComponentMinimap {
                         }
                     }
 
-                    drawMec(toolkit, dimension, component, clipLeft, clipTop, i_16, i_17, locType.mapCategoryid)
+                    drawMec(toolkit, dimension, component, clipLeft, clipTop, offsetX, offsetY, locType.mapCategoryid)
                 }
 
                 var groundItem: GroundItemWrapper? = Client.GROUND_ITEMS.first() as? GroundItemWrapper
                 while (groundItem != null) {
                     val plane = (groundItem.pointer shr 28 and 0x3L).toInt()
                     if (plane == MAP_PLANE) {
-                        val i_17 = (groundItem.pointer and 0x3fffL).toInt() - baseCoordinates.x
-                        val i_18 = (groundItem.pointer shr 14 and 0x3fffL).toInt() - baseCoordinates.y
-                        val sizeX = i_17 * 4 + 2 - absX / 128
-                        val sizeZ = i_18 * 4 + 2 - absY / 128
+                        val sceneX = (groundItem.pointer and 0x3fffL).toInt() - baseCoordinates.x
+                        val sceneY = (groundItem.pointer shr 14 and 0x3fffL).toInt() - baseCoordinates.y
+                        val sizeX = sceneX * 4 + 2 - absX / 128
+                        val sizeZ = sceneY * 4 + 2 - absY / 128
                         drawEntity(component, dimension, clipLeft, clipTop, sizeX, sizeZ, StaticMedia.mapdotSprites?.get(0))
                     }
                     groundItem = Client.GROUND_ITEMS.next() as? GroundItemWrapper
@@ -351,10 +351,10 @@ object ComponentMinimap {
         if (sprite != null) {
             Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, component.width + clipLeft, clipTop + component.height)
             if (minimapState < 3) {
-                var i_5 = (-Camera.camAngleY).toInt()
-                i_5 = i_5 + Client.minimapRotation * 2 and 0x3fff
-                i_5 = i_5 shl 2
-                StaticMedia.compassSprite!!.drawRotatedSprite(component.width / 2.0F + clipLeft, component.height / 2.0F + clipTop, i_5, sprite.surface, clipLeft, clipTop)
+                var angle = (-Camera.camAngleY).toInt()
+                angle = angle + Client.minimapRotation * 2 and 0x3fff
+                angle = angle shl 2
+                StaticMedia.compassSprite!!.drawRotatedSprite(component.width / 2.0F + clipLeft, component.height / 2.0F + clipTop, angle, sprite.surface, clipLeft, clipTop)
             } else {
                 Renderers.activeToolkit!!.clearRectangle(sprite.surface, clipLeft, clipTop)
             }
@@ -405,7 +405,7 @@ object ComponentMinimap {
     }
 
     @JvmStatic
-    fun drawNpcs(toolkit: AbstractToolkit, offsetX: Int, offsetY: Int, component: Component, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
+    fun drawNpcs(toolkit: AbstractToolkit, absX: Int, absY: Int, component: Component, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
         for (npcIndex in 0 until Client.NPC_UPDATE_INDEX) {
             val node: ObjectNode? = Client.NPC_MAP.get(Client.NPC_UPDATE_INDICES[npcIndex].toLong()) as? ObjectNode
             if (node != null) {
@@ -417,9 +417,9 @@ object ComponentMinimap {
                     }
 
                     if (npctype != null && npctype.displayOnMinimap && npctype.visible) {
-                        val abs: Vector3 = npcEntity.getAbsolutePosition().coords
-                        val sizeX = abs.x.toInt() / 128 - offsetX / 128
-                        val sizeZ = abs.z.toInt() / 128 - offsetY / 128
+                        val absolutePosition: Vector3 = npcEntity.getAbsolutePosition().coords
+                        val sizeX = absolutePosition.x.toInt() / 128 - absX / 128
+                        val sizeZ = absolutePosition.z.toInt() / 128 - absY / 128
                         if (npctype.mecId != -1) {
                             drawMec(toolkit, dimension, component, clipLeft, clipTop, sizeX, sizeZ, npctype.mecId)
                         } else {
@@ -432,113 +432,113 @@ object ComponentMinimap {
     }
 
     @JvmStatic
-    fun drawMec(toolkit: AbstractToolkit, class4551: ComponentSurface, component: Component, clipLeft: Int, clipTop: Int, i_5: Int, i_6: Int, mecId: Int) {
+    fun drawMec(toolkit: AbstractToolkit, dimension: ComponentSurface, component: Component, clipLeft: Int, clipTop: Int, offsetX: Int, offsetY: Int, mecId: Int) {
         val mecType: MECType? = TypeLists.MEC!!.list(mecId)
         if (mecType != null && mecType.displayedOnMinimap && mecType.shouldDraw(VarProviders.PLAYER_VAR_PROVIDER)) {
-            var i_11: Int
+            var i: Int
             if (mecType.offsets != null) {
                 val offsets = mecType.offsets
-                val ints_10 = IntArray(offsets!!.size)
-                i_11 = 0
-                while (i_11 < ints_10.size / 2) {
-                    val rotation2: Int
+                val polygonPoints = IntArray(offsets!!.size)
+                i = 0
+                while (i < polygonPoints.size / 2) {
+                    val rotation: Int
                     if (Camera.cameraCalculationType == 4) {
-                        rotation2 = Camera.camAngleY.toInt() and 0x3fff
+                        rotation = Camera.camAngleY.toInt() and 0x3fff
                     } else {
-                        rotation2 = Camera.camAngleY.toInt() + Client.minimapRotation and 0x3fff
+                        rotation = Camera.camAngleY.toInt() + Client.minimapRotation and 0x3fff
                     }
-                    var i_13_2 = MathUtils.SINE[rotation2]
-                    var i_14_2 = MathUtils.COSINE[rotation2]
+                    var xan = MathUtils.SINE[rotation]
+                    var zan = MathUtils.COSINE[rotation]
                     if (Camera.cameraCalculationType != 4) {
-                        i_13_2 = i_13_2 * 256 / (Client.minimapZoom + 256)
-                        i_14_2 = i_14_2 * 256 / (Client.minimapZoom + 256)
+                        xan = xan * 256 / (Client.minimapZoom + 256)
+                        zan = zan * 256 / (Client.minimapZoom + 256)
                     }
-                    ints_10[i_11 * 2] = clipLeft + component.width / 2 + ((offsets[i_11 * 2 + 1] * 4 + i_6) * i_13_2 + i_14_2 * (i_5 + offsets[i_11 * 2] * 4) shr 14)
-                    ints_10[i_11 * 2 + 1] = component.height / 2 + clipTop - ((offsets[i_11 * 2 + 1] * 4 + i_6) * i_14_2 - i_13_2 * (i_5 + offsets[i_11 * 2] * 4) shr 14)
-                    i_11++
+                    polygonPoints[i * 2] = clipLeft + component.width / 2 + ((offsets[i * 2 + 1] * 4 + offsetY) * xan + zan * (offsetX + offsets[i * 2] * 4) shr 14)
+                    polygonPoints[i * 2 + 1] = component.height / 2 + clipTop - ((offsets[i * 2 + 1] * 4 + offsetY) * zan - xan * (offsetX + offsets[i * 2] * 4) shr 14)
+                    i++
                 }
-                val class11919: InteractiveComponentSprite? = component.addInteractiveSprite(toolkit)
-                if (class11919 != null) {
-                    WorldMapRasterManager.fillPolygonMasked(toolkit, ints_10, mecType.lineColor, class11919.rowStartX!!, class11919.rowWidth!!)
+                val sprite: InteractiveComponentSprite? = component.addInteractiveSprite(toolkit)
+                if (sprite != null) {
+                    WorldMapRasterManager.fillPolygonMasked(toolkit, polygonPoints, mecType.lineColor, sprite.rowStartX!!, sprite.rowWidth!!)
                 }
                 if (mecType.dashLineSpacing > 0) {
-                    var i_15: Int
-                    var i_16: Int
-                    var i_17: Int
+                    var closeY1: Int
+                    var closeTmp: Int
+                    var swapTmp: Int
                     val colors = mecType.colors!!
                     val colorPointers = mecType.colorPointers!!
-                    var rotation3 = 0
-                    while (rotation3 < ints_10.size / 2 - 1) {
-                        var i_13_3 = ints_10[rotation3 * 2]
-                        var i_14_3 = ints_10[rotation3 * 2 + 1]
-                        var i_15_2 = ints_10[(rotation3 + 1) * 2]
-                        var i_16_2 = ints_10[(rotation3 + 1) * 2 + 1]
-                        if (i_15_2 < i_13_3) {
-                            i_17 = i_13_3
-                            val i_18 = i_14_3
-                            i_13_3 = i_15_2
-                            i_14_3 = i_16_2
-                            i_15_2 = i_17
-                            i_16_2 = i_18
-                        } else if (i_13_3 == i_15_2 && i_16_2 < i_14_3) {
-                            i_17 = i_14_3
-                            i_14_3 = i_16_2
-                            i_16_2 = i_17
+                    var j = 0
+                    while (j < polygonPoints.size / 2 - 1) {
+                        var lineX0 = polygonPoints[j * 2]
+                        var lineY0 = polygonPoints[j * 2 + 1]
+                        var lineX1 = polygonPoints[(j + 1) * 2]
+                        var lineY1 = polygonPoints[(j + 1) * 2 + 1]
+                        if (lineX1 < lineX0) {
+                            swapTmp = lineX0
+                            val swapTmpY = lineY0
+                            lineX0 = lineX1
+                            lineY0 = lineY1
+                            lineX1 = swapTmp
+                            lineY1 = swapTmpY
+                        } else if (lineX0 == lineX1 && lineY1 < lineY0) {
+                            swapTmp = lineY0
+                            lineY0 = lineY1
+                            lineY1 = swapTmp
                         }
-                        toolkit.drawTexturedLine(i_13_3, i_14_3, i_15_2, i_16_2, colors[colorPointers[rotation3].toInt() and 0xff], class4551, clipLeft, clipTop, mecType.dashLineSpacing, mecType.dashLineLength, mecType.dashLineOffset)
-                        rotation3++
+                        toolkit.drawTexturedLine(lineX0, lineY0, lineX1, lineY1, colors[colorPointers[j].toInt() and 0xff], dimension, clipLeft, clipTop, mecType.dashLineSpacing, mecType.dashLineLength, mecType.dashLineOffset)
+                        j++
                     }
-                    rotation3 = ints_10[ints_10.size - 2]
-                    var i_13_4 = ints_10[ints_10.size - 1]
-                    var i_14_4 = ints_10[0]
-                    i_15 = ints_10[1]
-                    if (i_14_4 < rotation3) {
-                        i_16 = rotation3
-                        i_17 = i_13_4
-                        rotation3 = i_14_4
-                        i_13_4 = i_15
-                        i_14_4 = i_16
-                        i_15 = i_17
-                    } else if (i_14_4 == rotation3 && i_15 < i_13_4) {
-                        i_16 = i_13_4
-                        i_13_4 = i_15
-                        i_15 = i_16
+                    j = polygonPoints[polygonPoints.size - 2]
+                    var closeY0 = polygonPoints[polygonPoints.size - 1]
+                    var closeX1 = polygonPoints[0]
+                    closeY1 = polygonPoints[1]
+                    if (closeX1 < j) {
+                        closeTmp = j
+                        swapTmp = closeY0
+                        j = closeX1
+                        closeY0 = closeY1
+                        closeX1 = closeTmp
+                        closeY1 = swapTmp
+                    } else if (closeX1 == j && closeY1 < closeY0) {
+                        closeTmp = closeY0
+                        closeY0 = closeY1
+                        closeY1 = closeTmp
                     }
-                    toolkit.drawTexturedLine(rotation3, i_13_4, i_14_4, i_15, colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], class4551, clipLeft, clipTop, mecType.dashLineSpacing, mecType.dashLineLength, mecType.dashLineOffset)
+                    toolkit.drawTexturedLine(j, closeY0, closeX1, closeY1, colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], dimension, clipLeft, clipTop, mecType.dashLineSpacing, mecType.dashLineLength, mecType.dashLineOffset)
                 } else {
                     val colors = mecType.colors!!
                     val colorPointers = mecType.colorPointers!!
-                    var rotation4 = 0
-                    while (rotation4 < ints_10.size / 2 - 1) {
-                        toolkit.drawSurfaceLine(ints_10[rotation4 * 2], ints_10[rotation4 * 2 + 1], ints_10[(rotation4 + 1) * 2], ints_10[(rotation4 + 1) * 2 + 1], colors[colorPointers[rotation4].toInt() and 0xff], class4551, clipLeft, clipTop)
-                        rotation4++
+                    var j = 0
+                    while (j < polygonPoints.size / 2 - 1) {
+                        toolkit.drawSurfaceLine(polygonPoints[j * 2], polygonPoints[j * 2 + 1], polygonPoints[(j + 1) * 2], polygonPoints[(j + 1) * 2 + 1], colors[colorPointers[j].toInt() and 0xff], dimension, clipLeft, clipTop)
+                        j++
                     }
-                    toolkit.drawSurfaceLine(ints_10[ints_10.size - 2], ints_10[ints_10.size - 1], ints_10[0], ints_10[1], colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], class4551, clipLeft, clipTop)
+                    toolkit.drawSurfaceLine(polygonPoints[polygonPoints.size - 2], polygonPoints[polygonPoints.size - 1], polygonPoints[0], polygonPoints[1], colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], dimension, clipLeft, clipTop)
                 }
             }
             var iconSprite: NativeSprite? = null
             if (mecType.defaultIconArchive != -1) {
                 iconSprite = mecType.getIcon(toolkit, false)
                 if (iconSprite != null) {
-                    drawEntity(component, class4551, clipLeft, clipTop, i_5, i_6, iconSprite)
+                    drawEntity(component, dimension, clipLeft, clipTop, offsetX, offsetY, iconSprite)
                 }
             }
             if (mecType.areaName != null) {
-                i_11 = 0
+                i = 0
                 if (iconSprite != null) {
-                    i_11 = iconSprite.getHeight()
+                    i = iconSprite.getHeight()
                 }
-                var fontrenderer20: AbstractFontRenderer? = Renderers.FONT_RENDERER
-                var fontmetrics21: FontMetrics? = FontManager.worldMapAreaFont
+                var fontRenderer: AbstractFontRenderer? = Renderers.FONT_RENDERER
+                var fontMetrics: FontMetrics? = FontManager.worldMapAreaFont
                 if (mecType.baseTextzoom == 1) {
-                    fontrenderer20 = FontManager.debugOverlayFont
-                    fontmetrics21 = FontManager.messageboxFont
+                    fontRenderer = FontManager.debugOverlayFont
+                    fontMetrics = FontManager.messageboxFont
                 }
                 if (mecType.baseTextzoom == 2) {
-                    fontrenderer20 = MiniMenu.minimenuHeader
-                    fontmetrics21 = FontMetrics.defaultFontMetrics
+                    fontRenderer = MiniMenu.minimenuHeader
+                    fontMetrics = FontMetrics.defaultFontMetrics
                 }
-                InterfaceComponentRenderer.drawMinimapText(component, class4551, clipLeft, clipTop, i_5, i_6, i_11, mecType.areaName, fontrenderer20!!, fontmetrics21!!, mecType.defaultTextColor)
+                InterfaceComponentRenderer.drawMinimapText(component, dimension, clipLeft, clipTop, offsetX, offsetY, i, mecType.areaName, fontRenderer!!, fontMetrics!!, mecType.defaultTextColor)
             }
         }
     }
@@ -547,9 +547,9 @@ object ComponentMinimap {
      * Renders the minimap
      */
     @JvmStatic
-    fun drawGame(abstractToolkit: AbstractToolkit, fromPlane: Int): Boolean {
+    fun drawGame(toolkit: AbstractToolkit, fromPlane: Int): Boolean {
         Utils.time()
-        if (!abstractToolkit.readyForRendering()) {
+        if (!toolkit.readyForRendering()) {
             return false
         }
         val regionDimensionX = Resource.mapRegion!!.sceneSizeX
@@ -585,18 +585,18 @@ object ComponentMinimap {
             var centerOffsetX: Byte = 0 // + makes map move east
             var centerOffsetY: Byte = 0 // + makes map move south
             if (MapRegion.requiresDisplayResize) {
-                minimapBackground = abstractToolkit.generateEmptySprite(minimapDimension, minimapDimension, false, true)
-                directDisplay = abstractToolkit.getImageProducer()
+                minimapBackground = toolkit.generateEmptySprite(minimapDimension, minimapDimension, false, true)
+                directDisplay = toolkit.getImageProducer()
                 directDisplay.setFramebuffer(0, minimapBackground!!.getFramebuffer())
-                val minimapRenderBuffer: RenderBuffer = abstractToolkit.getRenderBuffer(minimapDimension, minimapDimension)
+                val minimapRenderBuffer: RenderBuffer = toolkit.getRenderBuffer(minimapDimension, minimapDimension)
                 directDisplay.setRenderBuffer(minimapRenderBuffer)
-                abstractToolkit.setDisplay(directDisplay)
+                toolkit.setDisplay(directDisplay)
                 halfRegionDimension = regionDimensionX
                 centerOffsetX = 48
                 centerOffsetY = 48
-                abstractToolkit.applyClearFlags(1, 0)
+                toolkit.applyClearFlags(1, 0)
             } else {
-                minimapBackground = abstractToolkit.createNativeSprite(minimapPixels, minimapDimension, minimapDimension, minimapDimension)
+                minimapBackground = toolkit.createNativeSprite(minimapPixels, minimapDimension, minimapDimension, minimapDimension)
             }
             Resource.mapRegion!!.getEnvironmentManager().prepareLights()
             val backgroundMaxRandomise = MapRegion.BACKGROUND_COLOR or ((238 + (Math.random() * 20.0).toInt() - 10 shl 16) + (238 + (Math.random() * 20.0).toInt() - 10 shl 8) + (238 + (Math.random() * 20.0).toInt() - 10))
@@ -610,39 +610,39 @@ object ComponentMinimap {
                 while (length < regionDimensionY) {
                     var drawPositionX = centerOffsetX.toInt()
                     var drawPositionY = centerOffsetY.toInt()
-                    var positionXOffset = width // + makes map move west
+                    var tilesStartX = width // + makes map move west
                     if (width > 0) {
-                        positionXOffset = width - 1
+                        tilesStartX = width - 1
                         drawPositionX = centerOffsetX + 4
                     }
-                    var positionYOffset = length // + makes map move north
+                    var tilesStartY = length // + makes map move north
                     if (length > 0) {
-                        positionYOffset = length - 1
+                        tilesStartY = length - 1
                     }
-                    var i_26 = halfRegionDimension + width
-                    if (i_26 < regionDimensionX) {
-                        i_26++
+                    var tilesEndX = halfRegionDimension + width
+                    if (tilesEndX < regionDimensionX) {
+                        tilesEndX++
                     }
-                    var altIndex = halfRegionDimension + length
-                    if (altIndex < regionDimensionY) {
-                        altIndex++
+                    var tilesEndY = halfRegionDimension + length
+                    if (tilesEndY < regionDimensionY) {
+                        tilesEndY++
                         drawPositionY = centerOffsetY + 4
                     }
                     if (MapRegion.requiresClippingReset) {
-                        abstractToolkit.resetClipping()
+                        toolkit.resetClipping()
                     } else {
-                        abstractToolkit.setClipping(0, 0, drawPositionX + halfRegionDimension * 4, drawPositionY + halfRegionDimension * 4)
+                        toolkit.setClipping(0, 0, drawPositionX + halfRegionDimension * 4, drawPositionY + halfRegionDimension * 4)
                     }
-                    abstractToolkit.applyClearFlags(3, MapRegion.BACKGROUND_COLOR)
+                    toolkit.applyClearFlags(3, MapRegion.BACKGROUND_COLOR)
                     val minHalfRegionDimension = Math.min(halfRegionDimension, regionDimensionX - 1)
                     for (z in fromPlane..3) {
                         for (x in 0..minHalfRegionDimension) {
                             for (y in 0..minHalfRegionDimension) {
-                                visibleTiles[x][y] = settingsBits.isVisible(fromPlane, z, x + positionXOffset, y + positionYOffset)
+                                visibleTiles[x][y] = settingsBits.isVisible(fromPlane, z, x + tilesStartX, y + tilesStartY)
                             }
                         }
                         // FIXME: better names for the parameters
-                        scene.surfaceHeightmap!![z]!!.renderMinimapFloor(centerOffsetX.toInt(), centerOffsetY.toInt(), positionXOffset, positionYOffset, i_26, altIndex, visibleTiles)
+                        scene.surfaceHeightmap!![z]!!.renderMinimapFloor(centerOffsetX.toInt(), centerOffsetY.toInt(), tilesStartX, tilesStartY, tilesEndX, tilesEndY, visibleTiles)
                         if (!MapRegion.visualizeClippedTilesOnMinimap) {
                             for (offsetX in -4 until halfRegionDimension) {
                                 for (offsetY in -4 until halfRegionDimension) {
@@ -654,7 +654,7 @@ object ComponentMinimap {
                                             locPlane = z - 1
                                         }
                                         if (locPlane >= 0) {
-                                            drawLocOnMinimap(abstractToolkit, locPlane, sceneX, sceneY, drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, backgroundMaxRandomise, backgroundMinRandomise)
+                                            drawLocOnMinimap(toolkit, locPlane, sceneX, sceneY, drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, backgroundMaxRandomise, backgroundMinRandomise)
                                         }
                                     }
                                 }
@@ -669,26 +669,26 @@ object ComponentMinimap {
                                 val tileY = length + offsetY
                                 val activeFlag = collision.collisionFlags[tileX - collision.offsetX][tileY - collision.offsetY]
                                 if (!CollisionMap.notFlagged(activeFlag, CollisionFlag.BLOCKED_DECO, CollisionFlag.BLOCKED, CollisionFlag.ALT_OBJ)) {
-                                    abstractToolkit.clearPixels(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, 4, -1713569622)
+                                    toolkit.clearPixels(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, 4, -1713569622)
                                 } else if (!CollisionMap.notFlagged(activeFlag, CollisionFlag.N_ALT_OBJ)) {
-                                    abstractToolkit.drawOpaqueHorizontalLine(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, -1713569622)
+                                    toolkit.drawOpaqueHorizontalLine(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, -1713569622)
                                 } else if (!CollisionMap.notFlagged(activeFlag, CollisionFlag.E_ALT_OBJ)) {
-                                    abstractToolkit.drawOpaqueVerticalLine(drawPositionX + offsetX * 4 + 3, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, -1713569622)
+                                    toolkit.drawOpaqueVerticalLine(drawPositionX + offsetX * 4 + 3, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, -1713569622)
                                 } else if (!CollisionMap.notFlagged(activeFlag, CollisionFlag.S_ALT_OBJ)) {
-                                    abstractToolkit.drawOpaqueHorizontalLine(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4 + 3, 4, -1713569622)
+                                    toolkit.drawOpaqueHorizontalLine(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4 + 3, 4, -1713569622)
                                 } else if (!CollisionMap.notFlagged(activeFlag, CollisionFlag.W_ALT_OBJ)) {
-                                    abstractToolkit.drawOpaqueVerticalLine(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, -1713569622)
+                                    toolkit.drawOpaqueVerticalLine(drawPositionX + offsetX * 4, (halfRegionDimension - offsetY) * 4 + drawPositionY - 4, 4, -1713569622)
                                 }
                             }
                         }
                     }
-                    abstractToolkit.drawFilledRectangle(drawPositionX, drawPositionY, halfRegionDimension * 4, halfRegionDimension * 4, pixelClearColor, 2)
+                    toolkit.drawFilledRectangle(drawPositionX, drawPositionY, halfRegionDimension * 4, halfRegionDimension * 4, pixelClearColor, 2)
                     if (!MapRegion.requiresDisplayResize) {
                         minimapBackground!!.captureScreenRegion(width * 4 + 48, regionDimensionY * 4 + 48 - length * 4 - halfRegionDimension * 4, halfRegionDimension * 4, halfRegionDimension * 4, drawPositionX, drawPositionY)
                         if (MapRegion.requiresClippingReset) {
                             minimapBackground!!.draw(256, 0)
                             try {
-                                abstractToolkit.renderFrame()
+                                toolkit.renderFrame()
                                 TimeTools.sleep(2000L)
                             } catch (exception: Exception) {
                                 exception.printStackTrace()
@@ -701,19 +701,19 @@ object ComponentMinimap {
             }
             val mapRegion = Resource.mapRegion!!
             if (MapRegion.requiresDisplayResize) {
-                abstractToolkit.resizeDisplay(directDisplay!!)
+                toolkit.resizeDisplay(directDisplay!!)
                 if (MapRegion.requiresClippingReset) {
                     minimapBackground!!.draw(256, 0)
                     try {
-                        abstractToolkit.renderFrame()
+                        toolkit.renderFrame()
                         TimeTools.sleep(2000L)
                     } catch (exception: Exception) {
                         exception.printStackTrace()
                     }
                 }
             }
-            abstractToolkit.resetClipping()
-            abstractToolkit.applyClearFlags(1, 1)
+            toolkit.resetClipping()
+            toolkit.applyClearFlags(1, 1)
             GameShell.setComponentsOnTop()
             val locTypeList: ObjectTypeList = mapRegion.getLoctypeList()
             minimapLocCount = 0
@@ -760,7 +760,7 @@ object ComponentMinimap {
                                                 val collision = mapRegion.getCollisionMap(sceneZ).collisionFlags
                                                 val offsetX = mapRegion.getCollisionMap(sceneZ).offsetX
                                                 val offsetY = mapRegion.getCollisionMap(sceneZ).offsetY
-                                                for (i_33 in 0 until 10) {
+                                                for (i in 0 until 10) {
                                                     val randomPositioning = (Math.random() * 4.0).toInt()
                                                     if (randomPositioning == 0 && mectypeSceneX > 0 && mectypeSceneX > sceneX - 3 && (collision[mectypeSceneX - 1 - offsetX][mectypeSceneY - offsetY] and 0x2c0108) == 0) {
                                                         mectypeSceneX--

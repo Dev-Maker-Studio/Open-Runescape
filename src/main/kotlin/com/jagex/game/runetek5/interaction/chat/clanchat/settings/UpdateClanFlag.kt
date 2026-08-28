@@ -23,7 +23,7 @@ class UpdateClanFlag(
         this.bitmaskSize = buffer.readUByte()
     }
 
-    override fun apply(class611: ClanSettings) {
-        class611.updateClanFlag(this.index, this.flag, this.shift, this.bitmaskSize)
+    override fun apply(clanSettings: ClanSettings) {
+        clanSettings.updateClanFlag(this.index, this.flag, this.shift, this.bitmaskSize)
     }
 }

@@ -13,199 +13,188 @@ import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 
 class NativeFont(
-    class505Sub21: AbstractNativeToolkit,
-    fontmetrics2: FontMetrics,
-    arr_3: Array<SpriteType>,
-    bool4: Boolean
-) : AbstractFontRenderer(class505Sub21, fontmetrics2) {
+    toolkit: AbstractNativeToolkit,
+    fontMetrics: FontMetrics,
+    characterSprites: Array<SpriteType>,
+    isPlain: Boolean
+) : AbstractFontRenderer(toolkit, fontMetrics) {
 
-    @JvmField val aGraphicalRendererSub29321: AbstractNativeToolkit
-    @JvmField val anInterface69322: NativeTextureSampler
-    @JvmField val anInterface49320: NativeStream
+    @JvmField val nativeToolkit: AbstractNativeToolkit
+    @JvmField val glyphAtlasSampler: NativeTextureSampler
+    @JvmField val glyphVertexStream: NativeStream
 
     init {
-        aGraphicalRendererSub29321 = class505Sub21
-        var i_5 = 0
+        nativeToolkit = toolkit
+        var maxDimension = 0
 
-        var i_6: Int
-        for (i_6 in 0 until 256) {
-            val class917 = arr_3[i_6]
-            if (class917.height > i_5) {
-                i_5 = class917.height
+        var atlasSize: Int
+        for (charIndex in 0 until 256) {
+            val charSprite = characterSprites[charIndex]
+            if (charSprite.height > maxDimension) {
+                maxDimension = charSprite.height
             }
 
-            if (class917.width > i_5) {
-                i_5 = class917.width
+            if (charSprite.width > maxDimension) {
+                maxDimension = charSprite.width
             }
         }
 
-        i_6 = i_5 * 16
-        var i_8: Int
-        var i_10: Int
-        var i_12: Int
-        var i_13: Int
-        var i_14: Int
-        var i_15: Int
-        var i_17: Int
-        var i_18: Int
-        var class9123: SpriteType
-        if (bool4) {
-            val bytes_28 = ByteArray(i_6 * i_6)
+        atlasSize = maxDimension * 16
+        if (isPlain) {
+            val pixels = ByteArray(atlasSize * atlasSize)
 
-            for (i_8 in 0 until 256) {
-                class9123 = arr_3[i_8]
-                i_10 = class9123.height
-                val i_11 = class9123.width
-                i_12 = i_5 * (i_8 % 16)
-                i_13 = i_8 / 16 * i_5
-                i_14 = i_12 + i_13 * i_6
-                i_15 = 0
-                val bytes_16: ByteArray
-                if (class9123.alpha == null) {
-                    bytes_16 = class9123.pixels
+            for (charIndex in 0 until 256) {
+                val charSprite = characterSprites[charIndex]
+                val glyphHeight = charSprite.height
+                val glyphWidth = charSprite.width
+                val cellX = maxDimension * (charIndex % 16)
+                val cellY = charIndex / 16 * maxDimension
+                var atlasIndex = cellX + cellY * atlasSize
+                var pixelIndex = 0
+                val maskBytes: ByteArray
+                if (charSprite.alpha == null) {
+                    maskBytes = charSprite.pixels
 
-                    for (i_17 in 0 until i_10) {
-                        for (i_18 in 0 until i_11) {
-                            bytes_28[i_14++] = (if (bytes_16[i_15++] == 0.toByte()) 0 else -1).toByte()
+                    for (y in 0 until glyphHeight) {
+                        for (x in 0 until glyphWidth) {
+                            pixels[atlasIndex++] = (if (maskBytes[pixelIndex++] == 0.toByte()) 0 else -1).toByte()
                         }
 
-                        i_14 += i_6 - i_11
+                        atlasIndex += atlasSize - glyphWidth
                     }
                 } else {
-                    bytes_16 = class9123.alpha!!
+                    maskBytes = charSprite.alpha!!
 
-                    for (i_17 in 0 until i_10) {
-                        for (i_18 in 0 until i_11) {
-                            bytes_28[i_14++] = bytes_16[i_15++]
+                    for (y in 0 until glyphHeight) {
+                        for (x in 0 until glyphWidth) {
+                            pixels[atlasIndex++] = maskBytes[pixelIndex++]
                         }
 
-                        i_14 += i_6 - i_11
+                        atlasIndex += atlasSize - glyphWidth
                     }
                 }
             }
 
-            if (!class505Sub21.supportsTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
-                val ints_22 = IntArray(bytes_28.size)
+            if (!toolkit.supportsTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
+                val argbPixels = IntArray(pixels.size)
 
-                for (i_9 in bytes_28.indices) {
-                    ints_22[i_9] = bytes_28[i_9].toInt() shl 24
+                for (i in pixels.indices) {
+                    argbPixels[i] = pixels[i].toInt() shl 24
                 }
 
-                anInterface69322 = class505Sub21.createTexture(i_6, i_6, false, ints_22)
+                glyphAtlasSampler = toolkit.createTexture(atlasSize, atlasSize, false, argbPixels)
             } else {
-                anInterface69322 = class505Sub21.createTextureSampler(GLFormat.RGBA, i_6, i_6, false, bytes_28)
+                glyphAtlasSampler = toolkit.createTextureSampler(GLFormat.RGBA, atlasSize, atlasSize, false, pixels)
             }
         } else {
-            val ints_29 = IntArray(i_6 * i_6)
+            val pixels = IntArray(atlasSize * atlasSize)
 
-            for (i_8 in 0 until 256) {
-                class9123 = arr_3[i_8]
-                val ints_24 = class9123.pallete
-                val bytes_25 = class9123.alpha
-                val bytes_26 = class9123.pixels
-                i_13 = class9123.height
-                i_14 = class9123.width
-                i_15 = i_5 * (i_8 % 16)
-                val i_27 = i_8 / 16 * i_5
-                i_17 = i_15 + i_27 * i_6
-                i_18 = 0
-                var i_19: Int
-                var i_20: Int
-                if (bytes_25 != null) {
-                    for (i_19 in 0 until i_13) {
-                        for (i_20 in 0 until i_14) {
-                            ints_29[i_17++] = bytes_25[i_18].toInt() shl 24 or ints_24[bytes_26[i_18].toInt() and 0xff]
-                            ++i_18
+            for (charIndex in 0 until 256) {
+                val charSprite = characterSprites[charIndex]
+                val palette = charSprite.pallete
+                val alpha = charSprite.alpha
+                val charPixels = charSprite.pixels
+                val glyphHeight = charSprite.height
+                val glyphWidth = charSprite.width
+                val cellX = maxDimension * (charIndex % 16)
+                val cellY = charIndex / 16 * maxDimension
+                var atlasIndex = cellX + cellY * atlasSize
+                var pixelIndex = 0
+                if (alpha != null) {
+                    for (y in 0 until glyphHeight) {
+                        for (x in 0 until glyphWidth) {
+                            pixels[atlasIndex++] = alpha[pixelIndex].toInt() shl 24 or palette[charPixels[pixelIndex].toInt() and 0xff]
+                            ++pixelIndex
                         }
 
-                        i_17 += i_6 - i_14
+                        atlasIndex += atlasSize - glyphWidth
                     }
                 } else {
-                    for (i_19 in 0 until i_13) {
-                        for (i_20 in 0 until i_14) {
-                            val b_21: Byte
-                            b_21 = bytes_26[i_18++]
-                            if (b_21 != 0.toByte()) {
-                                ints_29[i_17++] = 0xffffff.inv() or ints_24[b_21.toInt() and 0xff]
+                    for (y in 0 until glyphHeight) {
+                        for (x in 0 until glyphWidth) {
+                            val charPixel: Byte
+                            charPixel = charPixels[pixelIndex++]
+                            if (charPixel != 0.toByte()) {
+                                pixels[atlasIndex++] = 0xffffff.inv() or palette[charPixel.toInt() and 0xff]
                             } else {
-                                ++i_17
+                                ++atlasIndex
                             }
                         }
 
-                        i_17 += i_6 - i_14
+                        atlasIndex += atlasSize - glyphWidth
                     }
                 }
             }
 
-            anInterface69322 = class505Sub21.createTexture(i_6, i_6, false, ints_29)
+            glyphAtlasSampler = toolkit.createTexture(atlasSize, atlasSize, false, pixels)
         }
 
-        anInterface69322.setSamplerMode(SampleMode.NEAREST)
-        anInterface49320 = class505Sub21.createStream(false)
-        anInterface49320.create(20480, 20)
-        val bytebuffer30 = aGraphicalRendererSub29321.directBuffer
-        bytebuffer30.clear()
-        val f_31 = anInterface69322.method47(i_6.toFloat()) / i_6
-        val f_32 = anInterface69322.method62(i_6.toFloat()) / i_6
+        glyphAtlasSampler.setSamplerMode(SampleMode.NEAREST)
+        glyphVertexStream = toolkit.createStream(false)
+        glyphVertexStream.create(20480, 20)
+        val vertexBuffer = nativeToolkit.directBuffer
+        vertexBuffer.clear()
+        val sScale = glyphAtlasSampler.toTextureCoordS(atlasSize.toFloat()) / atlasSize
+        val tScale = glyphAtlasSampler.toTextureCoordT(atlasSize.toFloat()) / atlasSize
 
-        for (i_10 in 0 until 256) {
-            val class9138 = arr_3[i_10]
-            i_12 = class9138.height
-            i_13 = class9138.width
-            i_14 = class9138.minY
-            i_15 = class9138.minX
-            val f_39 = (i_5 * (i_10 % 16)).toFloat()
-            val f_33 = (i_10 / 16 * i_5).toFloat()
-            val f_34 = f_39 * f_31
-            val f_35 = f_33 * f_32
-            val f_36 = (f_39 + i_13) * f_31
-            val f_37 = (f_33 + i_12) * f_32
-            bytebuffer30.putFloat(i_15.toFloat())
-            bytebuffer30.putFloat(i_14.toFloat())
-            bytebuffer30.putFloat(0.0f)
-            bytebuffer30.putFloat(f_34)
-            bytebuffer30.putFloat(f_35)
-            bytebuffer30.putFloat(i_15.toFloat())
-            bytebuffer30.putFloat((i_14 + i_12).toFloat())
-            bytebuffer30.putFloat(0.0f)
-            bytebuffer30.putFloat(f_34)
-            bytebuffer30.putFloat(f_37)
-            bytebuffer30.putFloat((i_15 + i_13).toFloat())
-            bytebuffer30.putFloat((i_14 + i_12).toFloat())
-            bytebuffer30.putFloat(0.0f)
-            bytebuffer30.putFloat(f_36)
-            bytebuffer30.putFloat(f_37)
-            bytebuffer30.putFloat((i_15 + i_13).toFloat())
-            bytebuffer30.putFloat(i_14.toFloat())
-            bytebuffer30.putFloat(0.0f)
-            bytebuffer30.putFloat(f_36)
-            bytebuffer30.putFloat(f_35)
+        for (charIndex in 0 until 256) {
+            val charSprite = characterSprites[charIndex]
+            val glyphHeight = charSprite.height
+            val glyphWidth = charSprite.width
+            val minY = charSprite.minY
+            val minX = charSprite.minX
+            val cellX = (maxDimension * (charIndex % 16)).toFloat()
+            val cellY = (charIndex / 16 * maxDimension).toFloat()
+            val s0 = cellX * sScale
+            val t0 = cellY * tScale
+            val s1 = (cellX + glyphWidth) * sScale
+            val t1 = (cellY + glyphHeight) * tScale
+            vertexBuffer.putFloat(minX.toFloat())
+            vertexBuffer.putFloat(minY.toFloat())
+            vertexBuffer.putFloat(0.0f)
+            vertexBuffer.putFloat(s0)
+            vertexBuffer.putFloat(t0)
+            vertexBuffer.putFloat(minX.toFloat())
+            vertexBuffer.putFloat((minY + glyphHeight).toFloat())
+            vertexBuffer.putFloat(0.0f)
+            vertexBuffer.putFloat(s0)
+            vertexBuffer.putFloat(t1)
+            vertexBuffer.putFloat((minX + glyphWidth).toFloat())
+            vertexBuffer.putFloat((minY + glyphHeight).toFloat())
+            vertexBuffer.putFloat(0.0f)
+            vertexBuffer.putFloat(s1)
+            vertexBuffer.putFloat(t1)
+            vertexBuffer.putFloat((minX + glyphWidth).toFloat())
+            vertexBuffer.putFloat(minY.toFloat())
+            vertexBuffer.putFloat(0.0f)
+            vertexBuffer.putFloat(s1)
+            vertexBuffer.putFloat(t0)
         }
 
-        anInterface49320.upload(0, bytebuffer30.position(), aGraphicalRendererSub29321.directBufferAddress)
-        class505Sub21.getShaderByEffect(12)
+        glyphVertexStream.upload(0, vertexBuffer.position(), nativeToolkit.directBufferAddress)
+        toolkit.getShaderByEffect(12)
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean) {
-        aGraphicalRendererSub29321.setProjectionMatrixMode()
-        aGraphicalRendererSub29321.toggleBlending(1)
-        val class476 = aGraphicalRendererSub29321.spriteShader!!
-        class476.spriteSampler = anInterface69322
-        class476.setColours(3, i_4)
-        val f_7 = aGraphicalRendererSub29321.getDisplay()!!.getWidth().toFloat()
-        val f_8 = aGraphicalRendererSub29321.getDisplay()!!.getHeight().toFloat()
-        class476.worldViewProjectionMatrix.setDiagonal(2.0f / f_7, 2.0f / f_8, 1.0f, 1.0f)
-        class476.worldViewProjectionMatrix.elements[12] = (i_2 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_7 - 1.0f
-        class476.worldViewProjectionMatrix.elements[13] = (i_3 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_8 - 1.0f
-        class476.worldViewProjectionMatrix.elements[14] = -1.0f
-        class476.spriteTexCoordMatrix.identity()
-        class476.vertexStream = anInterface49320
-        class476.startVertex = var_1 * 4
-        class476.vertexDeclaration = aGraphicalRendererSub29321.positionTexCoordDeclaration
-        class476.loadNormal()
+    override fun drawChar(charIndex: Int, translateX: Int, translateY: Int, colorArgb: Int, isShadow: Boolean) {
+        nativeToolkit.setProjectionMatrixMode()
+        nativeToolkit.toggleBlending(1)
+        val spriteShader = nativeToolkit.spriteShader!!
+        spriteShader.spriteSampler = glyphAtlasSampler
+        spriteShader.setColours(3, colorArgb)
+        val displayWidth = nativeToolkit.getDisplay()!!.getWidth().toFloat()
+        val displayHeight = nativeToolkit.getDisplay()!!.getHeight().toFloat()
+        spriteShader.worldViewProjectionMatrix.setDiagonal(2.0f / displayWidth, 2.0f / displayHeight, 1.0f, 1.0f)
+        spriteShader.worldViewProjectionMatrix.elements[12] = (translateX + nativeToolkit.getPixelOffset()) * 2.0f / displayWidth - 1.0f
+        spriteShader.worldViewProjectionMatrix.elements[13] = (translateY + nativeToolkit.getPixelOffset()) * 2.0f / displayHeight - 1.0f
+        spriteShader.worldViewProjectionMatrix.elements[14] = -1.0f
+        spriteShader.spriteTexCoordMatrix.identity()
+        spriteShader.vertexStream = glyphVertexStream
+        spriteShader.startVertex = charIndex * 4
+        spriteShader.vertexDeclaration = nativeToolkit.positionTexCoordDeclaration
+        spriteShader.loadNormal()
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean, class4556: ComponentSurface, i_7: Int, i_8: Int) {
+    override fun drawChar(charIndex: Int, translateX: Int, translateY: Int, colorArgb: Int, isShadow: Boolean, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
     }
 
 }

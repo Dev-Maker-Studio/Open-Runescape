@@ -1,7 +1,7 @@
 #version 330 core
 
 // Cube Map Specular Vertex Shader
-// Replaces MaterialEffect1GL (effect index 1)
+// Replaces CubeMapSpecularEffect (effect index 1)
 //
 // Legacy behavior:
 //   - Generates texture coordinates from surface normals (GL_NORMAL_MAP texgen)

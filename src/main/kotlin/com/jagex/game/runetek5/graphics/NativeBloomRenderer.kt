@@ -70,10 +70,10 @@ class NativeBloomRenderer(
         this.pongTextureSampler!!.deallocate()
         this.compositeTextureSampler!!.deallocate()
         this.depthRenderBuffer!!.deallocate()
-        val elements = this.bloomVector.size
-        for (index in 0 until elements) {
-            val bloom = this.bloomVector.elementAt(index)
-            bloom.destroy()
+        val count = this.bloomVector.size
+        for (index in 0 until count) {
+            val bloomShader = this.bloomVector.elementAt(index)
+            bloomShader.destroy()
         }
     }
 
@@ -94,11 +94,11 @@ class NativeBloomRenderer(
         this.compositeTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
         this.compositeFramebuffer = this.compositeTextureSampler!!.getFramebuffer()
         this.depthRenderBuffer = this.toolkit.getRenderBuffer(this.width, this.height)
-        val i_1 = this.bloomVector.size
+        val count = this.bloomVector.size
 
-        for (i_2 in 0 until i_1) {
-            val class553 = this.bloomVector.elementAt(i_2)
-            class553.onRendererInitialized()
+        for (index in 0 until count) {
+            val bloomShader = this.bloomVector.elementAt(index)
+            bloomShader.onRendererInitialized()
         }
 
     }
@@ -109,25 +109,25 @@ class NativeBloomRenderer(
         this.toolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLES, 0, 1)
     }
 
-    fun initialize(insertAtIndex: Int, bloom: AbstractBloomShader): Boolean {
-        if (!bloom.isLoaded() && !bloom.loadShader()) {
-            removeBloomShader(bloom)
+    fun initialize(insertAtIndex: Int, bloomShader: AbstractBloomShader): Boolean {
+        if (!bloomShader.isLoaded() && !bloomShader.loadShader()) {
+            removeBloomShader(bloomShader)
             return true
         }
-        this.bloomVector.insertElementAt(bloom, insertAtIndex)
-        bloom.onRendererInitialized()
-        val format = bloom.getFormatType()
-        if (format > this.formatType) {
-            this.formatType = format
+        this.bloomVector.insertElementAt(bloomShader, insertAtIndex)
+        bloomShader.onRendererInitialized()
+        val shaderFormatType = bloomShader.getFormatType()
+        if (shaderFormatType > this.formatType) {
+            this.formatType = shaderFormatType
         }
-        bloom.hasLinkedVector = true
+        bloomShader.hasLinkedVector = true
         return true
     }
 
-    fun removeBloomShader(bloom: AbstractBloomShader) {
-        bloom.destroy()
-        bloom.hasLinkedVector = false
-        this.bloomVector.removeElement(bloom)
+    fun removeBloomShader(bloomShader: AbstractBloomShader) {
+        bloomShader.destroy()
+        bloomShader.hasLinkedVector = false
+        this.bloomVector.removeElement(bloomShader)
     }
 
     fun draw() {
@@ -160,12 +160,12 @@ class NativeBloomRenderer(
                 bloomShader.initialize(type, this.directDisplay!!, compositeSampler!!, this.compositeTextureSampler!!)
                 drawTriangles()
                 bloomShader.reset()
-                val interface298 = this.pingTextureSampler
+                val swapSampler = this.pingTextureSampler
                 this.pingTextureSampler = this.pongTextureSampler
-                this.pongTextureSampler = interface298
-                val interface99 = this.pingFramebuffer
+                this.pongTextureSampler = swapSampler
+                val swapFramebuffer = this.pingFramebuffer
                 this.pingFramebuffer = this.pongFramebuffer
-                this.pongFramebuffer = interface99
+                this.pongFramebuffer = swapFramebuffer
             }
         }
 

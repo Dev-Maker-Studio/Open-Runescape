@@ -6,7 +6,7 @@ import jaclib.memory.Source
 interface NativeStream : NativeBuffer, Binding {
     override fun deallocate()
 
-    fun createFromSource(var1: Int, var2: Int, var3: Source): Boolean
+    fun createFromSource(size: Int, stride: Int, source: Source): Boolean
 
-    fun create(var1: Int, var2: Int): Boolean
+    fun create(size: Int, stride: Int): Boolean
 }

@@ -16,7 +16,7 @@ import com.jagex.game.runetek5.graphics.loginscreen.component.LoginBackgroundSpr
 import com.jagex.game.runetek5.graphics.loginscreen.component.AnchoredText
 import com.jagex.game.runetek5.graphics.loginscreen.component.SpriteLoadingBar
 import com.jagex.game.runetek5.graphics.loginscreen.component.LoadingBar
-import com.jagex.game.runetek5.graphics.loginscreen.component.LoadingBarSub1
+import com.jagex.game.runetek5.graphics.loginscreen.component.AnimatedLoadingBar
 import com.jagex.game.runetek5.graphics.loginscreen.component.SolidLoadingBar
 import com.jagex.game.runetek5.graphics.loginscreen.component.DrawableNewsItem
 import com.jagex.game.runetek5.graphics.loginscreen.component.NewsItemBackground
@@ -68,7 +68,7 @@ class GameTipsLoader(
             return LoginBackgroundSprite(spriteResource, tipDetails as TipsSprite)
         }
         if (details == TipRenderDetails.ANIMATED_LOADING_BAR) {
-            return LoadingBarSub1(spriteResource, fontResource, tipDetails as AnimatedLoadingBarElement)
+            return AnimatedLoadingBar(spriteResource, fontResource, tipDetails as AnimatedLoadingBarElement)
         }
         return null
     }

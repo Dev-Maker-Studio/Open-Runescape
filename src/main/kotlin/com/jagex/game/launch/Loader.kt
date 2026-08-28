@@ -44,8 +44,8 @@ class Loader : Panel() {
         }
     }
 
-    fun getParameter(arg0: String): String? {
-        return clientParams[arg0] as? String
+    fun getParameter(paramName: String): String? {
+        return clientParams[paramName] as? String
     }
 
     fun openFrame() {
@@ -82,8 +82,8 @@ class Loader : Panel() {
         }
     }
 
-    fun showError(string: String) {
-        JOptionPane.showMessageDialog(this, string)
+    fun showError(message: String) {
+        JOptionPane.showMessageDialog(this, message)
     }
 
     fun startClient() {
@@ -92,10 +92,10 @@ class Loader : Panel() {
         System.setProperty("sun.java2d.win.uiScaleY", "1.0")
         System.setProperty("sun.java2d.uiScale.enabled", "false")
         loadParams()
-        val clnt = Client()
-        clnt.supplyApplet(this)
-        clnt.init()
-        clnt.start()
+        val client = Client()
+        client.supplyApplet(this)
+        client.init()
+        client.start()
     }
 
     companion object {

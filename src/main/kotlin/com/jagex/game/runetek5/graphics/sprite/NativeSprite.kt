@@ -24,15 +24,15 @@ abstract class NativeSprite : Sprite {
 
     abstract fun draw(x: Int, y: Int, combineMode: Int, colorArgb: Int, blendMode: Int)
 
-    abstract fun setSize(var1: Int, var2: Int, var3: Int, var4: Int)
+    abstract fun setSize(offsetX: Int, offsetY: Int, trimRight: Int, trimBottom: Int)
 
-    abstract fun cacheSizeInto(var1: IntArray)
+    abstract fun cacheSizeInto(sizeOut: IntArray)
 
     abstract fun getWidth(): Int
 
     abstract fun getSpriteHeight(): Int
 
-    abstract fun captureScreenRegion(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var6: Int)
+    abstract fun captureScreenRegion(dstX: Int, dstY: Int, width: Int, height: Int, srcX: Int, srcY: Int)
 
     abstract fun pixelTransfer()
 
@@ -40,83 +40,83 @@ abstract class NativeSprite : Sprite {
         draw(x, y, 1, 0, 1)
     }
 
-    open fun drawCircle(x: Int, y: Int, width: Int, length: Int, i_5: Int, color: Int, alpha: Int) {
-        drawColoredCircle(x, y, width, length, i_5, color, alpha)
+    open fun drawCircle(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        drawColoredCircle(x, y, width, height, combineMode, colorArgb, blendMode)
     }
 
-    abstract fun drawColoredCircle(x: Int, y: Int, width: Int, length: Int, var5: Int, color: Int, blendMode: Int)
+    abstract fun drawColoredCircle(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int)
 
     open fun drawTiled(x: Int, y: Int, width: Int, height: Int) {
         drawScaledColored(x, y, width, height, 1, 0, 1)
     }
 
-    open fun drawRotatedCenter(f_1: Float, f_2: Float, i_3: Int, rotation: Int) {
-        drawRotatedWithPivot(f_1, f_2, getSpriteWidth() / 2.0F, getSpriteHeight() / 2.0F, i_3, rotation, 1, 0)
+    open fun drawRotatedCenter(x: Float, y: Float, zoom: Int, rotation: Int) {
+        drawRotatedWithPivot(x, y, getSpriteWidth() / 2.0F, getSpriteHeight() / 2.0F, zoom, rotation, 1, 0)
     }
 
-    open fun drawRotatedWithPivot(x: Float, y: Float, scaleX: Float, scaleY: Float, offset: Int, rotation: Int, i_7: Int, i_8: Int) {
-        if (offset != 0) {
-            var mutableScaleX = scaleX
+    open fun drawRotatedWithPivot(x: Float, y: Float, pivotX: Float, pivotY: Float, zoom: Int, rotation: Int, combineMode: Int, colorArgb: Int) {
+        if (zoom != 0) {
+            var mutablePivotX = pivotX
             val rotationRadians = (rotation and 0xffff) * 9.587379924285257E-5
-            var sinRotation = (StrictMath.sin(rotationRadians) * offset).toFloat()
-            var cosRotation = (StrictMath.cos(rotationRadians) * offset).toFloat()
-            var transformedX1 = (-mutableScaleX * cosRotation + -scaleY * sinRotation) / 4096.0F + x
-            var transformedY1 = (--mutableScaleX * sinRotation + -scaleY * cosRotation) / 4096.0F + y
-            val transformedX2 = ((getSpriteWidth() - mutableScaleX) * cosRotation + -scaleY * sinRotation) / 4096.0F + x
-            val transformedY2 = (-(getSpriteWidth() - mutableScaleX) * sinRotation + -scaleY * cosRotation) / 4096.0F + y
-            val transformedX3 = (-mutableScaleX * cosRotation + (getSpriteHeight() - scaleY) * sinRotation) / 4096.0F + x
-            val transformedY3 = (--mutableScaleX * sinRotation + (getSpriteHeight() - scaleY) * cosRotation) / 4096.0F + y
-            drawAffineTransformed(transformedX1, transformedY1, transformedX2, transformedY2, transformedX3, transformedY3, i_7, i_8, 1)
+            var sinRotation = (StrictMath.sin(rotationRadians) * zoom).toFloat()
+            var cosRotation = (StrictMath.cos(rotationRadians) * zoom).toFloat()
+            var topLeftX = (-mutablePivotX * cosRotation + -pivotY * sinRotation) / 4096.0F + x
+            var topLeftY = (--mutablePivotX * sinRotation + -pivotY * cosRotation) / 4096.0F + y
+            val topRightX = ((getSpriteWidth() - mutablePivotX) * cosRotation + -pivotY * sinRotation) / 4096.0F + x
+            val topRightY = (-(getSpriteWidth() - mutablePivotX) * sinRotation + -pivotY * cosRotation) / 4096.0F + y
+            val bottomLeftX = (-mutablePivotX * cosRotation + (getSpriteHeight() - pivotY) * sinRotation) / 4096.0F + x
+            val bottomLeftY = (--mutablePivotX * sinRotation + (getSpriteHeight() - pivotY) * cosRotation) / 4096.0F + y
+            drawAffineTransformed(topLeftX, topLeftY, topRightX, topRightY, bottomLeftX, bottomLeftY, combineMode, colorArgb, 1)
         }
     }
 
-    open fun drawRotatedSprite(f_1: Float, f_2: Float, i_4: Int, class4555: ComponentSurface, i_6: Int, i_7: Int) {
-        rotate(f_1, f_2, getSpriteWidth() / 2.0F, getSpriteHeight() / 2.0F, 4141, i_4, class4555, i_6, i_7)
+    open fun drawRotatedSprite(x: Float, y: Float, rotation: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        rotate(x, y, getSpriteWidth() / 2.0F, getSpriteHeight() / 2.0F, 4141, rotation, surface, surfaceOffsetX, surfaceOffsetY)
     }
 
-    open fun rotate(f_1: Float, f_2: Float, f_3: Float, f_4: Float, i_5: Int, i_6: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
-        if (i_5 != 0) {
-            var mutableF_3 = f_3
-            val d_10 = (i_6 and 0xffff) * 9.587379924285257E-5
-            val f_12 = (StrictMath.sin(d_10) * i_5).toFloat()
-            val f_13 = (StrictMath.cos(d_10) * i_5).toFloat()
-            val f_14 = (-mutableF_3 * f_13 + -f_4 * f_12) / 4096.0F + f_1
-            val f_15 = (--mutableF_3 * f_12 + -f_4 * f_13) / 4096.0F + f_2
-            val f_16 = ((getSpriteWidth() - mutableF_3) * f_13 + -f_4 * f_12) / 4096.0F + f_1
-            val f_17 = (-(getSpriteWidth() - mutableF_3) * f_12 + -f_4 * f_13) / 4096.0F + f_2
-            val f_18 = (-mutableF_3 * f_13 + (getSpriteHeight() - f_4) * f_12) / 4096.0F + f_1
-            val f_19 = (--mutableF_3 * f_12 + (getSpriteHeight() - f_4) * f_13) / 4096.0F + f_2
-            drawAffineTransformedMasked(f_14, f_15, f_16, f_17, f_18, f_19, class4557, i_8, i_9)
+    open fun rotate(x: Float, y: Float, pivotX: Float, pivotY: Float, zoom: Int, rotation: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        if (zoom != 0) {
+            var mutablePivotX = pivotX
+            val rotationRadians = (rotation and 0xffff) * 9.587379924285257E-5
+            val sinRotation = (StrictMath.sin(rotationRadians) * zoom).toFloat()
+            val cosRotation = (StrictMath.cos(rotationRadians) * zoom).toFloat()
+            val topLeftX = (-mutablePivotX * cosRotation + -pivotY * sinRotation) / 4096.0F + x
+            val topLeftY = (--mutablePivotX * sinRotation + -pivotY * cosRotation) / 4096.0F + y
+            val topRightX = ((getSpriteWidth() - mutablePivotX) * cosRotation + -pivotY * sinRotation) / 4096.0F + x
+            val topRightY = (-(getSpriteWidth() - mutablePivotX) * sinRotation + -pivotY * cosRotation) / 4096.0F + y
+            val bottomLeftX = (-mutablePivotX * cosRotation + (getSpriteHeight() - pivotY) * sinRotation) / 4096.0F + x
+            val bottomLeftY = (--mutablePivotX * sinRotation + (getSpriteHeight() - pivotY) * cosRotation) / 4096.0F + y
+            drawAffineTransformedMasked(topLeftX, topLeftY, topRightX, topRightY, bottomLeftX, bottomLeftY, surface, surfaceOffsetX, surfaceOffsetY)
         }
     }
 
-    open fun drawAffineTransformed(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
-        drawAffine(f_1, f_2, f_3, f_4, f_5, f_6, i_7, i_8, i_9)
+    open fun drawAffineTransformed(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        drawAffine(topLeftX, topLeftY, topRightX, topRightY, bottomLeftX, bottomLeftY, combineMode, colorArgb, blendMode)
     }
 
-    abstract fun drawAffine(var1: Float, var2: Float, var3: Float, var4: Float, var5: Float, var6: Float, var7: Int, var8: Int, var9: Int)
+    abstract fun drawAffine(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, colorArgb: Int, blendMode: Int)
 
-    abstract fun drawAffineMasked(var1: Float, var2: Float, var3: Float, var4: Float, var5: Float, var6: Float, var7: Int, var8: ComponentSurface, var9: Int, var10: Int)
+    abstract fun drawAffineMasked(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int)
 
-    abstract fun drawScaledColored(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var6: Int, var7: Int)
+    abstract fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int)
 
-    abstract fun drawWithSurface(var1: Int, var2: Int, var3: ComponentSurface, var4: Int, var5: Int)
+    abstract fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int)
 
     /**
      * Draws a black opaque circle
      */
-    open fun drawCircle(x: Int, y: Int, width: Int, length: Int) {
-        drawColoredCircle(x, y, width, length, 1, 0, 1)
+    open fun drawCircle(x: Int, y: Int, width: Int, height: Int) {
+        drawColoredCircle(x, y, width, height, 1, 0, 1)
     }
 
-    open fun drawRotatedCenterColored(f_1: Float, f_2: Float, i_3: Int, i_4: Int, i_6: Int) {
-        drawRotatedWithPivot(f_1, f_2, getSpriteWidth() / 2.0F, getSpriteHeight() / 2.0F, i_3, i_4, 0, i_6)
+    open fun drawRotatedCenterColored(x: Float, y: Float, zoom: Int, rotation: Int, colorArgb: Int) {
+        drawRotatedWithPivot(x, y, getSpriteWidth() / 2.0F, getSpriteHeight() / 2.0F, zoom, rotation, 0, colorArgb)
     }
 
     abstract fun getHeight(): Int
 
-    open fun drawAffineTransformedMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, class4557: ComponentSurface, i_8: Int, i_9: Int) {
-        drawAffineMasked(f_1, f_2, f_3, f_4, f_5, f_6, 1, class4557, i_8, i_9)
+    open fun drawAffineTransformedMasked(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        drawAffineMasked(topLeftX, topLeftY, topRightX, topRightY, bottomLeftX, bottomLeftY, 1, surface, surfaceOffsetX, surfaceOffsetY)
     }
 
     abstract override fun getSpriteWidth(): Int
@@ -146,10 +146,10 @@ abstract class NativeSprite : Sprite {
         }
 
         @JvmStatic
-        fun drawLoadingBarBackground(toolkit: AbstractToolkit, x: Int, y: Int, width: Int, i_4: Int, height: Int, fontrenderer: AbstractFontRenderer, fontmetrics: FontMetrics, string_8: String) {
-            var i_10 = 255 - backgroundTransparency - alphaJitter
-            if (i_10 < 0) {
-                i_10 = 0
+        fun drawLoadingBarBackground(toolkit: AbstractToolkit, x: Int, y: Int, width: Int, totalHeight: Int, height: Int, fontRenderer: AbstractFontRenderer, fontMetrics: FontMetrics, text: String) {
+            var alpha = 255 - backgroundTransparency - alphaJitter
+            if (alpha < 0) {
+                alpha = 0
             }
 
             if (StaticMedia.loadingBarBackgroundSprite == null || StaticMedia.loadingBarEdgeSprite == null) {
@@ -160,21 +160,21 @@ abstract class NativeSprite : Sprite {
                     spriteType!!.flipHorizontal()
                     StaticMethods.loadingBarTileSprite = toolkit.generateSprite(spriteType, true)
                 } else {
-                    toolkit.drawFilledRectangle(x, y, width, height, i_10 shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
+                    toolkit.drawFilledRectangle(x, y, width, height, alpha shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
                 }
             }
 
             if (StaticMedia.loadingBarBackgroundSprite != null && StaticMedia.loadingBarEdgeSprite != null) {
-                val i_11 = (width - StaticMedia.loadingBarEdgeSprite!!.getWidth() * 2) / StaticMedia.loadingBarBackgroundSprite!!.getWidth()
-                for (i_12 in 0 until i_11) {
-                    StaticMedia.loadingBarBackgroundSprite!!.draw(x + StaticMedia.loadingBarEdgeSprite!!.getWidth() + i_12 * StaticMedia.loadingBarBackgroundSprite!!.getWidth(), y)
+                val tileCount = (width - StaticMedia.loadingBarEdgeSprite!!.getWidth() * 2) / StaticMedia.loadingBarBackgroundSprite!!.getWidth()
+                for (i in 0 until tileCount) {
+                    StaticMedia.loadingBarBackgroundSprite!!.draw(x + StaticMedia.loadingBarEdgeSprite!!.getWidth() + i * StaticMedia.loadingBarBackgroundSprite!!.getWidth(), y)
                 }
                 StaticMedia.loadingBarEdgeSprite!!.draw(x, y)
                 StaticMethods.loadingBarTileSprite!!.draw(width + x - StaticMethods.loadingBarTileSprite!!.getWidth(), y)
             }
 
-            fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.menuTextColor or 0xffffff.inv(), -1)
-            toolkit.drawFilledRectangle(x, height + y, width, i_4 - height, i_10 shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
+            fontRenderer.renderPlain(text, x + 3, (20 - fontMetrics.topPadding) / 2 + y + fontMetrics.topPadding, MiniMenu.menuTextColor or 0xffffff.inv(), -1)
+            toolkit.drawFilledRectangle(x, height + y, width, totalHeight - height, alpha shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
         }
 
         @JvmStatic

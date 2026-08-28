@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.config.varp.VarpbitType
 
 class ConfigNodeMap {
 
-    @JvmField var configs: IterableNodeMap<IntNode>? = null
+    @JvmField var varpValues: IterableNodeMap<IntNode>? = null
 
     @JvmField val capacity: Int
 
@@ -17,31 +17,31 @@ class ConfigNodeMap {
     }
 
     fun clear() {
-        if (this.configs != null) {
-            this.configs!!.clear()
+        if (this.varpValues != null) {
+            this.varpValues!!.clear()
         }
     }
 
     fun put(key: Int, value: Int) {
-        if (this.configs == null) {
-            this.configs = IterableNodeMap(this.capacity)
+        if (this.varpValues == null) {
+            this.varpValues = IterableNodeMap(this.capacity)
         }
-        var intNode = this.configs!!.get(key.toLong())
+        var intNode = this.varpValues!!.get(key.toLong())
         if (intNode != null) {
             intNode.value = value
         } else {
             intNode = IntNode(value)
-            this.configs!!.put(intNode, key.toLong())
+            this.varpValues!!.put(intNode, key.toLong())
         }
     }
 
     fun getVarp(varId: Int): Int {
-        val intNode = this.configs?.get(varId.toLong())
+        val intNode = this.varpValues?.get(varId.toLong())
         if (intNode != null) {
             return intNode.value
         }
         val varType = TypeLists.VAR!!.list(varId)
-        return if (varType.aChar4328.code != 105) -1 else 0
+        return if (varType.typeChar.code != 105) -1 else 0
     }
 
     fun getVarbit(varbitId: Int): Int {

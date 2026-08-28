@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -151,8 +151,8 @@ object InterfaceQueryOps {
             ClientScriptOpCode.IF_GET2DANGLE -> ifGetAngle2D(exec)
             ClientScriptOpCode.IF_GETMODEL -> ifGetModel(exec)
             ClientScriptOpCode.IF_GETFONTGRAPHIC -> ifGetFontGraphic(exec)
-            ClientScriptOpCode.IF_GETGRAPHICDIMENSIONS -> method7643(exec)
-            ClientScriptOpCode.IF_GETFONTMETRICS -> method6142(exec)
+            ClientScriptOpCode.IF_GETGRAPHICDIMENSIONS -> ifGetGraphicDimensions(exec)
+            ClientScriptOpCode.IF_GETFONTMETRICS -> ifGetFontMetrics(exec)
             ClientScriptOpCode.IF_GETCONTAINERITEMID -> ifGetContainerItemId(exec)
             ClientScriptOpCode.IF_GETITEMSTACKSIZE -> ifGetItemStackSize(exec)
             ClientScriptOpCode.IF_ISSUBOPEN -> ifGetSubId(exec)
@@ -165,8 +165,8 @@ object InterfaceQueryOps {
             ClientScriptOpCode.IF_CALLONRESIZE -> ifCallonresize(exec)
             ClientScriptOpCode.IF_GETCHARINDEXATPOS -> ifGetCharIndexAtPos(exec)
             ClientScriptOpCode.IF_GETCHARPOSATINDEX -> ifGetCharPosAtIndex(exec)
-            ClientScriptOpCode.IF_NPC_SETCUSTOMBODYMODEL -> method6670(exec)
-            ClientScriptOpCode.CC_NPC_SETCUSTOMBODYMODEL -> method1967(exec)
+            ClientScriptOpCode.IF_NPC_SETCUSTOMBODYMODEL -> ifNpcSetCustomBodyModel(exec)
+            ClientScriptOpCode.CC_NPC_SETCUSTOMBODYMODEL -> ccNpcSetCustomBodyModel(exec)
             ClientScriptOpCode.IF_NPC_SETCUSTOMHEADMODEL -> ifNpcSetCustomHeadModel(exec)
             ClientScriptOpCode.CC_NPC_SETCUSTOMHEADMODEL -> ccNpcSetCustomHeadModel(exec)
             ClientScriptOpCode.IF_NPC_SETCUSTOMRECOL -> ifNpcSetCustomRecol(exec)
@@ -182,12 +182,12 @@ object InterfaceQueryOps {
     fun ifCallonresize(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
-        CS2SharedOps.method3251(component!!, executor)
+        CS2SharedOps.callonresize(component!!, executor)
     }
 
     @JvmStatic
     fun ccIsopen(executor: CS2Executor) {
-        method1573(executor)
+        isInterfaceOpen(executor)
     }
 
     @JvmStatic
@@ -195,38 +195,38 @@ object InterfaceQueryOps {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
-        method3601(component!!, executor)
+        npcSetCustomRetex(component!!, executor)
     }
 
     @JvmStatic
-    fun method7643(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(i_2)
-        var i_4 = -1
-        var i_5 = -1
+    fun ifGetGraphicDimensions(executor: CS2Executor) {
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
+        var width = -1
+        var height = -1
         assert(component != null)
-        val class1196: InteractiveComponentSprite? = component!!.addInteractiveSprite(Renderers.activeToolkit!!)
-        if (class1196 != null) {
-            i_4 = class1196.width
-            i_5 = class1196.height
+        val sprite: InteractiveComponentSprite? = component!!.addInteractiveSprite(Renderers.activeToolkit!!)
+        if (sprite != null) {
+            width = sprite.width
+            height = sprite.height
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
-        executor.intStack[++executor.intStackPtr - 1] = i_5
+        executor.intStack[++executor.intStackPtr - 1] = width
+        executor.intStack[++executor.intStackPtr - 1] = height
     }
 
     @JvmStatic
     fun ccNpcSetCustomHeadModel(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        method1494(component!!, executor)
+        npcSetCustomHeadModel(component!!, executor)
     }
 
     @JvmStatic
-    fun method6670(executor: CS2Executor) {
+    fun ifNpcSetCustomBodyModel(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
-        method14680(component!!, executor)
+        npcSetCustomBodyModel(component!!, executor)
     }
 
     @JvmStatic
@@ -246,7 +246,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun method6142(executor: CS2Executor) {
+    fun ifGetFontMetrics(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
@@ -263,10 +263,10 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun getCompText(executor: CS2Executor) {
-        val component = executor.intStack[--executor.intStackPtr]
-        val icomponentdefinitions3: Component? = Component.fromHash(component)
-        assert(icomponentdefinitions3 != null)
-        executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3!!.text
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
+        assert(component != null)
+        executor.stringStack[++executor.stringStackPtr - 1] = component!!.text
     }
 
     @JvmStatic
@@ -302,20 +302,20 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun ifGetParentLayer(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val icomponentdefinitions3: Component? = Component.fromHash(i_2)
-        val parentInterface: Interface? = Interface.INTERFACES!![i_2  ushr  16]
-        assert(icomponentdefinitions3 != null)
-        val icomponentdefinitions5: Component? = Interface.getSub(parentInterface!!, icomponentdefinitions3!!)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
+        val parentInterface: Interface? = Interface.INTERFACES!![componentHash  ushr  16]
+        assert(component != null)
+        val parentLayer: Component? = Interface.getSub(parentInterface!!, component!!)
         val stack: IntArray? = executor.intStack
-        val i_7 = ++executor.intStackPtr - 1
-        var i_8: Int = 0
-        if (icomponentdefinitions5!! == null) {
-            i_8 = -1
+        val stackIdx = ++executor.intStackPtr - 1
+        var parentIdHash: Int = 0
+        if (parentLayer!! == null) {
+            parentIdHash = -1
         } else {
-            i_8 = icomponentdefinitions5!!.idHash
+            parentIdHash = parentLayer!!.idHash
         }
-        stack!![i_7] = i_8
+        stack!![stackIdx] = parentIdHash
     }
 
     @JvmStatic
@@ -339,7 +339,7 @@ object InterfaceQueryOps {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
-        method1494(component!!, executor)
+        npcSetCustomHeadModel(component!!, executor)
     }
 
     @JvmStatic
@@ -365,14 +365,14 @@ object InterfaceQueryOps {
         if (component!!.slotChildren == null) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            var i_3 = component!!.slotChildren!!.size
-            for (i_4 in 0 until component!!.slotChildren!!.size) {
-                if (component!!.slotChildren!![i_4] == null) {
-                    i_3 = i_4
+            var count = component!!.slotChildren!!.size
+            for (i in 0 until component!!.slotChildren!!.size) {
+                if (component!!.slotChildren!![i] == null) {
+                    count = i
                     break
                 }
             }
-            executor.intStack[++executor.intStackPtr - 1] = i_3
+            executor.intStack[++executor.intStackPtr - 1] = count
         }
     }
 
@@ -389,7 +389,7 @@ object InterfaceQueryOps {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
-        method15207(component!!, executor)
+        npcSetCustomRecol(component!!, executor)
     }
 
     @JvmStatic
@@ -402,13 +402,13 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun ifGetOp(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(i_2)
-        var i_4 = executor.intStack[--executor.intStackPtr]
-        --i_4
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
+        var opIndex = executor.intStack[--executor.intStackPtr]
+        --opIndex
         assert(component != null)
-        if (component!!.options != null && i_4 < component!!.options!!.size && component!!.options!![i_4] != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = component!!.options!![i_4]
+        if (component!!.options != null && opIndex < component!!.options!!.size && component!!.options!![opIndex] != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = component!!.options!![opIndex]
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         }
@@ -424,16 +424,16 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun getCompHidden(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = if (component!!.hidden) 1  else 0
     }
 
     @JvmStatic
     fun ifGetTransparency(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.transparency
     }
@@ -453,16 +453,16 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun ifGetCharPosAtIndex(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
-        CS2SharedOps.method5001(component!!, executor)
+        CS2SharedOps.getCharPosAtIndex(component!!, executor)
     }
 
     @JvmStatic
     fun ifGetColour(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.color
     }
@@ -471,37 +471,37 @@ object InterfaceQueryOps {
     fun ccNpcSetCustomRetex(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        method3601(component!!, executor)
+        npcSetCustomRetex(component!!, executor)
     }
 
     @JvmStatic
     fun ccNpcSetCustomRecol(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        method15207(component!!, executor)
+        npcSetCustomRecol(component!!, executor)
     }
 
     @JvmStatic
     fun ifGetCharIndexAtPos(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
-        CS2SharedOps.method3965(component!!, executor)
+        CS2SharedOps.getCharIndexAtPos(component!!, executor)
     }
 
     @JvmStatic
     fun ifGetScrollWidth(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.scrollWidth
     }
 
     @JvmStatic
     fun ifGetSubId(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class282Sub443: SubInterface? = Client.OPEN_INTERFACES!!.get(value.toLong())
-        if (class282Sub443 != null) {
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val openSub: SubInterface? = Client.OPEN_INTERFACES!!.get(componentHash.toLong())
+        if (openSub != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -510,47 +510,47 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun ifGetScrollX(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.scrollX
     }
 
     @JvmStatic
-    fun method1967(executor: CS2Executor) {
+    fun ccNpcSetCustomBodyModel(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
-        method14680(component!!, executor)
+        npcSetCustomBodyModel(component!!, executor)
     }
 
     @JvmStatic
     fun ifIsopen(executor: CS2Executor) {
-        method1573(executor)
+        isInterfaceOpen(executor)
     }
 
     @JvmStatic
     fun ifGetOptionFlags(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = Client.getComponentSettings(component!!)!!.getUseOptionFlags()
     }
 
     @JvmStatic
     fun ifGetSpriteRoll(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.spriteRoll
     }
 
     @JvmStatic
-    fun method1573(executor: CS2Executor) {
+    fun isInterfaceOpen(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val class282Sub444: SubInterface? = Client.OPEN_INTERFACES!!.get(i_2.toLong())
-        if (class282Sub444 != null && i_3 == class282Sub444.subInterfaceId) {
+        val targetComponentHash = executor.intStack[executor.intStackPtr]
+        val interfaceId = executor.intStack[executor.intStackPtr + 1]
+        val openSub: SubInterface? = Client.OPEN_INTERFACES!!.get(targetComponentHash.toLong())
+        if (openSub != null && interfaceId == openSub.subInterfaceId) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -559,79 +559,79 @@ object InterfaceQueryOps {
 
     @JvmStatic
     fun ifGety(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.y
     }
 
     @JvmStatic
     fun ifGetSpritePitch(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.spritePitch
     }
 
     @JvmStatic
     fun ifGetx(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.x
     }
 
     @JvmStatic
     fun getCompHeight(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.height
     }
 
     @JvmStatic
     fun ifGetOffsetY(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val component: Component? = Component.fromHash(value)
+        val componentHash = executor.intStack[--executor.intStackPtr]
+        val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.offsetY
     }
 
     @JvmStatic
-    fun method14680(component: Component, cs2executor1: CS2Executor) {
-        val i_3 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr] - 1
+    fun npcSetCustomBodyModel(component: Component, executor: CS2Executor) {
+        val modelId = executor.intStack[--executor.intStackPtr]
+        val slot = executor.intStack[--executor.intStackPtr] - 1
         if (component!!.mediaType != MediaType.NPC_MODEL) {
             throw RuntimeException("")
         } else {
-            val npcdefinitions5: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
+            val npcType: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
             if (component!!.npcCustomisation == null) {
-                component!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, true)
+                component!!.npcCustomisation = NPCTypeCustomisation(npcType!!, true)
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
-            if (i_4 >= 0 && i_4 < npcdefinitions5!!.modelIds!!.size) {
-                component!!.npcCustomisation!!.modelIds[i_4] = i_3
+            if (slot >= 0 && slot < npcType!!.modelIds!!.size) {
+                component!!.npcCustomisation!!.modelIds[slot] = modelId
                 Component.redrawComponent(component!!)
             } else {
-                throw RuntimeException("" + i_4)
+                throw RuntimeException("" + slot)
             }
         }
     }
 
     @JvmStatic
-    fun method15207(component: Component, cs2executor1: CS2Executor) {
-        val i_3 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr] - 1
+    fun npcSetCustomRecol(component: Component, executor: CS2Executor) {
+        val color = executor.intStack[--executor.intStackPtr]
+        val slot = executor.intStack[--executor.intStackPtr] - 1
         if (component!!.mediaType != MediaType.NPC_MODEL && component!!.mediaType != MediaType.NPC_HEAD) {
             throw RuntimeException("")
         } else {
-            val npcdefinitions5: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
+            val npcType: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
             if (component!!.npcCustomisation == null) {
-                component!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, component!!.mediaType == MediaType.NPC_MODEL)
+                component!!.npcCustomisation = NPCTypeCustomisation(npcType!!, component!!.mediaType == MediaType.NPC_MODEL)
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
-            if (npcdefinitions5!!.recolorDst != null && i_4 >= 0 && i_4 < npcdefinitions5!!.recolorDst!!.size) {
-                component!!.npcCustomisation!!.recolorDst!![i_4] = i_3.toShort()
+            if (npcType!!.recolorDst != null && slot >= 0 && slot < npcType!!.recolorDst!!.size) {
+                component!!.npcCustomisation!!.recolorDst!![slot] = color.toShort()
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("")
@@ -640,19 +640,19 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun method1494(component: Component, cs2executor1: CS2Executor) {
-        val i_3 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr] - 1
+    fun npcSetCustomHeadModel(component: Component, executor: CS2Executor) {
+        val modelId = executor.intStack[--executor.intStackPtr]
+        val slot = executor.intStack[--executor.intStackPtr] - 1
         if (component!!.mediaType != MediaType.NPC_HEAD) {
             throw RuntimeException("")
         } else {
-            val npcdefinitions5: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
+            val npcType: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
             if (component!!.npcCustomisation == null) {
-                component!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, false)
+                component!!.npcCustomisation = NPCTypeCustomisation(npcType!!, false)
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
-            if (i_4 >= 0 && i_4 < npcdefinitions5!!.headModels!!.size) {
-                component!!.npcCustomisation!!.modelIds[i_4] = i_3
+            if (slot >= 0 && slot < npcType!!.headModels!!.size) {
+                component!!.npcCustomisation!!.modelIds[slot] = modelId
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("")
@@ -661,19 +661,19 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun method3601(component: Component, cs2executor1: CS2Executor) {
-        val i_3 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        val i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr] - 1
+    fun npcSetCustomRetex(component: Component, executor: CS2Executor) {
+        val textureId = executor.intStack[--executor.intStackPtr]
+        val slot = executor.intStack[--executor.intStackPtr] - 1
         if (component!!.mediaType != MediaType.NPC_MODEL && component!!.mediaType != MediaType.NPC_HEAD) {
             throw RuntimeException("")
         } else {
-            val npcdefinitions5: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
+            val npcType: NPCType? = TypeLists.NPC!!.list(component!!.primaryMediaId)
             if (component!!.npcCustomisation == null) {
-                component!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, component!!.mediaType == MediaType.NPC_MODEL)
+                component!!.npcCustomisation = NPCTypeCustomisation(npcType!!, component!!.mediaType == MediaType.NPC_MODEL)
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
-            if (npcdefinitions5!!.retextureDst != null && i_4 >= 0 && i_4 < npcdefinitions5!!.retextureDst!!.size) {
-                component!!.npcCustomisation!!.retextureDst!![i_4] = i_3.toShort()
+            if (npcType!!.retextureDst != null && slot >= 0 && slot < npcType!!.retextureDst!!.size) {
+                component!!.npcCustomisation!!.retextureDst!![slot] = textureId.toShort()
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("")

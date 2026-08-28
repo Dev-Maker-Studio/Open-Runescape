@@ -793,8 +793,8 @@ open class MidiPcmStream : PcmStream {
             patchNode.vibratoPhase += patchInfo.volumeEnvelopeRelease
             val pitchScalar = 5.086263020833333E-6 * ((patchNode.currentNotePitch - 60 shl 8) + (patchNode.portamentoPitchOffset * patchNode.portamentoFactor shr 12))
             if (patchInfo.volumeEnvelopeDecay > 0) {
-                if (patchInfo.vibratoLfoFrequency > 0) {
-                    patchNode.volumeEnvelopeTime += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.vibratoLfoFrequency.toDouble())) + 0.5).toInt()
+                if (patchInfo.decayKeyScaling > 0) {
+                    patchNode.volumeEnvelopeTime += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.decayKeyScaling.toDouble())) + 0.5).toInt()
                 } else {
                     patchNode.volumeEnvelopeTime += 128
                 }
@@ -805,8 +805,8 @@ open class MidiPcmStream : PcmStream {
             }
 
             patchInfo.volumeEnvelopeData?.let { array ->
-                if (patchInfo.volumeEnvelopeSustain > 0) {
-                    patchNode.volumeEnvelopePosition += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.volumeEnvelopeSustain.toDouble())) + 0.5).toInt()
+                if (patchInfo.volumeEnvelopeKeyScaling > 0) {
+                    patchNode.volumeEnvelopePosition += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.volumeEnvelopeKeyScaling.toDouble())) + 0.5).toInt()
                 } else {
                     patchNode.volumeEnvelopePosition += 128
                 }
@@ -822,8 +822,8 @@ open class MidiPcmStream : PcmStream {
 
             if (patchNode.releaseState >= 0 && (this.sustain[patchNode.currentTrack] and 0x1) == 0 && (patchNode.loopVariable < 0 || patchNode != this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable])) {
                 patchInfo.releaseEnvelopeData?.let { array ->
-                    if (patchInfo.vibratoLfoDelay > 0) {
-                        patchNode.releaseState += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.vibratoLfoDelay.toDouble())) + 0.5).toInt()
+                    if (patchInfo.releaseEnvelopeKeyScaling > 0) {
+                        patchNode.releaseState += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.releaseEnvelopeKeyScaling.toDouble())) + 0.5).toInt()
                     } else {
                         patchNode.releaseState += 128
                     }

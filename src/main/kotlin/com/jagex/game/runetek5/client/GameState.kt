@@ -46,7 +46,6 @@ enum class GameState {
         }
 
         @JvmStatic
-        @JvmName("method12426")
         fun startGameLogin() {
             if (Client.gameState == UNK_5 && !LoginManager.isLoginInProgress() && !AccountCreationStage.isCreatingAccount()) {
                 Client.setGameState(UNK_8)
@@ -65,7 +64,6 @@ enum class GameState {
         }
 
         @JvmStatic
-        @JvmName("method6270")
         fun handleDisconnection() {
             if (StaticMethods.isInLobbyState(Client.gameState)) {
                 if (Client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
@@ -83,7 +81,6 @@ enum class GameState {
         }
 
         @JvmStatic
-        @JvmName("method6693")
         fun isReadyForLogin(): Boolean {
             return Client.gameState == UNK_5 && !LoginManager.isLoginInProgress() && !AccountCreationStage.isCreatingAccount()
         }

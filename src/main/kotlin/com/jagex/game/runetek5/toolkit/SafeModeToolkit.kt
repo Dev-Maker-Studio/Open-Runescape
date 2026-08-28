@@ -35,7 +35,7 @@ import com.jagex.game.runetek5.imageproducer.AbstractImageProducerSM
 import com.jagex.game.runetek5.imageproducer.BufferedImageProducerSM
 import com.jagex.game.runetek5.imageproducer.DelegatingDisplay
 import com.jagex.game.runetek5.imageproducer.DirectDisplay
-import com.jagex.game.runetek5.imageproducer.ImageProducerSM1
+import com.jagex.game.runetek5.imageproducer.SafeModeDirectDisplay
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.rendering.RenderInfo
@@ -1723,7 +1723,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-    fun drawBillboard(colorWrite: Boolean, depthWrite: Boolean, transparent: Boolean, x: Int, y: Int, z: Float, size2d: Int, size3d: Int, materialId: Int, color: Int, blendType: Int, shape: Int) {
+    fun drawBillboard(colorWrite: Boolean, depthTest: Boolean, transparent: Boolean, x: Int, y: Int, z: Float, size2d: Int, size3d: Int, materialId: Int, color: Int, blendType: Int, shape: Int) {
         if (size2d != 0 && size3d != 0) {
             if (materialId != 0xffff) {
                 val material = materialProvider!!.getMaterial(materialId)
@@ -1742,16 +1742,16 @@ open class SafeModeToolkit : AbstractToolkit {
                         this.renderedMaterialId = materialId
                         this.renderedNativeSprite = nativeSprite
                     }
-                    (this.renderedNativeSprite as SpriteSM).drawParticle(colorWrite, depthWrite, transparent, x - size2d, y - size3d, z, size2d shl 1, size3d shl 1, blendType, color, shape, material.effectCombiner != 2)
+                    (this.renderedNativeSprite as SpriteSM).drawParticle(colorWrite, depthTest, transparent, x - size2d, y - size3d, z, size2d shl 1, size3d shl 1, blendType, color, shape, material.effectCombiner != 2)
                     return
                 }
             }
-            drawParticleShape(depthWrite, x, y, z, size2d, color, shape)
+            drawParticleShape(depthTest, x, y, z, size2d, color, shape)
         }
 
     }
 
-    fun drawParticleShape(writeDepth: Boolean, x: Int, y: Int, z: Float, deltaY: Int, color: Int, shape: Int) {
+    fun drawParticleShape(depthTest: Boolean, x: Int, y: Int, z: Float, deltaY: Int, color: Int, shape: Int) {
         var y = y
         var deltaY = deltaY
         var color = color
@@ -1812,7 +1812,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
                         pixelX = leftX
                         while (pixelX < rightX) {
-                            if (!writeDepth || z < this.depthBuffer!![bufferOffset]) {
+                            if (!depthTest || z < this.depthBuffer!![bufferOffset]) {
                                 existingColor = this.colourBuffer!![bufferOffset]
                                 existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
                                 this.colourBuffer!![bufferOffset] = existingColor + color
@@ -1853,7 +1853,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
                         pixelX = leftX
                         while (pixelX <= rightX) {
-                            if (!writeDepth || z < this.depthBuffer!![bufferOffset]) {
+                            if (!depthTest || z < this.depthBuffer!![bufferOffset]) {
                                 existingColor = this.colourBuffer!![bufferOffset]
                                 existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
                                 this.colourBuffer!![bufferOffset] = existingColor + color
@@ -1893,7 +1893,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
                         bufferOffset = invAlpha
                         while (bufferOffset < leftX) {
-                            if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                            if (!depthTest || z < this.depthBuffer!![rightX]) {
                                 pixelX = this.colourBuffer!![rightX]
                                 existingColor = pixelX + color
                                 channelSum = (pixelX and 0xff00ff) + (color and 0xff00ff)
@@ -1936,7 +1936,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
                         bufferOffset = invAlpha
                         while (bufferOffset <= leftX) {
-                            if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                            if (!depthTest || z < this.depthBuffer!![rightX]) {
                                 pixelX = this.colourBuffer!![rightX]
                                 existingColor = pixelX + color
                                 channelSum = (pixelX and 0xff00ff) + (color and 0xff00ff)
@@ -1974,7 +1974,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
                     bufferOffset = invAlpha
                     while (bufferOffset < leftX) {
-                        if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                        if (!depthTest || z < this.depthBuffer!![rightX]) {
                             this.colourBuffer!![rightX] = color
                         }
 
@@ -2013,7 +2013,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
                     bufferOffset = invAlpha
                     while (bufferOffset <= leftX) {
-                        if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                        if (!depthTest || z < this.depthBuffer!![rightX]) {
                             this.colourBuffer!![rightX] = color
                         }
 
@@ -2235,7 +2235,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
 
     override fun getImageProducer(): DirectDisplay {
-        return ImageProducerSM1(this)
+        return SafeModeDirectDisplay(this)
     }
 
 

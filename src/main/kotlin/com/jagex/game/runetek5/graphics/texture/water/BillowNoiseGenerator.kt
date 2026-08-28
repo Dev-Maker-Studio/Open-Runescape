@@ -10,17 +10,17 @@ internal open class BillowNoiseGenerator : WaterTextureGenerator(12, 16, 2) {
     init {
         this.amplitudeWeights = IntArray(super.octaveCount)
 
-        for (i_7 in 0 until super.octaveCount) {
-            this.amplitudeWeights[i_7] = (Math.pow(0.45, i_7.toDouble()) * 4096.0).toInt()
+        for (octave in 0 until super.octaveCount) {
+            this.amplitudeWeights[octave] = (Math.pow(0.45, octave.toDouble()) * 4096.0).toInt()
         }
     }
 
-    open fun writeSample(i_1: Int, b_2: Byte) {
-        this.outputBuffer!![this.writePosition++] = ((b_2.toInt() and 0xff shr 1) + 127).toByte()
+    open fun writeSample(index: Int, value: Byte) {
+        this.outputBuffer!![this.writePosition++] = ((value.toInt() and 0xff shr 1) + 127).toByte()
     }
 
-    override fun update(i_1: Int, i_2: Int) {
-        this.accumulator += i_2 * this.amplitudeWeights[i_1] shr 12
+    override fun update(octave: Int, noise: Int) {
+        this.accumulator += noise * this.amplitudeWeights[octave] shr 12
     }
 
     override fun clear() {

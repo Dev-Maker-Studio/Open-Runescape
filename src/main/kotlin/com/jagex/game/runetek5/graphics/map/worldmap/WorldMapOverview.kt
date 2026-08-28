@@ -69,7 +69,7 @@ object WorldMapOverview {
             val backgroundWidth = scaledWidth * StaticMethods.worldMapViewWidth / WorldMap.mapSizeX
             val backgroundHeight = scaledHeight * ComponentMinimap.mapViewportScale / WorldMap.mapSizeY
             val backgroundX = scaledWidth * DebugDisplay.worldMapViewLeftTileX / WorldMap.mapSizeX + adjustedX
-            val backgroundY = scaledHeight + adjustedY - scaledHeight * WorldMapSub1.viewBottomTileY / WorldMap.mapSizeY - backgroundHeight
+            val backgroundY = scaledHeight + adjustedY - scaledHeight * WorldMapDisplay.viewBottomTileY / WorldMap.mapSizeY - backgroundHeight
             var backgroundColor = -1996554240
 
             if (Game.STELLAR_DAWN == Client.CURRENT_GAME) {
@@ -89,12 +89,12 @@ object WorldMapOverview {
                 var mapCategory = WorldMap.worldMapCategories.getFirst() as WorldMapCategory?
                 while (mapCategory != null) {
                     val mectype: MECType? = WorldMap.MECTYPE_LIST!!.list(mapCategory.mecId)
-                    if (WorldMapSub1.shouldDraw(mectype)) {
-                        if (mapCategory.mecId == WorldMapSub1.someMecId) {
+                    if (WorldMapDisplay.shouldDraw(mectype)) {
+                        if (mapCategory.mecId == WorldMapDisplay.someMecId) {
                             val mecStartX = scaledWidth * mapCategory.absX / WorldMap.mapSizeX + adjustedX
                             val mecStartY = scaledHeight * (WorldMap.mapSizeY - mapCategory.absY) / WorldMap.mapSizeY + adjustedY
                             toolkit.clearPixels(mecStartX - 2, mecStartY - 2, 4, 4, randomizedColor shl 24 or 0xffff00)
-                        } else if (WorldMapSub1.highlightedCategoryId != -1 && mectype!!.categoryId == WorldMapSub1.highlightedCategoryId) {
+                        } else if (WorldMapDisplay.highlightedCategoryId != -1 && mectype!!.categoryId == WorldMapDisplay.highlightedCategoryId) {
                             val mecStartX = scaledWidth * mapCategory.absX / WorldMap.mapSizeX + adjustedX
                             val mecStartY = scaledHeight * (WorldMap.mapSizeY - mapCategory.absY) / WorldMap.mapSizeY + adjustedY
                             toolkit.clearPixels(mecStartX - 2, mecStartY - 2, 4, 4, randomizedColor shl 24 or 0xffff00)

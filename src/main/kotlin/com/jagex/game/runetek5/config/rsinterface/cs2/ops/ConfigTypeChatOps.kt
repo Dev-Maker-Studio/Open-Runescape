@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -166,7 +166,7 @@ object ConfigTypeChatOps {
             ClientScriptOpCode.CHAT_SETMODE -> chatSetMode(exec)
             ClientScriptOpCode.CHAT_SENDPUBLIC -> chatSendPublic(exec)
             ClientScriptOpCode.CHAT_SENDPRIVATE -> chatSendPrivate(exec)
-            ClientScriptOpCode.CHATLINE_GETCROWNEDNAME -> method6237(exec)
+            ClientScriptOpCode.CHATLINE_GETCROWNEDNAME -> chatlineGetCrownedName(exec)
             ClientScriptOpCode.CHAT_GETCLAN -> chatGetClan(exec)
             ClientScriptOpCode.CHATLINE_GETQUICKCHATID -> chatlineGetQuickchatId(exec)
             ClientScriptOpCode.CHAT_PLAYERNAME -> chatPlayerName(exec)
@@ -177,7 +177,7 @@ object ConfigTypeChatOps {
             ClientScriptOpCode.GETMYDISPLAYNAME -> getMyDisplayname(exec)
             ClientScriptOpCode.CHATLINE_GETUID -> chatlineGetUid(exec)
             ClientScriptOpCode.CHATLINE_GETCYCLES20MS -> chatLineGetCycles20Ms(exec)
-            ClientScriptOpCode.CHATLINE_GETSIMPLENAME -> method565(exec)
+            ClientScriptOpCode.CHATLINE_GETSIMPLENAME -> chatlineGetSimpleName(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by ConfigTypeChatOps")
         }
     }
@@ -209,36 +209,36 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun chatPlayerName(executor: CS2Executor) {
-        var text: String? = null
+        var name: String? = null
         if (PlayerUpdate.MY_PLAYER != null && PlayerUpdate.MY_PLAYER!!.username != null) {
-            text = PlayerUpdate.MY_PLAYER!!.getUsernameWithTitle()
+            name = PlayerUpdate.MY_PLAYER!!.getUsernameWithTitle()
         } else {
-            text = ""
+            name = ""
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = text
+        executor.stringStack[++executor.stringStackPtr - 1] = name
     }
 
     @JvmStatic
     fun chatlineGetQuickchatId(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(i_2)
-        var i_4 = -1
-        if (chatline3 != null) {
-            i_4 = chatline3.quickchatMessageId
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var quickchatId = -1
+        if (chatLine != null) {
+            quickchatId = chatLine.quickchatMessageId
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        executor.intStack[++executor.intStackPtr - 1] = quickchatId
     }
 
     @JvmStatic
     fun getNPCParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.NPC!!.list(i_2).getCS2Param(i_3, attributedefault4!!.typeName!!)
+        val npcId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.NPC!!.list(npcId).getCS2Param(paramId, paramType!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.NPC!!.list(i_2).getCs2Value(i_3, attributedefault4!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.NPC!!.list(npcId).getCs2Value(paramId, paramType!!.defaultInt)
         }
     }
 
@@ -250,63 +250,63 @@ object ConfigTypeChatOps {
     @JvmStatic
     fun getAnimationParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.SEQ!!.list(i_2).getCs2Object(i_3, attributedefault4!!.typeName!!)
+        val seqId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.SEQ!!.list(seqId).getCs2Object(paramId, paramType!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.SEQ!!.list(i_2).getCs2Integer(i_3, attributedefault4!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.SEQ!!.list(seqId).getCs2Integer(paramId, paramType!!.defaultInt)
         }
     }
 
     @JvmStatic
     fun ocUncert(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val itemdefinitions3: ItemType? = TypeLists.OBJ!!.list(value)
-        if (itemdefinitions3!!.certTemplateId >= 0 && itemdefinitions3!!.certId >= 0) {
-            executor.intStack[++executor.intStackPtr - 1] = itemdefinitions3!!.certId
+        val objId = executor.intStack[--executor.intStackPtr]
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        if (objType!!.certTemplateId >= 0 && objType!!.certId >= 0) {
+            executor.intStack[++executor.intStackPtr - 1] = objType!!.certId
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = value
+            executor.intStack[++executor.intStackPtr - 1] = objId
         }
     }
 
     @JvmStatic
     fun ocCert(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val itemdefinitions3: ItemType? = TypeLists.OBJ!!.list(value)
-        if (itemdefinitions3!!.certTemplateId == -1 && itemdefinitions3!!.certId >= 0) {
-            executor.intStack[++executor.intStackPtr - 1] = itemdefinitions3!!.certId
+        val objId = executor.intStack[--executor.intStackPtr]
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        if (objType!!.certTemplateId == -1 && objType!!.certId >= 0) {
+            executor.intStack[++executor.intStackPtr - 1] = objType!!.certId
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = value
+            executor.intStack[++executor.intStackPtr - 1] = objId
         }
     }
 
     @JvmStatic
     fun ocCost(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(i_2).value
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(objId).value
     }
 
     @JvmStatic
     fun chatLineGetCycles20Ms(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(i_2)
-        var i_4 = -1
-        if (chatline3 != null) {
-            i_4 = chatline3.time
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var cycles = -1
+        if (chatLine != null) {
+            cycles = chatLine.time
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        executor.intStack[++executor.intStackPtr - 1] = cycles
     }
 
     @JvmStatic
     fun itemFindParamInt(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val itemName: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStackPtr -= 3
-        val i_3 = executor.intStack[executor.intStackPtr]
-        val i_4 = executor.intStack[executor.intStackPtr + 1]
-        val i_5 = executor.intStack[executor.intStackPtr + 2]
-        StaticMethods.queryItemParamInt(text!!, i_3 == 1, i_4, i_5)
+        val tradeableOnly = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramIntQuery = executor.intStack[executor.intStackPtr + 2]
+        StaticMethods.queryItemParamInt(itemName!!, tradeableOnly == 1, paramId, paramIntQuery)
         executor.intStack[++executor.intStackPtr - 1] = CS2QueryResults.count
     }
 
@@ -321,13 +321,13 @@ object ConfigTypeChatOps {
     @JvmStatic
     fun getObjectParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = Resource.mapRegion!!.getLoctypeList().list(i_2).getParamsString(i_3, attributedefault4!!.typeName!!)
+        val locId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            executor.stringStack[++executor.stringStackPtr - 1] = Resource.mapRegion!!.getLoctypeList().list(locId).getParamsString(paramId, paramType!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = Resource.mapRegion!!.getLoctypeList().list(i_2).getParamsInt(i_3, attributedefault4!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = Resource.mapRegion!!.getLoctypeList().list(locId).getParamsInt(paramId, paramType!!.defaultInt)
         }
     }
 
@@ -338,24 +338,24 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun ocName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.OBJ!!.list(value).name
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.OBJ!!.list(objId).name
     }
 
     @JvmStatic
     fun sendDisplayNameChangeRequest(executor: CS2Executor) {
-        val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        val displayName: String? = executor.stringStack[--executor.stringStackPtr] as String?
         if (Client.gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress()) {
-            if (text!!.length > 20) {
+            if (displayName!!.length > 20) {
                 Client.displayNameChangeState = -4
             } else {
                 Client.displayNameChangeState = -1
-                val tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.DEPRECATED_97_SERVERPACKET_52, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-                tcpmessage3!!.buffer.writeByte(0)
-                val value = tcpmessage3!!.buffer.currentPosition
-                tcpmessage3!!.buffer.writeString(text!!)
-                tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - value)
-                Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3)
+                val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.DEPRECATED_97_SERVERPACKET_52, Client.LOBBY_CONNECTION_CONTEXT.isaac)
+                packet!!.buffer.writeByte(0)
+                val position = packet!!.buffer.currentPosition
+                packet!!.buffer.writeString(displayName!!)
+                packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - position)
+                Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
             }
         } else {
             Client.displayNameChangeState = -5
@@ -364,19 +364,19 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun ocStackable(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val objType = TypeLists.OBJ!!.list(value)
+        val objId = executor.intStack[--executor.intStackPtr]
+        val objType = TypeLists.OBJ!!.list(objId)
         executor.intStack[++executor.intStackPtr - 1] = if (objType.stackable == 1) 1 else 0
     }
 
     @JvmStatic
     fun ocIop(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val itemdefinitions4: ItemType? = TypeLists.OBJ!!.list(i_2)
-        if (i_3 >= 1 && i_3 <= 5 && itemdefinitions4!!.inventoryActions!![i_3 - 1] != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = itemdefinitions4!!.inventoryActions!![i_3 - 1]
+        val objId = executor.intStack[executor.intStackPtr]
+        val op = executor.intStack[executor.intStackPtr + 1]
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        if (op >= 1 && op <= 5 && objType!!.inventoryActions!![op - 1] != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = objType!!.inventoryActions!![op - 1]
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         }
@@ -384,82 +384,82 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun getMyDisplayname(executor: CS2Executor) {
-        var text: String? = null
+        var displayName: String? = null
         if (PlayerUpdate.MY_PLAYER != null && PlayerUpdate.MY_PLAYER!!.username != null) {
-            text = PlayerUpdate.MY_PLAYER!!.getDisplayName()
+            displayName = PlayerUpdate.MY_PLAYER!!.getDisplayName()
         } else {
-            text = ""
+            displayName = ""
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = text
+        executor.stringStack[++executor.stringStackPtr - 1] = displayName
     }
 
     @JvmStatic
     fun chatlineGetUid(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(i_2)
-        var i_4 = -1
-        if (chatline3 != null) {
-            i_4 = chatline3.identifier
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var uid = -1
+        if (chatLine != null) {
+            uid = chatLine.identifier
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        executor.intStack[++executor.intStackPtr - 1] = uid
     }
 
     @JvmStatic
     fun itemFindParamStr(executor: CS2Executor) {
         executor.stringStackPtr -= 2
         executor.intStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val i_3 = executor.intStack[executor.intStackPtr]
-        val i_4 = executor.intStack[executor.intStackPtr + 1]
-        val string_5: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
-        CS2Executor.queryItemParamString(string_2!!, i_3 == 1, i_4, string_5!!)
+        val itemName: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val tradeableOnly = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramString: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        CS2Executor.queryItemParamString(itemName!!, tradeableOnly == 1, paramId, paramString!!)
         executor.intStack[++executor.intStackPtr - 1] = CS2QueryResults.count
     }
 
     @JvmStatic
     fun ocWearpos2(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(value).wearPos2
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(objId).wearPos2
     }
 
     @JvmStatic
     fun ocMembers(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = if (TypeLists.OBJ!!.list(value).membersOnly) 1  else 0
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = if (TypeLists.OBJ!!.list(objId).membersOnly) 1  else 0
     }
 
     @JvmStatic
-    fun method565(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(value)
-        var str4: String? = ""
-        if (chatline3 != null && chatline3.simpleName != null) {
-            str4 = chatline3.simpleName
+    fun chatlineGetSimpleName(executor: CS2Executor) {
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var simpleName: String? = ""
+        if (chatLine != null && chatLine.simpleName != null) {
+            simpleName = chatLine.simpleName
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = str4
+        executor.stringStack[++executor.stringStackPtr - 1] = simpleName
     }
 
     @JvmStatic
     fun chatGetByline(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(value)
-        var str4: String? = ""
-        if (chatline3 != null && chatline3.message != null) {
-            str4 = chatline3.message
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var message: String? = ""
+        if (chatLine != null && chatLine.message != null) {
+            message = chatLine.message
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = str4
+        executor.stringStack[++executor.stringStackPtr - 1] = message
     }
 
     @JvmStatic
     fun getItemParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.OBJ!!.list(i_2).getCs2String(i_3, attributedefault4!!.typeName!!)
+        val objId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.OBJ!!.list(objId).getCs2String(paramId, paramType!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(i_2).getCs2Integer(i_3, attributedefault4!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(objId).getCs2Integer(paramId, paramType!!.defaultInt)
         }
     }
 
@@ -474,8 +474,8 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun ocMultiStackSize(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(value).multiStackSize
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(objId).multiStackSize
     }
 
     @JvmStatic
@@ -488,11 +488,11 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun chatlineGeteffectflags(executor: CS2Executor) {
-        val line = executor.intStack[--executor.intStackPtr]
-        val chatline: ChatLine? = ChatBox.getLine(line)
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
         var effectFlags = 0
-        if (chatline != null) {
-            effectFlags = chatline.effectFlags
+        if (chatLine != null) {
+            effectFlags = chatLine.effectFlags
         }
         executor.intStack[++executor.intStackPtr - 1] = effectFlags
     }
@@ -500,85 +500,85 @@ object ConfigTypeChatOps {
     @JvmStatic
     fun getStructParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val attributedefault4: ParamType? = TypeLists.PARAMS!!.list(i_3)
-        if (attributedefault4!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.STRUCT!!.getStruct(i_2).getString(i_3, attributedefault4!!.typeName!!)
+        val structId = executor.intStack[executor.intStackPtr]
+        val paramId = executor.intStack[executor.intStackPtr + 1]
+        val paramType: ParamType? = TypeLists.PARAMS!!.list(paramId)
+        if (paramType!!.isString()) {
+            executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.STRUCT!!.getStruct(structId).getString(paramId, paramType!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = TypeLists.STRUCT!!.getStruct(i_2).getInteger(i_3, attributedefault4!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = TypeLists.STRUCT!!.getStruct(structId).getInteger(paramId, paramType!!.defaultInt)
         }
     }
 
     @JvmStatic
     fun chatGetClan(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(value)
-        var str4: String? = ""
-        if (chatline3 != null && chatline3.clan != null) {
-            str4 = chatline3.clan
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var clan: String? = ""
+        if (chatLine != null && chatLine.clan != null) {
+            clan = chatLine.clan
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = str4
+        executor.stringStack[++executor.stringStackPtr - 1] = clan
     }
 
     @JvmStatic
-    fun method6237(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(value)
-        var str4: String? = ""
-        if (chatline3 != null && chatline3.crownedName != null) {
-            str4 = chatline3.crownedName
+    fun chatlineGetCrownedName(executor: CS2Executor) {
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var crownedName: String? = ""
+        if (chatLine != null && chatLine.crownedName != null) {
+            crownedName = chatLine.crownedName
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = str4
+        executor.stringStack[++executor.stringStackPtr - 1] = crownedName
     }
 
     @JvmStatic
     fun ocWearpos(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(value).wearPos
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(objId).wearPos
     }
 
     @JvmStatic
     fun chatSetMode(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val class1843: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT_TYPE, class1843?.isaac)
-        tcpmessage4!!.buffer.writeByte(value)
-        class1843!!.queuePacket(tcpmessage4)
+        val mode = executor.intStack[--executor.intStackPtr]
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT_TYPE, connection?.isaac)
+        packet!!.buffer.writeByte(mode)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
     fun sendReportAbusePacket(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        var string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        val reportedName: String? = executor.stringStack[executor.stringStackPtr] as String?
+        var comment: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
         executor.intStackPtr -= 2
-        val i_4 = executor.intStack[executor.intStackPtr]
-        val i_5 = executor.intStack[executor.intStackPtr + 1]
-        if (string_3 == null) {
-            string_3 = ""
+        val ruleId = executor.intStack[executor.intStackPtr]
+        val mute = executor.intStack[executor.intStackPtr + 1]
+        if (comment == null) {
+            comment = ""
         }
-        if (string_3!!.length > 80) {
-            string_3 = string_3!!.substring(0, 80)
+        if (comment!!.length > 80) {
+            comment = comment!!.substring(0, 80)
         }
-        val class1846: BufferedConnectionContext? = Client.connectionContext
-        val tcpmessage7: TcpPacket? = PacketEncoder.createPacket(ClientProt.REPORT_ABUSE, class1846!!.isaac)
-        tcpmessage7!!.buffer.writeByte(TextUtils.getLength(string_2!!) + 2 + TextUtils.getLength(string_3!!))
-        tcpmessage7!!.buffer.writeString(string_2!!)
-        tcpmessage7!!.buffer.writeByte(i_4 - 1)
-        tcpmessage7!!.buffer.writeByte(i_5)
-        tcpmessage7!!.buffer.writeString(string_3!!)
-        class1846!!.queuePacket(tcpmessage7)
+        val connection: BufferedConnectionContext? = Client.connectionContext
+        val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.REPORT_ABUSE, connection!!.isaac)
+        packet!!.buffer.writeByte(TextUtils.getLength(reportedName!!) + 2 + TextUtils.getLength(comment!!))
+        packet!!.buffer.writeString(reportedName!!)
+        packet!!.buffer.writeByte(ruleId - 1)
+        packet!!.buffer.writeByte(mute)
+        packet!!.buffer.writeString(comment!!)
+        connection!!.queuePacket(packet)
     }
 
     @JvmStatic
     fun ocOp(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val itemdefinitions4: ItemType? = TypeLists.OBJ!!.list(i_2)
-        if (i_3 >= 1 && i_3 <= 5 && itemdefinitions4!!.groundActions!![i_3 - 1] != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = itemdefinitions4!!.groundActions!![i_3 - 1]
+        val objId = executor.intStack[executor.intStackPtr]
+        val op = executor.intStack[executor.intStackPtr + 1]
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        if (op >= 1 && op <= 5 && objType!!.groundActions!![op - 1] != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = objType!!.groundActions!![op - 1]
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         }
@@ -586,27 +586,27 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun ocWearpos3(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(value).wearPos3
+        val objId = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.OBJ!!.list(objId).wearPos3
     }
 
     @JvmStatic
     fun ocMiniMenuColourOverridden(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val itemdefinitions3: ItemType? = TypeLists.OBJ!!.list(value)
-        executor.intStack[++executor.intStackPtr - 1] = if (itemdefinitions3!!.hasTooltipColor) 1  else 0
+        val objId = executor.intStack[--executor.intStackPtr]
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        executor.intStack[++executor.intStackPtr - 1] = if (objType!!.hasTooltipColor) 1  else 0
     }
 
     @JvmStatic
     fun ocIcursor(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1] - 1
-        val itemdefinitions4: ItemType? = TypeLists.OBJ!!.list(i_2)
-        if (i_3 == itemdefinitions4!!.customCursorOp1) {
-            executor.intStack[++executor.intStackPtr - 1] = itemdefinitions4!!.customCursorId1
-        } else if (i_3 == itemdefinitions4!!.customCursorOp2) {
-            executor.intStack[++executor.intStackPtr - 1] = itemdefinitions4!!.customCursorId2
+        val objId = executor.intStack[executor.intStackPtr]
+        val op = executor.intStack[executor.intStackPtr + 1] - 1
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        if (op == objType!!.customCursorOp1) {
+            executor.intStack[++executor.intStackPtr - 1] = objType!!.customCursorId1
+        } else if (op == objType!!.customCursorOp2) {
+            executor.intStack[++executor.intStackPtr - 1] = objType!!.customCursorId2
         } else {
             executor.intStack[++executor.intStackPtr - 1] = -1
         }
@@ -619,45 +619,45 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun chatlineGetName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        val chatline3: ChatLine? = ChatBox.getLine(value)
-        var str4: String? = ""
-        if (chatline3 != null && chatline3.name != null) {
-            str4 = chatline3.name
+        val index = executor.intStack[--executor.intStackPtr]
+        val chatLine: ChatLine? = ChatBox.getLine(index)
+        var name: String? = ""
+        if (chatLine != null && chatLine.name != null) {
+            name = chatLine.name
         }
-        executor.stringStack[++executor.stringStackPtr - 1] = str4
+        executor.stringStack[++executor.stringStackPtr - 1] = name
     }
 
     @JvmStatic
     fun chatSendPrivate(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        val string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
-        val string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
+        val recipient: String? = executor.stringStack[executor.stringStackPtr] as String?
+        val message: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
         if (Client.PLAYER_RIGHTS != 0 || (!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-            val class1844: BufferedConnectionContext? = Client.connectionContext
-            val tcpmessage5: TcpPacket? = PacketEncoder.createPacket(ClientProt.SEND_PRIVATE_MESSAGE, class1844!!.isaac)
-            tcpmessage5!!.buffer.writeShort(0)
-            val value = tcpmessage5!!.buffer.currentPosition
-            tcpmessage5!!.buffer.writeString(string_2!!)
-            PacketEncoder.chatMessageToBuffer(tcpmessage5!!.buffer, string_3)
-            tcpmessage5!!.buffer.writeShortLength(tcpmessage5!!.buffer.currentPosition - value)
-            class1844!!.queuePacket(tcpmessage5)
+            val connection: BufferedConnectionContext? = Client.connectionContext
+            val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.SEND_PRIVATE_MESSAGE, connection!!.isaac)
+            packet!!.buffer.writeShort(0)
+            val position = packet!!.buffer.currentPosition
+            packet!!.buffer.writeString(recipient!!)
+            PacketEncoder.chatMessageToBuffer(packet!!.buffer, message)
+            packet!!.buffer.writeShortLength(packet!!.buffer.currentPosition - position)
+            connection!!.queuePacket(packet)
         }
     }
 
     @JvmStatic
     fun ocMiniMenuColour(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val itemdefinitions3: ItemType? = TypeLists.OBJ!!.list(i_2)
-        var i_4: Int = 0
-        if (itemdefinitions3!!.hasTooltipColor) {
-            i_4 = itemdefinitions3!!.tooltipColor
-        } else if (itemdefinitions3!!.membersOnly) {
-            i_4 = TypeLists.INTERACTION_DEFAULTS!!.tooltipColorP2p
+        val objId = executor.intStack[--executor.intStackPtr]
+        val objType: ItemType? = TypeLists.OBJ!!.list(objId)
+        var color: Int = 0
+        if (objType!!.hasTooltipColor) {
+            color = objType!!.tooltipColor
+        } else if (objType!!.membersOnly) {
+            color = TypeLists.INTERACTION_DEFAULTS!!.tooltipColorP2p
         } else {
-            i_4 = TypeLists.INTERACTION_DEFAULTS!!.tooltipColorF2p
+            color = TypeLists.INTERACTION_DEFAULTS!!.tooltipColorF2p
         }
-        executor.intStack[++executor.intStackPtr - 1] = i_4
+        executor.intStack[++executor.intStackPtr - 1] = color
     }
 
     @JvmStatic
@@ -667,144 +667,144 @@ object ConfigTypeChatOps {
 
     @JvmStatic
     fun chatSendPublic(executor: CS2Executor) {
-        var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        var message: String? = executor.stringStack[--executor.stringStackPtr] as String?
         if (Client.PLAYER_RIGHTS != 0 || (!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-            var string_3: String? = string_2!!.lowercase()
-            var b_4 = 0
-            if (string_3!!.startsWith(LocalizedText.YELLOW.translate(Language.ENGLISH))) {
-                string_2 = string_2!!.substring(LocalizedText.YELLOW.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.RED.translate(Language.ENGLISH))) {
-                b_4 = 1
-                string_2 = string_2!!.substring(LocalizedText.RED.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.GREEN.translate(Language.ENGLISH))) {
-                b_4 = 2
-                string_2 = string_2!!.substring(LocalizedText.GREEN.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.CYAN.translate(Language.ENGLISH))) {
-                b_4 = 3
-                string_2 = string_2!!.substring(LocalizedText.CYAN.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.PURPLE.translate(Language.ENGLISH))) {
-                b_4 = 4
-                string_2 = string_2!!.substring(LocalizedText.PURPLE.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.WHITE.translate(Language.ENGLISH))) {
-                b_4 = 5
-                string_2 = string_2!!.substring(LocalizedText.WHITE.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.FLASH1.translate(Language.ENGLISH))) {
-                b_4 = 6
-                string_2 = string_2!!.substring(LocalizedText.FLASH1.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.FLASH2.translate(Language.ENGLISH))) {
-                b_4 = 7
-                string_2 = string_2!!.substring(LocalizedText.FLASH2.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.FLASH3.translate(Language.ENGLISH))) {
-                b_4 = 8
-                string_2 = string_2!!.substring(LocalizedText.FLASH3.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.GLOW1.translate(Language.ENGLISH))) {
-                b_4 = 9
-                string_2 = string_2!!.substring(LocalizedText.GLOW1.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.GLOW2.translate(Language.ENGLISH))) {
-                b_4 = 10
-                string_2 = string_2!!.substring(LocalizedText.GLOW2.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.GLOW3.translate(Language.ENGLISH))) {
-                b_4 = 11
-                string_2 = string_2!!.substring(LocalizedText.GLOW3.translate(Language.ENGLISH).length)
+            var lower: String? = message!!.lowercase()
+            var color = 0
+            if (lower!!.startsWith(LocalizedText.YELLOW.translate(Language.ENGLISH))) {
+                message = message!!.substring(LocalizedText.YELLOW.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.RED.translate(Language.ENGLISH))) {
+                color = 1
+                message = message!!.substring(LocalizedText.RED.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.GREEN.translate(Language.ENGLISH))) {
+                color = 2
+                message = message!!.substring(LocalizedText.GREEN.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.CYAN.translate(Language.ENGLISH))) {
+                color = 3
+                message = message!!.substring(LocalizedText.CYAN.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.PURPLE.translate(Language.ENGLISH))) {
+                color = 4
+                message = message!!.substring(LocalizedText.PURPLE.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.WHITE.translate(Language.ENGLISH))) {
+                color = 5
+                message = message!!.substring(LocalizedText.WHITE.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.FLASH1.translate(Language.ENGLISH))) {
+                color = 6
+                message = message!!.substring(LocalizedText.FLASH1.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.FLASH2.translate(Language.ENGLISH))) {
+                color = 7
+                message = message!!.substring(LocalizedText.FLASH2.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.FLASH3.translate(Language.ENGLISH))) {
+                color = 8
+                message = message!!.substring(LocalizedText.FLASH3.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.GLOW1.translate(Language.ENGLISH))) {
+                color = 9
+                message = message!!.substring(LocalizedText.GLOW1.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.GLOW2.translate(Language.ENGLISH))) {
+                color = 10
+                message = message!!.substring(LocalizedText.GLOW2.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.GLOW3.translate(Language.ENGLISH))) {
+                color = 11
+                message = message!!.substring(LocalizedText.GLOW3.translate(Language.ENGLISH).length)
             } else if (Client.CURRENT_LANGUAGE!! != Language.ENGLISH) {
-                if (string_3!!.startsWith(LocalizedText.YELLOW.translate(Client.CURRENT_LANGUAGE!!))) {
-                    string_2 = string_2!!.substring(LocalizedText.YELLOW.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.RED.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 1
-                    string_2 = string_2!!.substring(LocalizedText.RED.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.GREEN.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 2
-                    string_2 = string_2!!.substring(LocalizedText.GREEN.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.CYAN.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 3
-                    string_2 = string_2!!.substring(LocalizedText.CYAN.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.PURPLE.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 4
-                    string_2 = string_2!!.substring(LocalizedText.PURPLE.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.WHITE.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 5
-                    string_2 = string_2!!.substring(LocalizedText.WHITE.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.FLASH1.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 6
-                    string_2 = string_2!!.substring(LocalizedText.FLASH1.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.FLASH2.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 7
-                    string_2 = string_2!!.substring(LocalizedText.FLASH2.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.FLASH3.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 8
-                    string_2 = string_2!!.substring(LocalizedText.FLASH3.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.GLOW1.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 9
-                    string_2 = string_2!!.substring(LocalizedText.GLOW1.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.GLOW2.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 10
-                    string_2 = string_2!!.substring(LocalizedText.GLOW2.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.GLOW3.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_4 = 11
-                    string_2 = string_2!!.substring(LocalizedText.GLOW3.translate(Client.CURRENT_LANGUAGE!!).length)
+                if (lower!!.startsWith(LocalizedText.YELLOW.translate(Client.CURRENT_LANGUAGE!!))) {
+                    message = message!!.substring(LocalizedText.YELLOW.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.RED.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 1
+                    message = message!!.substring(LocalizedText.RED.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.GREEN.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 2
+                    message = message!!.substring(LocalizedText.GREEN.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.CYAN.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 3
+                    message = message!!.substring(LocalizedText.CYAN.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.PURPLE.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 4
+                    message = message!!.substring(LocalizedText.PURPLE.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.WHITE.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 5
+                    message = message!!.substring(LocalizedText.WHITE.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.FLASH1.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 6
+                    message = message!!.substring(LocalizedText.FLASH1.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.FLASH2.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 7
+                    message = message!!.substring(LocalizedText.FLASH2.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.FLASH3.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 8
+                    message = message!!.substring(LocalizedText.FLASH3.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.GLOW1.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 9
+                    message = message!!.substring(LocalizedText.GLOW1.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.GLOW2.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 10
+                    message = message!!.substring(LocalizedText.GLOW2.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.GLOW3.translate(Client.CURRENT_LANGUAGE!!))) {
+                    color = 11
+                    message = message!!.substring(LocalizedText.GLOW3.translate(Client.CURRENT_LANGUAGE!!).length)
                 }
             }
-            string_3 = string_2!!.lowercase()
-            var b_5 = 0
-            if (string_3!!.startsWith(LocalizedText.WAVE.translate(Language.ENGLISH))) {
-                b_5 = 1
-                string_2 = string_2!!.substring(LocalizedText.WAVE.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.WAVE2.translate(Language.ENGLISH))) {
-                b_5 = 2
-                string_2 = string_2!!.substring(LocalizedText.WAVE2.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.SHAKE.translate(Language.ENGLISH))) {
-                b_5 = 3
-                string_2 = string_2!!.substring(LocalizedText.SHAKE.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.SCROLL.translate(Language.ENGLISH))) {
-                b_5 = 4
-                string_2 = string_2!!.substring(LocalizedText.SCROLL.translate(Language.ENGLISH).length)
-            } else if (string_3!!.startsWith(LocalizedText.SLIDE.translate(Language.ENGLISH))) {
-                b_5 = 5
-                string_2 = string_2!!.substring(LocalizedText.SLIDE.translate(Language.ENGLISH).length)
+            lower = message!!.lowercase()
+            var effect = 0
+            if (lower!!.startsWith(LocalizedText.WAVE.translate(Language.ENGLISH))) {
+                effect = 1
+                message = message!!.substring(LocalizedText.WAVE.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.WAVE2.translate(Language.ENGLISH))) {
+                effect = 2
+                message = message!!.substring(LocalizedText.WAVE2.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.SHAKE.translate(Language.ENGLISH))) {
+                effect = 3
+                message = message!!.substring(LocalizedText.SHAKE.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.SCROLL.translate(Language.ENGLISH))) {
+                effect = 4
+                message = message!!.substring(LocalizedText.SCROLL.translate(Language.ENGLISH).length)
+            } else if (lower!!.startsWith(LocalizedText.SLIDE.translate(Language.ENGLISH))) {
+                effect = 5
+                message = message!!.substring(LocalizedText.SLIDE.translate(Language.ENGLISH).length)
             } else if (Client.CURRENT_LANGUAGE!! != Language.ENGLISH) {
-                if (string_3!!.startsWith(LocalizedText.WAVE.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_5 = 1
-                    string_2 = string_2!!.substring(LocalizedText.WAVE.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.WAVE2.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_5 = 2
-                    string_2 = string_2!!.substring(LocalizedText.WAVE2.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.SHAKE.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_5 = 3
-                    string_2 = string_2!!.substring(LocalizedText.SHAKE.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.SCROLL.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_5 = 4
-                    string_2 = string_2!!.substring(LocalizedText.SCROLL.translate(Client.CURRENT_LANGUAGE!!).length)
-                } else if (string_3!!.startsWith(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE!!))) {
-                    b_5 = 5
-                    string_2 = string_2!!.substring(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE!!).length)
+                if (lower!!.startsWith(LocalizedText.WAVE.translate(Client.CURRENT_LANGUAGE!!))) {
+                    effect = 1
+                    message = message!!.substring(LocalizedText.WAVE.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.WAVE2.translate(Client.CURRENT_LANGUAGE!!))) {
+                    effect = 2
+                    message = message!!.substring(LocalizedText.WAVE2.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.SHAKE.translate(Client.CURRENT_LANGUAGE!!))) {
+                    effect = 3
+                    message = message!!.substring(LocalizedText.SHAKE.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.SCROLL.translate(Client.CURRENT_LANGUAGE!!))) {
+                    effect = 4
+                    message = message!!.substring(LocalizedText.SCROLL.translate(Client.CURRENT_LANGUAGE!!).length)
+                } else if (lower!!.startsWith(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE!!))) {
+                    effect = 5
+                    message = message!!.substring(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE!!).length)
                 }
             }
-            val class1846: BufferedConnectionContext? = Client.connectionContext
-            val tcpmessage7: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT, class1846!!.isaac)
-            tcpmessage7!!.buffer.writeByte(0)
-            val value = tcpmessage7!!.buffer.currentPosition
-            tcpmessage7!!.buffer.writeByte(b_4)
-            tcpmessage7!!.buffer.writeByte(b_5)
-            PacketEncoder.chatMessageToBuffer(tcpmessage7!!.buffer, string_2)
-            tcpmessage7!!.buffer.writeIndex(tcpmessage7!!.buffer.currentPosition - value)
-            class1846!!.queuePacket(tcpmessage7)
+            val connection: BufferedConnectionContext? = Client.connectionContext
+            val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT, connection!!.isaac)
+            packet!!.buffer.writeByte(0)
+            val position = packet!!.buffer.currentPosition
+            packet!!.buffer.writeByte(color)
+            packet!!.buffer.writeByte(effect)
+            PacketEncoder.chatMessageToBuffer(packet!!.buffer, message)
+            packet!!.buffer.writeIndex(packet!!.buffer.currentPosition - position)
+            connection!!.queuePacket(packet)
         }
     }
 
     @JvmStatic
     fun basGetAnimReady(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val bas: BasType? = TypeLists.BAS!!.list(i_2)
+        val basId = executor.intStack[--executor.intStackPtr]
+        val bas: BasType? = TypeLists.BAS!!.list(basId)
         if (bas!!.randomStandSequences != null && bas!!.randomStandSequences!!.size > 0) {
-            var i_4 = 0
-            var i_5 = bas!!.randomStandSequenceChances!![0]
-            for (i_6 in 1 until bas!!.randomStandSequences!!.size) {
-                if (bas!!.randomStandSequenceChances!![i_6] > i_5) {
-                    i_4 = i_6
-                    i_5 = bas!!.randomStandSequenceChances!![i_6]
+            var bestIndex = 0
+            var bestChance = bas!!.randomStandSequenceChances!![0]
+            for (i in 1 until bas!!.randomStandSequences!!.size) {
+                if (bas!!.randomStandSequenceChances!![i] > bestChance) {
+                    bestIndex = i
+                    bestChance = bas!!.randomStandSequenceChances!![i]
                 }
             }
-            executor.intStack[++executor.intStackPtr - 1] = bas!!.randomStandSequences!![i_4]
+            executor.intStack[++executor.intStackPtr - 1] = bas!!.randomStandSequences!![bestIndex]
         } else {
             executor.intStack[++executor.intStackPtr - 1] = bas!!.standSequenceId
         }

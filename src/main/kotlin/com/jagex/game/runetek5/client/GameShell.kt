@@ -164,41 +164,41 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
 
         @JvmStatic
         fun calculateGraphics(): Int {
-            var highMemory = true
-            var enhancedCpuMode = false
-            var windowsOs = false
+            var profileSoftware = true
+            var profileOpengl = false
+            var profileDirectx = false
             if (SystemInfo.SYSTEM_INFO!!.ram < 512 && SystemInfo.SYSTEM_INFO!!.ram != 0) {
-                highMemory = false
+                profileSoftware = false
             }
             if (SystemInfo.operatingSystemLowercase!!.startsWith("win")) {
-                windowsOs = true
-                enhancedCpuMode = true
+                profileDirectx = true
+                profileOpengl = true
             } else {
-                enhancedCpuMode = true
+                profileOpengl = true
             }
             if (softwareMode) {
-                highMemory = false
+                profileSoftware = false
             }
             if (openglMode) {
-                enhancedCpuMode = false
+                profileOpengl = false
             }
             if (directxMode) {
-                windowsOs = false
+                profileDirectx = false
             }
-            if (!highMemory && !enhancedCpuMode && !windowsOs) {
+            if (!profileSoftware && !profileOpengl && !profileDirectx) {
                 return PreferenceManager.calculateDisplayMode()
             } else {
-                var performanceSoftwaremode = -1
-                var performanceLdOpengl = -1
+                var performanceSoftware = -1
+                var performanceOpengl = -1
                 var performanceDirectx = -1
-                if (highMemory) {
+                if (profileSoftware) {
                     try {
-                        performanceSoftwaremode = DisplayModeDetails.getProfilingPerformance(2, 1000)
+                        performanceSoftware = DisplayModeDetails.getProfilingPerformance(2, 1000)
                     } catch (exception: Exception) {
                         // NOOP
                     }
                 }
-                if (windowsOs) {
+                if (profileDirectx) {
                     try {
                         performanceDirectx = DisplayModeDetails.getProfilingPerformance(3, 1000)
                         if (PreferenceManager.preferences?.activeToolkit?.getValue() == 3) {
@@ -206,10 +206,10 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                             val driverVersion = renderInfo?.driverVersion?.and(0xffffffffffffL)
                             when (renderInfo?.vendor) {
                                 4098 -> {
-                                    enhancedCpuMode = enhancedCpuMode and (driverVersion != null && driverVersion >= 60129613779L)
+                                    profileOpengl = profileOpengl and (driverVersion != null && driverVersion >= 60129613779L)
                                 }
                                 4318 -> {
-                                    enhancedCpuMode = enhancedCpuMode and (driverVersion != null && driverVersion >= 64425238954L)
+                                    profileOpengl = profileOpengl and (driverVersion != null && driverVersion >= 64425238954L)
                                 }
                             }
                         }
@@ -217,25 +217,25 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                         exception.printStackTrace()
                     }
                 }
-                if (enhancedCpuMode) {
+                if (profileOpengl) {
                     try {
-                        performanceLdOpengl = DisplayModeDetails.getProfilingPerformance(1, 1000)
+                        performanceOpengl = DisplayModeDetails.getProfilingPerformance(1, 1000)
                     } catch (exception: Exception) {
                         exception.printStackTrace()
                     }
                 }
-                if (performanceSoftwaremode == -1 && performanceLdOpengl == -1 && performanceDirectx == -1) {
+                if (performanceSoftware == -1 && performanceOpengl == -1 && performanceDirectx == -1) {
                     return PreferenceManager.calculateDisplayMode()
                 }
                 performanceDirectx = (performanceDirectx * 1.1f).toInt()
-                performanceLdOpengl = (performanceLdOpengl * 1.1f).toInt()
-                return if (performanceSoftwaremode > performanceDirectx && performanceSoftwaremode > performanceLdOpengl)
-                    PreferenceManager.setSoftwaremodePerformance(performanceSoftwaremode)
+                performanceOpengl = (performanceOpengl * 1.1f).toInt()
+                return if (performanceSoftware > performanceDirectx && performanceSoftware > performanceOpengl)
+                    PreferenceManager.setSoftwaremodePerformance(performanceSoftware)
                 else
-                    if (performanceDirectx > performanceLdOpengl)
+                    if (performanceDirectx > performanceOpengl)
                         PreferenceManager.setHardwarePerformance(3, performanceDirectx)
                     else
-                        PreferenceManager.setHardwarePerformance(1, performanceLdOpengl)
+                        PreferenceManager.setHardwarePerformance(1, performanceOpengl)
             }
         }
 
@@ -262,9 +262,9 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 }
                 if (playerRandomDat == null) {
                     val raf = RandomAccessFile(randomFile, "rw")
-                    val nByte = raf.read()
+                    val firstByte = raf.read()
                     raf.seek(0L)
-                    raf.write(nByte)
+                    raf.write(firstByte)
                     raf.seek(0L)
                     raf.close()
                     playerRandomDat = FileOnDisk(JFS32(randomFile, 25L), 24)
@@ -433,7 +433,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         val cacheSubpaths = arrayOf(".dk_cache_" + SystemInfo.storeId, ".file_store_" + SystemInfo.storeId)
         SystemInfo.cacheFilestoreSubpath = cacheSubpaths
         var failures = 0
-        label131@ while (failures < 4) {
+        preferenceScan@ while (failures < 4) {
             PreferenceManager.preferenceFile = loadPreferenceFile(gameName, buildEnvironmentName, failures)
             if (!PreferenceManager.preferenceFile!!.exists()) {
                 PreferenceManager.preferenceFile!!.mkdirs()
@@ -442,13 +442,13 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             if (files == null) {
                 break
             }
-            val Files = files
+            val prefFiles = files
             var fileIndex = 0
             while (true) {
-                if (fileIndex >= Files.size) {
-                    break@label131
+                if (fileIndex >= prefFiles.size) {
+                    break@preferenceScan
                 }
-                val file = Files[fileIndex]
+                val file = prefFiles[fileIndex]
                 if (!generateRandomAccessFile(file, false)) {
                     ++failures
                     break
@@ -470,17 +470,17 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             WindowMode.fullScreenSupported = false
         }
         CursorManager.instance = CursorManager()
-        var currentThreadgroup = Thread.currentThread().threadGroup
-        var parentGroup = currentThreadgroup.parent
+        var currentThreadGroup = Thread.currentThread().threadGroup
+        var parentGroup = currentThreadGroup.parent
         while (parentGroup != null) {
-            currentThreadgroup = parentGroup
+            currentThreadGroup = parentGroup
             parentGroup = parentGroup.parent
         }
-        val threadPool = arrayOfNulls<Thread>(1000)
-        currentThreadgroup.enumerate(threadPool)
-        for (threadIndex in threadPool.indices) {
-            if (threadPool[threadIndex] != null && threadPool[threadIndex]!!.name.startsWith("AWT")) {
-                threadPool[threadIndex]!!.priority = 1
+        val threads = arrayOfNulls<Thread>(1000)
+        currentThreadGroup.enumerate(threads)
+        for (threadIndex in threads.indices) {
+            if (threads[threadIndex] != null && threads[threadIndex]!!.name.startsWith("AWT")) {
+                threads[threadIndex]!!.priority = 1
             }
         }
         val engineThread = Thread(this)
@@ -489,52 +489,52 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         engineThread.priority = 1
     }
 
-    fun loadPreferenceFile(gameName: String, buildEnvironmentName: String, version: Int): File {
-        val preferenceEnd = if (version == 0) "" else "" + version
+    fun loadPreferenceFile(gameName: String, buildEnvironmentName: String, attempt: Int): File {
+        val preferenceEnd = if (attempt == 0) "" else "" + attempt
         userPreferenceFile = File(PreferenceManager.preferencesParentFile + File.separatorChar + Loader.CACHE_DIR, "dk_cl_" + gameName + "_" + buildEnvironmentName + preferenceEnd + ".dat")
         var parentPath: String? = null
         var childPath: String? = null
         var preferenceWrite = false
         if (userPreferenceFile!!.exists()) {
             try {
-                val prefFile = JFS32(userPreferenceFile!!, 10000L)
+                val fileSystem = JFS32(userPreferenceFile!!, 10000L)
                 var buffer: Packet
-                var bufferOffset: Int
-                buffer = Packet(prefFile.length().toInt())
+                var bytesRead: Int
+                buffer = Packet(fileSystem.length().toInt())
                 while (buffer.currentPosition < buffer.buffer.size) {
-                    bufferOffset = prefFile.getSeekOffset(buffer.buffer, buffer.currentPosition, buffer.buffer.size - buffer.currentPosition)
-                    if (bufferOffset == -1) {
+                    bytesRead = fileSystem.getSeekOffset(buffer.buffer, buffer.currentPosition, buffer.buffer.size - buffer.currentPosition)
+                    if (bytesRead == -1) {
                         throw IOException()
                     }
-                    buffer.currentPosition += bufferOffset
+                    buffer.currentPosition += bytesRead
                 }
                 buffer.currentPosition = 0
-                val contentType = buffer.readUByte()
-                if (contentType < 1 || contentType > 3) {
-                    throw IOException("" + contentType)
+                val formatVersion = buffer.readUByte()
+                if (formatVersion < 1 || formatVersion > 3) {
+                    throw IOException("" + formatVersion)
                 }
-                var childType = 0
-                if (contentType > 1) {
-                    childType = buffer.readUByte()
+                var childFlag = 0
+                if (formatVersion > 1) {
+                    childFlag = buffer.readUByte()
                 }
-                if (contentType <= 2) {
+                if (formatVersion <= 2) {
                     parentPath = buffer.readJagString()
-                    if (childType == 1) {
+                    if (childFlag == 1) {
                         childPath = buffer.readJagString()
                     }
                 } else {
                     parentPath = buffer.readPathReference()
-                    if (childType == 1) {
+                    if (childFlag == 1) {
                         childPath = buffer.readPathReference()
                     }
                 }
-                prefFile.close()
+                fileSystem.close()
             } catch (ioexception: IOException) {
                 ioexception.printStackTrace()
             }
             if (parentPath != null) {
-                val parentFile = File(parentPath)
-                if (!parentFile.exists()) {
+                val parentDir = File(parentPath)
+                if (!parentDir.exists()) {
                     parentPath = null
                 }
             }
@@ -545,14 +545,14 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 }
             }
         }
-        if (parentPath == null && version == 0) {
-            label103@ for (i_17 in SystemInfo.cacheFilestoreSubpath!!.indices) {
-                for (i_10 in SystemInfo.cacheBaseDirectory!!.indices) {
-                    val file23 = File(SystemInfo.cacheBaseDirectory!![i_10] + SystemInfo.cacheFilestoreSubpath!![i_17] + File.separatorChar + gameName + File.separatorChar)
-                    if (file23.exists() && generateRandomAccessFile(File(file23, "test.dat"), true)) {
-                        parentPath = file23.toString()
+        if (parentPath == null && attempt == 0) {
+            cacheScan@ for (sub in SystemInfo.cacheFilestoreSubpath!!.indices) {
+                for (base in SystemInfo.cacheBaseDirectory!!.indices) {
+                    val cacheDir = File(SystemInfo.cacheBaseDirectory!![base] + SystemInfo.cacheFilestoreSubpath!![sub] + File.separatorChar + gameName + File.separatorChar)
+                    if (cacheDir.exists() && generateRandomAccessFile(File(cacheDir, "test.dat"), true)) {
+                        parentPath = cacheDir.toString()
                         preferenceWrite = true
-                        break@label103
+                        break@cacheScan
                     }
                 }
             }
@@ -562,16 +562,16 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             preferenceWrite = true
         }
         if (childPath != null) {
-            val childFile = File(childPath)
-            val parentFile = File(parentPath!!)
+            val childDir = File(childPath)
+            val parentDir = File(parentPath!!)
             try {
-                val childFiles = childFile.listFiles()
-                val ChildFiles = childFiles
-                if (ChildFiles != null) {
-                    for (index in ChildFiles.indices) {
-                        val ChildFile = ChildFiles[index]
-                        val newFile = File(parentFile, ChildFile.name)
-                        val renamed = ChildFile.renameTo(newFile)
+                val childFiles = childDir.listFiles()
+                val filesToMove = childFiles
+                if (filesToMove != null) {
+                    for (index in filesToMove.indices) {
+                        val sourceFile = filesToMove[index]
+                        val destFile = File(parentDir, sourceFile.name)
+                        val renamed = sourceFile.renameTo(destFile)
                         if (!renamed) {
                             throw IOException()
                         }
@@ -588,31 +588,31 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         return File(parentPath!!)
     }
 
-    fun validateCacheDirectory(file1: File?): Boolean {
+    fun validateCacheDirectory(cacheDir: File?): Boolean {
         return when {
-            file1 == null -> false
-            !file1.exists() -> false
-            !file1.isDirectory -> false
-            file1.listFiles()!!.size != 0 -> false
-            !generateRandomAccessFile(File(file1, "test.dat"), true) -> false
+            cacheDir == null -> false
+            !cacheDir.exists() -> false
+            !cacheDir.isDirectory -> false
+            cacheDir.listFiles()!!.size != 0 -> false
+            !generateRandomAccessFile(File(cacheDir, "test.dat"), true) -> false
             else -> {
-                writeToPreferences(file1, PreferenceManager.preferenceFile!!)
+                writeToPreferences(cacheDir, PreferenceManager.preferenceFile!!)
                 true
             }
         }
     }
 
-    fun writeToPreferences(file1: File?, file2: File?) {
+    fun writeToPreferences(parentDir: File?, childDir: File?) {
         try {
             val fileSystem = JFS32(userPreferenceFile!!, 10000L)
             val buffer = Packet(500)
             buffer.writeByte(3)
-            buffer.writeByte(if (file2 != null) 1 else 0)
-            if (file1 != null) {
-                buffer.writePathReference(file1.path)
+            buffer.writeByte(if (childDir != null) 1 else 0)
+            if (parentDir != null) {
+                buffer.writePathReference(parentDir.path)
             }
-            if (file2 != null) {
-                buffer.writePathReference(file2.path)
+            if (childDir != null) {
+                buffer.writePathReference(childDir.path)
             }
             fileSystem.write(buffer.buffer, 0, buffer.currentPosition)
             fileSystem.close()
@@ -660,8 +660,8 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         canvasInitializationTime = Utils.time()
     }
 
-    override fun supplyApplet(applet_1: Loader) {
-        suppliedApplet = applet_1
+    override fun supplyApplet(applet: Loader) {
+        suppliedApplet = applet
     }
 
     override fun run() {
@@ -677,7 +677,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 return
             }
             prepareExit()
-        } catch (exception4: Exception) {
+        } catch (exception: Exception) {
             prepareExit()
         }
     }
@@ -696,9 +696,9 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         // while rendering is uncapped, so its cost is a per-SECOND load that gets
         // amortised over however many frames fit between pulses — and a spike on the
         // frames that carry one.
-        val pulseT0 = System.nanoTime()
+        val pulseStartNs = System.nanoTime()
         onPulse()
-        pulseNs += System.nanoTime() - pulseT0
+        pulseNs += System.nanoTime() - pulseStartNs
         pulseCount++
     }
 
@@ -753,12 +753,12 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         }
     }
 
-    override fun focusGained(focusevent1: FocusEvent) {
+    override fun focusGained(focusEvent: FocusEvent) {
         WindowMode.hasFocus = true
         WindowMode.redrawWindowBackground = true
     }
 
-    override fun focusLost(focusevent: FocusEvent) {
+    override fun focusLost(focusEvent: FocusEvent) {
         WindowMode.hasFocus = false
     }
 
@@ -890,9 +890,9 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     fun generateRandomAccessFile(source: File, deleteSource: Boolean): Boolean {
         return try {
             val raf = RandomAccessFile(source, "rw")
-            val value = raf.read()
+            val firstByte = raf.read()
             raf.seek(0L)
-            raf.write(value)
+            raf.write(firstByte)
             raf.seek(0L)
             raf.close()
             if (deleteSource) {
@@ -916,17 +916,17 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         if (SystemInfo.javaVendor != null) {
             val vendor = SystemInfo.javaVendor!!.lowercase()
             if (vendor.indexOf("sun") != -1 || vendor.indexOf("apple") != -1) {
-                val version = SystemInfo.javaVersion
-                if ("1.1" == version || version.startsWith("1.1.") || "1.2" == version || version.startsWith("1.2.") || "1.3" == version || version.startsWith("1.3.") || "1.4" == version || version.startsWith("1.4.") || "1.5" == version || version.startsWith("1.5.") || "1.6.0" == version) {
+                val javaVersion = SystemInfo.javaVersion
+                if ("1.1" == javaVersion || javaVersion.startsWith("1.1.") || "1.2" == javaVersion || javaVersion.startsWith("1.2.") || "1.3" == javaVersion || javaVersion.startsWith("1.3.") || "1.4" == javaVersion || javaVersion.startsWith("1.4.") || "1.5" == javaVersion || javaVersion.startsWith("1.5.") || "1.6.0" == javaVersion) {
                     raiseErrorScreen("wrongjava")
                     return
                 }
-                if (version.startsWith("1.6.0_")) {
+                if (javaVersion.startsWith("1.6.0_")) {
                     var charIndex = 6
-                    while (charIndex < version.length && Utils.isNumber(version[charIndex])) {
+                    while (charIndex < javaVersion.length && Utils.isNumber(javaVersion[charIndex])) {
                         charIndex++
                     }
-                    val minorVersion = version.substring(6, charIndex)
+                    val minorVersion = javaVersion.substring(6, charIndex)
                     if (Utils.isWrongJava(minorVersion) && Utils.parseInt(minorVersion) < 10) {
                         raiseErrorScreen("wrongjava")
                         return

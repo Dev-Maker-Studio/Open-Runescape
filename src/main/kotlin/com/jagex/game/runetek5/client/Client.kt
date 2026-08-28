@@ -73,7 +73,7 @@ import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceRenderer
 import com.jagex.game.runetek5.graphics.loginscreen.LoginScreenComponent
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.particle.ParticleProducer
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
 import com.jagex.game.runetek5.icmp.IcmpServiceJaclib
@@ -269,11 +269,11 @@ class Client : GameShell() {
         if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == 2) {
             try {
                 pulse()
-            } catch (threaddeath3: ThreadDeath) {
-                throw threaddeath3
-            } catch (throwable4: Throwable) {
-                //was added throwable_4.printStackTrace();
-                PacketEncoder.sendErrorToServer(throwable4.message + " " + getDebugString(), throwable4)
+            } catch (threadDeath: ThreadDeath) {
+                throw threadDeath
+            } catch (throwable: Throwable) {
+                //was added throwable.printStackTrace();
+                PacketEncoder.sendErrorToServer(throwable.message + " " + getDebugString(), throwable)
                 renderWithCpu = true
                 loadAssets(0, false)
             }
@@ -303,8 +303,8 @@ class Client : GameShell() {
 
             ++cycles
             if (cycles % 1000 == 1) {
-                val calender = GregorianCalendar()
-                randomSeed = calender.get(Calendar.HOUR_OF_DAY) * 600 + calender.get(Calendar.MINUTE) * 10 + calender.get(Calendar.SECOND) / 6
+                val calendar = GregorianCalendar()
+                randomSeed = calendar.get(Calendar.HOUR_OF_DAY) * 600 + calendar.get(Calendar.MINUTE) * 10 + calendar.get(Calendar.SECOND) / 6
                 RANDOMIZER.setSeed(randomSeed.toLong())
             }
 
@@ -327,15 +327,15 @@ class Client : GameShell() {
             maximumHeldKeys = 0
 
             run {
-                var record = KeyRecorder.keyRecorder!!.popHead()
-                while (record != null) {
-                    val type = record.getType()
+                var keyRecord = KeyRecorder.keyRecorder!!.popHead()
+                while (keyRecord != null) {
+                    val type = keyRecord.getType()
                     if (type != 2 && type != 3) {
                         if (type == 0 && maximumHeldKeys < 75) {
-                            KEY_RECORDS[maximumHeldKeys++] = record
+                            KEY_RECORDS[maximumHeldKeys++] = keyRecord
                         }
                     } else {
-                        val keyCode = record.getCharacter()
+                        val keyCode = keyRecord.getCharacter()
                         if (GameState.isIngame() && (keyCode.code == 96 || keyCode.code == 167 || keyCode.code == 178)) {
                             if (Console.isOpen()) {
                                 Console.close()
@@ -343,25 +343,25 @@ class Client : GameShell() {
                                 Console.open()
                             }
                         } else if (keyCachePointerPoss < 131) {
-                            KEYS_PRESSED[keyCachePointerPoss++] = record
+                            KEYS_PRESSED[keyCachePointerPoss++] = keyRecord
                         }
                     }
-                    record = KeyRecorder.keyRecorder!!.popHead()
+                    keyRecord = KeyRecorder.keyRecorder!!.popHead()
                 }
             }
 
             mouseWheelDelta = 0
 
-            var record = MouseRecord.recorder!!.nextSubmission()
-            while (record != null) {
-                val type = record.getClickType()
-                if (type == -1) {
-                    MouseRecord.record(record)
-                } else if (type == 6) {
-                    mouseWheelDelta += record.getMeta()
-                    record.pushToTop()
-                } else if (MouseRecord.clicktypeRequiresRecord(type)) {
-                    MOUSE_MOVEMENTS.addFirst(record)
+            var mouseRecord = MouseRecord.recorder!!.nextSubmission()
+            while (mouseRecord != null) {
+                val clickType = mouseRecord.getClickType()
+                if (clickType == -1) {
+                    MouseRecord.record(mouseRecord)
+                } else if (clickType == 6) {
+                    mouseWheelDelta += mouseRecord.getMeta()
+                    mouseRecord.pushToTop()
+                } else if (MouseRecord.clicktypeRequiresRecord(clickType)) {
+                    MOUSE_MOVEMENTS.addFirst(mouseRecord)
                     if (MOUSE_MOVEMENTS.size() > 10) {
                         val head = MOUSE_MOVEMENTS.popHead() as MouseRecord?
                         if (head != null) {
@@ -369,7 +369,7 @@ class Client : GameShell() {
                         }
                     }
                 }
-                record = MouseRecord.recorder!!.nextSubmission()
+                mouseRecord = MouseRecord.recorder!!.nextSubmission()
             }
 
             if (Console.isOpen()) {
@@ -423,7 +423,7 @@ class Client : GameShell() {
 
     fun redraw() {
         if (gameState != GameState.UNK_16) {
-            val long_2: Long = currentCycle / 1000000L - lastRedrawTimeMillis
+            val elapsedMillis: Long = currentCycle / 1000000L - lastRedrawTimeMillis
             lastRedrawTimeMillis = currentCycle / 1000000L
             val songLoaded = SoundResourceManager.loadPendingSong()
             if (songLoaded && SoundEffectPlayer.soundJinglePlaying && SoundEffectPlayer.jinglePlayer != null) {
@@ -495,7 +495,7 @@ class Client : GameShell() {
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
                 }
             } else if (gameState == GameState.LOGGED_INGAME) {
-                drawGameFrame(long_2)
+                drawGameFrame(elapsedMillis)
             } else if (gameState == GameState.UNK_10) {
                 MessageBox.draw(LocalizedText.CONNECTION_LOST.translate(CURRENT_LANGUAGE!!) + "<br>" + LocalizedText.ATTEMPTING_TO_REESTABLISH.translate(CURRENT_LANGUAGE!!), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
             } else if (gameState == GameState.UNK_17) {
@@ -504,13 +504,13 @@ class Client : GameShell() {
 
             if (interfaceDebugMode == 3) {
                 for (index in 0..<componentBackgroundCount) {
-                    val rectangle10: Rectangle? = INTERFACE_BG_COMPONENTS[index]
+                    val rectangle: Rectangle? = INTERFACE_BG_COMPONENTS[index]
                     if (PREV_COMPONENT_ON_TOP[index]) {
                         checkNotNull(Renderers.activeToolkit)
-                        Renderers.activeToolkit!!.drawOpaqueRectangle(rectangle10!!.x, rectangle10!!.y, rectangle10!!.width, rectangle10!!.height, -65281)
+                        Renderers.activeToolkit!!.drawOpaqueRectangle(rectangle!!.x, rectangle!!.y, rectangle!!.width, rectangle!!.height, -65281)
                     } else {
                         checkNotNull(Renderers.activeToolkit)
-                        Renderers.activeToolkit!!.drawOpaqueRectangle(rectangle10!!.x, rectangle10!!.y, rectangle10!!.width, rectangle10!!.height, -16711936)
+                        Renderers.activeToolkit!!.drawOpaqueRectangle(rectangle!!.x, rectangle!!.y, rectangle!!.width, rectangle!!.height, -16711936)
                     }
                 }
             }
@@ -582,32 +582,32 @@ class Client : GameShell() {
 
             try {
                 if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == 2) {
-                    val classLoader = Class.forName("java.lang.ClassLoader")
-                    val nativeLibsField = classLoader.getDeclaredField("nativeLibraries")
-                    val accessibleObject = Class.forName("java.lang.reflect.AccessibleObject")
-                    val setAccessibleMethod = accessibleObject.getDeclaredMethod("setAccessible", java.lang.Boolean.TYPE)
+                    val classLoaderClass = Class.forName("java.lang.ClassLoader")
+                    val nativeLibsField = classLoaderClass.getDeclaredField("nativeLibraries")
+                    val accessibleObjectClass = Class.forName("java.lang.reflect.AccessibleObject")
+                    val setAccessibleMethod = accessibleObjectClass.getDeclaredMethod("setAccessible", java.lang.Boolean.TYPE)
                     setAccessibleMethod.invoke(nativeLibsField, java.lang.Boolean.TRUE)
-                    val objectVector = nativeLibsField.get(Client::class.java.getClassLoader()) as Vector<*>
+                    val nativeLibraries = nativeLibsField.get(Client::class.java.getClassLoader()) as Vector<*>
 
-                    for (index in objectVector.indices) {
+                    for (index in nativeLibraries.indices) {
                         try {
-                            val `object`: Any = objectVector.elementAt(index)
-                            val field = `object`.javaClass.getDeclaredField("name")
-                            setAccessibleMethod.invoke(field, java.lang.Boolean.TRUE)
+                            val nativeLibrary: Any = nativeLibraries.elementAt(index)
+                            val nameField = nativeLibrary.javaClass.getDeclaredField("name")
+                            setAccessibleMethod.invoke(nameField, java.lang.Boolean.TRUE)
 
                             try {
-                                val fieldName = field.get(`object`) as String?
-                                if (fieldName != null && fieldName.indexOf("sw3d.dll") != -1) {
-                                    val handleField = `object`.javaClass.getDeclaredField("handle")
+                                val libraryName = nameField.get(nativeLibrary) as String?
+                                if (libraryName != null && libraryName.indexOf("sw3d.dll") != -1) {
+                                    val handleField = nativeLibrary.javaClass.getDeclaredField("handle")
                                     setAccessibleMethod.invoke(handleField, java.lang.Boolean.TRUE)
-                                    debug = debug + " " + java.lang.Long.toHexString(handleField.getLong(`object`))
+                                    debug = debug + " " + java.lang.Long.toHexString(handleField.getLong(nativeLibrary))
                                     setAccessibleMethod.invoke(handleField, java.lang.Boolean.FALSE)
                                 }
                             } catch (throwable: Throwable) {
                                 // NOOP
                             }
 
-                            setAccessibleMethod.invoke(field, java.lang.Boolean.FALSE)
+                            setAccessibleMethod.invoke(nameField, java.lang.Boolean.FALSE)
                         } catch (throwable: Throwable) {
                             // NOOP
                         }
@@ -691,23 +691,23 @@ class Client : GameShell() {
                 Connection.updateConnection = AsyncConnection.createAsyncConnection(clientSocket!!, 125000)
                 if (Bot.PROD) {
                     val length: Int = 13 + js5AuthToken!!.length
-                    val stream = Packet(length + 4)
-                    stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id)
-                    stream.writeByte(length)
-                    stream.writeInt(6)
-                    stream.writeInt(Loader.MAJOR_BUILD)
-                    stream.writeInt(Loader.MINOR_BUILD)
-                    stream.writeString(js5AuthToken!!)
-                    Connection.updateConnection!!.write(stream.buffer, length + 2)
+                    val handshake = Packet(length + 4)
+                    handshake.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id)
+                    handshake.writeByte(length)
+                    handshake.writeInt(6)
+                    handshake.writeInt(Loader.MAJOR_BUILD)
+                    handshake.writeInt(Loader.MINOR_BUILD)
+                    handshake.writeString(js5AuthToken!!)
+                    Connection.updateConnection!!.write(handshake.buffer, length + 2)
                 } else {
                     val length: Int = 9 + js5AuthToken!!.length
-                    val stream = Packet(length + 4)
-                    stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id)
-                    stream.writeByte(length)
-                    stream.writeInt(Loader.MAJOR_BUILD)
-                    stream.writeInt(Loader.MINOR_BUILD)
-                    stream.writeString(js5AuthToken!!)
-                    Connection.updateConnection!!.write(stream.buffer, length + 2)
+                    val handshake = Packet(length + 4)
+                    handshake.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id)
+                    handshake.writeByte(length)
+                    handshake.writeInt(Loader.MAJOR_BUILD)
+                    handshake.writeInt(Loader.MINOR_BUILD)
+                    handshake.writeString(js5AuthToken!!)
+                    Connection.updateConnection!!.write(handshake.buffer, length + 2)
                 }
                 updateStage++
                 js5ConnectTime = Utils.time()
@@ -716,13 +716,13 @@ class Client : GameShell() {
             if (updateStage == 2) {
                 if (Connection.updateConnection!!.available(1)) {
                     val js5Action = ByteArray(1)
-                    val status = Connection.updateConnection!!.read(js5Action, 0, 1)
+                    val bytesRead = Connection.updateConnection!!.read(js5Action, 0, 1)
                     if (js5Action[0].toInt() == 25) {
                         return
                     }
 
                     if (js5Action[0].toInt() != 0) {
-                        updateJs5ConnectionStatus(status)
+                        updateJs5ConnectionStatus(bytesRead)
                         return
                     }
 
@@ -903,9 +903,9 @@ class Client : GameShell() {
                 MiniMenu.resetEntries()
             }
 
-            var packetLoop = 0
-            while (packetLoop < 100 && PacketDecoder.decodePacketFromStream(LOBBY_CONNECTION_CONTEXT)) {
-                packetLoop++
+            var packetCount = 0
+            while (packetCount < 100 && PacketDecoder.decodePacketFromStream(LOBBY_CONNECTION_CONTEXT)) {
+                packetCount++
             }
         }
 
@@ -924,11 +924,11 @@ class Client : GameShell() {
                 if ((walkMask.toInt() and 0x1) != 0) {
                     val size = npc.getSize()
                     if ((walkMask.toInt() and 0x2) != 0 && npc.movementStepsLeft == 0 && Math.random() * 1000.0 < 10.0) {
-                        val random1 = Math.round(Math.random() * 10.0 - 5.0).toInt()
-                        val random2 = Math.round(Math.random() * 10.0 - 5.0).toInt()
-                        if (random1 != 0 || random2 != 0) {
-                            var x = random1 + npc.movementBaseX[0]
-                            var y = random2 + npc.movementBaseY[0]
+                        val dx = Math.round(Math.random() * 10.0 - 5.0).toInt()
+                        val dy = Math.round(Math.random() * 10.0 - 5.0).toInt()
+                        if (dx != 0 || dy != 0) {
+                            var x = dx + npc.movementBaseX[0]
+                            var y = dy + npc.movementBaseY[0]
                             if (x < 0) {
                                 x = 0
                             } else if (x > Resource.mapRegion!!.sceneSizeX - size - 1) {
@@ -1035,8 +1035,8 @@ class Client : GameShell() {
                                                     logout(false)
                                                 } else {
                                                     if (++LOBBY_CONNECTION_CONTEXT.lastFlush > 50) {
-                                                        val ping = PacketEncoder.createPacket(ClientProt.PING, LOBBY_CONNECTION_CONTEXT.isaac)
-                                                        LOBBY_CONNECTION_CONTEXT.queuePacket(ping)
+                                                        val pingPacket = PacketEncoder.createPacket(ClientProt.PING, LOBBY_CONNECTION_CONTEXT.isaac)
+                                                        LOBBY_CONNECTION_CONTEXT.queuePacket(pingPacket)
                                                     }
 
                                                     try {
@@ -1665,9 +1665,9 @@ class Client : GameShell() {
         }
 
         @JvmStatic
-        fun getComponentSettings(icomponentdefinitions0: Component): IFEvents? {
-            val class282Sub101 = ICOMPONENT_SETTINGS_SLOTS.get((icomponentdefinitions0.idHash.toLong() shl 32) + icomponentdefinitions0.slotId) as IFEvents?
-            return if (class282Sub101 != null) class282Sub101 else icomponentdefinitions0.targetParams
+        fun getComponentSettings(component: Component): IFEvents? {
+            val slotEvents = ICOMPONENT_SETTINGS_SLOTS.get((component.idHash.toLong() shl 32) + component.slotId) as IFEvents?
+            return if (slotEvents != null) slotEvents else component.targetParams
         }
 
         fun getDragTarget(component: Component?): Component? {
@@ -1700,24 +1700,24 @@ class Client : GameShell() {
                     val abs = npc.getAbsolutePosition().coords
                     val x = abs.x.toInt() - size shr 9
                     val z = abs.z.toInt() - size shr 9
-                    val pathing = PathingEntity.getLargestEntity(npc.plane.toInt(), x, z)
-                    if (pathing != null) {
-                        var indexReference = pathing.playerIndex
-                        if (pathing is NpcEntity) {
+                    val largestEntity = PathingEntity.getLargestEntity(npc.plane.toInt(), x, z)
+                    if (largestEntity != null) {
+                        var indexReference = largestEntity.playerIndex
+                        if (largestEntity is NpcEntity) {
                             indexReference += 2048
                         }
 
-                        if (pathing.overheadSpriteCount == 0 && pathing.getOverheadSprite() != -1) {
+                        if (largestEntity.overheadSpriteCount == 0 && largestEntity.getOverheadSprite() != -1) {
                             ENTITY_INDEX_REFERENCES[overlappingEntityCount] = indexReference
                             NPC_INDEX_REFERENCES[overlappingEntityCount] = indexReference
                             overlappingEntityCount++
-                            pathing.overheadSpriteCount++
+                            largestEntity.overheadSpriteCount++
                         }
 
                         ENTITY_INDEX_REFERENCES[overlappingEntityCount] = indexReference
                         NPC_INDEX_REFERENCES[overlappingEntityCount] = npc.playerIndex + 2048
                         overlappingEntityCount++
-                        pathing.overheadSpriteCount++
+                        largestEntity.overheadSpriteCount++
                     }
                 }
             }
@@ -1791,13 +1791,13 @@ class Client : GameShell() {
         fun logout(reconnect: Boolean) {
             val contexts: Array<BufferedConnectionContext> = connectionContexts
             for (index in contexts.indices) {
-                val connectionContext = contexts[index]
+                val context = contexts[index]
                 try {
-                    connectionContext.flush()
+                    context.flush()
                 } catch (ignored: IOException) {
                     // NOOP
                 }
-                connectionContext.closeConnection()
+                context.closeConnection()
             }
             LoginManager.resetLoginState()
             TypeLists.resetCachedData(false)
@@ -1849,8 +1849,8 @@ class Client : GameShell() {
             get() = cycleManager!!.getCurrentCycle()
 
         fun clearWorldMapCaches() {
-            WorldMapSub1.hiddenMecIds.clear()
-            WorldMapSub1.hiddenCategoryIds.clear()
+            WorldMapDisplay.hiddenMecIds.clear()
+            WorldMapDisplay.hiddenCategoryIds.clear()
         }
 
         @JvmStatic
@@ -1925,7 +1925,7 @@ class Client : GameShell() {
                         PingRequester.CURRENT_REQUEST = PING_REQUESTER!!.createPingRequest(LoginManager.GAME_CONNECTION_INFO!!.host)
                     }
                     PacketEncoder.submitQueuedPackets()
-                    val record = MOUSE_MOVEMENTS.getFirst() as MouseRecord?
+                    val mouseRecord = MOUSE_MOVEMENTS.getFirst() as MouseRecord?
                     if (Resource.mapRegion!!.getScene() != null) {
                         if (Camera.cameraCalculationType == 5) {
                             Camera.calculateCameraPosition()
@@ -1957,7 +1957,7 @@ class Client : GameShell() {
                             if (MAP_LOADING_STAGE == 1) {
                                 PlayerUpdate.movePlayers()
                                 NPCUpdate.moveNpcs()
-                            } else if (TypeLists.CUTSCENE_DEFAULTS!!.exitCutscene!!.valid(record, KEY_RECORDS, maximumHeldKeys, KeyRecorder.keyRecorder)) {
+                            } else if (TypeLists.CUTSCENE_DEFAULTS!!.exitCutscene!!.valid(mouseRecord, KEY_RECORDS, maximumHeldKeys, KeyRecorder.keyRecorder)) {
                                 PacketEncoder.queueCutsceneExit(false)
                             } else {
                                 if (MAP_LOADING_STAGE == 3 && CutsceneTypeList.isFullyCached(CURRENT_CUTSCENE)) {
@@ -2028,8 +2028,8 @@ class Client : GameShell() {
                             }
 
                             while (true) {
-                                var icomponentdefinitions10: Component?
-                                var icomponentdefinitions11: Component?
+                                var srcComponent: Component?
+                                var parentComponent: Component?
                                 var hookRequest: HookRequest?
                                 do {
                                     hookRequest = TICK_HOOK_REQUESTS.popHead() as HookRequest?
@@ -2084,14 +2084,14 @@ class Client : GameShell() {
                                                                 ++cameraRandomizationCycle
                                                                 if (cameraRandomizationCycle > 508) {
                                                                     cameraRandomizationCycle = 0
-                                                                    val direction = (Math.random() * 8.0).toInt()
-                                                                    if ((direction and 0x1) == 1) {
+                                                                    val randomBits = (Math.random() * 8.0).toInt()
+                                                                    if ((randomBits and 0x1) == 1) {
                                                                         Camera.cameraRandomisationH += Camera.cameraStepH
                                                                     }
-                                                                    if ((direction and 0x2) == 2) {
+                                                                    if ((randomBits and 0x2) == 2) {
                                                                         Camera.cameraRandomisationV += Camera.cameraStepV
                                                                     }
-                                                                    if ((direction and 0x4) == 4) {
+                                                                    if ((randomBits and 0x4) == 4) {
                                                                         Camera.cameraRandomisationA += Camera.cameraStepA
                                                                     }
                                                                 }
@@ -2151,30 +2151,30 @@ class Client : GameShell() {
                                                                 }
                                                                 return
                                                             }
-                                                            icomponentdefinitions10 = hookRequest.source
-                                                            if (icomponentdefinitions10!!.slotId < 0) {
+                                                            srcComponent = hookRequest.source
+                                                            if (srcComponent!!.slotId < 0) {
                                                                 break
                                                             }
-                                                            icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parentId)
-                                                        } while (icomponentdefinitions11 == null || icomponentdefinitions11.slotChildren == null || icomponentdefinitions10.slotId >= icomponentdefinitions11.slotChildren!!.size || icomponentdefinitions10 != icomponentdefinitions11.slotChildren!![icomponentdefinitions10.slotId])
+                                                            parentComponent = Component.fromHash(srcComponent.parentId)
+                                                        } while (parentComponent == null || parentComponent.slotChildren == null || srcComponent.slotId >= parentComponent.slotChildren!!.size || srcComponent != parentComponent.slotChildren!![srcComponent.slotId])
                                                         CS2Executor.executeHookInner(hookRequest)
                                                     }
                                                 }
-                                                icomponentdefinitions10 = hookRequest.source
-                                                if (icomponentdefinitions10!!.slotId < 0) {
+                                                srcComponent = hookRequest.source
+                                                if (srcComponent!!.slotId < 0) {
                                                     break
                                                 }
-                                                icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parentId)
-                                            } while (icomponentdefinitions11 == null || icomponentdefinitions11.slotChildren == null || icomponentdefinitions10.slotId >= icomponentdefinitions11.slotChildren!!.size || icomponentdefinitions10 != icomponentdefinitions11.slotChildren!![icomponentdefinitions10.slotId])
+                                                parentComponent = Component.fromHash(srcComponent.parentId)
+                                            } while (parentComponent == null || parentComponent.slotChildren == null || srcComponent.slotId >= parentComponent.slotChildren!!.size || srcComponent != parentComponent.slotChildren!![srcComponent.slotId])
                                             CS2Executor.executeHookInner(hookRequest)
                                         }
                                     }
-                                    icomponentdefinitions10 = hookRequest.source
-                                    if (icomponentdefinitions10!!.slotId < 0) {
+                                    srcComponent = hookRequest.source
+                                    if (srcComponent!!.slotId < 0) {
                                         break
                                     }
-                                    icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parentId)
-                                } while (icomponentdefinitions11 == null || icomponentdefinitions11.slotChildren == null || icomponentdefinitions10.slotId >= icomponentdefinitions11.slotChildren!!.size || icomponentdefinitions10 != icomponentdefinitions11.slotChildren!![icomponentdefinitions10.slotId])
+                                    parentComponent = Component.fromHash(srcComponent.parentId)
+                                } while (parentComponent == null || parentComponent.slotChildren == null || srcComponent.slotId >= parentComponent.slotChildren!!.size || srcComponent != parentComponent.slotChildren!![srcComponent.slotId])
                                 CS2Executor.executeHookInner(hookRequest)
                             }
                         }
@@ -2208,25 +2208,25 @@ class Client : GameShell() {
         @JvmField
         var JCOINS: Int = 0
 
-        fun drawGameArea(x: Int, y: Int, gameAreaWidth: Int, gameAreaHeight: Int, skipProjectiles: Boolean) {
+        fun drawGameArea(x: Int, y: Int, w: Int, h: Int, skipProjectiles: Boolean) {
             var x = x
             var y = y
-            var gameAreaWidth = gameAreaWidth
-            var gameAreaHeight = gameAreaHeight
+            var w = w
+            var h = h
             if (Resource.mapRegion!!.getScene() == null) {
-                Renderers.activeToolkit!!.clearPixels(x, y, gameAreaWidth, gameAreaHeight, 0xffffff.inv())
+                Renderers.activeToolkit!!.clearPixels(x, y, w, h, 0xffffff.inv())
             } else {
                 val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
-                var clearPixels = false
+                var blankViewport = false
                 if (MAP_LOADING_STAGE != 1) {
                     if (!cutsceneCameraActive) {
-                        clearPixels = true
+                        blankViewport = true
                     }
                 } else if (abs.x.toInt() < 0 || abs.x.toInt() >= Resource.mapRegion!!.sceneSizeX * 512 || abs.z.toInt() < 0 || abs.z.toInt() >= Resource.mapRegion!!.sceneSizeY * 512) {
-                    clearPixels = true
+                    blankViewport = true
                 }
-                if (clearPixels) {
-                    Renderers.activeToolkit!!.clearPixels(x, y, gameAreaWidth, gameAreaHeight, 0xffffff.inv())
+                if (blankViewport) {
+                    Renderers.activeToolkit!!.clearPixels(x, y, w, h, 0xffffff.inv())
                 } else {
                     timesSceneRendered++
                     if (PlayerUpdate.MY_PLAYER != null && abs.x.toInt() - (PlayerUpdate.MY_PLAYER!!.getSize() - 1) * 256 shr 9 == ComponentMinimap.minimapFlagX && abs.z.toInt() - (PlayerUpdate.MY_PLAYER!!.getSize() - 1) * 256 shr 9 == ComponentMinimap.minimapFlagY) {
@@ -2239,11 +2239,11 @@ class Client : GameShell() {
                         MapRegion.addProjectileSpawnsToScene()
                     }
                     MapRegion.addGfxsToScene()
-                    AbstractToolkit.calculateGameArea(x, y, gameAreaWidth, gameAreaHeight, true)
+                    AbstractToolkit.calculateGameArea(x, y, w, h, true)
                     x = hintArrowOffsetX
                     y = hintArrowOffsetY
-                    gameAreaWidth = gameAreaWidth
-                    gameAreaHeight = gameAreaHeight
+                    w = gameAreaWidth
+                    h = gameAreaHeight
                     MiniMenu.setViewportOrigin(x, y)
                     if (Camera.cameraCalculationType == 2) {
                         var yaw = Camera.camAngleX.toInt()
@@ -2254,7 +2254,7 @@ class Client : GameShell() {
                             yaw = CUSTOM_LOWEST_YAW[4] + 128
                         }
                         val roll = Camera.camAngleY.toInt() + Camera.cameraRandomisationA and 0x3fff
-                        Camera.setCameraPosition(Camera.cameraBaseX, MapRegion.tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), PlayerUpdate.MY_PLAYER_PLANE) - 200, Camera.cameraBaseY, yaw, roll, (yaw shr 3) * 3 + Camera.cameraZoom shl 2, gameAreaHeight)
+                        Camera.setCameraPosition(Camera.cameraBaseX, MapRegion.tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), PlayerUpdate.MY_PLAYER_PLANE) - 200, Camera.cameraBaseY, yaw, roll, (yaw shr 3) * 3 + Camera.cameraZoom shl 2, h)
                     } else if (Camera.cameraCalculationType == 4) {
                         var yaw = Camera.camAngleX.toInt()
                         if (Camera.regularLowestYaw shr 8 > yaw) {
@@ -2264,9 +2264,9 @@ class Client : GameShell() {
                             yaw = CUSTOM_LOWEST_YAW[4] + 128
                         }
                         val roll = Camera.camAngleY.toInt() and 0x3fff
-                        Camera.setCameraPosition(Camera.cameraBaseX, MapRegion.tileheightForAbsolutePosition(cameraTargetAbsX, cameraTargetAbsY, PlayerUpdate.MY_PLAYER_PLANE) - 200, Camera.cameraBaseY, yaw, roll, (yaw shr 3) * 3 + Camera.cameraZoom shl 2, gameAreaHeight)
+                        Camera.setCameraPosition(Camera.cameraBaseX, MapRegion.tileheightForAbsolutePosition(cameraTargetAbsX, cameraTargetAbsY, PlayerUpdate.MY_PLAYER_PLANE) - 200, Camera.cameraBaseY, yaw, roll, (yaw shr 3) * 3 + Camera.cameraZoom shl 2, h)
                     } else if (Camera.cameraCalculationType == 1) {
-                        Camera.updateSmoothTransitionCamera(gameAreaHeight)
+                        Camera.updateSmoothTransitionCamera(h)
                     }
                     val camAbsX = Camera.cameraPositionAbsoluteX
                     val camAbsZ = Camera.cameraPositionAbsoluteZ
@@ -2311,8 +2311,8 @@ class Client : GameShell() {
                         Camera.cameraPositionAbsoluteY = (Resource.mapRegion!!.getScene()!!.sceneDimensionY shl 9) - 1
                     }
                     MapRegion.handleRoofDisplay()
-                    Renderers.activeToolkit!!.setDrawableArea(x, y, gameAreaWidth, gameAreaHeight)
-                    Renderers.activeToolkit!!.setClipping(x, y, gameAreaWidth + x, gameAreaHeight + y)
+                    Renderers.activeToolkit!!.setDrawableArea(x, y, w, h)
+                    Renderers.activeToolkit!!.setClipping(x, y, w + x, h + y)
                     val sceneAtmosphere = Resource.mapRegion!!.getEnvironmentManager().getEnvironment()
                     val fogColor = sceneAtmosphere.getFogColor()
                     SUN_MATRIX.setViewPosition(-Camera.cameraPositionAbsoluteX.toFloat(), -Camera.cameraPositionAbsoluteZ.toFloat(), -Camera.cameraPositionAbsoluteY.toFloat())
@@ -2320,16 +2320,16 @@ class Client : GameShell() {
                     SUN_MATRIX.rotate(-1.0f, 0.0f, 0.0f, MathUtils.getTheta(-Camera.cameraYaw and 0x3fff))
                     SUN_MATRIX.rotate(0.0f, 0.0f, -1.0f, MathUtils.getTheta(-Camera.cameraPitch and 0x3fff))
                     Renderers.activeToolkit!!.setSunPosition(SUN_MATRIX)
-                    StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
+                    StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (w / 2).toFloat(), (h / 2).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), w, h)
                     Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
                     if (sceneAtmosphere.getSkybox() != null) {
                         Renderers.activeToolkit!!.updateSun(1.0f)
                         Renderers.activeToolkit!!.applyLighting(16777215, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f)
-                        sceneAtmosphere.getSkybox()!!.render(Renderers.activeToolkit!!, Environment.skyboxRotation shl 3, x, y, gameAreaWidth, gameAreaHeight, Camera.cameraYaw, Camera.cameraRoll, Camera.cameraPitch, fogColor)
+                        sceneAtmosphere.getSkybox()!!.render(Renderers.activeToolkit!!, Environment.skyboxRotation shl 3, x, y, w, h, Camera.cameraYaw, Camera.cameraRoll, Camera.cameraPitch, fogColor)
                     } else {
                         Renderers.activeToolkit!!.applyClearFlags(3, fogColor)
                     }
-                    Camera.storePickingState(SUN_MATRIX, Camera.projectionMatrix, gameAreaWidth, gameAreaHeight)
+                    Camera.storePickingState(SUN_MATRIX, Camera.projectionMatrix, w, h)
                     Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
                     val roofPrefValue = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()
                     val roofPreference = if (roofPrefValue == 2) timesSceneRendered.toByte() else 1
@@ -2346,7 +2346,7 @@ class Client : GameShell() {
                     SoundEffectPlayer.updatePlayers()
                     if (gameState == GameState.LOGGED_INGAME) {
                         StaticMethods.drawTileMessages(x, y)
-                        EntityUpdating.drawEntitites(x, y, gameAreaWidth, gameAreaHeight)
+                        EntityUpdating.drawEntitites(x, y, w, h)
                         HintRenderer.drawHintArrow(x, y)
                         StaticMedia.drawClickCross()
                     }
@@ -2360,10 +2360,10 @@ class Client : GameShell() {
                         awaitingPriorityRequests = false
                     }
                     if (awaitingPriorityRequests) {
-                        Renderers.activeToolkit!!.clearPixels(x, y, gameAreaWidth, gameAreaHeight, 0xffffff.inv())
+                        Renderers.activeToolkit!!.clearPixels(x, y, w, h, 0xffffff.inv())
                         MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
                     }
-                    StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (x + gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2 + y).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
+                    StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (x + w / 2).toFloat(), (h / 2 + y).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), w, h)
                     Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
                     Camera.storeViewProjectionMatrix(Camera.projectionMatrix)
                 }
@@ -2403,7 +2403,7 @@ class Client : GameShell() {
                 TypeLists.resetCachedData(false)
                 StaticMedia.reset()
                 GraphicsCache.resetWorldmapCaches(true)
-                WorldMapSub1.reset()
+                WorldMapDisplay.reset()
                 initializeTips()
                 for (hintIndex in HINT_TRAILS.indices) {
                     val hint: HintTrail? = HINT_TRAILS[hintIndex]
@@ -2491,18 +2491,18 @@ class Client : GameShell() {
                     scrollX = dragX - selectedComponentX + selectedComponent!!.scrollX
                     scrollY = dragY - selectedComponentY + selectedComponent!!.scrollY
                 }
-                val hookrequest5: HookRequest?
+                val hookRequest: HookRequest?
                 if (!MouseRecord.recorder!!.isMouseButtonPressed()) {
                     if (isDragThresholdMet) {
                         InterfaceComponentRenderer.cancelInterfaceSelection()
                         if (draggingComponent!!.onDragComplete != null) {
-                            hookrequest5 = HookRequest()
-                            hookrequest5.source = draggingComponent
-                            hookrequest5.mouseX = scrollX
-                            hookrequest5.mouseY = scrollY
-                            hookrequest5.targetComponent = hoveredComponent
-                            hookrequest5.params = draggingComponent!!.onDragComplete
-                            CS2Executor.executeHookInner(hookrequest5)
+                            hookRequest = HookRequest()
+                            hookRequest.source = draggingComponent
+                            hookRequest.mouseX = scrollX
+                            hookRequest.mouseY = scrollY
+                            hookRequest.targetComponent = hoveredComponent
+                            hookRequest.params = draggingComponent!!.onDragComplete
+                            CS2Executor.executeHookInner(hookRequest)
                         }
                         if (hoveredComponent != null && getDragTarget(draggingComponent) != null) {
                             PacketEncoder.sendInterfaceDragOntoInterface(draggingComponent, hoveredComponent)
@@ -2523,12 +2523,12 @@ class Client : GameShell() {
                         }
                     }
                     if (draggingComponent!!.onDrag != null && isDragThresholdMet) {
-                        hookrequest5 = HookRequest()
-                        hookrequest5.source = draggingComponent
-                        hookrequest5.mouseX = scrollX
-                        hookrequest5.mouseY = scrollY
-                        hookrequest5.params = draggingComponent!!.onDrag
-                        CS2Executor.executeHookInner(hookrequest5)
+                        hookRequest = HookRequest()
+                        hookRequest.source = draggingComponent
+                        hookRequest.mouseX = scrollX
+                        hookRequest.mouseY = scrollY
+                        hookRequest.params = draggingComponent!!.onDrag
+                        CS2Executor.executeHookInner(hookRequest)
                     }
                 }
             } else if (InterfaceRenderer.dragTickCount > 1) {
@@ -2578,14 +2578,14 @@ class Client : GameShell() {
             loadAssets(toolkitId, LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), verifySettingsPreUpdate)
         }
 
-        fun drawGameFrame(long_0: Long) {
+        fun drawGameFrame(elapsedMillis: Long) {
             if (Resource.mapRegion!!.getScene() != null) {
                 if (Camera.cameraCalculationType != 2 && Camera.cameraCalculationType != 1) {
                     if (Camera.cameraCalculationType == 4) {
-                        Camera.updateOrbitTargetCamera(long_0)
+                        Camera.updateOrbitTargetCamera(elapsedMillis)
                     }
                 } else {
-                    Camera.updateFollowPlayerCamera(long_0)
+                    Camera.updateFollowPlayerCamera(elapsedMillis)
                 }
             }
             ParticleProducer.cycle(Renderers.activeToolkit!!, cycles.toLong())
@@ -2604,14 +2604,14 @@ class Client : GameShell() {
             }
             Renderers.activeToolkit!!.resetClipping()
             MiniMenu.render(Renderers.activeToolkit!!)
-            var cursor = MiniMenu.getMinimenuCursor()
-            if (cursor == -1) {
-                cursor = defaultMenuCursor
+            var cursorId = MiniMenu.getMinimenuCursor()
+            if (cursorId == -1) {
+                cursorId = defaultMenuCursor
             }
-            if (cursor == -1) {
-                cursor = CursorManager.defaultCursorId
+            if (cursorId == -1) {
+                cursorId = CursorManager.defaultCursorId
             }
-            CursorTypeList.setCustomCursor(cursor)
+            CursorTypeList.setCustomCursor(cursorId)
             val size = PlayerUpdate.MY_PLAYER!!.getSize() shl 8
             val absolute = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
             SoundEffectPlayer.updateAllAmbientSounds(PlayerUpdate.MY_PLAYER!!.plane.toInt(), size + absolute.x.toInt(), size + absolute.z.toInt(), animatingStep)

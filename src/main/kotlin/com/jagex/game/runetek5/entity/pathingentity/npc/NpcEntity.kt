@@ -78,9 +78,9 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         val bastype = getBastype()
         val seq = if (super.currentSequence.hasType() && !super.currentSequence.hasSpeed()) super.currentSequence else null
         val moveAnimation = if (super.movingSequence.hasType() && (!super.movingSequence.hasType || seq == null)) super.movingSequence else null
-        val x = bastype.modelWidth
-        val z = bastype.modelLength
-        if (x != 0 || z != 0 || bastype.rollTargetAngle != 0 || bastype.pitchTargetAngle != 0) {
+        val modelWidth = bastype.modelWidth
+        val modelLength = bastype.modelLength
+        if (modelWidth != 0 || modelLength != 0 || bastype.rollTargetAngle != 0 || bastype.pitchTargetAngle != 0) {
             functionMask = functionMask or (ModelFunctionMask.DISPLACE_X or ModelFunctionMask.DISPLACE_Y or ModelFunctionMask.DISPLACE_Z)
         }
 
@@ -89,8 +89,8 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             functionMask = functionMask or ModelFunctionMask.TINT
         }
 
-        val rotation = super.yaw.getRotation()
-        val model = this.definitions!!.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS!!, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences as Array<Sequence?>?, super.equipmentRotations, rotation, this.customisation, getCurrentRenderAnimation(), false)
+        val yawRotation = super.yaw.getRotation()
+        val model = this.definitions!!.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS!!, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences as Array<Sequence?>?, super.equipmentRotations, yawRotation, this.customisation, getCurrentRenderAnimation(), false)
         super.models[0] = model
         if (model == null) {
             return false
@@ -98,10 +98,10 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         super.modelMinY = model.getMinY()
         model.getSize3d()
         rotate(model)
-        if (x == 0 && z == 0) {
-            hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
+        if (modelWidth == 0 && modelLength == 0) {
+            hillChange(yawRotation, getSize() shl 9, getSize() shl 9, 0, 0)
         } else {
-            hillChange(rotation, x, z, bastype.hillRotateX, bastype.hillRotateZ)
+            hillChange(yawRotation, modelWidth, modelLength, bastype.hillRotateX, bastype.hillRotateZ)
             if (super.rotateX != 0) {
                 super.models[0]!!.xaxisRotateWithoutNormals(super.rotateX)
             }
@@ -119,7 +119,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             model.tint(super.hue.toInt(), super.saturation.toInt(), super.lightness.toInt(), super.opacity.toInt() and 0xff)
         }
 
-        displace(toolkit, bastype, initialFunctionMask, x, z, rotation)
+        displace(toolkit, bastype, initialFunctionMask, modelWidth, modelLength, yawRotation)
         return true
     }
 
@@ -150,8 +150,8 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         }
         for (index in super.spotAnimations.indices) {
             if (super.spotAnimations[index].spotAnimationId != -1) {
-                val gfxType = TypeLists.SPOT_ANIM!!.list(super.spotAnimations[index].spotAnimationId)
-                if (gfxType.replay && gfxType.sequenceId != -1 && TypeLists.SEQ!!.list(gfxType.sequenceId)!!.moveType == 1) {
+                val spotAnimType = TypeLists.SPOT_ANIM!!.list(super.spotAnimations[index].spotAnimationId)
+                if (spotAnimType.replay && spotAnimType.sequenceId != -1 && TypeLists.SEQ!!.list(spotAnimType.sequenceId)!!.moveType == 1) {
                     super.spotAnimations[index].sequence.update(-1)
                     super.spotAnimations[index].spotAnimationId = -1
                 }
@@ -166,10 +166,10 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
                     super.movementStepsLeft++
                 }
 
-                for (index in super.movementStepsLeft downTo 1) {
-                    super.movementBaseX[index] = super.movementBaseX[index - 1]
-                    super.movementBaseY[index] = super.movementBaseY[index - 1]
-                    super.movementTypes[index] = super.movementTypes[index - 1]
+                for (step in super.movementStepsLeft downTo 1) {
+                    super.movementBaseX[step] = super.movementBaseX[step - 1]
+                    super.movementBaseY[step] = super.movementBaseY[step - 1]
+                    super.movementTypes[step] = super.movementTypes[step - 1]
                 }
 
                 super.movementBaseX[0] = baseX
@@ -184,11 +184,11 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         super.stalledStepCount = 0
         super.movementBaseX[0] = baseX
         super.movementBaseY[0] = baseY
-        val abs = Vector3Pool.vector3From(getAbsolutePosition().coords)
-        abs.x = ((size shl 8) + (super.movementBaseX[0] shl 9)).toFloat()
-        abs.z = ((size shl 8) + (super.movementBaseY[0] shl 9)).toFloat()
-        setBasePosition(abs)
-        abs.pushVectorStack()
+        val absPos = Vector3Pool.vector3From(getAbsolutePosition().coords)
+        absPos.x = ((size shl 8) + (super.movementBaseX[0] shl 9)).toFloat()
+        absPos.z = ((size shl 8) + (super.movementBaseY[0] shl 9)).toFloat()
+        setBasePosition(absPos)
+        absPos.pushVectorStack()
         if (super.particleSystem != null) {
             super.particleSystem!!.onEntityUpdate()
         }
@@ -245,8 +245,8 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
         for (index in super.spotAnimations.indices) {
             if (super.spotAnimations[index].spotAnimationId != -1) {
-                val gfxtype = TypeLists.SPOT_ANIM!!.list(super.spotAnimations[index].spotAnimationId)
-                if (gfxtype.replay && gfxtype.sequenceId != -1 && TypeLists.SEQ!!.list(gfxtype.sequenceId)!!.moveType == 1) {
+                val spotAnimType = TypeLists.SPOT_ANIM!!.list(super.spotAnimations[index].spotAnimationId)
+                if (spotAnimType.replay && spotAnimType.sequenceId != -1 && TypeLists.SEQ!!.list(spotAnimType.sequenceId)!!.moveType == 1) {
                     super.spotAnimations[index].sequence.update(-1)
                     super.spotAnimations[index].spotAnimationId = -1
                 }
@@ -270,16 +270,16 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
     override fun getIconHeight(): Int {
         if (this.definitions!!.alternativeIds != null) {
-            val npctype = this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
-            if (npctype != null && npctype.iconHeight != -1) {
-                return npctype.iconHeight
+            val npcType = this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
+            if (npcType != null && npcType.iconHeight != -1) {
+                return npcType.iconHeight
             }
         }
 
         return if (this.definitions!!.iconHeight != -1) this.definitions!!.iconHeight else super.getIconHeight()
     }
 
-    fun isVisibile(): Boolean {
+    fun isVisible(): Boolean {
         return this.definitions!!.visible
     }
 
@@ -295,26 +295,26 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         throw IllegalStateException()
     }
 
-    fun getStat(index: Int): Int {
-        return this.maxStats[index]
+    fun getStat(statIndex: Int): Int {
+        return this.maxStats[statIndex]
     }
 
     override fun calculateProjection(toolkit: AbstractToolkit, cameraX: Int, cameraY: Int): Boolean {
         if (this.definitions != null && this.getAnimatedBodymodel(toolkit, 131072)) {
             val projectionMatrix = this.getProjectionMatrix()
             var projectionCalculated = false
-            for (index in this.models.indices) {
-                if (this.models[index] != null) {
+            for (modelIndex in this.models.indices) {
+                if (this.models[modelIndex] != null) {
                     val notRendered = this.definitions!!.sizeShift > 0 || (if (this.definitions!!.shadowSize != -1) this.definitions!!.shadowSize == 1 else this.definitions!!.size == 1)
-                    val isProjected = this.models[index]!!.calculateProjection(cameraX, cameraY, projectionMatrix, notRendered, this.definitions!!.sizeShift)
+                    val isProjected = this.models[modelIndex]!!.calculateProjection(cameraX, cameraY, projectionMatrix, notRendered, this.definitions!!.sizeShift)
                     if (isProjected) {
                         projectionCalculated = true
                         break
                     }
                 }
             }
-            for (index in this.models.indices) {
-                this.models[index] = null
+            for (modelIndex in this.models.indices) {
+                this.models[modelIndex] = null
             }
             return projectionCalculated
         }
@@ -332,9 +332,9 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             val absPos = getAbsolutePosition()
             val renderingMatrix = toolkit.getRenderingMatrix()
             val yawRotation = super.yaw.getRotation()
-            val class2937 = super.scene!!.tiles[super.plane.toInt()][(absPos.coords.x.toInt() shr 9)][(absPos.coords.z.toInt() shr 9)]
-            if (class2937 != null && class2937.groundDecoration != null) {
-                val groundDecoration = class2937.groundDecoration as? AbstractGroundDecoration
+            val tile = super.scene!!.tiles[super.plane.toInt()][(absPos.coords.x.toInt() shr 9)][(absPos.coords.z.toInt() shr 9)]
+            if (tile != null && tile.groundDecoration != null) {
+                val groundDecoration = tile.groundDecoration as? AbstractGroundDecoration
                 val offsetDelta = super.groundContouredOffsetY - (groundDecoration?.floorOffsetY?.toInt() ?: 0)
                 super.groundContouredOffsetY = (super.groundContouredOffsetY - offsetDelta / 10.0F).toInt()
             } else {
@@ -344,21 +344,21 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             renderingMatrix.copyFrom(projectionMatrix)
             renderingMatrix.translate(0.0F, (-20 - super.groundContouredOffsetY).toFloat(), 0.0F)
             val bastype = getBastype()
-            val npctype = if (this.definitions!!.alternativeIds != null) this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) else this.definitions
+            val npcType = if (this.definitions!!.alternativeIds != null) this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) else this.definitions
             super.hasPreferedPriorities = false
             var renderedEntity: RenderedEntity? = null
-            if (PreferenceManager.preferences!!.characterShadows!!.getValue() == 1 && npctype!!.shadowed && bastype.rendersShadow) {
+            if (PreferenceManager.preferences!!.characterShadows!!.getValue() == 1 && npcType!!.shadowed && bastype.rendersShadow) {
                 val seq = if (super.currentSequence.hasType() && super.currentSequence.hasSpeed()) super.currentSequence else null
-                val moveseq = if (!super.movingSequence.hasType() || super.movingSequence.hasType && seq != null) null else super.movingSequence
+                val moveAnimation = if (!super.movingSequence.hasType() || super.movingSequence.hasType && seq != null) null else super.movingSequence
                 val model = PathingEntity.getAnimatedShadowModel(toolkit, super.rotateX, super.rotateZ, super.translateY, this.definitions!!.size, super.models[0],
                         this.definitions!!.shadowColorSrc.toInt() and 0xffff, this.definitions!!.shadowColorDst.toInt() and 0xffff, this.definitions!!.shadowAlphaSrc.toInt() and 0xff, this.definitions!!.shadowAlphaDst.toInt() and 0xff,
-                        if (moveseq != null) moveseq else seq)
+                        if (moveAnimation != null) moveAnimation else seq)
                 if (model != null) {
                     if (super.boundingBoxPolygons == null || super.boundingBoxPolygons!!.size < super.models.size + 1) {
                         setupBoundingBox(super.models.size + 1)
                     }
 
-                    renderedEntity = RenderedEntityCache.generate(isVisibile())
+                    renderedEntity = RenderedEntityCache.generate(isVisible())
                     super.hasPreferedPriorities = true
                     toolkit.setDepthBuffering(false)
                     model.drawMatrixThreaded(renderingMatrix, super.boundingBoxPolygons!![super.models.size], ModelFunctionMaskGL.EMPTY)
@@ -371,7 +371,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             }
 
             if (renderedEntity == null) {
-                renderedEntity = RenderedEntityCache.generate(isVisibile())
+                renderedEntity = RenderedEntityCache.generate(isVisible())
             }
 
             updateParticles(toolkit, super.models, renderingMatrix, false)
@@ -411,7 +411,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         return if (super.hintDetails != null && super.hintDetails!!.text == null) null else super.hintDetails
     }
 
-    fun setDirection(npcType: NPCType?) {
+    fun setNpcType(npcType: NPCType?) {
         if (npcType != this.definitions && MiniMenu.isOpen && MiniMenu.containsEntryForNpc(super.playerIndex)) {
             MiniMenu.close()
         }

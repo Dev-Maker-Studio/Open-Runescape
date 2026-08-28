@@ -21,7 +21,7 @@ class CpuMaxMemoryPreference : Preference {
         return if (super.gamePreferences.getProcessorSpecs().getProcessorCount() > 1) 4 else 2
     }
 
-    override fun canModify(i_1: Int): Int {
+    override fun canModify(value: Int): Int {
         return 1
     }
 

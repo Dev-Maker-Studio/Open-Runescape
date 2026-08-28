@@ -43,7 +43,7 @@ class Projectile(
     entityLockOn: Int,
     endHeight: Int,
     useTerrainHeight: Boolean,
-    i_16: Int
+    matrxIndex: Int
 ) : AbstractInteractiveEntity(
     scene,
     fromPlane,
@@ -97,7 +97,7 @@ class Projectile(
         this.endHeight = endHeight
         this.adjustToTerrain = useTerrainHeight
         this.animating = false
-        this.matrxIndex = i_16
+        this.matrxIndex = matrxIndex
         val sequenceId = TypeLists.SPOT_ANIM!!.list(this.gfxId).sequenceId
         this.sequence = EntitySequence(this)
         this.sequence.update(sequenceId)
@@ -110,60 +110,60 @@ class Projectile(
 
     fun cycle() {
         if (!animating && entitySource != 0) {
-            var lockedOnEntity: Any? = null
+            var sourceEntity: Any? = null
             if (Client.MAP_LOADING_STAGE == 4) {
-                lockedOnEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![entitySource - 1].getEntity()
+                sourceEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![entitySource - 1].getEntity()
             } else {
-                val entityLockon: Int
+                val entityIndex: Int
                 if (entitySource < 0) {
-                    entityLockon = -entitySource - 1
-                    if (entityLockon == PlayerUpdate.myPlayerIndex) {
-                        lockedOnEntity = PlayerUpdate.MY_PLAYER!!
+                    entityIndex = -entitySource - 1
+                    if (entityIndex == PlayerUpdate.myPlayerIndex) {
+                        sourceEntity = PlayerUpdate.MY_PLAYER!!
                     } else {
-                        lockedOnEntity = PlayerUpdate.players[entityLockon]
+                        sourceEntity = PlayerUpdate.players[entityIndex]
                     }
                 } else {
-                    entityLockon = entitySource - 1
-                    val npcObjectNode = Client.NPC_MAP.get(entityLockon.toLong()) as ObjectNode?
+                    entityIndex = entitySource - 1
+                    val npcObjectNode = Client.NPC_MAP.get(entityIndex.toLong()) as ObjectNode?
                     if (npcObjectNode != null) {
-                        lockedOnEntity = npcObjectNode.value
+                        sourceEntity = npcObjectNode.value
                     }
                 }
             }
 
-            if (lockedOnEntity != null) {
-                val absolute = (lockedOnEntity as PathingEntity).getAbsolutePosition().coords
+            if (sourceEntity != null) {
+                val absolute = (sourceEntity as PathingEntity).getAbsolutePosition().coords
                 setBasePosition(
                     absolute.x,
                     (MapRegion.tileheightForAbsolutePosition(absolute.x.toInt(), absolute.z.toInt(), plane.toInt()) - startHeight).toFloat(),
                     absolute.z
                 )
                 if (matrxIndex >= 0) {
-                    val bastype = (lockedOnEntity as PathingEntity).getBastype()
+                    val basType = (sourceEntity as PathingEntity).getBastype()
                     var projectionX = 0
                     var projectionZ = 0
-                    if (bastype.objVerticeTransformations != null && bastype.objVerticeTransformations!![matrxIndex] != null) {
-                        projectionX += bastype.objVerticeTransformations!![matrxIndex]!![0]
-                        projectionZ += bastype.objVerticeTransformations!![matrxIndex]!![2]
+                    if (basType.objVerticeTransformations != null && basType.objVerticeTransformations!![matrxIndex] != null) {
+                        projectionX += basType.objVerticeTransformations!![matrxIndex]!![0]
+                        projectionZ += basType.objVerticeTransformations!![matrxIndex]!![2]
                     }
 
-                    if (bastype.projectionOffset != null && bastype.projectionOffset!![matrxIndex] != null) {
-                        projectionX += bastype.projectionOffset!![matrxIndex]!![0]
-                        projectionZ += bastype.projectionOffset!![matrxIndex]!![2]
+                    if (basType.projectionOffset != null && basType.projectionOffset!![matrxIndex] != null) {
+                        projectionX += basType.projectionOffset!![matrxIndex]!![0]
+                        projectionZ += basType.projectionOffset!![matrxIndex]!![2]
                     }
 
                     if (projectionX != 0 || projectionZ != 0) {
-                        val rotationOffset = (lockedOnEntity as PathingEntity).yaw.getRotation()
+                        val rotationOffset = (sourceEntity as PathingEntity).yaw.getRotation()
                         var baseRotation = rotationOffset
-                        if ((lockedOnEntity as PathingEntity).equipmentRotations != null && (lockedOnEntity as PathingEntity).equipmentRotations!![matrxIndex] != -1) {
-                            baseRotation = (lockedOnEntity as PathingEntity).equipmentRotations!![matrxIndex]
+                        if ((sourceEntity as PathingEntity).equipmentRotations != null && (sourceEntity as PathingEntity).equipmentRotations!![matrxIndex] != -1) {
+                            baseRotation = (sourceEntity as PathingEntity).equipmentRotations!![matrxIndex]
                         }
 
                         val rotation = baseRotation - rotationOffset and 0x3fff
-                        val xan = MathUtils.SINE[rotation]
-                        val zan = MathUtils.COSINE[rotation]
-                        val offsetX = xan * projectionZ + projectionX * zan shr 14
-                        val offsetZ = projectionZ * zan - xan * projectionX shr 14
+                        val sin = MathUtils.SINE[rotation]
+                        val cos = MathUtils.COSINE[rotation]
+                        val offsetX = sin * projectionZ + projectionX * cos shr 14
+                        val offsetZ = projectionZ * cos - sin * projectionX shr 14
                         val newAbsolutePosition = Vector3Pool.vector3From(getAbsolutePosition().coords)
                         newAbsolutePosition.x += offsetX
                         newAbsolutePosition.z += offsetZ
@@ -267,17 +267,17 @@ class Projectile(
         }
     }
 
-    override fun calculateProjection(graphicalrenderer1: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         return false
     }
 
-    override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 
     fun generateGfxModel(toolkit: AbstractToolkit, functionMask: Int): Model? {
-        val gfxtype = TypeLists.SPOT_ANIM!!.list(gfxId)
-        return gfxtype.getAnimatedModel(toolkit, functionMask, sequence, 2.toByte())
+        val spotAnimType = TypeLists.SPOT_ANIM!!.list(gfxId)
+        return spotAnimType.getAnimatedModel(toolkit, functionMask, sequence, 2.toByte())
     }
 
     override fun removeTileShadow() {
@@ -290,24 +290,24 @@ class Projectile(
 
     fun animate(step: Int) {
         animating = true
-        val abs = CoordinateSpace(getAbsolutePosition())
-        abs.coords.x = (abs.coords.x + stepX * step).toFloat()
-        abs.coords.z = (abs.coords.z + stepZ * step).toFloat()
+        val absolutePosition = CoordinateSpace(getAbsolutePosition())
+        absolutePosition.coords.x = (absolutePosition.coords.x + stepX * step).toFloat()
+        absolutePosition.coords.z = (absolutePosition.coords.z + stepZ * step).toFloat()
         if (adjustToTerrain) {
-            abs.coords.y = (MapRegion.tileheightForAbsolutePosition(abs.coords.x.toInt(), abs.coords.z.toInt(), plane.toInt()) - startHeight).toFloat()
+            absolutePosition.coords.y = (MapRegion.tileheightForAbsolutePosition(absolutePosition.coords.x.toInt(), absolutePosition.coords.z.toInt(), plane.toInt()) - startHeight).toFloat()
         } else if (angle != -1) {
-            abs.coords.y = (abs.coords.y + verticalSpeed * step + step.toDouble() * step * 0.5 * verticalAcceleration).toFloat()
+            absolutePosition.coords.y = (absolutePosition.coords.y + verticalSpeed * step + step.toDouble() * step * 0.5 * verticalAcceleration).toFloat()
             verticalSpeed += step * verticalAcceleration
         } else {
-            abs.coords.y = (abs.coords.y + verticalSpeed * step).toFloat()
+            absolutePosition.coords.y = (absolutePosition.coords.y + verticalSpeed * step).toFloat()
         }
 
-        abs.quaternion.rotate(1.0f, 0.0f, 0.0f, atan2(verticalSpeed, horizontalSpeed).toFloat())
+        absolutePosition.quaternion.rotate(1.0f, 0.0f, 0.0f, atan2(verticalSpeed, horizontalSpeed).toFloat())
         val quaternion = QuaternionPool.newQuaternion()
         quaternion.rotate(0.0f, 1.0f, 0.0f, atan2(stepX, stepZ).toFloat() - 3.1415927f)
-        abs.quaternion.multiply(quaternion)
+        absolutePosition.quaternion.multiply(quaternion)
         quaternion.store()
-        setAbsolutePosition(abs)
+        setAbsolutePosition(absolutePosition)
         if (sequence.progressCycle(1) && sequence.needsReset()) {
             sequence.reset()
         }

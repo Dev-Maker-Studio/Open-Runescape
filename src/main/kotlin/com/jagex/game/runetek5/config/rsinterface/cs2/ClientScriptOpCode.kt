@@ -113,8 +113,8 @@ enum class ClientScriptOpCode(
     CC_SETMAXLINES(77, familyId = 2),
     CC_SETPARAM_INT(497, familyId = 2),
     CC_SETPARAM_STRING(639, familyId = 2),
-    CC_SETVIDEO_SPRITE(513, familyId = 2),  // sets videoFileId, sprite components only
-    CC_SETVIDEO_TEXT(100, familyId = 2),  // sets videoFileId, text components only
+    instr6050(513, familyId = 2),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    instr6051(100, familyId = 2),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     CC_SETRECOL(589, familyId = 2),
     CC_SETRETEX(579, familyId = 2),
     CC_SETFONTMONO(476, familyId = 2),
@@ -130,7 +130,7 @@ enum class ClientScriptOpCode(
     CC_SETMODELLIGHTING_SUNROTATION(314, familyId = 2),
     CC_SETOBJECT_WEARCOL(878, familyId = 2),
     CC_SETOBJECT_WEARCOL_NONUM(173, familyId = 2),
-    CC_SETMODEL_ITEMCONTAINER(928, familyId = 2),
+    instr6895(928, familyId = 2),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     CC_SETPLAYERMODEL_SELF(443, familyId = 2),
     CC_SETOBJECT_ALWAYSNUM(998, familyId = 2),
     CC_SETOBJECT_WEARCOL_ALWAYSNUM(834, familyId = 2),
@@ -151,7 +151,7 @@ enum class ClientScriptOpCode(
     CC_SETOPKEY(895, familyId = 2),
     CC_SETOPTKEY(67, familyId = 2),
     CC_SETMOUSEOVERCURSOR(219, familyId = 2),
-    CC_HOOK_MOUSE_PRESS(813, familyId = 2),  // active-component form of HOOK_MOUSE_PRESS
+    CC_SETONCLICK(813, familyId = 2),  // official name (CS2InstructionType.java:160); was CC_HOOK_MOUSE_PRESS
     CC_SETONHOLD(158, familyId = 2),
     CC_SETONRELEASE(374, familyId = 2),
     CC_HOOK_MOUSE_ENTER(1, familyId = 2),  // active-component form of HOOK_MOUSE_ENTER
@@ -256,8 +256,8 @@ enum class ClientScriptOpCode(
     IF_SETMAXLINES(432, familyId = 4),
     IF_SETPARAM_INT(369, familyId = 4),
     IF_SETPARAM_STRING(198, familyId = 4),
-    IF_SETVIDEO_SPRITE(479, familyId = 4),  // sets videoFileId, sprite components only
-    IF_SETVIDEO_TEXT(206, familyId = 4),  // sets videoFileId, text components only
+    instr6193(479, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    instr6194(206, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     IF_SETRECOL(194, familyId = 4),
     IF_SETRETEX(950, familyId = 4),
     IF_SETFONTMONO(316, familyId = 4),
@@ -271,11 +271,11 @@ enum class ClientScriptOpCode(
     IF_SETMODELLIGHTING(203, familyId = 4),
     IF_SETMODELLIGHTING_SUNROTATION(598, familyId = 4),
     IF_SETOBJECT_WEARCOL(518, familyId = 4),
-    IF_SETOBJECT_WEARCOL_NONUM(352, familyId = 4),
-    IF_SETMODEL_ITEMCONTAINER(744, familyId = 4),
+    instr6208(352, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    instr6209(744, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     IF_SETPLAYERMODEL_SELF(499, familyId = 4),
     IF_SETOBJECT_ALWAYSNUM(552, familyId = 4),
-    IF_SETOBJECT_WEARCOL_ALWAYSNUM(898, familyId = 4),
+    instr6793(898, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     IF_SETOP(255, familyId = 4),
     IF_SETDEPTHCHILD(899, familyId = 4),
     IF_SETDRAGRENDERBEHAVIOUR(495, familyId = 4),
@@ -664,7 +664,7 @@ enum class ClientScriptOpCode(
     QC_GETPHRASEVALUE(349, familyId = 12),
     CHATPHRASE_FIND(711, familyId = 12),
     CHATPHRASE_FINDNEXT(830, familyId = 12),
-    CHATPHRASE_FINDRESET(227, familyId = 12),
+    instr6601(227, familyId = 12),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     QC_SENDCLANCHATMESSAGE(285, familyId = 12),
     QC_SENDGUESTCLANCHATMESSAGE(663, familyId = 12),
     KEYHELD_CTRL(290, familyId = 12),
@@ -762,7 +762,7 @@ enum class ClientScriptOpCode(
     SEND_SIGNUP_FORM_PACKET(686, familyId = 13),
     LOGIN_STARTGAME(362, familyId = 13),
     CREATE_CREATEREQUEST(684, familyId = 13),
-    LOGIN_REPLY_WORLD_ALT(1003, familyId = 13),  // same handler as LOGIN_REPLY_WORLD
+    instr6699(1003, familyId = 13),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     LOGIN_QUEUE_POSITION(9, familyId = 13),
     CREATE_GET_EMAIL(92, familyId = 13),
     CREATE_EMAIL_VALIDATE_REPLY(742, familyId = 13),
@@ -881,7 +881,7 @@ enum class ClientScriptOpCode(
     IF_DEBUG_GETCOMCOUNT(136, familyId = 14),
     IF_DEBUG_GETCOMNAME(40, familyId = 14),
     IF_DEBUG_GETSERVERTRIGGERS(307, familyId = 14),
-    NOOP(429, familyId = 14),  // empty in the stock interpreter too
+    instr6386(429, familyId = 14),  // empty in the stock interpreter too
     IF_DEBUG_BUTTON1(305, familyId = 14),
     IF_DEBUG_BUTTON2(653, familyId = 14),
     IF_DEBUG_BUTTON3(561, familyId = 14),
@@ -926,7 +926,7 @@ enum class ClientScriptOpCode(
     SOUND_VORBIS_PRELOAD(174, familyId = 14),
     SOUND_VORBIS_STOP(88, familyId = 14),
     SOUND_VORBIS_PLAY(762, familyId = 14),
-    VIDEOADVERT_ISSUPPORTED(548, familyId = 14),
+    instr6863(548, familyId = 14),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     BROWSER_AGECHECK(766, familyId = 14),
     BROWSER_REFRESH(507, familyId = 14),
     BROWSER_FOCUS(576, familyId = 14),
@@ -968,7 +968,7 @@ enum class ClientScriptOpCode(
     GETENTITYOVERHEADIF(282, familyId = 15),
     GET_ENTITY_SAY(378, familyId = 15),
     GET_DISPLAYNAME_WITHEXTRAS(812, familyId = 15),
-    CC_LOADENTITYMODEL(740, familyId = 15),
+    instr6905(740, familyId = 15),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
     IF_CREATE(29, familyId = 15),
     GET_NPC_NAME(660, familyId = 15),
     GET_NPC_VISLEVEL(165, familyId = 15),

@@ -41,7 +41,7 @@ object CommandExecutor {
     @JvmField var teleportCommandPositionY: Int = 0
 
     @JvmStatic
-    fun executeCommand(command: String, bool1: Boolean, save: Boolean) {
+    fun executeCommand(command: String, clientCommand: Boolean, save: Boolean) {
         try {
             // Handle bot commands first
             try {
@@ -84,18 +84,18 @@ object CommandExecutor {
                     return
                 }
                 command.equals("toolkit", ignoreCase = true) || command.startsWith("toolkit ", ignoreCase = true) -> {
-                    val current = PreferenceManager.preferences!!.activeToolkit!!.getValue()
-                    val id = command.substringAfter(' ', "").trim().toIntOrNull()
-                    if (id == null || id < 0 || id > 6) {
-                        Console.writeLine("Usage: toolkit <0-6> (current: $current, 6 = modern shader renderer)")
+                    val currentToolkitId = PreferenceManager.preferences!!.activeToolkit!!.getValue()
+                    val toolkitId = command.substringAfter(' ', "").trim().toIntOrNull()
+                    if (toolkitId == null || toolkitId < 0 || toolkitId > 6) {
+                        Console.writeLine("Usage: toolkit <0-6> (current: $currentToolkitId, 6 = modern shader renderer)")
                         return
                     }
-                    if (id == current) {
-                        Console.writeLine("Toolkit $id is already active")
+                    if (toolkitId == currentToolkitId) {
+                        Console.writeLine("Toolkit $toolkitId is already active")
                         return
                     }
-                    Console.writeLine("Switching to toolkit $id...")
-                    Client.loadAssets(id, "Please wait - changing renderer...", true)
+                    Console.writeLine("Switching to toolkit $toolkitId...")
+                    Client.loadAssets(toolkitId, "Please wait - changing renderer...", true)
                     return
                 }
                 command.equals("render", ignoreCase = true) ||
@@ -226,9 +226,9 @@ object CommandExecutor {
                             try {
                                 val dimension = Math.sqrt(pixels!!.size.toDouble()).toInt() - 1
                                 val itemImage = BufferedImage(36, 32, BufferedImage.TYPE_INT_ARGB)
-                                for (x in 0 until dimension) {
-                                    for (y in 0 until dimension) {
-                                        itemImage.setRGB(y, x, pixels[x * 36 + y])
+                                for (y in 0 until dimension) {
+                                    for (x in 0 until dimension) {
+                                        itemImage.setRGB(x, y, pixels[y * 36 + x])
                                     }
                                 }
                                 val imageFile = File("./items/$itemId.png")
@@ -241,18 +241,18 @@ object CommandExecutor {
                         return
                     }
                     command.startsWith("setlobby ") -> {
-                        val commandStr = command.substring(9)
-                        val spaceIndex = commandStr.indexOf(' ')
+                        val args = command.substring(9)
+                        val spaceIndex = args.indexOf(' ')
                         if (spaceIndex == -1) {
                             Console.writeLine("Failure")
                             return
                         }
-                        val port = commandStr.substring(0, spaceIndex).toIntOrNull()
+                        val port = args.substring(0, spaceIndex).toIntOrNull()
                         if (port == null) {
                             Console.writeLine("Failure")
                             return
                         }
-                        val host = "${commandStr.substring(spaceIndex + 1).trim()}.runescape.com"
+                        val host = "${args.substring(spaceIndex + 1).trim()}.runescape.com"
                         WorldConnection.setLobbyConnection(host, port)
                         Console.writeLine("Success")
                         return
@@ -342,9 +342,9 @@ object CommandExecutor {
                     }
                     command.startsWith("checknpprio") -> {
                         (0 until 100_000).forEach { id ->
-                            TypeLists.NPC!!.list(id).let { npctype ->
-                                if (npctype.highPriority) {
-                                    Console.writeLine("NPC: [$id] ${npctype.name}")
+                            TypeLists.NPC!!.list(id).let { npcType ->
+                                if (npcType.highPriority) {
+                                    Console.writeLine("NPC: [$id] ${npcType.name}")
                                 }
                             }
                         }
@@ -353,9 +353,9 @@ object CommandExecutor {
                     }
                     command.startsWith("npctoggle") -> {
                         (0 until 100_000).forEach { id ->
-                            TypeLists.NPC!!.list(id).let { npctype ->
-                                if (!npctype.delayMovement) {
-                                    npctype.delayMovement = true
+                            TypeLists.NPC!!.list(id).let { npcType ->
+                                if (!npcType.delayMovement) {
+                                    npcType.delayMovement = true
                                 }
                             }
                         }
@@ -374,11 +374,11 @@ object CommandExecutor {
                     command.startsWith("checknpcop") -> {
                         Console.writeLine("Executing $command")
                         (0 until 100_000).forEach { id ->
-                            TypeLists.NPC!!.list(id).let { npc ->
-                                if (npc.npcBasId > 0) {
-                                    val basType = TypeLists.BAS!!.list(npc.npcBasId)
+                            TypeLists.NPC!!.list(id).let { npcType ->
+                                if (npcType.npcBasId > 0) {
+                                    val basType = TypeLists.BAS!!.list(npcType.npcBasId)
                                     if (basType.unused != -1) {
-                                        Console.writeLine("NPC: $id with name ${npc.name} - has anInt2826: ${basType.unused}")
+                                        Console.writeLine("NPC: $id with name ${npcType.name} - unused BAS opcode-37 value: ${basType.unused}")
                                     }
                                 }
                             }
@@ -407,7 +407,7 @@ object CommandExecutor {
                 if (Client.gameState == GameState.LOGGED_INGAME) {
                     val clientPacket = PacketEncoder.createPacket(ClientProt.COMMAND, Client.GAME_CONNECTION_CONTEXT.isaac)
                     clientPacket.buffer.writeByte(command.length + 3)
-                    clientPacket.buffer.writeByte(if (bool1) 1 else 0)
+                    clientPacket.buffer.writeByte(if (clientCommand) 1 else 0)
                     clientPacket.buffer.writeByte(if (save) 1 else 0)
                     clientPacket.buffer.writeString(command)
                     Client.GAME_CONNECTION_CONTEXT.queuePacket(clientPacket)
@@ -425,11 +425,11 @@ object CommandExecutor {
         }
     }
 
-    private fun handleToolkitSwitch(toolkit: Int) {
-        Client.loadAssets(toolkit, false)
-        if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == toolkit) {
+    private fun handleToolkitSwitch(toolkitId: Int) {
+        Client.loadAssets(toolkitId, false)
+        if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == toolkitId) {
             Console.writeLine("Success")
-            PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, toolkit)
+            PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, toolkitId)
             PreferenceManager.savePreferences()
             Client.preferencesSavedOnServer = false
         } else {

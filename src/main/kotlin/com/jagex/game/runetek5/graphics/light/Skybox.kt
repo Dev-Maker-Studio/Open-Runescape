@@ -164,20 +164,20 @@ class Skybox(
         }
     }
 
-    fun interpolateAlpha(i_1: Int, i_2: Int) {
-        skyboxAlpha = (i_2 - previousAlpha) * i_1 / 255 + previousAlpha
+    fun interpolateAlpha(progress: Int, targetAlpha: Int) {
+        skyboxAlpha = (targetAlpha - previousAlpha) * progress / 255 + previousAlpha
     }
 
-    fun transitionToSkybox(class2471: Skybox?) {
+    fun transitionToSkybox(targetSkybox: Skybox?) {
         if (copyAlpha) {
             previousAlpha = skyboxAlpha
-        } else if (class2471 != null && class2471.copyAlpha) {
-            previousAlpha = 255 - class2471.skyboxAlpha
+        } else if (targetSkybox != null && targetSkybox.copyAlpha) {
+            previousAlpha = 255 - targetSkybox.skyboxAlpha
         } else {
             previousAlpha = 0
         }
         copyAlpha = true
-        skybox = class2471
+        skybox = targetSkybox
         skyboxAlpha = 0
     }
 
@@ -236,28 +236,28 @@ class Skybox(
     fun updateForHeight(toolkit: AbstractToolkit, componentHeight: Int, skyboxPreference: Int): Boolean {
         if (componentHeight != lastComponentHeight) {
             lastComponentHeight = componentHeight
-            var i_5 = MathUtils.furtestBitValue(componentHeight)
-            if (i_5 > 512) {
-                i_5 = 512
+            var size = MathUtils.furtestBitValue(componentHeight)
+            if (size > 512) {
+                size = 512
             }
-            if (i_5 <= 0) {
-                i_5 = 1
+            if (size <= 0) {
+                size = 1
             }
-            if (i_5 != useSize) {
-                useSize = i_5
+            if (size != useSize) {
+                useSize = size
                 backgroundSprite = null
             }
             if (initialSuns != null) {
                 availableSunCount = 0
-                val ints_6 = IntArray(initialSuns.size)
-                for (i_7 in initialSuns.indices) {
-                    val class3348 = initialSuns[i_7]
-                    if (class3348 != null && class3348.move(positionX, positionY, positionZ, lastComponentHeight)) {
-                        ints_6[availableSunCount] = class3348.sunSize2d
-                        availableSuns!![availableSunCount++] = class3348
+                val sunSizes = IntArray(initialSuns.size)
+                for (i in initialSuns.indices) {
+                    val sun = initialSuns[i]
+                    if (sun != null && sun.move(positionX, positionY, positionZ, lastComponentHeight)) {
+                        sunSizes[availableSunCount] = sun.sunSize2d
+                        availableSuns!![availableSunCount++] = sun
                     }
                 }
-                ArrayUtils.quicksort(ints_6, availableSuns!!, 0, availableSunCount - 1)
+                ArrayUtils.quicksort(sunSizes, availableSuns!!, 0, availableSunCount - 1)
             }
             prepareSun = true
         }

@@ -338,8 +338,8 @@ class Particle(
                                     dimension = 1.0
                                 }
 
-                                val d_30 = (offX * particleNode.defaultMatrixX + offY * particleType!!.offsetY + offZ * particleNode.defaultMatrixZ) * 65535.0 / (particleType.size3d * dimension)
-                                if (d_30 >= particleType!!.zan) {
+                                val cosAngle = (offX * particleNode.defaultMatrixX + offY * particleType!!.offsetY + offZ * particleNode.defaultMatrixZ) * 65535.0 / (particleType.size3d * dimension)
+                                if (cosAngle >= particleType!!.zan) {
                                     var posOffset = 0.0
                                     if (particleType!!.type == 1) {
                                         posOffset = dimension / 16.0 * particleType!!.sizeMultiplier
@@ -359,18 +359,18 @@ class Particle(
                                             this.z = (this.z + (particleNode.defaultMatrixZ - posOffset) * delta).toInt()
                                         }
                                     } else {
-                                        val d_34 = offX / dimension * particleType!!.size3d
-                                        val d_36 = offY / dimension * particleType!!.size3d
-                                        val d_38 = offZ / dimension * particleType!!.size3d
+                                        val stepXChange = offX / dimension * particleType!!.size3d
+                                        val stepYChange = offY / dimension * particleType!!.size3d
+                                        val stepZChange = offZ / dimension * particleType!!.size3d
                                         if (particleType!!.currentOffset == 0) {
-                                            replacementDirectionX += d_34 * delta
-                                            replacementDirectionY += d_36 * delta
-                                            replacementDirectionZ += d_38 * delta
+                                            replacementDirectionX += stepXChange * delta
+                                            replacementDirectionY += stepYChange * delta
+                                            replacementDirectionZ += stepZChange * delta
                                             isOffset = true
                                         } else {
-                                            this.x = (this.x + d_34 * delta).toInt()
-                                            this.y = (this.y + d_36 * delta).toInt()
-                                            this.z = (this.z + d_38 * delta).toInt()
+                                            this.x = (this.x + stepXChange * delta).toInt()
+                                            this.y = (this.y + stepYChange * delta).toInt()
+                                            this.z = (this.z + stepZChange * delta).toInt()
                                         }
                                     }
                                 }
@@ -398,8 +398,8 @@ class Particle(
                                 timesSizeHalved = 1.0
                             }
 
-                            val d_29 = (particleSizeX * particleNode.defaultMatrixX + particleSizeY * particleType.offsetY + particleSizeZ * particleNode.defaultMatrixZ) * 65535.0 / (particleType.size3d * timesSizeHalved)
-                            if (d_29 < particleType.zan) {
+                            val cosAngle = (particleSizeX * particleNode.defaultMatrixX + particleSizeY * particleType.offsetY + particleSizeZ * particleNode.defaultMatrixZ) * 65535.0 / (particleType.size3d * timesSizeHalved)
+                            if (cosAngle < particleType.zan) {
                                 particleNode = ParticleSystemManager.activeEffectiveVertexEffects.nextInBucket()
                             } else {
                                 var posOffset = 0.0

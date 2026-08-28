@@ -14,7 +14,7 @@ class VarcType {
     var persistenceType: Int = 1
 
     @JvmField
-    var aChar4984: Char = '\u0000'
+    var typeChar: Char = '\u0000'
 
     fun decode(buffer: Packet) {
         while (true) {
@@ -28,7 +28,7 @@ class VarcType {
 
     fun decode(stream: Packet, opcode: Int) {
         if (opcode == 1) {
-            aChar4984 = Utils.cp1252ToChar(stream.readByte())
+            typeChar = Utils.cp1252ToChar(stream.readByte())
         } else if (opcode == 2) {
             persistenceType = 0
         }

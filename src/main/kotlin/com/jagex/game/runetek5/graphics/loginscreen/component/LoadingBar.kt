@@ -9,7 +9,7 @@ open class LoadingBar(
     index1: Js5ResourceProvider,
     index2: Js5ResourceProvider,
     class350Sub33: MultiSpriteLoadingBarElement
-) : LBC(index1, index2, class350Sub33) {
+) : AbstractLoadingBar(index1, index2, class350Sub33) {
 
     @JvmField var fillSprite: NativeSprite? = null
     @JvmField var emptySprite: NativeSprite? = null

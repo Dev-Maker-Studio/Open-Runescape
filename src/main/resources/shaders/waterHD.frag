@@ -1,7 +1,7 @@
 #version 330 core
 
 // HD Water Fragment Shader
-// Replaces both ReflectiveRipplingWaterEffect (effect 8) and MaterialEffect9GL (effect 9)
+// Replaces both ReflectiveRipplingWaterEffect (effect 8) and BreakingWaterEffect (effect 9)
 //
 // Both effects share a very similar fragment shader:
 //   1. Sample 3D normal map texture, decode from [0,1] to [-1,1], swizzle .rbga
@@ -19,7 +19,7 @@
 //     - No wave intensity/exponent uniforms
 //     - surfaceColour = vec4(envColour, fresnel*shoreFactor) + specular*shoreFactor
 //
-//   Effect 9 (MaterialEffect9GL):
+//   Effect 9 (BreakingWaterEffect):
 //     - Fresnel: pow(1 - abs(ndote), 1.0) = 1 - abs(ndote) -- linear falloff
 //     - Wave intensity/exponent uniforms for breaking wave foam
 //     - surfaceColour = mix(reflection, waveColor, waveFactor) + specular*shoreFactor
@@ -103,7 +103,7 @@ void main() {
     vec4 surfaceColour;
 
     if (uUseWaveEffect) {
-        // Effect 9 (MaterialEffect9GL): wave breaking + linear fresnel
+        // Effect 9 (BreakingWaterEffect): wave breaking + linear fresnel
         float waveFactor = pow(1.0 - shoreFactor, uWaveExponent) - 0.5;
         waveFactor = -4.0 * waveFactor * waveFactor + 1.0;
 

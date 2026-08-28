@@ -41,7 +41,7 @@ import com.jagex.game.runetek5.graphics.model.ModelGL
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL
 import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
 import com.jagex.game.runetek5.imageproducer.DirectDisplay
-import com.jagex.game.runetek5.imageproducer.ImageProducerGL2
+import com.jagex.game.runetek5.imageproducer.ImageProducerGL
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.scene.ground.GroundGL
@@ -409,7 +409,7 @@ class ModernGLToolkit(
     override fun generateFlags() {
         super.generateFlags()
         // ROOT CAUSE of the invisible UI (driver: "Target doesn't match the texture's
-        // target"): with this flag set, legacy sprite textures (OpenGl2DTexture_Sub1)
+        // target"): with this flag set, legacy sprite textures (OpenGl2DImageTexture)
         // are created as GL_TEXTURE_RECTANGLE, but the modern sprite pipeline binds
         // everything as GL_TEXTURE_2D — every bind raised GL_INVALID_OPERATION and
         // every UI quad sampled nothing. Force the legacy power-of-two/TEXTURE_2D
@@ -435,11 +435,11 @@ class ModernGLToolkit(
         if (System.getProperty("render.vsync")?.equals("true", true) == true) return
         // Whichever swap-control extension the driver exposes. LWJGL resolves entry
         // points lazily, so an unavailable one throws rather than reporting absence.
-        val display = try { org.lwjgl.opengl.GLX14.glXGetCurrentDisplay() } catch (e: Throwable) { 0L }
-        val drawable = try { org.lwjgl.opengl.GLX.glXGetCurrentDrawable() } catch (e: Throwable) { 0L }
-        if (display != 0L && drawable != 0L) {
+        val glxDisplay = try { org.lwjgl.opengl.GLX14.glXGetCurrentDisplay() } catch (e: Throwable) { 0L }
+        val glxDrawable = try { org.lwjgl.opengl.GLX.glXGetCurrentDrawable() } catch (e: Throwable) { 0L }
+        if (glxDisplay != 0L && glxDrawable != 0L) {
             try {
-                org.lwjgl.opengl.GLXEXTSwapControl.glXSwapIntervalEXT(display, drawable, 0)
+                org.lwjgl.opengl.GLXEXTSwapControl.glXSwapIntervalEXT(glxDisplay, glxDrawable, 0)
                 println("[ModernGLToolkit] swap interval 0 via GLX_EXT_swap_control")
                 return
             } catch (e: Throwable) {
@@ -762,7 +762,7 @@ class ModernGLToolkit(
             // actually the one in the visible hierarchy?
             try {
                 val canvas = GameShell.gameCanvas
-                val producer = delegatingDisplay as? ImageProducerGL2
+                val producer = delegatingDisplay as? ImageProducerGL
                 println(
                     "[ModernDiag3] canvas=${System.identityHashCode(canvas)} " +
                         "displayable=${canvas?.isDisplayable} showing=${canvas?.isShowing} " +
@@ -815,9 +815,9 @@ class ModernGLToolkit(
         // and no amount of CPU work removal will raise the frame rate; a near-zero
         // value means the GPU is idle waiting on us.
         if (GPU_SYNC) {
-            val fenceStart = System.nanoTime()
+            val fenceStartNs = System.nanoTime()
             glFinish()
-            phaseGpuWaitNs += System.nanoTime() - fenceStart
+            phaseGpuWaitNs += System.nanoTime() - fenceStartNs
         }
 
         // Parent render: swapBuffers via jaggl (presents the framebuffer)
@@ -855,9 +855,9 @@ class ModernGLToolkit(
      * Called before scene rendering begins.
      * This starts the batcher to collect geometry from drawMatrixThreaded calls.
      */
-    override fun setModelMatrix(matrix441: Matrix44) {
+    override fun setModelMatrix(modelMatrix: Matrix44) {
         // Call parent to set up legacy matrix state
-        super.setModelMatrix(matrix441)
+        super.setModelMatrix(modelMatrix)
 
         diagSetModelMatrixCalls++
 
@@ -1059,9 +1059,9 @@ class ModernGLToolkit(
         val batcher = frameBatcher ?: return
 
         // Get display dimensions
-        val display = delegatingDisplay ?: return
-        val width = display.getWidth()
-        val height = display.getHeight()
+        val presentTarget = delegatingDisplay ?: return
+        val width = presentTarget.getWidth()
+        val height = presentTarget.getHeight()
         if (width <= 0 || height <= 0) return
 
         // Setup projection (not used directly - we use legacy's combined VP matrix)
@@ -1694,13 +1694,13 @@ class ModernGLToolkit(
         // deterministically, instead of varying with collection order.
         val maxLights = InstancedModelBatcher.MAX_POINT_LIGHTS
         if (frameLights.size > maxLights) {
-            val camX = Camera.cameraPositionAbsoluteX.toFloat()
-            val camY = Camera.cameraPositionAbsoluteZ.toFloat()
-            val camZ = Camera.cameraPositionAbsoluteY.toFloat()
+            val camWorldX = Camera.cameraPositionAbsoluteX.toFloat()
+            val camWorldY = Camera.cameraPositionAbsoluteZ.toFloat()
+            val camWorldZ = Camera.cameraPositionAbsoluteY.toFloat()
             frameLights.sortBy { l ->
-                val dx = l.getX() - camX
-                val dy = l.getY() - camY
-                val dz = l.getZ() - camZ
+                val dx = l.getX() - camWorldX
+                val dy = l.getY() - camWorldY
+                val dz = l.getZ() - camWorldZ
                 dx * dx + dy * dy + dz * dz
             }
         }
@@ -1927,13 +1927,13 @@ class ModernGLToolkit(
     // constructor is byte-for-byte the SpriteGL constructor (legacy texture upload —
     // a resource operation, not FFP drawing), so it is safe on any thread/state where
     // legacy sprite creation was safe. Modern-vs-skip is decided at DRAW time.
-    override fun createNativeSprite(pixels: IntArray, stride: Int, srcWidth: Int, width: Int, height: Int, bool6: Boolean): NativeSprite {
+    override fun createNativeSprite(pixels: IntArray, stride: Int, srcWidth: Int, width: Int, height: Int, hasAlpha: Boolean): NativeSprite {
         return ModernSpriteGL(this, width, height, pixels, stride, srcWidth)
     }
 
-    override fun createNativeSprite(x: Int, y: Int, width: Int, height: Int, bool5: Boolean): NativeSprite {
+    override fun createNativeSprite(x: Int, y: Int, width: Int, height: Int, hasAlpha: Boolean): NativeSprite {
         // SCREEN CAPTURE constructor: SpriteGL(toolkit, x, y, w, h) captures the
-        // framebuffer region via OpenGl2DTexture_Sub1.createFromScreenCapture
+        // framebuffer region via OpenGl2DImageTexture.createFromScreenCapture
         // (SpriteGL.kt:48 → OpenGl2DTexture.kt:118 glCopyTexImage2D). Under legacy
         // everything was drawn immediately, so the pixels were present; the modern
         // sprite batch DEFERS draws, so flush everything pending first or the
@@ -1945,7 +1945,7 @@ class ModernGLToolkit(
         return ModernSpriteGL(this, x, y, width, height)
     }
 
-    override fun generateEmptySprite(width: Int, height: Int, hasAlpha: Boolean, bool4: Boolean): NativeSprite {
+    override fun generateEmptySprite(width: Int, height: Int, hasAlpha: Boolean, mipmapped: Boolean): NativeSprite {
         return ModernSpriteGL(this, width, height, hasAlpha)
     }
 
@@ -2147,7 +2147,7 @@ class ModernGLToolkit(
         val sr = spriteRenderer
         if (sr != null && sr.isReady() && canUseModernPipeline()) {
             // clearRectangle draws the component surface texture across the clipping region.
-            // SpriteSurfaceGL holds an OpenGl2DTexture_Sub1 whose activeHandle is the GL texture ID.
+            // SpriteSurfaceGL holds an OpenGl2DImageTexture whose activeHandle is the GL texture ID.
             val spriteSurface = surface as? SpriteSurfaceGL
             if (spriteSurface != null) {
                 val surfaceTexture = spriteSurface.surface
@@ -2478,10 +2478,10 @@ class ModernGLToolkit(
             MemoryUtil.memFree(buf)
             val mean = sum.toDouble() / n
             if (partial > 0 || zero > 0) {
-                val mt = materialProvider?.getMaterial(materialId)
+                val material = materialProvider?.getMaterial(materialId)
                 System.err.println("[TexAlpha] mat=$materialId ${w}x$h meanA=${"%.1f".format(mean)} " +
                     "zero=${zero * 100 / n}% partial=${partial * 100 / n}% full=${full * 100 / n}% " +
-                    "combine=${mt?.combineMode} effectId=${mt?.effectId} effectCombiner=${mt?.effectCombiner} " +
+                    "combine=${material?.combineMode} effectId=${material?.effectId} effectCombiner=${material?.effectCombiner} " +
                     "hasAlpha=${materialTextureHasAlpha(materialId)}")
             }
         } catch (t: Throwable) {
@@ -2492,7 +2492,7 @@ class ModernGLToolkit(
     /**
      * Whether a material's fragment alpha should come from its TEXTURE.
      *
-     * Legacy decides this per material effect. Effects 1 (MaterialEffect1GL) and 7
+     * Legacy decides this per material effect. Effects 1 (CubeMapSpecularEffect) and 7
      * (ReflectingTextureEffect) install their own combiner:
      *   loadTextureCombineMode(..., GL_REPLACE) + setTextureTransparency(0, GL_PRIMARY_COLOR)
      * i.e. fragment alpha is REPLACED by the primary (vertex) colour's alpha and the
@@ -2512,8 +2512,8 @@ class ModernGLToolkit(
      */
     fun materialTextureHasAlpha(materialId: Int): Boolean {
         if (materialId < 0) return false
-        val m = materialProvider?.getMaterial(materialId) ?: return false
-        return MaterialTypeList.isOpaqueEffect(m.effectId.toInt())
+        val material = materialProvider?.getMaterial(materialId) ?: return false
+        return MaterialTypeList.isOpaqueEffect(material.effectId.toInt())
     }
 
     private fun lookupTextureHandle(materialId: Int): Int {
@@ -2544,7 +2544,7 @@ class ModernGLToolkit(
         return handle
     }
 
-    override fun createModel(rsmesh1: Mesh, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Model {
+    override fun createModel(mesh: Mesh, modelFunctionMask: Int, preferenceMask: Int, ambient: Int, contrast: Int): Model {
         // Build BEFORE super.createModel. The ModelGL constructor consumes the
         // mesh's billboard list, so by the time it returns, mesh.billboards is empty
         // and ModernModelBuilder can no longer tell which faces are billboard
@@ -2554,18 +2554,18 @@ class ModernGLToolkit(
         // GeometryDiff proved it: every remaining divergence was extraInMesh=N with
         // bb[seen=0], i.e. the builder saw no billboards at all while legacy hid N.
         val built = try {
-            ModernModelBuilder.build(rsmesh1, i_4, materialProvider, (i_3 and 0x40) != 0)
+            ModernModelBuilder.build(mesh, ambient, materialProvider, (preferenceMask and 0x40) != 0)
         } catch (e: Exception) {
             null  // Never let a build failure break model creation
         }
 
-        val model = super.createModel(rsmesh1, i_2, i_3, i_4, i_5)
+        val model = super.createModel(mesh, modelFunctionMask, preferenceMask, ambient, contrast)
         // Build modern geometry from the CLEAN decoded mesh (direct vertex
         // indices, proper texture-projection UVs) BEFORE any post-create baking
         // (loc yaw, mirror, contour, recolor...). The mesh here is unrotated
         // base geometry; ModelGL tracks later mutations (modernYaw accumulates
         // representable yaw; anything else nulls modernBuilt → legacy-capture
-        // fallback). i_4 is the model ambient baked into the vertex colors.
+        // fallback). `ambient` is the model ambient baked into the vertex colors.
         if (model is ModelGL) {
             model.modernBuilt = built
             model.modernYaw = 0
@@ -2684,14 +2684,14 @@ class ModernGLToolkit(
      * touch every vertex position.
      */
     private fun colourStateHash(model: ModelGL): Long {
-        val fc = model.facesColor ?: return 0L
-        val fa = model.facesAlpha
+        val facesColor = model.facesColor ?: return 0L
+        val facesAlpha = model.facesAlpha
         var h = 1125899906842597L
         h = h * 31 + model.ambient
         val n = model.numFaces
-        for (i in 0 until minOf(n, fc.size)) {
-            h = h * 31 + fc[i]
-            if (fa != null && i < fa.size) h = h * 31 + fa[i]
+        for (i in 0 until minOf(n, facesColor.size)) {
+            h = h * 31 + facesColor[i]
+            if (facesAlpha != null && i < facesAlpha.size) h = h * 31 + facesAlpha[i]
         }
         return h
     }
@@ -2871,13 +2871,13 @@ class ModernGLToolkit(
             }
             return
         }
-        val t0 = System.nanoTime()
+        val modelStartNs = System.nanoTime()
         if (useOptimizedBatcher) {
             renderModelGLOptimized(model, modelMatrix)
         } else {
             renderModelGLLegacy(model, modelMatrix)
         }
-        phaseModelNs += System.nanoTime() - t0
+        phaseModelNs += System.nanoTime() - modelStartNs
         phaseModelCalls++
     }
 
@@ -2930,17 +2930,17 @@ class ModernGLToolkit(
         totalModelsProcessed++
 
         // OPTIMIZATION: Frustum culling at model level
-        val t1 = stageNow()
+        val cullStartNs = stageNow()
         if (frustumCullEnabled && model.boundsCalculated) {
             val vp = viewProjectionMatrix.elements
             if (!isModelVisible(model, modelMatrix, vp)) {
                 if (VERIFY_MODEL_CULL) verifyModelCull(model, modelMatrix, vp)
                 modelsCulled++
-                if (PHASE_TIMERS) timeFrustumCull += System.nanoTime() - t1
+                if (PHASE_TIMERS) timeFrustumCull += System.nanoTime() - cullStartNs
                 return
             }
         }
-        if (PHASE_TIMERS) timeFrustumCull += System.nanoTime() - t1
+        if (PHASE_TIMERS) timeFrustumCull += System.nanoTime() - cullStartNs
 
         // renderedFaceCount, NOT numFaces — see buildModelCache: faces in
         // [renderedFaceCount, numFaces) are billboard ANCHOR faces that legacy never
@@ -2979,7 +2979,7 @@ class ModernGLToolkit(
             ModelFunctionMaskGL.altersVertices(model.functionMask)
         val cache = if (isAnimated) null else modelCache
 
-        val t4 = stageNow()
+        val cacheStartNs = stageNow()
         if (cache != null) {
             // MESH-BUILT PATH: geometry constructed from the clean decoded mesh
             // at createModel time (ModernModelBuilder) — multi-model locs keep
@@ -3036,7 +3036,7 @@ class ModernGLToolkit(
                     }
                 }
                 if (cachedModel != null) {
-                    if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - t4
+                    if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - cacheStartNs
                     cacheHits++
                     modernBuiltPathModels++
                     submitCachedModel(
@@ -3052,14 +3052,14 @@ class ModernGLToolkit(
             // meaningful for static models; computing it for animated models
             // was pure per-frame waste).
             modernBuiltFallbackModels++
-            val t3 = stageNow()
+            val hashStartNs = stageNow()
             val modelId = computeModelContentHash(model)
-            if (PHASE_TIMERS) timeComputeHash += System.nanoTime() - t3
+            if (PHASE_TIMERS) timeComputeHash += System.nanoTime() - hashStartNs
 
             val cachedModel = sharedGeometryFor(model, cache, modelId) {
                 buildModelCache(model)
             }
-            if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - t4
+            if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - cacheStartNs
 
             if (cachedModel != null) {
                 cacheHits++
@@ -3069,7 +3069,7 @@ class ModernGLToolkit(
             }
         } else {
             modernBuiltFallbackModels++
-            if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - t4
+            if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - cacheStartNs
 
             // ANIMATED / POSE-SNAPSHOT PATH.
             //
@@ -3115,9 +3115,9 @@ class ModernGLToolkit(
         // Fallback: process faces directly (no cache or cache build failed)
         // Register model matrix with the optimized batcher
         selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
-        val t2 = stageNow()
+        val beginModelStartNs = stageNow()
         var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
-        if (PHASE_TIMERS) timeBeginModel += System.nanoTime() - t2
+        if (PHASE_TIMERS) timeBeginModel += System.nanoTime() - beginModelStartNs
 
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
@@ -3138,28 +3138,28 @@ class ModernGLToolkit(
      *
      * @param geometryKey stable key identifying the geometry: the instanced
      *   batcher groups instances by it, so all instances sharing it must carry
-     *   identical vertex data (per-instance placement lives in [matrix]).
+     *   identical vertex data (per-instance placement lives in [modelMatrix]).
      */
     /**
-     * Fills [currentLightIdx] for [model] at [matrix]'s origin, reusing the model's own
+     * Fills [currentLightIdx] for [model] at [modelMatrix]'s origin, reusing the model's own
      * memo when neither its position nor the frame's light set has changed.
      */
-    private fun selectLightsForModel(model: ModelGL, matrix: Matrix43) {
+    private fun selectLightsForModel(model: ModelGL, modelMatrix: Matrix43) {
         if (model.modernLightEpoch == lightEpoch &&
-            model.modernLightX == matrix.xD &&
-            model.modernLightY == matrix.yD &&
-            model.modernLightZ == matrix.zD
+            model.modernLightX == modelMatrix.xD &&
+            model.modernLightY == modelMatrix.yD &&
+            model.modernLightZ == modelMatrix.zD
         ) {
             val memo = model.modernLightIdx
             currentLightIdx[0] = memo[0]; currentLightIdx[1] = memo[1]
             currentLightIdx[2] = memo[2]; currentLightIdx[3] = memo[3]
             return
         }
-        selectLightsFor(matrix.xD, matrix.yD, matrix.zD)
+        selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
         model.modernLightEpoch = lightEpoch
-        model.modernLightX = matrix.xD
-        model.modernLightY = matrix.yD
-        model.modernLightZ = matrix.zD
+        model.modernLightX = modelMatrix.xD
+        model.modernLightY = modelMatrix.yD
+        model.modernLightZ = modelMatrix.zD
         val memo = model.modernLightIdx
         memo[0] = currentLightIdx[0]; memo[1] = currentLightIdx[1]
         memo[2] = currentLightIdx[2]; memo[3] = currentLightIdx[3]
@@ -3172,11 +3172,11 @@ class ModernGLToolkit(
         batcher: OptimizedFrameBatcher,
         cachedModel: ModelCache.CachedModel,
         geometryKey: Long,
-        matrix: Matrix43,
+        modelMatrix: Matrix43,
         model: ModelGL
     ) {
         // Pick this model's lights from its own world origin (see selectLightsFor).
-        selectLightsForModel(model, matrix)
+        selectLightsForModel(model, modelMatrix)
         // INSTANCING PATH: groups identical meshes (by geometryKey) and renders
         // them with glDrawElementsInstanced, using one draw call per material
         // regardless of how many instances exist.
@@ -3189,9 +3189,9 @@ class ModernGLToolkit(
         // retries), and the legacy-capture path is ~96% of all models. That
         // overran the 500k-vertex streaming buffer every frame and deleted walls.
         if (instancingEnabled && useInstancing && instancedBatcher?.isActive() == true) {
-            val t5 = stageNow()
-            val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, matrix, currentLightIdx)
-            if (PHASE_TIMERS) timeAddCachedModel += System.nanoTime() - t5
+            val addInstanceStartNs = stageNow()
+            val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, modelMatrix, currentLightIdx)
+            if (PHASE_TIMERS) timeAddCachedModel += System.nanoTime() - addInstanceStartNs
             if (added) {
                 totalFacesProcessed += cachedModel.faceCount
                 modelCounter++
@@ -3202,20 +3202,20 @@ class ModernGLToolkit(
         }
 
         // REGULAR BATCHER PATH: used when instancing is disabled or full
-        val t2 = stageNow()
-        var modelIndex = batcher.beginModel(matrix, currentLightIdx)
-        if (PHASE_TIMERS) timeBeginModel += System.nanoTime() - t2
+        val beginModelStartNs = stageNow()
+        var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
+        if (PHASE_TIMERS) timeBeginModel += System.nanoTime() - beginModelStartNs
 
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(matrix, currentLightIdx)
+            modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
             if (modelIndex < 0) return
         }
 
         modelCounter++
         debugModelSuccesses++
 
-        val t5 = stageNow()
+        val addCachedModelStartNs = stageNow()
         var facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
 
         // addCachedModel returns 0 when its vertex buffer is full and DISCARDS the
@@ -3226,13 +3226,13 @@ class ModernGLToolkit(
         // and retry once, mirroring the beginModel path.
         if (facesAdded == 0 && cachedModel.faceCount > 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(matrix, currentLightIdx)
+            modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
             if (modelIndex >= 0) {
                 facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
             }
             if (facesAdded == 0) streamingModelsDropped++
         }
-        if (PHASE_TIMERS) timeAddCachedModel += System.nanoTime() - t5
+        if (PHASE_TIMERS) timeAddCachedModel += System.nanoTime() - addCachedModelStartNs
         totalFacesProcessed += facesAdded
     }
 
@@ -3317,11 +3317,11 @@ class ModernGLToolkit(
         val stride = ModelCache.BYTES_PER_VERTEX
         val off = ModernModelBuilder.COLOR_OFFSET
         var bad = 0
-        var first: String? = null
+        var firstMsg: String? = null
         for (i in built.acceptedFaces.indices) {
-            val mf = built.acceptedFaces[i]
-            if (mf >= meshToModel.size) continue
-            val modelFace = meshToModel[mf]
+            val meshFace = built.acceptedFaces[i]
+            if (meshFace >= meshToModel.size) continue
+            val modelFace = meshToModel[meshFace]
             if (modelFace < 0 || modelFace >= reference.faceCount) continue
             val rp = i * 3 * stride + off
             val cp = modelFace * 3 * stride + off
@@ -3330,7 +3330,7 @@ class ModernGLToolkit(
             for (k in 0 until 3) if (redone[rp + k] != reference.vertexData.get(cp + k)) diff = true
             if (diff) {
                 bad++
-                if (first == null) first =
+                if (firstMsg == null) firstMsg =
                     "got=(${redone[rp].toInt() and 0xff},${redone[rp+1].toInt() and 0xff},${redone[rp+2].toInt() and 0xff}) " +
                     "want=(${reference.vertexData.get(cp).toInt() and 0xff},${reference.vertexData.get(cp+1).toInt() and 0xff},${reference.vertexData.get(cp+2).toInt() and 0xff})"
             }
@@ -3339,7 +3339,7 @@ class ModernGLToolkit(
         if (bad > 0) {
             recolourBad++
             if (recolourBad <= 6) System.err.println(
-                "[RecolourMut] $bad/${built.acceptedFaces.size} faces rev=${model.modernColorRevision} $first")
+                "[RecolourMut] $bad/${built.acceptedFaces.size} faces rev=${model.modernColorRevision} $firstMsg")
         }
     }
 
@@ -3595,16 +3595,16 @@ class ModernGLToolkit(
         val stamp = ++slotStampCounter
         val colorFaceCount = minOf(model.numFaces, facesA.size, facesB.size, facesC.size)
         for (f in 0 until colorFaceCount) {
-            val mat = facesMaterial?.get(f)?.toInt() ?: -1
+            val materialId = facesMaterial?.get(f)?.toInt() ?: -1
             val hsl = facesColor?.get(f)?.toInt()?.and(0xFFFF) ?: 0
-            val fa = facesAlpha?.get(f) ?: 0.toByte()
-            val rgba = model.hslToRgb(hsl.toShort(), mat.toShort(), modelAmbient, fa)
-            val sa = facesA[f].toInt() and 0xFFFF
-            val sb = facesB[f].toInt() and 0xFFFF
-            val sc = facesC[f].toInt() and 0xFFFF
-            if (sa < slotCount) { slotColor[sa] = rgba; slotStamp[sa] = stamp }
-            if (sb < slotCount) { slotColor[sb] = rgba; slotStamp[sb] = stamp }
-            if (sc < slotCount) { slotColor[sc] = rgba; slotStamp[sc] = stamp }
+            val faceAlpha = facesAlpha?.get(f) ?: 0.toByte()
+            val rgba = model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, faceAlpha)
+            val slotA = facesA[f].toInt() and 0xFFFF
+            val slotB = facesB[f].toInt() and 0xFFFF
+            val slotC = facesC[f].toInt() and 0xFFFF
+            if (slotA < slotCount) { slotColor[slotA] = rgba; slotStamp[slotA] = stamp }
+            if (slotB < slotCount) { slotColor[slotB] = rgba; slotStamp[slotB] = stamp }
+            if (slotC < slotCount) { slotColor[slotC] = rgba; slotStamp[slotC] = stamp }
         }
 
         // Process faces - write full 40-byte vertices with pre-computed normals
@@ -3638,8 +3638,8 @@ class ModernGLToolkit(
             // face) would read 0 = alpha 0 = invisible; fall back to the face colour.
             val faceRgba = run {
                 val hsl = facesColor?.get(faceIdx)?.toInt()?.and(0xFFFF) ?: 0
-                val fa = facesAlpha?.get(faceIdx) ?: 0.toByte()
-model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
+                val faceAlpha = facesAlpha?.get(faceIdx) ?: 0.toByte()
+                model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, faceAlpha)
             }
             val useSlot = slotColorEnabled
             val rgbaA = if (useSlot && idxA < slotCount && slotStamp[idxA] == stamp) slotColor[idxA] else { if (useSlot) unwrittenSlotFaces++; faceRgba }
@@ -3864,13 +3864,13 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
     private fun submitStreamedModel(
         batcher: OptimizedFrameBatcher,
         cached: ModelCache.CachedModel,
-        matrix: Matrix43
+        modelMatrix: Matrix43
     ) {
-        selectLightsFor(matrix.xD, matrix.yD, matrix.zD)
-        var modelIndex = batcher.beginModel(matrix, currentLightIdx)
+        selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
+        var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(matrix, currentLightIdx)
+            modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
             if (modelIndex < 0) return
         }
         modelCounter++
@@ -3880,7 +3880,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         // full; flush and retry once, exactly as submitCachedModel does.
         if (facesAdded == 0 && cached.faceCount > 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(matrix, currentLightIdx)
+            modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
             if (modelIndex >= 0) facesAdded = batcher.addCachedModel(cached, modelIndex)
             if (facesAdded == 0) streamingModelsDropped++
         }
@@ -3979,16 +3979,16 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         // pass skips still contribute their colour to shared slots.
         val colorFaceCount = minOf(model.numFaces, facesA.size, facesB.size, facesC.size)
         for (f in 0 until colorFaceCount) {
-            val mat = facesMaterial?.get(f)?.toInt() ?: -1
+            val materialId = facesMaterial?.get(f)?.toInt() ?: -1
             val hsl = facesColor?.get(f)?.toInt()?.and(0xFFFF) ?: 0
-            val fa = facesAlpha?.get(f) ?: 0.toByte()
-            val rgba = model.hslToRgb(hsl.toShort(), mat.toShort(), modelAmbient, fa)
-            val sa = facesA[f].toInt() and 0xFFFF
-            val sb = facesB[f].toInt() and 0xFFFF
-            val sc = facesC[f].toInt() and 0xFFFF
-            if (sa < slotCount) { slotColor[sa] = rgba; slotStamp[sa] = stamp }
-            if (sb < slotCount) { slotColor[sb] = rgba; slotStamp[sb] = stamp }
-            if (sc < slotCount) { slotColor[sc] = rgba; slotStamp[sc] = stamp }
+            val faceAlpha = facesAlpha?.get(f) ?: 0.toByte()
+            val rgba = model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, faceAlpha)
+            val slotA = facesA[f].toInt() and 0xFFFF
+            val slotB = facesB[f].toInt() and 0xFFFF
+            val slotC = facesC[f].toInt() and 0xFFFF
+            if (slotA < slotCount) { slotColor[slotA] = rgba; slotStamp[slotA] = stamp }
+            if (slotB < slotCount) { slotColor[slotB] = rgba; slotStamp[slotB] = stamp }
+            if (slotC < slotCount) { slotColor[slotC] = rgba; slotStamp[slotC] = stamp }
         }
 
         for (faceIdx in 0 until numFaces) {
@@ -4021,8 +4021,8 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
             // face) would read 0 = alpha 0 = invisible; fall back to the face colour.
             val faceRgba = run {
                 val hsl = facesColor?.get(faceIdx)?.toInt()?.and(0xFFFF) ?: 0
-                val fa = facesAlpha?.get(faceIdx) ?: 0.toByte()
-model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
+                val faceAlpha = facesAlpha?.get(faceIdx) ?: 0.toByte()
+                model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, faceAlpha)
             }
             val useSlot = slotColorEnabled
             val rgbaA = if (useSlot && idxA < slotCount && slotStamp[idxA] == stamp) slotColor[idxA] else { if (useSlot) unwrittenSlotFaces++; faceRgba }
@@ -4595,7 +4595,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
     private var modelCullChecks = 0L
     private var modelCullBad = 0L
 
-    private fun verifyModelCull(model: ModelGL, m: Matrix43, vp: FloatArray) {
+    private fun verifyModelCull(model: ModelGL, modelMatrix: Matrix43, vp: FloatArray) {
         // A model with no drawn faces has degenerate bounds and paints nothing, so
         // whether it is culled is unobservable. Counting them only buries real hits.
         if (model.renderedFaceCount <= 0) return
@@ -4611,9 +4611,9 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
             val lx = if (corner and 1 == 0) minX else maxX
             val ly = if (corner and 2 == 0) minY else maxY
             val lz = if (corner and 4 == 0) minZ else maxZ
-            val wx = lx * m.xA + ly * m.xB + lz * m.xC + m.xD
-            val wy = lx * m.yA + ly * m.yB + lz * m.yC + m.yD
-            val wz = lx * m.zA + ly * m.zB + lz * m.zC + m.zD
+            val wx = lx * modelMatrix.xA + ly * modelMatrix.xB + lz * modelMatrix.xC + modelMatrix.xD
+            val wy = lx * modelMatrix.yA + ly * modelMatrix.yB + lz * modelMatrix.yC + modelMatrix.yD
+            val wz = lx * modelMatrix.zA + ly * modelMatrix.zB + lz * modelMatrix.zC + modelMatrix.zD
             val cx = vp[12] + vp[0] * wx + vp[4] * wy + vp[8] * wz
             val cy = vp[13] + vp[1] * wx + vp[5] * wy + vp[9] * wz
             val cz = vp[14] + vp[2] * wx + vp[6] * wy + vp[10] * wz
@@ -4629,7 +4629,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
             modelCullBad++
             if (modelCullBad <= 15) System.err.println(
                 "[CullVerify] model culled but its AABB is inside the frustum: " +
-                    "faces=${model.renderedFaceCount} origin=(${m.xD}, ${m.yD}, ${m.zD})")
+                    "faces=${model.renderedFaceCount} origin=(${modelMatrix.xD}, ${modelMatrix.yD}, ${modelMatrix.zD})")
         }
     }
 
@@ -4741,7 +4741,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
 
     /**
      * Renders ground material using the modern pipeline.
-     * Called from GroundMaterialGL.method12085 when using ModernGLToolkit.
+     * Called from GroundMaterialGL.drawMaterialTriangles when using ModernGLToolkit.
      *
      * This method renders textured ground tiles through the modern shader
      * by reusing the legacy VBOs that GroundGL has already populated.
@@ -4750,7 +4750,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
      * @param ground The GroundGL containing vertex/normal/texcoord buffers
      * @param tileIndices Array of tile indices to render
      * @param tileCount Number of tiles to render
-     * @param functionMask Per-tile function mask for face selection
+     * @param tileFunctionMasks Per-tile function mask for face selection
      * @param materialId The material ID for texture lookup
      * @param textureScale Texture coordinate scale factor
      * @param hasNormals Whether HD lighting normals are present
@@ -4821,12 +4821,12 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         ground: GroundGL,
         tileIndices: IntArray,
         tileCount: Int,
-        functionMask: IntArray,
+        tileFunctionMasks: IntArray,
         materialId: Int,
         textureScale: Float,
         hasNormals: Boolean
     ): Boolean {
-        val groundT0 = System.nanoTime()
+        val groundStartNs = System.nanoTime()
         try {
         diagGroundCalls++
         val gr = groundRenderer ?: return false
@@ -4865,7 +4865,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         for (i in 0 until tileCount) {
             val tileIdx = tileIndices[i]
             val materialsByTriangle = ground.materialIndices[tileIdx]
-            val tileMask = functionMask[tileIdx]
+            val tileMask = tileFunctionMasks[tileIdx]
 
             if (tileMask != 0 && materialsByTriangle != null) {
                 // The overwhelmingly common case is a tile whose triangles all belong
@@ -4876,10 +4876,10 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
                     System.arraycopy(materialsByTriangle, 0, indexArray, indexCount, materialsByTriangle.size)
                     indexCount += materialsByTriangle.size
                 } else {
-                    var loopIdx = 0
+                    var triIdx = 0
                     var vertIdx = 0
                     while (vertIdx < materialsByTriangle.size) {
-                        if ((tileMask and (1 shl loopIdx++)) != 0) {
+                        if ((tileMask and (1 shl triIdx++)) != 0) {
                             indexArray[indexCount++] = materialsByTriangle[vertIdx++]
                             indexArray[indexCount++] = materialsByTriangle[vertIdx++]
                             indexArray[indexCount++] = materialsByTriangle[vertIdx++]
@@ -4973,7 +4973,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         currentElementsBuffer = null
         return true
         } finally {
-            phaseGroundNs += System.nanoTime() - groundT0
+            phaseGroundNs += System.nanoTime() - groundStartNs
             phaseGroundCalls++
         }
     }

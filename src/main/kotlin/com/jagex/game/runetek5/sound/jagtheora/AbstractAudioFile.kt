@@ -17,5 +17,5 @@ abstract class AbstractAudioFile : AudioNode() {
 
     abstract fun getTotalSamples(): Int
 
-    abstract fun getStream(var1: Int, var2: Int, var3: Int): AreaSoundStream
+    abstract fun getStream(sampleRate: Int, volume: Int, pan: Int): AreaSoundStream
 }

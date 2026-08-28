@@ -73,7 +73,7 @@ class RasterizerSM(
         xA: Int,
         xB: Int,
         depth: Float,
-        depthOffset: Float
+        slopeDepth: Float
     ) {
         var bufferOffset = bufferOffset
         var color = color
@@ -92,7 +92,7 @@ class RasterizerSM(
         if (xA < xB) {
             bufferOffset += xA - 1
             x = xB - xA shr 2
-            depth += depthOffset * xA
+            depth += slopeDepth * xA
             val depthBuf = depthBuffer!!
             if (threadResource.zbuffering) {
                 if (blendingAlpha == 0) {
@@ -106,7 +106,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             if (colorWrite) {
@@ -116,7 +116,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             if (colorWrite) {
@@ -126,7 +126,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             if (colorWrite) {
@@ -136,7 +136,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     x = xB - xA and 0x3
                     while (--x >= 0) {
@@ -149,7 +149,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     return
                 }
@@ -172,7 +172,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             if (colorWrite) {
@@ -187,7 +187,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             if (colorWrite) {
@@ -202,7 +202,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             if (colorWrite) {
@@ -217,7 +217,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     x = xB - xA and 0x3
                     while (--x >= 0) {
@@ -235,7 +235,7 @@ class RasterizerSM(
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     return
                 }
@@ -245,22 +245,22 @@ class RasterizerSM(
                         if ((!depthWrite || depth < depthBuf[bufferOffset]) && colorWrite) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if ((!depthWrite || depth < depthBuf[bufferOffset]) && colorWrite) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if ((!depthWrite || depth < depthBuf[bufferOffset]) && colorWrite) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if ((!depthWrite || depth < depthBuf[bufferOffset]) && colorWrite) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     x = xB - xA and 0x3
                     while (--x >= 0) {
@@ -268,7 +268,7 @@ class RasterizerSM(
                         if ((!depthWrite || depth < depthBuf[bufferOffset]) && colorWrite) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                 }
             } else if (colorWrite) {
@@ -278,22 +278,22 @@ class RasterizerSM(
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset] = color
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset] = color
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset] = color
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset] = color
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     x = xB - xA and 0x3
                     while (--x >= 0) {
@@ -301,7 +301,7 @@ class RasterizerSM(
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset] = color
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     return
                 }
@@ -319,7 +319,7 @@ class RasterizerSM(
                                 pixels[bufferOffset] = ((pixel and 0xFF00FF) * alpha shr 8 and 0xFF00FF) + (alpha * (pixel and 0xFF00) shr 8 and 0xFF00) + color
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
@@ -329,7 +329,7 @@ class RasterizerSM(
                                 pixels[bufferOffset] = ((pixel and 0xFF00FF) * alpha shr 8 and 0xFF00FF) + (alpha * (pixel and 0xFF00) shr 8 and 0xFF00) + color
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
@@ -339,7 +339,7 @@ class RasterizerSM(
                                 pixels[bufferOffset] = ((pixel and 0xFF00FF) * alpha shr 8 and 0xFF00FF) + (alpha * (pixel and 0xFF00) shr 8 and 0xFF00) + color
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
@@ -349,7 +349,7 @@ class RasterizerSM(
                                 pixels[bufferOffset] = ((pixel and 0xFF00FF) * alpha shr 8 and 0xFF00FF) + (alpha * (pixel and 0xFF00) shr 8 and 0xFF00) + color
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     x = xB - xA and 0x3
                     while (--x >= 0) {
@@ -362,7 +362,7 @@ class RasterizerSM(
                                 pixels[bufferOffset] = ((pixel and 0xFF00FF) * alpha shr 8 and 0xFF00FF) + (alpha * (pixel and 0xFF00) shr 8 and 0xFF00) + color
                             }
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     return
                 }
@@ -372,22 +372,22 @@ class RasterizerSM(
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                         bufferOffset++
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                     x = xB - xA and 0x3
                     while (--x >= 0) {
@@ -395,7 +395,7 @@ class RasterizerSM(
                         if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             pixels[bufferOffset - 1] = pixels[bufferOffset]
                         }
-                        depth += depthOffset
+                        depth += slopeDepth
                     }
                 }
             }
@@ -519,8 +519,8 @@ class RasterizerSM(
             if (texturePixelsA == null) {
                 blendingAlpha = 255 - (floorColorA shr 24 and 0xff)
                 val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialA)).toInt() and 0xffff]
-                val tmp2 = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
-                drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC))
+                val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
+                drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                 return
             }
 
@@ -536,8 +536,8 @@ class RasterizerSM(
             if (texturePixelsB == null) {
                 blendingAlpha = 255 - (floorColorA shr 24 and 0xff)
                 val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialB)).toInt() and 0xffff]
-                val tmp2 = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
-                drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC))
+                val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
+                drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                 return
             }
 
@@ -552,8 +552,8 @@ class RasterizerSM(
             if (texturePixelsC == null) {
                 blendingAlpha = 255 - (floorColorA shr 24 and 0xff)
                 val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialC)).toInt() and 0xffff]
-                val tmp2 = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
-                drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC))
+                val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
+                drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                 return
             }
 
@@ -1045,7 +1045,7 @@ class RasterizerSM(
     }
 
     fun drawScanline(
-        writeDepth: Boolean, transparent: Boolean,
+        depthWrite: Boolean, transparent: Boolean,
         pixels: IntArray, bufferOffset: Int,
         xA: Int, xB: Int,
         depth: Float, slopeDepth: Float,
@@ -1159,29 +1159,29 @@ class RasterizerSM(
                                 green += slopeGreen
                                 blue += slopeBlue
                                 invertedAlpha = bufferOffset++
-                                var i_21 = pixels[invertedAlpha]
-                                var i_20 = colorRgb + i_21
-                                var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                pixels[invertedAlpha] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                i_20 = bufferOffset++
-                                var i_23 = pixels[i_20]
-                                var i_24 = colorRgb + i_23
-                                var i_25 = (i_23 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                i_23 = (i_25 and 0x1000100) + (i_24 - i_25 and 0x10000)
-                                pixels[i_20] = 0xff000000.toInt() or (i_24 - i_23) or (i_23 - (i_23 ushr 8))
-                                i_24 = bufferOffset++
-                                var i_26 = pixels[i_24]
-                                var i_27 = colorRgb + i_26
-                                var i_28 = (i_26 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                i_26 = (i_28 and 0x1000100) + (i_27 - i_28 and 0x10000)
-                                pixels[i_24] = 0xff000000.toInt() or (i_27 - i_26) or (i_26 - (i_26 ushr 8))
-                                i_27 = bufferOffset++
-                                var i_29 = pixels[i_27]
-                                var i_30 = colorRgb + i_29
-                                var i_31 = (i_29 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                i_29 = (i_31 and 0x1000100) + (i_30 - i_31 and 0x10000)
-                                pixels[i_27] = 0xff000000.toInt() or (i_30 - i_29) or (i_29 - (i_29 ushr 8))
+                                var currentPixel0 = pixels[invertedAlpha]
+                                var pixelSum0 = colorRgb + currentPixel0
+                                var channelSum0 = (currentPixel0 and 0xff00ff) + (colorRgb and 0xff00ff)
+                                currentPixel0 = (channelSum0 and 0x1000100) + (pixelSum0 - channelSum0 and 0x10000)
+                                pixels[invertedAlpha] = 0xff000000.toInt() or (pixelSum0 - currentPixel0) or (currentPixel0 - (currentPixel0 ushr 8))
+                                pixelSum0 = bufferOffset++
+                                var currentPixel1 = pixels[pixelSum0]
+                                var pixelSum1 = colorRgb + currentPixel1
+                                var channelSum1 = (currentPixel1 and 0xff00ff) + (colorRgb and 0xff00ff)
+                                currentPixel1 = (channelSum1 and 0x1000100) + (pixelSum1 - channelSum1 and 0x10000)
+                                pixels[pixelSum0] = 0xff000000.toInt() or (pixelSum1 - currentPixel1) or (currentPixel1 - (currentPixel1 ushr 8))
+                                pixelSum1 = bufferOffset++
+                                var currentPixel2 = pixels[pixelSum1]
+                                var pixelSum2 = colorRgb + currentPixel2
+                                var channelSum2 = (currentPixel2 and 0xff00ff) + (colorRgb and 0xff00ff)
+                                currentPixel2 = (channelSum2 and 0x1000100) + (pixelSum2 - channelSum2 and 0x10000)
+                                pixels[pixelSum1] = 0xff000000.toInt() or (pixelSum2 - currentPixel2) or (currentPixel2 - (currentPixel2 ushr 8))
+                                pixelSum2 = bufferOffset++
+                                var currentPixel3 = pixels[pixelSum2]
+                                var pixelSum3 = colorRgb + currentPixel3
+                                var channelSum3 = (currentPixel3 and 0xff00ff) + (colorRgb and 0xff00ff)
+                                currentPixel3 = (channelSum3 and 0x1000100) + (pixelSum3 - channelSum3 and 0x10000)
+                                pixels[pixelSum2] = 0xff000000.toInt() or (pixelSum3 - currentPixel3) or (currentPixel3 - (currentPixel3 ushr 8))
                             } while (--x > 0)
                         }
                         x = xB - xA and 0x3
@@ -1189,11 +1189,11 @@ class RasterizerSM(
                             colorRgb = (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                             do {
                                 invertedAlpha = bufferOffset++
-                                var i_21 = pixels[invertedAlpha]
-                                var i_20 = colorRgb + i_21
-                                var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                pixels[invertedAlpha] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                                var currentPixel = pixels[invertedAlpha]
+                                var pixelSum = colorRgb + currentPixel
+                                var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                pixels[invertedAlpha] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                             } while (--x > 0)
                         }
                     }
@@ -1226,11 +1226,11 @@ class RasterizerSM(
                         do {
                             invertedAlpha = bufferOffset++
                             pixel = (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
-                            var i_21 = pixels[invertedAlpha]
-                            var i_20 = pixel + i_21
-                            var i_22 = (pixel and 0xff00ff) + (i_21 and 0xff00ff)
-                            i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                            pixels[invertedAlpha] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                            var currentPixel = pixels[invertedAlpha]
+                            var pixelSum = pixel + currentPixel
+                            var channelSum = (pixel and 0xff00ff) + (currentPixel and 0xff00ff)
+                            currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                            pixels[invertedAlpha] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                             red += slopeRed
                             green += slopeGreen
                             blue += slopeBlue
@@ -1257,33 +1257,33 @@ class RasterizerSM(
                                     green += slopeGreen
                                     blue += slopeBlue
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixels[bufferOffset] = colorRgb
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixels[bufferOffset] = colorRgb
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixels[bufferOffset] = colorRgb
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixels[bufferOffset] = colorRgb
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1295,9 +1295,9 @@ class RasterizerSM(
                                 colorRgb = 0xff000000.toInt() or (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                                 do {
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixels[bufferOffset] = colorRgb
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1315,53 +1315,53 @@ class RasterizerSM(
                                     blue += slopeBlue
                                     colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + ((colorRgb and 0xff00) * invertedAlpha shr 8 and 0xff00)
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixel = pixels[bufferOffset]
                                         if (transparent) {
                                             pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                         } else {
                                             pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                         }
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixel = pixels[bufferOffset]
                                         if (transparent) {
                                             pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                         } else {
                                             pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                         }
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixel = pixels[bufferOffset]
                                         if (transparent) {
                                             pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                         } else {
                                             pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                         }
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixel = pixels[bufferOffset]
                                         if (transparent) {
                                             pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                         } else {
                                             pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                         }
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1374,14 +1374,14 @@ class RasterizerSM(
                                 colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + ((colorRgb and 0xff00) * invertedAlpha shr 8 and 0xff00)
                                 do {
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixel = pixels[bufferOffset]
                                         if (transparent) {
                                             pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                         } else {
                                             pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                         }
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1396,49 +1396,49 @@ class RasterizerSM(
                                     green += slopeGreen
                                     blue += slopeBlue
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                        var i_21 = pixels[bufferOffset]
-                                        var i_20 = colorRgb + i_21
-                                        var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                        i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                        pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                        if (writeDepth) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                        var currentPixel = pixels[bufferOffset]
+                                        var pixelSum = colorRgb + currentPixel
+                                        var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                        currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                        pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                        var i_21 = pixels[bufferOffset]
-                                        var i_20 = colorRgb + i_21
-                                        var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                        i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                        pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                        if (writeDepth) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                        var currentPixel = pixels[bufferOffset]
+                                        var pixelSum = colorRgb + currentPixel
+                                        var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                        currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                        pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                        var i_21 = pixels[bufferOffset]
-                                        var i_20 = colorRgb + i_21
-                                        var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                        i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                        pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                        if (writeDepth) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                        var currentPixel = pixels[bufferOffset]
+                                        var pixelSum = colorRgb + currentPixel
+                                        var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                        currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                        pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
                                     depth += slopeDepth
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                        var i_21 = pixels[bufferOffset]
-                                        var i_20 = colorRgb + i_21
-                                        var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                        i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                        pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                        if (writeDepth) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                        var currentPixel = pixels[bufferOffset]
+                                        var pixelSum = colorRgb + currentPixel
+                                        var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                        currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                        pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1450,13 +1450,13 @@ class RasterizerSM(
                                 colorRgb = (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                                 do {
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                        var i_21 = pixels[bufferOffset]
-                                        var i_20 = colorRgb + i_21
-                                        var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                        i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                        pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                        if (writeDepth) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                        var currentPixel = pixels[bufferOffset]
+                                        var pixelSum = colorRgb + currentPixel
+                                        var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                        currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                        pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1470,14 +1470,14 @@ class RasterizerSM(
                             if (blending) {
                                 do {
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         pixel = (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
-                                        var i_21 = pixels[bufferOffset]
-                                        var i_20 = pixel + i_21
-                                        var i_22 = (pixel and 0xff00ff) + (i_21 and 0xff00ff)
-                                        i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                        pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
-                                        if (writeDepth) {
+                                        var currentPixel = pixels[bufferOffset]
+                                        var pixelSum = pixel + currentPixel
+                                        var channelSum = (pixel and 0xff00ff) + (currentPixel and 0xff00ff)
+                                        currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                        pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1491,7 +1491,7 @@ class RasterizerSM(
                                 invertedAlpha = 256 - blendingAlpha
                                 do {
                                     bufferOffset++
-                                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                         colorRgb = 0xff000000.toInt() or (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                                         colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + ((colorRgb and 0xff00) * invertedAlpha shr 8 and 0xff00)
                                         pixel = pixels[bufferOffset]
@@ -1501,7 +1501,7 @@ class RasterizerSM(
                                             pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                         }
 
-                                        if (writeDepth) {
+                                        if (depthWrite) {
                                             depthBuf[bufferOffset] = depth
                                         }
                                     }
@@ -1514,9 +1514,9 @@ class RasterizerSM(
                         } else {
                             do {
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixels[bufferOffset] = 0xff000000.toInt() or (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
-                                    if (writeDepth) {
+                                    if (depthWrite) {
                                         depthBuf[bufferOffset] = depth
                                     }
                                 }
@@ -1540,22 +1540,22 @@ class RasterizerSM(
                                 green += slopeGreen
                                 blue += slopeBlue
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixels[bufferOffset] = colorRgb
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixels[bufferOffset] = colorRgb
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixels[bufferOffset] = colorRgb
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixels[bufferOffset] = colorRgb
                                 }
                                 depth += slopeDepth
@@ -1566,7 +1566,7 @@ class RasterizerSM(
                             colorRgb = 0xff000000.toInt() or (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                             do {
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixels[bufferOffset] = colorRgb
                                 }
                                 depth += slopeDepth
@@ -1583,7 +1583,7 @@ class RasterizerSM(
                                 blue += slopeBlue
                                 colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + ((colorRgb and 0xff00) * invertedAlpha shr 8 and 0xff00)
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixel = pixels[bufferOffset]
                                     if (transparent) {
                                         pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
@@ -1593,7 +1593,7 @@ class RasterizerSM(
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixel = pixels[bufferOffset]
                                     if (transparent) {
                                         pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
@@ -1603,7 +1603,7 @@ class RasterizerSM(
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixel = pixels[bufferOffset]
                                     if (transparent) {
                                         pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
@@ -1613,7 +1613,7 @@ class RasterizerSM(
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixel = pixels[bufferOffset]
                                     if (transparent) {
                                         pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
@@ -1630,7 +1630,7 @@ class RasterizerSM(
                             colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + ((colorRgb and 0xff00) * invertedAlpha shr 8 and 0xff00)
                             do {
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixel = pixels[bufferOffset]
                                     if (transparent) {
                                         pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
@@ -1649,39 +1649,39 @@ class RasterizerSM(
                                 green += slopeGreen
                                 blue += slopeBlue
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                    var i_21 = pixels[bufferOffset]
-                                    var i_20 = colorRgb + i_21
-                                    var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                    i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                    pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                    var currentPixel = pixels[bufferOffset]
+                                    var pixelSum = colorRgb + currentPixel
+                                    var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                    currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                    pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                    var i_21 = pixels[bufferOffset]
-                                    var i_20 = colorRgb + i_21
-                                    var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                    i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                    pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                    var currentPixel = pixels[bufferOffset]
+                                    var pixelSum = colorRgb + currentPixel
+                                    var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                    currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                    pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                    var i_21 = pixels[bufferOffset]
-                                    var i_20 = colorRgb + i_21
-                                    var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                    i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                    pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                    var currentPixel = pixels[bufferOffset]
+                                    var pixelSum = colorRgb + currentPixel
+                                    var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                    currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                    pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                                 }
                                 depth += slopeDepth
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                    var i_21 = pixels[bufferOffset]
-                                    var i_20 = colorRgb + i_21
-                                    var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                    i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                    pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                    var currentPixel = pixels[bufferOffset]
+                                    var pixelSum = colorRgb + currentPixel
+                                    var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                    currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                    pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                                 }
                                 depth += slopeDepth
                             } while (--x > 0)
@@ -1691,12 +1691,12 @@ class RasterizerSM(
                             colorRgb = (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                             do {
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                    var i_21 = pixels[bufferOffset]
-                                    var i_20 = colorRgb + i_21
-                                    var i_22 = (i_21 and 0xff00ff) + (colorRgb and 0xff00ff)
-                                    i_21 = (i_22 and 0x1000100) + (i_20 - i_22 and 0x10000)
-                                    pixels[bufferOffset] = 0xff000000.toInt() or (i_20 - i_21) or (i_21 - (i_21 ushr 8))
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                    var currentPixel = pixels[bufferOffset]
+                                    var pixelSum = colorRgb + currentPixel
+                                    var channelSum = (currentPixel and 0xff00ff) + (colorRgb and 0xff00ff)
+                                    currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
+                                    pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                                 }
                                 depth += slopeDepth
                             } while (--x > 0)
@@ -1708,12 +1708,12 @@ class RasterizerSM(
                         if (blending) {
                             do {
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     pixel = (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                                     var currentPixel = pixels[bufferOffset]
                                     var pixelSum = pixel + currentPixel
-                                    var i_22 = (pixel and 0xff00ff) + (currentPixel and 0xff00ff)
-                                    currentPixel = (i_22 and 0x1000100) + (pixelSum - i_22 and 0x10000)
+                                    var channelSum = (pixel and 0xff00ff) + (currentPixel and 0xff00ff)
+                                    currentPixel = (channelSum and 0x1000100) + (pixelSum - channelSum and 0x10000)
                                     pixels[bufferOffset] = 0xff000000.toInt() or (pixelSum - currentPixel) or (currentPixel - (currentPixel ushr 8))
                                 }
                                 depth += slopeDepth
@@ -1726,7 +1726,7 @@ class RasterizerSM(
                             invertedAlpha = 256 - blendingAlpha
                             do {
                                 bufferOffset++
-                                if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                                if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                     colorRgb = 0xff000000.toInt() or (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                                     colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + ((colorRgb and 0xff00) * invertedAlpha shr 8 and 0xff00)
                                     pixel = pixels[bufferOffset]
@@ -1745,7 +1745,7 @@ class RasterizerSM(
                     } else {
                         do {
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                 pixels[bufferOffset] = 0xff000000.toInt() or (red.toInt() and 0xff0000) or (green.toInt() and 0xff00) or (blue.toInt() and 0xff)
                             }
                             depth += slopeDepth
@@ -1803,9 +1803,9 @@ class RasterizerSM(
                 texturePixelsA = safemodeToolkit.getAnimatedMaterialArgb(materialId)
                 if (texturePixelsA == null) {
                     blendingAlpha = 255 - (colorA shr 24 and 0xff)
-                    val materialARgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialId)).toInt() and 0xffff]
-                    val centerColour = 0xff000000.toInt() or (materialARgb shr 16 and 0xff) * (colorA shr 16 and 0xff) shl 8 and 0xff0000 or (colorA shr 8 and 0xff) * (materialARgb shr 8 and 0xff) and 0xff00 or (materialARgb and 0xff) * (colorA and 0xff) shr 8
-                    drawTriangle(true, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityC))
+                    val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialId)).toInt() and 0xffff]
+                    val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (colorA shr 16 and 0xff) shl 8 and 0xff0000 or (colorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (colorA and 0xff) shr 8
+                    drawTriangle(true, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                     return
                 }
                 textureSizeA = if (safemodeToolkit.isSmallTexture(materialId)) 64 else safemodeToolkit.materialSize
@@ -1816,55 +1816,55 @@ class RasterizerSM(
             fogColour = fogColor
             if (yA > yB || yA > yC) {
                 if (yB <= yC) {
-                    var tmp1 = xA
+                    var tmpFloat = xA
                     xA = xB
-                    xB = tmp1
-                    tmp1 = yA
+                    xB = tmpFloat
+                    tmpFloat = yA
                     yA = yB
-                    yB = tmp1
-                    tmp1 = zNearA
+                    yB = tmpFloat
+                    tmpFloat = zNearA
                     zNearA = zNearB
-                    zNearB = tmp1
-                    tmp1 = uA
+                    zNearB = tmpFloat
+                    tmpFloat = uA
                     uA = uB
-                    uB = tmp1
-                    tmp1 = vA
+                    uB = tmpFloat
+                    tmpFloat = vA
                     vA = vB
-                    vB = tmp1
-                    tmp1 = zFarA
+                    vB = tmpFloat
+                    tmpFloat = zFarA
                     zFarA = zFarB
-                    zFarB = tmp1
-                    tmp1 = fogDensityA
+                    zFarB = tmpFloat
+                    tmpFloat = fogDensityA
                     fogDensityA = fogDensityB
-                    fogDensityB = tmp1
-                    var tmp2 = colorA
+                    fogDensityB = tmpFloat
+                    var tmpInt = colorA
                     colorA = colorB
-                    colorB = tmp2
+                    colorB = tmpInt
                 } else {
-                    var tmp1 = xA
+                    var tmpFloat = xA
                     xA = xC
-                    xC = tmp1
-                    tmp1 = yA
+                    xC = tmpFloat
+                    tmpFloat = yA
                     yA = yC
-                    yC = tmp1
-                    tmp1 = zNearA
+                    yC = tmpFloat
+                    tmpFloat = zNearA
                     zNearA = zNearC
-                    zNearC = tmp1
-                    tmp1 = uA
+                    zNearC = tmpFloat
+                    tmpFloat = uA
                     uA = uC
-                    uC = tmp1
-                    tmp1 = vA
+                    uC = tmpFloat
+                    tmpFloat = vA
                     vA = vC
-                    vC = tmp1
-                    tmp1 = zFarA
+                    vC = tmpFloat
+                    tmpFloat = zFarA
                     zFarA = zFarC
-                    zFarC = tmp1
-                    tmp1 = fogDensityA
+                    zFarC = tmpFloat
+                    tmpFloat = fogDensityA
                     fogDensityA = fogDensityC
-                    fogDensityC = tmp1
-                    var tmp = colorA
+                    fogDensityC = tmpFloat
+                    var tmpInt = colorA
                     colorA = colorC
-                    colorC = tmp
+                    colorC = tmpInt
                 }
             }
             uA /= zFarA
@@ -1892,8 +1892,8 @@ class RasterizerSM(
             var colorBBlue = (colorB and 0xff).toFloat()
             var colorCBlue = (colorC and 0xff).toFloat()
             var slopeXBa = 0.0f
-            var slopeZnearBa = 0.0f
-            var slopeZfarBa = 0.0f
+            var slopeZNearBa = 0.0f
+            var slopeZFarBa = 0.0f
             var slopeUBa = 0.0f
             var slopeVBa = 0.0f
             var slopeFogDensityBa = 0.0f
@@ -1904,8 +1904,8 @@ class RasterizerSM(
             if (yB != yA) {
                 val lengthDeltaYAb = yB - yA
                 slopeXBa = (xB - xA) / lengthDeltaYAb
-                slopeZnearBa = (zNearB - zNearA) / lengthDeltaYAb
-                slopeZfarBa = (zFarB - zFarA) / lengthDeltaYAb
+                slopeZNearBa = (zNearB - zNearA) / lengthDeltaYAb
+                slopeZFarBa = (zFarB - zFarA) / lengthDeltaYAb
                 slopeUBa = (uB - uA) / lengthDeltaYAb
                 slopeVBa = (vB - vA) / lengthDeltaYAb
                 slopeFogDensityBa = (fogDensityB - fogDensityA) / lengthDeltaYAb
@@ -1915,8 +1915,8 @@ class RasterizerSM(
                 slopeBlueBa = (colorBBlue - colorABlue) / lengthDeltaYAb
             }
             var slopeXCb = 0.0f
-            var slopeZnearCb = 0.0f
-            var slopeZfarCb = 0.0f
+            var slopeZNearCb = 0.0f
+            var slopeZFarCb = 0.0f
             var slopeUCb = 0.0f
             var slopeVCb = 0.0f
             var slopeFogDensityCb = 0.0f
@@ -1927,8 +1927,8 @@ class RasterizerSM(
             if (yC != yB) {
                 val lengthDeltaYCb = yC - yB
                 slopeXCb = (xC - xB) / lengthDeltaYCb
-                slopeZnearCb = (zNearC - zNearB) / lengthDeltaYCb
-                slopeZfarCb = (zFarC - zFarB) / lengthDeltaYCb
+                slopeZNearCb = (zNearC - zNearB) / lengthDeltaYCb
+                slopeZFarCb = (zFarC - zFarB) / lengthDeltaYCb
                 slopeUCb = (uC - uB) / lengthDeltaYCb
                 slopeVCb = (vC - vB) / lengthDeltaYCb
                 slopeFogDensityCb = (fogDensityC - fogDensityB) / lengthDeltaYCb
@@ -1938,8 +1938,8 @@ class RasterizerSM(
                 slopeBlueCb = (colorCBlue - colorBBlue) / lengthDeltaYCb
             }
             var slopeXAc = 0.0f
-            var slopeZnearAc = 0.0f
-            var slopeZfarAc = 0.0f
+            var slopeZNearAc = 0.0f
+            var slopeZFarAc = 0.0f
             var slopeUAc = 0.0f
             var slopeVAc = 0.0f
             var slopeFogDensityAc = 0.0f
@@ -1950,8 +1950,8 @@ class RasterizerSM(
             if (yA != yC) {
                 val lengthDeltaYAc = yA - yC
                 slopeXAc = (xA - xC) / lengthDeltaYAc
-                slopeZnearAc = (zNearA - zNearC) / lengthDeltaYAc
-                slopeZfarAc = (zFarA - zFarC) / lengthDeltaYAc
+                slopeZNearAc = (zNearA - zNearC) / lengthDeltaYAc
+                slopeZFarAc = (zFarA - zFarC) / lengthDeltaYAc
                 slopeUAc = (uA - uC) / lengthDeltaYAc
                 slopeVAc = (vA - vC) / lengthDeltaYAc
                 slopeFogDensityAc = (fogDensityA - fogDensityC) / lengthDeltaYAc
@@ -1981,10 +1981,10 @@ class RasterizerSM(
                     if (yA < 0.0f) {
                         xA -= slopeXBa * yA
                         xC -= slopeXAc * yA
-                        zNearA -= slopeZnearBa * yA
-                        zNearC -= slopeZnearAc * yA
-                        zFarA -= slopeZfarBa * yA
-                        zFarC -= slopeZfarAc * yA
+                        zNearA -= slopeZNearBa * yA
+                        zNearC -= slopeZNearAc * yA
+                        zFarA -= slopeZFarBa * yA
+                        zFarC -= slopeZFarAc * yA
                         uA -= slopeUBa * yA
                         uC -= slopeUAc * yA
                         vA -= slopeVBa * yA
@@ -2003,8 +2003,8 @@ class RasterizerSM(
                     }
                     if (yB < 0.0f) {
                         xB -= slopeXCb * yB
-                        zNearB -= slopeZnearCb * yB
-                        zFarB -= slopeZfarCb * yB
+                        zNearB -= slopeZNearCb * yB
+                        zFarB -= slopeZFarCb * yB
                         uB -= slopeUCb * yB
                         vB -= slopeVCb * yB
                         fogDensityB -= slopeFogDensityCb * yB
@@ -2024,10 +2024,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xC.toInt(), xA.toInt(), zNearC, zNearA, zFarC, zFarA, uC, uA, vC, vA, fogDensityC, fogDensityA, colorCAlpha, colorAAlpha, colorCRed, colorARed, colorCGreen, colorAGreen, colorCBlue, colorABlue)
                             xA += slopeXBa
                             xC += slopeXAc
-                            zNearA += slopeZnearBa
-                            zNearC += slopeZnearAc
-                            zFarA += slopeZfarBa
-                            zFarC += slopeZfarAc
+                            zNearA += slopeZNearBa
+                            zNearC += slopeZNearAc
+                            zFarA += slopeZFarBa
+                            zFarC += slopeZFarAc
                             uA += slopeUBa
                             uC += slopeUAc
                             vA += slopeVBa
@@ -2048,10 +2048,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xC.toInt(), xB.toInt(), zNearC, zNearB, zFarC, zFarB, uC, uB, vC, vB, fogDensityC, fogDensityB, colorCAlpha, colorBAlpha, colorCRed, colorBRed, colorCGreen, colorBGreen, colorCBlue, colorBBlue)
                             xB += slopeXCb
                             xC += slopeXAc
-                            zNearB += slopeZnearCb
-                            zNearC += slopeZnearAc
-                            zFarB += slopeZfarCb
-                            zFarC += slopeZfarAc
+                            zNearB += slopeZNearCb
+                            zNearC += slopeZNearAc
+                            zFarB += slopeZFarCb
+                            zFarC += slopeZFarAc
                             uB += slopeUCb
                             uC += slopeUAc
                             vB += slopeVCb
@@ -2078,10 +2078,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xA.toInt(), xC.toInt(), zNearA, zNearC, zFarA, zFarC, uA, uC, vA, vC, fogDensityA, fogDensityC, colorAAlpha, colorCAlpha, colorARed, colorCRed, colorAGreen, colorCGreen, colorABlue, colorCBlue)
                             xA += slopeXBa
                             xC += slopeXAc
-                            zNearA += slopeZnearBa
-                            zNearC += slopeZnearAc
-                            zFarA += slopeZfarBa
-                            zFarC += slopeZfarAc
+                            zNearA += slopeZNearBa
+                            zNearC += slopeZNearAc
+                            zFarA += slopeZFarBa
+                            zFarC += slopeZFarAc
                             uA += slopeUBa
                             uC += slopeUAc
                             vA += slopeVBa
@@ -2102,10 +2102,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xB.toInt(), xC.toInt(), zNearB, zNearC, zFarB, zFarC, uB, uC, vB, vC, fogDensityB, fogDensityC, colorBAlpha, colorCAlpha, colorBRed, colorCRed, colorBGreen, colorCGreen, colorBBlue, colorCBlue)
                             xB += slopeXCb
                             xC += slopeXAc
-                            zNearB += slopeZnearCb
-                            zNearC += slopeZnearAc
-                            zFarB += slopeZfarCb
-                            zFarC += slopeZfarAc
+                            zNearB += slopeZNearCb
+                            zNearC += slopeZNearAc
+                            zFarB += slopeZFarCb
+                            zFarC += slopeZFarAc
                             uB += slopeUCb
                             uC += slopeUAc
                             vB += slopeVCb
@@ -2137,10 +2137,10 @@ class RasterizerSM(
                     if (yA < 0.0f) {
                         xA -= slopeXBa * yA
                         xB -= slopeXAc * yA
-                        zNearA -= slopeZnearBa * yA
-                        zNearB -= slopeZnearAc * yA
-                        zFarA -= slopeZfarBa * yA
-                        zFarB -= slopeZfarAc * yA
+                        zNearA -= slopeZNearBa * yA
+                        zNearB -= slopeZNearAc * yA
+                        zFarA -= slopeZFarBa * yA
+                        zFarB -= slopeZFarAc * yA
                         uA -= slopeUBa * yA
                         uB -= slopeUAc * yA
                         vA -= slopeVBa * yA
@@ -2159,8 +2159,8 @@ class RasterizerSM(
                     }
                     if (yC < 0.0f) {
                         xC -= slopeXCb * yC
-                        zNearC -= slopeZnearCb * yC
-                        zFarC -= slopeZfarCb * yC
+                        zNearC -= slopeZNearCb * yC
+                        zFarC -= slopeZFarCb * yC
                         uC -= slopeUCb * yC
                         vC -= slopeVCb * yC
                         fogDensityC -= slopeFogDensityCb * yC
@@ -2180,10 +2180,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xA.toInt(), xB.toInt(), zNearA, zNearB, zFarA, zFarB, uA, uB, vA, vB, fogDensityA, fogDensityB, colorAAlpha, colorBAlpha, colorARed, colorBRed, colorAGreen, colorBGreen, colorABlue, colorBBlue)
                             xB += slopeXAc
                             xA += slopeXBa
-                            zNearB += slopeZnearAc
-                            zNearA += slopeZnearBa
-                            zFarB += slopeZfarAc
-                            zFarA += slopeZfarBa
+                            zNearB += slopeZNearAc
+                            zNearA += slopeZNearBa
+                            zFarB += slopeZFarAc
+                            zFarA += slopeZFarBa
                             uB += slopeUAc
                             uA += slopeUBa
                             vB += slopeVAc
@@ -2204,10 +2204,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xA.toInt(), xC.toInt(), zNearA, zNearC, zFarA, zFarC, uA, uC, vA, vC, fogDensityA, fogDensityC, colorAAlpha, colorCAlpha, colorARed, colorCRed, colorAGreen, colorCGreen, colorABlue, colorCBlue)
                             xA += slopeXBa
                             xC += slopeXCb
-                            zNearA += slopeZnearBa
-                            zNearC += slopeZnearCb
-                            zFarA += slopeZfarBa
-                            zFarC += slopeZfarCb
+                            zNearA += slopeZNearBa
+                            zNearC += slopeZNearCb
+                            zFarA += slopeZFarBa
+                            zFarC += slopeZFarCb
                             uA += slopeUBa
                             uC += slopeUCb
                             vA += slopeVBa
@@ -2234,10 +2234,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xB.toInt(), xA.toInt(), zNearB, zNearA, zFarB, zFarA, uB, uA, vB, vA, fogDensityB, fogDensityA, colorBAlpha, colorAAlpha, colorBRed, colorARed, colorBGreen, colorAGreen, colorBBlue, colorABlue)
                             xA += slopeXBa
                             xB += slopeXAc
-                            zNearA += slopeZnearBa
-                            zNearB += slopeZnearAc
-                            zFarA += slopeZfarBa
-                            zFarB += slopeZfarAc
+                            zNearA += slopeZNearBa
+                            zNearB += slopeZNearAc
+                            zFarA += slopeZFarBa
+                            zFarB += slopeZFarAc
                             uA += slopeUBa
                             uB += slopeUAc
                             vA += slopeVBa
@@ -2258,10 +2258,10 @@ class RasterizerSM(
                             drawMaterialisedScanline(depthWrite, transparent, colourBuffer!!, yA.toInt(), xC.toInt(), xA.toInt(), zNearC, zNearA, zFarC, zFarA, uC, uA, vC, vA, fogDensityC, fogDensityA, colorCAlpha, colorAAlpha, colorCRed, colorARed, colorCGreen, colorAGreen, colorCBlue, colorABlue)
                             xC += slopeXCb
                             xA += slopeXBa
-                            zNearC += slopeZnearCb
-                            zNearA += slopeZnearBa
-                            zFarC += slopeZfarCb
-                            zFarA += slopeZfarBa
+                            zNearC += slopeZNearCb
+                            zNearA += slopeZNearBa
+                            zFarC += slopeZFarCb
+                            zFarA += slopeZFarBa
                             uC += slopeUCb
                             uA += slopeUBa
                             vC += slopeVCb
@@ -2285,7 +2285,7 @@ class RasterizerSM(
     }
 
     fun drawTriangle(
-        colorWrite: Boolean, depthWrite: Boolean, transparency: Boolean,
+        colorWrite: Boolean, depthWrite: Boolean, transparent: Boolean,
         yA: Float, yB: Float, yC: Float,
         xA: Float, xB: Float, xC: Float,
         zA: Float, zB: Float, zC: Float,
@@ -2302,7 +2302,7 @@ class RasterizerSM(
         var zC = zC
 
         if (!colorWrite) {
-            drawFlatTriangle(false, depthWrite, transparency, yA, yB, yC, xA, xB, xC, zA, zB, zC, 0)
+            drawFlatTriangle(false, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zA, zB, zC, 0)
         } else if (wireframeMode) {
             safemodeToolkit.drawOpaqueLine(xA.toInt(), yA.toInt(), xB.toInt(), yB.toInt(), 0xff000000.toInt() or colorA)
             safemodeToolkit.drawOpaqueLine(xB.toInt(), yB.toInt(), xC.toInt(), yC.toInt(), 0xff000000.toInt() or colorA)
@@ -2320,70 +2320,70 @@ class RasterizerSM(
             val colorGreenCa = ((colorC and 0xff00) - (colorA and 0xff00)).toFloat()
             val colorBlueBa = ((colorB and 0xff) - (colorA and 0xff)).toFloat()
             val colorBlueCa = ((colorC and 0xff) - (colorA and 0xff)).toFloat()
-            val scaleCb = if (yC != yB) (xC - xB) / (yC - yB) else 0.0f
-            val scaleBa = if (yB != yA) slopeXBa / slopeYBa else 0.0f
-            val scaleCa = if (yC != yA) slopeXCa / slopeYCa else 0.0f
-            val f31 = slopeXBa * slopeYCa - slopeXCa * slopeYBa
-            if (f31 != 0.0f) {
-                val f32 = (slopeZBa * slopeYCa - slopeZCa * slopeYBa) / f31
-                val f33 = (slopeZCa * slopeXBa - slopeZBa * slopeXCa) / f31
-                val f34 = (colorRedBa * slopeYCa - colorRedCa * slopeYBa) / f31
-                val f35 = (colorRedCa * slopeXBa - colorRedBa * slopeXCa) / f31
-                val f36 = (colorGreenBa * slopeYCa - colorGreenCa * slopeYBa) / f31
-                val f37 = (colorGreenCa * slopeXBa - colorGreenBa * slopeXCa) / f31
-                val f38 = (colorBlueBa * slopeYCa - colorBlueCa * slopeYBa) / f31
-                val f39 = (colorBlueCa * slopeXBa - colorBlueBa * slopeXCa) / f31
-                var f40: Float
-                var f41: Float
-                var f42: Float
+            val scaleXCb = if (yC != yB) (xC - xB) / (yC - yB) else 0.0f
+            val scaleXBa = if (yB != yA) slopeXBa / slopeYBa else 0.0f
+            val scaleXCa = if (yC != yA) slopeXCa / slopeYCa else 0.0f
+            val determinant = slopeXBa * slopeYCa - slopeXCa * slopeYBa
+            if (determinant != 0.0f) {
+                val slopeDepthX = (slopeZBa * slopeYCa - slopeZCa * slopeYBa) / determinant
+                val slopeDepthY = (slopeZCa * slopeXBa - slopeZBa * slopeXCa) / determinant
+                val slopeRedX = (colorRedBa * slopeYCa - colorRedCa * slopeYBa) / determinant
+                val slopeRedY = (colorRedCa * slopeXBa - colorRedBa * slopeXCa) / determinant
+                val slopeGreenX = (colorGreenBa * slopeYCa - colorGreenCa * slopeYBa) / determinant
+                val slopeGreenY = (colorGreenCa * slopeXBa - colorGreenBa * slopeXCa) / determinant
+                val slopeBlueX = (colorBlueBa * slopeYCa - colorBlueCa * slopeYBa) / determinant
+                val slopeBlueY = (colorBlueCa * slopeXBa - colorBlueBa * slopeXCa) / determinant
+                var blue: Float
+                var red: Float
+                var green: Float
                 val colourBuf = colourBuffer!!
                 if (yA <= yB && yA <= yC) {
                     if (yA < clipHeight) {
                         if (yB > clipHeight) yB = clipHeight.toFloat()
                         if (yC > clipHeight) yC = clipHeight.toFloat()
-                        zA = zA - f32 * xA + f32
-                        f41 = (colorA and 0xff0000) - f34 * xA + f34
-                        f42 = (colorA and 0xff00) - f36 * xA + f36
-                        f40 = (colorA and 0xff) - f38 * xA + f38
+                        zA = zA - slopeDepthX * xA + slopeDepthX
+                        red = (colorA and 0xff0000) - slopeRedX * xA + slopeRedX
+                        green = (colorA and 0xff00) - slopeGreenX * xA + slopeGreenX
+                        blue = (colorA and 0xff) - slopeBlueX * xA + slopeBlueX
                         if (yB < yC) {
                             xC = xA
                             if (yA < 0.0f) {
-                                xC = xA - scaleCa * yA
-                                xA -= scaleBa * yA
-                                zA -= f33 * yA
-                                f41 -= f35 * yA
-                                f42 -= f37 * yA
-                                f40 -= f39 * yA
+                                xC = xA - scaleXCa * yA
+                                xA -= scaleXBa * yA
+                                zA -= slopeDepthY * yA
+                                red -= slopeRedY * yA
+                                green -= slopeGreenY * yA
+                                blue -= slopeBlueY * yA
                                 yA = 0.0f
                             }
                             if (yB < 0.0f) {
-                                xB -= scaleCb * yB
+                                xB -= scaleXCb * yB
                                 yB = 0.0f
                             }
-                            if ((yA == yB || scaleCa >= scaleBa) && (yA != yB || scaleCa <= scaleCb)) {
+                            if ((yA == yB || scaleXCa >= scaleXBa) && (yA != yB || scaleXCa <= scaleXCb)) {
                                 yA = (yA + 0.5f).toInt().toFloat()
                                 yB = (yB + 0.5f).toInt().toFloat()
                                 yC = (yC + 0.5f).toInt() - yB
                                 yB -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yB >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xA.toInt(), xC.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleCa
-                                    xA += scaleBa
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xA.toInt(), xC.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXCa
+                                    xA += scaleXBa
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xB.toInt(), xC.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleCa
-                                    xB += scaleCb
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xB.toInt(), xC.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXCa
+                                    xB += scaleXCb
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                             } else {
@@ -2393,65 +2393,65 @@ class RasterizerSM(
                                 yB -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yB >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xC.toInt(), xA.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleCa
-                                    xA += scaleBa
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xC.toInt(), xA.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXCa
+                                    xA += scaleXBa
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xC.toInt(), xB.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleCa
-                                    xB += scaleCb
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xC.toInt(), xB.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXCa
+                                    xB += scaleXCb
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                             }
                         } else {
                             xB = xA
                             if (yA < 0.0f) {
-                                xB = xA - scaleCa * yA
-                                xA -= scaleBa * yA
-                                zA -= f33 * yA
-                                f41 -= f35 * yA
-                                f42 -= f37 * yA
-                                f40 -= f39 * yA
+                                xB = xA - scaleXCa * yA
+                                xA -= scaleXBa * yA
+                                zA -= slopeDepthY * yA
+                                red -= slopeRedY * yA
+                                green -= slopeGreenY * yA
+                                blue -= slopeBlueY * yA
                                 yA = 0.0f
                             }
                             if (yC < 0.0f) {
-                                xC -= scaleCb * yC
+                                xC -= scaleXCb * yC
                                 yC = 0.0f
                             }
-                            if (yA != yC && scaleCa < scaleBa || yA == yC && scaleCb > scaleBa) {
+                            if (yA != yC && scaleXCa < scaleXBa || yA == yC && scaleXCb > scaleXBa) {
                                 yA = (yA + 0.5f).toInt().toFloat()
                                 yC = (yC + 0.5f).toInt().toFloat()
                                 yB = (yB + 0.5f).toInt() - yC
                                 yC -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xB.toInt(), xA.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xB += scaleCa
-                                    xA += scaleBa
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xB.toInt(), xA.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xB += scaleXCa
+                                    xA += scaleXBa
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                                 while (--yB >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xC.toInt(), xA.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleCb
-                                    xA += scaleBa
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xC.toInt(), xA.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXCb
+                                    xA += scaleXBa
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                             } else {
@@ -2461,23 +2461,23 @@ class RasterizerSM(
                                 yC -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xA.toInt(), xB.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xB += scaleCa
-                                    xA += scaleBa
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xA.toInt(), xB.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xB += scaleXCa
+                                    xA += scaleXBa
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                                 while (--yB >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yA.toInt(), xA.toInt(), xC.toInt(), zA, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleCb
-                                    xA += scaleBa
-                                    zA += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yA.toInt(), xA.toInt(), xC.toInt(), zA, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXCb
+                                    xA += scaleXBa
+                                    zA += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yA += scanlineWidth
                                 }
                             }
@@ -2487,49 +2487,49 @@ class RasterizerSM(
                     if (yB < clipHeight) {
                         if (yC > clipHeight) yC = clipHeight.toFloat()
                         if (yA > clipHeight) yA = clipHeight.toFloat()
-                        zB = zB - f32 * xB + f32
-                        f41 = (colorB and 0xff0000) - f34 * xB + f34
-                        f42 = (colorB and 0xff00) - f36 * xB + f36
-                        f40 = (colorB and 0xff) - f38 * xB + f38
+                        zB = zB - slopeDepthX * xB + slopeDepthX
+                        red = (colorB and 0xff0000) - slopeRedX * xB + slopeRedX
+                        green = (colorB and 0xff00) - slopeGreenX * xB + slopeGreenX
+                        blue = (colorB and 0xff) - slopeBlueX * xB + slopeBlueX
                         if (yC < yA) {
                             xA = xB
                             if (yB < 0.0f) {
-                                xA = xB - scaleBa * yB
-                                xB -= scaleCb * yB
-                                zB -= f33 * yB
-                                f41 -= f35 * yB
-                                f42 -= f37 * yB
-                                f40 -= f39 * yB
+                                xA = xB - scaleXBa * yB
+                                xB -= scaleXCb * yB
+                                zB -= slopeDepthY * yB
+                                red -= slopeRedY * yB
+                                green -= slopeGreenY * yB
+                                blue -= slopeBlueY * yB
                                 yB = 0.0f
                             }
                             if (yC < 0.0f) {
-                                xC -= scaleCa * yC
+                                xC -= scaleXCa * yC
                                 yC = 0.0f
                             }
-                            if ((yB == yC || scaleBa >= scaleCb) && (yB != yC || scaleBa <= scaleCa)) {
+                            if ((yB == yC || scaleXBa >= scaleXCb) && (yB != yC || scaleXBa <= scaleXCa)) {
                                 yB = (yB + 0.5f).toInt().toFloat()
                                 yC = (yC + 0.5f).toInt().toFloat()
                                 yA = (yA + 0.5f).toInt() - yC
                                 yC -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xB.toInt(), xA.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xA += scaleBa
-                                    xB += scaleCb
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xB.toInt(), xA.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xA += scaleXBa
+                                    xB += scaleXCb
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                                 while (--yA >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xC.toInt(), xA.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xA += scaleBa
-                                    xC += scaleCa
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xC.toInt(), xA.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xA += scaleXBa
+                                    xC += scaleXCa
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                             } else {
@@ -2539,65 +2539,65 @@ class RasterizerSM(
                                 yC -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xA.toInt(), xB.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xA += scaleBa
-                                    xB += scaleCb
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xA.toInt(), xB.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xA += scaleXBa
+                                    xB += scaleXCb
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                                 while (--yA >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xA.toInt(), xC.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xA += scaleBa
-                                    xC += scaleCa
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xA.toInt(), xC.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xA += scaleXBa
+                                    xC += scaleXCa
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                             }
                         } else {
                             xC = xB
                             if (yB < 0.0f) {
-                                xC = xB - scaleBa * yB
-                                xB -= scaleCb * yB
-                                zB -= f33 * yB
-                                f41 -= f35 * yB
-                                f42 -= f37 * yB
-                                f40 -= f39 * yB
+                                xC = xB - scaleXBa * yB
+                                xB -= scaleXCb * yB
+                                zB -= slopeDepthY * yB
+                                red -= slopeRedY * yB
+                                green -= slopeGreenY * yB
+                                blue -= slopeBlueY * yB
                                 yB = 0.0f
                             }
                             if (yA < 0.0f) {
-                                xA -= scaleCa * yA
+                                xA -= scaleXCa * yA
                                 yA = 0.0f
                             }
-                            if (scaleBa < scaleCb) {
+                            if (scaleXBa < scaleXCb) {
                                 yB = (yB + 0.5f).toInt().toFloat()
                                 yA = (yA + 0.5f).toInt().toFloat()
                                 yC = (yC + 0.5f).toInt() - yA
                                 yA -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yA >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xC.toInt(), xB.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleBa
-                                    xB += scaleCb
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xC.toInt(), xB.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXBa
+                                    xB += scaleXCb
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xA.toInt(), xB.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xA += scaleCa
-                                    xB += scaleCb
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xA.toInt(), xB.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xA += scaleXCa
+                                    xB += scaleXCb
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                             } else {
@@ -2607,23 +2607,23 @@ class RasterizerSM(
                                 yA -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yA >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xB.toInt(), xC.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xC += scaleBa
-                                    xB += scaleCb
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xB.toInt(), xC.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xC += scaleXBa
+                                    xB += scaleXCb
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawScanline(depthWrite, transparency, colourBuf, yB.toInt(), xB.toInt(), xA.toInt(), zB, f32, f41, f34, f42, f36, f40, f38)
-                                    xA += scaleCa
-                                    xB += scaleCb
-                                    zB += f33
-                                    f41 += f35
-                                    f42 += f37
-                                    f40 += f39
+                                    drawScanline(depthWrite, transparent, colourBuf, yB.toInt(), xB.toInt(), xA.toInt(), zB, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                    xA += scaleXCa
+                                    xB += scaleXCb
+                                    zB += slopeDepthY
+                                    red += slopeRedY
+                                    green += slopeGreenY
+                                    blue += slopeBlueY
                                     yB += scanlineWidth
                                 }
                             }
@@ -2632,49 +2632,49 @@ class RasterizerSM(
                 } else if (yC < clipHeight) {
                     if (yA > clipHeight) yA = clipHeight.toFloat()
                     if (yB > clipHeight) yB = clipHeight.toFloat()
-                    zC = zC - f32 * xC + f32
-                    f41 = (colorC and 0xff0000) - f34 * xC + f34
-                    f42 = (colorC and 0xff00) - f36 * xC + f36
-                    f40 = (colorC and 0xff) - f38 * xC + f38
+                    zC = zC - slopeDepthX * xC + slopeDepthX
+                    red = (colorC and 0xff0000) - slopeRedX * xC + slopeRedX
+                    green = (colorC and 0xff00) - slopeGreenX * xC + slopeGreenX
+                    blue = (colorC and 0xff) - slopeBlueX * xC + slopeBlueX
                     if (yA < yB) {
                         xB = xC
                         if (yC < 0.0f) {
-                            xB = xC - scaleCb * yC
-                            xC -= scaleCa * yC
-                            zC -= f33 * yC
-                            f41 -= f35 * yC
-                            f42 -= f37 * yC
-                            f40 -= f39 * yC
+                            xB = xC - scaleXCb * yC
+                            xC -= scaleXCa * yC
+                            zC -= slopeDepthY * yC
+                            red -= slopeRedY * yC
+                            green -= slopeGreenY * yC
+                            blue -= slopeBlueY * yC
                             yC = 0.0f
                         }
                         if (yA < 0.0f) {
-                            xA -= scaleBa * yA
+                            xA -= scaleXBa * yA
                             yA = 0.0f
                         }
-                        if (scaleCb < scaleCa) {
+                        if (scaleXCb < scaleXCa) {
                             yC = (yC + 0.5f).toInt().toFloat()
                             yA = (yA + 0.5f).toInt().toFloat()
                             yB = (yB + 0.5f).toInt() - yA
                             yA -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yA >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xB.toInt(), xC.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xB += scaleCb
-                                xC += scaleCa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xB.toInt(), xC.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xB += scaleXCb
+                                xC += scaleXCa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                             while (--yB >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xB.toInt(), xA.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xB += scaleCb
-                                xA += scaleBa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xB.toInt(), xA.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xB += scaleXCb
+                                xA += scaleXBa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                         } else {
@@ -2684,65 +2684,65 @@ class RasterizerSM(
                             yA -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yA >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xC.toInt(), xB.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xB += scaleCb
-                                xC += scaleCa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xC.toInt(), xB.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xB += scaleXCb
+                                xC += scaleXCa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                             while (--yB >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xA.toInt(), xB.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xB += scaleCb
-                                xA += scaleBa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xA.toInt(), xB.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xB += scaleXCb
+                                xA += scaleXBa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                         }
                     } else {
                         xA = xC
                         if (yC < 0.0f) {
-                            xA = xC - scaleCb * yC
-                            xC -= scaleCa * yC
-                            zC -= f33 * yC
-                            f41 -= f35 * yC
-                            f42 -= f37 * yC
-                            f40 -= f39 * yC
+                            xA = xC - scaleXCb * yC
+                            xC -= scaleXCa * yC
+                            zC -= slopeDepthY * yC
+                            red -= slopeRedY * yC
+                            green -= slopeGreenY * yC
+                            blue -= slopeBlueY * yC
                             yC = 0.0f
                         }
                         if (yB < 0.0f) {
-                            xB -= scaleBa * yB
+                            xB -= scaleXBa * yB
                             yB = 0.0f
                         }
-                        if (scaleCb < scaleCa) {
+                        if (scaleXCb < scaleXCa) {
                             yC = (yC + 0.5f).toInt().toFloat()
                             yB = (yB + 0.5f).toInt().toFloat()
                             yA = (yA + 0.5f).toInt() - yB
                             yB -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yB >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xA.toInt(), xC.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xA += scaleCb
-                                xC += scaleCa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xA.toInt(), xC.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xA += scaleXCb
+                                xC += scaleXCa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                             while (--yA >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xB.toInt(), xC.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xB += scaleBa
-                                xC += scaleCa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xB.toInt(), xC.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xB += scaleXBa
+                                xC += scaleXCa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                         } else {
@@ -2752,23 +2752,23 @@ class RasterizerSM(
                             yB -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yB >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xC.toInt(), xA.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xA += scaleCb
-                                xC += scaleCa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xC.toInt(), xA.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xA += scaleXCb
+                                xC += scaleXCa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                             while (--yA >= 0.0f) {
-                                drawScanline(depthWrite, transparency, colourBuf, yC.toInt(), xC.toInt(), xB.toInt(), zC, f32, f41, f34, f42, f36, f40, f38)
-                                xB += scaleBa
-                                xC += scaleCa
-                                zC += f33
-                                f41 += f35
-                                f42 += f37
-                                f40 += f39
+                                drawScanline(depthWrite, transparent, colourBuf, yC.toInt(), xC.toInt(), xB.toInt(), zC, slopeDepthX, red, slopeRedX, green, slopeGreenX, blue, slopeBlueX)
+                                xB += scaleXBa
+                                xC += scaleXCa
+                                zC += slopeDepthY
+                                red += slopeRedY
+                                green += slopeGreenY
+                                blue += slopeBlueY
                                 yC += scanlineWidth
                             }
                         }
@@ -2809,8 +2809,8 @@ class RasterizerSM(
             var slopeYBa = yB - yA
             var slopeXCa = xC - xA
             var slopeYCa = yC - yA
-            var slopeColorABa = colorB - colorA
-            var slopeColorBBa = colorC - colorA
+            var slopeColorBa = colorB - colorA
+            var slopeColorCa = colorC - colorA
             var slopeZBa = zB - zA
             var slopeZCa = zC - zA
             var scaleXCb: Float
@@ -2834,12 +2834,12 @@ class RasterizerSM(
                 scaleXCa = 0.0f
             }
 
-            var f_27 = slopeXBa * slopeYCa - slopeXCa * slopeYBa
-            if (f_27 != 0.0f) {
-                var scaleColorB = (slopeColorABa * slopeYCa - slopeColorBBa * slopeYBa) / f_27
-                var scaleColorA = (slopeColorBBa * slopeXBa - slopeColorABa * slopeXCa) / f_27
-                var scaleZB = (slopeZBa * slopeYCa - slopeZCa * slopeYBa) / f_27
-                var scaleZA = (slopeZCa * slopeXBa - slopeZBa * slopeXCa) / f_27
+            var determinant = slopeXBa * slopeYCa - slopeXCa * slopeYBa
+            if (determinant != 0.0f) {
+                var slopeColorX = (slopeColorBa * slopeYCa - slopeColorCa * slopeYBa) / determinant
+                var slopeColorY = (slopeColorCa * slopeXBa - slopeColorBa * slopeXCa) / determinant
+                var slopeDepthX = (slopeZBa * slopeYCa - slopeZCa * slopeYBa) / determinant
+                var slopeDepthY = (slopeZCa * slopeXBa - slopeZBa * slopeXCa) / determinant
                 if (yA <= yB && yA <= yC) {
                     if (yA < clipHeight) {
                         if (yB > clipHeight) {
@@ -2848,15 +2848,15 @@ class RasterizerSM(
                         if (yC > clipHeight) {
                             yC = clipHeight.toFloat()
                         }
-                        colorA = colorA - scaleColorB * xA + scaleColorB
-                        zA = zA - scaleZB * xA + scaleZB
+                        colorA = colorA - slopeColorX * xA + slopeColorX
+                        zA = zA - slopeDepthX * xA + slopeDepthX
                         if (yB < yC) {
                             xC = xA
                             if (yA < 0.0f) {
                                 xC = xA - scaleXCa * yA
                                 xA -= scaleXBa * yA
-                                colorA -= scaleColorA * yA
-                                zA -= scaleZA * yA
+                                colorA -= slopeColorY * yA
+                                zA -= slopeDepthY * yA
                                 yA = 0.0f
                             }
                             if (yB < 0.0f) {
@@ -2870,19 +2870,19 @@ class RasterizerSM(
                                 yB -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yB >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xC.toInt(), xA.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xC.toInt(), xA.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xC += scaleXCa
                                     xA += scaleXBa
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xC.toInt(), xB.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xC.toInt(), xB.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xC += scaleXCa
                                     xB += scaleXCb
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             } else {
@@ -2892,19 +2892,19 @@ class RasterizerSM(
                                 yB -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yB >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xA.toInt(), xC.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xA.toInt(), xC.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xC += scaleXCa
                                     xA += scaleXBa
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xB.toInt(), xC.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xB.toInt(), xC.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xC += scaleXCa
                                     xB += scaleXCb
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             }
@@ -2913,8 +2913,8 @@ class RasterizerSM(
                             if (yA < 0.0f) {
                                 xB = xA - scaleXCa * yA
                                 xA -= scaleXBa * yA
-                                colorA -= scaleColorA * yA
-                                zA -= scaleZA * yA
+                                colorA -= slopeColorY * yA
+                                zA -= slopeDepthY * yA
                                 yA = 0.0f
                             }
                             if (yC < 0.0f) {
@@ -2928,19 +2928,19 @@ class RasterizerSM(
                                 yC -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xA.toInt(), xB.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xA.toInt(), xB.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xB += scaleXCa
                                     xA += scaleXBa
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yB >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xA.toInt(), xC.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xA.toInt(), xC.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xC += scaleXCb
                                     xA += scaleXBa
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             } else {
@@ -2951,19 +2951,19 @@ class RasterizerSM(
 
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xB.toInt(), xA.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xB.toInt(), xA.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xB += scaleXCa
                                     xA += scaleXBa
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yB >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xC.toInt(), xA.toInt(), colorA, scaleColorB, zA, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yA.toInt(), xC.toInt(), xA.toInt(), colorA, slopeColorX, zA, slopeDepthX)
                                     xC += scaleXCb
                                     xA += scaleXBa
-                                    colorA += scaleColorA
-                                    zA += scaleZA
+                                    colorA += slopeColorY
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             }
@@ -2977,15 +2977,15 @@ class RasterizerSM(
                         if (yA > clipHeight) {
                             yA = clipHeight.toFloat()
                         }
-                        colorB = colorB - scaleColorB * xB + scaleColorB
-                        zB = zB - scaleZB * xB + scaleZB
+                        colorB = colorB - slopeColorX * xB + slopeColorX
+                        zB = zB - slopeDepthX * xB + slopeDepthX
                         if (yC < yA) {
                             xA = xB
                             if (yB < 0.0f) {
                                 xA = xB - scaleXBa * yB
                                 xB -= scaleXCb * yB
-                                colorB -= scaleColorA * yB
-                                zB -= scaleZA * yB
+                                colorB -= slopeColorY * yB
+                                zB -= slopeDepthY * yB
                                 yB = 0.0f
                             }
                             if (yC < 0.0f) {
@@ -2999,19 +2999,19 @@ class RasterizerSM(
                                 yC -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xA.toInt(), xB.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xA.toInt(), xB.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xA += scaleXBa
                                     xB += scaleXCb
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yA >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xA.toInt(), xC.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xA.toInt(), xC.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xA += scaleXBa
                                     xC += scaleXCa
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             } else {
@@ -3021,19 +3021,19 @@ class RasterizerSM(
                                 yC -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xB.toInt(), xA.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xB.toInt(), xA.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xA += scaleXBa
                                     xB += scaleXCb
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yA >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xC.toInt(), xA.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xC.toInt(), xA.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xA += scaleXBa
                                     xC += scaleXCa
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             }
@@ -3042,8 +3042,8 @@ class RasterizerSM(
                             if (yB < 0.0f) {
                                 xC = xB - scaleXBa * yB
                                 xB -= scaleXCb * yB
-                                colorB -= scaleColorA * yB
-                                zB -= scaleZA * yB
+                                colorB -= slopeColorY * yB
+                                zB -= slopeDepthY * yB
                                 yB = 0.0f
                             }
                             if (yA < 0.0f) {
@@ -3057,19 +3057,19 @@ class RasterizerSM(
                                 yA -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yA >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xC.toInt(), xB.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xC.toInt(), xB.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xC += scaleXBa
                                     xB += scaleXCb
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xA.toInt(), xB.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xA.toInt(), xB.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xA += scaleXCa
                                     xB += scaleXCb
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             } else {
@@ -3079,19 +3079,19 @@ class RasterizerSM(
                                 yA -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yA >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xB.toInt(), xC.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xB.toInt(), xC.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xC += scaleXBa
                                     xB += scaleXCb
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xB.toInt(), xA.toInt(), colorB, scaleColorB, zB, scaleZB)
+                                    drawShadedScanline(depthWrite, transparent, colourBuffer, yB.toInt(), xB.toInt(), xA.toInt(), colorB, slopeColorX, zB, slopeDepthX)
                                     xA += scaleXCa
                                     xB += scaleXCb
-                                    colorB += scaleColorA
-                                    zB += scaleZA
+                                    colorB += slopeColorY
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             }
@@ -3104,15 +3104,15 @@ class RasterizerSM(
                     if (yB > clipHeight) {
                         yB = clipHeight.toFloat()
                     }
-                    colorC = colorC - scaleColorB * xC + scaleColorB
-                    zC = zC - scaleZB * xC + scaleZB
+                    colorC = colorC - slopeColorX * xC + slopeColorX
+                    zC = zC - slopeDepthX * xC + slopeDepthX
                     if (yA < yB) {
                         xB = xC
                         if (yC < 0.0f) {
                             xB = xC - scaleXCb * yC
                             xC -= scaleXCa * yC
-                            colorC -= scaleColorA * yC
-                            zC -= scaleZA * yC
+                            colorC -= slopeColorY * yC
+                            zC -= slopeDepthY * yC
                             yC = 0.0f
                         }
                         if (yA < 0.0f) {
@@ -3126,19 +3126,19 @@ class RasterizerSM(
                             yA -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yA >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xB.toInt(), xC.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xB.toInt(), xC.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xB += scaleXCb
                                 xC += scaleXCa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yB >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xB.toInt(), xA.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xB.toInt(), xA.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xB += scaleXCb
                                 xA += scaleXBa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         } else {
@@ -3148,19 +3148,19 @@ class RasterizerSM(
                             yA -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yA >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xC.toInt(), xB.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xC.toInt(), xB.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xB += scaleXCb
                                 xC += scaleXCa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yB >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xA.toInt(), xB.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xA.toInt(), xB.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xB += scaleXCb
                                 xA += scaleXBa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         }
@@ -3169,8 +3169,8 @@ class RasterizerSM(
                         if (yC < 0.0f) {
                             xA = xC - scaleXCb * yC
                             xC -= scaleXCa * yC
-                            colorC -= scaleColorA * yC
-                            zC -= scaleZA * yC
+                            colorC -= slopeColorY * yC
+                            zC -= slopeDepthY * yC
                             yC = 0.0f
                         }
                         if (yB < 0.0f) {
@@ -3184,19 +3184,19 @@ class RasterizerSM(
                             yB -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yB >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xA.toInt(), xC.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xA.toInt(), xC.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xA += scaleXCb
                                 xC += scaleXCa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yA >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xB.toInt(), xC.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xB.toInt(), xC.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xB += scaleXBa
                                 xC += scaleXCa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         } else {
@@ -3206,19 +3206,19 @@ class RasterizerSM(
                             yB -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yB >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xC.toInt(), xA.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xC.toInt(), xA.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xA += scaleXCb
                                 xC += scaleXCa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yA >= 0.0f) {
-                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xC.toInt(), xB.toInt(), colorC, scaleColorB, zC, scaleZB)
+                                drawShadedScanline(depthWrite, transparent, colourBuffer, yC.toInt(), xC.toInt(), xB.toInt(), colorC, slopeColorX, zC, slopeDepthX)
                                 xB += scaleXBa
                                 xC += scaleXCa
-                                colorC += scaleColorA
-                                zC += scaleZA
+                                colorC += slopeColorY
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         }
@@ -3384,10 +3384,10 @@ class RasterizerSM(
             if (yC != yA) {
                 scaleXCa = (xA - xC) / (yA - yC)
             }
-            val length = slopeXBa * slopeYCa - slopeXCa * slopeYBa
-            if (length != 0.0f) {
-                val deltaA = (slopeZBa * slopeYCa - slopeZCa * slopeYBa) / length
-                val scaleZAvg = (slopeZCa * slopeXBa - slopeZBa * slopeXCa) / length
+            val determinant = slopeXBa * slopeYCa - slopeXCa * slopeYBa
+            if (determinant != 0.0f) {
+                val slopeDepthX = (slopeZBa * slopeYCa - slopeZCa * slopeYBa) / determinant
+                val slopeDepthY = (slopeZCa * slopeXBa - slopeZBa * slopeXCa) / determinant
                 val colourBuf = colourBuffer!!
                 if (yA <= yB && yA <= yC) {
                     if (yA < clipHeight) {
@@ -3397,13 +3397,13 @@ class RasterizerSM(
                         if (yC > clipHeight) {
                             yC = clipHeight.toFloat()
                         }
-                        zA = zA - deltaA * xA + deltaA
+                        zA = zA - slopeDepthX * xA + slopeDepthX
                         if (yB < yC) {
                             xC = xA
                             if (yA < 0.0f) {
                                 xC = xA - scaleXCa * yA
                                 xA -= scaleXBa * yA
-                                zA -= scaleZAvg * yA
+                                zA -= slopeDepthY * yA
                                 yA = 0.0f
                             }
                             if (yB < 0.0f) {
@@ -3417,17 +3417,17 @@ class RasterizerSM(
                                 yB -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yB >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xC.toInt(), xA.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xC.toInt(), xA.toInt(), zA, slopeDepthX)
                                     xC += scaleXCa
                                     xA += scaleXBa
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xC.toInt(), xB.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xC.toInt(), xB.toInt(), zA, slopeDepthX)
                                     xC += scaleXCa
                                     xB += scaleXCb
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             } else {
@@ -3437,17 +3437,17 @@ class RasterizerSM(
                                 yB -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yB >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xA.toInt(), xC.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xA.toInt(), xC.toInt(), zA, slopeDepthX)
                                     xC += scaleXCa
                                     xA += scaleXBa
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xB.toInt(), xC.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xB.toInt(), xC.toInt(), zA, slopeDepthX)
                                     xC += scaleXCa
                                     xB += scaleXCb
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             }
@@ -3456,7 +3456,7 @@ class RasterizerSM(
                             if (yA < 0.0f) {
                                 xB = xA - scaleXCa * yA
                                 xA -= scaleXBa * yA
-                                zA -= scaleZAvg * yA
+                                zA -= slopeDepthY * yA
                                 yA = 0.0f
                             }
                             if (yC < 0.0f) {
@@ -3470,17 +3470,17 @@ class RasterizerSM(
                                 yC -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xA.toInt(), xB.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xA.toInt(), xB.toInt(), zA, slopeDepthX)
                                     xB += scaleXCa
                                     xA += scaleXBa
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yB >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xA.toInt(), xC.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xA.toInt(), xC.toInt(), zA, slopeDepthX)
                                     xC += scaleXCb
                                     xA += scaleXBa
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             } else {
@@ -3490,17 +3490,17 @@ class RasterizerSM(
                                 yC -= yA
                                 yA = scanlineOffsets[yA.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xB.toInt(), xA.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xB.toInt(), xA.toInt(), zA, slopeDepthX)
                                     xB += scaleXCa
                                     xA += scaleXBa
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                                 while (--yB >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xC.toInt(), xA.toInt(), zA, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yA.toInt(), color, xC.toInt(), xA.toInt(), zA, slopeDepthX)
                                     xC += scaleXCb
                                     xA += scaleXBa
-                                    zA += scaleZAvg
+                                    zA += slopeDepthY
                                     yA += scanlineWidth
                                 }
                             }
@@ -3514,13 +3514,13 @@ class RasterizerSM(
                         if (yA > clipHeight) {
                             yA = clipHeight.toFloat()
                         }
-                        zB = zB - deltaA * xB + deltaA
+                        zB = zB - slopeDepthX * xB + slopeDepthX
                         if (yC < yA) {
                             xA = xB
                             if (yB < 0.0f) {
                                 xA = xB - scaleXBa * yB
                                 xB -= scaleXCb * yB
-                                zB -= scaleZAvg * yB
+                                zB -= slopeDepthY * yB
                                 yB = 0.0f
                             }
                             if (yC < 0.0f) {
@@ -3534,17 +3534,17 @@ class RasterizerSM(
                                 yC -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xB.toInt(), xA.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xB.toInt(), xA.toInt(), zB, slopeDepthX)
                                     xA += scaleXBa
                                     xB += scaleXCb
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yA >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xC.toInt(), xA.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xC.toInt(), xA.toInt(), zB, slopeDepthX)
                                     xA += scaleXBa
                                     xC += scaleXCa
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             } else {
@@ -3554,17 +3554,17 @@ class RasterizerSM(
                                 yC -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xA.toInt(), xB.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xA.toInt(), xB.toInt(), zB, slopeDepthX)
                                     xA += scaleXBa
                                     xB += scaleXCb
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yA >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xA.toInt(), xC.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xA.toInt(), xC.toInt(), zB, slopeDepthX)
                                     xA += scaleXBa
                                     xC += scaleXCa
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             }
@@ -3573,7 +3573,7 @@ class RasterizerSM(
                             if (yB < 0.0f) {
                                 xC = xB - scaleXBa * yB
                                 xB -= scaleXCb * yB
-                                zB -= scaleZAvg * yB
+                                zB -= slopeDepthY * yB
                                 yB = 0.0f
                             }
                             if (yA < 0.0f) {
@@ -3587,17 +3587,17 @@ class RasterizerSM(
                                 yA -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yA >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xC.toInt(), xB.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xC.toInt(), xB.toInt(), zB, slopeDepthX)
                                     xC += scaleXBa
                                     xB += scaleXCb
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xA.toInt(), xB.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xA.toInt(), xB.toInt(), zB, slopeDepthX)
                                     xA += scaleXCa
                                     xB += scaleXCb
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             } else {
@@ -3607,17 +3607,17 @@ class RasterizerSM(
                                 yA -= yB
                                 yB = scanlineOffsets[yB.toInt()].toFloat()
                                 while (--yA >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xB.toInt(), xC.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xB.toInt(), xC.toInt(), zB, slopeDepthX)
                                     xC += scaleXBa
                                     xB += scaleXCb
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                                 while (--yC >= 0.0f) {
-                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xB.toInt(), xA.toInt(), zB, deltaA)
+                                    drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yB.toInt(), color, xB.toInt(), xA.toInt(), zB, slopeDepthX)
                                     xA += scaleXCa
                                     xB += scaleXCb
-                                    zB += scaleZAvg
+                                    zB += slopeDepthY
                                     yB += scanlineWidth
                                 }
                             }
@@ -3630,13 +3630,13 @@ class RasterizerSM(
                     if (yB > clipHeight) {
                         yB = clipHeight.toFloat()
                     }
-                    zC = zC - deltaA * xC + deltaA
+                    zC = zC - slopeDepthX * xC + slopeDepthX
                     if (yA < yB) {
                         xB = xC
                         if (yC < 0.0f) {
                             xB = xC - scaleXCb * yC
                             xC -= scaleXCa * yC
-                            zC -= scaleZAvg * yC
+                            zC -= slopeDepthY * yC
                             yC = 0.0f
                         }
                         if (yA < 0.0f) {
@@ -3650,17 +3650,17 @@ class RasterizerSM(
                             yA -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yA >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xB.toInt(), xC.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xB.toInt(), xC.toInt(), zC, slopeDepthX)
                                 xB += scaleXCb
                                 xC += scaleXCa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yB >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xB.toInt(), xA.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xB.toInt(), xA.toInt(), zC, slopeDepthX)
                                 xB += scaleXCb
                                 xA += scaleXBa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         } else {
@@ -3670,17 +3670,17 @@ class RasterizerSM(
                             yA -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yA >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xC.toInt(), xB.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xC.toInt(), xB.toInt(), zC, slopeDepthX)
                                 xB += scaleXCb
                                 xC += scaleXCa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yB >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xA.toInt(), xB.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xA.toInt(), xB.toInt(), zC, slopeDepthX)
                                 xB += scaleXCb
                                 xA += scaleXBa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         }
@@ -3689,7 +3689,7 @@ class RasterizerSM(
                         if (yC < 0.0f) {
                             xA = xC - scaleXCb * yC
                             xC -= scaleXCa * yC
-                            zC -= scaleZAvg * yC
+                            zC -= slopeDepthY * yC
                             yC = 0.0f
                         }
                         if (yB < 0.0f) {
@@ -3703,17 +3703,17 @@ class RasterizerSM(
                             yB -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yB >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xA.toInt(), xC.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xA.toInt(), xC.toInt(), zC, slopeDepthX)
                                 xA += scaleXCb
                                 xC += scaleXCa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yA >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xB.toInt(), xC.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xB.toInt(), xC.toInt(), zC, slopeDepthX)
                                 xB += scaleXBa
                                 xC += scaleXCa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         } else {
@@ -3723,17 +3723,17 @@ class RasterizerSM(
                             yB -= yC
                             yC = scanlineOffsets[yC.toInt()].toFloat()
                             while (--yB >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xC.toInt(), xA.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xC.toInt(), xA.toInt(), zC, slopeDepthX)
                                 xA += scaleXCb
                                 xC += scaleXCa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                             while (--yA >= 0.0f) {
-                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xC.toInt(), xB.toInt(), zC, deltaA)
+                                drawFlatScanline(colorWrite, depthWrite, transparent, colourBuf, yC.toInt(), color, xC.toInt(), xB.toInt(), zC, slopeDepthX)
                                 xB += scaleXBa
                                 xC += scaleXCa
-                                zC += scaleZAvg
+                                zC += slopeDepthY
                                 yC += scanlineWidth
                             }
                         }
@@ -3744,7 +3744,7 @@ class RasterizerSM(
     }
 
     fun drawMaterialisedScanline(
-        writeDepth: Boolean, transparent: Boolean,
+        depthWrite: Boolean, transparent: Boolean,
         pixels: IntArray, bufferOffset: Int,
         xA: Int, xB: Int,
         zNearA: Float, zNearB: Float,
@@ -3773,8 +3773,8 @@ class RasterizerSM(
         val texturePixelsA = texturePixelsA!!
         var lengthX = xB - xA
         var scaleX = 1.0f / lengthX
-        var slopeZnearBa = (zNearB - zNearA) * scaleX
-        var slopeZfarBa = (zFarB - zFarA) * scaleX
+        var slopeZNearBa = (zNearB - zNearA) * scaleX
+        var slopeZFarBa = (zFarB - zFarA) * scaleX
         var slopeUBa = (uB - uA) * scaleX
         var slopeVBa = (vB - vA) * scaleX
         var slopeFogDensityBa = (fogDensityB - fogDensityA) * scaleX
@@ -3787,8 +3787,8 @@ class RasterizerSM(
                 xB = clipWidth
             }
             if (xA < 0) {
-                zNearA -= slopeZnearBa * xA
-                zFarA -= slopeZfarBa * xA
+                zNearA -= slopeZNearBa * xA
+                zFarA -= slopeZFarBa * xA
                 uA -= slopeUBa * xA
                 vA -= slopeVBa * xA
                 fogDensityA -= slopeFogDensityBa * xA
@@ -3803,19 +3803,10 @@ class RasterizerSM(
             lengthX = xB - xA
             bufferOffset += xA
             while (lengthX-- > 0) {
-                var depth = 1.0f / zNearA
-                var aUvScale = 1.0f / zFarA
-                if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                    var v = (uA * aUvScale * textureSizeA).toInt()
-                    if (textureRepeat) {
-                        v = v and textureMaskA
-                    } else if (v < 0) {
-                        v = 0
-                    } else if (v > textureMaskA) {
-                        v = textureMaskA
-                    }
-
-                    var u = (vA * aUvScale * textureSizeA).toInt()
+                var depthNear = 1.0f / zNearA
+                var depthFar = 1.0f / zFarA
+                if (!depthWrite || depthNear < depthBuf[bufferOffset]) {
+                    var u = (uA * depthFar * textureSizeA).toInt()
                     if (textureRepeat) {
                         u = u and textureMaskA
                     } else if (u < 0) {
@@ -3824,7 +3815,16 @@ class RasterizerSM(
                         u = textureMaskA
                     }
 
-                    var texel = texturePixelsA[v + u * textureSizeA]
+                    var v = (vA * depthFar * textureSizeA).toInt()
+                    if (textureRepeat) {
+                        v = v and textureMaskA
+                    } else if (v < 0) {
+                        v = 0
+                    } else if (v > textureMaskA) {
+                        v = textureMaskA
+                    }
+
+                    var texel = texturePixelsA[u + v * textureSizeA]
                     var alpha: Int
                     if (alphaMode == 2) {
                         alpha = texel shr 24 and 0xff
@@ -3863,14 +3863,14 @@ class RasterizerSM(
                                 pixels[bufferOffset] = pixel
                             }
                         }
-                        if (writeDepth) {
-                            depthBuf[bufferOffset] = depth
+                        if (depthWrite) {
+                            depthBuf[bufferOffset] = depthNear
                         }
                     }
                 }
                 bufferOffset++
-                zNearA += slopeZnearBa
-                zFarA += slopeZfarBa
+                zNearA += slopeZNearBa
+                zFarA += slopeZFarBa
                 uA += slopeUBa
                 vA += slopeVBa
                 fogDensityA += slopeFogDensityBa
@@ -3883,17 +3883,17 @@ class RasterizerSM(
     }
 
     fun drawShadedScanline(
-        writeDepth: Boolean, transparent: Boolean,
+        depthWrite: Boolean, transparent: Boolean,
         pixels: IntArray, bufferOffset: Int,
         startX: Int, endX: Int,
-        colour: Float, colourSlope: Float,
-        depth: Float, depthSlope: Float
+        color: Float, slopeColor: Float,
+        depth: Float, slopeDepth: Float
     ) {
         var bufferOffset = bufferOffset
         var startX = startX
         var endX = endX
-        var colour = colour
-        var colourSlope = colourSlope
+        var color = color
+        var slopeColor = slopeColor
         var depth = depth
         val depthBuf = depthBuffer!!
 
@@ -3911,63 +3911,63 @@ class RasterizerSM(
         }
 
         bufferOffset += startX - 1
-        colour += colourSlope * startX
-        depth += depthSlope * startX
+        color += slopeColor * startX
+        depth += slopeDepth * startX
         if (threadResource.zbuffering) {
             if (smoothEdges) {
                 var x = endX - startX shr 2
-                colourSlope *= 4.0f
+                slopeColor *= 4.0f
                 if (blendingAlpha == 0) {
                     if (x > 0) {
                         do {
-                            val background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                            colour += colourSlope
+                            val colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                            color += slopeColor
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                pixels[bufferOffset] = background
-                                if (writeDepth) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                pixels[bufferOffset] = colorRgb
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                pixels[bufferOffset] = background
-                                if (writeDepth) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                pixels[bufferOffset] = colorRgb
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                pixels[bufferOffset] = background
-                                if (writeDepth) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                pixels[bufferOffset] = colorRgb
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                pixels[bufferOffset] = background
-                                if (writeDepth) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                pixels[bufferOffset] = colorRgb
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                         } while (--x > 0)
                     }
                     x = endX - startX and 0x3
                     if (x > 0) {
-                        val background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
+                        val colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
                         do {
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                                pixels[bufferOffset] = background
-                                if (writeDepth) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                                pixels[bufferOffset] = colorRgb
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                         } while (--x > 0)
                     }
                 } else {
@@ -3975,81 +3975,81 @@ class RasterizerSM(
                     val invertedAlpha = 256 - blendingAlpha
                     if (x > 0) {
                         do {
-                            var background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                            colour += colourSlope
-                            background = ((background and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (background and 0xff00) shr 8 and 0xff00)
+                            var colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                            color += slopeColor
+                            colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (colorRgb and 0xff00) shr 8 and 0xff00)
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                 val pixel = pixels[bufferOffset]
                                 if (transparent) {
-                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                 } else {
-                                    pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                    pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                 }
-                                if (writeDepth) {
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                 val pixel = pixels[bufferOffset]
                                 if (transparent) {
-                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                 } else {
-                                    pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                    pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                 }
-                                if (writeDepth) {
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                 val pixel = pixels[bufferOffset]
                                 if (transparent) {
-                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                 } else {
-                                    pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                    pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                 }
-                                if (writeDepth) {
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                 val pixel = pixels[bufferOffset]
                                 if (transparent) {
-                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                 } else {
-                                    pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                    pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                 }
-                                if (writeDepth) {
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                         } while (--x > 0)
                     }
                     x = endX - startX and 0x3
                     if (x > 0) {
-                        var background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                        background = ((background and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (background and 0xff00) shr 8 and 0xff00)
+                        var colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                        colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (colorRgb and 0xff00) shr 8 and 0xff00)
                         do {
                             bufferOffset++
-                            if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                            if (!depthWrite || depth < depthBuf[bufferOffset]) {
                                 val pixel = pixels[bufferOffset]
                                 if (transparent) {
-                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                    pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                                 } else {
-                                    pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                    pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                                 }
-                                if (writeDepth) {
+                                if (depthWrite) {
                                     depthBuf[bufferOffset] = depth
                                 }
                             }
-                            depth += depthSlope
+                            depth += slopeDepth
                         } while (--x > 0)
                     }
                 }
@@ -4060,75 +4060,75 @@ class RasterizerSM(
                     val invertedAlpha = 256 - blendingAlpha
                     do {
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            var background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                            background = ((background and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (background and 0xff00) shr 8 and 0xff00)
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            var colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                            colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (colorRgb and 0xff00) shr 8 and 0xff00)
                             val pixel = pixels[bufferOffset]
                             if (transparent) {
-                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                             } else {
-                                pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                             }
-                            if (writeDepth) {
+                            if (depthWrite) {
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        colour += colourSlope
-                        depth += depthSlope
+                        color += slopeColor
+                        depth += slopeDepth
                     } while (--x > 0)
                 } else {
                     do {
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            pixels[bufferOffset] = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                            if (writeDepth) {
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            pixels[bufferOffset] = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                            if (depthWrite) {
                                 depthBuf[bufferOffset] = depth
                             }
                         }
-                        depth += depthSlope
-                        colour += colourSlope
+                        depth += slopeDepth
+                        color += slopeColor
                     } while (--x > 0)
                 }
             }
         } else if (smoothEdges) {
             var x = endX - startX shr 2
-            colourSlope *= 4.0f
+            slopeColor *= 4.0f
             if (blendingAlpha == 0) {
                 if (x > 0) {
                     do {
-                        val background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                        colour += colourSlope
+                        val colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                        color += slopeColor
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            pixels[bufferOffset] = background
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            pixels[bufferOffset] = colorRgb
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            pixels[bufferOffset] = background
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            pixels[bufferOffset] = colorRgb
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            pixels[bufferOffset] = background
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            pixels[bufferOffset] = colorRgb
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            pixels[bufferOffset] = background
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            pixels[bufferOffset] = colorRgb
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                     } while (--x > 0)
                 }
                 x = endX - startX and 0x3
                 if (x > 0) {
-                    val background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
+                    val colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
                     do {
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                            pixels[bufferOffset] = background
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                            pixels[bufferOffset] = colorRgb
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                     } while (--x > 0)
                 }
             } else {
@@ -4136,66 +4136,66 @@ class RasterizerSM(
                 val invertedAlpha = 256 - blendingAlpha
                 if (x > 0) {
                     do {
-                        var background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                        colour += colourSlope
-                        background = ((background and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (background and 0xff00) shr 8 and 0xff00)
+                        var colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                        color += slopeColor
+                        colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (colorRgb and 0xff00) shr 8 and 0xff00)
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
                             if (transparent) {
-                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                             } else {
-                                pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                             }
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
                             if (transparent) {
-                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                             } else {
-                                pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                             }
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
                             if (transparent) {
-                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                             } else {
-                                pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                             }
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
                             if (transparent) {
-                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                             } else {
-                                pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                             }
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                     } while (--x > 0)
                 }
                 x = endX - startX and 0x3
                 if (x > 0) {
-                    var background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                    background = ((background and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (background and 0xff00) shr 8 and 0xff00)
+                    var colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                    colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (colorRgb and 0xff00) shr 8 and 0xff00)
                     do {
                         bufferOffset++
-                        if (!writeDepth || depth < depthBuf[bufferOffset]) {
+                        if (!depthWrite || depth < depthBuf[bufferOffset]) {
                             val pixel = pixels[bufferOffset]
                             if (transparent) {
-                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                                pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                             } else {
-                                pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                                pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                             }
                         }
-                        depth += depthSlope
+                        depth += slopeDepth
                     } while (--x > 0)
                 }
             }
@@ -4206,27 +4206,27 @@ class RasterizerSM(
                 val invertedAlpha = 256 - blendingAlpha
                 do {
                     bufferOffset++
-                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                        var background = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
-                        background = ((background and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (background and 0xff00) shr 8 and 0xff00)
+                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                        var colorRgb = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
+                        colorRgb = ((colorRgb and 0xff00ff) * invertedAlpha shr 8 and 0xff00ff) + (invertedAlpha * (colorRgb and 0xff00) shr 8 and 0xff00)
                         val pixel = pixels[bufferOffset]
                         if (transparent) {
-                            pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
+                            pixels[bufferOffset] = (invertedAlpha or (pixel shr 24)) shl 24 or (colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00))
                         } else {
-                            pixels[bufferOffset] = background + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
+                            pixels[bufferOffset] = colorRgb + ((pixel and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha * (pixel and 0xff00) shr 8 and 0xff00)
                         }
                     }
-                    colour += colourSlope
-                    depth += depthSlope
+                    color += slopeColor
+                    depth += slopeDepth
                 } while (--x > 0)
             } else {
                 do {
                     bufferOffset++
-                    if (!writeDepth || depth < depthBuf[bufferOffset]) {
-                        pixels[bufferOffset] = ColorUtil.hsvToRgbTable!![colour.toInt() and 0xffff]
+                    if (!depthWrite || depth < depthBuf[bufferOffset]) {
+                        pixels[bufferOffset] = ColorUtil.hsvToRgbTable!![color.toInt() and 0xffff]
                     }
-                    depth += depthSlope
-                    colour += colourSlope
+                    depth += slopeDepth
+                    color += slopeColor
                 } while (--x > 0)
             }
         }

@@ -257,7 +257,7 @@ object AreaSoundPlayer {
     @JvmStatic
     fun resetAreaSound(areaSound: AreaSound) {
         if (areaSound.areaSoundStream != null) {
-            AmbientSound.gameSounds!!.unlink(areaSound.areaSoundStream!!)
+            AmbientSound.gameSounds!!.removeSubStream(areaSound.areaSoundStream!!)
         } else {
             areaSound.delay = Int.MIN_VALUE
         }

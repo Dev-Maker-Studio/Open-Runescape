@@ -313,10 +313,10 @@ object Bot {
         Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
-    fun sendText(string: String) {
+    fun sendText(text: String) {
         val packet = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeByte(string.length + 1)
-        packet.buffer.writeString(string)
+        packet.buffer.writeByte(text.length + 1)
+        packet.buffer.writeString(text)
         Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
@@ -334,8 +334,8 @@ object Bot {
         sendItemOnObject(itemId, obj.id, obj.x, obj.y)
     }
 
-    fun sendItemOnObject(item: String, id: Int) {
-        getClosestObject(id)?.let { sendItemOnObject(item, it) }
+    fun sendItemOnObject(item: String, objectId: Int) {
+        getClosestObject(objectId)?.let { sendItemOnObject(item, it) }
     }
 
     fun sendItemOnObject(item: String, objectName: String) {
@@ -511,9 +511,9 @@ object Bot {
 
     fun bankAllInDepositBox() = clickButton(DEPOSIT_BOX_INTERFACE, 18)
 
-    fun bankAllExcept(id: Int) {
+    fun bankAllExcept(itemId: Int) {
         clickButton(BANK_INTERFACE, 33)
-        withdrawOneItem(id)
+        withdrawOneItem(itemId)
     }
 
     fun getNearbyGroundItemsWithIds(vararg ids: Int): List<Item> {
@@ -610,13 +610,13 @@ object Bot {
         )
     }
 
-    fun getDistanceTo(strategy: RouteStrategy, alt: Boolean = false): Int {
+    fun getDistanceTo(strategy: RouteStrategy, findAlternative: Boolean = false): Int {
         return Utils.findRouteDistance(
             getMyPlayer().endX.toInt(),
             getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER!!.getSize(),
             strategy,
             Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
-            alt,
+            findAlternative,
             Client.WALKING_STEPS_X,
             Client.WALKING_STEPS_Y
         )
@@ -636,14 +636,14 @@ object Bot {
 
     fun facingMe(entity: PathingEntity) = (entity.faceEntity - 32768) == getMyPlayer().playerIndex
 
-    fun getHitbarValue(entity: PathingEntity?, hitbarIndex: Int): Int {
+    fun getHitbarValue(entity: PathingEntity?, hitbarId: Int): Int {
         if (entity == null) return -1
-        val hitbarDef = TypeLists.HITBAR!!.list(hitbarIndex)
-        for (hitbar in entity.entityHitbars) {
-            val bar = hitbar as? EntityHitbar ?: continue
-            if (bar.hitbarType != hitbarDef) continue
-            val update = bar.getActiveDisplay(Client.cycles)
-            if (update != null) return update.toPercentage
+        val hitbarType = TypeLists.HITBAR!!.list(hitbarId)
+        for (node in entity.entityHitbars) {
+            val hitbar = node as? EntityHitbar ?: continue
+            if (hitbar.hitbarType != hitbarType) continue
+            val details = hitbar.getActiveDisplay(Client.cycles)
+            if (details != null) return details.toPercentage
         }
         return -1
     }
@@ -870,10 +870,10 @@ object Bot {
                 val positionHash = (getMyPlayer().plane.toLong() shl 28 or
                                    ((y + getBaseY()).toLong() shl 14) or
                                    (x + getBaseX()).toLong())
-                val deque = Client.GROUND_ITEMS.get(positionHash) ?: continue
-                for (groundItems in deque.groundItems) {
-                    val gi = groundItems as? GroundItemNode ?: continue
-                    items.add(Item(gi.id, gi.amount, Tile(x + getBaseX(), y + getBaseY(), getMyPlayer().plane.toInt())))
+                val groundItemWrapper = Client.GROUND_ITEMS.get(positionHash) ?: continue
+                for (node in groundItemWrapper.groundItems) {
+                    val groundItem = node as? GroundItemNode ?: continue
+                    items.add(Item(groundItem.id, groundItem.amount, Tile(x + getBaseX(), y + getBaseY(), getMyPlayer().plane.toInt())))
                 }
             }
         }

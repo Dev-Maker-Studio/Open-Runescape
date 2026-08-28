@@ -133,14 +133,14 @@ class Sun(
             toolkit.updateSun(1.0f)
             toolkit.applyLighting(sunColor, 1.0f, 1.0f, positionX.toFloat(), positionY.toFloat(), positionZ.toFloat())
             mesh.rotateWithoutNormals(rotationX and 0x3fff, rotationY and 0x3fff, rotationZ and 0x3fff)
-            val sunModel = toolkit.createModel(mesh, 2048, 0, 64, 768)
-            val sizeX = sunModel.getMaxX() - sunModel.getMinX()
-            val sizeY = sunModel.getMaxY() - sunModel.getMinY()
+            val coloredSunModel = toolkit.createModel(mesh, 2048, 0, 64, 768)
+            val sizeX = coloredSunModel.getMaxX() - coloredSunModel.getMinX()
+            val sizeY = coloredSunModel.getMaxY() - coloredSunModel.getMinY()
             val highestDimension = max(sizeX, sizeY)
             val size = sunUseDimension * 1024 / highestDimension
-            val matrix4412 = toolkit.copyModelMatrix()
-            val matrix4413 = toolkit.getScratchMatrix()
-            matrix4413.setPerspectiveFromViewport(
+            val savedModelMatrix = toolkit.copyModelMatrix()
+            val projectionMatrix = toolkit.getScratchMatrix()
+            projectionMatrix.setPerspectiveFromViewport(
                 (sunUseDimension / 2).toFloat(),
                 (sunUseDimension / 2).toFloat(),
                 size.toFloat(),
@@ -151,15 +151,15 @@ class Sun(
                 toolkit.getDisplay()!!!!.getHeight().toFloat(),
                 1024.0f
             )
-            toolkit.setModelMatrix(matrix4413)
+            toolkit.setModelMatrix(projectionMatrix)
             val sunPosition = Matrix43()
             toolkit.setSunPosition(sunPosition)
             val renderingMatrix = toolkit.getRenderingMatrix()
-            renderingMatrix.setViewPosition(0.0f, 0.0f, (50 - sunModel.getMinZ()).toFloat())
-            sunModel.drawMatrixThreaded(renderingMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
+            renderingMatrix.setViewPosition(0.0f, 0.0f, (50 - coloredSunModel.getMinZ()).toFloat())
+            coloredSunModel.drawMatrixThreaded(renderingMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
             sunSprite = toolkit.createNativeSprite(0, 0, sunUseDimension, sunUseDimension, true)
             sunSprite!!.pixelTransfer()
-            toolkit.setModelMatrix(matrix4412)
+            toolkit.setModelMatrix(savedModelMatrix)
             toolkit.setClipping(SUN_CLIPPING[0], SUN_CLIPPING[1], SUN_CLIPPING[2], SUN_CLIPPING[3])
         }
     }
@@ -204,16 +204,16 @@ class Sun(
         if (sunRotationX != 0) {
             val xan = MathUtils.SINE[sunRotationX]
             val zan = MathUtils.COSINE[sunRotationX]
-            val tmp = positionY * zan - positionZ * xan shr 14
+            val tmpY = positionY * zan - positionZ * xan shr 14
             positionZ = positionY * xan + positionZ * zan shr 14
-            positionY = tmp
+            positionY = tmpY
         }
         if (sunRotationY != 0) {
             val xan = MathUtils.SINE[sunRotationY]
             val zan = MathUtils.COSINE[sunRotationY]
-            val tmp = positionZ * xan + positionX * zan shr 14
+            val tmpX = positionZ * xan + positionX * zan shr 14
             positionZ = positionZ * zan - positionX * xan shr 14
-            positionX = tmp
+            positionX = tmpX
         }
         val copiedSunModel = sunModel!!.copy(0.toByte(), ModelFunctionMask.HAS_TEXTURE_COORDS or ModelFunctionMask.RECOLOR or ModelFunctionMask.RETEXTURE, true)
         copiedSunModel!!.rematerial(0.toShort(), sunMaterialId.toShort())
@@ -223,9 +223,9 @@ class Sun(
         if (sunColor != 0) {
             size = size * 13 / 16
         }
-        val matrix4414 = toolkit.copyModelMatrix()
-        val matrix449 = toolkit.getScratchMatrix()
-        matrix449.setPerspectiveFromViewport(
+        val savedModelMatrix = toolkit.copyModelMatrix()
+        val projectionMatrix = toolkit.getScratchMatrix()
+        projectionMatrix.setPerspectiveFromViewport(
             (sunUseDimension / 2).toFloat(),
             (sunUseDimension / 2).toFloat(),
             size.toFloat(),
@@ -236,11 +236,11 @@ class Sun(
             toolkit.getDisplay()!!.getHeight().toFloat(),
             1024.0f
         )
-        toolkit.setModelMatrix(matrix449)
+        toolkit.setModelMatrix(projectionMatrix)
         toolkit.setSunPosition(Matrix43())
-        val sunProjectionMatrix = Matrix43()
-        sunProjectionMatrix.setViewPosition(0.0f, 0.0f, (50 - copiedSunModel!!.getMinZ()).toFloat())
-        copiedSunModel!!.drawMatrixThreaded(sunProjectionMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
+        val renderingMatrix = Matrix43()
+        renderingMatrix.setViewPosition(0.0f, 0.0f, (50 - copiedSunModel!!.getMinZ()).toFloat())
+        copiedSunModel!!.drawMatrixThreaded(renderingMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
         val useDimension = sunUseDimension * 13 / 16
         val position = (sunUseDimension - useDimension) / 2
         activeAntiSun!!.drawCircle(position, position, useDimension, useDimension, 0, 0xff000000.toInt() or sunColor, 1)
@@ -249,7 +249,7 @@ class Sun(
         toolkit.drawFilledRectangle(0, 0, sunUseDimension, sunUseDimension, 0, 0)
         activeSun!!.drawCircle(0, 0, sunUseDimension, sunUseDimension, 1, 0, 0)
         sunSprite!!.pixelTransfer()
-        toolkit.setModelMatrix(matrix4414)
+        toolkit.setModelMatrix(savedModelMatrix)
         toolkit.setClipping(SUN_CLIPPING[0], SUN_CLIPPING[1], SUN_CLIPPING[2], SUN_CLIPPING[3])
     }
 
@@ -345,19 +345,19 @@ class Sun(
         @JvmStatic
         fun generateSunSprites(toolkit: AbstractToolkit) {
             if (activeSun == null) {
-                val antiSunColor = IntArray(16384)
-                val sunColor = IntArray(16384)
-                for (i_3 in 0 until 64) {
-                    var i_4 = 64 - i_3
-                    i_4 *= i_4
-                    val i_5 = 128 - i_3 - 1
-                    val offsetA = i_3 * 128
-                    val offsetC = i_5 * 128
-                    for (offsetB in 0 until 64) {
-                        var i_9 = 64 - offsetB
-                        i_9 *= i_9
-                        val offsetD = 128 - offsetB - 1
-                        var alpha = 256 - (i_9 + i_4 shl 8) / 4096
+                val antiSunPixels = IntArray(16384)
+                val sunPixels = IntArray(16384)
+                for (y in 0 until 64) {
+                    var dySq = 64 - y
+                    dySq *= dySq
+                    val mirrorY = 128 - y - 1
+                    val rowOffset = y * 128
+                    val mirrorRowOffset = mirrorY * 128
+                    for (x in 0 until 64) {
+                        var dxSq = 64 - x
+                        dxSq *= dxSq
+                        val mirrorX = 128 - x - 1
+                        var alpha = 256 - (dxSq + dySq shl 8) / 4096
                         alpha = alpha * 3072 / 1536
                         if (alpha < 0) {
                             alpha = 0
@@ -365,18 +365,18 @@ class Sun(
                             alpha = 255
                         }
                         val halvedAlpha = alpha / 2
-                        sunColor[offsetA + offsetB] = 0xff000000.toInt() or (alpha shl 16)
-                        sunColor[offsetA + offsetD] = sunColor[offsetA + offsetB]
-                        sunColor[offsetC + offsetB] = sunColor[offsetA + offsetB]
-                        sunColor[offsetC + offsetD] = sunColor[offsetA + offsetB]
-                        antiSunColor[offsetA + offsetB] = (127 - halvedAlpha shl 24) or 0xffffff
-                        antiSunColor[offsetA + offsetD] = antiSunColor[offsetA + offsetB]
-                        antiSunColor[offsetC + offsetB] = antiSunColor[offsetA + offsetB]
-                        antiSunColor[offsetC + offsetD] = antiSunColor[offsetA + offsetB]
+                        sunPixels[rowOffset + x] = 0xff000000.toInt() or (alpha shl 16)
+                        sunPixels[rowOffset + mirrorX] = sunPixels[rowOffset + x]
+                        sunPixels[mirrorRowOffset + x] = sunPixels[rowOffset + x]
+                        sunPixels[mirrorRowOffset + mirrorX] = sunPixels[rowOffset + x]
+                        antiSunPixels[rowOffset + x] = (127 - halvedAlpha shl 24) or 0xffffff
+                        antiSunPixels[rowOffset + mirrorX] = antiSunPixels[rowOffset + x]
+                        antiSunPixels[mirrorRowOffset + x] = antiSunPixels[rowOffset + x]
+                        antiSunPixels[mirrorRowOffset + mirrorX] = antiSunPixels[rowOffset + x]
                     }
                 }
-                activeSun = toolkit.createNativeSprite(sunColor, 128, 128, 128)
-                activeAntiSun = toolkit.createNativeSprite(antiSunColor, 128, 128, 128)
+                activeSun = toolkit.createNativeSprite(sunPixels, 128, 128, 128)
+                activeAntiSun = toolkit.createNativeSprite(antiSunPixels, 128, 128, 128)
             }
         }
 

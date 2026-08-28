@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.DefaultsFile
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-class EntityDefaults(index1: Js5ResourceProvider) {
+class EntityDefaults(defaultsResource: Js5ResourceProvider) {
 
     @JvmField var maximumHits = 4
     @JvmField var hitOffsetsX: IntArray? = null
@@ -26,7 +26,7 @@ class EntityDefaults(index1: Js5ResourceProvider) {
     @JvmField var recolorPaletteDst: Array<Array<ShortArray>>? = null
 
     init {
-        decode(Packet(index1.getFile(DefaultsFile.ENTITY.fileId)!!))
+        decode(Packet(defaultsResource.getFile(DefaultsFile.ENTITY.fileId)!!))
     }
 
     fun decode(buffer: Packet) {
@@ -54,9 +54,9 @@ class EntityDefaults(index1: Js5ResourceProvider) {
                         hitOffsetsX = IntArray(4)
                         hitOffsetsY = IntArray(4)
                     }
-                    for (i_5 in hitOffsetsX!!.indices) {
-                        hitOffsetsX!![i_5] = buffer.readShort()
-                        hitOffsetsY!![i_5] = buffer.readShort()
+                    for (i in hitOffsetsX!!.indices) {
+                        hitOffsetsX!![i] = buffer.readShort()
+                        hitOffsetsY!![i] = buffer.readShort()
                     }
                     loadedOffsets = true
                 }
@@ -72,21 +72,21 @@ class EntityDefaults(index1: Js5ResourceProvider) {
                 7 -> {
                     recolorPaletteSrc = Array(10) { ShortArray(4) }
                     recolorPaletteDst = Array(10) { Array(4) { ShortArray(0) } }
-                    for (i_5 in 0..9) {
-                        for (i_6 in 0..3) {
-                            var i_7 = buffer.readUShort()
-                            if (i_7 == 65535) {
-                                i_7 = -1
+                    for (paletteIndex in 0..9) {
+                        for (colorIndex in 0..3) {
+                            var srcColor = buffer.readUShort()
+                            if (srcColor == 65535) {
+                                srcColor = -1
                             }
-                            recolorPaletteSrc!![i_5][i_6] = i_7.toShort()
-                            val i_8 = buffer.readUShort()
-                            recolorPaletteDst!![i_5][i_6] = ShortArray(i_8)
-                            for (i_9 in 0 until i_8) {
-                                var i_10 = buffer.readUShort()
-                                if (i_10 == 65535) {
-                                    i_10 = -1
+                            recolorPaletteSrc!![paletteIndex][colorIndex] = srcColor.toShort()
+                            val dstCount = buffer.readUShort()
+                            recolorPaletteDst!![paletteIndex][colorIndex] = ShortArray(dstCount)
+                            for (dstIndex in 0 until dstCount) {
+                                var dstColor = buffer.readUShort()
+                                if (dstColor == 65535) {
+                                    dstColor = -1
                                 }
-                                recolorPaletteDst!![i_5][i_6][i_9] = i_10.toShort()
+                                recolorPaletteDst!![paletteIndex][colorIndex][dstIndex] = dstColor.toShort()
                             }
                         }
                     }

@@ -41,18 +41,18 @@ class LappingWaterEffect(
                 glToolkit, """// Vertex Program in ARB_vp1.0 (deprecated)// Enable the ARB_position_invariant option to specify that the vertex program output is position invariant.!!ARBvp1.0OPTION ARB_position_invariant;// Define input attributesATTRIB iPos      = vertex.position; // Input vertex positionATTRIB iColour   = vertex.color;    // Input vertex colorATTRIB iTexCoord = vertex.texcoord[0]; // Input vertex texture coordinates// Define output attributesOUTPUT oColour    = result.color;    // Output vertex colorOUTPUT oTexCoord0 = result.texcoord[0]; // Output vertex texture coordinates for texture unit 0OUTPUT oTexCoord1 = result.texcoord[1]; // Output vertex texture coordinates for texture unit 1OUTPUT oFogCoord  = result.fogcoord;  // Output vertex fog coordinates// Define parameter constants (uniforms)PARAM time         = program.local[65];  // Time parameterPARAM turbulence   = program.local[64];  // Turbulence parameterPARAM lightAmbient = program.local[66];  // Light ambient parameterPARAM pMatrix[4]   = { state.matrix.projection };  // Projection matrixPARAM mvMatrix[4]  = { state.matrix.modelview };   // Model-View matrixPARAM ivMatrix[4]  = { state.matrix.texture[1] };  // Inverse texture matrix for texture unit 1PARAM texMatrix[4] = { state.matrix.texture[0] };  // Texture matrix for texture unit 0PARAM fNoise[64]   = { program.local[0..63] };    // Noise array// Temporary registers for intermediate calculationsTEMP noise, viewPos, worldPos, texCoord;ADDRESS noiseAddr;// Calculate vertex position in view spaceDP4 viewPos.x, mvMatrix[0], iPos;DP4 viewPos.y, mvMatrix[1], iPos;DP4 viewPos.z, mvMatrix[2], iPos;DP4 viewPos.w, mvMatrix[3], iPos;// Output fog coordinate from the z-component of the view positionMOV oFogCoord.x, viewPos.z;// Transform the vertex position from view space to world space using the inverse texture matrixDP4 worldPos.x, ivMatrix[0], viewPos;DP4 worldPos.y, ivMatrix[1], viewPos;DP4 worldPos.z, ivMatrix[2], viewPos;DP4 worldPos.w, ivMatrix[3], viewPos;// Create noise offsets by combining the x and z components of the world positionADD noise.x, worldPos.x, worldPos.z;SUB noise.y, worldPos.z, worldPos.x;// Scale the noise offsets and wrap them around using the fractional part function (FRC)MUL noise, noise, 0.0001220703125; // 1/8192, approximate reciprocal of 8192FRC noise, noise;MUL noise, noise, 64;// Calculate the address for the noise lookup in the fNoise arrayARL noiseAddr.x, noise.x;// Lookup the noise value from the fNoise arrayMOV noise.x, fNoise[noiseAddr.x].x;// Repeat the same process for the y component of the noise offsetARL noiseAddr.x, noise.y;MOV noise.y, fNoise[noiseAddr.x].y;// Apply turbulence to the noise offsetsMUL noise, noise, turbulence.x;// Calculate texture coordinates for texture unit 0DP4 texCoord.x, texMatrix[0], iTexCoord;DP4 texCoord.y, texMatrix[1], iTexCoord;// Apply the noise offsets to the texture coordinates for texture unit 0ADD oTexCoord0.xy, texCoord, noise;MOV oTexCoord0.z, 0;MOV oTexCoord0.w, 1;// Calculate texture coordinates for texture unit 1 (used for animation)MUL oTexCoord1.xy, texCoord, 0.125; // Scaled down by 1/8MOV oTexCoord1.zw, time.xxxw;      // Set the time parameter for animation// Apply lighting by multiplying the input vertex color with the light ambient parameterMUL oColour.xyz, iColour, lightAmbient;// Copy the alpha component of the input vertex color to the output vertex colorMOV oColour.w, iColour.w;// End of the vertex shaderEND"""
             )
             if (program != null) {
-                val ints_3 = TextureOpPerlinNoise.generateNoiseMap()
-                val ints_4 = TextureOpPerlinNoise.generateNoiseMap()
-                var i_5 = 0
+                val noiseMapX = TextureOpPerlinNoise.generateNoiseMap()
+                val noiseMapY = TextureOpPerlinNoise.generateNoiseMap()
+                var offset = 0
                 noise = FloatArray(32768)
 
                 for (index in 0 until 256) {
-                    val ints_7 = ints_3[index]
-                    val ints_8 = ints_4[index]
+                    val rowX = noiseMapX[index]
+                    val rowY = noiseMapY[index]
 
-                    for (i_9 in 0 until 64) {
-                        noise!![i_5++] = ints_7[i_9] / 4096.0f
-                        noise!![i_5++] = ints_8[i_9] / 4096.0f
+                    for (i in 0 until 64) {
+                        noise!![offset++] = rowX[i] / 4096.0f
+                        noise!![offset++] = rowY[i] / 4096.0f
                     }
                 }
 
@@ -90,7 +90,7 @@ class LappingWaterEffect(
         return true
     }
 
-    override fun toggle(bool1: Boolean) {
+    override fun toggle(enabled: Boolean) {
         //System.out.println("Enabled material effect "+this.getClass().getSimpleName());
         if (Loader.MATERIAL_EFFECTS_DISABLED[2]) return
         if (listUtils != null) {
@@ -101,11 +101,11 @@ class LappingWaterEffect(
             OpenGL.glMatrixMode(GL_MODELVIEW)
             glToolkit.activateTexture(0)
             if (glToolkit.textureAnimatingProgression != animatingProgression) {
-                var progress = glToolkit.textureAnimatingProgression % 5000 * 128 / 5000
+                var noiseOffset = glToolkit.textureAnimatingProgression % 5000 * 128 / 5000
 
                 for (index in 0 until 64) {
-                    OpenGL.glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, index, noise, progress)
-                    progress += 2
+                    OpenGL.glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, index, noise, noiseOffset)
+                    noiseOffset += 2
                 }
 
                 if (textureContainer.texture3dSupported) {
@@ -132,14 +132,14 @@ class LappingWaterEffect(
         }
     }
 
-    override fun applyEffectParams(param1: Int, param2: Int) {
+    override fun applyEffectParams(effectParam1: Int, effectParam2: Int) {
         if (listUtils != null) {
             glToolkit.activateTexture(1)
-            if ((param1 and 0x80) == 0) {
-                if ((param2 and 0x1) == 1) {
+            if ((effectParam1 and 0x80) == 0) {
+                if ((effectParam2 and 0x1) == 1) {
                     if (!textureContainer.texture3dSupported) {
-                        val progress = glToolkit.textureAnimatingProgression % 4000 * 16 / 4000
-                        glToolkit.setActiveTexture(textureContainer.textures2d!![progress])
+                        val frame = glToolkit.textureAnimatingProgression % 4000 * 16 / 4000
+                        glToolkit.setActiveTexture(textureContainer.textures2d!![frame])
                         OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 65, 0.0f, 0.0f, 0.0f, 1.0f)
                     } else {
                         glToolkit.setActiveTexture(textureContainer.texture3d)
@@ -159,7 +159,7 @@ class LappingWaterEffect(
             }
 
             glToolkit.activateTexture(0)
-            if ((param1 and 0x40) == 0) {
+            if ((effectParam1 and 0x40) == 0) {
                 SUN_COLOR[0] = glToolkit.sunBrightness * glToolkit.sunColorRed
                 SUN_COLOR[1] = glToolkit.sunBrightness * glToolkit.sunColorGreen
                 SUN_COLOR[2] = glToolkit.sunBrightness * glToolkit.sunColorBlue
@@ -168,10 +168,10 @@ class LappingWaterEffect(
                 OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 66, 1.0f, 1.0f, 1.0f, 1.0f)
             }
 
-            val type = param1 and 0x3
-            if (type == 2) {
+            val turbulenceLevel = effectParam1 and 0x3
+            if (turbulenceLevel == 2) {
                 OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 64, 0.05f, 1.0f, 1.0f, 1.0f)
-            } else if (type == 3) {
+            } else if (turbulenceLevel == 3) {
                 OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 64, 0.1f, 1.0f, 1.0f, 1.0f)
             } else {
                 OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 64, 0.025f, 1.0f, 1.0f, 1.0f)

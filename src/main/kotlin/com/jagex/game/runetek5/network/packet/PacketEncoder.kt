@@ -406,7 +406,7 @@ object PacketEncoder {
             buffer.writeByte(1)
             buffer.writeShort(Client.VARCS_BOOLS_LOADED)
             for (varcIndex in VarcTypeList.VARC_INT!!.indices) {
-                if (VarcTypeList.VARC_BOOL!![varcIndex]) {
+                if (VarcTypeList.VARC_PERSISTENT!![varcIndex]) {
                     buffer.writeShort(varcIndex)
                     buffer.writeInt(VarcTypeList.VARC_INT!![varcIndex])
                 }

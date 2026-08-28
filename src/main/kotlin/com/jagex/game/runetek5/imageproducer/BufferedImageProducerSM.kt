@@ -11,11 +11,11 @@ import java.awt.image.Raster
 import java.util.Hashtable
 
 class BufferedImageProducerSM(
-    hardwarerenderer1: SafeModeToolkit,
-    canvas2: Canvas,
-    i_3: Int,
-    i_4: Int
-) : AbstractImageProducerSM(hardwarerenderer1, canvas2, i_3, i_4) {
+    toolkit: SafeModeToolkit,
+    canvas: Canvas,
+    width: Int,
+    height: Int
+) : AbstractImageProducerSM(toolkit, canvas, width, height) {
 
     @JvmField var image: Image? = null
 

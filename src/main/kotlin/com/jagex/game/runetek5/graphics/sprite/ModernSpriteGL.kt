@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.sprite
 
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
-import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.graphics.texture.OpenGl2DImageTexture
 import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
 
@@ -53,9 +53,9 @@ class ModernSpriteGL : SpriteGL {
      * instead of falling through to the legacy SpriteGL draw methods.
      */
     private fun useModernPath(): Boolean {
-        val mt = modernToolkit
-        val sr = mt.getSpriteRenderer() ?: return false
-        return sr.isReady() && mt.isModernRenderingActive()
+        val modern = modernToolkit
+        val spriteRenderer = modern.getSpriteRenderer() ?: return false
+        return spriteRenderer.isReady() && modern.isModernRenderingActive()
     }
 
     /**
@@ -103,7 +103,7 @@ class ModernSpriteGL : SpriteGL {
             return
         }
 
-        val sr = modernToolkit.getSpriteRenderer()!!
+        val spriteRenderer = modernToolkit.getSpriteRenderer()!!
         modernToolkit.ensureSpriteBatchForFont() // Ensures sprite batch is active
 
         val drawX = x + translateX
@@ -111,7 +111,7 @@ class ModernSpriteGL : SpriteGL {
         val textureHandle = texture2d.activeHandle
         if (textureHandle <= 0) return
 
-        sr.drawSprite(
+        spriteRenderer.drawSprite(
             textureId = textureHandle,
             x0 = drawX.toFloat(),
             y0 = drawY.toFloat(),
@@ -143,7 +143,7 @@ class ModernSpriteGL : SpriteGL {
             return
         }
 
-        val sr = modernToolkit.getSpriteRenderer()!!
+        val spriteRenderer = modernToolkit.getSpriteRenderer()!!
         modernToolkit.ensureSpriteBatchForFont()
 
         val textureHandle = texture2d.activeHandle
@@ -157,7 +157,7 @@ class ModernSpriteGL : SpriteGL {
             val t = texture2d.t * height / texture2d.singleLength
             val s = texture2d.s * width / texture2d.singleWidth
 
-            sr.drawSprite(
+            spriteRenderer.drawSprite(
                 textureId = textureHandle,
                 x0 = x.toFloat(), y0 = y.toFloat(),
                 x1 = endX.toFloat(), y1 = endY.toFloat(),
@@ -179,7 +179,7 @@ class ModernSpriteGL : SpriteGL {
                 var tileEndX = texture2d.singleWidth + x
 
                 while (tileEndX <= endX) {
-                    sr.drawSprite(
+                    spriteRenderer.drawSprite(
                         textureId = textureHandle,
                         x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
                         x1 = (tileEndX + translateX).toFloat(), y1 = (tileEndY + translateY).toFloat(),
@@ -195,7 +195,7 @@ class ModernSpriteGL : SpriteGL {
                 // Partial column at right edge
                 if (startX < endX) {
                     val partialS = texture2d.s * (endX - startX) / texture2d.singleWidth
-                    sr.drawSprite(
+                    spriteRenderer.drawSprite(
                         textureId = textureHandle,
                         x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
                         x1 = (endX + translateX).toFloat(), y1 = (tileEndY + translateY).toFloat(),
@@ -217,7 +217,7 @@ class ModernSpriteGL : SpriteGL {
                 var tileEndX = texture2d.singleWidth + x
 
                 while (tileEndX <= endX) {
-                    sr.drawSprite(
+                    spriteRenderer.drawSprite(
                         textureId = textureHandle,
                         x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
                         x1 = (tileEndX + translateX).toFloat(), y1 = (endY + translateY).toFloat(),
@@ -233,7 +233,7 @@ class ModernSpriteGL : SpriteGL {
                 // Bottom-right corner partial
                 if (startX < endX) {
                     val partialS = texture2d.s * (endX - startX) / texture2d.singleWidth
-                    sr.drawSprite(
+                    spriteRenderer.drawSprite(
                         textureId = textureHandle,
                         x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
                         x1 = (endX + translateX).toFloat(), y1 = (endY + translateY).toFloat(),
@@ -266,7 +266,7 @@ class ModernSpriteGL : SpriteGL {
             return
         }
 
-        val sr = modernToolkit.getSpriteRenderer()!!
+        val spriteRenderer = modernToolkit.getSpriteRenderer()!!
         modernToolkit.ensureSpriteBatchForFont()
 
         val textureHandle = texture2d.activeHandle
@@ -278,20 +278,20 @@ class ModernSpriteGL : SpriteGL {
             val scaleY = height.toFloat() / getSpriteHeight()
             val drawX = x + translateX * scaleX
             val drawY = y + translateY * scaleY
-            val drawEndX = drawX + texture2d.singleWidth * scaleX
-            val drawEndY = drawY + texture2d.singleLength * scaleY
+            val endX = drawX + texture2d.singleWidth * scaleX
+            val endY = drawY + texture2d.singleLength * scaleY
 
-            sr.drawSprite(
+            spriteRenderer.drawSprite(
                 textureId = textureHandle,
                 x0 = drawX, y0 = drawY,
-                x1 = drawEndX, y1 = drawEndY,
+                x1 = endX, y1 = endY,
                 u0 = 0.0f, v0 = texture2d.t,
                 u1 = texture2d.s, v1 = 0.0f,
                 colorArgb = shaderColor(combineMode, colorArgb),
                 blendMode = blendMode
             )
         } else {
-            sr.drawSprite(
+            spriteRenderer.drawSprite(
                 textureId = textureHandle,
                 x0 = x.toFloat(), y0 = y.toFloat(),
                 x1 = (x + width).toFloat(), y1 = (y + height).toFloat(),
@@ -312,57 +312,57 @@ class ModernSpriteGL : SpriteGL {
      * Modern: uses drawQuad to emit an arbitrary quad.
      *
      * The 6 float parameters define 3 corners of a parallelogram:
-     * (f_1, f_2) = top-left, (f_3, f_4) = top-right, (f_5, f_6) = bottom-left
+     * (topLeftX, topLeftY), (topRightX, topRightY), (bottomLeftX, bottomLeftY)
      * The 4th corner (bottom-right) is computed as: bottom-left + (top-right - top-left)
      */
-    override fun drawAffine(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, combineMode: Int, colorArgb: Int, blendMode: Int) {
+    override fun drawAffine(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, colorArgb: Int, blendMode: Int) {
         if (!useModernPath()) {
             modernToolkit.countLegacySkip("SpriteGL.drawAffine(skipped)")
             return
         }
 
-        val sr = modernToolkit.getSpriteRenderer()!!
+        val spriteRenderer = modernToolkit.getSpriteRenderer()!!
         modernToolkit.ensureSpriteBatchForFont()
 
         val textureHandle = texture2d.activeHandle
         if (textureHandle <= 0) return
 
         // Apply stretch/translate transforms matching legacy drawAffine
-        var x1 = f_1
-        var y1 = f_2
-        var x2 = f_3
-        var y2 = f_4
-        var x3 = f_5
-        var y3 = f_6
+        var x1 = topLeftX
+        var y1 = topLeftY
+        var x2 = topRightX
+        var y2 = topRightY
+        var x3 = bottomLeftX
+        var y3 = bottomLeftY
 
         if (stretched) {
-            val spriteW = getSpriteWidth().toFloat()
-            val spriteH = getSpriteHeight().toFloat()
-            val scaleXx = (x2 - x1) / spriteW
-            val scaleXy = (y2 - y1) / spriteW
-            val scaleYx = (x3 - x1) / spriteH
-            val scaleYy = (y3 - y1) / spriteH
+            val spriteWidth = getSpriteWidth().toFloat()
+            val spriteHeight = getSpriteHeight().toFloat()
+            val scaleXx = (x2 - x1) / spriteWidth
+            val scaleXy = (y2 - y1) / spriteWidth
+            val scaleYx = (x3 - x1) / spriteHeight
+            val scaleYy = (y3 - y1) / spriteHeight
             val transYx = scaleYx * translateY
             val transYy = scaleYy * translateY
             val transXx = scaleXx * translateX
             val transXy = scaleXy * translateX
-            val borderXx = -scaleXx * trimRight
-            val borderXy = -scaleXy * trimRight
-            val borderYx = -scaleYx * trimBottom
-            val borderYy = -scaleYy * trimBottom
+            val trimRightX = -scaleXx * trimRight
+            val trimRightY = -scaleXy * trimRight
+            val trimBottomX = -scaleYx * trimBottom
+            val trimBottomY = -scaleYy * trimBottom
             x1 = x1 + transXx + transYx
             y1 = y1 + transXy + transYy
-            x2 = x2 + borderXx + transYx
-            y2 = y2 + borderXy + transYy
-            x3 = x3 + transXx + borderYx
-            y3 = y3 + transXy + borderYy
+            x2 = x2 + trimRightX + transYx
+            y2 = y2 + trimRightY + transYy
+            x3 = x3 + transXx + trimBottomX
+            y3 = y3 + transXy + trimBottomY
         }
 
         // 4th corner = bottom-left + (top-right - top-left)
         val x4 = x3 + (x2 - x1)
         val y4 = y2 + (y3 - y1)
 
-        sr.drawQuad(
+        spriteRenderer.drawQuad(
             textureId = textureHandle,
             x0 = x1, y0 = y1, u0 = 0.0f, v0 = texture2d.t,
             x1 = x3, y1 = y3, u1 = 0.0f, v1 = 0.0f,
@@ -403,10 +403,10 @@ class ModernSpriteGL : SpriteGL {
      * Real surface-mask composite (was an unmasked approximation). Corner and UV
      * math is byte-for-byte the legacy fixed-function version:
      * SpriteGL.drawWithSurface, SpriteGL.kt:271-313 — mask UVs are screen-space
-     * relative to (offsetX, offsetY) scaled by surface.s/singleWidth and
+     * relative to (surfaceOffsetX, surfaceOffsetY) scaled by surface.s/singleWidth and
      * surface.t/singleLength, with the mask V axis flipped (surface.t - v).
      */
-    override fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, offsetX: Int, offsetY: Int) {
+    override fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
         val maskTexture = (surface as? SpriteSurfaceGL)?.surface
         if (maskTexture == null) {
             modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(skipped)")
@@ -425,10 +425,10 @@ class ModernSpriteGL : SpriteGL {
         val endY = drawY + texture2d.singleLength
         val sScale = maskTexture.s / maskTexture.singleWidth
         val tScale = maskTexture.t / maskTexture.singleLength
-        val mu0 = (drawX - offsetX) * sScale
-        val mu1 = (endX - offsetX) * sScale
-        val mv0 = maskTexture.t - (drawY - offsetY) * tScale
-        val mv1 = maskTexture.t - (endY - offsetY) * tScale
+        val mu0 = (drawX - surfaceOffsetX) * sScale
+        val mu1 = (endX - surfaceOffsetX) * sScale
+        val mv0 = maskTexture.t - (drawY - surfaceOffsetY) * tScale
+        val mv1 = maskTexture.t - (endY - surfaceOffsetY) * tScale
 
         if (!modernToolkit.drawSurfaceMaskedQuad(
                 baseHandle, maskHandle,
@@ -445,10 +445,10 @@ class ModernSpriteGL : SpriteGL {
     /**
      * Real affine surface-mask composite. Legacy reference:
      * SpriteGL.drawAffineMasked, SpriteGL.kt:451-519 — the stretch/translate corner
-     * transform matches drawAffine; mask UVs per corner are f_14*(cornerX - offsetX)
-     * and surface.t - f_15*(cornerY - offsetY); linear filtering per (flags and 1).
+     * transform matches drawAffine; mask UVs per corner are sScale*(cornerX - surfaceOffsetX)
+     * and surface.t - tScale*(cornerY - surfaceOffsetY); linear filtering per (flags and 1).
      */
-    override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, flags: Int, surface: ComponentSurface, offsetX: Int, offsetY: Int) {
+    override fun drawAffineMasked(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, flags: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
         val maskTexture = (surface as? SpriteSurfaceGL)?.surface
         if (maskTexture == null) {
             modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(skipped)")
@@ -464,33 +464,33 @@ class ModernSpriteGL : SpriteGL {
         // Legacy filtering toggle (SpriteGL.kt:489)
         texture2d.setLinearTextureFilter((flags and 0x1) != 0)
 
-        var x1 = f_1
-        var y1 = f_2
-        var x2 = f_3
-        var y2 = f_4
-        var x3 = f_5
-        var y3 = f_6
+        var x1 = topLeftX
+        var y1 = topLeftY
+        var x2 = topRightX
+        var y2 = topRightY
+        var x3 = bottomLeftX
+        var y3 = bottomLeftY
         if (stretched) {
-            val spriteW = getSpriteWidth().toFloat()
-            val spriteH = getSpriteHeight().toFloat()
-            val scaleXx = (x2 - x1) / spriteW
-            val scaleXy = (y2 - y1) / spriteW
-            val scaleYx = (x3 - x1) / spriteH
-            val scaleYy = (y3 - y1) / spriteH
+            val spriteWidth = getSpriteWidth().toFloat()
+            val spriteHeight = getSpriteHeight().toFloat()
+            val scaleXx = (x2 - x1) / spriteWidth
+            val scaleXy = (y2 - y1) / spriteWidth
+            val scaleYx = (x3 - x1) / spriteHeight
+            val scaleYy = (y3 - y1) / spriteHeight
             val transYx = scaleYx * translateY
             val transYy = scaleYy * translateY
             val transXx = scaleXx * translateX
             val transXy = scaleXy * translateX
-            val borderXx = -scaleXx * trimRight
-            val borderXy = -scaleXy * trimRight
-            val borderYx = -scaleYx * trimBottom
-            val borderYy = -scaleYy * trimBottom
+            val trimRightX = -scaleXx * trimRight
+            val trimRightY = -scaleXy * trimRight
+            val trimBottomX = -scaleYx * trimBottom
+            val trimBottomY = -scaleYy * trimBottom
             x1 = x1 + transXx + transYx
             y1 = y1 + transXy + transYy
-            x2 = x2 + borderXx + transYx
-            y2 = y2 + borderXy + transYy
-            x3 = x3 + transXx + borderYx
-            y3 = y3 + transXy + borderYy
+            x2 = x2 + trimRightX + transYx
+            y2 = y2 + trimRightY + transYy
+            x3 = x3 + transXx + trimBottomX
+            y3 = y3 + transXy + trimBottomY
         }
         // 4th corner (legacy SpriteGL.kt:487-488)
         val x4 = x3 + (x2 - x1)
@@ -498,8 +498,8 @@ class ModernSpriteGL : SpriteGL {
 
         val sScale = maskTexture.s / maskTexture.singleWidth
         val tScale = maskTexture.t / maskTexture.singleLength
-        fun mu(px: Float) = sScale * (px - offsetX)
-        fun mv(py: Float) = maskTexture.t - tScale * (py - offsetY)
+        fun mu(px: Float) = sScale * (px - surfaceOffsetX)
+        fun mv(py: Float) = maskTexture.t - tScale * (py - surfaceOffsetY)
 
         if (!modernToolkit.drawSurfaceMaskedQuad(
                 baseHandle, maskHandle,

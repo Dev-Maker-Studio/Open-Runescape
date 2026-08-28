@@ -77,11 +77,11 @@ abstract class SceneGraphEntity(
         boundingBoxPolygons = Array(amount) { BoundingBoxPolygon() }
     }
 
-    abstract fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, var6: Boolean)
+    abstract fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, renderTypeAdjustment: Boolean)
 
     abstract fun canRender(): Boolean
 
-    abstract fun getActiveLights(nodes: Array<PointLight?>): Int
+    abstract fun getActiveLights(lights: Array<PointLight?>): Int
 
     abstract fun isSoftHidden(toolkit: AbstractToolkit): Boolean
 }

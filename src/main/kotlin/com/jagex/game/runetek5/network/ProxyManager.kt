@@ -23,33 +23,33 @@ open class ProxyManager : SocketManager() {
         if (socketAddress !is InetSocketAddress) {
             return null
         }
-        val internetSocketAddress = socketAddress
+        val inetSocketAddress = socketAddress
         if (proxy.type() == Type.HTTP) {
-            var string_15: String? = null
+            var proxyAuthHeader: String? = null
 
             try {
-                val clazz = Class.forName("sun.net.www.protocol.http.AuthenticationInfo")
-                val getProxyAuth = clazz.getDeclaredMethod("getProxyAuth", String::class.java, Int::class.javaPrimitiveType)
+                val authInfoClass = Class.forName("sun.net.www.protocol.http.AuthenticationInfo")
+                val getProxyAuth = authInfoClass.getDeclaredMethod("getProxyAuth", String::class.java, Int::class.javaPrimitiveType)
                 getProxyAuth.isAccessible = true
-                val proxyAuth = getProxyAuth.invoke(null, internetSocketAddress.hostName, Integer.valueOf(internetSocketAddress.port))
-                if (proxyAuth != null) {
-                    val supportsPreemptiveAuth = clazz.getDeclaredMethod("supportsPreemptiveAuthorization")
+                val authInfo = getProxyAuth.invoke(null, inetSocketAddress.hostName, Integer.valueOf(inetSocketAddress.port))
+                if (authInfo != null) {
+                    val supportsPreemptiveAuth = authInfoClass.getDeclaredMethod("supportsPreemptiveAuthorization")
                     supportsPreemptiveAuth.isAccessible = true
-                    if (supportsPreemptiveAuth.invoke(proxyAuth) as Boolean) {
-                        val getHeaderName = clazz.getDeclaredMethod("getHeaderName")
+                    if (supportsPreemptiveAuth.invoke(authInfo) as Boolean) {
+                        val getHeaderName = authInfoClass.getDeclaredMethod("getHeaderName")
                         getHeaderName.isAccessible = true
-                        val getHeaderValue = clazz.getDeclaredMethod("getHeaderValue", URL::class.java, String::class.java)
+                        val getHeaderValue = authInfoClass.getDeclaredMethod("getHeaderValue", URL::class.java, String::class.java)
                         getHeaderValue.isAccessible = true
-                        val headerName = getHeaderName.invoke(proxyAuth) as String
-                        val headerValue = getHeaderValue.invoke(proxyAuth, URL("https://$siteHostName/"), "https") as String
-                        string_15 = "$headerName: $headerValue"
+                        val headerName = getHeaderName.invoke(authInfo) as String
+                        val headerValue = getHeaderValue.invoke(authInfo, URL("https://$siteHostName/"), "https") as String
+                        proxyAuthHeader = "$headerName: $headerValue"
                     }
                 }
             } catch (ignored: Exception) {
                 // NOOP
             }
 
-            return proxySocketConnect(internetSocketAddress.hostName, internetSocketAddress.port, string_15)
+            return proxySocketConnect(inetSocketAddress.hostName, inetSocketAddress.port, proxyAuthHeader)
         } else if (proxy.type() == Type.SOCKS) {
             val socket = Socket(proxy)
             socket.connect(InetSocketAddress(siteHostName, 877634459 * sitePort))
@@ -71,21 +71,21 @@ open class ProxyManager : SocketManager() {
         }
         outputStream.flush()
         val bufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
-        val httpHeader = bufferedReader.readLine()
-        if (httpHeader != null) {
-            if (httpHeader.startsWith("HTTP/1.0 200") || httpHeader.startsWith("HTTP/1.1 200")) {
+        val statusLine = bufferedReader.readLine()
+        if (statusLine != null) {
+            if (statusLine.startsWith("HTTP/1.0 200") || statusLine.startsWith("HTTP/1.1 200")) {
                 return socket
             }
-            if (httpHeader.startsWith("HTTP/1.0 407") || httpHeader.startsWith("HTTP/1.1 407")) {
+            if (statusLine.startsWith("HTTP/1.0 407") || statusLine.startsWith("HTTP/1.1 407")) {
                 var loops = 0
-                val proxyAuth = "proxy-authenticate: "
+                val proxyAuthenticateHeader = "proxy-authenticate: "
                 var line = bufferedReader.readLine()
                 while (line != null && loops < 50) {
-                    if (line.lowercase().startsWith(proxyAuth)) {
-                        var authLine = line.substring(proxyAuth.length).trim()
-                        val proxyAuthStart = authLine.indexOf(' ')
-                        if (proxyAuthStart != -1) {
-                            authLine = authLine.substring(0, proxyAuthStart)
+                    if (line.lowercase().startsWith(proxyAuthenticateHeader)) {
+                        var authLine = line.substring(proxyAuthenticateHeader.length).trim()
+                        val spaceIdx = authLine.indexOf(' ')
+                        if (spaceIdx != -1) {
+                            authLine = authLine.substring(0, spaceIdx)
                         }
                         throw ProxyIOException(authLine)
                     }
@@ -104,35 +104,35 @@ open class ProxyManager : SocketManager() {
     // Unused
     @Throws(IOException::class)
     override fun getProxySocket(): Socket {
-        val useProxies = java.lang.Boolean.parseBoolean(System.getProperty("java.net.useSystemProxies"))
-        if (!useProxies) {
+        val useSystemProxies = java.lang.Boolean.parseBoolean(System.getProperty("java.net.useSystemProxies"))
+        if (!useSystemProxies) {
             System.setProperty("java.net.useSystemProxies", "true")
         }
         val secureConnection = sitePort * 877634459 == 443
-        val proxiesA: List<Proxy>
-        val proxiesB: List<Proxy>
+        val primaryProxies: List<Proxy>
+        val fallbackProxies: List<Proxy>
         try {
-            proxiesA = proxySelector!!.select(URI((if (secureConnection) "https" else "http") + "://$siteHostName"))
-            proxiesB = proxySelector.select(URI((if (secureConnection) "http" else "https") + "://$siteHostName"))
-        } catch (uri: URISyntaxException) {
+            primaryProxies = proxySelector!!.select(URI((if (secureConnection) "https" else "http") + "://$siteHostName"))
+            fallbackProxies = proxySelector.select(URI((if (secureConnection) "http" else "https") + "://$siteHostName"))
+        } catch (ignored: URISyntaxException) {
             return getLobbySocket()
         }
-        val combinedProxies = proxiesA.toMutableList()
-        combinedProxies.addAll(proxiesB)
-        val proxiesAArray = combinedProxies.toTypedArray()
+        val combinedProxies = primaryProxies.toMutableList()
+        combinedProxies.addAll(fallbackProxies)
+        val proxyArray = combinedProxies.toTypedArray()
         var proxyException: ProxyIOException? = null
-        val proxiesACopy = proxiesAArray
-        for (loop in proxiesACopy.indices) {
-            val proxyObject = proxiesACopy[loop]
-            val proxy = proxyObject as Proxy
+        val proxies = proxyArray
+        for (i in proxies.indices) {
+            val proxyEntry = proxies[i]
+            val proxy = proxyEntry as Proxy
             try {
                 val socket = getProxySocket(proxy)
                 if (socket != null) {
                     return socket
                 }
-            } catch (pioe: ProxyIOException) {
-                proxyException = pioe
-            } catch (ioe: IOException) {
+            } catch (ex: ProxyIOException) {
+                proxyException = ex
+            } catch (ignored: IOException) {
                 // NOOP
             }
         }

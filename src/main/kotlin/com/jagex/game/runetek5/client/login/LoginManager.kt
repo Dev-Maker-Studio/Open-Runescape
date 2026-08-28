@@ -117,12 +117,12 @@ object LoginManager {
     fun loginBlock() {
         if (loginStage != LoginStage.IDLE && loginStage != LoginStage.AWAITING_CLIENT_CONFIRM) {
             try {
-                val s_1: Short = if (connectionRetryCount == 0) {
+                val baseTimeout: Short = if (connectionRetryCount == 0) {
                     250
                 } else {
                     2000
                 }
-                var timeout = s_1
+                var timeout = baseTimeout
                 if (socialNetworkLogin && loginStage.ordinal >= LoginStage.AWAITING_SOCIAL_AUTH_CONFIRM.ordinal) {
                     timeout = 6000
                 }
@@ -146,8 +146,8 @@ object LoginManager {
                     loginStage = LoginStage.OPENING_CONNECTION
                 }
                 var tcpPacket: TcpPacket
-                var tcpPacketPositionBefore: Int
-                var loginBlockPositionBefore: Int
+                var scratchInt: Int
+                var loginBlockStart: Int
                 if (loginStage == LoginStage.OPENING_CONNECTION) {
                     if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
                         CURRENT_CONNECTION_CONTEXT!!.init(AsyncConnection.createAsyncConnection(GAME_CONNECTION_INFO!!.createSocket(), 15000), GAME_CONNECTION_INFO!!.host!!)
@@ -159,7 +159,7 @@ object LoginManager {
                     if (socialNetworkLogin) {
                         tcpPacket.buffer.writeByte(LoginProt.INIT_SOCIAL_NETWORK_CONNECTION.id)
                         tcpPacket.buffer.writeShort(0)
-                        tcpPacketPositionBefore = tcpPacket.buffer.currentPosition
+                        scratchInt = tcpPacket.buffer.currentPosition
                         tcpPacket.buffer.writeInt(Loader.MAJOR_BUILD)
                         tcpPacket.buffer.writeInt(Loader.MINOR_BUILD)
                         if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
@@ -178,7 +178,7 @@ object LoginManager {
                         seedBlock.writeByte((Math.random() * 9.9999999E7).toInt())
                         seedBlock.applyRSA()
                         tcpPacket.buffer.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition)
-                        tcpPacket.buffer.writeShortLength(tcpPacket.buffer.currentPosition - tcpPacketPositionBefore)
+                        tcpPacket.buffer.writeShortLength(tcpPacket.buffer.currentPosition - scratchInt)
                     } else {
                         tcpPacket.buffer.writeByte(LoginProt.INIT_GAME_CONNECTION.id)
                     }
@@ -191,10 +191,10 @@ object LoginManager {
                         return
                     }
                     CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, 1)
-                    val i_10 = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff
-                    if (i_10 != 0) {
+                    val responseCode = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff
+                    if (responseCode != 0) {
                         loginStage = LoginStage.IDLE
-                        setLoginResponse(i_10)
+                        setLoginResponse(responseCode)
                         CURRENT_CONNECTION_CONTEXT!!.closeConnection()
                         GameState.handleDisconnection()
                         return
@@ -256,7 +256,7 @@ object LoginManager {
                     CURRENT_CONNECTION_CONTEXT!!.clearAllQueuedPackets()
                     tcpPacket = TcpPacket.createLoginPacket()
                     loginBlock = tcpPacket.buffer
-                    var startPositionLoginBlock: Int
+                    var xteaStart: Int
                     val currentLoginProt: LoginProt
                     if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
                         currentLoginProt = if (socialNetworkLogin) {
@@ -266,16 +266,16 @@ object LoginManager {
                         }
                         loginBlock.writeByte(currentLoginProt.id)
                         loginBlock.writeShort(0)
-                        loginBlockPositionBefore = loginBlock.currentPosition
-                        startPositionLoginBlock = loginBlock.currentPosition
+                        loginBlockStart = loginBlock.currentPosition
+                        xteaStart = loginBlock.currentPosition
                         if (!socialNetworkLogin) {
                             loginBlock.writeInt(Loader.MAJOR_BUILD)
                             loginBlock.writeInt(Loader.MINOR_BUILD)
                             loginBlock.writeByte(if (Client.gameState == GameState.UNK_10) 1 else 0)
-                            startPositionLoginBlock = loginBlock.currentPosition
+                            xteaStart = loginBlock.currentPosition
                             val seedBlock = getSeedBlock(false)
                             loginBlock.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition)
-                            startPositionLoginBlock = loginBlock.currentPosition
+                            xteaStart = loginBlock.currentPosition
                             loginBlock.writeByte(if (socialNetworkToken == -1L) 1 else 0)
                             if (socialNetworkToken == -1L) {
                                 loginBlock.writeString(StaticMethods.loginUsername)
@@ -300,10 +300,10 @@ object LoginManager {
                         loginBlock.writeInt(Client.varVerifyId)
                         loginBlock.writeLong(Client.machineUid)
                         loginBlock.writeString(Client.loginToken!!)
-                        val str7156 = Client.supplementaryLoginData
-                        loginBlock.writeByte(if (str7156 == null) 0 else 1)
-                        if (str7156 != null) {
-                            loginBlock.writeString(str7156)
+                        val supplementaryLoginData = Client.supplementaryLoginData
+                        loginBlock.writeByte(if (supplementaryLoginData == null) 0 else 1)
+                        if (supplementaryLoginData != null) {
+                            loginBlock.writeString(supplementaryLoginData)
                         }
                         loginBlock.writeByte(if (Resource.NATIVE_LIBRARY_LOADER!!.isJagtheoraLoaded()) 1 else 0)
                         loginBlock.writeByte(if (Client.isApplet) 1 else 0)
@@ -323,14 +323,14 @@ object LoginManager {
                         }
                         loginBlock.writeByte(currentLoginProt.id)
                         loginBlock.writeShort(0)
-                        loginBlockPositionBefore = loginBlock.currentPosition
-                        startPositionLoginBlock = loginBlock.currentPosition
+                        loginBlockStart = loginBlock.currentPosition
+                        xteaStart = loginBlock.currentPosition
                         if (!socialNetworkLogin) {
                             loginBlock.writeInt(Loader.MAJOR_BUILD)
                             loginBlock.writeInt(Loader.MINOR_BUILD)
                             val seedBlock = getSeedBlock(true)
                             loginBlock.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition)
-                            startPositionLoginBlock = loginBlock.currentPosition
+                            xteaStart = loginBlock.currentPosition
                             loginBlock.writeByte(if (socialNetworkToken == -1L) 1 else 0)
                             if (socialNetworkToken == -1L) {
                                 loginBlock.writeString(StaticMethods.loginUsername)
@@ -351,8 +351,8 @@ object LoginManager {
                         loginBlock.writeString(Client.js5AuthToken!!)
                         writeResourceCrc(loginBlock)
                     }
-                    loginBlock.encryptXtea(clientSeed!!, startPositionLoginBlock, loginBlock.currentPosition)
-                    loginBlock.writeShortLength(loginBlock.currentPosition - loginBlockPositionBefore)
+                    loginBlock.encryptXtea(clientSeed!!, xteaStart, loginBlock.currentPosition)
+                    loginBlock.writeShortLength(loginBlock.currentPosition - loginBlockStart)
                     CURRENT_CONNECTION_CONTEXT!!.queuePacket(tcpPacket)
                     CURRENT_CONNECTION_CONTEXT!!.flush()
                     CURRENT_CONNECTION_CONTEXT!!.isaac = Isaac(clientSeed!!)
@@ -370,41 +370,41 @@ object LoginManager {
                         return
                     }
                     CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, 1)
-                    val i_10 = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff
-                    println("Login response: $i_10")
+                    val responseCode = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff
+                    println("Login response: $responseCode")
                     when {
-                        i_10 == 21 -> {
+                        responseCode == 21 -> {
                             loginStage = LoginStage.READING_QUEUE_POSITION
                         }
-                        i_10 == 29 || i_10 == 45 -> {
-                            loginResponseCode = i_10
+                        responseCode == 29 || responseCode == 45 -> {
+                            loginResponseCode = responseCode
                             loginStage = LoginStage.READING_RESPONSE_DETAIL
                         }
-                        i_10 == 1 -> {
+                        responseCode == 1 -> {
                             loginStage = LoginStage.AWAITING_CLIENT_CONFIRM
                             setLoginResponse(1)
                             return
                         }
-                        i_10 == 2 -> {
+                        responseCode == 2 -> {
                             loginStage = LoginStage.READING_PAYLOAD_SIZE
                         }
-                        i_10 == 15 -> {
+                        responseCode == 15 -> {
                             CURRENT_CONNECTION_CONTEXT!!.currentPacketSize = -2
                             loginStage = LoginStage.READING_RECONNECT_RESPONSE
                         }
-                        i_10 == 23 && connectionRetryCount < 3 -> {
+                        responseCode == 23 && connectionRetryCount < 3 -> {
                             connectionTickCount = 0
                             connectionRetryCount++
                             loginStage = LoginStage.OPENING_CONNECTION
                             CURRENT_CONNECTION_CONTEXT!!.closeConnection()
                             return
                         }
-                        i_10 == 42 -> {
+                        responseCode == 42 -> {
                             loginStage = LoginStage.AWAITING_TIME_SYNC
                             setLoginResponse(42)
                             return
                         }
-                        StaticMethods.hasStoredCredentials && !socialNetworkLogin && StaticMethods.selectedWorldId != -1 && i_10 == 35 -> {
+                        StaticMethods.hasStoredCredentials && !socialNetworkLogin && StaticMethods.selectedWorldId != -1 && responseCode == 35 -> {
                             socialNetworkLogin = true
                             connectionTickCount = 0
                             loginStage = LoginStage.OPENING_CONNECTION
@@ -412,7 +412,7 @@ object LoginManager {
                         }
                         else -> {
                             loginStage = LoginStage.IDLE
-                            setLoginResponse(i_10)
+                            setLoginResponse(responseCode)
                             CURRENT_CONNECTION_CONTEXT!!.closeConnection()
                             GameState.handleDisconnection()
                         }
@@ -431,8 +431,8 @@ object LoginManager {
                 } else if (loginStage == LoginStage.READING_QUEUE_POSITION) {
                     if (CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(1)) {
                         CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, 1)
-                        val i_10 = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff
-                        loginQueuePosition = i_10 * 50
+                        val queuePosition = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff
+                        loginQueuePosition = queuePosition * 50
                         loginStage = LoginStage.IDLE
                         setLoginResponse(21)
                         CURRENT_CONNECTION_CONTEXT!!.closeConnection()
@@ -512,9 +512,9 @@ object LoginManager {
                             Client.hasAccountSecurity = buffer.readUByte() == 1
                             MEMBERSHIP_END = buffer.readLong()
                             membershipTimeCorrection = MEMBERSHIP_END - Utils.time() - buffer.read40BitLong()
-                            tcpPacketPositionBefore = buffer.readUByte()
-                            Client.IS_MEMBER = (tcpPacketPositionBefore and 0x1) != 0
-                            IS_MEMBER_SUBSCRIPTION = (tcpPacketPositionBefore and 0x2) != 0
+                            scratchInt = buffer.readUByte()
+                            Client.IS_MEMBER = (scratchInt and 0x1) != 0
+                            IS_MEMBER_SUBSCRIPTION = (scratchInt and 0x2) != 0
                             Client.JCOINS = buffer.readInt()
                             QueueIterator.LOYALTY_ENABLED = buffer.readUByte() == 1
                             LOYALTY_BALANCE = buffer.readInt()
@@ -573,8 +573,8 @@ object LoginManager {
                             }
                             CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(buffer.buffer, 3, 1)
                         }
-                        tcpPacketPositionBefore = buffer.readEncryptedSmart()
-                        CURRENT_CONNECTION_CONTEXT!!.currentPacket = ServerProt.forId(tcpPacketPositionBefore)
+                        scratchInt = buffer.readEncryptedSmart()
+                        CURRENT_CONNECTION_CONTEXT!!.currentPacket = ServerProt.forId(scratchInt)
                         CURRENT_CONNECTION_CONTEXT!!.currentPacketSize = buffer.readUShort()
                         loginStage = LoginStage.READING_FIRST_GAME_PACKET
                     }
@@ -582,22 +582,22 @@ object LoginManager {
                         if (CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(CURRENT_CONNECTION_CONTEXT!!.currentPacketSize)) {
                             CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, CURRENT_CONNECTION_CONTEXT!!.currentPacketSize)
                             CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition = 0
-                            val i_10 = CURRENT_CONNECTION_CONTEXT!!.currentPacketSize
+                            val packetSize = CURRENT_CONNECTION_CONTEXT!!.currentPacketSize
                             loginStage = LoginStage.IDLE
                             setLoginResponse(2)
                             onEnterIngame()
                             PlayerUpdate.decodeOwnPlayer(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer)
-                            tcpPacketPositionBefore = i_10 - CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition
-                            val rsbitsbuffer21 = Packet.Bit(tcpPacketPositionBefore)
-                            System.arraycopy(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition, rsbitsbuffer21.buffer, 0, tcpPacketPositionBefore)
-                            CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition += tcpPacketPositionBefore
+                            scratchInt = packetSize - CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition
+                            val mapRegionBuffer = Packet.Bit(scratchInt)
+                            System.arraycopy(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition, mapRegionBuffer.buffer, 0, scratchInt)
+                            CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition += scratchInt
                             if (CURRENT_CONNECTION_CONTEXT!!.currentPacket == ServerProt.DYNAMIC_MAP_REGION) {
-                                Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.INSTANCE, rsbitsbuffer21))
+                                Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.INSTANCE, mapRegionBuffer))
                             } else {
-                                Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.STANDARD, rsbitsbuffer21))
+                                Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.STANDARD, mapRegionBuffer))
                             }
-                            if (CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition != i_10) {
-                                throw RuntimeException("${CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition} $i_10")
+                            if (CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition != packetSize) {
+                                throw RuntimeException("${CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition} $packetSize")
                             }
                             CURRENT_CONNECTION_CONTEXT!!.currentPacket = null
                         }
@@ -614,19 +614,19 @@ object LoginManager {
                         if (CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(CURRENT_CONNECTION_CONTEXT!!.currentPacketSize)) {
                             CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, CURRENT_CONNECTION_CONTEXT!!.currentPacketSize)
                             CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition = 0
-                            val i_10 = CURRENT_CONNECTION_CONTEXT!!.currentPacketSize
+                            val packetSize = CURRENT_CONNECTION_CONTEXT!!.currentPacketSize
                             loginStage = LoginStage.IDLE
                             setLoginResponse(15)
                             onReconnect()
                             PlayerUpdate.decodeOwnPlayer(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer)
-                            if (CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition != i_10) {
-                                throw RuntimeException("${CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition} $i_10")
+                            if (CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition != packetSize) {
+                                throw RuntimeException("${CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition} $packetSize")
                             }
                             CURRENT_CONNECTION_CONTEXT!!.currentPacket = null
                         }
                     }
                 }
-            } catch (ioexception: IOException) {
+            } catch (e: IOException) {
                 CURRENT_CONNECTION_CONTEXT!!.closeConnection()
                 if (connectionRetryCount < 3) {
                     if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
@@ -653,10 +653,10 @@ object LoginManager {
 
     @Suppress("unused")
     @JvmStatic
-    fun lobbyLogin(string_0: String, string_1: String) {
+    fun lobbyLogin(username: String, password: String) {
         lobbyStage = LobbyStage.LOGGING_IN_LOBBY
         CURRENT_CONNECTION_CONTEXT = Client.LOBBY_CONNECTION_CONTEXT
-        initializeLogin(false, false, string_0, string_1, -1L)
+        initializeLogin(false, false, username, password, -1L)
     }
 
     @JvmStatic
@@ -720,14 +720,14 @@ object LoginManager {
     }
 
     @JvmStatic
-    fun getSeedBlock(password: Boolean): Packet {
-        val clientSeed = encodeClientSeed()
-        clientSeed.writeLong(0L)
-        clientSeed.writeString(if (password) StaticMethods.loginPassword!! else lobbyAuthToken!!)
-        clientSeed.writeLong(socialNetworkNonce)
-        clientSeed.writeLong(Client.clientRandomSeed)
-        clientSeed.applyRSA()
-        return clientSeed
+    fun getSeedBlock(usePassword: Boolean): Packet {
+        val seedBlock = encodeClientSeed()
+        seedBlock.writeLong(0L)
+        seedBlock.writeString(if (usePassword) StaticMethods.loginPassword!! else lobbyAuthToken!!)
+        seedBlock.writeLong(socialNetworkNonce)
+        seedBlock.writeLong(Client.clientRandomSeed)
+        seedBlock.applyRSA()
+        return seedBlock
     }
 
     @JvmStatic
@@ -738,10 +738,10 @@ object LoginManager {
     }
 
     @JvmStatic
-    fun worldLogin(string_0: String, string_1: String) {
+    fun worldLogin(username: String, password: String) {
         lobbyStage = LobbyStage.LOBBY_TO_WORLD
         CURRENT_CONNECTION_CONTEXT = Client.GAME_CONNECTION_CONTEXT
-        initializeLogin(false, false, string_0, string_1, -1L)
+        initializeLogin(false, false, username, password, -1L)
     }
 
     @JvmStatic
@@ -763,11 +763,11 @@ object LoginManager {
     }
 
     @JvmStatic
-    fun setLoginResponse(i_0: Int) {
+    fun setLoginResponse(responseCode: Int) {
         if (lobbyStage == LobbyStage.LOGGING_IN_LOBBY) {
-            StaticMethods.lobbyLoginResponse = i_0
+            StaticMethods.lobbyLoginResponse = responseCode
         } else if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
-            StaticMethods.worldLoginResponse = i_0
+            StaticMethods.worldLoginResponse = responseCode
         }
     }
 
@@ -779,12 +779,12 @@ object LoginManager {
     }
 
     @JvmStatic
-    fun switchWorldAndLogin(string_0: String, string_1: String) {
-        if (string_0.length <= 320 && GameState.isReadyForLogin()) {
+    fun switchWorldAndLogin(username: String, password: String) {
+        if (username.length <= 320 && GameState.isReadyForLogin()) {
             Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
             resetCredentials()
-            StaticMethods.loginUsername = string_0
-            StaticMethods.loginPassword = string_1
+            StaticMethods.loginUsername = username
+            StaticMethods.loginPassword = password
             Client.setGameState(GameState.UNK_14)
         }
     }
@@ -797,22 +797,22 @@ object LoginManager {
     }
 
     @JvmStatic
-    fun directLogin(string_0: String, string_1: String) {
-        if (string_0.length <= 320 && GameState.isReadyForLogin()) {
+    fun directLogin(username: String, password: String) {
+        if (username.length <= 320 && GameState.isReadyForLogin()) {
             resetCredentials()
-            StaticMethods.loginUsername = string_0
-            StaticMethods.loginPassword = string_1
+            StaticMethods.loginUsername = username
+            StaticMethods.loginPassword = password
             Client.setGameState(GameState.UNK_19)
         }
     }
 
     @JvmStatic
-    fun snLogin(i_0: Int) {
+    fun snLogin(worldId: Int) {
         if (GameState.isReadyForLogin()) {
-            if (i_0 != StaticMethods.selectedWorldId) {
+            if (worldId != StaticMethods.selectedWorldId) {
                 socialNetworkToken = -1L
             }
-            StaticMethods.selectedWorldId = i_0
+            StaticMethods.selectedWorldId = worldId
             Client.setGameState(GameState.UNK_19)
         }
     }
@@ -826,11 +826,11 @@ object LoginManager {
         try {
             GameShell.playerRandomDat!!.setPosition(0L)
             GameShell.playerRandomDat!!.load(randomDatData)
-            var emptyStats = 0
-            while (emptyStats < 24 && randomDatData[emptyStats] == 0.toByte()) {
-                emptyStats++
+            var zeroBytes = 0
+            while (zeroBytes < 24 && randomDatData[zeroBytes] == 0.toByte()) {
+                zeroBytes++
             }
-            if (emptyStats >= 24) {
+            if (zeroBytes >= 24) {
                 throw IOException()
             }
         } catch (exception: Exception) {
@@ -968,12 +968,12 @@ object LoginManager {
     var RECOVERYQUESTIONSSETDATE = 0
 
     @JvmStatic
-    fun setGameHost(world: Int, host: String): Boolean {
+    fun setGameHost(worldId: Int, host: String): Boolean {
         if (Bot.ENABLED) {
             var worldInList = false
             for (i in WorldConnection.WORLD_DESCRIPTORS_BYID.indices) {
                 if (WorldConnection.WORLD_DESCRIPTORS_BYID[i] != null &&
-                    WorldConnection.WORLD_DESCRIPTORS_BYID[i]!!.worldNumber == world) {
+                    WorldConnection.WORLD_DESCRIPTORS_BYID[i]!!.worldNumber == worldId) {
                     worldInList = true
                     break
                 }
@@ -983,7 +983,7 @@ object LoginManager {
         }
 
         GAME_CONNECTION_INFO = ConnectionInfo()
-        GAME_CONNECTION_INFO!!.worldId = world
+        GAME_CONNECTION_INFO!!.worldId = worldId
         GAME_CONNECTION_INFO!!.host = host
         if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE) {
             GAME_CONNECTION_INFO!!.devWorld1 = GAME_CONNECTION_INFO!!.worldId
@@ -1055,7 +1055,7 @@ object LoginManager {
         Camera.moveCameraAngle = 0
 
         for (index in VarcTypeList.VARC_INT!!.indices) {
-            if (!VarcTypeList.VARC_BOOL!![index]) {
+            if (!VarcTypeList.VARC_PERSISTENT!![index]) {
                 VarcTypeList.VARC_INT!![index] = -1
             }
         }
@@ -1128,15 +1128,15 @@ object LoginManager {
     var EMAIL_STATUS = 0
 
     @JvmStatic
-    fun initializeLogin(socialNetworkLogin: Boolean, bool1: Boolean, string_2: String, string_3: String, long_4: Long) {
+    fun initializeLogin(socialNetworkLogin: Boolean, hasStoredCredentials: Boolean, username: String, password: String, snToken: Long) {
         LoginManager.socialNetworkLogin = socialNetworkLogin
-        if (!bool1) {
+        if (!hasStoredCredentials) {
             StaticMethods.selectedWorldId = -1
         }
-        StaticMethods.hasStoredCredentials = bool1
-        StaticMethods.loginUsername = string_2
-        StaticMethods.loginPassword = string_3
-        socialNetworkToken = long_4
+        StaticMethods.hasStoredCredentials = hasStoredCredentials
+        StaticMethods.loginUsername = username
+        StaticMethods.loginPassword = password
+        socialNetworkToken = snToken
         if (StaticMethods.hasStoredCredentials || StaticMethods.loginUsername.isNotEmpty() && StaticMethods.loginPassword.isNotEmpty()) {
             if (lobbyStage != LobbyStage.LOGGING_IN_LOBBY) {
                 loginQueuePosition = 0
@@ -1161,9 +1161,9 @@ object LoginManager {
         lobbyStage = LobbyStage.LOBBY_TO_WORLD
         CURRENT_CONNECTION_CONTEXT = Client.GAME_CONNECTION_CONTEXT
         Client.base64Url?.let { url ->
-            val rsbytebuffer1 = Packet(url)
-            socialNetworkToken = rsbytebuffer1.readLong()
-            socialNetworkNonce = rsbytebuffer1.readLong()
+            val buffer = Packet(url)
+            socialNetworkToken = buffer.readLong()
+            socialNetworkNonce = buffer.readLong()
         }
         if (socialNetworkToken < 0L) {
             setLoginResponse(35)

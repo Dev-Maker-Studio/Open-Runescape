@@ -7,7 +7,7 @@ class FluType {
 
     @JvmField var saturation: Int = 0
     @JvmField var lightness: Int = 0
-    @JvmField var divisor: Int = 0
+    @JvmField var hueMultiplier: Int = 0
     @JvmField var hue: Int = 0
     @JvmField var texture = -1
     @JvmField var scale = 512
@@ -43,52 +43,52 @@ class FluType {
         }
     }
 
-    fun calculateHsl16(rgb: Int) {
-        val red = (rgb shr 16 and 0xff) / 256.0
-        val green = (rgb shr 8 and 0xff) / 256.0
-        val blue = (rgb and 0xff) / 256.0
-        var d_9 = red
+    fun calculateHsl16(packedRgb: Int) {
+        val red = (packedRgb shr 16 and 0xff) / 256.0
+        val green = (packedRgb shr 8 and 0xff) / 256.0
+        val blue = (packedRgb and 0xff) / 256.0
+        var min = red
         if (green < red) {
-            d_9 = green
+            min = green
         }
 
-        if (blue < d_9) {
-            d_9 = blue
+        if (blue < min) {
+            min = blue
         }
 
-        var d_11 = red
+        var max = red
         if (green > red) {
-            d_11 = green
+            max = green
         }
 
-        if (blue > d_11) {
-            d_11 = blue
+        if (blue > max) {
+            max = blue
         }
 
-        var d_13 = 0.0
-        var d_15 = 0.0
-        val d_17 = (d_11 + d_9) / 2.0
-        if (d_11 != d_9) {
-            if (d_17 < 0.5) {
-                d_15 = (d_11 - d_9) / (d_11 + d_9)
+        var h = 0.0
+        var s = 0.0
+        val l = (max + min) / 2.0
+        if (max != min) {
+            if (l < 0.5) {
+                s = (max - min) / (max + min)
             }
 
-            if (d_17 >= 0.5) {
-                d_15 = (d_11 - d_9) / (2.0 - d_11 - d_9)
+            if (l >= 0.5) {
+                s = (max - min) / (2.0 - max - min)
             }
 
-            if (red == d_11) {
-                d_13 = (green - blue) / (d_11 - d_9)
-            } else if (d_11 == green) {
-                d_13 = 2.0 + (blue - red) / (d_11 - d_9)
-            } else if (d_11 == blue) {
-                d_13 = (red - green) / (d_11 - d_9) + 4.0
+            if (red == max) {
+                h = (green - blue) / (max - min)
+            } else if (max == green) {
+                h = 2.0 + (blue - red) / (max - min)
+            } else if (max == blue) {
+                h = (red - green) / (max - min) + 4.0
             }
         }
 
-        d_13 /= 6.0
-        saturation = (d_15 * 256.0).toInt()
-        lightness = (256.0 * d_17).toInt()
+        h /= 6.0
+        saturation = (s * 256.0).toInt()
+        lightness = (256.0 * l).toInt()
         if (saturation < 0) {
             saturation = 0
         } else if (saturation > 255) {
@@ -101,16 +101,16 @@ class FluType {
             lightness = 255
         }
 
-        if (d_17 > 0.5) {
-            divisor = (d_15 * (1.0 - d_17) * 512.0).toInt()
+        if (l > 0.5) {
+            hueMultiplier = (s * (1.0 - l) * 512.0).toInt()
         } else {
-            divisor = (d_15 * d_17 * 512.0).toInt()
+            hueMultiplier = (s * l * 512.0).toInt()
         }
 
-        if (divisor < 1) {
-            divisor = 1
+        if (hueMultiplier < 1) {
+            hueMultiplier = 1
         }
 
-        hue = (d_13 * divisor).toInt()
+        hue = (h * hueMultiplier).toInt()
     }
 }

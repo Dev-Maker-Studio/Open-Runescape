@@ -54,15 +54,15 @@ class AccountCreationStage {
         fun handleAccountCreationStart() {
             if (ACCOUNT_CREATION_STAGE != null) {
                 try {
-                    val s_1: Short
+                    val timeoutTicks: Short
                     if (connectionRetryCount == 0) {
-                        s_1 = 250
+                        timeoutTicks = 250
                     } else {
-                        s_1 = 2000
+                        timeoutTicks = 2000
                     }
 
                     ++connectionTickCount
-                    if (connectionTickCount > s_1) {
+                    if (connectionTickCount > timeoutTicks) {
                         retryOrFailConnection()
                     }
 
@@ -81,7 +81,7 @@ class AccountCreationStage {
                         packet.buffer.writeShort(MAJOR_BUILD)
                         packet.buffer.writeShort(MINOR_BUILD)
                         LOGIN_XTEAS = PacketEncoder.generateSeed(packet)
-                        val i_4 = packet.buffer.currentPosition
+                        val encryptStartOffset = packet.buffer.currentPosition
                         packet.buffer.writeString(Client.js5AuthToken!!)
                         packet.buffer.writeShort(Client.AFFILIATE)
                         packet.buffer.writeLong(Client.machineUid)
@@ -89,15 +89,15 @@ class AccountCreationStage {
                         packet.buffer.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
                         packet.buffer.writeByte(Client.CURRENT_GAME!!.id)
                         LoginManager.pushRandomDat(packet.buffer)
-                        val string_5 = Client.supplementaryLoginData
-                        packet.buffer.writeByte(if (string_5 == null) 0 else 1)
-                        if (string_5 != null) {
-                            packet.buffer.writeString(string_5)
+                        val supplementaryLoginData = Client.supplementaryLoginData
+                        packet.buffer.writeByte(if (supplementaryLoginData == null) 0 else 1)
+                        if (supplementaryLoginData != null) {
+                            packet.buffer.writeString(supplementaryLoginData)
                         }
 
                         SystemInfo.SYSTEM_INFO!!.writeMachineInformation(packet.buffer)
                         packet.buffer.currentPosition += 7
-                        packet.buffer.encryptXtea(LOGIN_XTEAS!!, i_4, packet.buffer.currentPosition)
+                        packet.buffer.encryptXtea(LOGIN_XTEAS!!, encryptStartOffset, packet.buffer.currentPosition)
                         packet.buffer.writeShortLength(packet.buffer.currentPosition - dataStartOffset)
                         Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
                         Client.LOBBY_CONNECTION_CONTEXT.flush()
@@ -139,7 +139,7 @@ class AccountCreationStage {
                             ACCOUNT_CREATION_STAGE = null
                         }
                     }
-                } catch (ioexception: IOException) {
+                } catch (e: IOException) {
                     retryOrFailConnection()
                 }
             }
@@ -156,8 +156,8 @@ class AccountCreationStage {
         }
 
         @JvmStatic
-        fun setCurrentRequest(class4940: CreateAccountRequest) {
-            currentRequest = class4940
+        fun setCurrentRequest(request: CreateAccountRequest) {
+            currentRequest = request
         }
     }
 }

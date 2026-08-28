@@ -6,23 +6,23 @@ import com.jagex.game.runetek5.graphics.sprite.meta.AnchorX
 import com.jagex.game.runetek5.graphics.sprite.meta.AnchorY
 
 class AnimatedLoadingBarElement(
-    class3561: AnchorX,
-    class3532: AnchorY,
-    i_3: Int,
-    i_4: Int,
-    i_5: Int,
-    i_6: Int,
-    i_7: Int,
-    i_8: Int,
-    i_9: Int,
-    i_10: Int,
-    i_11: Int,
-    i_12: Int,
-    i_13: Int,
-    i_14: Int,
-    i_15: Int,
+    horizontalAnchor: AnchorX,
+    verticalAnchor: AnchorY,
+    offsetX: Int,
+    offsetY: Int,
+    width: Int,
+    height: Int,
+    textOffsetY: Int,
+    fileId: Int,
+    textColor: Int,
+    fillSpriteId: Int,
+    emptySpriteId: Int,
+    leftCapSpriteId: Int,
+    rightCapSpriteId: Int,
+    topBorderSpriteId: Int,
+    bottomBorderSpriteId: Int,
     @JvmField val scrollSpeed: Int
-) : MultiSpriteLoadingBarElement(class3561, class3532, i_3, i_4, i_5, i_6, i_7, i_8, i_9, i_10, i_11, i_12, i_13, i_14, i_15) {
+) : MultiSpriteLoadingBarElement(horizontalAnchor, verticalAnchor, offsetX, offsetY, width, height, textOffsetY, fileId, textColor, fillSpriteId, emptySpriteId, leftCapSpriteId, rightCapSpriteId, topBorderSpriteId, bottomBorderSpriteId) {
     override fun getRenderDetails(): TipRenderDetails {
         return TipRenderDetails.ANIMATED_LOADING_BAR
     }
@@ -31,59 +31,59 @@ class AnimatedLoadingBarElement(
 fun decodeAnchored(buffer: Packet): AnchoredElement {
     val horizontalAnchor: AnchorX = AnchorX.entries[buffer.readUByte()]
     val verticalAnchor: AnchorY = AnchorY.entries[buffer.readUByte()]
-    val offX = buffer.readShort()
-    val offY = buffer.readShort()
+    val offsetX = buffer.readShort()
+    val offsetY = buffer.readShort()
     val width = buffer.readUShort()
     val height = buffer.readUShort()
-    val i_8 = buffer.readShort()
+    val textOffsetY = buffer.readShort()
     val fileId = buffer.readBigSmart()
-    val i_10 = buffer.readInt()
-    return AnchoredElement(horizontalAnchor, verticalAnchor, offX, offY, width, height, i_8, fileId, i_10)
+    val textColor = buffer.readInt()
+    return AnchoredElement(horizontalAnchor, verticalAnchor, offsetX, offsetY, width, height, textOffsetY, fileId, textColor)
 }
 
-fun decodeColorLoadingBar(rsbytebuffer0: Packet): AnchoredElement {
-    val anchoredElement = decodeAnchored(rsbytebuffer0)
-    val i_3 = rsbytebuffer0.readInt()
-    val i_4 = rsbytebuffer0.readInt()
+fun decodeColorLoadingBar(buffer: Packet): AnchoredElement {
+    val element = decodeAnchored(buffer)
+    val fillColor = buffer.readInt()
+    val outlineColor = buffer.readInt()
     return ColorLoadingBarElement(
-        anchoredElement.horizontalAnchor, anchoredElement.verticalAnchor,
-        anchoredElement.offsetX, anchoredElement.offsetY,
-        anchoredElement.width, anchoredElement.height,
-        anchoredElement.textOffsetY, anchoredElement.fileId, anchoredElement.textColor, i_3, i_4
+        element.horizontalAnchor, element.verticalAnchor,
+        element.offsetX, element.offsetY,
+        element.width, element.height,
+        element.textOffsetY, element.fileId, element.textColor, fillColor, outlineColor
     )
 }
 
-fun decodeMultiSpriteLoadingBar(rsbytebuffer0: Packet): AnchoredElement {
-    val class3502 = decodeAnchored(rsbytebuffer0)
-    val i_3 = rsbytebuffer0.readBigSmart()
-    val i_4 = rsbytebuffer0.readBigSmart()
-    val i_5 = rsbytebuffer0.readBigSmart()
-    val i_6 = rsbytebuffer0.readBigSmart()
-    val i_7 = rsbytebuffer0.readBigSmart()
-    val i_8 = rsbytebuffer0.readBigSmart()
-    return MultiSpriteLoadingBarElement(class3502.horizontalAnchor, class3502.verticalAnchor, class3502.offsetX, class3502.offsetY, class3502.width, class3502.height, class3502.textOffsetY, class3502.fileId, class3502.textColor, i_3, i_4, i_5, i_6, i_7, i_8)
+fun decodeMultiSpriteLoadingBar(buffer: Packet): AnchoredElement {
+    val element = decodeAnchored(buffer)
+    val fillSpriteId = buffer.readBigSmart()
+    val emptySpriteId = buffer.readBigSmart()
+    val leftCapSpriteId = buffer.readBigSmart()
+    val rightCapSpriteId = buffer.readBigSmart()
+    val topBorderSpriteId = buffer.readBigSmart()
+    val bottomBorderSpriteId = buffer.readBigSmart()
+    return MultiSpriteLoadingBarElement(element.horizontalAnchor, element.verticalAnchor, element.offsetX, element.offsetY, element.width, element.height, element.textOffsetY, element.fileId, element.textColor, fillSpriteId, emptySpriteId, leftCapSpriteId, rightCapSpriteId, topBorderSpriteId, bottomBorderSpriteId)
 }
 
-fun decodeAnimatedLoadingBar(rsbytebuffer0: Packet): AnchoredElement {
-    val class350Sub32 = decodeMultiSpriteLoadingBar(rsbytebuffer0) as MultiSpriteLoadingBarElement
-    val i_3 = rsbytebuffer0.readShort()
+fun decodeAnimatedLoadingBar(buffer: Packet): AnchoredElement {
+    val element = decodeMultiSpriteLoadingBar(buffer) as MultiSpriteLoadingBarElement
+    val scrollSpeed = buffer.readShort()
     return AnimatedLoadingBarElement(
-        class350Sub32.horizontalAnchor, class350Sub32.verticalAnchor,
-        class350Sub32.offsetX, class350Sub32.offsetY,
-        class350Sub32.width, class350Sub32.height,
-        class350Sub32.textOffsetY, class350Sub32.fileId, class350Sub32.textColor,
-        class350Sub32.spriteA, class350Sub32.spriteB, class350Sub32.spriteC,
-        class350Sub32.spriteD, class350Sub32.spriteE, class350Sub32.spriteF, i_3
+        element.horizontalAnchor, element.verticalAnchor,
+        element.offsetX, element.offsetY,
+        element.width, element.height,
+        element.textOffsetY, element.fileId, element.textColor,
+        element.spriteA, element.spriteB, element.spriteC,
+        element.spriteD, element.spriteE, element.spriteF, scrollSpeed
     )
 }
 
 fun decodeSpriteLoadingBar(buffer: Packet): AnchoredElement {
     val element: AnchoredElement = decodeAnchored(buffer)
-    val i_3 = buffer.readInt()
-    val i_4 = buffer.readInt()
-    val i_5 = buffer.readBigSmart()
+    val fillColor = buffer.readInt()
+    val backgroundColor = buffer.readInt()
+    val spriteFileId = buffer.readBigSmart()
     return SpriteLoadingBarElement(
-        element.horizontalAnchor, element.verticalAnchor, element.offsetX, element.offsetY, element.width, element.height, element.textOffsetY, element.fileId, element.textColor, i_4, i_5
+        element.horizontalAnchor, element.verticalAnchor, element.offsetX, element.offsetY, element.width, element.height, element.textOffsetY, element.fileId, element.textColor, backgroundColor, spriteFileId
     )
 }
 

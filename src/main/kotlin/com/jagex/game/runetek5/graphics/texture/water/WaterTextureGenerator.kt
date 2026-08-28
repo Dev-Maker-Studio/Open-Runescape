@@ -6,8 +6,8 @@ import kotlin.math.pow
 
 abstract class WaterTextureGenerator internal constructor(
     @JvmField val seed: Int,
-    i_3: Int,
-    i_4: Int
+    xScale: Int,
+    yScale: Int
 ) {
 
     @JvmField val permutationTable: ShortArray = ShortArray(512)
@@ -18,8 +18,8 @@ abstract class WaterTextureGenerator internal constructor(
     @JvmField var octaveWeights: ShortArray? = null
 
     init {
-        scaleX = i_3
-        scaleY = i_4
+        scaleX = xScale
+        scaleY = yScale
         scaleZ = 2
         octaveCount = 5
         initOctaveWeights()
@@ -29,96 +29,96 @@ abstract class WaterTextureGenerator internal constructor(
     abstract fun reset()
 
     fun generateNoise() {
-        val ints_4 = IntArray(128)
-        val ints_5 = IntArray(128)
-        val ints_6 = IntArray(16)
+        val xCoords = IntArray(128)
+        val yCoords = IntArray(128)
+        val zCoords = IntArray(16)
 
-        var i_7: Int
-        for (i_7 in 0 until 128) {
-            ints_4[i_7] = (i_7 shl 12) / 128
+        var i: Int
+        for (i in 0 until 128) {
+            xCoords[i] = (i shl 12) / 128
         }
 
-        for (i_7 in 0 until 128) {
-            ints_5[i_7] = (i_7 shl 12) / 128
+        for (i in 0 until 128) {
+            yCoords[i] = (i shl 12) / 128
         }
 
-        for (i_7 in 0 until 16) {
-            ints_6[i_7] = (i_7 shl 12) / 16
+        for (i in 0 until 16) {
+            zCoords[i] = (i shl 12) / 16
         }
 
         clear()
 
-        for (i_7 in 0 until 16) {
-            for (i_8 in 0 until 128) {
-                for (i_9 in 0 until 128) {
-                    for (i_10 in 0 until octaveCount) {
-                        val i_11 = octaveWeights!![i_10].toInt() shl 12
-                        val i_12 = i_11 * scaleX shr 12
-                        val i_13 = i_11 * scaleY shr 12
-                        val i_14 = i_11 * scaleZ shr 12
-                        var i_15 = i_11 * ints_4[i_9] shr 12
-                        var i_16 = i_11 * ints_5[i_8] shr 12
-                        var i_17 = i_11 * ints_6[i_7] shr 12
-                        i_15 *= scaleX
-                        i_16 *= scaleY
-                        i_17 *= scaleZ
-                        var i_18 = i_15 shr 12
-                        var i_19 = i_18 + 1
-                        i_18 = i_18 and 0xff
-                        var i_20 = i_16 shr 12
-                        var i_21 = i_20 + 1
-                        i_20 = i_20 and 0xff
-                        var i_22 = i_17 shr 12
-                        var i_23 = i_22 + 1
-                        i_22 = i_22 and 0xff
-                        if (i_19 >= i_12) {
-                            i_19 = 0
+        for (z in 0 until 16) {
+            for (y in 0 until 128) {
+                for (x in 0 until 128) {
+                    for (octave in 0 until octaveCount) {
+                        val frequency = octaveWeights!![octave].toInt() shl 12
+                        val wrapX = frequency * scaleX shr 12
+                        val wrapY = frequency * scaleY shr 12
+                        val wrapZ = frequency * scaleZ shr 12
+                        var sampleX = frequency * xCoords[x] shr 12
+                        var sampleY = frequency * yCoords[y] shr 12
+                        var sampleZ = frequency * zCoords[z] shr 12
+                        sampleX *= scaleX
+                        sampleY *= scaleY
+                        sampleZ *= scaleZ
+                        var gridX0 = sampleX shr 12
+                        var gridX1 = gridX0 + 1
+                        gridX0 = gridX0 and 0xff
+                        var gridY0 = sampleY shr 12
+                        var gridY1 = gridY0 + 1
+                        gridY0 = gridY0 and 0xff
+                        var gridZ0 = sampleZ shr 12
+                        var gridZ1 = gridZ0 + 1
+                        gridZ0 = gridZ0 and 0xff
+                        if (gridX1 >= wrapX) {
+                            gridX1 = 0
                         } else {
-                            i_19 = i_19 and 0xff
+                            gridX1 = gridX1 and 0xff
                         }
 
-                        if (i_21 >= i_13) {
-                            i_21 = 0
+                        if (gridY1 >= wrapY) {
+                            gridY1 = 0
                         } else {
-                            i_21 = i_21 and 0xff
+                            gridY1 = gridY1 and 0xff
                         }
 
-                        if (i_23 >= i_14) {
-                            i_23 = 0
+                        if (gridZ1 >= wrapZ) {
+                            gridZ1 = 0
                         } else {
-                            i_23 = i_23 and 0xff
+                            gridZ1 = gridZ1 and 0xff
                         }
 
-                        i_15 = i_15 and 0xfff
-                        i_16 = i_16 and 0xfff
-                        i_17 = i_17 and 0xfff
-                        val i_24 = SINE_WAVE[i_15]
-                        val i_25 = SINE_WAVE[i_16]
-                        val i_26 = SINE_WAVE[i_17]
-                        val i_27 = i_15 - 4096
-                        val i_28 = i_16 - 4096
-                        val i_29 = i_17 - 4096
-                        val s_30 = permutationTable[i_22]
-                        val s_31 = permutationTable[i_23]
-                        val s_32 = permutationTable[i_20 + s_30]
-                        val s_33 = permutationTable[i_21 + s_30]
-                        val s_34 = permutationTable[i_20 + s_31]
-                        val s_35 = permutationTable[i_21 + s_31]
-                        var i_36 = gradientDot(permutationTable[i_18 + s_32].toInt(), i_15, i_16, i_17)
-                        var i_37 = gradientDot(permutationTable[i_19 + s_32].toInt(), i_27, i_16, i_17)
-                        val i_38 = i_36 + (i_24 * (i_37 - i_36) shr 12)
-                        i_36 = gradientDot(permutationTable[i_18 + s_33].toInt(), i_15, i_28, i_17)
-                        i_37 = gradientDot(permutationTable[i_19 + s_33].toInt(), i_27, i_28, i_17)
-                        val i_39 = i_36 + (i_24 * (i_37 - i_36) shr 12)
-                        val i_40 = i_38 + (i_25 * (i_39 - i_38) shr 12)
-                        i_36 = gradientDot(permutationTable[i_18 + s_34].toInt(), i_15, i_16, i_29)
-                        i_37 = gradientDot(permutationTable[i_19 + s_34].toInt(), i_27, i_16, i_29)
-                        val i_38b = i_36 + (i_24 * (i_37 - i_36) shr 12)
-                        i_36 = gradientDot(permutationTable[i_18 + s_35].toInt(), i_15, i_28, i_29)
-                        i_37 = gradientDot(permutationTable[i_19 + s_35].toInt(), i_27, i_28, i_29)
-                        val i_39b = i_36 + (i_24 * (i_37 - i_36) shr 12)
-                        val i_41 = i_38b + (i_25 * (i_39b - i_38b) shr 12)
-                        update(i_10, i_40 + (i_26 * (i_41 - i_40) shr 12))
+                        sampleX = sampleX and 0xfff
+                        sampleY = sampleY and 0xfff
+                        sampleZ = sampleZ and 0xfff
+                        val fadeX = SINE_WAVE[sampleX]
+                        val fadeY = SINE_WAVE[sampleY]
+                        val fadeZ = SINE_WAVE[sampleZ]
+                        val farX = sampleX - 4096
+                        val farY = sampleY - 4096
+                        val farZ = sampleZ - 4096
+                        val hashZ0 = permutationTable[gridZ0]
+                        val hashZ1 = permutationTable[gridZ1]
+                        val hashY0Z0 = permutationTable[gridY0 + hashZ0]
+                        val hashY1Z0 = permutationTable[gridY1 + hashZ0]
+                        val hashY0Z1 = permutationTable[gridY0 + hashZ1]
+                        val hashY1Z1 = permutationTable[gridY1 + hashZ1]
+                        var grad0 = gradientDot(permutationTable[gridX0 + hashY0Z0].toInt(), sampleX, sampleY, sampleZ)
+                        var grad1 = gradientDot(permutationTable[gridX1 + hashY0Z0].toInt(), farX, sampleY, sampleZ)
+                        val edgeY0Z0 = grad0 + (fadeX * (grad1 - grad0) shr 12)
+                        grad0 = gradientDot(permutationTable[gridX0 + hashY1Z0].toInt(), sampleX, farY, sampleZ)
+                        grad1 = gradientDot(permutationTable[gridX1 + hashY1Z0].toInt(), farX, farY, sampleZ)
+                        val edgeY1Z0 = grad0 + (fadeX * (grad1 - grad0) shr 12)
+                        val faceZ0 = edgeY0Z0 + (fadeY * (edgeY1Z0 - edgeY0Z0) shr 12)
+                        grad0 = gradientDot(permutationTable[gridX0 + hashY0Z1].toInt(), sampleX, sampleY, farZ)
+                        grad1 = gradientDot(permutationTable[gridX1 + hashY0Z1].toInt(), farX, sampleY, farZ)
+                        val edgeY0Z1 = grad0 + (fadeX * (grad1 - grad0) shr 12)
+                        grad0 = gradientDot(permutationTable[gridX0 + hashY1Z1].toInt(), sampleX, farY, farZ)
+                        grad1 = gradientDot(permutationTable[gridX1 + hashY1Z1].toInt(), farX, farY, farZ)
+                        val edgeY1Z1 = grad0 + (fadeX * (grad1 - grad0) shr 12)
+                        val faceZ1 = edgeY0Z1 + (fadeY * (edgeY1Z1 - edgeY0Z1) shr 12)
+                        update(octave, faceZ0 + (fadeZ * (faceZ1 - faceZ0) shr 12))
                     }
 
                     reset()
@@ -130,57 +130,57 @@ abstract class WaterTextureGenerator internal constructor(
     fun initOctaveWeights() {
         octaveWeights = ShortArray(octaveCount)
 
-        for (i_1 in 0 until octaveCount) {
-            octaveWeights!![i_1] = 2.0.pow(i_1.toDouble()).toInt().toShort()
+        for (octave in 0 until octaveCount) {
+            octaveWeights!![octave] = 2.0.pow(octave.toDouble()).toInt().toShort()
         }
     }
 
     fun initPermutationTable() {
-        val random1 = Random(seed.toLong())
+        val random = Random(seed.toLong())
 
-        var i_2: Int
-        for (i_2 in 0 until 255) {
-            permutationTable[i_2] = i_2.toShort()
+        var i: Int
+        for (i in 0 until 255) {
+            permutationTable[i] = i.toShort()
         }
 
-        for (i_2 in 0 until 255) {
-            val i_3 = 255 - i_2
-            val i_4 = StaticMethods.boundedRandom(random1, i_3)
-            val s_5 = permutationTable[i_4]
-            permutationTable[i_4] = permutationTable[i_3]
-            permutationTable[i_3 + 256] = s_5
-            permutationTable[i_3] = permutationTable[i_3 + 256]
+        for (i in 0 until 255) {
+            val last = 255 - i
+            val swapIndex = StaticMethods.boundedRandom(random, last)
+            val swapped = permutationTable[swapIndex]
+            permutationTable[swapIndex] = permutationTable[last]
+            permutationTable[last + 256] = swapped
+            permutationTable[last] = permutationTable[last + 256]
         }
     }
 
     abstract fun clear()
 
-    abstract fun update(var1: Int, var2: Int)
+    abstract fun update(octave: Int, noise: Int)
 
     companion object {
         @JvmField
         val SINE_WAVE: IntArray = IntArray(4096)
 
         init {
-            for (i_0 in 0 until 4096) {
-                SINE_WAVE[i_0] = computeSCurve(i_0)
+            for (i in 0 until 4096) {
+                SINE_WAVE[i] = computeSCurve(i)
             }
         }
 
         @JvmStatic
-        fun gradientDot(i_0: Int, i_1: Int, i_2: Int, i_3: Int): Int {
-            val i_4 = i_0 and 0xf
-            val i_5 = if (i_4 < 8) i_1 else i_2
-            val i_6 = if (i_4 < 4) i_2 else if (i_4 != 12 && i_4 != 14) i_3 else i_1
-            return (if ((i_4 and 0x1) == 0) i_5 else -i_5) + (if ((i_4 and 0x2) == 0) i_6 else -i_6)
+        fun gradientDot(gradientIndex: Int, x: Int, y: Int, z: Int): Int {
+            val hash = gradientIndex and 0xf
+            val u = if (hash < 8) x else y
+            val v = if (hash < 4) y else if (hash != 12 && hash != 14) z else x
+            return (if ((hash and 0x1) == 0) u else -u) + (if ((hash and 0x2) == 0) v else -v)
         }
 
         @JvmStatic
-        fun computeSCurve(i_0: Int): Int {
-            val i_1 = i_0 * (i_0 * i_0 shr 12) shr 12
-            val i_2 = i_0 * 6 - 61440
-            val i_3 = (i_0 * i_2 shr 12) + 40960
-            return i_3 * i_1 shr 12
+        fun computeSCurve(t: Int): Int {
+            val t3 = t * (t * t shr 12) shr 12
+            val sixTMinus15 = t * 6 - 61440
+            val poly = (t * sixTMinus15 shr 12) + 40960
+            return poly * t3 shr 12
         }
     }
 }

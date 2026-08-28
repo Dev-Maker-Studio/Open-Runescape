@@ -72,7 +72,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapCategory
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapElement
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
-import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -176,15 +176,15 @@ object ClanStockOps {
 
     @JvmStatic
     fun stockMarketIsOfferStable(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
-        executor.intStack[++executor.intStackPtr - 1] = if (i_3 == 2) 1 else 0
+        val slot = executor.intStack[--executor.intStackPtr]
+        val state = Client.GRAND_EXCHANGE_SLOTS[slot]!!.getSlotState()
+        executor.intStack[++executor.intStackPtr - 1] = if (state == 2) 1 else 0
     }
 
     @JvmStatic
     fun activeClanSettingsGetBannedDisplayName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = executor.currentClanSettings!!.bannedUserNames!![value]
+        val bannedSlot = executor.intStack[--executor.intStackPtr]
+        executor.stringStack[++executor.stringStackPtr - 1] = executor.currentClanSettings!!.bannedUserNames!![bannedSlot]
     }
 
     @JvmStatic
@@ -199,9 +199,9 @@ object ClanStockOps {
 
     @JvmStatic
     fun stockMarketIsOfferEmpty(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
-        executor.intStack[++executor.intStackPtr - 1] = if (i_3 == 0) 1 else 0
+        val slot = executor.intStack[--executor.intStackPtr]
+        val state = Client.GRAND_EXCHANGE_SLOTS[slot]!!.getSlotState()
+        executor.intStack[++executor.intStackPtr - 1] = if (state == 0) 1 else 0
     }
 
     @JvmStatic
@@ -226,14 +226,14 @@ object ClanStockOps {
 
     @JvmStatic
     fun stockMarketGetOfferCompletedGold(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[value]!!.totalPrice
+        val slot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[slot]!!.totalPrice
     }
 
     @JvmStatic
     fun activeClanChannelGetUserWorld(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = executor.clanChannel!!.players!![value]!!.world
+        val userSlot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = executor.clanChannel!!.players!![userSlot]!!.world
     }
 
     @JvmStatic
@@ -243,35 +243,35 @@ object ClanStockOps {
 
     @JvmStatic
     fun activeClanSettingsGetAffinedRank(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.memberRanks!![value].toInt()
+        val memberSlot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.memberRanks!![memberSlot].toInt()
     }
 
     @JvmStatic
     fun stockMarketIsOfferAdding(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
+        val slot = executor.intStack[--executor.intStackPtr]
+        val state = Client.GRAND_EXCHANGE_SLOTS[slot]!!.getSlotState()
         val stack: IntArray? = executor.intStack
-        val i_5 = ++executor.intStackPtr - 1
-        var b_6: Int
-        if (i_3 == 1) {
-            b_6 = 1
+        val resultIndex = ++executor.intStackPtr - 1
+        var result: Int
+        if (state == 1) {
+            result = 1
         } else {
-            b_6 = 0
+            result = 0
         }
-        stack!![i_5] = b_6
+        stack!![resultIndex] = result
     }
 
     @JvmStatic
     fun getGEOfferPrice(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[value]!!.price
+        val slot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[slot]!!.price
     }
 
     @JvmStatic
     fun getGEOfferItem(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[value]!!.itemId
+        val slot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[slot]!!.itemId
     }
 
     @JvmStatic
@@ -286,8 +286,8 @@ object ClanStockOps {
 
     @JvmStatic
     fun stockMarketGetOfferCount(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[value]!!.amount
+        val slot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[slot]!!.amount
     }
 
     @JvmStatic
@@ -302,8 +302,8 @@ object ClanStockOps {
 
     @JvmStatic
     fun activeClanChannelKickUser(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        PacketEncoder.kickPlayer(executor.clanChannel == Client.CLAN_CHANNEL, value)
+        val userSlot = executor.intStack[--executor.intStackPtr]
+        PacketEncoder.kickPlayer(executor.clanChannel == Client.CLAN_CHANNEL, userSlot)
     }
 
     @JvmStatic
@@ -328,15 +328,15 @@ object ClanStockOps {
 
     @JvmStatic
     fun stockMarketGetOfferCompletedCount(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[value]!!.currentAmount
+        val slot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[slot]!!.currentAmount
     }
 
     @JvmStatic
     fun stockMarketIsOfferFinished(executor: CS2Executor) {
-        val i_2 = executor.intStack[--executor.intStackPtr]
-        val i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
-        executor.intStack[++executor.intStackPtr - 1] = if (i_3 == 5) 1 else 0
+        val slot = executor.intStack[--executor.intStackPtr]
+        val state = Client.GRAND_EXCHANGE_SLOTS[slot]!!.getSlotState()
+        executor.intStack[++executor.intStackPtr - 1] = if (state == 5) 1 else 0
     }
 
     @JvmStatic
@@ -351,20 +351,20 @@ object ClanStockOps {
 
     @JvmStatic
     fun activeClanSettingsGetAffinedJoinRuneday(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.memberJoinDays!![value]
+        val memberSlot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.memberJoinDays!![memberSlot]
     }
 
     @JvmStatic
     fun stockMarketGetOfferType(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[value]!!.isBuyOffer()
+        val slot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[slot]!!.isBuyOffer()
     }
 
     @JvmStatic
     fun activeClanSettingsGetAffinedDisplayName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = executor.currentClanSettings!!.memberNames!![value]
+        val memberSlot = executor.intStack[--executor.intStackPtr]
+        executor.stringStack[++executor.stringStackPtr - 1] = executor.currentClanSettings!!.memberNames!![memberSlot]
     }
 
     @JvmStatic
@@ -390,10 +390,10 @@ object ClanStockOps {
     @JvmStatic
     fun activeClanSettingsGetAffinedExtraInfo(executor: CS2Executor) {
         executor.intStackPtr -= 3
-        val i_2 = executor.intStack[executor.intStackPtr]
-        val i_3 = executor.intStack[executor.intStackPtr + 1]
-        val i_4 = executor.intStack[executor.intStackPtr + 2]
-        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.getClanFlagBitfield(i_2, i_3, i_4)
+        val memberSlot = executor.intStack[executor.intStackPtr]
+        val startBit = executor.intStack[executor.intStackPtr + 1]
+        val endBit = executor.intStack[executor.intStackPtr + 2]
+        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.getClanFlagBitfield(memberSlot, startBit, endBit)
     }
 
     @JvmStatic
@@ -403,8 +403,8 @@ object ClanStockOps {
 
     @JvmStatic
     fun activeClanChannelGetUserRank(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = executor.clanChannel!!.players!![value]!!.rank.toInt()
+        val userSlot = executor.intStack[--executor.intStackPtr]
+        executor.intStack[++executor.intStackPtr - 1] = executor.clanChannel!!.players!![userSlot]!!.rank.toInt()
     }
 
     @JvmStatic
@@ -414,8 +414,8 @@ object ClanStockOps {
 
     @JvmStatic
     fun activeClanChannelGetUserDisplayName(executor: CS2Executor) {
-        val value = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = executor.clanChannel!!.players!![value]!!.name
+        val userSlot = executor.intStack[--executor.intStackPtr]
+        executor.stringStack[++executor.stringStackPtr - 1] = executor.clanChannel!!.players!![userSlot]!!.name
     }
 
     @JvmStatic

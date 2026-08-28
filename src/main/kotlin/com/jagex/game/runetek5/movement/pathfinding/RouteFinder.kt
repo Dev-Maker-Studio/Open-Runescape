@@ -61,9 +61,9 @@ object RouteFinder {
         entitySize: Int,
         strategy: RouteStrategy,
         clipping: CollisionMap,
-        bool5: Boolean,
-        ints_6: IntArray,
-        ints_7: IntArray
+        findAlternative: Boolean,
+        stepsX: IntArray,
+        stepsY: IntArray
     ): Int {
         for (sceneX in 0 until 128) {
             for (sceneY in 0 until 128) {
@@ -78,97 +78,97 @@ object RouteFinder {
             else -> performCalculationSX(srcX, srcY, entitySize, strategy, clipping)
         }
 
-        val sceneY = srcX - 64
-        val i_11 = srcY - 64
+        val graphBaseX = srcX - 64
+        val graphBaseY = srcY - 64
         var pathExitX = exitX
         var pathExitY = exitY
-        val i_14: Int
-        val i_15: Int
+        val nearestDistSq: Int
+        val nearestSteps: Int
 
         if (!canReach) {
-            if (!bool5) {
+            if (!findAlternative) {
                 return -1
             }
-            i_14 = Int.MAX_VALUE
-            var tempI15 = Int.MAX_VALUE
-            val b_16: Byte = 10
-            val i_17 = strategy.destinationX
-            val i_18 = strategy.destinationY
-            val i_19 = strategy.destinationSizeX
-            val i_20 = strategy.destinationSizeY
+            nearestDistSq = Int.MAX_VALUE
+            var bestSteps = Int.MAX_VALUE
+            val searchRadius: Byte = 10
+            val destX = strategy.destinationX
+            val destY = strategy.destinationY
+            val destSizeX = strategy.destinationSizeX
+            val destSizeY = strategy.destinationSizeY
 
-            for (i_21 in i_17 - b_16..i_17 + b_16) {
-                for (i_22 in i_18 - b_16..i_18 + b_16) {
-                    val i_23 = i_21 - sceneY
-                    val i_24 = i_22 - i_11
-                    if (i_23 >= 0 && i_24 >= 0 && i_23 < 128 && i_24 < 128 && distances[i_23][i_24] < 100) {
-                        var i_25 = 0
-                        if (i_21 < i_17) {
-                            i_25 = i_17 - i_21
-                        } else if (i_21 > i_19 + i_17 - 1) {
-                            i_25 = i_21 - (i_17 + i_19 - 1)
+            for (x in destX - searchRadius..destX + searchRadius) {
+                for (y in destY - searchRadius..destY + searchRadius) {
+                    val graphX = x - graphBaseX
+                    val graphY = y - graphBaseY
+                    if (graphX >= 0 && graphY >= 0 && graphX < 128 && graphY < 128 && distances[graphX][graphY] < 100) {
+                        var dx = 0
+                        if (x < destX) {
+                            dx = destX - x
+                        } else if (x > destSizeX + destX - 1) {
+                            dx = x - (destX + destSizeX - 1)
                         }
-                        var i_26 = 0
-                        if (i_22 < i_18) {
-                            i_26 = i_18 - i_22
-                        } else if (i_22 > i_20 + i_18 - 1) {
-                            i_26 = i_22 - (i_18 + i_20 - 1)
+                        var dy = 0
+                        if (y < destY) {
+                            dy = destY - y
+                        } else if (y > destSizeY + destY - 1) {
+                            dy = y - (destY + destSizeY - 1)
                         }
-                        val i_27 = i_25 * i_25 + i_26 * i_26
-                        if (i_27 < i_14 || i_27 == i_14 && distances[i_23][i_24] < tempI15) {
-                            tempI15 = distances[i_23][i_24]
-                            pathExitX = i_21
-                            pathExitY = i_22
+                        val distSq = dx * dx + dy * dy
+                        if (distSq < nearestDistSq || distSq == nearestDistSq && distances[graphX][graphY] < bestSteps) {
+                            bestSteps = distances[graphX][graphY]
+                            pathExitX = x
+                            pathExitY = y
                         }
                     }
                 }
             }
-            if (i_14 == Int.MAX_VALUE) {
+            if (nearestDistSq == Int.MAX_VALUE) {
                 return -1
             }
-            i_15 = tempI15
+            nearestSteps = bestSteps
         } else {
-            i_15 = 0
+            nearestSteps = 0
         }
 
         if (srcX == pathExitX && pathExitY == srcY) {
             return 0
         } else {
-            val b_29: Byte = 0
-            bufferX[b_29.toInt()] = pathExitX
-            var i_14_2 = b_29 + 1
-            bufferY[b_29.toInt()] = pathExitY
-            var i_15_2 = directions[pathExitX - sceneY][pathExitY - i_11]
-            var i_30 = i_15_2
+            val startIndex: Byte = 0
+            bufferX[startIndex.toInt()] = pathExitX
+            var stepCount = startIndex + 1
+            bufferY[startIndex.toInt()] = pathExitY
+            var lastDirection = directions[pathExitX - graphBaseX][pathExitY - graphBaseY]
+            var direction = lastDirection
 
             while (srcX != pathExitX || pathExitY != srcY) {
-                if (i_15_2 != i_30) {
-                    i_15_2 = i_30
-                    bufferX[i_14_2] = pathExitX
-                    bufferY[i_14_2++] = pathExitY
+                if (lastDirection != direction) {
+                    lastDirection = direction
+                    bufferX[stepCount] = pathExitX
+                    bufferY[stepCount++] = pathExitY
                 }
-                if ((i_30 and 0x2) != 0) {
+                if ((direction and 0x2) != 0) {
                     ++pathExitX
-                } else if ((i_30 and 0x8) != 0) {
+                } else if ((direction and 0x8) != 0) {
                     --pathExitX
                 }
-                if ((i_30 and 0x1) != 0) {
+                if ((direction and 0x1) != 0) {
                     ++pathExitY
-                } else if ((i_30 and 0x4) != 0) {
+                } else if ((direction and 0x4) != 0) {
                     --pathExitY
                 }
-                i_30 = directions[pathExitX - sceneY][pathExitY - i_11]
+                direction = directions[pathExitX - graphBaseX][pathExitY - graphBaseY]
             }
 
-            var i_17 = 0
-            while (i_14_2-- > 0) {
-                ints_6[i_17] = bufferX[i_14_2]
-                ints_7[i_17++] = bufferY[i_14_2]
-                if (i_17 >= ints_6.size) {
+            var stepIndex = 0
+            while (stepCount-- > 0) {
+                stepsX[stepIndex] = bufferX[stepCount]
+                stepsY[stepIndex++] = bufferY[stepCount]
+                if (stepIndex >= stepsX.size) {
                     break
                 }
             }
-            return i_17
+            return stepIndex
         }
     }
 
@@ -402,42 +402,42 @@ object RouteFinder {
     }
 
     @JvmStatic
-    fun performCalculationS2(i_0: Int, i_1: Int, routestrategy2: RouteStrategy, clipmap3: CollisionMap): Boolean {
-        var i_5 = i_0
-        var i_6 = i_1
-        val b_7: Byte = 64
-        val b_8: Byte = 64
-        val i_9 = i_0 - b_7
-        val i_10 = i_1 - b_8
-        directions[b_7.toInt()][b_8.toInt()] = 99
-        distances[b_7.toInt()][b_8.toInt()] = 0
-        val b_11: Byte = 0
-        var i_12 = 0
-        bufferX[b_11.toInt()] = i_0
-        val b_10001 = b_11
-        var i_19 = b_11 + 1
-        bufferY[b_10001.toInt()] = i_1
-        val ints_13 = clipmap3.collisionFlags
+    fun performCalculationS2(srcX: Int, srcY: Int, strategy: RouteStrategy, clipMap: CollisionMap): Boolean {
+        var currentX = srcX
+        var currentY = srcY
+        val centerX: Byte = 64
+        val centerY: Byte = 64
+        val graphBaseX = srcX - centerX
+        val graphBaseY = srcY - centerY
+        directions[centerX.toInt()][centerY.toInt()] = 99
+        distances[centerX.toInt()][centerY.toInt()] = 0
+        val startIndex: Byte = 0
+        var read = 0
+        bufferX[startIndex.toInt()] = srcX
+        val startIndexCopy = startIndex
+        var write = startIndex + 1
+        bufferY[startIndexCopy.toInt()] = srcY
+        val clip = clipMap.collisionFlags
 
-        while (i_12 != i_19) {
-            i_5 = bufferX[i_12]
-            i_6 = bufferY[i_12]
-            i_12 = i_12 + 1 and QUEUE_SIZE
-            val i_17 = i_5 - i_9
-            val i_18 = i_6 - i_10
-            val i_14 = i_5 - clipmap3.offsetX
-            val i_15 = i_6 - clipmap3.offsetY
+        while (read != write) {
+            currentX = bufferX[read]
+            currentY = bufferY[read]
+            read = read + 1 and QUEUE_SIZE
+            val currentGraphX = currentX - graphBaseX
+            val currentGraphY = currentY - graphBaseY
+            val clipX = currentX - clipMap.offsetX
+            val clipY = currentY - clipMap.offsetY
 
-            if (routestrategy2.canExit(2, i_5, i_6, clipmap3)) {
-                exitX = i_5
-                exitY = i_6
+            if (strategy.canExit(2, currentX, currentY, clipMap)) {
+                exitX = currentX
+                exitY = currentY
                 return true
             }
 
-            val i_16 = distances[i_17][i_18] + 1
+            val nextDistance = distances[currentGraphX][currentGraphY] + 1
 
-            if (i_17 > 0 && directions[i_17 - 1][i_18] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14 - 1][i_15],
+            if (currentGraphX > 0 && directions[currentGraphX - 1][currentGraphY] == 0 && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -445,7 +445,7 @@ object RouteFinder {
                     CollisionFlag.E_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 - 1][i_15 + 1],
+                    clip[clipX - 1][clipY + 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.E_ALT_OBJ,
@@ -454,15 +454,15 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                bufferX[i_19] = i_5 - 1
-                bufferY[i_19] = i_6
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17 - 1][i_18] = 2
-                distances[i_17 - 1][i_18] = i_16
+                bufferX[write] = currentX - 1
+                bufferY[write] = currentY
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX - 1][currentGraphY] = 2
+                distances[currentGraphX - 1][currentGraphY] = nextDistance
             }
 
-            if (i_17 < 126 && directions[i_17 + 1][i_18] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14 + 2][i_15],
+            if (currentGraphX < 126 && directions[currentGraphX + 1][currentGraphY] == 0 && CollisionMap.notFlagged(
+                    clip[clipX + 2][clipY],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -470,7 +470,7 @@ object RouteFinder {
                     CollisionFlag.W_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 2][i_15 + 1],
+                    clip[clipX + 2][clipY + 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.S_ALT_OBJ,
@@ -479,15 +479,15 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                bufferX[i_19] = i_5 + 1
-                bufferY[i_19] = i_6
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17 + 1][i_18] = 8
-                distances[i_17 + 1][i_18] = i_16
+                bufferX[write] = currentX + 1
+                bufferY[write] = currentY
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX + 1][currentGraphY] = 8
+                distances[currentGraphX + 1][currentGraphY] = nextDistance
             }
 
-            if (i_18 > 0 && directions[i_17][i_18 - 1] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14][i_15 - 1],
+            if (currentGraphY > 0 && directions[currentGraphX][currentGraphY - 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -495,7 +495,7 @@ object RouteFinder {
                     CollisionFlag.E_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 1][i_15 - 1],
+                    clip[clipX + 1][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -504,15 +504,15 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                bufferX[i_19] = i_5
-                bufferY[i_19] = i_6 - 1
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17][i_18 - 1] = 1
-                distances[i_17][i_18 - 1] = i_16
+                bufferX[write] = currentX
+                bufferY[write] = currentY - 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX][currentGraphY - 1] = 1
+                distances[currentGraphX][currentGraphY - 1] = nextDistance
             }
 
-            if (i_18 < 126 && directions[i_17][i_18 + 1] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14][i_15 + 2],
+            if (currentGraphY < 126 && directions[currentGraphX][currentGraphY + 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX][clipY + 2],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.E_ALT_OBJ,
@@ -520,7 +520,7 @@ object RouteFinder {
                     CollisionFlag.S_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 1][i_15 + 2],
+                    clip[clipX + 1][clipY + 2],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.S_ALT_OBJ,
@@ -529,15 +529,15 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                bufferX[i_19] = i_5
-                bufferY[i_19] = i_6 + 1
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17][i_18 + 1] = 4
-                distances[i_17][i_18 + 1] = i_16
+                bufferX[write] = currentX
+                bufferY[write] = currentY + 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX][currentGraphY + 1] = 4
+                distances[currentGraphX][currentGraphY + 1] = nextDistance
             }
 
-            if (i_17 > 0 && i_18 > 0 && directions[i_17 - 1][i_18 - 1] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14 - 1][i_15],
+            if (currentGraphX > 0 && currentGraphY > 0 && directions[currentGraphX - 1][currentGraphY - 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -547,7 +547,7 @@ object RouteFinder {
                     CollisionFlag.S_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 - 1][i_15 - 1],
+                    clip[clipX - 1][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -555,7 +555,7 @@ object RouteFinder {
                     CollisionFlag.E_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14][i_15 - 1],
+                    clip[clipX][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -566,15 +566,15 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                bufferX[i_19] = i_5 - 1
-                bufferY[i_19] = i_6 - 1
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17 - 1][i_18 - 1] = 3
-                distances[i_17 - 1][i_18 - 1] = i_16
+                bufferX[write] = currentX - 1
+                bufferY[write] = currentY - 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX - 1][currentGraphY - 1] = 3
+                distances[currentGraphX - 1][currentGraphY - 1] = nextDistance
             }
 
-            if (i_17 < 126 && i_18 > 0 && directions[i_17 + 1][i_18 - 1] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14 + 1][i_15 - 1],
+            if (currentGraphX < 126 && currentGraphY > 0 && directions[currentGraphX + 1][currentGraphY - 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX + 1][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -584,7 +584,7 @@ object RouteFinder {
                     CollisionFlag.W_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 2][i_15 - 1],
+                    clip[clipX + 2][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -592,81 +592,7 @@ object RouteFinder {
                     CollisionFlag.W_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 2][i_15],
-                    CollisionFlag.BLOCKED_DECO,
-                    CollisionFlag.BLOCKED,
-                    CollisionFlag.NW_ALT_OBJ,
-                    CollisionFlag.N_ALT_OBJ,
-                    CollisionFlag.S_ALT_OBJ,
-                    CollisionFlag.SW_ALT_OBJ,
-                    CollisionFlag.W_ALT_OBJ,
-                    CollisionFlag.ALT_OBJ
-                )
-            ) {
-                bufferX[i_19] = i_5 + 1
-                bufferY[i_19] = i_6 - 1
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17 + 1][i_18 - 1] = 9
-                distances[i_17 + 1][i_18 - 1] = i_16
-            }
-
-            if (i_17 > 0 && i_18 < 126 && directions[i_17 - 1][i_18 + 1] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14 - 1][i_15 + 1],
-                    CollisionFlag.BLOCKED_DECO,
-                    CollisionFlag.BLOCKED,
-                    CollisionFlag.N_ALT_OBJ,
-                    CollisionFlag.NE_ALT_OBJ,
-                    CollisionFlag.E_ALT_OBJ,
-                    CollisionFlag.SE_ALT_OBJ,
-                    CollisionFlag.S_ALT_OBJ,
-                    CollisionFlag.ALT_OBJ
-                ) && CollisionMap.notFlagged(
-                    ints_13[i_14 - 1][i_15 + 2],
-                    CollisionFlag.BLOCKED_DECO,
-                    CollisionFlag.BLOCKED,
-                    CollisionFlag.E_ALT_OBJ,
-                    CollisionFlag.SE_ALT_OBJ,
-                    CollisionFlag.S_ALT_OBJ,
-                    CollisionFlag.ALT_OBJ
-                ) && CollisionMap.notFlagged(
-                    ints_13[i_14][i_15 + 2],
-                    CollisionFlag.BLOCKED_DECO,
-                    CollisionFlag.BLOCKED,
-                    CollisionFlag.E_ALT_OBJ,
-                    CollisionFlag.SE_ALT_OBJ,
-                    CollisionFlag.S_ALT_OBJ,
-                    CollisionFlag.SW_ALT_OBJ,
-                    CollisionFlag.W_ALT_OBJ,
-                    CollisionFlag.ALT_OBJ
-                )
-            ) {
-                bufferX[i_19] = i_5 - 1
-                bufferY[i_19] = i_6 + 1
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17 - 1][i_18 + 1] = 6
-                distances[i_17 - 1][i_18 + 1] = i_16
-            }
-
-            if (i_17 < 126 && i_18 < 126 && directions[i_17 + 1][i_18 + 1] == 0 && CollisionMap.notFlagged(
-                    ints_13[i_14 + 1][i_15 + 2],
-                    CollisionFlag.BLOCKED_DECO,
-                    CollisionFlag.BLOCKED,
-                    CollisionFlag.E_ALT_OBJ,
-                    CollisionFlag.SE_ALT_OBJ,
-                    CollisionFlag.S_ALT_OBJ,
-                    CollisionFlag.SW_ALT_OBJ,
-                    CollisionFlag.W_ALT_OBJ,
-                    CollisionFlag.ALT_OBJ
-                ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 2][i_15 + 2],
-                    CollisionFlag.BLOCKED_DECO,
-                    CollisionFlag.BLOCKED,
-                    CollisionFlag.S_ALT_OBJ,
-                    CollisionFlag.SW_ALT_OBJ,
-                    CollisionFlag.W_ALT_OBJ,
-                    CollisionFlag.ALT_OBJ
-                ) && CollisionMap.notFlagged(
-                    ints_13[i_14 + 2][i_15 + 1],
+                    clip[clipX + 2][clipY],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -677,62 +603,136 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                bufferX[i_19] = i_5 + 1
-                bufferY[i_19] = i_6 + 1
-                i_19 = i_19 + 1 and QUEUE_SIZE
-                directions[i_17 + 1][i_18 + 1] = 12
-                distances[i_17 + 1][i_18 + 1] = i_16
+                bufferX[write] = currentX + 1
+                bufferY[write] = currentY - 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX + 1][currentGraphY - 1] = 9
+                distances[currentGraphX + 1][currentGraphY - 1] = nextDistance
+            }
+
+            if (currentGraphX > 0 && currentGraphY < 126 && directions[currentGraphX - 1][currentGraphY + 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY + 1],
+                    CollisionFlag.BLOCKED_DECO,
+                    CollisionFlag.BLOCKED,
+                    CollisionFlag.N_ALT_OBJ,
+                    CollisionFlag.NE_ALT_OBJ,
+                    CollisionFlag.E_ALT_OBJ,
+                    CollisionFlag.SE_ALT_OBJ,
+                    CollisionFlag.S_ALT_OBJ,
+                    CollisionFlag.ALT_OBJ
+                ) && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY + 2],
+                    CollisionFlag.BLOCKED_DECO,
+                    CollisionFlag.BLOCKED,
+                    CollisionFlag.E_ALT_OBJ,
+                    CollisionFlag.SE_ALT_OBJ,
+                    CollisionFlag.S_ALT_OBJ,
+                    CollisionFlag.ALT_OBJ
+                ) && CollisionMap.notFlagged(
+                    clip[clipX][clipY + 2],
+                    CollisionFlag.BLOCKED_DECO,
+                    CollisionFlag.BLOCKED,
+                    CollisionFlag.E_ALT_OBJ,
+                    CollisionFlag.SE_ALT_OBJ,
+                    CollisionFlag.S_ALT_OBJ,
+                    CollisionFlag.SW_ALT_OBJ,
+                    CollisionFlag.W_ALT_OBJ,
+                    CollisionFlag.ALT_OBJ
+                )
+            ) {
+                bufferX[write] = currentX - 1
+                bufferY[write] = currentY + 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX - 1][currentGraphY + 1] = 6
+                distances[currentGraphX - 1][currentGraphY + 1] = nextDistance
+            }
+
+            if (currentGraphX < 126 && currentGraphY < 126 && directions[currentGraphX + 1][currentGraphY + 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX + 1][clipY + 2],
+                    CollisionFlag.BLOCKED_DECO,
+                    CollisionFlag.BLOCKED,
+                    CollisionFlag.E_ALT_OBJ,
+                    CollisionFlag.SE_ALT_OBJ,
+                    CollisionFlag.S_ALT_OBJ,
+                    CollisionFlag.SW_ALT_OBJ,
+                    CollisionFlag.W_ALT_OBJ,
+                    CollisionFlag.ALT_OBJ
+                ) && CollisionMap.notFlagged(
+                    clip[clipX + 2][clipY + 2],
+                    CollisionFlag.BLOCKED_DECO,
+                    CollisionFlag.BLOCKED,
+                    CollisionFlag.S_ALT_OBJ,
+                    CollisionFlag.SW_ALT_OBJ,
+                    CollisionFlag.W_ALT_OBJ,
+                    CollisionFlag.ALT_OBJ
+                ) && CollisionMap.notFlagged(
+                    clip[clipX + 2][clipY + 1],
+                    CollisionFlag.BLOCKED_DECO,
+                    CollisionFlag.BLOCKED,
+                    CollisionFlag.NW_ALT_OBJ,
+                    CollisionFlag.N_ALT_OBJ,
+                    CollisionFlag.S_ALT_OBJ,
+                    CollisionFlag.SW_ALT_OBJ,
+                    CollisionFlag.W_ALT_OBJ,
+                    CollisionFlag.ALT_OBJ
+                )
+            ) {
+                bufferX[write] = currentX + 1
+                bufferY[write] = currentY + 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX + 1][currentGraphY + 1] = 12
+                distances[currentGraphX + 1][currentGraphY + 1] = nextDistance
             }
         }
 
-        exitX = i_5
-        exitY = i_6
+        exitX = currentX
+        exitY = currentY
         return false
     }
 
     @JvmStatic
     fun performCalculationSX(
-        i_0: Int,
-        i_1: Int,
-        i_2: Int,
-        routestrategy3: RouteStrategy,
-        clipmap4: CollisionMap
+        srcX: Int,
+        srcY: Int,
+        entitySize: Int,
+        strategy: RouteStrategy,
+        clipMap: CollisionMap
     ): Boolean {
-        var i_6 = i_0
-        var i_7 = i_1
-        val b_8: Byte = 64
-        val b_9: Byte = 64
-        val i_10 = i_0 - b_8
-        val i_11 = i_1 - b_9
-        directions[b_8.toInt()][b_9.toInt()] = 99
-        distances[b_8.toInt()][b_9.toInt()] = 0
-        val b_12: Byte = 0
-        var i_13 = 0
-        bufferX[b_12.toInt()] = i_0
-        var i_21 = b_12 + 1
-        bufferY[b_12.toInt()] = i_1
-        val ints_14 = clipmap4.collisionFlags
+        var currentX = srcX
+        var currentY = srcY
+        val centerX: Byte = 64
+        val centerY: Byte = 64
+        val graphBaseX = srcX - centerX
+        val graphBaseY = srcY - centerY
+        directions[centerX.toInt()][centerY.toInt()] = 99
+        distances[centerX.toInt()][centerY.toInt()] = 0
+        val startIndex: Byte = 0
+        var read = 0
+        bufferX[startIndex.toInt()] = srcX
+        var write = startIndex + 1
+        bufferY[startIndex.toInt()] = srcY
+        val clip = clipMap.collisionFlags
 
-        label208@ while (i_21 != i_13) {
-            i_6 = bufferX[i_13]
-            i_7 = bufferY[i_13]
-            i_13 = i_13 + 1 and QUEUE_SIZE
-            val i_19 = i_6 - i_10
-            val i_20 = i_7 - i_11
-            val i_15 = i_6 - clipmap4.offsetX
-            val i_16 = i_7 - clipmap4.offsetY
+        bfs@ while (write != read) {
+            currentX = bufferX[read]
+            currentY = bufferY[read]
+            read = read + 1 and QUEUE_SIZE
+            val currentGraphX = currentX - graphBaseX
+            val currentGraphY = currentY - graphBaseY
+            val clipX = currentX - clipMap.offsetX
+            val clipY = currentY - clipMap.offsetY
 
-            if (routestrategy3.canExit(i_2, i_6, i_7, clipmap4)) {
-                exitX = i_6
-                exitY = i_7
+            if (strategy.canExit(entitySize, currentX, currentY, clipMap)) {
+                exitX = currentX
+                exitY = currentY
                 return true
             }
 
-            val i_17 = distances[i_19][i_20] + 1
-            var i_18: Int
+            val nextDistance = distances[currentGraphX][currentGraphY] + 1
+            var i: Int
 
-            if (i_19 > 0 && directions[i_19 - 1][i_20] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15 - 1][i_16],
+            if (currentGraphX > 0 && directions[currentGraphX - 1][currentGraphY] == 0 && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -740,7 +740,7 @@ object RouteFinder {
                     CollisionFlag.E_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_14[i_15 - 1][i_16 + i_2 - 1],
+                    clip[clipX - 1][clipY + entitySize - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.E_ALT_OBJ,
@@ -749,18 +749,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2 - 1) {
-                        bufferX[i_21] = i_6 - 1
-                        bufferY[i_21] = i_7
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19 - 1][i_20] = 2
-                        distances[i_19 - 1][i_20] = i_17
+                    if (i >= entitySize - 1) {
+                        bufferX[write] = currentX - 1
+                        bufferY[write] = currentY
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX - 1][currentGraphY] = 2
+                        distances[currentGraphX - 1][currentGraphY] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 - 1][i_18 + i_16],
+                            clip[clipX - 1][i + clipY],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.N_ALT_OBJ,
@@ -773,12 +773,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_19 < 128 - i_2 && directions[i_19 + 1][i_20] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15 + i_2][i_16],
+            if (currentGraphX < 128 - entitySize && directions[currentGraphX + 1][currentGraphY] == 0 && CollisionMap.notFlagged(
+                    clip[clipX + entitySize][clipY],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -786,7 +786,7 @@ object RouteFinder {
                     CollisionFlag.W_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_14[i_15 + i_2][i_16 + i_2 - 1],
+                    clip[clipX + entitySize][clipY + entitySize - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.S_ALT_OBJ,
@@ -795,18 +795,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2 - 1) {
-                        bufferX[i_21] = i_6 + 1
-                        bufferY[i_21] = i_7
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19 + 1][i_20] = 8
-                        distances[i_19 + 1][i_20] = i_17
+                    if (i >= entitySize - 1) {
+                        bufferX[write] = currentX + 1
+                        bufferY[write] = currentY
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX + 1][currentGraphY] = 8
+                        distances[currentGraphX + 1][currentGraphY] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 + i_2][i_18 + i_16],
+                            clip[clipX + entitySize][i + clipY],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.NW_ALT_OBJ,
@@ -819,12 +819,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_20 > 0 && directions[i_19][i_20 - 1] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15][i_16 - 1],
+            if (currentGraphY > 0 && directions[currentGraphX][currentGraphY - 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -832,7 +832,7 @@ object RouteFinder {
                     CollisionFlag.E_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_14[i_15 + i_2 - 1][i_16 - 1],
+                    clip[clipX + entitySize - 1][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -841,18 +841,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2 - 1) {
-                        bufferX[i_21] = i_6
-                        bufferY[i_21] = i_7 - 1
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19][i_20 - 1] = 1
-                        distances[i_19][i_20 - 1] = i_17
+                    if (i >= entitySize - 1) {
+                        bufferX[write] = currentX
+                        bufferY[write] = currentY - 1
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX][currentGraphY - 1] = 1
+                        distances[currentGraphX][currentGraphY - 1] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_18 + i_15][i_16 - 1],
+                            clip[i + clipX][clipY - 1],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.NW_ALT_OBJ,
@@ -865,12 +865,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_20 < 128 - i_2 && directions[i_19][i_20 + 1] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15][i_16 + i_2],
+            if (currentGraphY < 128 - entitySize && directions[currentGraphX][currentGraphY + 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX][clipY + entitySize],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.E_ALT_OBJ,
@@ -878,7 +878,7 @@ object RouteFinder {
                     CollisionFlag.S_ALT_OBJ,
                     CollisionFlag.ALT_OBJ
                 ) && CollisionMap.notFlagged(
-                    ints_14[i_15 + i_2 - 1][i_16 + i_2],
+                    clip[clipX + entitySize - 1][clipY + entitySize],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.S_ALT_OBJ,
@@ -887,18 +887,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2 - 1) {
-                        bufferX[i_21] = i_6
-                        bufferY[i_21] = i_7 + 1
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19][i_20 + 1] = 4
-                        distances[i_19][i_20 + 1] = i_17
+                    if (i >= entitySize - 1) {
+                        bufferX[write] = currentX
+                        bufferY[write] = currentY + 1
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX][currentGraphY + 1] = 4
+                        distances[currentGraphX][currentGraphY + 1] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 + i_18][i_16 + i_2],
+                            clip[clipX + i][clipY + entitySize],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.E_ALT_OBJ,
@@ -911,12 +911,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_19 > 0 && i_20 > 0 && directions[i_19 - 1][i_20 - 1] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15 - 1][i_16 - 1],
+            if (currentGraphX > 0 && currentGraphY > 0 && directions[currentGraphX - 1][currentGraphY - 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.N_ALT_OBJ,
@@ -925,18 +925,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2) {
-                        bufferX[i_21] = i_6 - 1
-                        bufferY[i_21] = i_7 - 1
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19 - 1][i_20 - 1] = 3
-                        distances[i_19 - 1][i_20 - 1] = i_17
+                    if (i >= entitySize) {
+                        bufferX[write] = currentX - 1
+                        bufferY[write] = currentY - 1
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX - 1][currentGraphY - 1] = 3
+                        distances[currentGraphX - 1][currentGraphY - 1] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 - 1][i_18 + (i_16 - 1)],
+                            clip[clipX - 1][i + (clipY - 1)],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.N_ALT_OBJ,
@@ -946,7 +946,7 @@ object RouteFinder {
                             CollisionFlag.S_ALT_OBJ,
                             CollisionFlag.ALT_OBJ
                         ) || !CollisionMap.notFlagged(
-                            ints_14[i_18 + (i_15 - 1)][i_16 - 1],
+                            clip[i + (clipX - 1)][clipY - 1],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.NW_ALT_OBJ,
@@ -959,12 +959,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_19 < 128 - i_2 && i_20 > 0 && directions[i_19 + 1][i_20 - 1] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15 + i_2][i_16 - 1],
+            if (currentGraphX < 128 - entitySize && currentGraphY > 0 && directions[currentGraphX + 1][currentGraphY - 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX + entitySize][clipY - 1],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.NW_ALT_OBJ,
@@ -973,18 +973,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2) {
-                        bufferX[i_21] = i_6 + 1
-                        bufferY[i_21] = i_7 - 1
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19 + 1][i_20 - 1] = 9
-                        distances[i_19 + 1][i_20 - 1] = i_17
+                    if (i >= entitySize) {
+                        bufferX[write] = currentX + 1
+                        bufferY[write] = currentY - 1
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX + 1][currentGraphY - 1] = 9
+                        distances[currentGraphX + 1][currentGraphY - 1] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 + i_2][i_18 + (i_16 - 1)],
+                            clip[clipX + entitySize][i + (clipY - 1)],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.NW_ALT_OBJ,
@@ -994,7 +994,7 @@ object RouteFinder {
                             CollisionFlag.W_ALT_OBJ,
                             CollisionFlag.ALT_OBJ
                         ) || !CollisionMap.notFlagged(
-                            ints_14[i_18 + i_15][i_16 - 1],
+                            clip[i + clipX][clipY - 1],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.NW_ALT_OBJ,
@@ -1007,12 +1007,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_19 > 0 && i_20 < 128 - i_2 && directions[i_19 - 1][i_20 + 1] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15 - 1][i_16 + i_2],
+            if (currentGraphX > 0 && currentGraphY < 128 - entitySize && directions[currentGraphX - 1][currentGraphY + 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX - 1][clipY + entitySize],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.E_ALT_OBJ,
@@ -1021,18 +1021,18 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
+                i = 1
                 while (true) {
-                    if (i_18 >= i_2) {
-                        bufferX[i_21] = i_6 - 1
-                        bufferY[i_21] = i_7 + 1
-                        i_21 = i_21 + 1 and QUEUE_SIZE
-                        directions[i_19 - 1][i_20 + 1] = 6
-                        distances[i_19 - 1][i_20 + 1] = i_17
+                    if (i >= entitySize) {
+                        bufferX[write] = currentX - 1
+                        bufferY[write] = currentY + 1
+                        write = write + 1 and QUEUE_SIZE
+                        directions[currentGraphX - 1][currentGraphY + 1] = 6
+                        distances[currentGraphX - 1][currentGraphY + 1] = nextDistance
                         break
                     }
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 - 1][i_18 + i_16],
+                            clip[clipX - 1][i + clipY],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.N_ALT_OBJ,
@@ -1042,7 +1042,7 @@ object RouteFinder {
                             CollisionFlag.S_ALT_OBJ,
                             CollisionFlag.ALT_OBJ
                         ) || !CollisionMap.notFlagged(
-                            ints_14[i_18 + (i_15 - 1)][i_16 + i_2],
+                            clip[i + (clipX - 1)][clipY + entitySize],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.E_ALT_OBJ,
@@ -1055,12 +1055,12 @@ object RouteFinder {
                     ) {
                         break
                     }
-                    ++i_18
+                    ++i
                 }
             }
 
-            if (i_19 < 128 - i_2 && i_20 < 128 - i_2 && directions[i_19 + 1][i_20 + 1] == 0 && CollisionMap.notFlagged(
-                    ints_14[i_15 + i_2][i_16 + i_2],
+            if (currentGraphX < 128 - entitySize && currentGraphY < 128 - entitySize && directions[currentGraphX + 1][currentGraphY + 1] == 0 && CollisionMap.notFlagged(
+                    clip[clipX + entitySize][clipY + entitySize],
                     CollisionFlag.BLOCKED_DECO,
                     CollisionFlag.BLOCKED,
                     CollisionFlag.S_ALT_OBJ,
@@ -1069,10 +1069,10 @@ object RouteFinder {
                     CollisionFlag.ALT_OBJ
                 )
             ) {
-                i_18 = 1
-                while (i_18 < i_2) {
+                i = 1
+                while (i < entitySize) {
                     if (!CollisionMap.notFlagged(
-                            ints_14[i_15 + i_18][i_16 + i_2],
+                            clip[clipX + i][clipY + entitySize],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.E_ALT_OBJ,
@@ -1082,7 +1082,7 @@ object RouteFinder {
                             CollisionFlag.W_ALT_OBJ,
                             CollisionFlag.ALT_OBJ
                         ) || !CollisionMap.notFlagged(
-                            ints_14[i_15 + i_2][i_18 + i_16],
+                            clip[clipX + entitySize][i + clipY],
                             CollisionFlag.BLOCKED_DECO,
                             CollisionFlag.BLOCKED,
                             CollisionFlag.NW_ALT_OBJ,
@@ -1093,20 +1093,20 @@ object RouteFinder {
                             CollisionFlag.ALT_OBJ
                         )
                     ) {
-                        continue@label208
+                        continue@bfs
                     }
-                    i_18++
+                    i++
                 }
-                bufferX[i_21] = i_6 + 1
-                bufferY[i_21] = i_7 + 1
-                i_21 = i_21 + 1 and QUEUE_SIZE
-                directions[i_19 + 1][i_20 + 1] = 12
-                distances[i_19 + 1][i_20 + 1] = i_17
+                bufferX[write] = currentX + 1
+                bufferY[write] = currentY + 1
+                write = write + 1 and QUEUE_SIZE
+                directions[currentGraphX + 1][currentGraphY + 1] = 12
+                distances[currentGraphX + 1][currentGraphY + 1] = nextDistance
             }
         }
 
-        exitX = i_6
-        exitY = i_7
+        exitX = currentX
+        exitY = currentY
         return false
     }
 
@@ -1143,7 +1143,7 @@ object RouteFinder {
     }
 
     @JvmStatic
-    fun calculateRoute(destinationX: Int, destinationY: Int, bool2: Boolean, strategy: RouteStrategy): Boolean {
+    fun calculateRoute(destinationX: Int, destinationY: Int, findAlternative: Boolean, strategy: RouteStrategy): Boolean {
         val baseX = PlayerUpdate.MY_PLAYER!!.movementBaseX[0]
         val baseY = PlayerUpdate.MY_PLAYER!!.movementBaseY[0]
         if (baseX >= 0 && baseX < Resource.mapRegion!!.sceneSizeX && baseY >= 0 && baseY < Resource.mapRegion!!.sceneSizeY) {
@@ -1154,7 +1154,7 @@ object RouteFinder {
                     PlayerUpdate.MY_PLAYER!!.getSize(),
                     strategy,
                     Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
-                    bool2,
+                    findAlternative,
                     Client.WALKING_STEPS_X,
                     Client.WALKING_STEPS_Y
                 )

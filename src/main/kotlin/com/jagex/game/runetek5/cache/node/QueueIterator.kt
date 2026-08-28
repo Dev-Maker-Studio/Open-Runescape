@@ -20,7 +20,6 @@ class QueueIterator(queue: Queue<*>) : MutableIterator<CacheableNode?> {
      *
      * @return The next node after reset
      */
-    @JvmName("method7790")
     fun nextAndReset(): CacheableNode? {
         reset()
         return next() as CacheableNode?
@@ -51,7 +50,6 @@ class QueueIterator(queue: Queue<*>) : MutableIterator<CacheableNode?> {
     /**
      * Resets the iterator to the beginning of the queue.
      */
-    @JvmName("method7800")
     fun reset() {
         current = queue.current.nextCache
         lastReturned = null

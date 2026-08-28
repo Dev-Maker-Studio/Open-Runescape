@@ -14,10 +14,10 @@ abstract class OggStreamDecoder(
 
     abstract fun reset()
 
-    fun processPacket(oggpacket1: OggPacket) {
-        decode(oggpacket1)
+    fun processPacket(packet: OggPacket) {
+        decode(packet)
         ++packetCount
     }
 
-    abstract fun decode(var1: OggPacket)
+    abstract fun decode(packet: OggPacket)
 }

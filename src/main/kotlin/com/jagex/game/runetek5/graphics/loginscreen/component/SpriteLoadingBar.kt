@@ -6,16 +6,16 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.rendering.Renderers
 
 class SpriteLoadingBar(
-    index1: Js5ResourceProvider,
-    index2: Js5ResourceProvider,
-    class350Sub13: SpriteLoadingBarElement
-) : LBC(index1, index2, class350Sub13) {
+    spriteResource: Js5ResourceProvider,
+    fontResource: Js5ResourceProvider,
+    element: SpriteLoadingBarElement
+) : AbstractLoadingBar(spriteResource, fontResource, element) {
 
     @JvmField var fillTileSprite: NativeSprite? = null
 
-    override fun drawOutline(bool1: Boolean, i_2: Int, i_3: Int) {
-        Renderers.activeToolkit!!.drawRectangleOutline(i_2 - 2, i_3, super.anchoredElement.width + 4, super.anchoredElement.height + 2, (super.anchoredElement as SpriteLoadingBarElement).backgroundColor, 0)
-        Renderers.activeToolkit!!.drawRectangleOutline(i_2 - 1, i_3 + 1, super.anchoredElement.width + 2, super.anchoredElement.height, 0, 0)
+    override fun drawOutline(draw: Boolean, x: Int, y: Int) {
+        Renderers.activeToolkit!!.drawRectangleOutline(x - 2, y, super.anchoredElement.width + 4, super.anchoredElement.height + 2, (super.anchoredElement as SpriteLoadingBarElement).backgroundColor, 0)
+        Renderers.activeToolkit!!.drawRectangleOutline(x - 1, y + 1, super.anchoredElement.width + 2, super.anchoredElement.height, 0, 0)
     }
 
     override fun drawBackground(x: Int, y: Int) {

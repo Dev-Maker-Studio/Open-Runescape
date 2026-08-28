@@ -80,9 +80,9 @@ class Instrument {
 
                 for (j in 0..4) {
                     if (this.oscillatorVolume[j] != 0) {
-                        val i_15 = DELAYS[j] + i
-                        if (i_15 < mixDuration) {
-                            OUTPUT[i_15] += evaluateWave(PHASES[j], volumeChange * VOLUME_STEP[j] shr 15, this.pitch!!.form)
+                        val delayedIndex = DELAYS[j] + i
+                        if (delayedIndex < mixDuration) {
+                            OUTPUT[delayedIndex] += evaluateWave(PHASES[j], volumeChange * VOLUME_STEP[j] shr 15, this.pitch!!.form)
                             PHASES[j] += (pitchChange * PITCH_STEP[j] shr 16) + PITCH_BASE_STEP[j]
                         }
                     }
@@ -96,12 +96,12 @@ class Instrument {
                 var muted = true
 
                 for (i in 0 until mixDuration) {
-                    val onStep = this.release!!.step(mixDuration)
-                    val offStep = this.attack!!.step(mixDuration)
+                    val releaseStep = this.release!!.step(mixDuration)
+                    val attackStep = this.attack!!.step(mixDuration)
                     val threshold: Int = if (muted) {
-                        (onStep * (this.release!!.end - this.release!!.start) shr 8) + this.release!!.start
+                        (releaseStep * (this.release!!.end - this.release!!.start) shr 8) + this.release!!.start
                     } else {
-                        (offStep * (this.release!!.end - this.release!!.start) shr 8) + this.release!!.start
+                        (attackStep * (this.release!!.end - this.release!!.start) shr 8) + this.release!!.start
                     }
 
                     counter += 256
@@ -139,12 +139,12 @@ class Instrument {
                     while (n < delay) {
                         var y = (OUTPUT[n + M].toLong() * Filter.invUnityInt shr 16).toInt()
 
-                        for (i_17 in 0 until M) {
-                            y += (OUTPUT[n + M - 1 - i_17].toLong() * Filter.COEFFICIENT_INT[0][i_17] shr 16).toInt()
+                        for (i in 0 until M) {
+                            y += (OUTPUT[n + M - 1 - i].toLong() * Filter.COEFFICIENT_INT[0][i] shr 16).toInt()
                         }
 
-                        for (i_17 in 0 until n) {
-                            y -= (OUTPUT[n - 1 - i_17].toLong() * Filter.COEFFICIENT_INT[1][i_17] shr 16).toInt()
+                        for (i in 0 until n) {
+                            y -= (OUTPUT[n - 1 - i].toLong() * Filter.COEFFICIENT_INT[1][i] shr 16).toInt()
                         }
 
                         OUTPUT[n] = y
@@ -215,12 +215,12 @@ class Instrument {
         return OUTPUT
     }
 
-    fun evaluateWave(table: Int, phase: Int, amplitude: Int): Int {
-        return when (amplitude) {
-            1 -> if ((table and 0x7fff) < 16384) phase else -phase
-            2 -> SINE[table and 0x7fff] * phase shr 14
-            3 -> (phase * (table and 0x7fff) shr 14) - phase
-            4 -> phase * NOISE[table / 2607 and 0x7fff]
+    fun evaluateWave(phase: Int, amplitude: Int, form: Int): Int {
+        return when (form) {
+            1 -> if ((phase and 0x7fff) < 16384) amplitude else -amplitude
+            2 -> SINE[phase and 0x7fff] * amplitude shr 14
+            3 -> (amplitude * (phase and 0x7fff) shr 14) - amplitude
+            4 -> amplitude * NOISE[phase / 2607 and 0x7fff]
             else -> 0
         }
     }
@@ -258,12 +258,12 @@ class Instrument {
         }
 
         for (i in 0..9) {
-            val volume = buffer.readUSmart()
-            if (volume == 0) {
+            val oscVolume = buffer.readUSmart()
+            if (oscVolume == 0) {
                 break
             }
 
-            this.oscillatorVolume[i] = volume
+            this.oscillatorVolume[i] = oscVolume
             this.oscillatorPitch[i] = buffer.readSmart()
             this.oscillatorDelays[i] = buffer.readUSmart()
         }

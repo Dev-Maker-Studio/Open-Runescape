@@ -13,7 +13,7 @@ import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
  *
  * Effect index mapping:
  *   0 = None (standard model/ground shader)
- *   1 = Cube map specular highlights (MaterialEffect1GL)
+ *   1 = Cube map specular highlights (CubeMapSpecularEffect)
  *   2 = Lapping water with noise perturbation (LappingWaterEffect)
  *   3 = Still water with edge blending (StillWaterEffect)
  *   4 = Rippling white water waves (RipplingWaterEffect)
@@ -21,7 +21,7 @@ import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
  *   6 = Hide lights / disable lighting (HideLightsEffect)
  *   7 = Environment map reflections (ReflectingTextureEffect)
  *   8 = HD reflective rippling water (ReflectiveRipplingWaterEffect)
- *   9 = HD water with wave breaking (MaterialEffect9GL)
+ *   9 = HD water with wave breaking (BreakingWaterEffect)
  *
  * Usage in the modern pipeline:
  *   1. Call initialize() once after GL context is available

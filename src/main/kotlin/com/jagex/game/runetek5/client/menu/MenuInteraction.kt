@@ -407,7 +407,7 @@ object MenuInteraction {
                 if (KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.openMinimenuInputSubscriber, mouseRecord)) {
                     var hoveredIndex: Int
                     var queueIterator: QueueIterator?
-                    if (MiniMenu.activeSubmenu != null && mouseX >= MiniMenu.submenuX && mouseX <= MiniMenu.submenuX + MiniMenu.submenuWidth && mouseY >= MiniMenu.submenuY && mouseY <= StationaryWall.menuHeight + MiniMenu.submenuY) {
+                    if (MiniMenu.activeSubmenu != null && mouseX >= MiniMenu.submenuX && mouseX <= MiniMenu.submenuX + MiniMenu.submenuWidth && mouseY >= MiniMenu.submenuY && mouseY <= StationaryWall.submenuHeight + MiniMenu.submenuY) {
                         hoveredIndex = -1
                         entryCounter = 0
                         while (entryCounter < MiniMenu.activeSubmenu!!.queueSize) {
@@ -508,7 +508,7 @@ object MenuInteraction {
                 } else {
                     var isInSubmenuBounds = false
                     if (MiniMenu.activeSubmenu != null) {
-                        if (mouseX >= MiniMenu.submenuX - 10 && mouseX <= MiniMenu.submenuWidth + MiniMenu.submenuX + 10 && mouseY >= MiniMenu.submenuY - 10 && mouseY <= StationaryWall.menuHeight + MiniMenu.submenuY + 10) {
+                        if (mouseX >= MiniMenu.submenuX - 10 && mouseX <= MiniMenu.submenuWidth + MiniMenu.submenuX + 10 && mouseY >= MiniMenu.submenuY - 10 && mouseY <= StationaryWall.submenuHeight + MiniMenu.submenuY + 10) {
                             isInSubmenuBounds = true
                         } else {
                             MiniMenu.closeSubmenu()

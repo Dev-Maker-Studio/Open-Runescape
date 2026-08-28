@@ -146,9 +146,9 @@ abstract class AbstractInteractiveEntity(
         for (x in startX.toInt()..endX.toInt()) {
             for (y in startZ.toInt()..endZ.toInt()) {
                 val tileX = scene!!.visibleTiles + (x - scene!!.cameraGridPositionX)
-                if (tileX >= 0 && tileX < scene!!.adjacent_tile_on_screen.size) {
+                if (tileX >= 0 && tileX < scene!!.tileInFrustum.size) {
                     val tileY = scene!!.visibleTiles + (y - scene!!.cameraGridPositionY)
-                    if (tileY >= 0 && tileY < scene!!.adjacent_tile_on_screen.size && scene!!.adjacent_tile_on_screen[tileX][tileY]) {
+                    if (tileY >= 0 && tileY < scene!!.tileInFrustum.size && scene!!.tileInFrustum[tileX][tileY]) {
                         return true
                     }
                 }
