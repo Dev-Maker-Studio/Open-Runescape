@@ -1,0 +1,10 @@
+package com.jagex.game.runetek5.graphics.model.normal
+
+class FaceNormalGL {
+    @JvmField
+    var y: Int = 0
+    @JvmField
+    var x: Int = 0
+    @JvmField
+    var z: Int = 0
+}

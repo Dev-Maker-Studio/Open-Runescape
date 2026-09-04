@@ -1,27 +1,107 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.0"
+    id("com.gradleup.shadow") version "9.2.0"
     id("maven-publish")
     java
     application
+    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("jvm") version "2.2.21"
 }
 
 group = "darkan"
-version = "1.0.1"
+version = "2.0.0"
 description = "Darkan Client"
 
 application {
-    mainClass.set("com.rs.Loader")
+    mainClass.set("com.darkan.bot.BotKt")
+    // The client holds ~400 MB of live model/cache data and allocates steadily while
+    // streaming a region; G1's young collections copy that live set and pause the
+    // render thread 35-45 ms every couple of seconds (visible hitches, worst while
+    // rotating the camera). Generational ZGC keeps pauses under a millisecond.
+    // IDE run configurations need the same VM options.
+    applicationDefaultJvmArgs = listOf("-XX:+UseZGC", "-Xmx4g", "-Xms1g")
 }
 
-project.setProperty("mainClassName", "com.rs.Loader")
+// `./gradlew run -Dbot.enabled=true` sets the property on Gradle's own JVM, not on the
+// client JVM the run task forks. Forward the client's flags so that command works as expected.
+tasks.named<JavaExec>("run") {
+    val forwarded = listOf("bot.", "render.", "toolkit", "autologin", "window.")
+    System.getProperties().stringPropertyNames()
+        .filter { name -> forwarded.any { name.startsWith(it) } }
+        .forEach { systemProperty(it, System.getProperty(it)) }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+kotlin {
+	compilerOptions {
+		jvmTarget.set(JvmTarget.JVM_17)
+	}
+}
 
 repositories {
     mavenLocal()
     mavenCentral()
 }
 
-dependencies {
+// LWJGL3 version and native classifier configuration
+val lwjglVersion = "3.3.3"
+val lwjglNatives = Pair(
+    System.getProperty("os.name")!!,
+    System.getProperty("os.arch")!!
+).let { (name, arch) ->
+    when {
+        arrayOf("Linux", "SunOS", "Unit").any { name.startsWith(it) } ->
+            if (arrayOf("arm", "aarch64").any { arch.startsWith(it) })
+                "natives-linux${if (arch.contains("64") || arch.startsWith("armv8")) "-arm64" else "-arm32"}"
+            else if (arch.startsWith("ppc"))
+                "natives-linux-ppc64le"
+            else if (arch.startsWith("riscv"))
+                "natives-linux-riscv64"
+            else
+                "natives-linux"
+        arrayOf("Mac OS X", "Darwin").any { name.startsWith(it) } ->
+            "natives-macos${if (arch.startsWith("aarch64")) "-arm64" else ""}"
+        arrayOf("Windows").any { name.startsWith(it) } ->
+            if (arch.contains("64"))
+                "natives-windows${if (arch.startsWith("aarch64")) "-arm64" else ""}"
+            else
+                "natives-windows-x86"
+        else -> throw Error("Unrecognized or unsupported platform: $name")
+    }
+}
 
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation("io.github.classgraph:classgraph:4.8.177")
+    implementation("com.github.weisj:darklaf-core:3.0.2")
+
+    // LWJGL3 - Modern OpenGL bindings (for rendering modernization)
+    implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
+    implementation("org.lwjgl", "lwjgl")
+    implementation("org.lwjgl", "lwjgl-opengl")
+    implementation("org.lwjgl", "lwjgl-glfw")
+    implementation("org.lwjgl", "lwjgl-stb")  // For image loading
+    runtimeOnly("org.lwjgl", "lwjgl", classifier = lwjglNatives)
+    runtimeOnly("org.lwjgl", "lwjgl-opengl", classifier = lwjglNatives)
+    runtimeOnly("org.lwjgl", "lwjgl-glfw", classifier = lwjglNatives)
+    runtimeOnly("org.lwjgl", "lwjgl-stb", classifier = lwjglNatives)
+
+    // JOML - Java OpenGL Math Library (for matrix/vector operations)
+    implementation("org.joml:joml:1.10.5")
+
+    //kotlinscript support
+    implementation("org.jetbrains.kotlin:kotlin-scripting-common:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven:2.2.21")
 }
 
 publishing {
@@ -46,18 +126,13 @@ publishing {
 }
 
 tasks {
-    java {
-        sourceCompatibility = JavaVersion.VERSION_19
-        targetCompatibility = JavaVersion.VERSION_19
-    }
-
     withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
 
     jar {
         manifest {
-            attributes(mutableMapOf("Main-Class" to "com.rs.Loader"))
+            attributes(mutableMapOf("Main-Class" to "com.darkan.bot.BotKt"))
         }
     }
 
@@ -70,4 +145,15 @@ tasks {
 	build {
 		dependsOn(shadowJar)
 	}
+}
+
+// Task to run the rendering test application
+tasks.register<JavaExec>("runRenderTest") {
+    group = "application"
+    description = "Run the RuneTek5 Rendering Engine Test Application"
+    mainClass.set("com.darkan.rendertest.RenderingTestAppKt")
+    classpath = sourceSets["main"].runtimeClasspath
+
+    // Allow passing cache path as argument: ./gradlew runRenderTest --args="path/to/cache"
+    // Default cache path is ~/.darkan/cache
 }
