@@ -128,6 +128,7 @@ open class SpriteGL : NativeSprite {
         if (texture2d.tiled && !stretched) {
             val t = texture2d.t * height / texture2d.singleLength
             val s = texture2d.s * width / texture2d.singleWidth
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glTexCoord2f(0.0f, t)
             OpenGL.glVertex2i(x, y)
@@ -144,6 +145,7 @@ open class SpriteGL : NativeSprite {
             val spriteWidth = getSpriteWidth()
             val spriteHeight = getSpriteHeight()
             var tileEndY = texture2d.singleLength + y
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
 
             var startY: Int
@@ -238,6 +240,7 @@ open class SpriteGL : NativeSprite {
         if (channelMaskTexture == null) {
             toolkit.setActiveTexture(texture2d)
             toolkit.loadTextureCombineMode(combineMode)
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glTexCoord2f(0.0f, texture2d.t)
             OpenGL.glVertex2i(drawX, drawY)
@@ -251,6 +254,7 @@ open class SpriteGL : NativeSprite {
         } else {
             setupChannelMaskRendering(combineMode)
             channelMaskTexture!!.setLinearTextureFilter(false)
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
             OpenGL.glTexCoord2f(0.0f, texture2d.t)
@@ -292,6 +296,7 @@ open class SpriteGL : NativeSprite {
         val s1 = (endX - surfaceOffsetX) * sPerPixel
         val t0 = surfaceTexture.t - (drawY - surfaceOffsetY) * tPerPixel
         val t1 = surfaceTexture.t - (endY - surfaceOffsetY) * tPerPixel
+        toolkit.legacyDrawTrace()
         OpenGL.glBegin(7)
         OpenGL.glColor3f(1.0f, 1.0f, 1.0f)
         OpenGL.glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texture2d.t)
@@ -329,6 +334,7 @@ open class SpriteGL : NativeSprite {
             if (channelMaskTexture == null) {
                 toolkit.setActiveTexture(texture2d)
                 toolkit.loadTextureCombineMode(combineMode)
+                toolkit.legacyDrawTrace()
                 OpenGL.glBegin(GL_QUADS)
                 OpenGL.glTexCoord2f(0.0f, texture2d.t)
                 OpenGL.glVertex2f(x0, y0)
@@ -342,6 +348,7 @@ open class SpriteGL : NativeSprite {
             } else {
                 setupChannelMaskRendering(combineMode)
                 channelMaskTexture!!.setLinearTextureFilter(true)
+                toolkit.legacyDrawTrace()
                 OpenGL.glBegin(GL_QUADS)
                 OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
                 OpenGL.glTexCoord2f(0.0f, texture2d.t)
@@ -361,6 +368,7 @@ open class SpriteGL : NativeSprite {
         } else if (channelMaskTexture == null) {
             toolkit.setActiveTexture(texture2d)
             toolkit.loadTextureCombineMode(combineMode)
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glTexCoord2f(0.0f, texture2d.t)
             OpenGL.glVertex2i(x, y)
@@ -374,6 +382,7 @@ open class SpriteGL : NativeSprite {
         } else {
             setupChannelMaskRendering(combineMode)
             channelMaskTexture!!.setLinearTextureFilter(true)
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
             OpenGL.glTexCoord2f(0.0f, texture2d.t)
@@ -433,6 +442,7 @@ open class SpriteGL : NativeSprite {
         toolkit.setBlendMode(blendMode)
         toolkit.loadTextureCombineMode(combineMode)
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        toolkit.legacyDrawTrace()
         OpenGL.glBegin(7)
         OpenGL.glTexCoord2f(0.0f, texture2d.t)
         OpenGL.glVertex2f(x1, y1)
@@ -498,6 +508,7 @@ open class SpriteGL : NativeSprite {
         toolkit.setBlendMode(1)
         uX = surfaceTexture.s / surfaceTexture.singleWidth
         uY = surfaceTexture.t / surfaceTexture.singleLength
+        toolkit.legacyDrawTrace()
         OpenGL.glBegin(7)
         OpenGL.glColor3f(1.0f, 1.0f, 1.0f)
         OpenGL.glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texture2d.t)

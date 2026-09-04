@@ -162,6 +162,32 @@ class OptimizedFrameBatcher {
     private var tempIndicesPerMaterial = Array(MAX_MATERIALS) { IntArray(16384) }
     private var tempIndexCountPerMaterial = IntArray(MAX_MATERIALS)
 
+    /**
+     * Ordered translucent stream: indices in SUBMISSION order, cut into segments of
+     * one material run each, drawn after the material-grouped opaque geometry by
+     * [drawTranslucent]. See InstancedModelBatcher.translucentEntries for why the
+     * scene's alpha bucket cannot go through the material-grouped path.
+     */
+    private var orderedIndices = IntArray(65536)
+    private var orderedIndexCount = 0
+    private var orderedSegMaterial = IntArray(1024)
+    private var orderedSegStart = IntArray(1024)
+    private var orderedSegCount = IntArray(1024)
+    private var orderedSegDepthWrite = BooleanArray(1024)
+    private var orderedSegSeq = IntArray(1024)
+    /** Legacy sort key per segment (Scene floorDepth); see InstancedModelBatcher.translucentKey. */
+    private var orderedSegKey = IntArray(1024)
+    private var orderedSegments = 0
+    /** Segment indices in draw order (key descending, then sequence, then run order). */
+    private var orderedOrder = IntArray(1024)
+    private var orderedSortScratch = LongArray(1024)
+    /** Next position in [orderedOrder] that [drawTranslucent] will draw. */
+    private var orderedCursor = 0
+    /** Where the ordered indices begin in the uploaded IBO (set by [endFrame]). */
+    private var orderedBase = 0
+    /** Segments uploaded by the last [endFrame] and not yet drawn. */
+    private var orderedPacked = 0
+
     // Current state
     private var totalVertexCount = 0
     private var totalIndexCount = 0
@@ -223,8 +249,8 @@ class OptimizedFrameBatcher {
         uSunBrightnessLocation = shader!!.getUniformLocation("uSunBrightness")
         uSunColorLocation = shader!!.getUniformLocation("uSunColor")
         uPointLightCountLocation = shader!!.getUniformLocation("uPointLightCount")
-        uPointLightPosLocation = shader!!.getUniformLocation("uPointLightPos")
-        uPointLightColorLocation = shader!!.getUniformLocation("uPointLightColor")
+        uPointLightPosLocation = shader!!.getArrayUniformLocation("uPointLightPos")
+        uPointLightColorLocation = shader!!.getArrayUniformLocation("uPointLightColor")
         uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
         uContrastNegLocation = shader!!.getUniformLocation("uContrastNeg")
         uViewMatrixLocation = shader!!.getUniformLocation("uViewMatrix")
@@ -345,7 +371,7 @@ class OptimizedFrameBatcher {
                     if (i < 0) continue;
                     vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
                     float d2 = dot(toLight, toLight);
-                    float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+                    float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6); // legacy: kc=0, kl=0, kq=1/size^2
                     float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
                     litRGB += baseRGB * uPointLightColor[i] * (att * ndotl);
                 }
@@ -487,6 +513,10 @@ class OptimizedFrameBatcher {
             tempIndexCountPerMaterial[i] = 0
         }
         activeMaterialCount = 0
+        orderedIndexCount = 0
+        orderedSegments = 0
+        orderedPacked = 0
+        orderedCursor = 0
 
         // Reset counters for this batch (not cumulative)
         totalVertexCount = 0
@@ -661,7 +691,15 @@ class OptimizedFrameBatcher {
      */
     fun addCachedModel(
         cachedModel: ModelCache.CachedModel,
-        modelIndex: Int
+        modelIndex: Int,
+        /** Route to the ordered translucent stream (see [drawTranslucent]). */
+        translucent: Boolean = false,
+        /** Depth writes for a translucent model (legacy setDepthBuffering state). */
+        depthWrite: Boolean = true,
+        /** Frame-wide translucent sequence number (see InstancedModelBatcher.addInstance). */
+        seq: Int = 0,
+        /** Legacy sort key (Scene floorDepth) for the translucent pass. */
+        depthKey: Int = 0
     ): Int {
         if (!isFrameActive) return 0
         if (modelIndex < 0 || modelIndex >= MAX_MODELS) return 0
@@ -674,6 +712,27 @@ class OptimizedFrameBatcher {
         val neededBytes = vertexCount * BYTES_PER_VERTEX
         if (vb.remaining() < neededBytes) return 0
 
+        // Material-slot capacity is checked BEFORE anything is written. The slot
+        // loop below used to `continue` past a material it could not allocate,
+        // silently dropping every face of that material while reporting the model
+        // as added. Returning 0 here instead lets the caller flush and retry, the
+        // same protocol it already follows for a full vertex buffer.
+        if (!translucent) {
+            var newSlots = 0
+            val batches = cachedModel.materialBatches
+            for (bi in batches.indices) {
+                val mapKey = batches[bi].materialId + 1
+                if (mapKey < materialIndexMap.size && materialIndexMap[mapKey] >= 0) continue
+                // Distinct new materials only: runs of one material may repeat.
+                var seen = false
+                for (bj in 0 until bi) {
+                    if (batches[bj].materialId == batches[bi].materialId) { seen = true; break }
+                }
+                if (!seen) newSlots++
+            }
+            if (activeMaterialCount + newSlots > MAX_MATERIALS) return 0
+        }
+
         val baseVertex = totalVertexCount
 
         // FAST PATH 1: Bulk copy vertex data. Model-owned geometry (animated poses)
@@ -683,7 +742,11 @@ class OptimizedFrameBatcher {
         val dstStart = vb.position()
         val words = cachedModel.vertexWords
         if (words != null) {
-            val dup = vb.duplicate()
+            // NOTE: ByteBuffer.duplicate() resets the byte order to BIG_ENDIAN. Writing
+            // the words through an un-reordered duplicate byte-swapped every float, so
+            // every streamed pose model (players, NPCs, animated locs that missed the
+            // instanced store) collapsed to denormal coordinates and drew nothing.
+            val dup = vb.duplicate().order(vb.order())
             dup.position(dstStart)
             dup.asIntBuffer().put(words, 0, vertexCount * (BYTES_PER_VERTEX / 4))
             vb.position(dstStart + vertexCount * BYTES_PER_VERTEX)
@@ -715,8 +778,48 @@ class OptimizedFrameBatcher {
         }
         timePatchModelIdx += System.nanoTime() - t2
 
-        // FAST PATH 3: Use pre-sorted material batches with System.arraycopy
         val t3 = System.nanoTime()
+        if (translucent) {
+            // Ordered stream: indices in submission order, one segment per material
+            // run, never merged across models.
+            for (batch in cachedModel.materialBatches) {
+                val batchCount = batch.indexCount
+                if (batchCount == 0) continue
+                if (orderedIndexCount + batchCount > orderedIndices.size) {
+                    orderedIndices = orderedIndices.copyOf(
+                        (orderedIndices.size * 2).coerceAtLeast(orderedIndexCount + batchCount)
+                    )
+                }
+                if (orderedSegments == orderedSegMaterial.size) {
+                    val grown = orderedSegments * 2
+                    orderedSegMaterial = orderedSegMaterial.copyOf(grown)
+                    orderedSegStart = orderedSegStart.copyOf(grown)
+                    orderedSegCount = orderedSegCount.copyOf(grown)
+                    orderedSegDepthWrite = orderedSegDepthWrite.copyOf(grown)
+                    orderedSegSeq = orderedSegSeq.copyOf(grown)
+                    orderedSegKey = orderedSegKey.copyOf(grown)
+                }
+                val batchIndices = batch.indices
+                val out = orderedIndices
+                val start = orderedIndexCount
+                for (i in 0 until batchCount) out[start + i] = baseVertex + batchIndices[i]
+                orderedSegMaterial[orderedSegments] = batch.materialId
+                orderedSegStart[orderedSegments] = start
+                orderedSegCount[orderedSegments] = batchCount
+                orderedSegDepthWrite[orderedSegments] = depthWrite
+                orderedSegSeq[orderedSegments] = seq
+                orderedSegKey[orderedSegments] = depthKey
+                orderedSegments++
+                orderedIndexCount += batchCount
+            }
+            timeIndexCopy += System.nanoTime() - t3
+            totalVertexCount += vertexCount
+            totalIndexCount += vertexCount
+            cachedModelsThisBatch++
+            return faceCount
+        }
+
+        // FAST PATH 3: Use pre-sorted material batches with System.arraycopy
         for (batch in cachedModel.materialBatches) {
             // materialId: -1 = untextured, 0..N = textured (material 0 valid). Index
             // materialIndexMap by (id + 1) so -1 → 0; store the REAL id.
@@ -925,6 +1028,32 @@ class OptimizedFrameBatcher {
             ib.put(tempIndices, 0, count)
         }
 
+        // The ordered translucent stream rides in the same IBO after the grouped runs.
+        orderedBase = ib.position()
+        if (orderedIndexCount > 0) ib.put(orderedIndices, 0, orderedIndexCount)
+        orderedPacked = orderedSegments
+        orderedCursor = 0
+        if (orderedSegments > 0) {
+            val n = orderedSegments
+            if (orderedOrder.size < n) {
+                orderedOrder = IntArray(n * 2)
+                orderedSortScratch = LongArray(n * 2)
+            }
+            val scratch = orderedSortScratch
+            for (i in 0 until n) {
+                val keyPart = (Int.MAX_VALUE.toLong() - orderedSegKey[i]) and 0xFFFFFFFFL
+                val seqPart = orderedSegSeq[i].toLong() and 0xFFFFFL
+                scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL)
+            }
+            if (n <= 4096) {
+                java.util.Arrays.sort(scratch, 0, n)
+                for (i in 0 until n) orderedOrder[i] = (scratch[i] and 0xFFFL).toInt()
+            } else {
+                val idx = (0 until n).sortedWith(compareBy({ Int.MAX_VALUE.toLong() - orderedSegKey[it] }, { orderedSegSeq[it] }, { it }))
+                for (i in 0 until n) orderedOrder[i] = idx[i]
+            }
+        }
+
         ib.flip()
 
         // Upload geometry
@@ -981,12 +1110,14 @@ class OptimizedFrameBatcher {
         sh.setUniform(uSunBrightnessLocation, sunBrightness)
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
         // Point lights for this frame (see setPointLights).
-        if (uPointLightCountLocation >= 0) {
-            GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
-            if (pointLightCount > 0) {
-                if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
-                if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
-            }
+        // The count uniform is not read by the shader (the loop follows per-instance
+        // indices), so the driver reports it as -1; gating the whole upload on it, as
+        // this used to, meant the light arrays were NEVER uploaded and point lights
+        // had no effect on models at all.
+        if (uPointLightCountLocation >= 0) GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
+        if (pointLightCount > 0) {
+            if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
+            if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
         }
         sh.setUniform(uContrastPosLocation, contrastPos)
         sh.setUniform(uContrastNegLocation, contrastNeg)
@@ -1010,6 +1141,42 @@ class OptimizedFrameBatcher {
         var lastTextureHandle = -1
         // -1 = unknown, forces the first material batch to establish the state.
         var lastBlend = -1
+
+        if (ORDERED_DIAG && ofbDiagTick++ % 200 == 100) {
+            val ip = IntArray(1)
+            glGetIntegerv(GL_CURRENT_PROGRAM, ip); val cur = ip[0]
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, ip); val curVao = ip[0]
+            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, ip); val curIbo = ip[0]
+            glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, ip); val curUbo = ip[0]
+            val ubo0 = IntArray(1); glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, 0, ubo0)
+            val attr4 = IntArray(1); glGetVertexAttribiv(4, GL_VERTEX_ATTRIB_ARRAY_ENABLED, attr4)
+            val attr4buf = IntArray(1); glGetVertexAttribiv(4, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, attr4buf)
+            val attr0buf = IntArray(1); glGetVertexAttribiv(0, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, attr0buf)
+            val readback = java.nio.ByteBuffer.allocateDirect(64).order(java.nio.ByteOrder.nativeOrder())
+            glBindBuffer(GL_UNIFORM_BUFFER, matrixUbo)
+            glGetBufferSubData(GL_UNIFORM_BUFFER, 0L, readback)
+            glBindBuffer(GL_UNIFORM_BUFFER, 0)
+            val m = FloatArray(16) { readback.getFloat(it * 4) }
+            val mb = matrixBuffer!!
+            val blockIdx = glGetUniformBlockIndex(sh.getId(), "ModelMatrices")
+            val bind = IntArray(1); glGetActiveUniformBlockiv(sh.getId(), blockIdx, GL_UNIFORM_BLOCK_BINDING, bind)
+            val blockSize = IntArray(1); glGetActiveUniformBlockiv(sh.getId(), blockIdx, GL_UNIFORM_BLOCK_DATA_SIZE, blockSize)
+            val gpuIdx = java.nio.ByteBuffer.allocateDirect(12).order(java.nio.ByteOrder.nativeOrder())
+            glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0L, gpuIdx)
+            val gpuVert = java.nio.ByteBuffer.allocateDirect(40).order(java.nio.ByteOrder.nativeOrder())
+            glBindBuffer(GL_ARRAY_BUFFER, vbo!!.id)
+            glGetBufferSubData(GL_ARRAY_BUFFER, 0L, gpuVert)
+            val ib = indexBuffer!!
+            val cpuIdx = "${ib.get(0)},${ib.get(1)},${ib.get(2)}"
+            val vb = vertexBuffer!!
+            val ibSize = IntArray(1); glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, ibSize)
+            val vbSize = IntArray(1); glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, vbSize)
+            System.err.println("[OfbDiag2] gpuIdx=${gpuIdx.getInt(0)},${gpuIdx.getInt(4)},${gpuIdx.getInt(8)} cpuIdx=$cpuIdx ibLimit=${ib.limit()} ibPos=${ib.position()} gpuIbBytes=${ibSize[0]} gpuVbBytes=${vbSize[0]} " +
+                "gpuV0=(${gpuVert.getFloat(0)},${gpuVert.getFloat(4)},${gpuVert.getFloat(8)}) cpuV0=(${vb.getFloat(0)},${vb.getFloat(4)},${vb.getFloat(8)}) vbLimit=${vb.limit()} firstDraw[start=${materialStartIndices[sortedMaterials[0]]} count=${materialIndexCounts[sortedMaterials[0]]}] err=${glGetError()}")
+            System.err.println("[OfbDiag] prog=${sh.getId()} current=$cur vao=${vao!!.id} curVao=$curVao ibo=$curIbo ubo=$matrixUbo curUbo=$curUbo ubo0=${ubo0[0]} " +
+                "block=$blockIdx binding=${bind[0]} blockSize=${blockSize[0]} attr4[en=${attr4[0]} buf=${attr4buf[0]}] attr0buf=${attr0buf[0]} vboId=${vbo!!.id} " +
+                "m0(gpu)=${m.take(4)}|${m.drop(12).take(4)} m0(cpu)=${(0 until 4).map { mb.get(it) }}|${(12 until 16).map { mb.get(it) }} models=$currentModelIndex verts=$totalVertexCount idx=$totalIndexCount err=${glGetError()}")
+        }
 
         // Render each material batch
         for (slot in sortedMaterials) {
@@ -1069,6 +1236,105 @@ class OptimizedFrameBatcher {
 
         isFrameActive = false
     }
+
+    /** Translucent segments uploaded by the last [endFrame] and not yet drawn. */
+    fun pendingTranslucent(): Int = orderedPacked - orderedCursor
+
+    /**
+     * Draws the ordered translucent stream uploaded by the last [endFrame], in
+     * submission order. Call once every opaque pass of the frame is out; see
+     * InstancedModelBatcher.drawTranslucent.
+     */
+    fun drawTranslucent(
+        textureCache: (Int) -> Int,
+        combineModeOf: (Int) -> Int = { 0 },
+        /** Boundary in (key, seq) order; see InstancedModelBatcher.drawTranslucent. */
+        upToKey: Int = Int.MIN_VALUE,
+        upToSeq: Int = Int.MAX_VALUE
+    ) {
+        val start = orderedCursor
+        var end = start
+        while (end < orderedPacked) {
+            val i = orderedOrder[end]
+            val k = orderedSegKey[i]
+            if (k > upToKey || (k == upToKey && orderedSegSeq[i] < upToSeq)) end++ else break
+        }
+        if (end == start) return
+        orderedCursor = end
+        val sh = shader ?: return
+        val t0 = System.nanoTime()
+        sh.bind()
+        GLWrapper.enable(GLWrapper.Constants.BLEND)
+        GLWrapper.blendFunc(GLWrapper.Constants.SRC_ALPHA, GLWrapper.Constants.ONE_MINUS_SRC_ALPHA)
+        GLWrapper.enable(GLWrapper.Constants.DEPTH_TEST)
+        GLWrapper.depthMask(true)
+        if (CULL_FACE) {
+            GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+            GLWrapper.cullFace(CULL_MODE)
+            GLWrapper.frontFace(CULL_WIND)
+        } else {
+            GLWrapper.disable(GLWrapper.Constants.CULL_FACE)
+        }
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, matrixUbo)
+        vao!!.bind()
+        ibo!!.bind()
+        var lastTex = Int.MIN_VALUE
+        var depthWriteOn = true
+        for (oi in start until end) {
+            val seg = orderedOrder[oi]
+            val depthWrite = orderedSegDepthWrite[seg]
+            if (depthWrite != depthWriteOn) {
+                GLWrapper.depthMask(depthWrite)
+                depthWriteOn = depthWrite
+            }
+            val texId = orderedSegMaterial[seg]
+            if (texId != lastTex) {
+                val textureHandle = if (texId >= 0) textureCache(texId) else 0
+                if (textureHandle > 0) {
+                    GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                    GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
+                    sh.setUniform(uTextureEnabledLocation, 1)
+                    sh.setUniform(uCombineModeLocation, combineModeOf(texId))
+                    sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                } else {
+                    sh.setUniform(uTextureEnabledLocation, 0)
+                }
+                lastTex = texId
+                stateChangesCumulative++
+            }
+            val count = orderedSegCount[seg]
+            GLWrapper.drawElements(
+                TRIANGLES, count, UNSIGNED_INT,
+                (orderedBase + orderedSegStart[seg]).toLong() * 4
+            )
+            drawCallsCumulative++
+            trianglesCumulative += count / 3
+        }
+        if (!depthWriteOn) GLWrapper.depthMask(true)
+        if (ORDERED_DIAG && orderedDiagTick++ % 200 == 100) {
+            val seg0 = orderedOrder[start]
+            System.err.println("[OrderedDiag] segments=${end - start} orderedBase=$orderedBase totalIdx=$totalIndexCount totalVerts=$totalVertexCount " +
+                "seg0[mat=${orderedSegMaterial[seg0]} start=${orderedSegStart[seg0]} count=${orderedSegCount[seg0]} key=${orderedSegKey[seg0]} " +
+                "idx0=${orderedIndices[orderedSegStart[seg0]]}] models=$currentModelIndex glErr=${glGetError()} " +
+                run {
+                    val vb = vertexBuffer!!
+                    val v = orderedIndices[orderedSegStart[seg0]]
+                    val base = v * BYTES_PER_VERTEX
+                    if (base + 40 <= vb.capacity()) {
+                        "v0[pos=(${vb.getFloat(base)},${vb.getFloat(base + 4)},${vb.getFloat(base + 8)}) " +
+                            "rgba=(${vb.get(base + 32).toInt() and 0xff},${vb.get(base + 33).toInt() and 0xff},${vb.get(base + 34).toInt() and 0xff},${vb.get(base + 35).toInt() and 0xff}) " +
+                            "modelIdx=${vb.getFloat(base + 36)}] vbLimit=${vb.limit()} vbPos=${vb.position()}"
+                    } else "v0=out-of-range"
+                })
+        }
+        vao!!.unbind()
+        sh.unbind()
+        timeRender += System.nanoTime() - t0
+    }
+
+    private val ORDERED_DIAG = System.getProperty("render.transdiag") != null
+    private var orderedDiagTick = 0
+    private var ofbDiagTick = 0
 
     private fun setViewProjectionUniform(shader: ShaderProgram, vp: FloatArray) {
         // The legacy VP matrix uses row-vector convention with indexing:

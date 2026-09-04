@@ -59,6 +59,7 @@ class OpenGlCubeTextureGenerator(
                 break
             }
 
+            openglToolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             when (cubeFace) {
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X -> {

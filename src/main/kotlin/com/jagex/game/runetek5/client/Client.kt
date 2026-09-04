@@ -283,6 +283,7 @@ class Client : GameShell() {
     }
 
     fun pulse() {
+        logicPulses++
         if (gameState != GameState.UNK_16) {
             //System.out.println("[Client]GameState: "+client.gameState);
             val mapRegionLoader = Resource.mapRegionLoaderTask
@@ -535,7 +536,11 @@ class Client : GameShell() {
             // frame rate on top of the 50Hz cycle. Frame pacing is now owned by
             // FrameLimiter in the main loop; lower the fps target to reduce CPU.
 
-            if (typelistCycleUpdate) {
+            // Cache sweeps once per 50 Hz logic pulse, not per rendered frame: the
+            // legacy client never drew faster than its logic, so this restores its
+            // sweep cadence (and retention window) at any frame rate.
+            if (typelistCycleUpdate && logicPulses != lastTypelistCleanPulse) {
+                lastTypelistCleanPulse = logicPulses
                 TypeLists.clean()
             }
 
@@ -1093,6 +1098,12 @@ class Client : GameShell() {
     companion object {
         /** Scene-draw wall time: traversal + model submission, excluding the toolkit render. */
         @JvmStatic var sceneDrawNs = 0L
+        /** 50 Hz logic pulses so far; frame-rate-independent work (particle stepping) keys off it. */
+        @JvmField var logicPulses = 0L
+        private var lastTypelistCleanPulse = -1L
+        /** Whole mainRedraw() (scene + interfaces) and the once-a-second AWT canvas refresh (diag). */
+        @JvmStatic var redrawNs = 0L
+        @JvmStatic var canvasRefreshNs = 0L
         @JvmStatic var sceneDrawSamples = 0
         val HINT_TRAILS: Array<HintTrail?> = arrayOfNulls<HintTrail>(9)
         val MOUSE_MOVEMENTS: NodeCollection = NodeCollection()

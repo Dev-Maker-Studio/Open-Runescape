@@ -89,9 +89,12 @@ class VertexBuffer(
     fun upload(data: ByteBuffer) {
         bind()
         val sizeBytes = data.remaining().toLong()
-        if (sizeBytes > capacity) {
+        if (sizeBytes > capacity || usage == BufferUsage.STREAM) {
+            // STREAM buffers are rewritten every frame while the previous frame's
+            // draws may still read them: glBufferData orphans the old storage instead
+            // of making glBufferSubData wait for (or copy around) those draws.
             GLWrapper.bufferData(ARRAY_BUFFER, data, usage.glUsage)
-            capacity = sizeBytes
+            if (sizeBytes > capacity) capacity = sizeBytes
         } else {
             data.mark()
             GLWrapper.bufferSubData(ARRAY_BUFFER, 0, data)
@@ -112,7 +115,7 @@ class VertexBuffer(
         if (!data.hasRemaining()) return
         bind()
         data.mark()
-        GLWrapper.bufferSubData(ARRAY_BUFFER, byteOffset, data)
+        BufferStaging.upload(id, ARRAY_BUFFER, byteOffset, data)
         data.reset()
         val end = byteOffset + data.remaining()
         if (end > currentSize) currentSize = end

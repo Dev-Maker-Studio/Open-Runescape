@@ -3,6 +3,7 @@ package com.jagex.game.runetek5.scene
 import com.jagex.game.runetek5.client.PreferenceManager
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
+import com.jagex.game.runetek5.entity.gameobject.StationaryInteractiveObject
 import com.jagex.game.runetek5.entity.*
 import com.jagex.game.runetek5.entity.gameobject.AbstractGroundDecoration
 import com.jagex.game.runetek5.entity.gameobject.AbstractWall
@@ -288,6 +289,7 @@ class Scene(
     }
 
     fun addGroundDecoration(plane: Int, baseX: Int, baseY: Int, groundDecoration: AbstractGroundDecoration?) {
+        retainedChunkChanged(plane, baseX, baseY)
         val tile = getTile(plane, baseX, baseY)
         if (tile != null) {
             tile.groundDecoration = groundDecoration
@@ -330,6 +332,7 @@ class Scene(
 
 
     fun addWall(plane: Int, baseX: Int, baseY: Int, primaryWall: AbstractWall?, secondaryWall: AbstractWall?) {
+        retainedChunkChanged(plane, baseX, baseY)
         val tile = getTile(plane, baseX, baseY)
         if (tile != null) {
             tile.primaryWall = primaryWall
@@ -365,6 +368,7 @@ class Scene(
     }
 
     fun addWallDecoration(plane: Int, baseX: Int, baseY: Int, primaryWallDecoration: AbstractWallDecoration?, secondaryWallDecoration: AbstractWallDecoration?) {
+        retainedChunkChanged(plane, baseX, baseY)
         val tile = getTile(plane, baseX, baseY)
         if (tile != null) {
             tile.primaryWallDecoration = primaryWallDecoration
@@ -399,12 +403,85 @@ class Scene(
         }
     }
 
+    private fun notifyInteractiveChanged(interactive: AbstractInteractiveEntity) {
+        // Only stationary locs are ever retained. Players, NPCs and animated locs are
+        // re-added every frame (clearInteractives), and reporting those would
+        // invalidate the chunk under every moving entity each frame.
+        if (interactive !is StationaryInteractiveObject) return
+        walkRevision++
+        val hook = retainedHook ?: return
+        val plane = interactive.plane.toInt()
+        for (x in interactive.startX..interactive.endX) {
+            for (y in interactive.startZ..interactive.endZ) {
+                hook.chunkChanged(this, plane, x.toInt(), y.toInt())
+            }
+        }
+    }
+
+    private fun retainedChunkChanged(plane: Int, x: Int, y: Int) {
+        walkRevision++
+        retainedHook?.chunkChanged(this, plane, x, y)
+    }
+
+    private fun retainedSceneReset() {
+        walkRevision++
+        retainedHook?.sceneReset(this)
+    }
+
+    /**
+     * Bumped on every change to the static walk lists (adds, removes, resets,
+     * interactive churn) and by the retained renderer whenever it flips an entity's
+     * [SceneGraphEntity.modernRetained]. The retained walk cache below is keyed on it.
+     */
+    @JvmField var walkRevision: Int = 0
+    private var walkCacheRevision = -1
+    private var walkCacheLayer = -1
+    private var walkCacheOpaque: Array<SceneGraphEntity?> = arrayOfNulls(1024)
+    private var walkCacheOpaqueCount = 0
+    private var walkCacheAlpha: Array<SceneGraphEntity?> = arrayOfNulls(256)
+    private var walkCacheAlphaCount = 0
+
+    /**
+     * Under the retained path most static entities are skipped by the walk, but the
+     * walk still had to chase the whole singly-linked static lists (~10k nodes) to
+     * find the few it must draw. Cache the non-retained subset as flat arrays and
+     * rebuild only when the lists or the retained flags change.
+     */
+    private fun rebuildWalkCache(layerIndex: Int) {
+        walkCacheRebuildsAcc++
+        walkCacheRevision = walkRevision
+        walkCacheLayer = layerIndex
+        var n = 0
+        var entity = this.staticTextureOpaqueEntities[layerIndex]
+        while (entity != null) {
+            if (!entity.modernRetained) {
+                if (n == walkCacheOpaque.size) walkCacheOpaque = walkCacheOpaque.copyOf(n * 2)
+                walkCacheOpaque[n++] = entity
+            }
+            entity = entity.child
+        }
+        if (n < walkCacheOpaqueCount) java.util.Arrays.fill(walkCacheOpaque, n, walkCacheOpaqueCount.coerceAtMost(walkCacheOpaque.size), null)
+        walkCacheOpaqueCount = n
+        n = 0
+        entity = this.alphaEntities[layerIndex]
+        while (entity != null) {
+            if (!entity.modernRetained) {
+                if (n == walkCacheAlpha.size) walkCacheAlpha = walkCacheAlpha.copyOf(n * 2)
+                walkCacheAlpha[n++] = entity
+            }
+            entity = entity.child
+        }
+        if (n < walkCacheAlphaCount) java.util.Arrays.fill(walkCacheAlpha, n, walkCacheAlphaCount.coerceAtMost(walkCacheAlpha.size), null)
+        walkCacheAlphaCount = n
+    }
+
     fun addInteractive(interactive: AbstractInteractiveEntity, cached: Boolean): Boolean {
         val isUnderwater = this.localHeightmap === this.underwaterHeightmap
         var color = 0
         var scale: Short = 0
         var intensity: Byte = 0
         interactive.calculatePosition()
+        notifyInteractiveChanged(interactive)
         if (interactive.startX >= 0 && interactive.startZ >= 0 && interactive.endX < this.sceneDimensionX && interactive.endZ < this.sceneDimensionY) {
             var floorOffsetY: Short = 0
             for (x in interactive.startX..interactive.endX) {
@@ -474,6 +551,7 @@ class Scene(
     }
 
     fun offsetWallDecoration(plane: Int, x: Int, y: Int, displacement: Int) {
+        retainedChunkChanged(plane, x, y)
         val tile = this.tiles[plane][x][y]
         if (tile != null) {
             val primaryWallDecoration = tile.primaryWallDecoration
@@ -500,6 +578,7 @@ class Scene(
     }
 
     fun applyShading() {
+        retainedSceneReset()
         for (plane in 0 until this.regionSizeZ) {
             for (x in 0 until this.sceneDimensionX) {
                 for (y in 0 until this.sceneDimensionY) {
@@ -537,6 +616,7 @@ class Scene(
     }
 
     fun removePrimaryWallDecoration(plane: Int, x: Int, y: Int): AbstractWallDecoration? {
+        retainedChunkChanged(plane, x, y)
         val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.primaryWallDecoration)
@@ -550,6 +630,7 @@ class Scene(
     }
 
     fun removeGroundDecoration(plane: Int, x: Int, y: Int): AbstractGroundDecoration? {
+        retainedChunkChanged(plane, x, y)
         val tile = this.tiles[plane][x][y]
         if (tile == null) {
             return null
@@ -575,6 +656,7 @@ class Scene(
     }
 
     fun removeInteractive(interactive: AbstractInteractiveEntity, clearFully: Boolean) {
+        notifyInteractiveChanged(interactive)
         for (x in interactive.startX..interactive.endX) {
             for (y in interactive.startZ..interactive.endZ) {
                 val tile = this.tiles[interactive.plane.toInt()][x][y]
@@ -678,6 +760,7 @@ class Scene(
     }
 
     fun castShadow(entity: SceneGraphEntity, plane: Int, x: Int, y: Int) {
+        retainedChunkChanged(plane, x, y)
         if (x < this.sceneDimensionX) {
             val tile = this.tiles[plane][x + 1][y]
             if (tile != null && tile.groundDecoration != null && tile.groundDecoration!!.hasTileShadow()) {
@@ -716,6 +799,7 @@ class Scene(
     }
 
     fun removePrimaryWall(plane: Int, x: Int, y: Int): AbstractWall? {
+        retainedChunkChanged(plane, x, y)
         val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.primaryWall)
@@ -749,7 +833,7 @@ class Scene(
                                 && entity.canRender() && !entity.isSoftHidden(this.activeToolkit)) {
                             return false
                         }
-                        if (!hideInteractives && x >= this.cameraGridPositionX - 16 && x <= this.cameraGridPositionX + 16
+                        if (particleTickThisFrame && !hideInteractives && x >= this.cameraGridPositionX - 16 && x <= this.cameraGridPositionX + 16
                                                && y >= this.cameraGridPositionY - 16 && y <= this.cameraGridPositionY + 16) {
                             entity.particleCycle(this.activeToolkit)
                         }
@@ -772,7 +856,7 @@ class Scene(
                         && entity.canRender() && !entity.isSoftHidden(this.activeToolkit)) {
                     return false
                 }
-                if (!hideInteractives && sceneX >= this.cameraGridPositionX - 16 && sceneX <= this.cameraGridPositionX + 16
+                if (particleTickThisFrame && !hideInteractives && sceneX >= this.cameraGridPositionX - 16 && sceneX <= this.cameraGridPositionX + 16
                                        && sceneY >= this.cameraGridPositionY - 16 && sceneY <= this.cameraGridPositionY + 16) {
                     entity.particleCycle(this.activeToolkit)
                 }
@@ -819,6 +903,7 @@ class Scene(
     }
 
     fun resetSurfaceTiles() {
+        retainedSceneReset()
         for (x in 0 until this.sceneDimensionX) {
             for (y in 0 until this.sceneDimensionY) {
                 if (this.tiles[0][x][y] == null) {
@@ -989,6 +1074,7 @@ class Scene(
     }
 
     fun removeSecondaryWallDecoration(plane: Int, x: Int, y: Int): AbstractWallDecoration? {
+        retainedChunkChanged(plane, x, y)
         val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.secondaryWallDecoration)
@@ -1017,25 +1103,55 @@ class Scene(
         // rejected node's floorDepth is left at its previous value, which nothing
         // reads: it is the depth sort key for accepted nodes, and the interaction
         // cache only ever holds nodes that were drawn.
-        var entity = this.staticTextureOpaqueEntities[layerIndex]
-        while (entity != null) {
-            if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
-                separateFromFloor(entity)
-                if (entity.floorDepth != -1) {
-                    this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
+        // Retained statics: a deferred renderer may hold the static entities' draws
+        // and resubmit them itself (RetainedSceneHook). Only on the surface pass — the
+        // underwater pass (hideInteractives) is rare and keeps the full walk.
+        val hook = retainedHook
+        val retained = hook != null && !hideInteractives && hook.active(this)
+        var entity: SceneGraphEntity?
+        if (retained) {
+            if (walkCacheRevision != walkRevision || walkCacheLayer != layerIndex) rebuildWalkCache(layerIndex)
+            val opaque = walkCacheOpaque
+            for (index in 0 until walkCacheOpaqueCount) {
+                val e = opaque[index]!!
+                if (!isHidden(e, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                    separateFromFloor(e)
+                    if (e.floorDepth != -1) {
+                        this.depthRenderedEntities[++this.depthObjectCount - 1] = e
+                    }
                 }
             }
-            entity = entity.child
-        }
-        entity = this.alphaEntities[layerIndex]
-        while (entity != null) {
-            if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
-                separateFromFloor(entity)
-                if (entity.floorDepth != -1) {
-                    this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
+            val alpha = walkCacheAlpha
+            for (index in 0 until walkCacheAlphaCount) {
+                val e = alpha[index]!!
+                if (!isHidden(e, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                    separateFromFloor(e)
+                    if (e.floorDepth != -1) {
+                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = e
+                    }
                 }
             }
-            entity = entity.child
+        } else {
+            entity = this.staticTextureOpaqueEntities[layerIndex]
+            while (entity != null) {
+                if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                    separateFromFloor(entity)
+                    if (entity.floorDepth != -1) {
+                        this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
+                    }
+                }
+                entity = entity.child
+            }
+            entity = this.alphaEntities[layerIndex]
+            while (entity != null) {
+                if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
+                    separateFromFloor(entity)
+                    if (entity.floorDepth != -1) {
+                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
+                    }
+                }
+                entity = entity.child
+            }
         }
         entity = this.dynamicRenderObjects[layerIndex]
         while (entity != null) {
@@ -1054,6 +1170,7 @@ class Scene(
         if (!hideInteractives) {
             for (index in 0 until this.interactiveObjectCount) {
                 val interactive = this.interactiveObjects[index]!!
+                if (retained && interactive.modernRetained) continue
                 if (!isHidden(interactive, false, settingBits, lowestRenderedPlane, roofPreference)) {
                     separateFromFloor(interactive)
                     if (interactive.floorDepth != -1) {
@@ -1068,6 +1185,12 @@ class Scene(
         }
         phaseWalkNs += System.nanoTime() - walkT0
         walkDrawn += this.depthObjectCount.toLong() + this.layeredObjectCount.toLong()
+
+        if (retained) {
+            val retainedT0 = System.nanoTime()
+            hook!!.submitStatics(this, settingBits, lowestRenderedPlane, roofPreference)
+            phaseRetainedNs += System.nanoTime() - retainedT0
+        }
 
         /**
          * Renders general scene objects, walls
@@ -1113,34 +1236,29 @@ class Scene(
                     visibleSizeY -= this.tileInFrustum[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
-                    // Row slices and the index->scene offsets read once per column.
-                    // This sweep runs for every plane over the whole visible grid —
-                    // tens of thousands of iterations a frame — and every one of them
-                    // was re-resolving four two-dimensional array rows and recomputing
-                    // the same two offsets from fields.
                     val yBase = this.visibleToYnegative - this.visibleToInvertedYnegative
                     val cullingLocal = this.culling
+                    // Which descending plane owns each tile of this floor is static per
+                    // scene: resolve it once (refreshed periodically in case tiles are
+                    // still streaming in) instead of chasing tiles[p][x][y] down the
+                    // planes for every tile of every floor every frame.
+                    val owner = floorOwnerPlane(plane)
+                    val dimY = this.sceneDimensionY
+                    val cullingOff = !cullingLocal.cullingEnabled
                     for (tileX in this.visibleToInvertedXnegative until visibleSizeX) {
                         val sceneX = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
                         val onScreenRow = this.tileOnScreen[tileX]
                         val adjacentRow = this.tileInFrustum[tileX]
+                        val ownerBase = sceneX * dimY
                         for (tileY in this.visibleToInvertedYnegative until visibleSizeY) {
-                            onScreenRow[tileY] = false
-                            if (adjacentRow[tileY]) {
-                                val sceneY = tileY + yBase
-                                var descendingPlane = plane
-                                while (descendingPlane >= 0) {
-                                    val tile = this.tiles[descendingPlane][sceneX][sceneY]
-                                    if (tile != null && tile.plane.toInt() == plane) {
-                                        val byLowPlane = descendingPlane < lowestRenderedPlane
-                                        val byRoofBits = settingBits[descendingPlane][sceneX][sceneY] != roofPreference
-                                        onScreenRow[tileY] = (byLowPlane || byRoofBits) &&
-                                            !cullingLocal.isTileHidden(plane, sceneX, sceneY)
-                                        break
-                                    }
-                                    --descendingPlane
-                                }
-                            }
+                            if (!adjacentRow[tileY]) { onScreenRow[tileY] = false; continue }
+                            val sceneY = tileY + yBase
+                            val descendingPlane = owner[ownerBase + sceneY].toInt()
+                            if (descendingPlane < 0) { onScreenRow[tileY] = false; continue }
+                            val byLowPlane = descendingPlane < lowestRenderedPlane
+                            val byRoofBits = settingBits[descendingPlane][sceneX][sceneY] != roofPreference
+                            onScreenRow[tileY] = (byLowPlane || byRoofBits) &&
+                                (cullingOff || !cullingLocal.isTileHidden(plane, sceneX, sceneY))
                         }
                     }
                 }
@@ -1176,13 +1294,66 @@ class Scene(
         /**
          * Renders ground decoration, light rays, objects with particles, roof / next level decoration
          */
+        if (DUMP_ALPHA && !hideInteractives) dumpAlphaTick++
         if (this.layeredObjectCount > 0) {
+            val alphaT0 = System.nanoTime()
             quicksortAbove(this.priorityRenderedEntities, 0, this.layeredObjectCount - 1)
-            for (index in 0 until this.layeredObjectCount) {
-                placeSceneryObjects(this.priorityRenderedEntities[index]!!, this.activeLights)
+            // The alpha bucket. Legacy relies on nothing but submission order here:
+            // these entities are drawn after every opaque entity and after the floor,
+            // back to front, so their blended faces land over whatever is behind
+            // them. A deferred/batched toolkit has no way to recover that ordering
+            // from the models themselves (hasAlpha() is per-entity, not per-model),
+            // so the walk announces the phase and the toolkit keeps these draws in
+            // an ordered pass of their own.
+            alphaPassActive = true
+            try {
+                for (index in 0 until this.layeredObjectCount) {
+                    placeSceneryObjects(this.priorityRenderedEntities[index]!!, this.activeLights)
+                }
+            } finally {
+                alphaPassActive = false
             }
+            phaseAlphaNs += System.nanoTime() - alphaT0
+            walkAlpha += this.layeredObjectCount.toLong()
         }
     }
+    // Per floor plane: the descending plane whose tile carries that floor at each
+    // (x, y), or -1. See drawTiles.
+    private var floorOwnerPlanes: Array<ByteArray?> = arrayOfNulls(0)
+    private var floorOwnerCycle = IntArray(0)
+    private fun floorOwnerPlane(plane: Int): ByteArray {
+        if (floorOwnerPlanes.size != this.regionSizeZ) {
+            floorOwnerPlanes = arrayOfNulls(this.regionSizeZ)
+            floorOwnerCycle = IntArray(this.regionSizeZ) { Int.MIN_VALUE }
+        }
+        var owner = floorOwnerPlanes[plane]
+        val dimX = this.sceneDimensionX
+        val dimY = this.sceneDimensionY
+        if (owner == null || owner.size != dimX * dimY || this.tileDrawCycle - floorOwnerCycle[plane] > 64) {
+            if (owner == null || owner.size != dimX * dimY) owner = ByteArray(dimX * dimY)
+            for (x in 0 until dimX) {
+                val base = x * dimY
+                for (y in 0 until dimY) {
+                    var found = -1
+                    var p = plane
+                    while (p >= 0) {
+                        val tile = this.tiles[p][x][y]
+                        if (tile != null && tile.plane.toInt() == plane) { found = p; break }
+                        --p
+                    }
+                    owner[base + y] = found.toByte()
+                }
+            }
+            floorOwnerPlanes[plane] = owner
+            floorOwnerCycle[plane] = this.tileDrawCycle
+        }
+        return owner
+    }
+    private var lastParticlePulse = -1L
+    /** True on frames that advance particle simulation (one per logic pulse). */
+    @JvmField var particleTickThisFrame = true
+    private val PARTICLE_PER_TICK = System.getProperty("render.particletick")?.equals("false", true) != true
+
 
     fun drawScene(rotation: Int, cameraX: Int, cameraZ: Int, cameraY: Int, settingBits: Array<Array<ByteArray>>?,
                           visibleBelowDrawheight: IntArray?, visibleAboveX: IntArray?, visibleBelowX: IntArray?,
@@ -1328,14 +1499,15 @@ class Scene(
         val cullT0 = System.nanoTime()
         this.culling.processCulling(this.activeToolkit, lowestRenderedPlane)
         phaseCullNs += System.nanoTime() - cullT0
-        ParticleSystemManager.processParticleCycle(this, this.activeToolkit)
+        // Particle systems and emitters step once per CALL. The legacy client drew at
+        // most 50 frames a second, so that was one step per logic tick; with the
+        // render loop decoupled a 150-300 fps frame rate ran the simulation 3-6x too
+        // fast and the cape sparkles fell far below the emitters. Step per logic pulse.
+        particleTickThisFrame = !PARTICLE_PER_TICK || Client.logicPulses != lastParticlePulse
+        lastParticlePulse = Client.logicPulses
+        if (particleTickThisFrame) ParticleSystemManager.processParticleCycle(this, this.activeToolkit)
         if (!this.interactiveEntities.removeDuplicates) {
-            val interactivesIterator = this.interactiveEntities.entities.iterator()
-            while (interactivesIterator.hasNext()) {
-                val entityReference = interactivesIterator.next()
-                interactivesIterator.remove()
-                RenderedEntityCache.clear(entityReference)
-            }
+            this.interactiveEntities.clear()
         }
         if (this.copyLights) {
             for (slotIndex in 0 until this.lightSlot) {
@@ -1360,6 +1532,7 @@ class Scene(
     }
 
     fun castShadow(entity: SceneGraphEntity, basePlane: Int, startX: Int, startY: Int, width: Int, length: Int) {
+        for (px in startX until startX + width) for (py in startY until startY + length) retainedChunkChanged(basePlane, px, py)
         var isSamePlane = true
         val lowestX = startX
         val highestX = startX + width
@@ -1424,6 +1597,7 @@ class Scene(
     }
 
     fun removeSecondaryWall(plane: Int, x: Int, y: Int): AbstractWall? {
+        retainedChunkChanged(plane, x, y)
         val tile = this.tiles[plane][x][y]
         if (tile != null) {
             pushIntoStack(tile.secondaryWall)
@@ -1613,7 +1787,17 @@ class Scene(
             waterTile.floUnusedOpcode22 = unusedOpcode22(sceneX, sceneY)
             this.activeToolkit.addWaterTile(this.surfaceHeightmap[0]!!.getAverageHeight(absolutePosition.x.toInt(), absolutePosition.z.toInt()), waterTile)
         }
+        currentDrawEntity = entity
+        if (DUMP_ALPHA && alphaPassActive && dumpAlphaTick in 120..121) {
+            val abs = entity.getAbsolutePosition().coords
+            val tx = abs.x.toInt() shr this.tileUnits
+            val ty = abs.z.toInt() shr this.tileUnits
+            if (Math.abs(tx - this.cameraGridPositionX) <= 6 && Math.abs(ty - this.cameraGridPositionY) <= 6) {
+                System.err.println("[AlphaDump] ${entity.javaClass.simpleName} id=${(entity as? StationaryInteractiveObject)?.id ?: (entity as? com.jagex.game.runetek5.entity.gameobject.AnimatedInteractiveObject)?.id ?: -1} tile=($tx,$ty) plane=${entity.plane} depth=${entity.floorDepth} hasAlpha=${entity.hasAlpha()} retained=${entity.modernRetained}")
+            }
+        }
         val entityReference = entity.draw(this.activeToolkit)
+        currentDrawEntity = null
         if (entityReference != null) {
             if (entityReference.interactive) {
                 entityReference.entity = entity
@@ -1662,6 +1846,25 @@ class Scene(
         @JvmStatic var planesDrawn = 0L
         @JvmStatic var planesSkipped = 0L
         @JvmStatic var walkDrawn = 0L
+        @JvmStatic var walkAlpha = 0L
+        @JvmStatic var walkCacheRebuildsAcc = 0
+
+        /** Rebuilds since the previous call (the perf print reads it once per interval). */
+        @JvmStatic fun walkCacheRebuildsTotal(): Int { val v = walkCacheRebuildsAcc; walkCacheRebuildsAcc = 0; return v }
+        @JvmStatic var phaseAlphaNs = 0L
+        @JvmStatic var phaseRetainedNs = 0L
+        private val DUMP_ALPHA = System.getProperty("render.dumpalpha") != null
+        private var dumpAlphaTick = 0
+        /**
+         * True while [drawTiles] is submitting the alpha bucket (the entities whose
+         * hasAlpha() is set, drawn last and depth-sorted). Read by deferred toolkits
+         * to route those draws into an ordered translucent pass.
+         */
+        @JvmStatic @Volatile var alphaPassActive = false
+        /** Deferred-renderer takeover of static entities; null = legacy walk draws everything. */
+        @JvmStatic var retainedHook: RetainedSceneHook? = null
+        /** Entity whose draw() is executing (for renderers that need its floorDepth). */
+        @JvmStatic var currentDrawEntity: SceneGraphEntity? = null
         @JvmStatic var phaseWalkNs = 0L
         @JvmStatic var phaseSortNs = 0L
         @JvmStatic var phaseFloorNs = 0L

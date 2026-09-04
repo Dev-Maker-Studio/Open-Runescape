@@ -164,7 +164,7 @@ class IndexBuffer(
         bind()
         val end = indexOffset + buffer.remaining()
         buffer.mark()
-        GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, indexOffset.toLong() * 4, buffer)
+        BufferStaging.upload(id, ELEMENT_ARRAY_BUFFER, indexOffset.toLong() * 4, buffer)
         buffer.reset()
         if (end > indexCount) indexCount = end
     }

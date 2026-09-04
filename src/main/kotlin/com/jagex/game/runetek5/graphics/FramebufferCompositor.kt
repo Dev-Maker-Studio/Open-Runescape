@@ -174,6 +174,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                     if (prevEffect == null && face == numTexturedFaces - 1) {
                         activeToolkit.resizeDisplay(resolveDisplay!!)
                         activeToolkit.setViewportOffset(0, 0)
+                        activeToolkit.legacyDrawTrace()
                         OpenGL.glBegin(7)
                         OpenGL.glTexCoord2f(0.0f, t.toFloat())
                         OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 1.0f)
@@ -189,6 +190,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                         OpenGL.glVertex2i(vertexCoordinateX + s, vertexCoordinateY)
                     } else {
                         resolveDisplay!!.drawBuffer(colorAttachmentSlot)
+                        activeToolkit.legacyDrawTrace()
                         OpenGL.glBegin(7)
                         OpenGL.glTexCoord2f(0.0f, t.toFloat())
                         OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 1.0f)

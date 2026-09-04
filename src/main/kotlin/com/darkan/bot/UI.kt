@@ -1,394 +1,182 @@
 package com.darkan.bot
 
-import com.darkan.bot.scripts.ConfigurableScript
 import com.darkan.bot.scripts.ScriptConfigWrapper
-import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.scripts.ScriptMetadata
+import com.darkan.bot.ui.BotWorkspace
+import com.darkan.bot.ui.Dockable
+import com.darkan.bot.ui.DockablePane
+import com.darkan.bot.ui.LogBus
+import com.darkan.bot.ui.LogsPanel
+import com.darkan.bot.ui.ScriptsPanel
+import com.darkan.bot.ui.SettingsPanel
+import com.darkan.bot.ui.SkillsPanel
+import com.darkan.bot.ui.UiPreferences
+import com.darkan.bot.ui.VarsPanel
 import com.darkan.bot.utils.Skill
 import com.github.weisj.darklaf.LafManager
 import com.github.weisj.darklaf.theme.DarculaTheme
-import java.awt.*
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
-import java.io.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.io.PrintStream
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
-import javax.imageio.ImageIO
-import javax.swing.*
-import javax.swing.border.EmptyBorder
-import javax.swing.table.DefaultTableCellRenderer
-import javax.swing.table.DefaultTableModel
+import javax.swing.JPanel
+import javax.swing.JPopupMenu
+import javax.swing.SwingUtilities
+import javax.swing.Timer
+import javax.swing.ToolTipManager
 
-lateinit var UI: CheddarCheeseUI
-
-private const val LOG_LINE_MAX = 100
+lateinit var UI: BotUI
 
 var SETTING_VARP_DEBUG_ENABLED = false
 var SETTING_VARC_DEBUG_ENABLED = false
 
 fun initializeUI() {
-    SwingUtilities.invokeAndWait {
+    runOnEdt {
         LafManager.install(DarculaTheme())
-        UI = CheddarCheeseUI()
+        // The game canvas is a heavyweight AWT component; lightweight popups and
+        // tooltips would otherwise be painted underneath it.
+        JPopupMenu.setDefaultLightWeightPopupEnabled(false)
+        ToolTipManager.sharedInstance().isLightWeightPopupEnabled = false
+        ToolTipManager.sharedInstance().initialDelay = 400
+        UI = BotUI()
     }
 }
 
-class CheddarCheeseUI : JPanel() {
-    private val xpTableModel = DefaultTableModel()
-    private val xpData = mutableMapOf<Skill, Pair<Long, Int>>()
+/** Runs [block] on the event dispatch thread, synchronously, whichever thread calls it. */
+fun runOnEdt(block: () -> Unit) {
+    if (SwingUtilities.isEventDispatchThread()) block() else SwingUtilities.invokeAndWait(block)
+}
+
+/**
+ * Root of the bot sidebar: a dockable tab strip holding the Scripts, Logs,
+ * Skills, Vars and Settings tools plus one closable tab per open script
+ * configuration.
+ */
+class BotUI : JPanel(BorderLayout()) {
     val originalOut: PrintStream = System.out
     var logFile: File? = null
-    private var lastLogModifiedTime = 0L
-    private val configTabs = mutableMapOf<ScriptMetadata, ScriptConfigWrapper>()
-    var isUIInitialized = false
-    private val varcTableModel = DefaultTableModel()
-    private val varcSearchField = JTextField()
-    private val allVarcData = mutableListOf<Array<Any>>()
-    private val maxVarcEntries = 100
+        private set
 
-    val logTextPane = object : JTextPane() {
-        override fun getScrollableTracksViewportWidth(): Boolean {
-            return true
-        }
-    }
+    /** Set by [BotWorkspace.install]; null when the sidebar is shown on its own. */
+    var workspace: BotWorkspace? = null
 
-    private val tabbedPane = JTabbedPane()
+    val dock = DockablePane { SwingUtilities.getWindowAncestor(this) }
+    val scriptsPanel: ScriptsPanel
+    val logsPanel: LogsPanel
+    val skillsPanel = SkillsPanel()
+    val varsPanel = VarsPanel()
+    val settingsPanel: SettingsPanel
+
+    private val configTabs = HashMap<String, ScriptConfigWrapper>()
+    private val scriptsDockable: Dockable
 
     init {
-        layout = BorderLayout()
-        preferredSize = Dimension(600, 600)
-
-        tabbedPane.apply {
-            addTab("Scripts", ScriptSelectionPanel())
-            addTab("Logs", JScrollPane(logTextPane))
-            addTab("Skills", createSkillsTab())
-            addTab("Settings", createSettingsTab())
-        }
-        add(tabbedPane, BorderLayout.CENTER)
-
+        preferredSize = Dimension(520, 600)
         redirectSystemOut()
+        LogBus.capacity = UiPreferences.getInt("logs.maxLines", LogBus.capacity)
 
-        val logUpdateTimer = Timer(600) { updateLogTextPane() }
-        logUpdateTimer.start()
+        scriptsPanel = ScriptsPanel(openSettings = ::addConfigTab, onInstanceReplaced = ::rebindConfigTab)
+        logsPanel = LogsPanel { logFile }
+        settingsPanel = SettingsPanel(this)
+
+        scriptsDockable = Dockable("scripts", "Scripts", scriptsPanel, tooltip = "Browse, configure and run scripts")
+        dock.add(scriptsDockable)
+        dock.add(Dockable("logs", "Logs", logsPanel, tooltip = "Console output"))
+        dock.add(Dockable("skills", "Skills", skillsPanel, tooltip = "XP gained this session"))
+        dock.add(Dockable("vars", "Vars", varsPanel, tooltip = "Watch varp / varc changes"))
+        dock.add(Dockable("settings", "Settings", settingsPanel, tooltip = "Sidebar layout and preferences"))
+        dock.onClosed = { configTabs.remove(it.id) }
+        dock.restoreLayout()
+        add(dock, BorderLayout.CENTER)
+
+        Timer(1000) {
+            val running = scriptsPanel.runningCount
+            scriptsDockable.title = if (running > 0) "Scripts ($running)" else "Scripts"
+        }.start()
     }
 
-    private fun loadCustomIcon(): List<Image>? {
-        return try {
-            val iconStream = this::class.java.getResourceAsStream("/icons/logo.png")
-            if (iconStream != null) {
-                val originalImage = ImageIO.read(iconStream)
-                listOf(
-                    originalImage.getScaledInstance(16, 16, Image.SCALE_SMOOTH),
-                    originalImage.getScaledInstance(32, 32, Image.SCALE_SMOOTH),
-                    originalImage.getScaledInstance(64, 64, Image.SCALE_SMOOTH),
-                    originalImage
-                )
-            } else {
-                println("Icon resource not found")
-                null
-            }
-        } catch (e: Throwable) {
-            println(e.stackTraceToString())
-            e.printStackTrace()
-            null
-        }
-    }
-
-    private fun createSettingsTab(): JPanel = JPanel(BorderLayout()).apply {
-        border = EmptyBorder(10, 10, 10, 10)
-
-        val topPanel = JPanel()
-        topPanel.apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
-
-            val togglePanel = JPanel(FlowLayout(FlowLayout.LEFT))
-            listOf("Toggle Varp Debug", "Toggle Varc Debug").forEach { setting ->
-                togglePanel.add(JRadioButton(setting).apply {
-                    addActionListener { handleSettingToggle(setting, isSelected) }
-                })
-            }
-            add(togglePanel)
-
-            val searchPanel = JPanel(FlowLayout(FlowLayout.LEFT))
-            searchPanel.add(JLabel("Search:"))
-            varcSearchField.preferredSize = Dimension(200, 25)
-            varcSearchField.addActionListener { filterVarcTable(varcSearchField.text) }
-            searchPanel.add(varcSearchField)
-            searchPanel.add(JButton("Clear Search").apply {
-                addActionListener {
-                    varcSearchField.text = ""
-                    filterVarcTable("")
-                }
-            })
-            searchPanel.add(JButton("Clear Table").apply {
-                addActionListener { clearVarcTable() }
-            })
-            add(searchPanel)
-        }
-        add(topPanel, BorderLayout.NORTH)
-
-        varcTableModel.setColumnIdentifiers(arrayOf("Type", "ID", "Previous Value", "New Value"))
-        val varcTable = JTable(varcTableModel).apply {
-            setDefaultRenderer(Object::class.java, object : DefaultTableCellRenderer() {
-                override fun getTableCellRendererComponent(
-                    table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int
-                ): Component {
-                    val c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-                    if (!isSelected && row < table.rowCount && table.columnCount >= 4) {
-                        val prevValue = table.getValueAt(row, 2)?.toString() ?: ""
-                        val newValue = table.getValueAt(row, 3)?.toString() ?: ""
-                        if (column == 3 && prevValue != newValue && prevValue.isNotEmpty() && newValue.isNotEmpty()) {
-                            c.background = table.background
-                            c.font = c.font.deriveFont(java.awt.Font.BOLD)
-                        } else {
-                            c.background = table.background
-                            c.font = c.font.deriveFont(java.awt.Font.PLAIN)
-                        }
-                    }
-                    return c
-                }
-            })
-        }
-        add(JScrollPane(varcTable), BorderLayout.CENTER)
-        isUIInitialized = true
-    }
-
-    private fun handleSettingToggle(settingName: String, isSelected: Boolean) {
-        when(settingName) {
-            "Toggle Varp Debug" -> SETTING_VARP_DEBUG_ENABLED = isSelected
-            "Toggle Varc Debug" -> SETTING_VARC_DEBUG_ENABLED = isSelected
-        }
-    }
-
-    private fun filterVarcTable(searchText: String) {
-        if (!isUIInitialized) return
-        SwingUtilities.invokeLater {
-            varcTableModel.rowCount = 0
-            if (searchText.isEmpty()) allVarcData.forEach { varcTableModel.addRow(it) }
-            else allVarcData.filter { row ->
-                row[0].toString().lowercase().contains(searchText.lowercase()) ||
-                        row[1].toString().contains(searchText) ||
-                        row[2].toString().contains(searchText) ||
-                        row[3].toString().contains(searchText)
-            }.forEach { varcTableModel.addRow(it) }
-        }
-    }
-
-    fun addVarcTableEntry(type: String, id: Int, prevValue: Int, newValue: Int) {
-        if (!isUIInitialized || prevValue == newValue) return
-        SwingUtilities.invokeLater {
-            val newRow: Array<Any> = arrayOf(type, id, prevValue, newValue)
-            val existingIndex = allVarcData.indexOfFirst { it[0] == type && it[1] == id }
-            if (existingIndex != -1) allVarcData[existingIndex] = newRow
-            else {
-                allVarcData.add(0, newRow)
-                if (allVarcData.size > maxVarcEntries) allVarcData.removeAt(allVarcData.size - 1)
-            }
-            filterVarcTable(varcSearchField.text)
-            for (i in 0 until varcTableModel.rowCount) {
-                val rowType = varcTableModel.getValueAt(i, 0) as? String
-                val rowId = varcTableModel.getValueAt(i, 1) as? Int
-                if (rowType == type && rowId == id) {
-                    varcTableModel.setValueAt(prevValue, i, 2)
-                    varcTableModel.setValueAt(newValue, i, 3)
-                    return@invokeLater
-                }
-            }
-            varcTableModel.addRow(arrayOf<Any>(type, id, prevValue, newValue))
-        }
-    }
-
-    private fun clearVarcTable() = SwingUtilities.invokeLater {
-        allVarcData.clear()
-        varcTableModel.rowCount = 0
-        varcSearchField.text = ""
-    }
+    // ---- script configuration tabs ----
 
     fun addConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
-        val tabTitle = "${scriptMetadata.name} Settings"
-        val existingIndex = tabbedPane.indexOfTab(tabTitle)
-        if (existingIndex != -1) {
-            tabbedPane.selectedIndex = existingIndex
-            return
-        }
-
-        val configWrapper = ScriptConfigWrapper(script)
-        val panel = configWrapper.configPanel
-        configTabs[scriptMetadata] = configWrapper
-        tabbedPane.addTab(tabTitle, panel)
-        val tabIndex = tabbedPane.indexOfComponent(panel)
-        val tabComponent = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
-            isOpaque = false
-            add(JLabel(tabTitle))
-            add(JButton("x").apply {
-                margin = Insets(0, 5, 0, 5)
-                isBorderPainted = false
-                isFocusPainted = false
-                isContentAreaFilled = false
-                toolTipText = "Close tab"
-                addActionListener {
-                    tabbedPane.remove(panel)
-                    configTabs.remove(scriptMetadata)
-                }
-            })
-        }
-        tabbedPane.setTabComponentAt(tabIndex, tabComponent)
-        tabbedPane.selectedIndex = tabIndex
-    }
-
-    private fun createSkillsTab(): JPanel = JPanel(BorderLayout()).apply {
-        border = EmptyBorder(10, 10, 10, 10)
-        xpTableModel.setColumnIdentifiers(arrayOf("Skill", "XP Gained", "XP p/h"))
-        val table = JTable(xpTableModel)
-        addRightClickContextMenuToTable(table)
-        add(JScrollPane(table), BorderLayout.CENTER)
-    }
-
-    private fun addRightClickContextMenuToTable(table: JTable) {
-        table.addMouseListener(object : MouseAdapter() {
-            override fun mousePressed(e: MouseEvent) {
-                if (e.isPopupTrigger) showContextMenu(e)
+        val id = configTabId(scriptMetadata)
+        val existing = configTabs[id]
+        if (existing != null) {
+            if (existing.script === script) {
+                dock.select(id)
+                return
             }
-
-            override fun mouseReleased(e: MouseEvent) {
-                if (e.isPopupTrigger) showContextMenu(e)
-            }
-
-            private fun showContextMenu(e: MouseEvent) {
-                val row = table.rowAtPoint(e.point)
-                if (row >= 0 && row < table.rowCount) {
-                    table.setRowSelectionInterval(row, row)
-                    val skill = table.getValueAt(row, 0) as Skill
-                    val popupMenu = JPopupMenu()
-                    val resetMenuItem = JMenuItem("Reset XP")
-                    val removeMenuItem = JMenuItem("Remove Row")
-
-                    resetMenuItem.addActionListener { resetXpValues(skill, row) }
-                    removeMenuItem.addActionListener { removeRow(skill, row) }
-
-                    popupMenu.add(resetMenuItem)
-                    popupMenu.add(removeMenuItem)
-                    popupMenu.show(e.component, e.x, e.y)
-                }
-            }
-        })
-    }
-
-    private fun resetXpValues(skill: Skill, row: Int) {
-        SwingUtilities.invokeLater {
-            xpData[skill] = System.currentTimeMillis() to 0
-            xpTableModel.setValueAt("0", row, 1)
-            xpTableModel.setValueAt("0", row, 2)
+            // The script was restarted with a fresh instance; rebind the form to it.
+            dock.close(id)
         }
+        val wrapper = ScriptConfigWrapper(script)
+        configTabs[id] = wrapper
+        dock.add(
+            Dockable(id, "${scriptMetadata.name} settings", wrapper.configPanel, closable = true, tooltip = "Settings for ${scriptMetadata.name}"),
+            select = true,
+        )
     }
 
-    private fun removeRow(skill: Skill, row: Int) {
-        SwingUtilities.invokeLater {
-            xpData.remove(skill)
-            xpTableModel.removeRow(row)
-        }
+    fun closeConfigTab(scriptMetadata: ScriptMetadata) = dock.close(configTabId(scriptMetadata))
+
+    /** If a settings tab is open for this script, points it at [script] (a restarted script gets a fresh instance). */
+    fun rebindConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
+        val id = configTabId(scriptMetadata)
+        val existing = configTabs[id] ?: return
+        if (existing.script === script) return
+        val wasSelected = dock.current()?.id == id
+        val wasPoppedOut = dock.isPoppedOut(id)
+        dock.close(id)
+        addConfigTab(scriptMetadata, script)
+        if (wasPoppedOut) dock.popOut(id) else if (!wasSelected) scriptsDockable.let { dock.select(it.id) }
     }
 
-    fun updateAllXPPerHour() {
-        SwingUtilities.invokeLater {
-            Skill.entries.forEach { skill ->
-                val totalXp = xpData.getOrDefault(skill, System.currentTimeMillis() to 0)
-                val rowIndex = findSkillRowIndex(skill)
-                if (rowIndex != -1)
-                    xpTableModel.setValueAt(getFormattedUnitsPerHour(totalXp.second, totalXp.first), rowIndex, 2)
-            }
-        }
-    }
+    private fun configTabId(scriptMetadata: ScriptMetadata) = "config:${scriptMetadata.scriptClass.name}"
 
-    fun updateXpTable(skill: Skill, xpGained: Int) {
-        val totalXp = xpData.getOrDefault(skill, System.currentTimeMillis() to 0)
-        xpData[skill] = totalXp.first to totalXp.second + xpGained
+    // ---- data feeds (safe from any thread) ----
 
-        SwingUtilities.invokeLater {
-            val rowIndex = findSkillRowIndex(skill)
-            if (rowIndex != -1) {
-                xpTableModel.setValueAt(format(totalXp.second), rowIndex, 1)
-                xpTableModel.setValueAt(getFormattedUnitsPerHour(totalXp.second, totalXp.first), rowIndex, 2)
-            } else
-                xpTableModel.addRow(arrayOf(skill, format(totalXp.second), getFormattedUnitsPerHour(totalXp.second, totalXp.first)))
-        }
-    }
+    fun updateXpTable(skill: Skill, xpGained: Int) = skillsPanel.addXp(skill, xpGained)
 
-    private fun findSkillRowIndex(skill: Skill): Int {
-        for (i in 0 until xpTableModel.rowCount)
-            if (xpTableModel.getValueAt(i, 0) == skill)
-                return i
-        return -1
-    }
+    fun addVarcTableEntry(type: String, id: Int, prevValue: Int, newValue: Int) = varsPanel.record(type, id, prevValue, newValue)
+
+    /** Rates now refresh on a timer; kept so older callers keep compiling. */
+    fun updateAllXPPerHour() {}
+
+    // ---- logging ----
 
     private fun redirectSystemOut() {
         try {
-            val userHome = System.getProperty("user.home")
-            val logDir = File(userHome, ".cheddarcheese/logs")
-            if (!logDir.exists())
-                logDir.mkdirs()
+            val logDir = File(UiPreferences.dataDir, "logs")
+            if (!logDir.exists()) logDir.mkdirs()
             val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(Date())
             val pid = ProcessHandle.current().pid()
-            logFile = File(logDir, "cheddarcheese-${timestamp}-${pid}.log")
+            logFile = File(logDir, "cheddarcheese-$timestamp-$pid.log")
             println("Attaching to logfile at $logFile")
-            if (!logFile!!.exists())
-                logFile!!.createNewFile()
+            if (!logFile!!.exists()) logFile!!.createNewFile()
         } catch (e: Throwable) {
             e.printStackTrace()
         }
 
-        val outStream = TextPaneOutputStream(originalOut, logFile)
-        val errStream = TextPaneOutputStream(System.err, logFile)
-
-        System.setOut(PrintStream(outStream, true))
-        System.setErr(PrintStream(errStream, true))
-    }
-
-    private fun updateLogTextPane() {
-        if (logFile == null || !logFile!!.exists()) return
-
-        val modifiedTime = logFile!!.lastModified()
-        if (modifiedTime > lastLogModifiedTime) {
-            lastLogModifiedTime = modifiedTime
-            val lines = readLastLines(logFile!!)
-            SwingUtilities.invokeLater {
-                logTextPane.text = lines.joinToString("\n")
-                logTextPane.caretPosition = logTextPane.document.length
-            }
-        }
-    }
-
-    private fun readLastLines(file: File): List<String> {
-        val result = mutableListOf<String>()
-        RandomAccessFile(file, "r").use { raf ->
-            var filePointer = raf.length() - 1
-            var line = ""
-            while (filePointer >= 0 && result.size < LOG_LINE_MAX) {
-                raf.seek(filePointer)
-                val readByte = raf.readByte()
-                if (readByte.toInt().toChar() == '\n' && line.isNotEmpty()) {
-                    result.add(line.reversed())
-                    line = ""
-                } else
-                    line += readByte.toInt().toChar()
-                filePointer--
-            }
-            if (line.isNotEmpty() && result.size < LOG_LINE_MAX)
-                result.add(line.reversed())
-        }
-        return result.reversed()
+        System.setOut(PrintStream(TextPaneOutputStream(originalOut, logFile, isError = false), true))
+        System.setErr(PrintStream(TextPaneOutputStream(System.err, logFile, isError = true), true))
     }
 }
 
 private var fileOutputStream: OutputStream? = null
 
+/**
+ * Tees stdout/stderr to the original stream, the session log file and
+ * [LogBus] (which feeds the Logs tab) with a timestamp on every line.
+ */
 class TextPaneOutputStream(
     private val standardStream: PrintStream,
-    logFile: File?
+    logFile: File?,
+    private val isError: Boolean = false,
 ) : OutputStream() {
     private val buffer = StringBuilder()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
@@ -401,24 +189,25 @@ class TextPaneOutputStream(
     override fun write(b: Int) {
         val c = b.toChar()
         buffer.append(c)
-        if (c == '\n')
-            flushBuffer()
+        if (c == '\n') flushBuffer()
     }
 
     override fun write(b: ByteArray, off: Int, len: Int) {
-        val text = String(b, off, len)
-        buffer.append(text)
-        if (buffer.contains("\n"))
-            flushBuffer()
+        buffer.append(String(b, off, len))
+        if (buffer.contains("\n")) flushBuffer()
     }
 
     private fun flushBuffer() {
-        if (buffer.isNotEmpty()) {
-            val timestampedLine = "[${LocalDateTime.now().format(formatter)}] ${buffer.toString()}"
-            standardStream.print(timestampedLine)
+        if (buffer.isEmpty()) return
+        val text = buffer.toString()
+        buffer.clear()
+        val timestampedLine = "[${LocalDateTime.now().format(formatter)}] $text"
+        standardStream.print(timestampedLine)
+        try {
             fileOutputStream?.write(timestampedLine.toByteArray())
-            buffer.clear()
+        } catch (_: Exception) {
         }
+        text.split('\n').filter { it.isNotEmpty() }.forEach { LogBus.publish(it, isError) }
     }
 
     override fun flush() {

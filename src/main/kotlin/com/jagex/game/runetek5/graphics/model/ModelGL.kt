@@ -80,8 +80,8 @@ class ModelGL : Model {
     companion object {
         @JvmStatic val INVALIDATE_DIAG = System.getProperty("model.invalidatediag") != null
         @JvmStatic val VERIFY_RECOLOUR_CAPTURE = System.getProperty("render.verifyrecolour") != null
-        @JvmStatic val INVALIDATE_REASONS = arrayOf("yaxisRotate", "translate", "mirror", "scale", "recolor", "rematerial", "tint", "setAmbient", "envAlpha", "offsetSubmesh", "xaxisRotate", "zaxisRotate", "contourToGround", "hillChange")
-        @JvmStatic val invalidateCounts = LongArray(14)
+        @JvmStatic val INVALIDATE_REASONS = arrayOf("yaxisRotate", "translate", "mirror", "scale", "recolor", "rematerial", "tint", "setAmbient", "envAlpha", "offsetSubmesh", "xaxisRotate", "zaxisRotate", "contourToGround", "hillChange", "normalMerge")
+        @JvmStatic val invalidateCounts = LongArray(16)
 
         /** How often [calculateBounds] actually recomputes, and over how many vertices. */
 @JvmStatic var boundsCalls = 0L
@@ -319,6 +319,18 @@ class ModelGL : Model {
      */
     @JvmField
     var modernStreamKey: Long = 0
+    /** Entity whose pose memo should receive the geometry the toolkit builds next (see PoseMemoOwner). */
+    @JvmField var modernPoseMemoOwner: Any? = null
+
+    /**
+     * Set on copies owned by a PoseCopyPair: nobody but the owner writes this object
+     * between the scene walk and the frame flush, so its geometry may be built off
+     * the render thread. Shared toolkit copy slots are overwritten by the next entity.
+     */
+    @JvmField var privatePoseCopy: Boolean = false
+    /** Deferred-build bookkeeping (ModernGLToolkit.enqueueDeferredBuild). */
+    @JvmField var modernDeferredStamp: Int = -1
+    @JvmField var modernDeferredIndex: Int = 0
 
 
     /**
@@ -532,6 +544,19 @@ class ModelGL : Model {
     private var animScratchMatrixA: IntArray? = null
     private var animScratchMatrixB: IntArray? = null
     private var animScratchMatrixC: IntArray? = null
+
+    /**
+     * A copy slot must always own the draw-buffer objects the preallocated copy path
+     * writes into; an earlier copy with a different mask can have pointed a slot's
+     * field at the base's (possibly null) buffer. Restores the constructor's set.
+     */
+    fun ensureSlotBuffers() {
+        if (this.vertexBuffer == null) this.vertexBuffer = OpenGlArrayDrawBuffer(null, GL_FLOAT, 3, 0)
+        if (this.textureCoordinatesBuffer == null) this.textureCoordinatesBuffer = OpenGlArrayDrawBuffer(null, GL_FLOAT, 2, 0)
+        if (this.normalsBuffer == null) this.normalsBuffer = OpenGlArrayDrawBuffer(null, GL_FLOAT, 3, 0)
+        if (this.colorsBuffer == null) this.colorsBuffer = OpenGlArrayDrawBuffer(null, GL_UNSIGNED_BYTE, 4, 0)
+        if (this.modelElementsBuffer == null) this.modelElementsBuffer = ModelElementsBufferGL()
+    }
 
     constructor(toolkit: OpenGlToolkit) {
         this.toolkit = toolkit
@@ -1252,6 +1277,28 @@ class ModelGL : Model {
         }
 
         return copyModelData(dst, src, functionMask, usesPreallocated)
+    }
+
+    /**
+     * Gives this copy its own normal arrays wherever [copyModelData] left it sharing
+     * [base]'s. A copy that outlives the frame (a private pose kept across ticks) can be
+     * merged with its neighbours (applyShading(model, ...)), and through shared arrays
+     * that mutates the base every other instance and neighbour derives its lighting from.
+     */
+    fun detachSharedNormals(base: ModelGL) {
+        if (this.normalsX != null && this.normalsX === base.normalsX) this.normalsX = this.normalsX!!.copyOf()
+        if (this.normalsY != null && this.normalsY === base.normalsY) this.normalsY = this.normalsY!!.copyOf()
+        if (this.normalsZ != null && this.normalsZ === base.normalsZ) this.normalsZ = this.normalsZ!!.copyOf()
+        if (this.magnitudes != null && this.magnitudes === base.magnitudes) this.magnitudes = this.magnitudes!!.copyOf()
+        val merged = this.mergedNormals
+        if (merged != null && merged === base.mergedNormals) {
+            val copy = ModelNormalsGL()
+            copy.normalsX = merged.normalsX?.copyOf()
+            copy.normalsY = merged.normalsY?.copyOf()
+            copy.normalsZ = merged.normalsZ?.copyOf()
+            copy.magnitude = merged.magnitude?.copyOf()
+            this.mergedNormals = copy
+        }
     }
 
     fun copyModelData(dst: ModelGL, src: ModelGL, flags: Int, usesPreallocated: Boolean): Model {
@@ -2666,7 +2713,7 @@ class ModelGL : Model {
      * Calculates bounding box for mouse interaction when using modern renderer.
      * This is a simplified version that doesn't require legacy GL matrix operations.
      */
-    private fun calculateBoundingBoxForModern(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon) {
+    internal fun calculateBoundingBoxForModern(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon) {
         if (!this.boundsCalculated) {
             calculateBounds()
         }
@@ -2814,6 +2861,8 @@ class ModelGL : Model {
 
     override fun setContrast(contrast: Int) {
         invalidateModernContent()
+        // Mesh-built normals carry 768/contrast baked in (ModernModelBuilder).
+        invalidateModernBuilt(7)
         this.contrast = contrast.toShort()
         if (this.colorsBuffer != null) {
             this.colorsBuffer!!.buffer = null
@@ -3045,6 +3094,13 @@ class ModelGL : Model {
 
     override fun applyShading(model: Model, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         invalidateModernContent()
+        // Normal merging with an adjacent loc changes this model's LIGHTING (legacy
+        // uploads mergedNormals in place of normals), which the mesh-built geometry
+        // cannot express: it lit itself from the mesh's own normals at build time.
+        // Drop it so the legacy-capture path, which reads the merged normals, draws
+        // this model. Without this, building walls rendered visibly brighter than
+        // legacy along every shared edge.
+        invalidateModernBuilt(14)
         val openglModel = model as ModelGL
         if (this.numFaces != 0 && openglModel.numFaces != 0) {
             val glMaxDepth = openglModel.maxDepth

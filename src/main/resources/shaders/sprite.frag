@@ -4,6 +4,7 @@
 in vec2 vTexCoord;
 in vec4 vColor;
 flat in int vTexIndex;
+flat in vec4 vClip;
 
 // Texture samplers for multi-texture batching (up to 8 textures bound simultaneously)
 uniform sampler2D uTextures[8];
@@ -12,6 +13,13 @@ uniform sampler2D uTextures[8];
 out vec4 fragColor;
 
 void main() {
+    // Per-quad scissor: a pixel (px,py) passes glScissor(x,y,w,h) iff x <= px < x+w
+    // and y <= py < y+h; gl_FragCoord is the pixel centre (px + 0.5), so the same
+    // half-open comparison on it is exactly that test.
+    if (gl_FragCoord.x < vClip.x || gl_FragCoord.x >= vClip.z ||
+        gl_FragCoord.y < vClip.y || gl_FragCoord.y >= vClip.w) {
+        discard;
+    }
     if (vTexIndex >= 0) {
         vec4 texColor;
         // Select texture by index. Switch statement compiles to efficient branching

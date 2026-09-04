@@ -10,6 +10,11 @@ import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.npc.NPCType
 import com.jagex.game.runetek5.config.sequence.MovementType
 import com.jagex.game.runetek5.config.sequence.Sequence
+import com.jagex.game.runetek5.entity.pathingentity.PoseKey
+import com.jagex.game.runetek5.entity.pathingentity.PoseMemo
+import com.jagex.game.runetek5.entity.pathingentity.ShadowMemo
+import com.jagex.game.runetek5.graphics.model.Model
+import com.jagex.game.runetek5.graphics.model.PoseCopyPair
 import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
@@ -72,7 +77,24 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         return null
     }
 
-    fun getAnimatedBodymodel(toolkit: AbstractToolkit, functionMask: Int): Boolean {
+    private var poseMemoModel: Model? = null
+    private var poseMemoKey = 0L
+    private val poseKey = PoseKey()
+    /** Key of the pose handed out THIS draw (0 when it was not memoisable); drives the shadow memo. */
+    private var currentPoseKey = 0L
+    /** models[0] already carries the type tint (applied inside the memo); draw() skips it. */
+    private var bodyTintInMemo = false
+    private val shadowMemo = ShadowMemo()
+    private val shadowKey = PoseKey()
+    private val poseCopies = PoseCopyPair()
+    private val shadowCopies = PoseCopyPair()
+
+    /**
+     * @param applyTypeTint apply the NPC type's tint to the body inside the memo (the
+     *   draw path; draw() then skips its own tint for models[0]). The particle-cycle
+     *   caller builds with function mask 0, whose model is not tint-capable.
+     */
+    fun getAnimatedBodymodel(toolkit: AbstractToolkit, functionMask: Int, applyTypeTint: Boolean = false): Boolean {
         var functionMask = functionMask
         val initialFunctionMask = functionMask
         val bastype = getBastype()
@@ -90,30 +112,90 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         }
 
         val yawRotation = super.yaw.getRotation()
-        val model = this.definitions!!.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS!!, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences as Array<Sequence?>?, super.equipmentRotations, yawRotation, this.customisation, getCurrentRenderAnimation(), false)
+        val definitions = this.definitions!!
+        // Hill tilt first: it depends only on the entity's position, and both the memo
+        // key and the in-place model transforms below read its results.
+        if (modelWidth == 0 && modelLength == 0) {
+            hillChange(yawRotation, getSize() shl 9, getSize() shl 9, 0, 0)
+        } else {
+            hillChange(yawRotation, modelWidth, modelLength, bastype.hillRotateX, bastype.hillRotateZ)
+        }
+        // The memo model already carries every in-place transform applied on a miss
+        // (roll/pitch rotate, wide-model hill tilt/translate), so those inputs are part
+        // of the key and are NOT re-applied on a hit. Tints (entity or type — the type
+        // tint is re-applied per draw) compound in place, so tinted models stay out.
+        // The TYPE tint (definitions.hasTint) is a fixed recolour: applied once on a
+        // miss, it is part of the memoised model and draw() must not apply it again
+        // (bodyTintInMemo). The entity hit-flash tint is temporary and stays out.
+        // Only the draw path memoises (applyTypeTint is its marker): picking
+        // (calculateProjection, mask 131072) and the particle-init pass (mask 0) keep
+        // legacy's shared-slot copies and never touch the memo.
+        val memoEligible = PoseMemo.ENABLED && !hasTint && applyTypeTint
+        if (!memoEligible) { if (hasTint) PoseMemo.inelEntityTint++; if (definitions.hasTint) PoseMemo.inelTypeTint++ }
+        bodyTintInMemo = memoEligible && definitions.hasTint
+        var key = 0L
+        if (memoEligible) {
+            val resolved = if (definitions.alternativeIds != null) definitions.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) else definitions
+            key = poseKey.reset()
+                .add(resolved?.type ?: -1)
+                .add(functionMask)
+                .add(seq)
+                .add(moveAnimation)
+                .add(super.sequences)
+                .add(super.equipmentRotations)
+                .add(yawRotation)
+                .add(this.customisation?.uid ?: -1L)
+                .add(getCurrentRenderAnimation())
+                .add(toolkit.renderId)
+                .add(super.roll.rotation).add(super.pitch.rotation)
+                .add(modelWidth).add(modelLength)
+                .add(super.rotateX).add(super.rotateZ).add(super.translateY)
+                .add(if (bodyTintInMemo) 1 else 0).add(this.tintHue).add(this.tintSaturation).add(this.tintLightness).add(this.tintOpacity)
+                .value()
+        }
+        val memo = poseMemoModel
+        val model: Model?
+        currentPoseKey = if (memoEligible) key else 0L
+        if (memoEligible && memo != null && key == poseMemoKey) {
+            PoseMemo.poseHits++
+            lastPoseWasHit = true
+            model = memo
+        } else {
+            lastPoseWasHit = false
+            if (memoEligible) PoseMemo.poseMisses++ else PoseMemo.poseIneligible++
+            model = definitions.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS!!, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences as Array<Sequence?>?, super.equipmentRotations, yawRotation, this.customisation, getCurrentRenderAnimation(), false, privatePool = if (memoEligible) poseCopies else null)
+            if (model != null) {
+                rotate(model)
+                if (modelWidth != 0 || modelLength != 0) {
+                    if (super.rotateX != 0) {
+                        model.xaxisRotateWithoutNormals(super.rotateX)
+                    }
+                    if (super.rotateZ != 0) {
+                        model.zaxisRotateWithoutNormals(super.rotateZ)
+                    }
+                    if (super.translateY != 0) {
+                        model.translate(0, super.translateY, 0)
+                    }
+                }
+                if (bodyTintInMemo) {
+                    model.tint(this.tintHue, this.tintSaturation, this.tintLightness, this.tintOpacity)
+                }
+            }
+            if (memoEligible && model != null) {
+                PoseMemo.carryGeometry(poseMemoModel, model)
+                poseMemoModel = model
+                poseMemoKey = key
+            } else {
+                poseMemoModel = null
+                poseMemoKey = 0L
+            }
+        }
         super.models[0] = model
         if (model == null) {
             return false
         }
         super.modelMinY = model.getMinY()
         model.getSize3d()
-        rotate(model)
-        if (modelWidth == 0 && modelLength == 0) {
-            hillChange(yawRotation, getSize() shl 9, getSize() shl 9, 0, 0)
-        } else {
-            hillChange(yawRotation, modelWidth, modelLength, bastype.hillRotateX, bastype.hillRotateZ)
-            if (super.rotateX != 0) {
-                super.models[0]!!.xaxisRotateWithoutNormals(super.rotateX)
-            }
-
-            if (super.rotateZ != 0) {
-                super.models[0]!!.zaxisRotateWithoutNormals(super.rotateZ)
-            }
-
-            if (super.translateY != 0) {
-                super.models[0]!!.translate(0, super.translateY, 0)
-            }
-        }
 
         if (hasTint) {
             model.tint(super.hue.toInt(), super.saturation.toInt(), super.lightness.toInt(), super.opacity.toInt() and 0xff)
@@ -327,7 +409,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
     }
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
-        if (this.definitions != null && getAnimatedBodymodel(toolkit, 526336)) {
+        if (this.definitions != null && getAnimatedBodymodel(toolkit, 526336, applyTypeTint = true)) {
             val projectionMatrix = getProjectionMatrix()
             val absPos = getAbsolutePosition()
             val renderingMatrix = toolkit.getRenderingMatrix()
@@ -350,9 +432,19 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             if (PreferenceManager.preferences!!.characterShadows!!.getValue() == 1 && npcType!!.shadowed && bastype.rendersShadow) {
                 val seq = if (super.currentSequence.hasType() && super.currentSequence.hasSpeed()) super.currentSequence else null
                 val moveAnimation = if (!super.movingSequence.hasType() || super.movingSequence.hasType && seq != null) null else super.movingSequence
-                val model = PathingEntity.getAnimatedShadowModel(toolkit, super.rotateX, super.rotateZ, super.translateY, this.definitions!!.size, super.models[0],
+                val shadowSeq = if (moveAnimation != null) moveAnimation else seq
+                val body = super.models[0]
+                val model = shadowMemo.get(
+                    currentPoseKey,
+                    shadowKey.reset().add(super.rotateX).add(super.rotateZ).add(super.translateY).add(this.definitions!!.size)
+                        .add(this.definitions!!.shadowColorSrc.toInt()).add(this.definitions!!.shadowColorDst.toInt())
+                        .add(this.definitions!!.shadowAlphaSrc.toInt()).add(this.definitions!!.shadowAlphaDst.toInt())
+                        .add(shadowSeq).add(body?.getMinX() ?: 0).add(body?.getMaxX() ?: 0).add(body?.getMinZ() ?: 0).add(body?.getMaxZ() ?: 0)
+                ) {
+                    PathingEntity.getAnimatedShadowModel(toolkit, super.rotateX, super.rotateZ, super.translateY, this.definitions!!.size, body,
                         this.definitions!!.shadowColorSrc.toInt() and 0xffff, this.definitions!!.shadowColorDst.toInt() and 0xffff, this.definitions!!.shadowAlphaSrc.toInt() and 0xff, this.definitions!!.shadowAlphaDst.toInt() and 0xff,
-                        if (moveAnimation != null) moveAnimation else seq)
+                        shadowSeq, privatePool = if (currentPoseKey != 0L) shadowCopies else null)
+                }
                 if (model != null) {
                     if (super.boundingBoxPolygons == null || super.boundingBoxPolygons!!.size < super.models.size + 1) {
                         setupBoundingBox(super.models.size + 1)
@@ -378,7 +470,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
             for (modelIndex in super.models.indices) {
                 if (super.models[modelIndex] != null) {
-                    if (this.definitions!!.hasTint) {
+                    if (this.definitions!!.hasTint && !(modelIndex == 0 && bodyTintInMemo)) {
                         super.models[modelIndex]!!.tint(this.tintHue, this.tintSaturation, this.tintLightness, this.tintOpacity)
                     }
 

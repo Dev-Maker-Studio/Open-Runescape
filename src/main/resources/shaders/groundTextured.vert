@@ -30,6 +30,7 @@ uniform float uContrast;
 uniform float uSunBrightness;
 uniform float uContrastPos;   // sunColorIntensity
 uniform float uContrastNeg;   // antiSunColorIntensity
+uniform int uRawColorDebug;   // 1 = bypass lighting/lights/shadow (debug, -Drender.groundcolor=raw)
 
 // Fog uniforms
 uniform float uFogStart;
@@ -44,21 +45,23 @@ uniform int uPointLightCount;
 uniform vec4 uPointLightPos[MAX_POINT_LIGHTS];   // xyz world, w = 1/size2d^2
 uniform vec3 uPointLightColor[MAX_POINT_LIGHTS]; // colour * transparency/255
 
-// Native ground shadows: one intensity texel per shadow cell over the whole ground,
-// the same ShadowMapperGL data legacy composites with a fixed-function overlay.
-uniform bool uGroundShadowEnabled;
-uniform sampler2D uGroundShadowTex;
-uniform float uGroundShadowScale;   // 1 / (worldUnitsPerTexel * mapWidth)
-
 out vec4 vColor;
 out vec2 vTexCoord;
 out float vFogFactor;
+out vec2 vWorldXZ;   // for the per-fragment ground shadow overlay (see frag)
 
 void main() {
     // Apply the VP transform
     gl_Position = uViewProjection * vec4(aPosition, 1.0);
 
     vec3 color = aColor.rgb;
+    vWorldXZ = aPosition.xz;
+    vTexCoord = aTexCoord * uTextureScale;
+    vFogFactor = 1.0;
+    if (uRawColorDebug == 1) {
+        vColor = vec4(color, aColor.a);
+        return;
+    }
     if (uHasNormals) {
         float d = dot(uSunDirection, aNormal);
         float intensity = uSunBrightness + d * (d > 0.0 ? uContrastPos : uContrastNeg);
@@ -77,22 +80,9 @@ void main() {
     for (int i = 0; i < uPointLightCount; ++i) {
         vec3 toLight = uPointLightPos[i].xyz - aPosition;
         float d2 = dot(toLight, toLight);
-        float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+        float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6); // legacy: kc=0, kl=0, kq=1/size^2
         float ndotl = max(dot(n, normalize(toLight)), 0.0);
         color += aColor.rgb * uPointLightColor[i] * (att * ndotl);
     }
-    color = clamp(color, 0.0, 1.0);
-
-    if (uGroundShadowEnabled) {
-        // Legacy builds its overlay texture as 68 wherever shadowMapperData is
-        // non-zero, and neighbourCount*17 on the boundary (ShadowTileGL.
-        // regenerateTexture) -- so the stored magnitude is really a boolean and full
-        // shadow is 68/255. Saturating any non-zero texel reproduces that, and the
-        // texture's LINEAR filter supplies the soft edge the neighbour count encoded.
-        float raw = texture(uGroundShadowTex, aPosition.xz * uGroundShadowScale).r * 255.0;
-            color *= (1.0 - min(raw, 1.0) * (68.0 / 255.0));
-    }
-    vColor = vec4(color, aColor.a);
-    vTexCoord = aTexCoord * uTextureScale;
-    vFogFactor = 1.0;
+    vColor = vec4(clamp(color, 0.0, 1.0), aColor.a);
 }

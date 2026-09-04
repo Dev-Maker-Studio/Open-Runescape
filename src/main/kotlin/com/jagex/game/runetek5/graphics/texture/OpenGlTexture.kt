@@ -75,6 +75,7 @@ abstract class OpenGlTexture(
         if (this.activeHandle > 0) {
             this.activeToolkit.textureBuffersSize -= getBufferSizeRequirement()
             val handleToDelete = intArrayOf(this.activeHandle)
+            this.activeToolkit.onTextureDeleted(this.activeHandle)
             OpenGL.glDeleteTextures(1, handleToDelete, 0)
             this.activeHandle = 0
         }

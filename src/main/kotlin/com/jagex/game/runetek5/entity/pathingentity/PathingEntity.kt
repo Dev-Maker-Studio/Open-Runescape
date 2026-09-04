@@ -23,6 +23,8 @@ import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceRenderer
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
+import com.jagex.game.runetek5.graphics.model.ModelGL
+import com.jagex.game.runetek5.graphics.model.PoseCopyPair
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
 import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
@@ -32,7 +34,6 @@ import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.movement.CoordinateSpace
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
-import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.utils.MathUtils
 import kotlin.math.atan2
 import kotlin.math.ceil
@@ -452,6 +453,14 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     }
 
     protected fun updateParticles(toolkit: AbstractToolkit, models: Array<Model?>, particleMatrix: Matrix43, loaded: Boolean) {
+        if (PARTICLE_DIAG && !loaded && models[0] != null && models[0]!!.getEmissiveTriangles() != null && (particleDiagTick++ % 100) < 12) {
+            val m = models[0]!!
+            val e = m.getEmissiveTriangles()!!
+            val first = e[0]
+            val before = "(${first.verticeXA},${first.verticeYA},${first.verticeZA})"
+            m.updateParticlePosition(particleMatrix)
+            System.err.println("[ParticleDiag] ${this.javaClass.simpleName} f=$particleDiagTick hit=$lastPoseWasHit model=${System.identityHashCode(m)} emitter0=${System.identityHashCode(first)} before=$before after=(${first.verticeXA},${first.verticeYA},${first.verticeZA}) vtx=(${(m as? com.jagex.game.runetek5.graphics.model.ModelGL)?.verticesY?.get(first.faceA)}) matrixD=(${particleMatrix.xD},${particleMatrix.yD},${particleMatrix.zD}) producers=${particleSystem?.particleProducerCount}")
+        }
         if (!loaded) {
             var emissiveTriangleCount = 0
             var modelsWithEmissiveTriangles = 0
@@ -850,6 +859,10 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         }
     }
 
+    private var particleDiagTick = 0
+    /** Diagnostics: whether the last body-model request was served from the pose memo. */
+    @JvmField var lastPoseWasHit = false
+
     protected fun rotate(model: Model) {
         val angleZ = this.roll.rotation
         val angleX = this.pitch.rotation
@@ -1087,6 +1100,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     }
 
     companion object {
+        @JvmStatic val PARTICLE_DIAG = System.getProperty("render.particlediag") != null
         @JvmField
         val DEFAULT_BASTYPE = BasType()
 
@@ -1347,20 +1361,18 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         @JvmStatic
         fun getAnimatedShadowModel(
             toolkit: AbstractToolkit, rotationX: Int, rotationZ: Int, translateY: Int, size: Int, shadowModel: Model?,
-            colorSrc: Int, colorDst: Int, alphaSrc: Int, alphaDst: Int, animation: Sequence?
+            colorSrc: Int, colorDst: Int, alphaSrc: Int, alphaDst: Int, animation: Sequence?,
+            /** Private copy slots instead of the shared ones (the disc memo keeps the result across frames). */
+            privatePool: PoseCopyPair? = null
         ): Model? {
             if (shadowModel == null) {
                 return null
             }
-            // Under the modern toolkit there is no shadow pass yet (ShadowPass unwired):
-            // the entity shadow "model" is a flat projected silhouette that the modern
-            // model batcher rasterizes as opaque untextured quads (the flat green/blue
-            // ground quads at players/NPCs). Legacy draws it as a dark translucent
-            // overlay. No modern impl → draw NOTHING (per the toolkit-6 no-fallback
-            // directive). Both call sites null-check the return and skip cleanly.
-            if (toolkit is ModernGLToolkit) {
-                return null
-            }
+            // The entity shadow is a flat translucent disc (three rings, alpha fading
+            // outward) drawn with depth writes off; the modern batcher now carries
+            // per-vertex alpha and the submission's depth-write state, so it draws it
+            // like legacy does (the earlier "opaque quads" came from the old, since
+            // replaced, alpha handling).
             var functionMask = 2055
             if (animation != null) {
                 functionMask = functionMask or animation.getFunctionMask()
@@ -1444,16 +1456,18 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             val maxX = shadowModel.getMaxX()
             val minZ = shadowModel.getMinZ()
             val maxZ = shadowModel.getMaxZ()
+            val base = stationaryModel!!
             if (animation != null) {
-                stationaryModel = stationaryModel!!.copy(3.toByte(), functionMask, true)
+                stationaryModel = if (privatePool != null && base is ModelGL) privatePool.copy(base as ModelGL, functionMask) else base.copy(3.toByte(), functionMask, true)
                 stationaryModel!!.scale(maxX - minX shr 1, 128, maxZ - minZ shr 1)
                 stationaryModel.translate(maxX + minX shr 1, 0, minZ + maxZ shr 1)
                 animation.animateShadow(stationaryModel)
             } else {
-                stationaryModel = stationaryModel!!.copy(3.toByte(), functionMask, true)
+                stationaryModel = if (privatePool != null && base is ModelGL) privatePool.copy(base as ModelGL, functionMask) else base.copy(3.toByte(), functionMask, true)
                 stationaryModel!!.scale(maxX - minX shr 1, 128, maxZ - minZ shr 1)
                 stationaryModel.translate(minX + maxX shr 1, 0, minZ + maxZ shr 1)
             }
+            if (privatePool != null && stationaryModel is ModelGL && base is ModelGL) (stationaryModel as ModelGL).detachSharedNormals(base)
             if (rotationX != 0) {
                 stationaryModel!!.xaxisRotateWithoutNormals(rotationX)
             }

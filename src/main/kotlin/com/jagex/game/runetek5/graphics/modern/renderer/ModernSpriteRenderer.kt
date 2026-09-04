@@ -49,13 +49,19 @@ class ModernSpriteRenderer {
         @JvmField var captureFlushState = false
 
         /** Bytes per vertex: 2 floats pos + 2 floats UV + 4 bytes color + 1 float texIndex = 24 bytes */
-        const val BYTES_PER_VERTEX = 24
+        const val BYTES_PER_VERTEX = 40
 
         /** Vertices per quad (4 corners) */
         private const val VERTICES_PER_QUAD = 4
 
         /** Indices per quad (2 triangles = 6 indices) */
         private const val INDICES_PER_QUAD = 6
+
+        /** Attribute location of the per-quad clip rect. */
+        private const val ATTRIB_CLIP = 5
+
+        /** "No clip" upper bound for the per-quad clip rect. */
+        private const val NO_CLIP = 1.0e8f
 
         /** Maximum quads per batch before flush */
         private const val MAX_QUADS = 4096
@@ -68,15 +74,14 @@ class ModernSpriteRenderer {
 
         /** Maximum number of textures bound simultaneously per batch.
          *
-         *  Capped at 4 deliberately: on this client's GL setup, sampling a sprite
-         *  quad whose texture landed in slot 5+ of a batch returned nothing (the
-         *  minimenu entry text was invisible — box sprites filled slots 0-4 and the
-         *  font atlas got slot 5). Slots 0-4 were confirmed working; capping at 4
-         *  keeps every texture in a known-good low slot. When a 5th distinct texture
-         *  is needed the batch auto-flushes (resolveTextureSlot) and the new texture
-         *  starts again at slot 0 — the same flush-to-a-low-slot mechanism that fixed
-         *  the menu, applied globally. Cost is a few extra UI draw calls per frame. */
-        private const val MAX_TEXTURE_SLOTS = 4
+         *  Was capped at 4 after sprites in slot 5+ sampled nothing (invisible minimenu
+         *  text). The cause was the sampler uniforms: per-element locations
+         *  (uTextures[5]..) came back -1 on this driver, so those units were never
+         *  assigned and the shader read unit 0. flush() now writes the whole sampler
+         *  array with one glUniform1iv from the base location, so all 8 units the
+         *  shader declares are usable; with 4 the batch flushed ~18 times a frame on
+         *  slot exhaustion alone. */
+        private const val MAX_TEXTURE_SLOTS = 8
 
         /** {0,1,...,MAX_TEXTURE_SLOTS-1} — sampler-unit indices written to uTextures[]. */
         private val SAMPLER_UNIT_INDICES = IntArray(MAX_TEXTURE_SLOTS) { it }
@@ -157,6 +162,8 @@ class ModernSpriteRenderer {
         vao!!.setAttribute(3, 4, GLWrapper.Constants.UNSIGNED_BYTE, true, BYTES_PER_VERTEX, 16)
         // TexIndex: float at location 4, offset 20
         vao!!.setAttribute(ATTRIB_TEX_INDEX, 1, GLWrapper.Constants.FLOAT, false, BYTES_PER_VERTEX, 20)
+        // Clip rect: vec4 (x0, y0, x1, y1 in window pixels, bottom-up) at location 5, offset 24
+        vao!!.setAttribute(ATTRIB_CLIP, 4, GLWrapper.Constants.FLOAT, false, BYTES_PER_VERTEX, 24)
 
         ibo!!.bind()
         vao!!.unbind()
@@ -299,7 +306,7 @@ class ModernSpriteRenderer {
 
         // Flush on blend mode change (blend mode affects all quads in the batch)
         if (blendMode != currentBlendMode) {
-            flush()
+            flush("quadsFull")
             applyBlendMode(blendMode)
         }
 
@@ -308,7 +315,7 @@ class ModernSpriteRenderer {
         // at a slot the next flush never binds -- it samples an unbound sampler and
         // draws as white garbage.
         if (quadCount >= MAX_QUADS) {
-            flush()
+            flush("quadsFull")
         }
 
         // Resolve the texture slot index for this quad
@@ -324,22 +331,27 @@ class ModernSpriteRenderer {
 
         val texIdxFloat = texSlotIndex.toFloat()
         val vb = vertexData!!
+        val cx0 = clipX0; val cy0 = clipY0; val cx1 = clipX1; val cy1 = clipY1
 
         // Vertex 0: top-left
         vb.putFloat(x0).putFloat(y0).putFloat(u0).putFloat(v0)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         // Vertex 1: bottom-left
         vb.putFloat(x0).putFloat(y1).putFloat(u0).putFloat(v1)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         // Vertex 2: bottom-right
         vb.putFloat(x1).putFloat(y1).putFloat(u1).putFloat(v1)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         // Vertex 3: top-right
         vb.putFloat(x1).putFloat(y0).putFloat(u1).putFloat(v0)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         quadCount++
     }
@@ -372,7 +384,7 @@ class ModernSpriteRenderer {
 
         // Flush on blend mode change
         if (blendMode != currentBlendMode) {
-            flush()
+            flush("quadsFull")
             applyBlendMode(blendMode)
         }
 
@@ -381,7 +393,7 @@ class ModernSpriteRenderer {
         // at a slot the next flush never binds -- it samples an unbound sampler and
         // draws as white garbage.
         if (quadCount >= MAX_QUADS) {
-            flush()
+            flush("quadsFull")
         }
 
         // Resolve the texture slot index for this quad
@@ -396,22 +408,27 @@ class ModernSpriteRenderer {
 
         val texIdxFloat = texSlotIndex.toFloat()
         val vb = vertexData!!
+        val cx0 = clipX0; val cy0 = clipY0; val cx1 = clipX1; val cy1 = clipY1
 
         // Vertex 0
         vb.putFloat(x0).putFloat(y0).putFloat(u0).putFloat(v0)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         // Vertex 1
         vb.putFloat(x1).putFloat(y1).putFloat(u1).putFloat(v1)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         // Vertex 2
         vb.putFloat(x2).putFloat(y2).putFloat(u2).putFloat(v2)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         // Vertex 3
         vb.putFloat(x3).putFloat(y3).putFloat(u3).putFloat(v3)
         vb.put(r).put(g).put(b).put(a).putFloat(texIdxFloat)
+        vb.putFloat(cx0).putFloat(cy0).putFloat(cx1).putFloat(cy1)
 
         quadCount++
     }
@@ -678,7 +695,7 @@ class ModernSpriteRenderer {
     fun end() {
         if (!isBatching) return
 
-        flush()
+        flush("end")
         isBatching = false
 
         // Unbind shader
@@ -733,7 +750,7 @@ class ModernSpriteRenderer {
 
         // Need a new slot. If all slots are full, flush to free them.
         if (textureSlotCount >= MAX_TEXTURE_SLOTS) {
-            flush()
+            flush("slotsFull")
         }
 
         // Assign the texture to the next available slot
@@ -753,6 +770,47 @@ class ModernSpriteRenderer {
      * Public so that ModernGLToolkit can flush before scissor/clear state changes
      * that would affect the meaning of already-queued draw commands.
      */
+    // ---- Per-quad clipping -------------------------------------------------------
+    // Legacy clips 2D drawing with the GL scissor, and every interface component sets
+    // and resets it — ~60 changes a frame. Flushing the batch on each change made the
+    // UI cost dozens of tiny draws. Instead every quad carries the scissor box that
+    // was current when it was queued (window pixels, bottom-up, [x0,x1) x [y0,y1)) and
+    // the fragment shader applies exactly the scissor test; the batch itself draws
+    // with the GL scissor disabled and the toolkit re-enables it afterwards.
+    private var clipX0 = 0f
+    private var clipY0 = 0f
+    private var clipX1 = NO_CLIP
+    private var clipY1 = NO_CLIP
+
+    /** Called by the toolkit whenever the legacy scissor box changes (while enabled). */
+    fun setClipRect(x: Int, y: Int, width: Int, height: Int) {
+        clipX0 = x.toFloat(); clipY0 = y.toFloat()
+        clipX1 = (x + width).toFloat(); clipY1 = (y + height).toFloat()
+    }
+
+    /** Called by the toolkit when the legacy scissor test is disabled. */
+    fun clearClipRect() {
+        clipX0 = 0f; clipY0 = 0f; clipX1 = NO_CLIP; clipY1 = NO_CLIP
+    }
+
+    /**
+     * Re-establishes the legacy scissor enable after a batch draw (the draw runs
+     * with the scissor OFF because its quads clip themselves). Set by the toolkit.
+     */
+    @JvmField var scissorRestore: (() -> Unit)? = null
+
+    /** Diagnostics: flushes that actually drew, per cause, since the last perf print. */
+    @JvmField val flushCauses = HashMap<String, Int>()
+    @JvmField var flushQuads = 0L
+
+    fun flush(cause: String) {
+        if (quadCount != 0) {
+            flushCauses[cause] = (flushCauses[cause] ?: 0) + 1
+            flushQuads += quadCount
+        }
+        flush()
+    }
+
     fun flush() {
         if (quadCount == 0) {
             // Even if no quads, reset texture slots so new textures can be assigned
@@ -808,12 +866,16 @@ class ModernSpriteRenderer {
         vao!!.bind()
         ibo!!.bind()
         val indexCount = quadCount * INDICES_PER_QUAD
+        // The quads clip themselves (see setClipRect); the GL scissor would apply the
+        // box that happens to be current NOW to quads queued under earlier boxes.
+        GLWrapper.disable(GLWrapper.Constants.SCISSOR_TEST)
         GLWrapper.drawElements(
             GLWrapper.Constants.TRIANGLES,
             indexCount,
             GLWrapper.Constants.UNSIGNED_SHORT,
             0
         )
+        scissorRestore?.invoke()
 
         drawCallsThisFrame++
         quadsThisFrame += quadCount

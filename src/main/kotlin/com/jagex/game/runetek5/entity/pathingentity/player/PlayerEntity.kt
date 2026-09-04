@@ -11,6 +11,9 @@ import com.jagex.game.runetek5.config.item.ItemType
 import com.jagex.game.runetek5.config.item.ItemTypeCustomisation
 import com.jagex.game.runetek5.config.sequence.MovementType
 import com.jagex.game.runetek5.config.sequence.Sequence
+import com.jagex.game.runetek5.entity.pathingentity.PoseKey
+import com.jagex.game.runetek5.entity.pathingentity.PoseMemo
+import com.jagex.game.runetek5.entity.pathingentity.ShadowMemo
 import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
@@ -19,6 +22,7 @@ import com.jagex.game.runetek5.graphics.hint.HintArrow
 import com.jagex.game.runetek5.graphics.hint.HintDetails
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
+import com.jagex.game.runetek5.graphics.model.PoseCopyPair
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_X
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_Y
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_Z
@@ -290,7 +294,18 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         movementTypes[0] = movementType
     }
 
-    fun getAnimatedBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int): Boolean {
+    private var poseMemoModel: Model? = null
+    private var poseMemoKey = 0L
+    private val poseKey = PoseKey()
+    /** Key of the pose handed out THIS draw (0 when it was not memoisable); drives the shadow memo. */
+    private var currentPoseKey = 0L
+    private val shadowMemo = ShadowMemo()
+    private val shadowKey = PoseKey()
+    private val poseCopies = PoseCopyPair()
+    private val shadowCopies = PoseCopyPair()
+
+    /** @param forDraw the render path: the only caller that memoises the posed model. */
+    fun getAnimatedBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int, forDraw: Boolean = false): Boolean {
         var functionMask = initialFunctionMask
         val bastype = getBastype()
         val currSeq = if (currentSequence.hasType() && !currentSequence.hasSpeed()) currentSequence else null
@@ -307,12 +322,76 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             functionMask = functionMask or TINT
         }
 
-        @Suppress("UNCHECKED_CAST")
-        val model = playerAppearance!!.getBodyModel(
-            toolkit, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!,
-            VarProviders.PLAYER_VAR_PROVIDER, currSeq, moveAnimation, sequences as Array<Sequence?>?,
-            equipmentRotations, rotation, TypeLists.EQUIPMENT_DEFAULTS!!
-        ).also { models[0] = it }
+        val appearance = playerAppearance!!
+        // Hill tilt first: position-only, feeds both the memo key and the transforms.
+        if (x == 0 && z == 0) {
+            hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
+        } else {
+            hillChange(rotation, x, z, getBastype().hillRotateX, getBastype().hillRotateZ)
+        }
+        // See NpcEntity: the memo model already carries the in-place transforms, so
+        // their inputs are keyed; only tints (which compound) are excluded.
+        val memoEligible = PoseMemo.ENABLED && !tintModel && forDraw
+        var key = 0L
+        if (memoEligible) {
+            key = poseKey.reset()
+                .add(appearance.playerAppearanceHash)
+                .add(System.identityHashCode(appearance))
+                .add(appearance.morphism)
+                .add(appearance.basId)
+                .add(appearance.female)
+                .add(functionMask)
+                .add(currSeq)
+                .add(moveAnimation)
+                .add(sequences)
+                .add(equipmentRotations)
+                .add(rotation)
+                .add(toolkit.renderId)
+                .add(roll.rotation).add(pitch.rotation)
+                .add(x).add(z)
+                .add(rotateX).add(rotateZ).add(translateY)
+                .value()
+        }
+        val memo = poseMemoModel
+        val model: Model?
+        currentPoseKey = if (memoEligible) key else 0L
+        if (memoEligible && memo != null && key == poseMemoKey) {
+            PoseMemo.poseHits++
+            lastPoseWasHit = true
+            model = memo
+        } else {
+            lastPoseWasHit = false
+            if (memoEligible) PoseMemo.poseMisses++ else PoseMemo.poseIneligible++
+            @Suppress("UNCHECKED_CAST")
+            model = appearance.getBodyModel(
+                toolkit, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!,
+                VarProviders.PLAYER_VAR_PROVIDER, currSeq, moveAnimation, sequences as Array<Sequence?>?,
+                equipmentRotations, rotation, TypeLists.EQUIPMENT_DEFAULTS!!, privatePool = if (memoEligible) poseCopies else null
+            )
+            if (model != null) {
+                rotate(model)
+                if (x != 0 || z != 0) {
+                    if (rotateX != 0) {
+                        model.xaxisRotateWithoutNormals(rotateX)
+                    }
+                    if (rotateZ != 0) {
+                        model.zaxisRotateWithoutNormals(rotateZ)
+                    }
+                    if (translateY != 0) {
+                        model.translate(0, translateY, 0)
+                    }
+                }
+            }
+            if (memoEligible && model != null) {
+                PoseMemo.carryGeometry(poseMemoModel, model)
+                poseMemoModel = model
+                poseMemoKey = key
+            } else {
+                poseMemoModel = null
+                poseMemoKey = 0L
+            }
+        }
+        models[0] = model
 
         val bodyModelCount = PlayerAppearance.countBodyModels()
         if (GameShell.maxMemory < 96 && bodyModelCount > 50) {
@@ -341,23 +420,6 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
         modelMinY = model.getMinY()
         model.getSize3d()
-        rotate(model)
-        if (x == 0 && z == 0) {
-            hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
-        } else {
-            hillChange(rotation, x, z, getBastype().hillRotateX, getBastype().hillRotateZ)
-            if (rotateX != 0) {
-                model.xaxisRotateWithoutNormals(rotateX)
-            }
-
-            if (rotateZ != 0) {
-                model.zaxisRotateWithoutNormals(rotateZ)
-            }
-
-            if (translateY != 0) {
-                model.translate(0, translateY, 0)
-            }
-        }
 
         if (tintModel) {
             model.tint(hue.toInt(), saturation.toInt(), lightness.toInt(), opacity.toInt() and 0xff)
@@ -571,7 +633,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     override fun draw(activeToolkit: AbstractToolkit): RenderedEntity? {
-        if (playerAppearance != null && getAnimatedBodyModel(activeToolkit, 2048)) {
+        if (playerAppearance != null && getAnimatedBodyModel(activeToolkit, 2048, forDraw = true)) {
             val renderingMatrix = activeToolkit.getRenderingMatrix()
             val projectionMatrix = getProjectionMatrix()
             val absolute = getAbsolutePosition()
@@ -594,7 +656,15 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 if (bastype.rendersShadow && (playerAppearance!!.morphism == -1 || TypeLists.NPC!!.list(playerAppearance!!.morphism).shadowed)) {
                     val shadowSequence = if (currentSequence.hasType() && currentSequence.hasSpeed()) currentSequence else null
                     val shadowMovement = if (movingSequence.hasType() && (!movingSequence.hasType || shadowSequence == null)) movingSequence else null
-                    val shadowModel = getAnimatedShadowModel(activeToolkit, rotateX, rotateZ, translateY, 1, models[0], 0, 0, 160, 240, shadowMovement ?: shadowSequence)
+                    val shadowSeq = shadowMovement ?: shadowSequence
+                    val body = models[0]
+                    val shadowModel = shadowMemo.get(
+                        currentPoseKey,
+                        shadowKey.reset().add(rotateX).add(rotateZ).add(translateY).add(shadowSeq)
+                            .add(body?.getMinX() ?: 0).add(body?.getMaxX() ?: 0).add(body?.getMinZ() ?: 0).add(body?.getMaxZ() ?: 0)
+                    ) {
+                        getAnimatedShadowModel(activeToolkit, rotateX, rotateZ, translateY, 1, body, 0, 0, 160, 240, shadowSeq, privatePool = if (currentPoseKey != 0L) shadowCopies else null)
+                    }
                     if (shadowModel != null) {
                         if (boundingBoxPolygons == null || boundingBoxPolygons!!.size < models.size + 1) {
                             setupBoundingBox(models.size + 1)

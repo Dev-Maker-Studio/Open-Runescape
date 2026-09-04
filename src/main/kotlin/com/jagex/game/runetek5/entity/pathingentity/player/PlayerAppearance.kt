@@ -11,6 +11,8 @@ import com.jagex.game.runetek5.config.sequence.SeqType
 import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
+import com.jagex.game.runetek5.graphics.model.ModelGL
+import com.jagex.game.runetek5.graphics.model.PoseCopyPair
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.Hashing
@@ -354,9 +356,9 @@ class PlayerAppearance {
 	}
 
 	// 727
-	fun getBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int, basTypeList: BasTypeList, idkTypeList: IdkTypeList, loader: NpcTypeList, objTypeList: ItemTypeList, varProvider: VarDomain, animatingSequence: Sequence?, idleSequence: Sequence?, objSequence: Array<Sequence?>?, rotations: IntArray?, rotationDelta: Int, equipmentDefaults: EquipmentDefaultsType): Model? {
+	fun getBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int, basTypeList: BasTypeList, idkTypeList: IdkTypeList, loader: NpcTypeList, objTypeList: ItemTypeList, varProvider: VarDomain, animatingSequence: Sequence?, idleSequence: Sequence?, objSequence: Array<Sequence?>?, rotations: IntArray?, rotationDelta: Int, equipmentDefaults: EquipmentDefaultsType, privatePool: PoseCopyPair? = null): Model? {
 		if (this.morphism != -1) {
-			return loader.list(this.morphism).getAnimatedBodymodel(toolkit, initialFunctionMask, basTypeList, varProvider, animatingSequence, idleSequence, objSequence, rotations, rotationDelta, null)
+			return loader.list(this.morphism).getAnimatedBodymodel(toolkit, initialFunctionMask, basTypeList, varProvider, animatingSequence, idleSequence, objSequence, rotations, rotationDelta, null, privatePool = privatePool)
 		}
 		var displacementFunctionMask = initialFunctionMask
 		var AppearanceHash = this.playerAppearanceHash
@@ -558,7 +560,8 @@ class PlayerAppearance {
 				currentSlot++
 			}
 		}
-		val copiedModel = model!!.copy(4.toByte(), displacementFunctionMask, true)!!
+		val copiedModel: Model = if (privatePool != null && model is ModelGL) privatePool.copy(model as ModelGL, displacementFunctionMask) else model!!.copy(4.toByte(), displacementFunctionMask, true)!!
+		if (privatePool != null && copiedModel is ModelGL && model is ModelGL) copiedModel.detachSharedNormals(model as ModelGL)
 		if (flagAdjustment || requiresRotation) {
 			var submeshMatrices: Array<Matrix43?>? = null
 			if (basType != null) {

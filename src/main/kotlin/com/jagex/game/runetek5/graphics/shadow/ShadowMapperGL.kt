@@ -15,6 +15,62 @@ class ShadowMapperGL(
     val shadowMapperData: ByteArray
     /** Bumped whenever the intensity map changes, so the modern texture re-uploads. */
     @JvmField var shadowVersion: Int = 0
+
+    /**
+     * Texel rectangle of [shadowMapperData] changed since the modern ground renderer
+     * last uploaded it (min inclusive, max exclusive). Re-sending the whole 2.8MB map
+     * on every entity shadow add/remove is what made the native shadow path too
+     * expensive to enable; a moving NPC only touches a few hundred texels.
+     */
+    @JvmField var dirtyMinX = 0
+    @JvmField var dirtyMinY = 0
+    @JvmField var dirtyMaxX = 0
+    @JvmField var dirtyMaxY = 0
+    @JvmField var dirty = false
+
+    /**
+     * Individual dirty rectangles (x0,y0,x1,y1 per entry, max exclusive), up to
+     * [MAX_DIRTY_RECTS]. Every moving player/NPC touches its own few-hundred-texel
+     * patch per tick; one union rectangle over all of them spanned most of the map
+     * and re-derived ~100k texels a frame. The bounding rect above is kept as the
+     * union for readers that want it; [dirtyRectCount] == 0 with [dirty] set means
+     * "use the union" (overflow, or markAllDirty).
+     */
+    @JvmField val dirtyRects = IntArray(MAX_DIRTY_RECTS * 4)
+    @JvmField var dirtyRectCount = 0
+
+    fun markAllDirty() {
+        dirtyMinX = 0; dirtyMinY = 0; dirtyMaxX = width; dirtyMaxY = length
+        dirtyRectCount = 0
+        dirty = true
+    }
+
+    private fun markDirty(startX: Int, startY: Int, regionWidth: Int, regionHeight: Int) {
+        val x0 = maxOf(0, startX)
+        val y0 = maxOf(0, startY)
+        val x1 = minOf(width, startX + regionWidth)
+        val y1 = minOf(length, startY + regionHeight)
+        if (x1 <= x0 || y1 <= y0) return
+        if (!dirty) {
+            dirtyMinX = x0; dirtyMinY = y0; dirtyMaxX = x1; dirtyMaxY = y1
+            dirty = true
+            dirtyRectCount = 0
+        } else {
+            if (x0 < dirtyMinX) dirtyMinX = x0
+            if (y0 < dirtyMinY) dirtyMinY = y0
+            if (x1 > dirtyMaxX) dirtyMaxX = x1
+            if (y1 > dirtyMaxY) dirtyMaxY = y1
+            // Already in union mode (overflowed or markAllDirty): stay there.
+            if (dirtyRectCount == 0) return
+        }
+        if (dirtyRectCount == MAX_DIRTY_RECTS) {
+            dirtyRectCount = 0 // overflow: fall back to the union
+            return
+        }
+        val r = dirtyRectCount * 4
+        dirtyRects[r] = x0; dirtyRects[r + 1] = y0; dirtyRects[r + 2] = x1; dirtyRects[r + 3] = y1
+        dirtyRectCount++
+    }
     val sizeShift: Int
     val sizeX: Int
     val sizeY: Int
@@ -24,6 +80,7 @@ class ShadowMapperGL(
         width = (ground.width * ground.tileUnits shr toolkit.shadowScale) + 2
         length = (ground.length * ground.tileUnits shr toolkit.shadowScale) + 2
         shadowMapperData = ByteArray(width * length)
+        markAllDirty()
         sizeShift = toolkit.shadowScale + 7 - ground.tileScale
         sizeX = ground.width shr sizeShift
         sizeY = ground.length shr sizeShift
@@ -181,6 +238,7 @@ class ShadowMapperGL(
     }
 
     fun invalidateShadowTiles(startX: Int, startY: Int, regionWidth: Int, regionHeight: Int) {
+        markDirty(startX, startY, regionWidth, regionHeight)
         if (shadowTiles != null) {
             val minChunkX = (startX - 1) shr 7
             val maxChunkX = (regionWidth + (startX - 1) - 1) shr 7
@@ -308,6 +366,7 @@ class ShadowMapperGL(
     }
 
     companion object {
+        const val MAX_DIRTY_RECTS = 32
         @JvmStatic
         fun subtractShadowData(dstData: ByteArray, srcData: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
             var dstPos = dstOffset

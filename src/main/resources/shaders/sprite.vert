@@ -5,6 +5,7 @@ layout(location = 0) in vec2 aPosition;  // Screen-space position
 layout(location = 2) in vec2 aTexCoord;  // Texture coordinates
 layout(location = 3) in vec4 aColor;     // Vertex color (RGBA, normalized ubyte)
 layout(location = 4) in float aTexIndex; // Texture slot index (0-7, or -1 for untextured)
+layout(location = 5) in vec4 aClip;      // Scissor box current when the quad was queued (window px, bottom-up)
 
 // Uniforms
 uniform mat4 uProjection;  // Orthographic projection matrix
@@ -13,10 +14,12 @@ uniform mat4 uProjection;  // Orthographic projection matrix
 out vec2 vTexCoord;
 out vec4 vColor;
 flat out int vTexIndex;
+flat out vec4 vClip;
 
 void main() {
     gl_Position = uProjection * vec4(aPosition, 0.0, 1.0);
     vTexCoord = aTexCoord;
+    vClip = aClip;
     vColor = aColor;
     // Round to nearest int. Must use floor(): GLSL int() truncates TOWARD ZERO, so
     // the untextured marker -1.0 became int(-0.5) = 0 — every solid FILL quad then

@@ -15,6 +15,21 @@ description = "Darkan Client"
 
 application {
     mainClass.set("com.darkan.bot.BotKt")
+    // The client holds ~400 MB of live model/cache data and allocates steadily while
+    // streaming a region; G1's young collections copy that live set and pause the
+    // render thread 35-45 ms every couple of seconds (visible hitches, worst while
+    // rotating the camera). Generational ZGC keeps pauses under a millisecond.
+    // IDE run configurations need the same VM options.
+    applicationDefaultJvmArgs = listOf("-XX:+UseZGC", "-Xmx4g", "-Xms1g")
+}
+
+// `./gradlew run -Dbot.enabled=true` sets the property on Gradle's own JVM, not on the
+// client JVM the run task forks. Forward the client's flags so that command works as expected.
+tasks.named<JavaExec>("run") {
+    val forwarded = listOf("bot.", "render.", "toolkit", "autologin", "window.")
+    System.getProperties().stringPropertyNames()
+        .filter { name -> forwarded.any { name.startsWith(it) } }
+        .forEach { systemProperty(it, System.getProperty(it)) }
 }
 
 java {

@@ -14,7 +14,7 @@ class OpenGLTextureCache(
     @JvmField val materialProvider: MaterialProvider
 ) {
 
-    @JvmField val textureCache = LRUCache(256)
+    @JvmField val textureCache = LRUCache(toolkit.textureCacheCapacity())
 
     /**
      * Retrieves a texture for the specified material ID.
@@ -73,7 +73,7 @@ class OpenGLTextureCache(
      * Cycles the bloom cache, cleaning up old entries.
      */
     fun cycleBloomCache() {
-        textureCache.clean(5)
+        textureCache.clean(toolkit.textureRetainCycles())
     }
 
     /**

@@ -162,6 +162,16 @@ class ShaderProgram private constructor(
     /**
      * Gets the location of a uniform variable, caching the result.
      */
+    /**
+     * Location of a uniform ARRAY. Some drivers (Mesa/llvmpipe) only resolve the
+     * element form "name[0]" and return -1 for the bare name; NVIDIA accepts both.
+     * Querying the bare name alone silently dropped every point-light position.
+     */
+    fun getArrayUniformLocation(name: String): Int {
+        val bare = getUniformLocation(name)
+        return if (bare >= 0) bare else getUniformLocation("$name[0]")
+    }
+
     fun getUniformLocation(name: String): Int {
         return uniformLocations.getOrPut(name) {
             GLWrapper.getUniformLocation(programId, name)
@@ -233,11 +243,40 @@ class ShaderProgram private constructor(
 
     // ===== Direct Location Setters (for hot paths) =====
 
+    /**
+     * Last scalar value set per location, so repeated sets of the same value skip the
+     * GL call. Uniform state belongs to the program object and persists across binds,
+     * so this is exact for as long as every scalar set of these locations goes through
+     * here. The batchers set 3-4 scalars per material batch, hundreds of times a frame.
+     */
+    private var intUniformCache = IntArray(0)
+    private var intUniformValid = BooleanArray(0)
+    private var floatUniformCache = FloatArray(0)
+    private var floatUniformValid = BooleanArray(0)
+
     fun setUniform(location: Int, value: Int) {
+        if (location < 0) return
+        if (location >= intUniformCache.size) {
+            val n = maxOf(64, location + 1, intUniformCache.size * 2)
+            intUniformCache = intUniformCache.copyOf(n)
+            intUniformValid = intUniformValid.copyOf(n)
+        }
+        if (intUniformValid[location] && intUniformCache[location] == value) return
+        intUniformCache[location] = value
+        intUniformValid[location] = true
         GLWrapper.uniform1i(location, value)
     }
 
     fun setUniform(location: Int, value: Float) {
+        if (location < 0) return
+        if (location >= floatUniformCache.size) {
+            val n = maxOf(64, location + 1, floatUniformCache.size * 2)
+            floatUniformCache = floatUniformCache.copyOf(n)
+            floatUniformValid = floatUniformValid.copyOf(n)
+        }
+        if (floatUniformValid[location] && floatUniformCache[location] == value) return
+        floatUniformCache[location] = value
+        floatUniformValid[location] = true
         GLWrapper.uniform1f(location, value)
     }
 

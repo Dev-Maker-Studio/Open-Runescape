@@ -6,6 +6,7 @@ import com.jagex.game.runetek5.graphics.modern.core.VertexArray
 import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
 import com.jagex.game.runetek5.graphics.modern.core.VertexFormats
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
+import com.jagex.game.runetek5.graphics.shadow.ShadowMapperGL
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TRIANGLES
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_SHORT
 import com.jagex.game.runetek5.math.Matrix44
@@ -30,6 +31,9 @@ import java.nio.ByteBuffer
  * - Normal: vec3 (12 bytes) at offset 12
  * - Color: RGBA (4 bytes) at offset 24
  */
+/** -Drender.groundcolor=raw: ground vertex colour with no lighting at all (debug). */
+private val RAW_COLOR_DEBUG = System.getProperty("render.groundcolor")?.equals("raw", true) == true
+
 class ModernGroundRenderer {
 
     companion object {
@@ -87,74 +91,176 @@ class ModernGroundRenderer {
     // the same source data -- ShadowMapperGL.shadowMapperData, one intensity byte per
     // shadow texel over the whole ground -- is uploaded as an R8 texture and sampled
     // in the ground shaders instead.
-    private var shadowTex = 0
-    private var shadowW = 0
-    private var shadowH = 0
+    /** One resident overlay texture per shadow mapper (each ground plane owns a mapper). */
+    private class ShadowTexEntry(val mapper: ShadowMapperGL) {
+        var tex = 0
+        val w = mapper.width
+        val h = mapper.length
+        /** Legacy overlay texels (68 in shadow, 17 per shadowed 4-neighbour outside), full map. */
+        val derived = ByteArray(w * h)
+        var uploadedVersion = -1
+        var lastUsedFrame = 0L
+    }
+    private val shadowEntries = LinkedHashMap<ShadowMapperGL, ShadowTexEntry>()
+    private var currentShadowMapper: ShadowMapperGL? = null
+    /** Mapper whose texture the bound program currently samples; null = uniforms stale. */
+    private var boundShadowMapper: ShadowMapperGL? = null
     private var shadowTexelSize = 32f
-    private var shadowVersionUploaded = -1
-    private var shadowVersion = 0
-    private var shadowData: ByteArray? = null
+    private var shadowUploadScratch: ByteBuffer? = null
+    private var shadowFrame = 0L
     private var shadowDiagCount = 0
     private val GROUND_POINT_LIGHTS =
         System.getProperty("render.groundlights")?.equals("false", true) != true
+    /** -Drender.groundshadows=false disables the native ground shadow overlay. */
     private val GROUND_SHADOWS =
-        System.getProperty("render.groundshadows")?.equals("true", true) == true
+        System.getProperty("render.groundshadows")?.equals("false", true) != true
 
     /**
-     * [texelSize] = world units per shadow texel.
+     * Native replacement for legacy's fixed-function ground shadow overlay
+     * (ShadowMapperGL.renderShadowOverlay): a ground's whole intensity map lives in
+     * one R8 texture, sampled per fragment by the ground shader and applied as
+     * `colour *= 1 - texel`, which is exactly what legacy's REPLACE + alpha-blended
+     * overlay quad does. Texel values are derived the way ShadowTileGL.regenerateTexture
+     * derives them (68 where the map is non-zero, neighbourCount * 17 on the fringe),
+     * and only the texels the mapper reports dirty are re-derived and re-uploaded.
      *
-     * OFF by default (-Drender.groundshadows=true to enable). The sampling path is
-     * wired and verified end to end EXCEPT the fetch, which still returns ~0, so the
-     * feature contributes nothing visually — while the 2.78MB map re-uploads whenever
-     * ShadowMapperGL bumps its version (every entity shadow add/remove), which cost
-     * ~11ms/frame. Not worth carrying until the fetch is fixed.
+     * This is not a small effect: at the spawn hub the map is non-zero over ~94% of
+     * the ground, so without it the entire terrain renders ~27% brighter than legacy.
+     *
+     * Called by GroundGL BEFORE it draws that ground's materials, so the draws that
+     * follow sample the right plane's map. [texelSize] = world units per shadow texel.
      */
-    fun setShadowMap(data: ByteArray, w: Int, h: Int, texelSize: Float, version: Int) {
+    fun setShadowMapper(sm: ShadowMapperGL, texelSize: Float) {
         if (!GROUND_SHADOWS) return
-        shadowData = data; shadowW = w; shadowH = h
-        shadowTexelSize = texelSize; shadowVersion = version
+        currentShadowMapper = sm
+        shadowTexelSize = texelSize
     }
 
-    private fun ensureShadowTexture() {
-        val data = shadowData ?: return
-        if (shadowW <= 0 || shadowH <= 0) return
-        if (shadowTex == 0) {
-            shadowTex = glGenTextures()
-            glBindTexture(GL_TEXTURE_2D, shadowTex)
+    private fun shadowEntryFor(sm: ShadowMapperGL): ShadowTexEntry {
+        var e = shadowEntries[sm]
+        if (e == null) {
+            e = ShadowTexEntry(sm)
+            shadowEntries[sm] = e
+            sm.markAllDirty()
+            // A session that walks many regions must not accumulate 2.8MB textures.
+            while (shadowEntries.size > 6) {
+                val oldest = shadowEntries.values.minByOrNull { it.lastUsedFrame } ?: break
+                if (oldest === e) break
+                if (oldest.tex != 0) glDeleteTextures(oldest.tex)
+                shadowEntries.remove(oldest.mapper)
+            }
+        }
+        e.lastUsedFrame = shadowFrame
+        return e
+    }
+
+    private fun syncShadowTexture(e: ShadowTexEntry) {
+        val sm = e.mapper
+        val derived = e.derived
+        val w = e.w
+        val h = e.h
+        if (w <= 0 || h <= 0) return
+        if (e.tex == 0) {
+            e.tex = glGenTextures()
+            glBindTexture(GL_TEXTURE_2D, e.tex)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-            shadowVersionUploaded = -1
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, null as ByteBuffer?)
+            sm.markAllDirty()
         }
-        if (shadowVersionUploaded == shadowVersion) return
-        shadowVersionUploaded = shadowVersion
-        val buf = MemoryUtil.memAlloc(data.size)
-        buf.put(data); buf.flip()
-        glBindTexture(GL_TEXTURE_2D, shadowTex)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, shadowW, shadowH, 0,
-            GL_RED, GL_UNSIGNED_BYTE, buf)
-        MemoryUtil.memFree(buf)
+        if (!sm.dirty && e.uploadedVersion == sm.shadowVersion) return
+        if (!sm.dirty) sm.markAllDirty()
+        e.uploadedVersion = sm.shadowVersion
+        val rectCount = sm.dirtyRectCount
+        if (rectCount == 0) {
+            syncShadowRect(e, sm.dirtyMinX, sm.dirtyMinY, sm.dirtyMaxX, sm.dirtyMaxY)
+        } else {
+            val rects = sm.dirtyRects
+            for (k in 0 until rectCount) {
+                val r = k * 4
+                syncShadowRect(e, rects[r], rects[r + 1], rects[r + 2], rects[r + 3])
+            }
+        }
+        sm.dirty = false
+        sm.dirtyRectCount = 0
     }
 
+    /** Re-derives one texel rectangle (max exclusive) plus a one-texel halo and uploads it. */
+    private fun syncShadowRect(e: ShadowTexEntry, rx0: Int, ry0: Int, rx1: Int, ry1: Int) {
+        val sm = e.mapper
+        val derived = e.derived
+        val w = e.w
+        val h = e.h
+        // Fringe texels just outside the changed rectangle read their neighbour count
+        // from inside it, so re-derive one texel further out.
+        val x0 = maxOf(0, rx0 - 1)
+        val y0 = maxOf(0, ry0 - 1)
+        val x1 = minOf(w, rx1 + 1)
+        val y1 = minOf(h, ry1 + 1)
+        if (x1 <= x0 || y1 <= y0) return
+        val data = sm.shadowMapperData
+        val rectW = x1 - x0
+        val rectH = y1 - y0
+        var scratch = shadowUploadScratch
+        if (scratch == null || scratch.capacity() < rectW * rectH) {
+            scratch?.let { MemoryUtil.memFree(it) }
+            scratch = MemoryUtil.memAlloc(maxOf(rectW * rectH, 4096))
+            shadowUploadScratch = scratch
+        }
+        scratch.clear()
+        for (y in y0 until y1) {
+            val row = y * w
+            for (x in x0 until x1) {
+                val i = row + x
+                val v: Int = if (data[i].toInt() != 0) {
+                    68
+                } else {
+                    var n = 0
+                    if (x > 0 && data[i - 1].toInt() != 0) n++
+                    if (x < w - 1 && data[i + 1].toInt() != 0) n++
+                    if (y > 0 && data[i - w].toInt() != 0) n++
+                    if (y < h - 1 && data[i + w].toInt() != 0) n++
+                    n * 17
+                }
+                derived[i] = v.toByte()
+                scratch.put(v.toByte())
+            }
+        }
+        scratch.flip()
+        glBindTexture(GL_TEXTURE_2D, e.tex)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x0, y0, rectW, rectH, GL_RED, GL_UNSIGNED_BYTE, scratch)
+        if (System.getProperty("shadow.diag") != null) {
+            var nonZero = 0
+            for (i in derived.indices) if (derived[i].toInt() != 0) nonZero++
+            System.err.println("[GroundShadow] upload rect=($x0,$y0)-($x1,$y1) of ${w}x$h tex=${e.tex} " +
+                "ver=${sm.shadowVersion} derivedNonZero=$nonZero glErr=${glGetError()}")
+        }
+    }
+
+    /** Binds the current mapper's overlay texture and uniforms on the bound program [s]. */
     private fun uploadShadowUniforms(s: ShaderProgram) {
+        val sm = currentShadowMapper
+        boundShadowMapper = sm
         val en = s.getUniformLocation("uGroundShadowEnabled")
         if (System.getProperty("shadow.diag") != null && shadowDiagCount++ % 2000 == 1500) {
-            System.err.println("[GroundShadow] uniformLoc=$en data=${shadowData != null} " +
-                "dims=${shadowW}x${shadowH} texel=$shadowTexelSize tex=$shadowTex ver=$shadowVersion")
+            System.err.println("[GroundShadow] uniformLoc=$en mapper=${sm != null} entries=${shadowEntries.size} texel=$shadowTexelSize")
         }
         if (en < 0) return
-        val have = shadowData != null && shadowW > 0
-        if (!have) { GLWrapper.uniform1i(en, 0); return }
-        ensureShadowTexture()
+        if (sm == null) { GLWrapper.uniform1i(en, 0); return }
+        val e = shadowEntryFor(sm)
+        syncShadowTexture(e)
         GLWrapper.uniform1i(en, 1)
         val sc = s.getUniformLocation("uGroundShadowScale")
-        if (sc >= 0) GLWrapper.uniform1f(sc, 1f / (shadowTexelSize * shadowW))
+        if (sc >= 0) GLWrapper.uniform1f(sc, 1f / (shadowTexelSize * e.w))
         val tx = s.getUniformLocation("uGroundShadowTex")
         if (tx >= 0) {
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + 4)
-            glBindTexture(GL_TEXTURE_2D, shadowTex)
+            glBindTexture(GL_TEXTURE_2D, e.tex)
             GLWrapper.uniform1i(tx, 4)
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
         }
@@ -177,8 +283,8 @@ class ModernGroundRenderer {
         if (!GROUND_POINT_LIGHTS) { GLWrapper.uniform1i(loc, 0); return }
         GLWrapper.uniform1i(loc, plCount)
         if (plCount > 0) {
-            val lp = s.getUniformLocation("uPointLightPos")
-            val lc = s.getUniformLocation("uPointLightColor")
+            val lp = s.getArrayUniformLocation("uPointLightPos")
+            val lc = s.getArrayUniformLocation("uPointLightColor")
             if (lp >= 0) GLWrapper.uniform4fv(lp, plPos)
             if (lc >= 0) GLWrapper.uniform3fv(lc, plColor)
         }
@@ -746,7 +852,9 @@ class ModernGroundRenderer {
          * only when it actually changes — this used to re-send the whole snapshot
          * on every material draw.
          */
-        residentVertexVbo: Int = 0
+        residentVertexVbo: Int = 0,
+        /** Element buffer already holding [indexCount] indices, or 0 to upload [indexShorts]. */
+        residentIndexIbo: Int = 0
     ) {
         if (indexCount == 0) return
 
@@ -796,6 +904,7 @@ class ModernGroundRenderer {
             s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
             s.setUniform("uSunColor", sunColor)
             uploadPointLights(s)
+            shadowFrame++
             uploadShadowUniforms(s)
             s.setUniform(uTexAmbientLocation, ambient)
             s.setUniform(uTexContrastLocation, contrast)
@@ -803,6 +912,7 @@ class ModernGroundRenderer {
             s.setUniform(uTexContrastPosLocation, legacyContrastPos)
             s.setUniform(uTexContrastNegLocation, legacyContrastNeg)
             s.setUniform(uTexTextureLocation, 0)
+            s.setUniform("uRawColorDebug", if (RAW_COLOR_DEBUG) 1 else 0)
 
             s.setUniform(uTexFogEnabledLocation, if (fogEnabled) 1 else 0)
             s.setUniform(uTexFogStartLocation, fogStart)
@@ -849,6 +959,9 @@ class ModernGroundRenderer {
         }
 
         // ---- Per-GROUND state: the interleaved attribute layout ----
+        // Each ground plane has its own shadow map; GroundGL selects it before its draws.
+        if (currentShadowMapper !== boundShadowMapper) uploadShadowUniforms(s)
+
         val texCoordBytes = texCoordSize * 4
         if (vertexVbo != boundVertexVbo || stride != boundStride || texCoordSize != boundTexCoordSize) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexVbo)
@@ -886,8 +999,10 @@ class ModernGroundRenderer {
             if (hasTexture) {
                 GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
                 GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
-                GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_S, GLWrapper.Constants.REPEAT)
-                GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_T, GLWrapper.Constants.REPEAT)
+                // No wrap override here: the texture keeps the wrap its material
+                // declares (OpenGLTextureCache -> setRepeat(material.repeatS/T)), which
+                // is what legacy samples with. Forcing REPEAT also fails once the model
+                // batcher holds a bindless handle on the same texture (immutable).
             }
             boundTexture = textureHandle
         }
@@ -917,15 +1032,19 @@ class ModernGroundRenderer {
             }
         }
 
-        // Upload index data. The caller builds shorts directly, so this is a bulk
-        // put rather than the byte-pair reassembly loop it used to run per index.
-        ensureIndexCapacity(indexCount)
-        val shortBuffer = this.indexData!!
-        shortBuffer.clear()
-        shortBuffer.put(indexShorts, 0, indexCount)
-        shortBuffer.flip()
-        ibo.upload(shortBuffer)
-        ibo.bind()
+        // Index data: a material that already holds this frame's list in its own
+        // element buffer just binds it; otherwise upload the caller's shorts.
+        if (residentIndexIbo != 0) {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, residentIndexIbo)
+        } else {
+            ensureIndexCapacity(indexCount)
+            val shortBuffer = this.indexData!!
+            shortBuffer.clear()
+            shortBuffer.put(indexShorts, 0, indexCount)
+            shortBuffer.flip()
+            ibo.upload(shortBuffer)
+            ibo.bind()
+        }
 
         // Draw. Teardown is deferred to closeGroundBatch — every state this draw set
         // is either identical for the next material or re-checked above.
@@ -933,6 +1052,84 @@ class ModernGroundRenderer {
 
         drawCallsThisFrame++
         trianglesThisFrame += indexCount / 3
+    }
+
+    /**
+     * Draws a top-down slice of a ground into the CURRENT framebuffer for the minimap:
+     * the modern twin of GroundGL.renderMinimapFloor. [vpColMajor] is the finished
+     * GL clip transform (ortho over world X/Z, no Y flip needed). Untextured, unfogged,
+     * no depth, no blend; lit by the sun formula when HD normals are present, exactly
+     * the fixed-function state legacy used (lighting on for HD_LIGHT, off otherwise).
+     */
+    fun renderMinimapFloor(
+        vertexVbo: Int,
+        stride: Int,
+        texCoordSize: Int,
+        hasNormals: Boolean,
+        indexShorts: ShortArray,
+        indexCount: Int,
+        vpColMajor: FloatArray
+    ) {
+        if (indexCount == 0 || vertexVbo == 0) return
+        val s = texturedShader ?: return
+        val vao = externalVao ?: return
+        val ibo = externalIbo ?: return
+        closeGroundBatch()
+        s.bind()
+        glUniformMatrix4fv(uTexViewProjectionLocation, false, vpColMajor)
+        s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
+        s.setUniform("uSunColor", sunColor)
+        s.setUniform(uTexSunBrightnessLocation, legacySunBrightness)
+        s.setUniform(uTexContrastPosLocation, legacyContrastPos)
+        s.setUniform(uTexContrastNegLocation, legacyContrastNeg)
+        s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
+        s.setUniform(uTexHasTextureLocation, 0)
+        s.setUniform(uTexCombineModeLocation, 0)
+        s.setUniform(uTexTextureScaleLocation, 1f)
+        s.setUniform(uTexFogEnabledLocation, 0)
+        s.setUniform("uRawColorDebug", 0)
+        val en = s.getUniformLocation("uGroundShadowEnabled")
+        if (en >= 0) GLWrapper.uniform1i(en, 0)
+        val pl = s.getUniformLocation("uPointLightCount")
+        if (pl >= 0) GLWrapper.uniform1i(pl, 0)
+
+        glDisable(GL_DEPTH_TEST)
+        glDepthMask(false)
+        glDisable(GL_BLEND)
+        glDisable(GL_CULL_FACE)
+        glColorMask(true, true, true, true)
+
+        vao.bind()
+        glBindBuffer(GL_ARRAY_BUFFER, vertexVbo)
+        glEnableVertexAttribArray(0)
+        glEnableVertexAttribArray(1)
+        glEnableVertexAttribArray(2)
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, stride, 12L)
+        glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
+        if (hasNormals) {
+            glEnableVertexAttribArray(3)
+            glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, 16L + texCoordSize * 4L)
+        } else {
+            glDisableVertexAttribArray(3)
+        }
+        ensureIndexCapacity(indexCount)
+        val shortBuffer = this.indexData!!
+        shortBuffer.clear()
+        shortBuffer.put(indexShorts, 0, indexCount)
+        shortBuffer.flip()
+        ibo.upload(shortBuffer)
+        ibo.bind()
+        GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
+        vao.unbind()
+        s.unbind()
+        glDepthMask(true)
+        boundVertexVbo = 0
+        boundHasNormals = -1
+        boundTexture = -1
+        boundCombineMode = Int.MIN_VALUE
+        boundTextureScale = Float.NaN
+        boundShadowMapper = null
     }
 
     /**

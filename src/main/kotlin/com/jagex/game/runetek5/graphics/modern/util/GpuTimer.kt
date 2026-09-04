@@ -9,6 +9,8 @@ import org.lwjgl.opengl.GL33.glEndQuery
 import org.lwjgl.opengl.GL33.glGenQueries
 import org.lwjgl.opengl.GL33.glGetQueryObjecti
 import org.lwjgl.opengl.GL33.glGetQueryObjectui64
+import org.lwjgl.opengl.GL33.GL_TIMESTAMP
+import org.lwjgl.opengl.GL33.glQueryCounter
 
 /**
  * Per-pass GPU timing via `GL_TIME_ELAPSED` queries.
@@ -50,11 +52,26 @@ class GpuTimer(private val passNames: Array<String>) {
     private var openPass = -1
     private var initialized = false
 
+    /** Most recently collected per-pass result (ms), for stall diagnostics. */
+    val lastPassMs = DoubleArray(passCount)
+
+    // Whole-GPU-frame timing from GL_TIMESTAMP pairs (present to present); a
+    // TIME_ELAPSED query cannot enclose the pass queries, timestamps can.
+    private val stampStart = IntArray(RING)
+    private val stampEnd = IntArray(RING)
+    private val stampIssued = BooleanArray(RING)
+    private var stampSlot = 0
+    private var stampOpen = false
+    /** Last 6 collected GPU frame durations (ms), newest last. */
+    val frameHistoryMs = DoubleArray(6)
+    private var frameHistoryCount = 0L
+
     fun initialize() {
         if (initialized || !ENABLED) return
         for (p in 0 until passCount) {
             for (s in 0 until RING) queries[p][s] = glGenQueries()
         }
+        for (s in 0 until RING) { stampStart[s] = glGenQueries(); stampEnd[s] = glGenQueries() }
         initialized = true
     }
 
@@ -67,10 +84,50 @@ class GpuTimer(private val passNames: Array<String>) {
             if (!issued[p][slot]) continue
             val q = queries[p][slot]
             if (glGetQueryObjecti(q, GL_QUERY_RESULT_AVAILABLE) == 0) continue
-            accumNs[p] += glGetQueryObjectui64(q, GL_QUERY_RESULT)
+            val ns = glGetQueryObjectui64(q, GL_QUERY_RESULT)
+            accumNs[p] += ns
+            lastPassMs[p] = ns / 1e6
             samples[p]++
             issued[p][slot] = false
         }
+    }
+
+    /** GPU frame start: call right after present. */
+    fun frameStampStart() {
+        if (!initialized || stampOpen) return
+        // Collect the oldest outstanding pair before reusing its slot.
+        stampSlot = (stampSlot + 1) % RING
+        if (stampIssued[stampSlot]) {
+            val a = stampStart[stampSlot]; val b = stampEnd[stampSlot]
+            if (glGetQueryObjecti(b, GL_QUERY_RESULT_AVAILABLE) != 0 && glGetQueryObjecti(a, GL_QUERY_RESULT_AVAILABLE) != 0) {
+                val ms = (glGetQueryObjectui64(b, GL_QUERY_RESULT) - glGetQueryObjectui64(a, GL_QUERY_RESULT)) / 1e6
+                System.arraycopy(frameHistoryMs, 1, frameHistoryMs, 0, frameHistoryMs.size - 1)
+                frameHistoryMs[frameHistoryMs.size - 1] = ms
+                frameHistoryCount++
+            }
+            stampIssued[stampSlot] = false
+        }
+        glQueryCounter(stampStart[stampSlot], GL_TIMESTAMP)
+        stampOpen = true
+    }
+
+    /** GPU frame end: call right before present. */
+    fun frameStampEnd() {
+        if (!initialized || !stampOpen) return
+        glQueryCounter(stampEnd[stampSlot], GL_TIMESTAMP)
+        stampIssued[stampSlot] = true
+        stampOpen = false
+    }
+
+    /** Compact diag string: last per-pass results and the recent GPU frame history. */
+    fun lastFrameString(): String {
+        if (!initialized) return "gpu=off"
+        val sb = StringBuilder("gpuLast[")
+        for (p in 0 until passCount) { if (p > 0) sb.append(' '); sb.append(passNames[p]).append('=').append(String.format("%.2f", lastPassMs[p])) }
+        sb.append("] gpuFrameHist=[")
+        for (i in frameHistoryMs.indices) { if (i > 0) sb.append(','); sb.append(String.format("%.1f", frameHistoryMs[i])) }
+        sb.append(']')
+        return sb.toString()
     }
 
     fun begin(pass: Int) {
@@ -108,6 +165,7 @@ class GpuTimer(private val passNames: Array<String>) {
     fun destroy() {
         if (!initialized) return
         for (p in 0 until passCount) for (s in 0 until RING) glDeleteQueries(queries[p][s])
+        for (s in 0 until RING) { glDeleteQueries(stampStart[s]); glDeleteQueries(stampEnd[s]) }
         initialized = false
     }
 }

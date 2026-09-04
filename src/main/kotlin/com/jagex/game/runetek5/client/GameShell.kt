@@ -350,7 +350,16 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         try {
             setApplicationType(ApplicationType.BORDERLESS, padding)
             WindowMode.resizableScreenWidth = screenCanvasWidth.also { screenCanvasWidth = windowSettings.width }
-            val windowHeight = windowSettings.height
+            var windowHeight = windowSettings.height
+            // -Dwindow.size=WxH overrides the configured window size (see setFrameTitle).
+            System.getProperty("window.size")?.let { spec ->
+                val parts = spec.split('x').mapNotNull { it.trim().toIntOrNull() }
+                if (parts.size == 2 && parts[0] > 0 && parts[1] > 0) {
+                    screenCanvasWidth = parts[0]
+                    WindowMode.resizableScreenWidth = parts[0]
+                    windowHeight = parts[1]
+                }
+            }
             screenCanvasHeight = windowHeight * -1929118563
             WindowMode.resizableScreenHeight = windowHeight
             gameCanvasX = 0
@@ -630,6 +639,20 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         engineFrame!!.background = Color.black
         engineFrame!!.isVisible = true
         engineFrame!!.toFront()
+        // -Dwindow.size=WxH: create the frame at that canvas size (captures no longer
+        // depend on a window-manager resize the client may miss while loading).
+        System.getProperty("window.size")?.let { spec ->
+            val parts = spec.split('x').mapNotNull { it.trim().toIntOrNull() }
+            if (parts.size == 2 && parts[0] > 0 && parts[1] > 0) {
+                WindowMode.resizableScreenWidth = parts[0]
+                WindowMode.resizableScreenHeight = parts[1]
+                // The canvas fields too, or the client keeps laying out at the old size
+                // until a resize event it may never receive. screenCanvasHeight is stored
+                // pre-multiplied by the inverse of -969250379.
+                screenCanvasWidth = parts[0]
+                screenCanvasHeight = parts[1] * -1929118563
+            }
+        }
         val insets = engineFrame!!.insets
         engineFrame!!.setSize(insets.right + insets.left + WindowMode.resizableScreenWidth, insets.top + insets.bottom + WindowMode.resizableScreenHeight)
     }
@@ -702,6 +725,8 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         pulseCount++
     }
 
+    private val FRAME_HIST = System.getProperty("frame.hist") != null
+
     fun mainRedrawWrapper() {
         val currentTime = Utils.time()
         val lastTime = MAIN_REDRAW_CACHE[mainRedrawCachePos]
@@ -714,6 +739,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         // Legacy code refreshed the canvas every 50 redraws (~1/sec at 50fps).
         // Now that the render rate is decoupled, key this off wall time instead.
         if (currentTime >= nextCanvasRefreshAt) {
+            val refreshT0 = System.nanoTime()
             nextCanvasRefreshAt = currentTime + 1000L
             WindowMode.redrawWindowBackground = true
             gameCanvas!!.setSize(screenCanvasWidth, screenCanvasHeight * -969250379)
@@ -724,8 +750,36 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             } else {
                 gameCanvas!!.setLocation(gameCanvasX, gameCanvasY)
             }
+            Client.canvasRefreshNs += System.nanoTime() - refreshT0
         }
+        val redrawT0 = System.nanoTime()
         mainRedraw()
+        Client.redrawNs += System.nanoTime() - redrawT0
+        frameHistogram(redrawT0)
+    }
+
+    // Toolkit-independent frame pacing histogram (-Dframe.hist): wall time between
+    // consecutive redraw entries, so legacy and modern runs can be compared for stalls.
+    private var fhLast = 0L
+    private var fhCount = 0
+    private var fhOver15 = 0
+    private var fhOver30 = 0
+    private var fhMax = 0.0
+    private var fhSum = 0.0
+    private fun frameHistogram(nowNs: Long) {
+        if (!FRAME_HIST) return
+        if (fhLast != 0L) {
+            val ms = (nowNs - fhLast) / 1e6
+            fhCount++; fhSum += ms
+            if (ms > 15) fhOver15++
+            if (ms > 30) fhOver30++
+            if (ms > fhMax) fhMax = ms
+            if (fhCount >= 300) {
+                System.err.println("[FrameHist] frames=%d avg=%.2fms over15=%d over30=%d max=%.1fms".format(fhCount, fhSum / fhCount, fhOver15, fhOver30, fhMax))
+                fhCount = 0; fhOver15 = 0; fhOver30 = 0; fhMax = 0.0; fhSum = 0.0
+            }
+        }
+        fhLast = nowNs
     }
 
     open fun getDebugString(): String? {

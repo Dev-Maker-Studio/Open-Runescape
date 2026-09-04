@@ -15,6 +15,9 @@ open class Culling(
     @JvmField val scene: Scene
 ) {
     companion object {
+        /** Set while a ModernGLToolkit is the active renderer; forces the software occluder off. */
+        @JvmStatic var disabledForModern = false
+
         @JvmField
         var activeToolkit: AbstractToolkit? = null
 
@@ -141,7 +144,14 @@ open class Culling(
         // NOTE: this used to unconditionally re-enable culling, silently overriding
         // -Drender.occlusion=false set at field init — which is why an earlier
         // "occlusion disabled" experiment showed no change. Respect the property.
-        cullingEnabled = System.getProperty("render.occlusion")?.equals("false", true) != true
+        // The software occluder (wall-based occlusion buffer) is a legacy-renderer
+        // device: its tests are coarse enough to drop a whole loc that another loc
+        // barely overlaps, and the modern path resolves visibility on the GPU depth
+        // buffer anyway. It stays OFF whenever the modern toolkit is active
+        // (Culling.disabledForModern, set by ModernGLToolkit), unless
+        // -Drender.occlusion=true asks for it explicitly for a comparison.
+        cullingEnabled = System.getProperty("render.occlusion")?.equals("false", true) != true &&
+            !(disabledForModern && System.getProperty("render.occlusion")?.equals("true", true) != true)
         if (cullingEnabled) {
             frustumCulling = FrustumCulling(this)
         }
@@ -213,6 +223,11 @@ open class Culling(
 
     fun processCulling(toolkit: AbstractToolkit, nextPlane: Int) {
         activeToolkit = toolkit
+        // A scene built before the toolkit switched (or with the property unset) must
+        // still honour the modern override.
+        if (cullingEnabled && disabledForModern && System.getProperty("render.occlusion")?.equals("true", true) != true) {
+            cullingEnabled = false
+        }
         if (cullingEnabled && drawingScene) {
             if (benchmarkCulling) {
                 scene.nanoTimer.getTime()

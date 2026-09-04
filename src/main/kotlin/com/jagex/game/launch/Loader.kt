@@ -3,6 +3,8 @@ package com.jagex.game.launch
 import com.darkan.bot.Bot
 import com.darkan.bot.UI
 import com.darkan.bot.initializeUI
+import com.darkan.bot.runOnEdt
+import com.darkan.bot.ui.BotWorkspace
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.world.WorldDescriptor
 import java.awt.BorderLayout
@@ -48,7 +50,9 @@ class Loader : Panel() {
         return clientParams[paramName] as? String
     }
 
-    fun openFrame() {
+    fun openFrame() = runOnEdt {
+        // Swing components must be built, shown and laid out on the event dispatch
+        // thread; doing it from main races the sidebar's own timers.
         clientFrame = JFrame("Darkan Client with Bot").apply {
             layout = BorderLayout()
 
@@ -59,18 +63,12 @@ class Loader : Panel() {
                 preferredSize = Dimension(774, 588)
             }
 
+            var workspace: BotWorkspace? = null
             if (Bot.ENABLED) {
-                // Initialize bot UI
                 initializeUI()
-                val botPanel = UI
-
-                // Create split pane with game on left, bot controls on right
-                val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, clientPanel, botPanel).apply {
-                    resizeWeight = 0.6 // Give more space to the game
-                    dividerLocation = 774 // Initial divider position
-                }
-
-                contentPane.add(splitPane, BorderLayout.CENTER)
+                // Game on one side, bot sidebar on the other; the workspace owns the
+                // split, remembers its layout and lets the user move or hide the sidebar.
+                workspace = BotWorkspace(this, clientPanel, UI).also { it.install() }
             } else {
                 // Just add the game client without bot UI
                 contentPane.add(clientPanel, BorderLayout.CENTER)
@@ -79,6 +77,7 @@ class Loader : Panel() {
             defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
             pack()
             isVisible = true
+            workspace?.onFrameShown()
         }
     }
 

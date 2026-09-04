@@ -35,7 +35,8 @@ import kotlin.math.floor
 import kotlin.math.pow
 
 fun main(args: Array<String>) {
-    Bot.ENABLED = false
+    // Off by default; pass -Dbot.enabled=true to show the bot sidebar.
+    Bot.ENABLED = System.getProperty("bot.enabled")?.toBoolean() ?: false
     ScriptExecutor.loadScripts()
     Loader.main(args)
 }

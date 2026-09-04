@@ -1,10 +1,14 @@
 package com.jagex.game.runetek5.graphics.modern.debug
 
+import com.darkan.bot.Bot
+import com.darkan.bot.utils.Tile
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.client.login.LoginManager
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
+import com.jagex.game.runetek5.config.TypeLists
+import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import java.io.File
 
@@ -79,6 +83,12 @@ object AutoLogin {
     private var lastState: GameState? = null
     private var lastAttemptNs = 0L
     private var announcedReady = false
+    private var readyFrame = 0
+    private var spinAccum = 0f
+    private var commandIssued = false
+    private var equipIssued = false
+    private var bloomForced = false
+    private var walkIssued = false
 
     /**
      * Retry spacing. A login round-trip to prod takes seconds; hammering it every
@@ -116,17 +126,80 @@ object AutoLogin {
             // captures came back at different yaw/pitch, and comparing two renderers
             // across two different viewpoints is worthless — it already led me to
             // read a camera difference as "the walls are missing".
+            // cameraYaw/cameraPitch are OUTPUTS of Camera.processCamera, recomputed
+            // every frame from the user-controlled camAngleX/camAngleY (and the zoom),
+            // so pinning them changed nothing. Pin the inputs: "-Dautologin.camera=X,Y[,zoom]".
             System.getProperty("autologin.camera")?.let { spec ->
                 val parts = spec.split(',').mapNotNull { it.trim().toIntOrNull() }
                 if (parts.size >= 2) {
-                    Camera.cameraYaw = parts[0]
-                    Camera.cameraPitch = parts[1]
+                    Camera.camAngleX = parts[0].toFloat()
+                    // "-Dautologin.spin=N": rotate the yaw N units (of 16384) per frame
+                    // on top of the pinned value, to measure camera rotation cost.
+                    spinAccum += System.getProperty("autologin.spin")?.toFloatOrNull() ?: 0f
+                    Camera.camAngleY = ((parts[1] + spinAccum) % 16384f + 16384f) % 16384f
+                    if (parts.size >= 3) Camera.cameraZoom = parts[2]
                 }
             }
             if (!announcedReady) {
                 announcedReady = true
                 // The capture script waits for exactly this line.
                 System.err.println("[AutoLogin] READY — logged in to world ${targetWorld ?: "(default)"}")
+                readyFrame = frames
+            }
+            // "-Dautologin.bloom=1": switch the toolkit's bloom effect on for this run
+            // only (toolkit level, so the preference file is never touched).
+            if (!bloomForced && System.getProperty("autologin.bloom") == "1") {
+                bloomForced = true
+                val ok = Renderers.activeToolkit?.bloomSupported() ?: false
+                System.err.println("[AutoLogin] bloom forced on: supported=$ok enabled=${Renderers.activeToolkit?.bloomEnabled()}")
+            }
+            // Debug walk: "-Dautologin.walk=X,Y" (absolute tile) sends one walk request
+            // a short while after login, through the bot's own packet path (no input
+            // injection), so captures can be taken under roofs / on other planes.
+            val walkSpec = System.getProperty("autologin.walk")
+            if (walkSpec != null && !walkIssued && frames - readyFrame == 90) {
+                walkIssued = true
+                val parts = walkSpec.split(',').mapNotNull { it.trim().toIntOrNull() }
+                try {
+                    val px = Bot.getMyPlayerX(); val py = Bot.getMyPlayerY()
+                    if (parts.size >= 2) {
+                        Bot.walkTo(Tile(parts[0], parts[1]))
+                        System.err.println("[AutoLogin] WALK from ($px,$py) to (${parts[0]},${parts[1]})")
+                    }
+                } catch (t: Throwable) {
+                    System.err.println("[AutoLogin] WALK failed: $t")
+                }
+            }
+            // "-Dautologin.command=item 20767": one server command (";;" prefix is added
+            // by Bot.command) a few seconds after login; "-Dautologin.equip=20767" then
+            // equips that item from the inventory once it arrives. Both go through the
+            // bot's packet path — no input injection.
+            // '+' stands for a space so the value survives the launcher's word splitting.
+            val cmdSpec = System.getProperty("autologin.command")?.replace('+', ' ')
+            if (cmdSpec != null && !commandIssued && frames - readyFrame == 120) {
+                commandIssued = true
+                try { Bot.command(cmdSpec); System.err.println("[AutoLogin] COMMAND ;;$cmdSpec") } catch (t: Throwable) { System.err.println("[AutoLogin] COMMAND failed: $t") }
+            }
+            val equipId = System.getProperty("autologin.equip")?.toIntOrNull()
+            if (equipId != null && !equipIssued && frames - readyFrame >= 240 && (frames - readyFrame) % 60 == 0) {
+                try {
+                    val slot = Bot.inventory.container.itemIds?.indexOf(equipId) ?: -1
+                    if (slot >= 0) {
+                        equipIssued = true
+                        Bot.equipItem(equipId, slot)
+                        val name = try { TypeLists.OBJ?.list(equipId)?.name } catch (t: Throwable) { null }
+                        System.err.println("[AutoLogin] EQUIP item=$equipId slot=$slot name=$name")
+                    } else if ((frames - readyFrame) % 600 == 0) {
+                        System.err.println("[AutoLogin] EQUIP waiting: item $equipId not in inventory")
+                    }
+                } catch (t: Throwable) { System.err.println("[AutoLogin] EQUIP failed: $t") }
+            }
+            if (frames - readyFrame == 60 || (walkIssued && (frames - readyFrame) % 150 == 0)) {
+                try {
+                    System.err.println("[AutoLogin] player tile=(${Bot.getMyPlayerX()},${Bot.getMyPlayerY()}) plane=${PlayerUpdate.MY_PLAYER?.plane}")
+                } catch (t: Throwable) {
+                    System.err.println("[AutoLogin] player tile unavailable: $t")
+                }
             }
             return
         }

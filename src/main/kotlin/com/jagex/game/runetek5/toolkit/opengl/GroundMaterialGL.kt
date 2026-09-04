@@ -36,6 +36,19 @@ class GroundMaterialGL(
     @JvmField val groundFunctionMask: IntArray
     @JvmField val texture2d: GlElementsArrayBuffer
 
+    /** Modern path: visible-set stamp the cached index list below was built for. */
+    @JvmField var modernIndexStamp: Long = 0L
+    @JvmField var modernIndexCount: Int = -1
+    /** Modern path: resident GL element buffer holding the cached index list. */
+    @JvmField var modernIboId: Int = 0
+    @JvmField var modernIboCapacity: Int = 0
+    /** Tile indices where this material owns at least one triangle (static per material). */
+    @JvmField var modernTiles: IntArray? = null
+    @JvmField var modernTilesMaskSize: Int = -1
+    /** Per 8x8 chunk index lists of this material's triangles (see ModernGLToolkit ground draw). */
+    @JvmField var modernChunkIdx: Array<ShortArray?>? = null
+    @JvmField var modernChunkRevision: Int = -1
+
     init {
         this.ground = ground
         toolkit = ground.activeToolkit
@@ -45,6 +58,12 @@ class GroundMaterialGL(
         groundFunctionMask = IntArray(this.ground.width * this.ground.length)
         texture2d = GlElementsArrayBuffer(toolkit, null, 1)
     }
+
+    private val GROUND_COLOR_DEBUG = System.getProperty("render.groundcolor")?.let { it.equals("true", true) || it.equals("raw", true) } == true
+    private val RAW_COLOR_DEBUG = System.getProperty("render.groundcolor")?.equals("raw", true) == true
+    private val GROUND_COMBINE_OVERRIDE = System.getProperty("render.groundcombine")?.toIntOrNull() ?: -1
+    private val GROUND_PROBE = System.getProperty("render.sunprobe") != null
+    private var groundProbeTick = 0
 
     fun appendToNativeStream(vertexIndex: Int) {
         nativeStream!!.setOffset(vertexIndex * 4 + 3)
@@ -186,9 +205,122 @@ class GroundMaterialGL(
             }
         }
         if (addedTextures > 0) {
+            if (GROUND_PROBE && groundProbeTick++ % 1200 < 40) {
+                val sb = StringBuilder()
+                try {
+                    org.lwjgl.opengl.GL.createCapabilities()
+                    val handle = toolkit.textureCache?.get(materialId)?.activeHandle ?: 0
+                    sb.append(" tex=$handle")
+                    if (handle > 0) {
+                        val tp = IntArray(1)
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D, tp)
+                        val prev = tp[0]
+                        org.lwjgl.opengl.GL11.glBindTexture(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, handle)
+                        for ((name, pname) in listOf(
+                            "minF" to org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER, "magF" to org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER,
+                            "maxLvl" to org.lwjgl.opengl.GL12.GL_TEXTURE_MAX_LEVEL, "baseLvl" to org.lwjgl.opengl.GL12.GL_TEXTURE_BASE_LEVEL
+                        )) { org.lwjgl.opengl.GL11.glGetTexParameteriv(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, pname, tp); sb.append(" $name=${tp[0]}") }
+                        val fb = FloatArray(1)
+                        org.lwjgl.opengl.GL11.glGetTexParameterfv(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS, fb); sb.append(" lodBias=${fb[0]}")
+                        org.lwjgl.opengl.GL11.glGetTexEnvfv(org.lwjgl.opengl.GL14.GL_TEXTURE_FILTER_CONTROL, org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS, fb); sb.append(" unitLodBias=${fb[0]}")
+                        org.lwjgl.opengl.GL11.glGetTexLevelParameteriv(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, 0, org.lwjgl.opengl.GL11.GL_TEXTURE_INTERNAL_FORMAT, tp); sb.append(" fmt=${tp[0]}")
+                        for (lvl in 0 until 4) {
+                            org.lwjgl.opengl.GL11.glGetTexLevelParameteriv(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, lvl, org.lwjgl.opengl.GL11.GL_TEXTURE_WIDTH, tp)
+                            val w = tp[0]
+                            if (w <= 0) { sb.append(" L$lvl=none"); continue }
+                            val buf = java.nio.ByteBuffer.allocateDirect(w * w * 4).order(java.nio.ByteOrder.nativeOrder())
+                            org.lwjgl.opengl.GL11.glGetTexImage(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, lvl, org.lwjgl.opengl.GL11.GL_RGBA, org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE, buf)
+                            var r = 0L; var g = 0L; var b = 0L; var a = 0L
+                            for (k in 0 until w * w) { r += buf.get(k * 4).toInt() and 0xff; g += buf.get(k * 4 + 1).toInt() and 0xff; b += buf.get(k * 4 + 2).toInt() and 0xff; a += buf.get(k * 4 + 3).toInt() and 0xff }
+                            val n = (w * w).toLong()
+                            sb.append(" L$lvl=${w}px(${r / n},${g / n},${b / n},${a / n})")
+                        }
+                        org.lwjgl.opengl.GL11.glBindTexture(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, prev)
+                    }
+                    // Texture-environment state per unit: what the combiner actually multiplies.
+                    val ip = IntArray(1)
+                    val fp = FloatArray(4)
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL13.GL_ACTIVE_TEXTURE, ip)
+                    val activeUnit = ip[0]
+                    for (u in 0 until 3) {
+                        org.lwjgl.opengl.GL13.glActiveTexture(org.lwjgl.opengl.GL13.GL_TEXTURE0 + u)
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, ip); val en2d = ip[0]
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D, ip); val bound = ip[0]
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL31.GL_TEXTURE_RECTANGLE, ip); val enRect = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL11.GL_TEXTURE_ENV_MODE, ip); val mode = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_COMBINE_RGB, ip); val crgb = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_COMBINE_ALPHA, ip); val calpha = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_SOURCE0_RGB, ip); val s0 = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_SOURCE1_RGB, ip); val s1 = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_SOURCE2_RGB, ip); val s2 = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_OPERAND0_RGB, ip); val o0 = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnviv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_OPERAND1_RGB, ip); val o1 = ip[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnvfv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL13.GL_RGB_SCALE, fp); val scale = fp[0]
+                        org.lwjgl.opengl.GL11.glGetTexEnvfv(org.lwjgl.opengl.GL11.GL_TEXTURE_ENV, org.lwjgl.opengl.GL11.GL_TEXTURE_ENV_COLOR, fp)
+                        sb.append(" U$u[2d=$en2d rect=$enRect bound=$bound mode=${Integer.toHexString(mode)} rgb=${Integer.toHexString(crgb)} a=${Integer.toHexString(calpha)} src=${Integer.toHexString(s0)},${Integer.toHexString(s1)},${Integer.toHexString(s2)} op=${Integer.toHexString(o0)},${Integer.toHexString(o1)} scale=$scale envCol=${fp.toList()}]")
+                    }
+                    org.lwjgl.opengl.GL13.glActiveTexture(activeUnit)
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_BLEND, ip); sb.append(" blend=${ip[0]}")
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_BLEND_SRC, ip); sb.append(" bsrc=${Integer.toHexString(ip[0])}")
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_BLEND_DST, ip); sb.append(" bdst=${Integer.toHexString(ip[0])}")
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_FOG, ip); sb.append(" fog=${ip[0]}")
+                    org.lwjgl.opengl.GL11.glGetFloatv(org.lwjgl.opengl.GL11.GL_FOG_START, fp); sb.append(" fogStart=${fp[0]}")
+                    org.lwjgl.opengl.GL11.glGetFloatv(org.lwjgl.opengl.GL11.GL_FOG_END, fp); sb.append(" fogEnd=${fp[0]}")
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_FOG_MODE, ip); sb.append(" fogMode=${Integer.toHexString(ip[0])}")
+                    org.lwjgl.opengl.GL11.glGetFloatv(org.lwjgl.opengl.GL11.GL_FOG_COLOR, fp); sb.append(" fogCol=${fp.toList()}")
+                    org.lwjgl.opengl.GL11.glGetFloatv(org.lwjgl.opengl.GL11.GL_CURRENT_COLOR, fp); sb.append(" curCol=${fp.toList()}")
+                    org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_LIGHTING, ip); sb.append(" lighting=${ip[0]}")
+                } catch (e: Throwable) { sb.append(" probeFail=$e") }
+                System.err.println("[GroundDraw] legacy mat=$materialId indices=$addedTextures tiles=$tileCount scale=$textureScale$sb")
+            }
+            if (GROUND_PROBE && (materialId == 505 || materialId == 301) && groundProbeTick % 300 < 2) for (v0 in intArrayOf(1, 54, 838, 1778, (textureBuffer.buffer[0].toInt() and 0xff) or ((textureBuffer.buffer[1].toInt() and 0xff) shl 8))) {
+                try {
+                    org.lwjgl.opengl.GL.createCapabilities()
+                    val col = ByteArray(4)
+                    val cbuf = arrayBufferPointer?.buffer
+                    val cid = cbuf?.getId() ?: 0
+                    if (cid != 0) {
+                        org.lwjgl.opengl.GL15.glBindBuffer(org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER, cid)
+                        val bb = java.nio.ByteBuffer.allocateDirect(4).order(java.nio.ByteOrder.nativeOrder())
+                        org.lwjgl.opengl.GL15.glGetBufferSubData(org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER, v0.toLong() * 4, bb)
+                        bb.get(col)
+                    } else if (cbuf != null) {
+                        val addr = cbuf.getBufferAddress()
+                        for (k in 0 until 4) col[k] = org.lwjgl.system.MemoryUtil.memGetByte(addr + v0 * 4 + k)
+                    }
+                    val vb = ground.vertexBuffer?.buffer
+                    val vid = vb?.getId() ?: 0
+                    val stride = vb?.getStride() ?: 0
+                    val floats = FloatArray(8)
+                    if (vid != 0 && stride > 0) {
+                        org.lwjgl.opengl.GL15.glBindBuffer(org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER, vid)
+                        val bb = java.nio.ByteBuffer.allocateDirect(stride).order(java.nio.ByteOrder.nativeOrder())
+                        org.lwjgl.opengl.GL15.glGetBufferSubData(org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER, v0.toLong() * stride, bb)
+                        floats[0] = bb.getFloat(0); floats[1] = bb.getFloat(4); floats[2] = bb.getFloat(8)
+                        val nOff = ground.normalsBuffer?.offset?.toInt() ?: 24
+                        floats[3] = bb.getFloat(nOff); floats[4] = bb.getFloat(nOff + 4); floats[5] = bb.getFloat(nOff + 8)
+                    }
+                    System.err.println(
+                        "[GroundProbe] legacy mat=$materialId combine=${toolkit.materialProvider!!.getMaterial(materialId).combineMode} " +
+                            "hd=${(ground.waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0} v0=$v0 " +
+                            "colour=(${col[0].toInt() and 0xff},${col[1].toInt() and 0xff},${col[2].toInt() and 0xff},${col[3].toInt() and 0xff}) " +
+                            "pos=(${floats[0]},${floats[1]},${floats[2]}) normal=(${floats[3]},${floats[4]},${floats[5]}) stride=$stride sunB=${toolkit.sunBrightness}"
+                    )
+                } catch (e: Throwable) {
+                    System.err.println("[GroundProbe] legacy failed: $e")
+                }
+            }
             texture2d.putElements(textureBuffer.buffer, textureBuffer.currentPosition)
             toolkit.toggleDrawingClientstates(ground.vertexBuffer, ground.normalsBuffer, arrayBufferPointer, ground.textureBuffer)
             toolkit.renderTexture(materialId, (ground.waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0, (ground.waterFunctionMask and 0x8) != 0)
+            // -Drender.groundcolor=true: draw the lit primary colour alone (no texture),
+            // the legacy twin of the modern ground shader's colour-only debug mode.
+            if (GROUND_COLOR_DEBUG) {
+                toolkit.renderTexture(-1, (ground.waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0, (ground.waterFunctionMask and 0x8) != 0)
+                if (RAW_COLOR_DEBUG) toolkit.setLightingEnabled(false)
+            }
+            // -Drender.groundcombine=<mode>: force one combine mode (A/B aid; twin of the modern flag).
+            if (GROUND_COMBINE_OVERRIDE >= 0) toolkit.loadTextureCombineMode(GROUND_COMBINE_OVERRIDE)
             if (toolkit.stillWaterToggled) {
                 toolkit.addWaterTile(Int.MAX_VALUE, waterTile)
             }

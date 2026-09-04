@@ -43,6 +43,9 @@ class GlParticleRenderer {
         this.colors = OpenGlArrayDrawBuffer(this.arrayBuffer, GL_UNSIGNED_BYTE, 4, 20)
     }
 
+    private val PARTICLE_POS_DIAG = System.getProperty("render.particlediag") != null
+    private var posDiagTick = 0
+
     fun drawParticles(toolkit: OpenGlToolkit, particleWrapper: ParticleWrapper) {
         disableLights(toolkit)
         val vertexZA = toolkit.viewMatrix44.elements[2]
@@ -72,6 +75,14 @@ class GlParticleRenderer {
                 particle = particle.child
             }
 
+            if (PARTICLE_POS_DIAG && (tree.child as? PointEntity)?.materialId == 744 && posDiagTick++ % 40 == 0 && totalParticles > 0) {
+                val sb = StringBuilder("[ParticlePos] legacy n=$totalParticles")
+                var q = tree.child; var k = 0
+                while (q != null && q !== tree && k < 4) { val pe = q as PointEntity; sb.append(" p$k=(${pe.x shr 12},${pe.y shr 12},${pe.z shr 12} sz=${pe.size shr 12} mat=${pe.materialId})"); q = q.child; k++ }
+                var yMin = Int.MAX_VALUE; var yMax = Int.MIN_VALUE; var qq = tree.child; while (qq != null && qq !== tree) { val yy = (qq as PointEntity).y shr 12; if (yy < yMin) yMin = yy; if (yy > yMax) yMax = yy; qq = qq.child }; sb.append(" yRange=$yMin..$yMax")
+            sb.append(" view14=${toolkit.viewMatrix44.elements[14]}")
+                System.err.println(sb)
+            }
             var depthRange = maxDepth - minDepth
             val depthShift: Int
             if (depthRange + 2 > 1600) {

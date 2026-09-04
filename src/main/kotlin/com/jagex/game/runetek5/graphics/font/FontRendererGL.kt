@@ -143,6 +143,7 @@ class FontRendererGL(
             val u1 = (atlasX + width) * texelScaleS
             val v1 = (atlasY + height) * texelScaleT
             this.listUtils.newList(charIndex)
+            toolkit.legacyDrawTrace()
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glTexCoord2f(u0, this.texture.t - v0)
             OpenGL.glVertex2i(minX, minY)

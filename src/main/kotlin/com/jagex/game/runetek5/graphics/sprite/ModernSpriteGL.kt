@@ -90,7 +90,37 @@ class ModernSpriteGL : SpriteGL {
      * Note: channelMaskTexture multi-texture path (GL_DOT3_RGBA) is not supported
      * in the modern path. Normal-mapped sprites fall through to legacy rendering.
      */
+    /**
+     * Legacy sets the texture's min/mag filter per draw call (nearest for draw /
+     * scaled / surface, linear for circle / affine). The modern batch defers the
+     * actual draw, so a filter change flushes quads already queued with the old
+     * filter first. Without this, a scaled sprite kept whatever filter the last
+     * affine draw left on it and linear sampling bled the padding texels into the
+     * stretched middle of interface buttons.
+     */
+    private val SPRITE_DIAG = System.getProperty("render.spritediag") != null
+    private var spriteDiagBudget = 600
+
+    private fun spriteDiag(method: String, x: Int, y: Int, w: Int, h: Int, combineMode: Int, colorArgb: Int) {
+        if (!SPRITE_DIAG || spriteDiagBudget <= 0) return
+        if (y < 250 || y > 340 || x < 250 || x > 520) return
+        spriteDiagBudget--
+        System.err.println("[SpriteDiag] $method x=$x y=$y w=$w h=$h tiled=${texture2d.tiled} stretched=$stretched s=${texture2d.s} t=${texture2d.t} single=${texture2d.singleWidth}x${texture2d.singleLength} sprite=${getSpriteWidth()}x${getSpriteHeight()} translate=$translateX,$translateY trim=$trimRight,$trimBottom combine=$combineMode color=${Integer.toHexString(colorArgb)} linear=${texture2d.linearTextureFilter} forceNearest=${texture2d.forceNearestFilter} texClass=${texture2d.javaClass.simpleName}")
+    }
+
+    private fun useFilter(linear: Boolean) {
+        // Padded (power-of-two) sprite textures force nearest filtering; their base
+        // constructor turned linear on before that flag existed, so the effective state
+        // is what legacy's per-draw call converges to: nearest for them, [linear] otherwise.
+        val effective = linear && !texture2d.forceNearestFilter
+        if (texture2d.linearTextureFilter == effective) return
+        modernToolkit.getSpriteRenderer()?.flush("filter")
+        texture2d.setLinearTextureFilter(linear)
+    }
+
     override fun draw(x: Int, y: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        spriteDiag("draw", x, y, getSpriteWidth(), getSpriteHeight(), combineMode, colorArgb)
+        useFilter(false)
         // Normal-map (GL_DOT3_RGBA channel mask) sprites need a dedicated shader
         // variant; until then draw the base sprite without the mask (approximation,
         // counted as a parity gap — NO legacy fallback under the modern toolkit).
@@ -138,6 +168,8 @@ class ModernSpriteGL : SpriteGL {
      * single quad for simple cases.
      */
     override fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        spriteDiag("scaled", x, y, width, height, combineMode, colorArgb)
+        useFilter(false)
         if (!useModernPath()) {
             modernToolkit.countLegacySkip("SpriteGL.drawScaledColored(skipped)")
             return
@@ -256,6 +288,8 @@ class ModernSpriteGL : SpriteGL {
      * Modern: draws a single textured quad through the sprite batch.
      */
     override fun drawColoredCircle(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        spriteDiag("circle", x, y, width, height, combineMode, colorArgb)
+        useFilter(true)
         // Channel-mask variant approximated without the mask (counted parity gap)
         if (channelMaskTexture != null) {
             modernToolkit.countLegacySkip("SpriteGL.channelMask(approx)")
@@ -316,6 +350,8 @@ class ModernSpriteGL : SpriteGL {
      * The 4th corner (bottom-right) is computed as: bottom-left + (top-right - top-left)
      */
     override fun drawAffine(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        spriteDiag("affine", topLeftX.toInt(), topLeftY.toInt(), (topRightX - topLeftX).toInt(), (bottomLeftY - topLeftY).toInt(), combineMode, colorArgb)
+        useFilter(true)
         if (!useModernPath()) {
             modernToolkit.countLegacySkip("SpriteGL.drawAffine(skipped)")
             return
@@ -407,6 +443,8 @@ class ModernSpriteGL : SpriteGL {
      * surface.t/singleLength, with the mask V axis flipped (surface.t - v).
      */
     override fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        spriteDiag("surface", x, y, getSpriteWidth(), getSpriteHeight(), 0, 0)
+        useFilter(false)
         val maskTexture = (surface as? SpriteSurfaceGL)?.surface
         if (maskTexture == null) {
             modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(skipped)")

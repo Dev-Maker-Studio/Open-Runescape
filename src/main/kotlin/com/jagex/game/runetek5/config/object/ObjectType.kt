@@ -10,6 +10,8 @@ import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.ALTERS_AMBIENT
+import com.jagex.game.runetek5.graphics.model.ModelGL
+import com.jagex.game.runetek5.graphics.model.PoseCopyPair
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.ALTERS_CONTRAST
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_X
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_Y
@@ -818,7 +820,7 @@ open class ObjectType {
 	}
 
 	@Synchronized
-	fun getAnimatedModel(toolkit: AbstractToolkit, functionMask: Int, type: Int, rotation: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int, sequence: Sequence?, locCustomisation: ObjectTypeCustomisation?): Model? {
+	fun getAnimatedModel(toolkit: AbstractToolkit, functionMask: Int, type: Int, rotation: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int, sequence: Sequence?, locCustomisation: ObjectTypeCustomisation?, privatePool: PoseCopyPair? = null): Model? {
 		val locTypeList = this.locTypeList ?: return null
 		var typeVar = type
 		if (ObjectShapes.isWallDecoration(typeVar)) {
@@ -880,8 +882,20 @@ open class ObjectType {
 			// shared by identical locs on the same frame. Uncacheable ones keep using the
 			// shared toolkit copy slot, which the next animated entity overwrites and which
 			// therefore has to be rebuilt every render frame.
-			val copyType: Byte = if (animatedCacheKey != null) 0 else 1
-			model = baseModel.copy(copyType, functionMaskVar, true)
+			// privatePose: the caller keeps the returned pose across frames (see
+			// AnimatedGameObject's pose memo), so it must not live in the shared slot.
+			val privatePose = privatePool != null && baseModel is ModelGL
+			model = if (privatePose) {
+				privatePool!!.copy(baseModel as ModelGL, functionMaskVar)
+			} else {
+				val copyType: Byte = if (animatedCacheKey != null) 0 else 1
+				baseModel.copy(copyType, functionMaskVar, true)
+			}
+			// A private pose copy must own its normals: copyModelData shares the base's
+			// arrays unless the mask alters light, and neighbour normal merging
+			// (castShadow) on a copy that shares them drifts the BASE model's lighting —
+			// and every wall merged with it.
+			if (privatePose && model is ModelGL && baseModel is ModelGL) model.detachSharedNormals(baseModel)
 			applyShading = true
 			sequence.animateRotatedModel(model!!, rotation and 0x3)
 		}

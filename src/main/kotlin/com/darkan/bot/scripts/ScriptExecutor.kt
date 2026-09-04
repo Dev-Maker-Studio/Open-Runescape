@@ -9,6 +9,7 @@ import java.io.File
 import java.lang.reflect.Modifier
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.CopyOnWriteArrayList
 
 private object StayloggedInTask: Script() {
     private var nextAfkKeypress = 0L
@@ -28,6 +29,7 @@ object ScriptExecutor {
     private val _activeScripts = ConcurrentHashMap<String, Script>()
     val activeScripts: Collection<Script> get() = _activeScripts.values
     private val eventBus = ConcurrentLinkedDeque<Event>()
+    private val eventListeners = CopyOnWriteArrayList<(Event) -> Unit>()
     var tick = 0L
 
     private val scriptStartTimes = ConcurrentHashMap<String, Long>()
@@ -57,7 +59,25 @@ object ScriptExecutor {
         }
     }
 
-    fun pushEvent(event: Event) = eventBus.addLast(event)
+    fun pushEvent(event: Event) {
+        eventBus.addLast(event)
+        if (eventListeners.isNotEmpty()) eventListeners.forEach { listener ->
+            try {
+                listener(event)
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    /** Observes every event as it is pushed, on the pushing thread. Used by the sidebar's var watcher. */
+    fun addEventListener(listener: (Event) -> Unit) {
+        eventListeners.add(listener)
+    }
+
+    fun removeEventListener(listener: (Event) -> Unit) {
+        eventListeners.remove(listener)
+    }
 
     fun activate(script: Script) {
         _activeScripts[script.javaClass.name] = script
@@ -119,7 +139,8 @@ object ScriptExecutor {
                 name = annotation.name,
                 version = annotation.version,
                 author = annotation.author,
-                description = annotation.description
+                description = annotation.description,
+                category = annotation.category
             )
             _scripts[metadata.toString()] = metadata
         }
@@ -179,7 +200,8 @@ data class ScriptMetadata(
     val name: String,
     val version: String,
     val author: String,
-    val description: String
+    val description: String,
+    val category: ScriptCategory = ScriptCategory.OTHER
 ) {
     override fun toString(): String = "$name v$version by $author"
 }

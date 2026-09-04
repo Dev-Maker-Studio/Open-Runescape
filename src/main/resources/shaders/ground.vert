@@ -69,7 +69,7 @@ void main() {
     for (int i = 0; i < uPointLightCount; ++i) {
         vec3 toLight = uPointLightPos[i].xyz - aPosition;
         float d2 = dot(toLight, toLight);
-        float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+        float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6); // legacy: kc=0, kl=0, kq=1/size^2
         float ndotl = max(dot(aNormal, normalize(toLight)), 0.0);
         litRGB += aColor.rgb * uPointLightColor[i] * (att * ndotl);
     }

@@ -250,7 +250,9 @@ object ModernModelBuilder {
         mesh: Mesh,
         ambient: Int,
         materialProvider: MaterialProvider? = null,
-        stripDetailLayers: Boolean = false
+        stripDetailLayers: Boolean = false,
+        /** The model's lighting contrast (ModelGL.contrast); normals carry 768/contrast, as legacy's do. */
+        contrast: Int = 768
     ): BuiltModel? {
         val numFaces = mesh.numFaces
         val numVertices = mesh.numVertices
@@ -273,31 +275,44 @@ object ModernModelBuilder {
         fun isValidVertex(index: Int) = index < numVertices
 
         // ---- Pass 1: smooth vertex normals (render type 0 faces only) --------
-        val smoothX = FloatArray(numVertices)
-        val smoothY = FloatArray(numVertices)
-        val smoothZ = FloatArray(numVertices)
+        // Normals follow the ModelGL constructor exactly: an integer cross product
+        // shifted into +-8192, scaled to length 256 with integer division, summed per
+        // vertex for smooth (render type 0) faces with the face count as magnitude.
+        // Lighting then uses the PLAIN AVERAGE (sum / (count*256)) scaled by 768/contrast
+        // — never renormalised, so a crease lights darker — and a flat face normal at
+        // 256 * 2/contrast, two thirds of the smooth strength. See ModelGL.upload.
+        val smoothX = IntArray(numVertices)
+        val smoothY = IntArray(numVertices)
+        val smoothZ = IntArray(numVertices)
         val smoothCount = IntArray(numVertices)
         val faceNormal = FloatArray(3)
+        val contrastValue = if (contrast == 0) 768 else contrast
+        val flatNormalScale = 2f / contrastValue
+        val smoothNormalScale = 3f / contrastValue
 
         fun computeFaceNormal(face: Int) {
             val a = vertexA(face)
             val b = vertexB(face)
             val c = vertexC(face)
-            val e1x = (verticesX[b] - verticesX[a]).toFloat()
-            val e1y = (verticesY[b] - verticesY[a]).toFloat()
-            val e1z = (verticesZ[b] - verticesZ[a]).toFloat()
-            val e2x = (verticesX[c] - verticesX[a]).toFloat()
-            val e2y = (verticesY[c] - verticesY[a]).toFloat()
-            val e2z = (verticesZ[c] - verticesZ[a]).toFloat()
-            var nx = e1y * e2z - e1z * e2y
-            var ny = e1z * e2x - e1x * e2z
-            var nz = e1x * e2y - e1y * e2x
-            val len = sqrt(nx * nx + ny * ny + nz * nz)
-            if (len > 0f) {
-                nx /= len
-                ny /= len
-                nz /= len
+            val dx1 = verticesX[b] - verticesX[a]
+            val dy1 = verticesY[b] - verticesY[a]
+            val dz1 = verticesZ[b] - verticesZ[a]
+            val dx2 = verticesX[c] - verticesX[a]
+            val dy2 = verticesY[c] - verticesY[a]
+            val dz2 = verticesZ[c] - verticesZ[a]
+            var x = dy1 * dz2 - dy2 * dz1
+            var y = dz1 * dx2 - dz2 * dx1
+            var z = dx1 * dy2 - dx2 * dy1
+            while (x > 8192 || y > 8192 || z > 8192 || x < -8192 || y < -8192 || z < -8192) {
+                x = x shr 1
+                y = y shr 1
+                z = z shr 1
             }
+            var normalMagnitude = sqrt((x * x + y * y + z * z).toDouble()).toInt()
+            if (normalMagnitude <= 0) normalMagnitude = 1
+            val nx = (x * 256 / normalMagnitude).toFloat()
+            val ny = (y * 256 / normalMagnitude).toFloat()
+            val nz = (z * 256 / normalMagnitude).toFloat()
             faceNormal[0] = nx
             faceNormal[1] = ny
             faceNormal[2] = nz
@@ -311,9 +326,10 @@ object ModernModelBuilder {
             val c = vertexC(face)
             if (!isValidVertex(a) || !isValidVertex(b) || !isValidVertex(c)) continue
             computeFaceNormal(face)
-            smoothX[a] += faceNormal[0]; smoothY[a] += faceNormal[1]; smoothZ[a] += faceNormal[2]; smoothCount[a]++
-            smoothX[b] += faceNormal[0]; smoothY[b] += faceNormal[1]; smoothZ[b] += faceNormal[2]; smoothCount[b]++
-            smoothX[c] += faceNormal[0]; smoothY[c] += faceNormal[1]; smoothZ[c] += faceNormal[2]; smoothCount[c]++
+            val fx = faceNormal[0].toInt(); val fy = faceNormal[1].toInt(); val fz = faceNormal[2].toInt()
+            smoothX[a] += fx; smoothY[a] += fy; smoothZ[a] += fz; smoothCount[a]++
+            smoothX[b] += fx; smoothY[b] += fy; smoothZ[b] += fz; smoothCount[b]++
+            smoothX[c] += fx; smoothY[c] += fy; smoothZ[c] += fz; smoothCount[c]++
         }
 
         // Faces hidden by billboards: legacy removes a face from rasterization
@@ -408,6 +424,35 @@ object ModernModelBuilder {
         }
         if (acceptedCount == 0) return null
 
+        // ---- Order faces the way legacy does (Model.addBillboard) -------------
+        // Legacy sorts a model's faces so opaque faces precede alpha faces, grouped
+        // by material within each class, and draws them as material RUNS in that
+        // order. Emitting in that order gives the batchers legacy's run structure
+        // (few runs, and alpha faces last — which is what the ordered translucent
+        // pass relies on). Stable sort: ties keep mesh order.
+        run {
+            val order = IntArray(acceptedCount) { it }
+            val keys = IntArray(acceptedCount)
+            for (i in 0 until acceptedCount) {
+                val face = acceptedFaces[i]
+                val materialId = acceptedMaterials[i]
+                var alphaFace = (facesAlpha?.get(face)?.toInt() ?: 0) != 0
+                if (!alphaFace && materialId >= 0 && materialProvider != null &&
+                    materialProvider.getMaterial(materialId and 0xffff).effectCombiner != 0
+                ) alphaFace = true
+                keys[i] = (if (alphaFace) 1 shl 24 else 0) or ((materialId + 1) and 0xffffff)
+            }
+            val sorted = order.sortedBy { keys[it] }
+            val faces = IntArray(acceptedCount)
+            val materials = IntArray(acceptedCount)
+            for (i in 0 until acceptedCount) {
+                faces[i] = acceptedFaces[sorted[i]]
+                materials[i] = acceptedMaterials[sorted[i]]
+            }
+            System.arraycopy(faces, 0, acceptedFaces, 0, acceptedCount)
+            System.arraycopy(materials, 0, acceptedMaterials, 0, acceptedCount)
+        }
+
         // ---- Texture transform data (centers + matrices per texture) --------
         val transforms = if (mesh.facesTexture != null && mesh.numTextures > 0) {
             computeTextureTransforms(mesh)
@@ -460,38 +505,44 @@ object ModernModelBuilder {
 
             val renderType = faceRenderType?.get(face)?.toInt() ?: 0
             if (renderType == 0) {
-                writeVertex(a, smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, a, 0),
-                    smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, a, 1),
-                    smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, a, 2), uv[0], uv[1], rgba)
-                writeVertex(b, smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, b, 0),
-                    smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, b, 1),
-                    smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, b, 2), uv[2], uv[3], rgba)
-                writeVertex(c, smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, c, 0),
-                    smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, c, 1),
-                    smoothNormalX(smoothX, smoothY, smoothZ, smoothCount, c, 2), uv[4], uv[5], rgba)
+                val ka = if (smoothCount[a] == 0) 0f else smoothNormalScale / smoothCount[a]
+                val kb = if (smoothCount[b] == 0) 0f else smoothNormalScale / smoothCount[b]
+                val kc = if (smoothCount[c] == 0) 0f else smoothNormalScale / smoothCount[c]
+                writeVertex(a, smoothX[a] * ka, smoothY[a] * ka, smoothZ[a] * ka, uv[0], uv[1], rgba)
+                writeVertex(b, smoothX[b] * kb, smoothY[b] * kb, smoothZ[b] * kb, uv[2], uv[3], rgba)
+                writeVertex(c, smoothX[c] * kc, smoothY[c] * kc, smoothZ[c] * kc, uv[4], uv[5], rgba)
             } else {
-                // Flat shading: the face normal on all three vertices.
+                // Flat shading: the face normal (length 256, magnitude 0 in legacy) on
+                // all three vertices at legacy's 2/contrast.
                 computeFaceNormal(face)
-                writeVertex(a, faceNormal[0], faceNormal[1], faceNormal[2], uv[0], uv[1], rgba)
-                writeVertex(b, faceNormal[0], faceNormal[1], faceNormal[2], uv[2], uv[3], rgba)
-                writeVertex(c, faceNormal[0], faceNormal[1], faceNormal[2], uv[4], uv[5], rgba)
+                writeVertex(a, faceNormal[0] * flatNormalScale, faceNormal[1] * flatNormalScale, faceNormal[2] * flatNormalScale, uv[0], uv[1], rgba)
+                writeVertex(b, faceNormal[0] * flatNormalScale, faceNormal[1] * flatNormalScale, faceNormal[2] * flatNormalScale, uv[2], uv[3], rgba)
+                writeVertex(c, faceNormal[0] * flatNormalScale, faceNormal[1] * flatNormalScale, faceNormal[2] * flatNormalScale, uv[4], uv[5], rgba)
             }
         }
-        // ---- Group face indices by material (untextured first, then by id) ---
-        val materialToIndices = LinkedHashMap<Int, MutableList<Int>>()
-        for (i in 0 until acceptedCount) {
-            val materialId = if (acceptedMaterials[i] < 0) -1 else acceptedMaterials[i]
-            val indices = materialToIndices.getOrPut(materialId) { mutableListOf() }
-            val base = i * 3
-            indices.add(base)
-            indices.add(base + 1)
-            indices.add(base + 2)
-        }
-        val batches = materialToIndices.keys
-            .sortedBy { if (it < 0) Int.MIN_VALUE else it }
-            .map { materialId ->
-                BuiltModel.TextureBatch(materialId, materialToIndices[materialId]!!.toIntArray())
+        // ---- Material runs in emission order (see the sort above) ------------
+        val batches = ArrayList<BuiltModel.TextureBatch>()
+        run {
+            var runStart = 0
+            while (runStart < acceptedCount) {
+                val materialId = if (acceptedMaterials[runStart] < 0) -1 else acceptedMaterials[runStart]
+                var runEnd = runStart + 1
+                while (runEnd < acceptedCount &&
+                    (if (acceptedMaterials[runEnd] < 0) -1 else acceptedMaterials[runEnd]) == materialId
+                ) runEnd++
+                val indices = IntArray((runEnd - runStart) * 3)
+                var c = 0
+                for (i in runStart until runEnd) {
+                    val base = i * 3
+                    indices[c] = base
+                    indices[c + 1] = base + 1
+                    indices[c + 2] = base + 2
+                    c += 3
+                }
+                batches.add(BuiltModel.TextureBatch(materialId, indices))
+                runStart = runEnd
             }
+        }
 
         return BuiltModel(
             id = contentHash(vertexArray, batches),

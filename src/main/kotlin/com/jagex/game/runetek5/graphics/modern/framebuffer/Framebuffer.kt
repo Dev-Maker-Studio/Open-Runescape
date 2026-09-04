@@ -402,6 +402,9 @@ class MultisampleFramebuffer(
      */
     fun getResolvedTexture(): Int = resolveFbo?.getColorTexture(0) ?: 0
 
+    /** GL name of the multisampled framebuffer object. */
+    fun getId(): Int = fboId
+
     /**
      * Resizes the framebuffer.
      */

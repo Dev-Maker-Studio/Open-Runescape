@@ -97,6 +97,9 @@ class ModernParticleRenderer {
     /**
      * Initializes the renderer. Must be called on the GL thread before rendering.
      */
+    private val PARTICLE_POS_DIAG = System.getProperty("render.particlediag") != null
+    private var posDiagTick = 0
+
     fun initialize() {
         if (isInitialized) return
 
@@ -212,7 +215,9 @@ class ModernParticleRenderer {
         fogEnd: Float,
         fogR: Float,
         fogG: Float,
-        fogB: Float
+        fogB: Float,
+        /** The scene's tracked view-projection (row-major, RS clip space); when given it replaces proj x view. */
+        vpOverride: FloatArray? = null
     ) {
         if (!isInitialized) return
 
@@ -261,6 +266,10 @@ class ModernParticleRenderer {
         // reproduces the legacy row-vector clip result (the same "straight upload"
         // trick used by the ground/model batchers).
         val vpMatrix = FloatArray(16)
+        if (vpOverride != null) {
+            System.arraycopy(vpOverride, 0, vpMatrix, 0, 16)
+            vpMatrix[1] = -vpMatrix[1]; vpMatrix[5] = -vpMatrix[5]; vpMatrix[9] = -vpMatrix[9]; vpMatrix[13] = -vpMatrix[13]
+        } else {
         for (row in 0..3) {
             for (col in 0..3) {
                 var sum = 0f
@@ -276,6 +285,7 @@ class ModernParticleRenderer {
         vpMatrix[5] = -vpMatrix[5]
         vpMatrix[9] = -vpMatrix[9]
         vpMatrix[13] = -vpMatrix[13]
+        }
 
         // Setup GL state for particle rendering
         GLWrapper.enable(GLWrapper.Constants.BLEND)
@@ -316,6 +326,14 @@ class ModernParticleRenderer {
             s.unbind()
             GLWrapper.depthMask(true)
             return
+        }
+        if (PARTICLE_POS_DIAG && (tree.child as? PointEntity)?.materialId == 744 && posDiagTick++ % 40 == 0) {
+            val sb = StringBuilder("[ParticlePos] modern n=$totalParticles")
+            var q = tree.child; var k = 0
+            while (q != null && q !== tree && k < 4) { val pe = q as PointEntity; sb.append(" p$k=(${pe.x shr 12},${pe.y shr 12},${pe.z shr 12} sz=${pe.size shr 12} mat=${pe.materialId})"); q = q.child; k++ }
+            var yMin = Int.MAX_VALUE; var yMax = Int.MIN_VALUE; var qq = tree.child; while (qq != null && qq !== tree) { val yy = (qq as PointEntity).y shr 12; if (yy < yMin) yMin = yy; if (yy > yMax) yMax = yy; qq = qq.child }; sb.append(" yRange=$yMin..$yMax")
+            sb.append(" view14=${viewMatrixFloats[14]} vp13=${vpOverride?.get(13)}")
+            System.err.println(sb)
         }
 
         // Phase 2: Compute bucket parameters

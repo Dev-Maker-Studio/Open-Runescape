@@ -4,6 +4,18 @@
 in vec4 vColor;
 in vec2 vTexCoord;
 in float vFogFactor;
+in vec2 vWorldXZ;
+
+// Native ground shadow overlay. One R8 texel per shadow cell over the whole ground,
+// holding what legacy's ShadowTileGL.regenerateTexture puts in its per-chunk alpha
+// textures: 68 where the shadow map is non-zero, neighbourCount*17 on the fringe.
+// Legacy draws that texture over the terrain as a REPLACE + alpha-blended quad, i.e.
+// dst *= 1 - texel, with fog applied to the overlay too; fog(ground*(1-a)) is the
+// same number, so applying it here before fog is exact. LINEAR filtering supplies
+// the same soft edge legacy's linear-filtered chunk textures do.
+uniform bool uGroundShadowEnabled;
+uniform sampler2D uGroundShadowTex;
+uniform float uGroundShadowScale;   // 1 / (worldUnitsPerTexel * mapWidth)
 
 // Uniforms
 uniform sampler2D uTexture;
@@ -52,6 +64,10 @@ void main() {
     } else {
         // No texture: use vertex color directly
         color = vColor;
+    }
+
+    if (uGroundShadowEnabled) {
+        color.rgb *= 1.0 - texture(uGroundShadowTex, vWorldXZ * uGroundShadowScale).r;
     }
 
     // Apply fog

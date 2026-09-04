@@ -21,6 +21,8 @@ import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.RETEXTURE
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.TINT
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
+import com.jagex.game.runetek5.graphics.model.ModelGL
+import com.jagex.game.runetek5.graphics.model.PoseCopyPair
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.MathUtils
@@ -204,7 +206,8 @@ open class NPCType {
         animatingSequence: Array<Sequence?>?,
         submeshRotations: IntArray?,
         submeshRotationOffset: Int,
-        customisation: NPCTypeCustomisation?
+        customisation: NPCTypeCustomisation?,
+        privatePool: PoseCopyPair? = null
     ): Model? {
         return getAnimatedBodymodel(
             toolkit,
@@ -218,7 +221,8 @@ open class NPCType {
             submeshRotationOffset,
             customisation,
             this.npcBasId,
-            true
+            true,
+            privatePool
         )
     }
 
@@ -256,7 +260,13 @@ open class NPCType {
         submeshRotationOffset: Int,
         npcCustomisation: NPCTypeCustomisation?,
         basId: Int,
-        ignoreOverrideBas: Boolean
+        ignoreOverrideBas: Boolean,
+        /**
+         * Return a model the caller may keep across frames. copy(4) hands back the
+         * toolkit's SHARED per-type slot object (legacy draws immediately, so the next
+         * NPC overwriting it is fine); a memoised pose must own its object.
+         */
+        privatePool: PoseCopyPair? = null
     ): Model? {
         if (this.alternativeIds != null) {
             val npctype = getMultiNpc(varProvider)
@@ -272,7 +282,8 @@ open class NPCType {
                 submeshRotationOffset,
                 npcCustomisation,
                 basId,
-                ignoreOverrideBas
+                ignoreOverrideBas,
+                privatePool
             )
         }
         var displacementFunctionMask = functionMask
@@ -427,7 +438,8 @@ open class NPCType {
                 this.npcTypeList!!.bodymodelCache.put(model, npcHash)
             }
         }
-        val copiedModel = model!!.copy(4.toByte(), displacementFunctionMask, true)
+        val copiedModel = if (privatePool != null && model is ModelGL) privatePool.copy(model as ModelGL, displacementFunctionMask) else model!!.copy(4.toByte(), displacementFunctionMask, true)
+        if (privatePool != null && copiedModel is ModelGL && model is ModelGL) copiedModel.detachSharedNormals(model as ModelGL)
         var modifiesSubmesh = false
         if (submeshRotations != null) {
             for (index in 0 until 12) {

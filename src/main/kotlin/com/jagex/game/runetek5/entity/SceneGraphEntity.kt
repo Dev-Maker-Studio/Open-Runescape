@@ -24,6 +24,13 @@ abstract class SceneGraphEntity(
     @JvmField var child: SceneGraphEntity? = null
     @JvmField var floorDepth: Int = 0
 
+    /**
+     * Set by a deferred toolkit that holds this static entity's draw in a retained
+     * store; while the retained store is active the scene walk skips the entity and
+     * the toolkit resubmits it itself (see RetainedSceneHook).
+     */
+    @JvmField var modernRetained: Boolean = false
+
     abstract fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean
 
     abstract fun removeTileShadow()

@@ -41,6 +41,10 @@ open class GroundGL(
 
     companion object {
         @JvmStatic var shadowProbeTick = 0
+        private val SUN_PROBE = System.getProperty("render.sunprobe") != null
+        /** -Drender.groundshadow=false skips the legacy shadow overlay (A/B aid). */
+        private val GROUND_SHADOW_OVERLAY = System.getProperty("render.groundshadow")?.equals("false", true) != true
+        private var sunProbeTick = 0
         @JvmField val GROUND_MATRIX = FloatArray(16)
     }
 
@@ -73,6 +77,8 @@ open class GroundGL(
      * had not changed. The renderer now uploads only when this revision moves.
      */
     @JvmField var modernVertexRevision: Int = 0
+    /** Hash of the visible tile set of the frame being drawn (see renderShadows). */
+    @JvmField var modernVisibleStamp: Long = 0L
 
     /** GL name of the resident copy of [modernVertexData], 0 until first upload. */
     @JvmField var modernVboId: Int = 0
@@ -277,17 +283,76 @@ open class GroundGL(
             activeToolkit.setupMatrixRendering()
             activeToolkit.setLightingEnabled((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0)
 
-            for (tileX in goundMaterialNodes!!.indices) {
-                (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
+            // -Drender.sunprobe: the exact lighting inputs this ground pass sees, so the
+            // two toolkits can be compared on the same scene (a brightness gap between
+            // them is either these numbers or the shader, never both).
+            if (SUN_PROBE && sunProbeTick++ % 300 == 100) {
+                val tk = activeToolkit
+                val sd = tk.sunDirection
+                System.err.println(
+                    "[SunProbe] toolkit=${tk.javaClass.simpleName} hd=${(waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0} " +
+                        "sunBrightness=${tk.sunBrightness} sunColorIntensity=${tk.sunColorIntensity} " +
+                        "antiSunColorIntensity=${tk.antiSunColorIntensity} " +
+                        "sunDir=(${sd[0]},${sd[1]},${sd[2]}) sunColor=(${tk.sunColorRed},${tk.sunColorGreen},${tk.sunColorBlue}) " +
+                        "fog=${Integer.toHexString(tk.fogColor)} density=${tk.fogDensity} start=${tk.fogStartPosition} end=${tk.fogEndPosition} " +
+                        "materials=${goundMaterialNodes?.size} visibleTiles=$visibleTileCount"
+                )
+                if (tk !is ModernGLToolkit) {
+                    // Fixed-function state as GL holds it right now, not as the toolkit
+                    // fields claim. Queried through LWJGL against the current context.
+                    try {
+                        org.lwjgl.opengl.GL.createCapabilities()
+                        val f = FloatArray(4)
+                        val i = IntArray(4)
+                        val sb = StringBuilder("[SunProbeGL]")
+                        org.lwjgl.opengl.GL11.glGetFloatv(org.lwjgl.opengl.GL11.GL_LIGHT_MODEL_AMBIENT, f); sb.append(" modelAmbient=${f.toList()}")
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_LIGHTING, i); sb.append(" lighting=${i[0]}")
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_NORMALIZE, i); sb.append(" normalize=${i[0]}")
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL, i); sb.append(" rescale=${i[0]}")
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_COLOR_MATERIAL, i); sb.append(" colorMaterial=${i[0]}")
+                        org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL11.GL_COLOR_MATERIAL_PARAMETER, i); sb.append(" cmParam=${i[0]}")
+                        for (l in 0 until 3) {
+                            val light = org.lwjgl.opengl.GL11.GL_LIGHT0 + l
+                            org.lwjgl.opengl.GL11.glGetIntegerv(light, i); sb.append(" L$l[on=${i[0]}")
+                            org.lwjgl.opengl.GL11.glGetLightfv(light, org.lwjgl.opengl.GL11.GL_AMBIENT, f); sb.append(" amb=${f.toList()}")
+                            org.lwjgl.opengl.GL11.glGetLightfv(light, org.lwjgl.opengl.GL11.GL_DIFFUSE, f); sb.append(" dif=${f.toList()}")
+                            org.lwjgl.opengl.GL11.glGetLightfv(light, org.lwjgl.opengl.GL11.GL_SPECULAR, f); sb.append(" spec=${f.toList()}")
+                            org.lwjgl.opengl.GL11.glGetLightfv(light, org.lwjgl.opengl.GL11.GL_POSITION, f); sb.append(" pos=${f.toList()}]")
+                        }
+                        org.lwjgl.opengl.GL11.glGetMaterialfv(org.lwjgl.opengl.GL11.GL_FRONT, org.lwjgl.opengl.GL11.GL_EMISSION, f); sb.append(" matEmission=${f.toList()}")
+                        org.lwjgl.opengl.GL11.glGetMaterialfv(org.lwjgl.opengl.GL11.GL_FRONT, org.lwjgl.opengl.GL11.GL_SPECULAR, f); sb.append(" matSpec=${f.toList()}")
+                        val mv = FloatArray(16)
+                        org.lwjgl.opengl.GL11.glGetFloatv(org.lwjgl.opengl.GL11.GL_MODELVIEW_MATRIX, mv); sb.append(" modelview=${mv.toList()}")
+                        System.err.println(sb)
+                    } catch (e: Throwable) {
+                        System.err.println("[SunProbeGL] failed: $e")
+                    }
+                }
             }
 
-            // Native ground shadows for the modern pipeline: hand the shadow intensity
-            // map to the ground renderer, which samples it in-shader. No fixed function.
+            // Native ground shadows for the modern pipeline: select THIS ground's shadow
+            // map BEFORE its materials draw; the ground shader samples it per fragment.
+            // No fixed function.
             val sm = shadowMapper
             if (sm != null && activeToolkit is ModernGLToolkit) {
                 val texelSize = (width * tileUnits).toFloat() / (sm.width - 2).toFloat()
                 (activeToolkit as ModernGLToolkit).groundRendererForShadows()
-                    ?.setShadowMap(sm.shadowMapperData, sm.width, sm.length, texelSize, sm.shadowVersion)
+                    ?.setShadowMapper(sm, texelSize)
+            }
+
+            // Stamp of this frame's visible tile set. The modern ground path keys its
+            // per-material index lists and resident index buffers on it, so a frame
+            // whose camera did not move rebuilds and re-uploads nothing.
+            if (activeToolkit is ModernGLToolkit) {
+                var h = 1469598103934665603L xor visibleTileCount.toLong()
+                for (i in 0 until visibleTileCount) {
+                    h = (h xor visibleTileIndices[i].toLong()) * 1099511628211L
+                }
+                modernVisibleStamp = h xor (modernVertexRevision.toLong() shl 40)
+            }
+
+            for (tileX in goundMaterialNodes!!.indices) {
+                (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
             }
 
             // FIXED-FUNCTION, LEGACY TOOLKIT ONLY. The modern pipeline must never run
@@ -331,7 +396,7 @@ open class GroundGL(
                     "worldUnits=${width * tileUnits}x${length * tileUnits}")
             }
             // FIXED-FUNCTION, LEGACY TOOLKIT ONLY (see above).
-            if (shadowMapper != null && activeToolkit !is ModernGLToolkit) {
+            if (shadowMapper != null && activeToolkit !is ModernGLToolkit && GROUND_SHADOW_OVERLAY) {
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
@@ -749,6 +814,15 @@ open class GroundGL(
         materialized: Array<BooleanArray>
     ) {
         val activeDisplay = activeToolkit.getDisplay()
+        if (currentColorCount > 0 && activeToolkit is ModernGLToolkit) {
+            // Modern toolkit: never the fixed-function path below. If the modern
+            // renderer cannot draw yet, the slice is skipped (and the miss is loud in
+            // the diag), never rendered through legacy GL.
+            if (!activeToolkit.renderMinimapFloorModern(this, centerOffsetX, centerOffsetY, startX, startY, endX, endY, materialized)) {
+                activeToolkit.countLegacySkip("GroundGL.renderMinimapFloor")
+            }
+            return
+        }
         if (currentColorCount > 0 && activeDisplay != null) {
             activeToolkit.setOrthoMatrixMode()
             activeToolkit.toggleFog(false)

@@ -2,8 +2,13 @@ package com.jagex.game.runetek5.graphics.modern.debug
 
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteGL
-import org.lwjgl.opengl.GL33
-import org.lwjgl.system.MemoryUtil
+import jaggl.OpenGL
+import com.jagex.game.runetek5.toolkit.opengl.GL_PACK_ALIGNMENT
+import com.jagex.game.runetek5.toolkit.opengl.GL_RGBA
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_2D
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_HEIGHT
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_WIDTH
+import com.jagex.game.runetek5.toolkit.opengl.GL_UNSIGNED_BYTE
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -30,28 +35,28 @@ object MinimapDump {
         done = true
 
         try {
-            GL33.glBindTexture(GL33.GL_TEXTURE_2D, handle)
-            val w = GL33.glGetTexLevelParameteri(GL33.GL_TEXTURE_2D, 0, GL33.GL_TEXTURE_WIDTH)
-            val h = GL33.glGetTexLevelParameteri(GL33.GL_TEXTURE_2D, 0, GL33.GL_TEXTURE_HEIGHT)
+            // jaggl entry points: valid on both toolkits (the legacy toolkit never
+            // creates LWJGL capabilities, so GL33.* would abort there).
+            OpenGL.glBindTexture(GL_TEXTURE_2D, handle)
+            val w = OpenGL.glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH)
+            val h = OpenGL.glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT)
             if (w <= 0 || h <= 0) return
 
-            val buf = MemoryUtil.memAlloc(w * h * 4)
-            GL33.glPixelStorei(GL33.GL_PACK_ALIGNMENT, 1)
-            GL33.glGetTexImage(GL33.GL_TEXTURE_2D, 0, GL33.GL_RGBA, GL33.GL_UNSIGNED_BYTE, buf)
+            val buf = ByteArray(w * h * 4)
+            OpenGL.glPixelStorei(GL_PACK_ALIGNMENT, 1)
+            OpenGL.glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf)
 
             val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
             for (y in 0 until h) {
                 for (x in 0 until w) {
                     val i = (y * w + x) * 4
-                    val r = buf.get(i).toInt() and 0xff
-                    val g = buf.get(i + 1).toInt() and 0xff
-                    val b = buf.get(i + 2).toInt() and 0xff
-                    val a = buf.get(i + 3).toInt() and 0xff
+                    val r = buf[i].toInt() and 0xff
+                    val g = buf[i + 1].toInt() and 0xff
+                    val b = buf[i + 2].toInt() and 0xff
+                    val a = buf[i + 3].toInt() and 0xff
                     img.setRGB(x, y, (a shl 24) or (r shl 16) or (g shl 8) or b)
                 }
             }
-            MemoryUtil.memFree(buf)
-
             val out = File("$prefix-$tag-${w}x$h.png")
             ImageIO.write(img, "png", out)
             System.err.println("[MinimapDump] wrote ${out.absolutePath}")

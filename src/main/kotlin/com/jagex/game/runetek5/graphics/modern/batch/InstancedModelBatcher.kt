@@ -11,9 +11,13 @@ import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TRIANGLE
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_BYTE
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_INT
 import com.jagex.game.runetek5.math.Matrix43
+import org.lwjgl.opengl.ARBBindlessTexture.glGetTextureHandleARB
+import org.lwjgl.opengl.ARBBindlessTexture.glMakeTextureHandleNonResidentARB
+import org.lwjgl.opengl.ARBBindlessTexture.glMakeTextureHandleResidentARB
 import org.lwjgl.opengl.GL33.*
 import org.lwjgl.opengl.GL42.glDrawElementsInstancedBaseInstance
 import org.lwjgl.opengl.GL43.GL_DRAW_INDIRECT_BUFFER
+import org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER
 import org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
@@ -69,6 +73,12 @@ class InstancedModelBatcher {
          *  texture that legitimately uses its alpha opaque (cape icon backgrounds,
          *  roof tiles). -Drender.texalpha=false restores that behaviour. */
         @JvmStatic val TEX_ALPHA = System.getProperty("render.texalpha")?.equals("false", true) != true
+
+        /** Per-draw bindless materials (one multi-draw per pass). -Drender.bindless=false disables. */
+        @JvmStatic val BINDLESS_ENABLED = System.getProperty("render.bindless")?.equals("false", true) != true
+
+        /** Debug: models show only their point-light term (-Drender.lightonly=1). */
+        @JvmStatic val LIGHT_ONLY_DEBUG = System.getProperty("render.lightonly") != null
         /**
          * Alpha cutoff for the model pass.
          *
@@ -160,6 +170,9 @@ class InstancedModelBatcher {
          */
         private const val EVICT_TARGET_RATIO = 0.65f
 
+        /** -Drender.transsort=false draws translucent items in submission order (A/B aid). */
+        @JvmStatic val TRANS_SORT = System.getProperty("render.transsort")?.equals("false", true) != true
+
         /** Minimum instance count to use instancing (below this, falls through to regular batcher) */
         const val INSTANCING_THRESHOLD = 2
 
@@ -237,6 +250,8 @@ class InstancedModelBatcher {
     ) {
         /** Per-instance model matrices for the CURRENT frame (16 floats each, in place — no per-instance allocation) */
         var instanceData: FloatArray = FloatArray(INSTANCE_FLOATS * 16)
+        /** Bumped whenever this entry's index ranges change (refit); block templates compare it. */
+        var layoutStamp: Int = 0
         var instanceCount: Int = 0
 
         /**
@@ -287,6 +302,11 @@ class InstancedModelBatcher {
         }
 
         /** Reserves space for one more instance and returns its base offset into [instanceData]. */
+        fun ensureInstanceCapacity(instances: Int) {
+            val needed = instances * INSTANCE_FLOATS
+            if (needed > instanceData.size) instanceData = instanceData.copyOf(maxOf(instanceData.size * 2, needed))
+        }
+
         fun reserveInstanceSlot(): Int {
             val base = instanceCount * INSTANCE_FLOATS
             if (base + INSTANCE_FLOATS > instanceData.size) {
@@ -323,6 +343,61 @@ class InstancedModelBatcher {
     private class DrawRef(val mesh: MeshEntry, val batch: MaterialBatchEntry)
 
     /**
+     * A prebuilt opaque draw for a group of resident meshes (the retained scene's
+     * per-chunk block): packed instances plus an indirect-command template whose
+     * baseInstance is relative to the block. A frame stitches it in with two array
+     * copies and a base patch instead of a per-instance/per-command build.
+     */
+    class BlockDraw {
+        var floats = FloatArray(0)
+        var count = 0
+        /** 5 ints per command: indexCount, instanceCount, firstIndex, 0, relative baseInstance. */
+        var cmds = IntArray(0)
+        var cmdCount = 0
+        /** Material id per command. */
+        var mats = IntArray(0)
+        /** Cached SSBO words (4 per command) and the handle revision they were resolved at. */
+        var matWords = IntArray(0)
+        var matWordsRevision = -1
+        val entries = ArrayList<MeshEntry>(16)
+        var entryLayout = IntArray(0)
+        var layoutRevision = -1
+        /** Frame base assigned by endFrame packing. */
+        var base = 0
+    }
+    /** Bumped by arena compaction (every entry's offsets move). */
+    var storeLayoutRevision = 0
+        private set
+    val bindlessActive: Boolean get() = bindless
+    private val blockDraws = ArrayList<BlockDraw>(256)
+
+    /** True while [b]'s template still describes its meshes' current arena layout. */
+    fun blockDrawValid(b: BlockDraw): Boolean {
+        if (b.layoutRevision != storeLayoutRevision) return false
+        val es = b.entries
+        for (i in es.indices) {
+            val e = es[i]
+            if (!e.resident || e.layoutStamp != b.entryLayout[i]) return false
+        }
+        return true
+    }
+
+    /** Queues a valid block for this frame's opaque multi-draw. */
+    fun submitBlockDraw(b: BlockDraw): Boolean {
+        if (!isFrameActive || !bindless || b.count == 0) return false
+        blockDraws.add(b)
+        val es = b.entries
+        for (i in es.indices) es[i].lastUsedFrame = frameCounter
+        instancedModels += b.count
+        instancesThisBatch += b.count
+        return true
+    }
+    // Per-frame command build scratch (bindless path): sort keys + parallel refs.
+    private var cmdKeys = LongArray(4096)
+    private var cmdEntry = arrayOfNulls<MeshEntry>(4096)
+    private var cmdBatch = arrayOfNulls<MaterialBatchEntry>(4096)
+
+    /**
      * Draws grouped by material, maintained as meshes are added and evicted rather
      * than rebuilt per frame.
      *
@@ -349,6 +424,106 @@ class InstancedModelBatcher {
 
     /** Heap staging for the frame's packed instance data; see [endFrame]. */
     private var instancePackScratch = FloatArray(4096 * INSTANCE_FLOATS)
+
+    /**
+     * Translucent submissions of the open batch, in SUBMISSION order.
+     *
+     * Legacy draws the scene's alpha bucket after every opaque entity and the floor,
+     * sorted back to front, and relies on nothing but that order for correct
+     * blending. Grouping those draws by material — what the opaque pass does — puts
+     * a translucent face in front of geometry that has not been drawn yet, and its
+     * depth write then rejects that geometry outright: whole locs vanish behind a
+     * tent canopy or a window. These items therefore never enter the per-entry
+     * instance lists; they are packed after the opaque instances and drawn one by
+     * one, in order, by [drawTranslucent].
+     */
+    private var translucentEntries = arrayOfNulls<MeshEntry>(256)
+    private var translucentMatrices = FloatArray(256 * INSTANCE_FLOATS)
+    private var translucentDepthWrite = BooleanArray(256)
+    /** Frame-wide translucent sequence number of each item (toolkit-assigned, monotonic). */
+    private var translucentSeq = IntArray(256)
+    /**
+     * Legacy sort key of each item: the scene's floorDepth (view-space depth of the
+     * entity, larger = farther). The alpha bucket is drawn far to near by this key
+     * (Scene.quicksortAbove), so the pass replays items sorted by it — which also lets
+     * items submitted out of walk order (retained statics) fall into their place.
+     */
+    private var translucentKey = IntArray(256)
+    private var translucentCount = 0
+    // Template items (retained translucent records): instance floats live in the
+    // chunk's array, commands and material words come from the chunk's templates.
+    private var translucentSrc = arrayOfNulls<FloatArray>(256)
+    private var translucentSrcOff = IntArray(256)
+    private var translucentTpl = arrayOfNulls<IntArray>(256)
+    private var translucentTplOff = IntArray(256)
+    private var translucentTplCount = IntArray(256)
+    private var translucentMatW = arrayOfNulls<IntArray>(256)
+    private var translucentMatOff = IntArray(256)
+
+    private fun ensureTranslucentCapacity() {
+        if (translucentCount < translucentEntries.size) return
+        val grown = translucentEntries.size * 2
+        translucentEntries = translucentEntries.copyOf(grown)
+        translucentMatrices = translucentMatrices.copyOf(grown * INSTANCE_FLOATS)
+        translucentDepthWrite = translucentDepthWrite.copyOf(grown)
+        translucentSeq = translucentSeq.copyOf(grown)
+        translucentKey = translucentKey.copyOf(grown)
+        translucentSrc = translucentSrc.copyOf(grown)
+        translucentSrcOff = translucentSrcOff.copyOf(grown)
+        translucentTpl = translucentTpl.copyOf(grown)
+        translucentTplOff = translucentTplOff.copyOf(grown)
+        translucentTplCount = translucentTplCount.copyOf(grown)
+        translucentMatW = translucentMatW.copyOf(grown)
+        translucentMatOff = translucentMatOff.copyOf(grown)
+    }
+
+    /**
+     * Translucent item whose instance floats ([src] at [srcOff], INSTANCE_FLOATS) and
+     * command template ([tpl] at [tplOff], [tplCount] commands of 5 ints, baseInstance
+     * ignored) plus material words ([matW] at [matOff], 4 per command) are prebuilt by
+     * the retained scene. Only the depth key is per frame.
+     */
+    fun appendTranslucentTemplate(entry: MeshEntry, src: FloatArray, srcOff: Int, seq: Int, depthKey: Int,
+                                  tpl: IntArray, tplOff: Int, tplCount: Int, matW: IntArray, matOff: Int): Boolean {
+        if (!isFrameActive || !bindless || !entry.resident) return false
+        ensureTranslucentCapacity()
+        val i = translucentCount++
+        translucentEntries[i] = entry
+        translucentDepthWrite[i] = true
+        translucentSeq[i] = seq
+        translucentKey[i] = depthKey
+        translucentSrc[i] = src; translucentSrcOff[i] = srcOff
+        translucentTpl[i] = tpl; translucentTplOff[i] = tplOff; translucentTplCount[i] = tplCount
+        translucentMatW[i] = matW; translucentMatOff[i] = matOff
+        entry.lastUsedFrame = frameCounter
+        instancedModels++
+        instancesThisBatch++
+        return true
+    }
+
+    /** Resolves the SSBO words of [count] material ids into [out] (4 ints each). */
+    fun fillMaterialWords(mats: IntArray, count: Int, out: IntArray, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int) {
+        for (k in 0 until count) {
+            val slot = resolveMaterial(mats[k], textureCache, combineModeOf)
+            out[k * 4] = matEntryLo[slot]; out[k * 4 + 1] = matEntryHi[slot]; out[k * 4 + 2] = matEntryFlags[slot]; out[k * 4 + 3] = 0
+        }
+    }
+    /** Item indices in draw order (key descending, then sequence), built by [endFrame]. */
+    private var translucentOrder = IntArray(256)
+    private var translucentSortScratch = LongArray(256)
+    /** Next position in [translucentOrder] that [drawTranslucent] will draw. */
+    private var translucentCursor = 0
+    /** Per-material-run groups of the translucent command list (see [drawTranslucent]). */
+    private var translucentGroupTex = IntArray(256)
+    private var translucentGroupDepth = BooleanArray(256)
+    private var translucentGroupFirst = IntArray(256)
+    private var translucentGroupCount = IntArray(256)
+    /** Packed-instance slot of translucent item 0; assigned by [endFrame]. */
+    private var translucentBase = 0
+    /** Translucent items packed by the last [endFrame], still drawable until the next [beginFrame]. */
+    private var translucentPacked = 0
+    /** Current capacity of the frame-wide instance buffer, in instances. Grows on demand. */
+    private var instanceCapacity = MAX_INSTANCES_PER_FRAME
     private var totalVertexCount = 0
     private var totalIndexCount = 0
 
@@ -377,6 +552,8 @@ class InstancedModelBatcher {
 
     /** Times a resident entry was found not to describe the incoming geometry. */
     private var mismatchReports = 0
+    /** Submissions streamed because their slot's resident shape was already drawn this frame. */
+    private var sameFrameShapeConflicts = 0
 
     /**
      * Whether [entry]'s resident geometry still has the same shape as [cachedModel].
@@ -451,6 +628,7 @@ class InstancedModelBatcher {
         markIndexRangeDirty(firstIndex, writeIndex - firstIndex)
 
         entry.vertexCount = newVertexCount
+        entry.layoutStamp++
         cachedModel.instanceEntry = entry
         refits++
         return true
@@ -458,6 +636,21 @@ class InstancedModelBatcher {
 
     /** Entries refitted in place since the last stats reset. */
     private var refits = 0
+    /** Translucent items folded into a preceding same-mesh command (diag). */
+    @JvmField var translucentRunsMerged = 0L
+    /** Commands emitted from retained block templates (diag). */
+    @JvmField var blockCommandsDrawn = 0L
+    /** Translucent items drawn from templates (diag). */
+    @JvmField var translucentTemplateItems = 0L
+    /**
+     * -Drender.mergeuploads=true uploads one merged span per frame instead of one copy
+     * per dirty range. Experiment only: it removed nothing (the ~40 ms present stalls
+     * turned out to be X-server contention, not per-copy GPU syncs) and a span across
+     * the arena costs 20-30 MB a frame. Off by default.
+     */
+    private val MERGE_UPLOADS = System.getProperty("render.mergeuploads")?.equals("true", true) == true
+    /** Bytes sent by merged dirty-span uploads (diag). */
+    @JvmField var mergedUploadBytes = 0L
 
 
     /** Index ranges already uploaded whose contents changed; see [dirtyRanges]. */
@@ -536,6 +729,120 @@ class InstancedModelBatcher {
      * available, letting a whole material's draws go out as one GL call.
      */
     private var indirectSupported = false
+
+    // ---- Bindless per-draw materials ------------------------------------------------
+    // With ARB_bindless_texture + ARB_shader_draw_parameters every indirect command
+    // carries its own material (texture handle, combine mode, alpha rule) in an SSBO
+    // indexed by gl_DrawID, so a whole pass is ONE multi-draw instead of one draw per
+    // texture change (~1200 a frame in the translucent pass alone). Sampling is the
+    // same texture object with the same sampler state, so the pixels do not change.
+    private var bindless = false
+    private var uDrawBaseLocation = -1
+    private var drawMatVbo = 0
+    private var drawMatScratch = IntArray(4096 * 4)
+    private var drawMatBuffer: IntBuffer? = null
+    private var drawMatCursor = 0
+    private val bindlessHandles = HashMap<Int, Long>()
+    /** Per-pass memo: material id -> (handle lo, handle hi, flags), stamped, no boxing. */
+    private var matEntryLo = IntArray(4096)
+    private var matEntryHi = IntArray(4096)
+    private var matEntryFlags = IntArray(4096)
+    private var matEntryStamp = IntArray(4096)
+    private var matEntryPass = 0
+
+    private fun beginMaterialPass() { matEntryPass++ }
+
+    /** Whether the per-draw material path is active (diag). */
+    fun isBindless(): Boolean = bindless
+
+    private fun textureHandle64(glTex: Int): Long {
+        val known = bindlessHandles[glTex]
+        if (known != null) return known
+        val h = glGetTextureHandleARB(glTex)
+        if (h != 0L) {
+            glMakeTextureHandleResidentARB(h)
+            bindlessHandles[glTex] = h
+            materialWordsRevision++
+        }
+        return h
+    }
+
+    /** The GL texture [glTex] is being deleted: its handle must not stay resident. */
+    fun releaseTextureHandle(glTex: Int) {
+        val h = bindlessHandles.remove(glTex) ?: return
+        glMakeTextureHandleNonResidentARB(h)
+        materialWordsRevision++
+    }
+
+    /**
+     * Appends one SSBO entry for a command of material [texId]:
+     * (handle lo, handle hi, flags, 0) with flags = textured | combine<<1 | texAlpha<<4.
+     */
+    /** Bumped whenever a bindless handle appears or goes away: cached per-draw material words are stale. */
+    var materialWordsRevision = 0
+        private set
+
+    /** Resolves (and caches for this pass) the SSBO words of [texId]; returns the cache slot. */
+    private fun resolveMaterial(texId: Int, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int): Int {
+        val slot = texId + 1
+        if (slot >= matEntryLo.size) {
+            val n = maxOf(slot + 1, matEntryLo.size * 2)
+            matEntryLo = matEntryLo.copyOf(n); matEntryHi = matEntryHi.copyOf(n)
+            matEntryFlags = matEntryFlags.copyOf(n); matEntryStamp = matEntryStamp.copyOf(n)
+        }
+        if (matEntryStamp[slot] != matEntryPass) {
+            val glTex = if (texId >= 0) textureCache(texId) else 0
+            val h = if (glTex > 0) textureHandle64(glTex) else 0L
+            var f = 0
+            if (h != 0L) f = 1 or ((combineModeOf(texId) and 7) shl 1) or (if (TEX_ALPHA && texHasAlpha(texId)) 16 else 0)
+            matEntryLo[slot] = h.toInt(); matEntryHi[slot] = (h ushr 32).toInt(); matEntryFlags[slot] = f
+            matEntryStamp[slot] = matEntryPass
+        }
+        return slot
+    }
+
+    private fun appendDrawMaterial(texId: Int, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int) {
+        val slot = texId + 1 // -1 (untextured) -> 0
+        if (slot >= matEntryLo.size) {
+            val n = maxOf(slot + 1, matEntryLo.size * 2)
+            matEntryLo = matEntryLo.copyOf(n); matEntryHi = matEntryHi.copyOf(n)
+            matEntryFlags = matEntryFlags.copyOf(n); matEntryStamp = matEntryStamp.copyOf(n)
+        }
+        val lo: Int
+        val hi: Int
+        val flags: Int
+        if (matEntryStamp[slot] != matEntryPass) {
+            val glTex = if (texId >= 0) textureCache(texId) else 0
+            val h = if (glTex > 0) textureHandle64(glTex) else 0L
+            var f = 0
+            if (h != 0L) {
+                f = 1 or ((combineModeOf(texId) and 7) shl 1) or (if (TEX_ALPHA && texHasAlpha(texId)) 16 else 0)
+            }
+            lo = h.toInt(); hi = (h ushr 32).toInt(); flags = f
+            matEntryLo[slot] = lo; matEntryHi[slot] = hi; matEntryFlags[slot] = flags
+            matEntryStamp[slot] = matEntryPass
+        } else {
+            lo = matEntryLo[slot]; hi = matEntryHi[slot]; flags = matEntryFlags[slot]
+        }
+        if (drawMatCursor + 4 > drawMatScratch.size) drawMatScratch = drawMatScratch.copyOf(drawMatScratch.size * 2)
+        val b = drawMatScratch
+        b[drawMatCursor] = lo; b[drawMatCursor + 1] = hi; b[drawMatCursor + 2] = flags; b[drawMatCursor + 3] = 0
+        drawMatCursor += 4
+    }
+
+    /** Uploads the entries appended since [drawMatCursor] was reset and binds them at SSBO binding 0. */
+    private fun uploadDrawMaterials() {
+        if (drawMatBuffer!!.capacity() < drawMatCursor) {
+            drawMatBuffer = MemoryUtil.memRealloc(drawMatBuffer!!, drawMatScratch.size)
+        }
+        val db = drawMatBuffer!!
+        db.clear()
+        db.put(drawMatScratch, 0, drawMatCursor)
+        db.flip()
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, drawMatVbo)
+        glBufferData(GL_SHADER_STORAGE_BUFFER, db, GL_STREAM_DRAW)
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, drawMatVbo)
+    }
     private var indirectVbo = 0
     private var indirectBuffer: IntBuffer? = null
 
@@ -584,10 +891,24 @@ class InstancedModelBatcher {
     fun initialize() {
         if (isInitialized) return
 
-        shader = createInstancedShader()
+        val caps0 = org.lwjgl.opengl.GL.getCapabilities()
+        val bindlessCaps = caps0.GL_ARB_bindless_texture && caps0.GL_ARB_shader_draw_parameters &&
+            (caps0.OpenGL43 || caps0.GL_ARB_shader_storage_buffer_object)
+        bindless = false
+        if (BINDLESS_ENABLED && bindlessCaps) {
+            try {
+                shader = createInstancedShader(bindless = true)
+                bindless = true
+            } catch (t: Throwable) {
+                System.err.println("[InstancedModelBatcher] bindless shader failed, using per-material binding: $t")
+                shader = null
+            }
+        }
+        if (shader == null) shader = createInstancedShader(bindless = false)
 
         // Cache uniform locations
         shader!!.bind()
+        uDrawBaseLocation = shader!!.getUniformLocation("uDrawBase")
         uTextureLocation = shader!!.getUniformLocation("uTexture")
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
         uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
@@ -596,8 +917,8 @@ class InstancedModelBatcher {
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
         uPointLightCountLocation = shader!!.getUniformLocation("uPointLightCount")
-        uPointLightPosLocation = shader!!.getUniformLocation("uPointLightPos")
-        uPointLightColorLocation = shader!!.getUniformLocation("uPointLightColor")
+        uPointLightPosLocation = shader!!.getArrayUniformLocation("uPointLightPos")
+        uPointLightColorLocation = shader!!.getArrayUniformLocation("uPointLightColor")
         uSunBrightnessLocation = shader!!.getUniformLocation("uSunBrightness")
         uSunColorLocation = shader!!.getUniformLocation("uSunColor")
         uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
@@ -624,7 +945,12 @@ class InstancedModelBatcher {
             indirectVbo = glGenBuffers()
             indirectBuffer = MemoryUtil.memAllocInt(indirectScratch.size)
         }
-        println("[InstancedModelBatcher] baseInstance=$baseInstanceSupported multiDrawIndirect=$indirectSupported")
+        if (bindless && !indirectSupported) bindless = false
+        if (bindless) {
+            drawMatVbo = glGenBuffers()
+            drawMatBuffer = MemoryUtil.memAllocInt(drawMatScratch.size)
+        }
+        println("[InstancedModelBatcher] baseInstance=$baseInstanceSupported multiDrawIndirect=$indirectSupported bindless=$bindless uniforms[pos=$uPointLightPosLocation col=$uPointLightColorLocation count=$uPointLightCountLocation]")
 
         // Setup VAO with vertex format + instanced attributes
         setupVAO()
@@ -695,9 +1021,9 @@ class InstancedModelBatcher {
      * Creates the instanced rendering shader.
      * Uses per-instance attributes (mat4 at locations 5-8) instead of UBO + modelIndex.
      */
-    private fun createInstancedShader(): ShaderProgram {
+    private fun createInstancedShader(bindless: Boolean): ShaderProgram {
         val vertexSource = """
-            #version 330 core
+            ${if (bindless) "#version 430 core\n            #extension GL_ARB_shader_draw_parameters : require" else "#version 330 core"}
             #define MAX_POINT_LIGHTS $MAX_POINT_LIGHTS
 
             // Per-vertex attributes
@@ -745,8 +1071,10 @@ class InstancedModelBatcher {
             out vec2 vTexCoord;
             out vec4 vColor;
             out float vFogFactor;
+            ${if (bindless) "flat out int vDrawId;" else ""}
 
             void main() {
+                ${if (bindless) "vDrawId = gl_DrawIDARB;" else ""}
                 // Reconstruct model matrix from per-instance attributes
                 mat4 modelMat = mat4(aModelMatCol0, aModelMatCol1, aModelMatCol2, aModelMatCol3);
 
@@ -763,6 +1091,7 @@ class InstancedModelBatcher {
                 float lightIntensity = uSunBrightness + dotProduct * (dotProduct < 0.0 ? uContrastNeg : uContrastPos);
 
                 vec3 litRGB = aColor.rgb * uSunColor * lightIntensity;
+                ${if (LIGHT_ONLY_DEBUG) "litRGB = vec3(0.0);" else ""}
 
                 // Point lights add on top of the sun term, exactly as fixed-function
                 // accumulates GL_LIGHT2+ before the final clamp.
@@ -774,12 +1103,25 @@ class InstancedModelBatcher {
                     if (i < 0) continue;
                     vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
                     float d2 = dot(toLight, toLight);
-                    float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+                    float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6); // legacy: kc=0, kl=0, kq=1/size^2
                     float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
                     litRGB += aColor.rgb * uPointLightColor[i] * (att * ndotl);
                 }
 
                 litRGB = clamp(litRGB, 0.0, 1.0);
+                ${if (LIGHT_ONLY_DEBUG) """
+                {
+                    int i0 = int(aLightIdx[0]);
+                    if (i0 >= 0) {
+                        vec3 tl = uPointLightPos[i0].xyz - worldPos.xyz;
+                        float a0 = 1.0 / max(uPointLightPos[i0].w * dot(tl, tl), 1e-6);
+                        float c0 = dot(normalize(worldNormal), normalize(tl));
+                        litRGB = uPointLightColor[i0] * 2.0 + vec3(0.0, 0.0, 0.5 + 0.5 * c0) * 0.0;
+                    } else {
+                        litRGB = vec3(0.0, 0.0, 0.0);
+                    }
+                }
+                """ else ""}
 
                 vColor = vec4(litRGB, aColor.a);
 
@@ -794,28 +1136,43 @@ class InstancedModelBatcher {
         """.trimIndent()
 
         val fragmentSource = """
-            #version 330 core
+            ${if (bindless) "#version 430 core\n            #extension GL_ARB_bindless_texture : require" else "#version 330 core"}
 
             in vec2 vTexCoord;
             in vec4 vColor;
             in float vFogFactor;
             uniform vec3 uFogColor2;
 
+            uniform float uAlphaThreshold;
+            ${if (bindless) """
+            // Per-draw material: (texture handle lo, hi, flags, 0). flags bit0 = textured,
+            // bits1-3 = legacy combine mode, bit4 = texture alpha rule. Indexed by the
+            // multi-draw command index plus uDrawBase (the group's first command).
+            layout(std430, binding = 0) readonly buffer DrawMaterials { uvec4 drawMat[]; };
+            flat in int vDrawId;
+            uniform int uDrawBase;
+            """ else """
             uniform sampler2D uTexture;
             uniform bool uTextureEnabled;
-            uniform float uAlphaThreshold;
             // Legacy per-material texture combine mode (see OptimizedFrameBatcher /
             // groundTextured.frag). REPLACE(1) ignores the per-face vColor — required
             // or textured faces with junk face colors render tinted (green-quad bug).
             uniform int uCombineMode;
             uniform bool uTexAlpha;
+            """}
 
             out vec4 fragColor;
 
             void main() {
                 vec4 color;
+                ${if (bindless) """
+                uvec4 m = drawMat[uDrawBase + vDrawId];
+                bool uTextureEnabled = (m.z & 1u) != 0u;
+                int uCombineMode = int((m.z >> 1u) & 7u);
+                bool uTexAlpha = (m.z & 16u) != 0u;
+                """ else ""}
                 if (uTextureEnabled) {
-                    vec4 texColor = texture(uTexture, vTexCoord);
+                    ${if (bindless) "vec4 texColor = texture(sampler2D(m.xy), vTexCoord);" else "vec4 texColor = texture(uTexture, vTexCoord);"}
                     if (uCombineMode == 1) {
                         color = texColor;
                     } else if (uCombineMode == 3) {
@@ -853,6 +1210,9 @@ class InstancedModelBatcher {
     /**
      * Sets the view-projection matrix for this frame.
      */
+    /** Element [i] of the frame's stored (Y-flipped) VP, for diagnostics. */
+    fun vpElement(i: Int): Float = vpMatrix?.get(i) ?: Float.NaN
+
     fun setViewProjection(vp: FloatArray) {
         // Copy VP and negate Y row: RS VP has Y-down clip space, OpenGL expects Y-up.
         val flipped = vp.copyOf()
@@ -926,7 +1286,12 @@ class InstancedModelBatcher {
         // and only for the entries that actually collected instances.
         for (i in activeEntries.indices) activeEntries[i].resetInstances()
         activeEntries.clear()
+        blockDraws.clear()
         instancesThisBatch = 0
+        for (i in 0 until translucentCount) translucentEntries[i] = null
+        translucentCount = 0
+        translucentPacked = 0
+        translucentCursor = 0
 
         // NOTE: the presented-frame stats (instancedDrawCalls/Triangles/Models/...)
         // are NOT reset here — beginFrame runs at every mid-frame batch reopen, which
@@ -978,7 +1343,19 @@ class InstancedModelBatcher {
          * this [modelId] (an animated model that changed pose). The resident copy is
          * overwritten in place and queued for re-upload.
          */
-        geometryDirty: Boolean = false
+        geometryDirty: Boolean = false,
+        /**
+         * Draw this instance in the ordered translucent pass instead of the
+         * material-grouped opaque pass (the scene's alpha bucket; see
+         * [drawTranslucent]).
+         */
+        translucent: Boolean = false,
+        /** Depth writes for this instance (legacy setDepthBuffering state at submission). */
+        depthWrite: Boolean = true,
+        /** Frame-wide translucent sequence number (orders this item against other passes). */
+        seq: Int = 0,
+        /** Legacy sort key (Scene floorDepth) for the translucent pass; see [translucentKey]. */
+        depthKey: Int = 0
     ): Boolean {
         if (!isFrameActive) return false
 
@@ -1015,6 +1392,18 @@ class InstancedModelBatcher {
             // (hash collision, external invalidation, or an animated model whose face
             // set or material grouping changed) — drop that entry and re-append it
             // below. No whole-store rebuild.
+            //
+            // Unless the entry was already drawn from THIS frame: pose models come
+            // from a pool of ModelGL slots, and one slot can carry two different
+            // entities' poses in a single frame. Re-appending here every frame grew
+            // the arena, re-uploaded the tail each frame and forced compactions
+            // (~0.45 ms/frame of geometry upload at the spawn hub). Let the caller
+            // stream this one submission instead; the resident copy stays valid for
+            // the pose that first claimed the slot this frame.
+            if (entry.lastUsedFrame == frameCounter) {
+                sameFrameShapeConflicts++
+                return false
+            }
             if (mismatchReports < 20) {
                 mismatchReports++
                 println("[InstancedModelBatcher] resident entry no longer matches key=$modelId " +
@@ -1118,6 +1507,13 @@ class InstancedModelBatcher {
         // against eviction for the rest of it.
         entry.lastUsedFrame = frameCounter
 
+        if (translucent) {
+            appendTranslucent(entry, modelMatrix, lightIdx, depthWrite, seq, depthKey)
+            instancedModels++
+            instancesThisBatch++
+            return true
+        }
+
         // Check instance limit
         if (entry.instanceCount >= MAX_INSTANCES_PER_MESH) return false
 
@@ -1165,6 +1561,117 @@ class InstancedModelBatcher {
         instancesThisBatch++
 
         return true
+    }
+
+    /** Whether [addInstancesPacked] would accept [count] more instances of [entry] this frame. */
+    fun canAddPacked(entry: MeshEntry, count: Int): Boolean =
+        isFrameActive && entry.resident && entry.instanceCount + count <= MAX_INSTANCES_PER_MESH
+
+    /**
+     * Bulk-appends [count] pre-packed opaque instances ([INSTANCE_FLOATS] each, read from
+     * [floats] at [offset]) for the resident mesh [entry]: the retained scene's per-chunk
+     * blocks skip the per-instance lookup/refit/light path entirely.
+     */
+    fun addInstancesPacked(entry: MeshEntry, floats: FloatArray, offset: Int, count: Int): Boolean {
+        if (count <= 0) return true
+        if (!canAddPacked(entry, count)) return false
+        entry.lastUsedFrame = frameCounter
+        if (entry.instanceCount == 0) activeEntries.add(entry)
+        entry.ensureInstanceCapacity(entry.instanceCount + count)
+        System.arraycopy(floats, offset, entry.instanceData, entry.instanceCount * INSTANCE_FLOATS, count * INSTANCE_FLOATS)
+        entry.instanceCount += count
+        instancedModels += count
+        instancesThisBatch += count
+        return true
+    }
+
+    /**
+     * Sorts the frame's translucent items far-to-near by legacy key, ties by sequence
+     * (submission order). One 64-bit key per item, sorted as primitives.
+     */
+    private fun buildTranslucentOrder() {
+        val n = translucentCount
+        if (translucentOrder.size < n) {
+            translucentOrder = IntArray(n * 2)
+            translucentSortScratch = LongArray(n * 2)
+        }
+        if (!TRANS_SORT) {
+            for (i in 0 until n) translucentOrder[i] = i
+            return
+        }
+        val scratch = translucentSortScratch
+        for (i in 0 until n) {
+            val keyPart = (Int.MAX_VALUE.toLong() - translucentKey[i]) and 0xFFFFFFFFL
+            val seqPart = (translucentSeq[i].toLong() and 0xFFFFFL)
+            // (key desc, seq asc, index asc) packed into one long: 32 + 20 + 12 bits.
+            scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL)
+        }
+        if (n <= 4096) {
+            java.util.Arrays.sort(scratch, 0, n)
+            for (i in 0 until n) translucentOrder[i] = (scratch[i] and 0xFFFL).toInt()
+        } else {
+            // Wide index: sort boxed pairs (rare — thousands of translucent items).
+            val idx = (0 until n).sortedWith(compareBy({ Int.MAX_VALUE.toLong() - translucentKey[it] }, { translucentSeq[it] }, { it }))
+            for (i in 0 until n) translucentOrder[i] = idx[i]
+        }
+    }
+
+    /** Records one ordered translucent draw of [entry]; see [translucentEntries]. */
+    /** Translucent submission for a mesh already known to be resident (retained records); skips the lookup/refit path. */
+    fun appendTranslucentEntry(entry: MeshEntry, modelMatrix: Matrix43, lightIdx: FloatArray?, depthWrite: Boolean, seq: Int, depthKey: Int): Boolean {
+        if (!isFrameActive || !entry.resident) return false
+        entry.lastUsedFrame = frameCounter
+        appendTranslucent(entry, modelMatrix, lightIdx, depthWrite, seq, depthKey)
+        instancedModels++
+        instancesThisBatch++
+        return true
+    }
+
+    private fun appendTranslucent(
+        entry: MeshEntry,
+        modelMatrix: Matrix43,
+        lightIdx: FloatArray?,
+        depthWrite: Boolean,
+        seq: Int,
+        depthKey: Int
+    ) {
+        ensureTranslucentCapacity()
+        val i = translucentCount++
+        translucentEntries[i] = entry
+        translucentSrc[i] = null
+        translucentTpl[i] = null
+        translucentDepthWrite[i] = depthWrite
+        translucentSeq[i] = seq
+        translucentKey[i] = depthKey
+        val data = translucentMatrices
+        val base = i * INSTANCE_FLOATS
+        data[base] = modelMatrix.xA
+        data[base + 1] = modelMatrix.yA
+        data[base + 2] = modelMatrix.zA
+        data[base + 3] = 0f
+        data[base + 4] = modelMatrix.xB
+        data[base + 5] = modelMatrix.yB
+        data[base + 6] = modelMatrix.zB
+        data[base + 7] = 0f
+        data[base + 8] = modelMatrix.xC
+        data[base + 9] = modelMatrix.yC
+        data[base + 10] = modelMatrix.zC
+        data[base + 11] = 0f
+        data[base + 12] = modelMatrix.xD
+        data[base + 13] = modelMatrix.yD
+        data[base + 14] = modelMatrix.zD
+        data[base + 15] = 1f
+        if (lightIdx != null) {
+            data[base + 16] = lightIdx[0]
+            data[base + 17] = lightIdx[1]
+            data[base + 18] = lightIdx[2]
+            data[base + 19] = lightIdx[3]
+        } else {
+            data[base + 16] = -1f
+            data[base + 17] = -1f
+            data[base + 18] = -1f
+            data[base + 19] = -1f
+        }
     }
 
     /**
@@ -1288,6 +1795,7 @@ class InstancedModelBatcher {
         uploadedIndexCount = 0
         dirtyRangeCount = 0
         dirtyIndexRangeCount = 0
+        storeLayoutRevision++
     }
 
     /**
@@ -1344,7 +1852,7 @@ class InstancedModelBatcher {
         // glDrawElementsInstanced with instanceCount=1 is equivalent to a regular draw.
         // This is simpler than routing single-instance meshes back to the regular batcher.
         val allEntries = activeEntries
-        if (allEntries.isEmpty() || vpMatrix == null) {
+        if ((allEntries.isEmpty() && translucentCount == 0) || vpMatrix == null) {
             isFrameActive = false
             return
         }
@@ -1384,14 +1892,36 @@ class InstancedModelBatcher {
         if (dirtyRangeCount > 0) {
             val t0 = System.nanoTime()
             val vbView = vertexBuffer!!.duplicate()
-            for (r in 0 until dirtyRangeCount) {
-                val first = dirtyRanges[r * 2]
-                val count = dirtyRanges[r * 2 + 1]
-                if (first >= uploadedVertexCount) continue
-                vbView.clear()
-                vbView.position(first * VERTEX_STRIDE)
-                vbView.limit((first + count) * VERTEX_STRIDE)
-                vbo!!.uploadSubRange(first.toLong() * VERTEX_STRIDE, vbView)
+            if (MERGE_UPLOADS) {
+                // One copy per frame: every separate copy into the in-use arena costs a
+                // graphics/copy-engine sync on the GPU timeline (50-75 of them showed
+                // up as ~40 ms GPU waits on frames where many animated locs rebuilt).
+                var lo = Int.MAX_VALUE; var hi = 0
+                for (r in 0 until dirtyRangeCount) {
+                    val first = dirtyRanges[r * 2]
+                    val end = first + dirtyRanges[r * 2 + 1]
+                    if (first >= uploadedVertexCount) continue
+                    if (first < lo) lo = first
+                    if (end > hi) hi = end
+                }
+                if (hi > lo) {
+                    if (hi > uploadedVertexCount) hi = uploadedVertexCount
+                    vbView.clear()
+                    vbView.position(lo * VERTEX_STRIDE)
+                    vbView.limit(hi * VERTEX_STRIDE)
+                    vbo!!.uploadSubRange(lo.toLong() * VERTEX_STRIDE, vbView)
+                    mergedUploadBytes += (hi - lo).toLong() * VERTEX_STRIDE
+                }
+            } else {
+                for (r in 0 until dirtyRangeCount) {
+                    val first = dirtyRanges[r * 2]
+                    val count = dirtyRanges[r * 2 + 1]
+                    if (first >= uploadedVertexCount) continue
+                    vbView.clear()
+                    vbView.position(first * VERTEX_STRIDE)
+                    vbView.limit((first + count) * VERTEX_STRIDE)
+                    vbo!!.uploadSubRange(first.toLong() * VERTEX_STRIDE, vbView)
+                }
             }
             dirtyRangeCount = 0
             timeGeomUpload += System.nanoTime() - t0
@@ -1399,14 +1929,33 @@ class InstancedModelBatcher {
         if (dirtyIndexRangeCount > 0) {
             val t0 = System.nanoTime()
             val ibView = indexBuffer!!.duplicate()
-            for (r in 0 until dirtyIndexRangeCount) {
-                val first = dirtyIndexRanges[r * 2]
-                val count = dirtyIndexRanges[r * 2 + 1]
-                if (first >= uploadedIndexCount) continue
-                ibView.clear()
-                ibView.position(first)
-                ibView.limit(first + count)
-                ibo!!.uploadSubRange(first, ibView)
+            if (MERGE_UPLOADS) {
+                var lo = Int.MAX_VALUE; var hi = 0
+                for (r in 0 until dirtyIndexRangeCount) {
+                    val first = dirtyIndexRanges[r * 2]
+                    val end = first + dirtyIndexRanges[r * 2 + 1]
+                    if (first >= uploadedIndexCount) continue
+                    if (first < lo) lo = first
+                    if (end > hi) hi = end
+                }
+                if (hi > lo) {
+                    if (hi > uploadedIndexCount) hi = uploadedIndexCount
+                    ibView.clear()
+                    ibView.position(lo)
+                    ibView.limit(hi)
+                    ibo!!.uploadSubRange(lo, ibView)
+                    mergedUploadBytes += (hi - lo).toLong() * 4
+                }
+            } else {
+                for (r in 0 until dirtyIndexRangeCount) {
+                    val first = dirtyIndexRanges[r * 2]
+                    val count = dirtyIndexRanges[r * 2 + 1]
+                    if (first >= uploadedIndexCount) continue
+                    ibView.clear()
+                    ibView.position(first)
+                    ibView.limit(first + count)
+                    ibo!!.uploadSubRange(first, ibView)
+                }
             }
             dirtyIndexRangeCount = 0
             timeGeomUpload += System.nanoTime() - t0
@@ -1445,12 +1994,14 @@ class InstancedModelBatcher {
         // Set lighting uniforms
         sh.setUniform(uSunDirectionLocation, sunDirX, sunDirY, sunDirZ)
         // Point lights for this frame (see setPointLights).
-        if (uPointLightCountLocation >= 0) {
-            GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
-            if (pointLightCount > 0) {
-                if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
-                if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
-            }
+        // The count uniform is not read by the shader (the loop follows per-instance
+        // indices), so the driver reports it as -1; gating the whole upload on it, as
+        // this used to, meant the light arrays were NEVER uploaded and point lights
+        // had no effect on models at all.
+        if (uPointLightCountLocation >= 0) GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
+        if (pointLightCount > 0) {
+            if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
+            if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
         }
         sh.setUniform(uSunBrightnessLocation, sunBrightness)
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
@@ -1481,12 +2032,6 @@ class InstancedModelBatcher {
         for (entry in allEntries) {
             val count = entry.instanceCount
             if (count == 0) continue
-            if (packedInstances + count > MAX_INSTANCES_PER_FRAME) {
-                // Nothing sensible to do but drop the overflow; surfaced through the
-                // instance counter rather than a per-frame println.
-                entry.instanceCount = 0
-                continue
-            }
             val floats = count * INSTANCE_FLOATS
             val at = packedInstances * INSTANCE_FLOATS
             if (at + floats > scratch.size) {
@@ -1497,7 +2042,53 @@ class InstancedModelBatcher {
             System.arraycopy(entry.instanceData, 0, scratch, at, floats)
             packedInstances += count
         }
+        // Retained block draws: one copy each, base recorded for the command patch.
+        for (bi in blockDraws.indices) {
+            val b = blockDraws[bi]
+            val floats = b.count * INSTANCE_FLOATS
+            val at = packedInstances * INSTANCE_FLOATS
+            if (at + floats > scratch.size) {
+                scratch = scratch.copyOf(maxOf(scratch.size * 2, at + floats))
+                instancePackScratch = scratch
+            }
+            System.arraycopy(b.floats, 0, scratch, at, floats)
+            b.base = packedInstances
+            packedInstances += b.count
+        }
+        // Translucent items follow the opaque instances, one slot each, in order.
+        translucentBase = packedInstances
+        translucentPacked = translucentCount
+        translucentCursor = 0
+        if (translucentCount > 0) buildTranslucentOrder()
+        if (translucentCount > 0) {
+            val floats = translucentCount * INSTANCE_FLOATS
+            val at = packedInstances * INSTANCE_FLOATS
+            if (at + floats > scratch.size) {
+                scratch = scratch.copyOf(maxOf(scratch.size * 2, at + floats))
+                instancePackScratch = scratch
+            }
+            // Packed in draw (sorted) order: slot = translucentBase + position in the
+            // order, so a run of consecutive same-mesh items is one instanced command.
+            val order = translucentOrder
+            val src = translucentMatrices
+            for (oi in 0 until translucentCount) {
+                val i = order[oi]
+                val ext = translucentSrc[i]
+                if (ext != null) System.arraycopy(ext, translucentSrcOff[i], scratch, at + oi * INSTANCE_FLOATS, INSTANCE_FLOATS)
+                else System.arraycopy(src, i * INSTANCE_FLOATS, scratch, at + oi * INSTANCE_FLOATS, INSTANCE_FLOATS)
+            }
+            packedInstances += translucentCount
+        }
         if (packedInstances > 0) {
+            // The instance buffer used to be a fixed 65536 and silently zeroed any
+            // mesh that would overflow it. Grow instead: an instance that was
+            // submitted is drawn.
+            if (packedInstances > instanceCapacity) {
+                var grown = instanceCapacity
+                while (grown < packedInstances) grown *= 2
+                instanceBuffer = MemoryUtil.memRealloc(instanceBuffer!!, grown * INSTANCE_FLOATS)
+                instanceCapacity = grown
+            }
             val instBuf = instanceBuffer!!
             instBuf.clear()
             instBuf.put(scratch, 0, packedInstances * INSTANCE_FLOATS)
@@ -1529,8 +2120,105 @@ class InstancedModelBatcher {
         // were still reading it — the same write-after-read hazard that made the
         // per-mesh instance uploads serialise the whole pass.
         var indirectCommandCount = 0
-        if (indirectSupported) {
-            val buf = indirectScratch
+        if (bindless) {
+            drawMatCursor = 0
+            beginMaterialPass()
+        }
+        if (indirectSupported && bindless) {
+            // Commands from this frame's ACTIVE meshes only. Walking every resident
+            // mesh's DrawRefs per material (thousands with instanceCount == 0) was 8%
+            // of the spin frame. Sort by material id so the emission order matches
+            // the per-material walk (-1 untextured first).
+            var buf = indirectScratch
+            var cursor = 0
+            var nCmd = 0
+            for (ei in activeEntries.indices) {
+                val e = activeEntries[ei]
+                if (e.instanceCount == 0) continue
+                val batches = e.materialBatches
+                for (bi in batches.indices) {
+                    if (nCmd >= cmdKeys.size) {
+                        cmdKeys = cmdKeys.copyOf(cmdKeys.size * 2)
+                        cmdEntry = cmdEntry.copyOf(cmdEntry.size * 2)
+                        cmdBatch = cmdBatch.copyOf(cmdBatch.size * 2)
+                    }
+                    val b = batches[bi]
+                    cmdEntry[nCmd] = e
+                    cmdBatch[nCmd] = b
+                    cmdKeys[nCmd] = ((b.materialId + 1).toLong() shl 32) or nCmd.toLong()
+                    nCmd++
+                }
+            }
+            java.util.Arrays.sort(cmdKeys, 0, nCmd)
+            for (i in 0 until nCmd) {
+                val seq = (cmdKeys[i] and 0xffffffffL).toInt()
+                val mesh = cmdEntry[seq]!!
+                val matBatch = cmdBatch[seq]!!
+                val count = mesh.instanceCount
+                appendDrawMaterial(matBatch.materialId, textureCache, combineModeOf)
+                if (cursor + INDIRECT_INTS > buf.size) {
+                    buf = buf.copyOf(buf.size * 2)
+                    indirectScratch = buf
+                }
+                buf[cursor] = matBatch.indexCount
+                buf[cursor + 1] = count
+                buf[cursor + 2] = matBatch.indexOffset
+                buf[cursor + 3] = 0
+                buf[cursor + 4] = mesh.instanceBase
+                cursor += INDIRECT_INTS
+                indirectCommandCount++
+                instancedTriangles += (matBatch.indexCount / 3) * count
+            }
+            // Block templates: copy, patch baseInstance, one material append per command.
+            for (bi in blockDraws.indices) {
+                val b = blockDraws[bi]
+                val n = b.cmdCount * INDIRECT_INTS
+                if (cursor + n > buf.size) {
+                    buf = buf.copyOf(maxOf(buf.size * 2, cursor + n))
+                    indirectScratch = buf
+                }
+                System.arraycopy(b.cmds, 0, buf, cursor, n)
+                val base = b.base
+                val mats = b.mats
+                val words = b.cmdCount * 4
+                if (b.matWordsRevision != materialWordsRevision || b.matWords.size < words) {
+                    if (b.matWords.size < words) b.matWords = IntArray(words)
+                    val w = b.matWords
+                    for (k in 0 until b.cmdCount) {
+                        val slot = resolveMaterial(mats[k], textureCache, combineModeOf)
+                        w[k * 4] = matEntryLo[slot]; w[k * 4 + 1] = matEntryHi[slot]; w[k * 4 + 2] = matEntryFlags[slot]; w[k * 4 + 3] = 0
+                    }
+                    b.matWordsRevision = materialWordsRevision
+                }
+                if (drawMatCursor + words > drawMatScratch.size) drawMatScratch = drawMatScratch.copyOf(maxOf(drawMatScratch.size * 2, drawMatCursor + words))
+                System.arraycopy(b.matWords, 0, drawMatScratch, drawMatCursor, words)
+                drawMatCursor += words
+                var c = cursor
+                for (k in 0 until b.cmdCount) {
+                    buf[c + 4] += base
+                    instancedTriangles += (buf[c] / 3) * buf[c + 1]
+                    c += INDIRECT_INTS
+                }
+                cursor += n
+                indirectCommandCount += b.cmdCount
+                blockCommandsDrawn += b.cmdCount
+            }
+            blockDraws.clear()
+            java.util.Arrays.fill(cmdEntry, 0, nCmd, null)
+            java.util.Arrays.fill(cmdBatch, 0, nCmd, null)
+            if (indirectCommandCount > 0) {
+                if (indirectBuffer!!.capacity() < cursor) {
+                    indirectBuffer = MemoryUtil.memRealloc(indirectBuffer!!, buf.size)
+                }
+                val ib = indirectBuffer!!
+                ib.clear()
+                ib.put(buf, 0, cursor)
+                ib.flip()
+                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectVbo)
+                glBufferData(GL_DRAW_INDIRECT_BUFFER, ib, GL_STREAM_DRAW)
+            }
+        } else if (indirectSupported) {
+            var buf = indirectScratch
             var cursor = 0
             for (texId in materialOrder) {
                 val refs = drawsByMaterial[texId] ?: continue
@@ -1540,7 +2228,15 @@ class InstancedModelBatcher {
                     val count = mesh.instanceCount
                     if (count == 0) continue
                     val matBatch = r.batch
-                    if (cursor + INDIRECT_INTS > buf.size) break
+                    if (bindless) appendDrawMaterial(texId, textureCache, combineModeOf)
+                    if (cursor + INDIRECT_INTS > buf.size) {
+                        // This list used to be a fixed 2048 commands and BROKE out of
+                        // the loop when full — every mesh past the cap in a dense
+                        // scene simply did not draw (the stall canopy that vanished
+                        // whenever enough other meshes sorted ahead of it). Grow.
+                        buf = buf.copyOf(buf.size * 2)
+                        indirectScratch = buf
+                    }
                     buf[cursor] = matBatch.indexCount        // count
                     buf[cursor + 1] = count                  // instanceCount
                     buf[cursor + 2] = matBatch.indexOffset   // firstIndex
@@ -1554,6 +2250,9 @@ class InstancedModelBatcher {
                 indirectCount[texId] = indirectCommandCount - first
             }
             if (indirectCommandCount > 0) {
+                if (indirectBuffer!!.capacity() < cursor) {
+                    indirectBuffer = MemoryUtil.memRealloc(indirectBuffer!!, buf.size)
+                }
                 val ib = indirectBuffer!!
                 ib.clear()
                 ib.put(buf, 0, cursor)
@@ -1561,6 +2260,21 @@ class InstancedModelBatcher {
                 glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectVbo)
                 glBufferData(GL_DRAW_INDIRECT_BUFFER, ib, GL_STREAM_DRAW)
             }
+        }
+
+        if (bindless) {
+            // Every material in one multi-draw: the commands carry their materials.
+            if (indirectCommandCount > 0) {
+                uploadDrawMaterials()
+                sh.setUniform(uDrawBaseLocation, 0)
+                glMultiDrawElementsIndirect(TRIANGLES, UNSIGNED_INT, 0L, indirectCommandCount, 0)
+                instancedDrawCalls++
+            }
+            timeDraw += System.nanoTime() - t2
+            vao!!.unbind()
+            sh.unbind()
+            isFrameActive = false
+            return
         }
 
         for (texId in materialOrder) {
@@ -1631,6 +2345,286 @@ class InstancedModelBatcher {
         sh.unbind()
 
         isFrameActive = false
+    }
+
+    /** Number of translucent items packed by the last [endFrame] and not yet drawn. */
+    fun pendingTranslucent(): Int = translucentPacked - translucentCursor
+
+    /**
+     * Draws the translucent items packed by the last [endFrame], in submission order,
+     * one instance per draw. Call after EVERY opaque pass of the frame has been
+     * issued (this batcher's and the streaming batcher's), so blended faces land on
+     * a complete opaque scene exactly as legacy's alpha bucket does.
+     *
+     * Depth writes follow each item's legacy setDepthBuffering state: stationary
+     * alpha locs keep writing depth (legacy never turns it off for them — back-to-
+     * front order makes that harmless), while the entity paths that draw with it off
+     * (NPC hint models, player hints) get it off here too.
+     */
+    /** Diagnostics: translucent state groups (each = 1 GL draw) and commands since the last read. */
+    @JvmField var translucentGroupsDrawn = 0L
+    @JvmField var translucentCommandsDrawn = 0L
+
+    fun drawTranslucent(
+        textureCache: (Int) -> Int,
+        combineModeOf: (Int) -> Int = { 0 },
+        /**
+         * Draw only the items that sort before the boundary ([upToKey], [upToSeq]) —
+         * key strictly greater (farther), or equal key and lower sequence — leaving
+         * the rest for a later call. Lets the toolkit interleave other translucent
+         * passes (deferred particle systems) at their legacy position in the order.
+         */
+        upToKey: Int = Int.MIN_VALUE,
+        upToSeq: Int = Int.MAX_VALUE
+    ) {
+        val start = translucentCursor
+        var end = start
+        while (end < translucentPacked) {
+            val i = translucentOrder[end]
+            val k = translucentKey[i]
+            if (k > upToKey || (k == upToKey && translucentSeq[i] < upToSeq)) end++ else break
+        }
+        if (end == start) return
+        translucentCursor = end
+        val sh = shader ?: return
+        val t0 = System.nanoTime()
+        sh.bind()
+        // Whatever ran between passes (the particle renderer, the streaming batcher)
+        // may have left blend/depth state its own way; this pass wants legacy's model
+        // state: alpha blend, depth test, depth writes per item.
+        GLWrapper.enable(GLWrapper.Constants.BLEND)
+        GLWrapper.blendFunc(GLWrapper.Constants.SRC_ALPHA, GLWrapper.Constants.ONE_MINUS_SRC_ALPHA)
+        GLWrapper.enable(GLWrapper.Constants.DEPTH_TEST)
+        GLWrapper.depthMask(true)
+        if (CULL_FACE) {
+            GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+            GLWrapper.cullFace(CULL_MODE)
+            GLWrapper.frontFace(CULL_WIND)
+        } else {
+            GLWrapper.disable(GLWrapper.Constants.CULL_FACE)
+        }
+        vao!!.bind()
+        ibo!!.bind()
+        var lastTex = Int.MIN_VALUE
+        var depthWriteOn = true
+
+        if (indirectSupported) {
+            // Order is fixed by the scene, but consecutive runs sharing a material (a
+            // row of the same tree, the panes of one building) need no state change
+            // between them, so they go out as ONE multi-draw. Commands for the whole
+            // pass are built and uploaded once; each group is a byte range into them.
+            var buf = indirectScratch
+            var cursor = 0
+            var groupCount = 0
+            var gTex = translucentGroupTex
+            var gDepth = translucentGroupDepth
+            var gFirst = translucentGroupFirst
+            var gCount = translucentGroupCount
+            var commands = 0
+            var curTex = Int.MIN_VALUE
+            var curDepth = true
+            var curFirst = 0
+            if (bindless) {
+                drawMatCursor = 0
+                beginMaterialPass()
+            }
+            var oi = start
+            while (oi < end) {
+                val i = translucentOrder[oi]
+                val entry = translucentEntries[i]
+                if (entry == null || !entry.resident) { oi++; continue }
+                val depthWrite = translucentDepthWrite[i]
+                val slot = translucentBase + oi
+                val tpl = translucentTpl[i]
+                if (tpl != null && bindless) {
+                    // Prebuilt commands: copy, patch the slot, copy the material words.
+                    if (depthWrite != curDepth || commands == 0) {
+                        if (commands > curFirst) {
+                            if (groupCount == gTex.size) {
+                                gTex = gTex.copyOf(groupCount * 2); gDepth = gDepth.copyOf(groupCount * 2)
+                                gFirst = gFirst.copyOf(groupCount * 2); gCount = gCount.copyOf(groupCount * 2)
+                            }
+                            gTex[groupCount] = curTex; gDepth[groupCount] = curDepth
+                            gFirst[groupCount] = curFirst; gCount[groupCount] = commands - curFirst
+                            groupCount++
+                        }
+                        curDepth = depthWrite; curFirst = commands
+                    }
+                    val n = translucentTplCount[i]
+                    val ints = n * INDIRECT_INTS
+                    if (cursor + ints > buf.size) {
+                        buf = buf.copyOf(maxOf(buf.size * 2, cursor + ints))
+                        indirectScratch = buf
+                    }
+                    System.arraycopy(tpl, translucentTplOff[i], buf, cursor, ints)
+                    var c = cursor
+                    for (k in 0 until n) { buf[c + 1] = 1; buf[c + 4] = slot; instancedTriangles += buf[c] / 3; c += INDIRECT_INTS }
+                    cursor += ints
+                    val words = n * 4
+                    if (drawMatCursor + words > drawMatScratch.size) drawMatScratch = drawMatScratch.copyOf(maxOf(drawMatScratch.size * 2, drawMatCursor + words))
+                    System.arraycopy(translucentMatW[i]!!, translucentMatOff[i], drawMatScratch, drawMatCursor, words)
+                    drawMatCursor += words
+                    commands += n
+                    translucentTemplateItems++
+                    oi++
+                    continue
+                }
+                // Consecutive items of the same mesh with the same depth-write state
+                // are one command with instanceCount = run (instances draw in order,
+                // so blending order is unchanged).
+                var run = 1
+                while (oi + run < end) {
+                    val j = translucentOrder[oi + run]
+                    if (translucentEntries[j] !== entry || translucentDepthWrite[j] != depthWrite) break
+                    run++
+                }
+                oi += run
+                translucentRunsMerged += run - 1
+                val batches = entry.materialBatches
+                for (bi in batches.indices) {
+                    val batch = batches[bi]
+                    val texId = batch.materialId
+                    if (bindless) appendDrawMaterial(texId, textureCache, combineModeOf)
+                    // Bindless: the material rides with the command, so only a depth-write
+                    // change splits a group.
+                    if ((!bindless && texId != curTex) || depthWrite != curDepth || commands == 0) {
+                        if (commands > curFirst) {
+                            if (groupCount == gTex.size) {
+                                gTex = gTex.copyOf(groupCount * 2); gDepth = gDepth.copyOf(groupCount * 2)
+                                gFirst = gFirst.copyOf(groupCount * 2); gCount = gCount.copyOf(groupCount * 2)
+                            }
+                            gTex[groupCount] = curTex; gDepth[groupCount] = curDepth
+                            gFirst[groupCount] = curFirst; gCount[groupCount] = commands - curFirst
+                            groupCount++
+                        }
+                        curTex = texId; curDepth = depthWrite; curFirst = commands
+                    }
+                    if (cursor + INDIRECT_INTS > buf.size) {
+                        buf = buf.copyOf(buf.size * 2)
+                        indirectScratch = buf
+                    }
+                    buf[cursor] = batch.indexCount
+                    buf[cursor + 1] = run
+                    buf[cursor + 2] = batch.indexOffset
+                    buf[cursor + 3] = 0
+                    buf[cursor + 4] = slot
+                    cursor += INDIRECT_INTS
+                    commands++
+                    instancedTriangles += (batch.indexCount / 3) * run
+                }
+            }
+            if (commands > curFirst) {
+                if (groupCount == gTex.size) {
+                    gTex = gTex.copyOf(groupCount * 2); gDepth = gDepth.copyOf(groupCount * 2)
+                    gFirst = gFirst.copyOf(groupCount * 2); gCount = gCount.copyOf(groupCount * 2)
+                }
+                gTex[groupCount] = curTex; gDepth[groupCount] = curDepth
+                gFirst[groupCount] = curFirst; gCount[groupCount] = commands - curFirst
+                groupCount++
+            }
+            translucentGroupTex = gTex; translucentGroupDepth = gDepth
+            translucentGroupFirst = gFirst; translucentGroupCount = gCount
+            translucentGroupsDrawn += groupCount
+            translucentCommandsDrawn += commands
+            if (commands > 0) {
+                if (indirectBuffer!!.capacity() < cursor) {
+                    indirectBuffer = MemoryUtil.memRealloc(indirectBuffer!!, buf.size)
+                }
+                val ib = indirectBuffer!!
+                ib.clear()
+                ib.put(buf, 0, cursor)
+                ib.flip()
+                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectVbo)
+                glBufferData(GL_DRAW_INDIRECT_BUFFER, ib, GL_STREAM_DRAW)
+                if (bindless) uploadDrawMaterials()
+                for (g in 0 until groupCount) {
+                    val texId = gTex[g]
+                    if (bindless) {
+                        sh.setUniform(uDrawBaseLocation, gFirst[g])
+                    } else if (texId != lastTex) {
+                        val textureHandle = if (texId >= 0) textureCache(texId) else 0
+                        if (textureHandle > 0) {
+                            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                            GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
+                            sh.setUniform(uTextureEnabledLocation, 1)
+                            sh.setUniform(uCombineModeLocation, combineModeOf(texId))
+                            sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                        } else {
+                            sh.setUniform(uTextureEnabledLocation, 0)
+                        }
+                        lastTex = texId
+                    }
+                    if (gDepth[g] != depthWriteOn) {
+                        GLWrapper.depthMask(gDepth[g])
+                        depthWriteOn = gDepth[g]
+                    }
+                    if (gCount[g] == 1) {
+                        // A lone command costs less as a direct draw than as a one-entry
+                        // indirect list (the driver's indirect path is a CPU loop anyway).
+                        val c = gFirst[g] * INDIRECT_INTS
+                        glDrawElementsInstancedBaseInstance(
+                            TRIANGLES, buf[c], UNSIGNED_INT, buf[c + 2].toLong() * 4, buf[c + 1], buf[c + 4]
+                        )
+                    } else {
+                        glMultiDrawElementsIndirect(
+                            TRIANGLES, UNSIGNED_INT,
+                            gFirst[g].toLong() * INDIRECT_INTS * 4, gCount[g], 0
+                        )
+                    }
+                    instancedDrawCalls++
+                }
+            }
+        } else {
+            for (oi in start until end) {
+                val i = translucentOrder[oi]
+                val entry = translucentEntries[i] ?: continue
+                // An entry re-appended after a shape mismatch later in this batch left its
+                // old block behind; those index ranges may since have been compacted over.
+                if (!entry.resident) continue
+                val depthWrite = translucentDepthWrite[i]
+                if (depthWrite != depthWriteOn) {
+                    GLWrapper.depthMask(depthWrite)
+                    depthWriteOn = depthWrite
+                }
+                val slot = translucentBase + oi
+                val batches = entry.materialBatches
+                for (bi in batches.indices) {
+                    val batch = batches[bi]
+                    val texId = batch.materialId
+                    if (texId != lastTex) {
+                        val textureHandle = if (texId >= 0) textureCache(texId) else 0
+                        if (textureHandle > 0) {
+                            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                            GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
+                            sh.setUniform(uTextureEnabledLocation, 1)
+                            sh.setUniform(uCombineModeLocation, combineModeOf(texId))
+                            sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                        } else {
+                            sh.setUniform(uTextureEnabledLocation, 0)
+                        }
+                        lastTex = texId
+                    }
+                    if (baseInstanceSupported) {
+                        glDrawElementsInstancedBaseInstance(
+                            TRIANGLES, batch.indexCount, UNSIGNED_INT,
+                            batch.indexOffset.toLong() * 4, 1, slot
+                        )
+                    } else {
+                        repointInstanceAttributes(slot)
+                        GLWrapper.drawElementsInstanced(
+                            TRIANGLES, batch.indexCount, UNSIGNED_INT,
+                            batch.indexOffset.toLong() * 4, 1
+                        )
+                    }
+                    instancedDrawCalls++
+                    instancedTriangles += batch.indexCount / 3
+                }
+            }
+        }
+        if (!depthWriteOn) GLWrapper.depthMask(true)
+        vao!!.unbind()
+        sh.unbind()
+        timeDraw += System.nanoTime() - t0
     }
 
     fun isActive(): Boolean = isFrameActive

@@ -129,6 +129,24 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField val tempProjectionMatrix: Matrix44 = Matrix44()
     @JvmField val textureMatrix: FloatArray = FloatArray(16)
     @JvmField var depthBufferingEnabled: Boolean = true
+
+    /**
+     * Fixed-function draw submissions issued by this toolkit (glBegin / glDrawArrays /
+     * glDrawElements through jaggl). Under the modern toolkit this must stay at ZERO
+     * while in game: every drawn thing there is the modern pipeline's, and
+     * [ModernGLToolkit]'s diag prints and resets it so a regression is loud.
+     */
+    @JvmField var legacyDrawCalls: Long = 0L
+    private var legacyDrawTraces = 0
+
+    fun legacyDrawTrace() {
+        legacyDrawCalls++
+        if (this is ModernGLToolkit && legacyDrawTraces < 6 && System.getProperty("render.legacytrace") != null) {
+            legacyDrawTraces++
+            System.err.println("[LegacyDraw] fixed-function draw under the modern toolkit:")
+            Thread.currentThread().stackTrace.drop(2).take(9).forEach { System.err.println("    at $it") }
+        }
+    }
     @JvmField var clipTop: Int = 0
     @JvmField var clipBottom: Int = 0
     @JvmField var clipLeft: Int = 0
@@ -455,7 +473,13 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    fun defineScissorBox() {
+    /**
+     * A GL texture object is about to be deleted. The modern renderer keeps bindless
+     * handles resident per texture id and must drop them first.
+     */
+    open fun onTextureDeleted(glTextureId: Int) {}
+
+    open fun defineScissorBox() {
         val x: Int
         val y: Int
         val width: Int
@@ -480,7 +504,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    fun setScissorTestEnabled(enabled: Boolean) {
+    open fun setScissorTestEnabled(enabled: Boolean) {
         if (this.scissorTestEnabled != enabled) {
             if (enabled) {
                 OpenGL.glEnable(GL_SCISSOR_TEST)
@@ -625,6 +649,16 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         return this.rectangularTexture != null && (this.multiSamplesPreference <= 1 || this.advancedFramebuffers)
     }
 
+    /** Resident material textures before LRU eviction (legacy 256). */
+    open fun textureCacheCapacity(): Int = 256
+
+    /** Frames a texture may go untouched before the LRU demotes it to a soft reference (legacy 5). */
+    open fun textureRetainCycles(): Int = 5
+
+    /** Run the texture LRU sweep every N frames (legacy 1). */
+    open fun textureCycleDivider(): Int = 1
+    private var textureCycleTick = 0
+
     override fun hasHardwareRendering(): Boolean = true
 
     fun pushMatrix() {
@@ -720,6 +754,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         // Left disabled between consecutive rect draws; re-enabled lazily by the next
         // non-rect draw path (see setMultisampleEnabled callers).
         setMultisampleEnabled(false)
+        legacyDrawTrace()
         OpenGL.glBegin(GL_LINE_LOOP)
         OpenGL.glVertex2f(leftX, topY)
         OpenGL.glVertex2f(leftX, bottomY)
@@ -749,6 +784,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         setMultisampleEnabled(false)
 
+        legacyDrawTrace()
         OpenGL.glBegin(GL_QUADS)
         OpenGL.glVertex2f(leftX, topY)
         OpenGL.glVertex2f(leftX, bottomY)
@@ -765,6 +801,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         setupShapeRendering()
         setBlendMode(1)
         setMultisampleEnabled(true)
+        legacyDrawTrace()
         OpenGL.glBegin(4)
         OpenGL.glColor4ub((-65536 shr 16).toByte(), (-65536 shr 8).toByte(), (-65536).toByte(), (-65536 shr 24).toByte())
         OpenGL.glVertex3f(5.35f, 10.35f, 100.0f)
@@ -849,6 +886,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                     }
                 }
 
+                legacyDrawTrace()
                 OpenGL.glBegin(GL_LINES)
                 OpenGL.glVertex2f(curX, curY)
                 OpenGL.glVertex2f(curX + segLengthX, curY + segLengthY)
@@ -877,6 +915,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         deltaX *= inverseMagnitude
         deltaY *= inverseMagnitude
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        legacyDrawTrace()
         OpenGL.glBegin(GL_LINES)
         OpenGL.glTexCoord2f(textureScaleU * (startX - clipLeft), textureScaleV * (startY - clipTop))
         OpenGL.glVertex2f(startX + 0.35f, startY + 0.35f)
@@ -957,6 +996,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                     }
                 }
 
+                legacyDrawTrace()
                 OpenGL.glBegin(GL_LINES)
                 OpenGL.glTexCoord2f(textureScaleU * (curX - clipLeft), textureScaleV * (curY - clipTop))
                 OpenGL.glVertex2f(curX, curY)
@@ -1039,6 +1079,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
 
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        legacyDrawTrace()
         OpenGL.glBegin(GL_LINES)
         OpenGL.glVertex2f(startX + 0.35f, startY + 0.35f)
         OpenGL.glVertex2f(endX + deltaX + 0.35f, endY + deltaY + 0.35f)
@@ -1156,6 +1197,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         val textureScaleU = texture!!.s / texture.singleWidth
         val textureScaleV = texture.t / texture.singleLength
         OpenGL.glColor4ub((0xffffff.inv() shr 16).toByte(), (0xffffff.inv() shr 8).toByte(), (0xffffff.inv()).toByte(), (0xffffff.inv() shr 24).toByte())
+        legacyDrawTrace()
         OpenGL.glBegin(GL_QUADS)
         OpenGL.glTexCoord2f(textureScaleU * (this.clipLeft - offsetX), textureScaleV * (this.clipTop - offsetY))
         OpenGL.glVertex2i(this.clipLeft, this.clipTop)
@@ -1338,8 +1380,17 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         this.viewportOriginY = this.drawableY + this.imageProducerCenterY
     }
 
+    /** Time spent in [animateTextures] (GL object deallocation drain + texture cycle), diag. */
+    var animateTexturesNs = 0L
+
     @Synchronized
     override fun animateTextures(delta: Int) {
+        val t0 = System.nanoTime()
+        animateTexturesInner(delta)
+        animateTexturesNs += System.nanoTime() - t0
+    }
+
+    private fun animateTexturesInner(delta: Int) {
         var handleCount = 0
         var deletedVboBuffers = false
         val maskedDelta = delta and 0x7fffffff
@@ -1369,6 +1420,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
         while (!this.texturesAwaitingDeallocation.isEmpty()) {
             val handle = this.texturesAwaitingDeallocation.popTail() as IntNode
+            onTextureDeleted(handle.pointer.toInt())
             HANDLE_BUFFER[handleCount++] = handle.pointer.toInt()
             this.textureBuffersSize -= handle.value
             if (handleCount == 1000) {
@@ -1420,7 +1472,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             val handle = this.listsAwaitingDeallocation.popTail() as IntNode
             OpenGL.glDeleteLists(handle.pointer.toInt(), handle.value)
         }
-        this.textureCache?.cycleBloomCache()
+        // The LRU sweep walks every resident texture; toolkits with a large cache run
+        // it every N frames (with the retain count scaled to match).
+        if (++textureCycleTick % textureCycleDivider() == 0) this.textureCache?.cycleBloomCache()
         // A System.gc() call used to live here, gated to once per 60s whenever offheap
         // usage exceeded 96MB. A full GC can stall the render thread for 10-100ms, which
         // is catastrophic inside the frame loop; offheap buffers are already freed
@@ -1445,6 +1499,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             val pointSize = radius shl 1
             if (pointSize < this.fillCirclePointSize) {
                 // Filled circle
+                legacyDrawTrace()
                 OpenGL.glBegin(GL_QUADS)
                 OpenGL.glVertex2f(centerX + 1.0f, centerY + 1.0f)
                 OpenGL.glVertex2f(centerX + 1.0f, centerY - 1.0f)
@@ -1455,12 +1510,14 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                 // Circle outline
                 OpenGL.glEnable(GL_POINT_SMOOTH)
                 OpenGL.glPointSize(pointSize.toFloat())
+                legacyDrawTrace()
                 OpenGL.glBegin(GL_POINTS)
                 OpenGL.glVertex2f(centerX, centerY)
                 OpenGL.glEnd()
                 OpenGL.glDisable(GL_POINT_SMOOTH)
             } else {
                 // Filled circle with complex outline
+                legacyDrawTrace()
                 OpenGL.glBegin(GL_TRIANGLE_FAN)
                 OpenGL.glVertex2f(centerX, centerY)
                 var angleStep = 262144 / (radius * 6)
@@ -1801,6 +1858,8 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     override fun bloomSupported(): Boolean {
+        // -Drender.bloom=false: debug switch to compare captures without the post-process.
+        if (System.getProperty("render.bloom")?.equals("false", true) == true) return false
         if (this.rectangularTexture != null) {
             if (!this.rectangularTexture!!.isActive()) {
                 if (!this.framebufferCompositor!!.addEffect(this.rectangularTexture!!)) {
@@ -1885,6 +1944,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun drawArrays(count: Int) {
+        legacyDrawTrace()
         OpenGL.glDrawArrays(7, 0, count)
     }
 
@@ -2038,6 +2098,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
 
     fun drawElements(elementsBuffer: ElementsBufferGL, startIndex: Int, indexCount: Int) {
         setElementsBuffer(elementsBuffer)
+        legacyDrawTrace()
         OpenGL.glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, elementsBuffer.getBufferAddress() + (startIndex * 2L))
     }
 
@@ -2229,6 +2290,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     fun renderLights() {
         var lightIndex: Int
         lightIndex = 0
+        // -Drender.pointlights=false: debug switch (same name as the modern one) so
+        // both toolkits can be captured without scene point lights.
+        if (POINT_LIGHTS_DISABLED) this.lastSceneLightCount = 0
         while (lightIndex < this.lastSceneLightCount) {
             val activeLight = this.lightNodes[lightIndex]!!
             val lightHandle = lightIndex + 16386
@@ -2430,6 +2494,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         val lineX = x + 0.35f
         val lineY = y + 0.35f
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        legacyDrawTrace()
         OpenGL.glBegin(1)
         OpenGL.glVertex2f(lineX, lineY)
         OpenGL.glVertex2f(lineX + width, lineY)
@@ -2449,6 +2514,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         val lineX = x + 0.35f
         val lineY = y + 0.35f
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        legacyDrawTrace()
         OpenGL.glBegin(1)
         OpenGL.glVertex2f(lineX, lineY)
         OpenGL.glVertex2f(lineX, lineY + height)
@@ -2625,6 +2691,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         val yA = startY.toFloat()
         val xB = xA + width
         val yB = yA + height
+        legacyDrawTrace()
         OpenGL.glBegin(7)
         OpenGL.glTexCoord2f(0.0f, 0.0f)
         OpenGL.glVertex2f(xA, yA)
@@ -2737,6 +2804,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     override fun mergeFunctionMasks(base: Int, mask: Int): Int = base or mask
 
     companion object {
+        @JvmStatic val POINT_LIGHTS_DISABLED = System.getProperty("render.pointlights")?.equals("false", true) == true
         @JvmField val HANDLE_BUFFER = IntArray(1000)
         const val INITIAL_LIGHT_COUNT = 4
         @JvmField val BUFFER_4F = FloatArray(4)

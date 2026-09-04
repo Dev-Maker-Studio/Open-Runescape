@@ -15,6 +15,10 @@ import com.jagex.game.runetek5.systeminfo.SystemInfo
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 object Renderers {
+    /** -Drender.msaa=N overrides the anti-aliasing preference's sample count (debug/testing). */
+    @JvmStatic
+    fun multiSamplesFor(preference: Int): Int = System.getProperty("render.msaa")?.toIntOrNull() ?: preference
+
 
     @JvmField var activeToolkit: AbstractToolkit? = null
     @JvmField var FONT_RENDERER: AbstractFontRenderer? = null
@@ -41,7 +45,7 @@ object Renderers {
             return
         }
         if (toolkitId == 0) {
-            activeToolkit = AbstractToolkit.create(0, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2)
+            activeToolkit = AbstractToolkit.create(0, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, multiSamplesFor(PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2))
             if (topleftScreenText != null) {
                 activeToolkit!!.applyClearFlags(1, 0)
                 val fontMetrics = FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p12FullIndex)
@@ -63,7 +67,7 @@ object Renderers {
             }
             try {
                 try {
-                    activeToolkit = AbstractToolkit.create(toolkitId, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2)
+                    activeToolkit = AbstractToolkit.create(toolkitId, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, multiSamplesFor(PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2))
                     if (topleftScreenText != null) {
                         generatedToolkit!!.applyClearFlags(1, 0)
                         fontMetrics = FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p12FullIndex)
