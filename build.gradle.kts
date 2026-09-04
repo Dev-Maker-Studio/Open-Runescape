@@ -10,7 +10,9 @@ plugins {
 }
 
 group = "darkan"
-version = "2.0.0"
+// CI passes -PreleaseVersion=<tag without v> for tagged releases and dev-<sha> for dev builds;
+// local builds keep the fixed version so tooling that expects the jar name keeps working.
+version = providers.gradleProperty("releaseVersion").orElse("2.0.0").get()
 description = "Darkan Client"
 
 application {
@@ -51,7 +53,7 @@ repositories {
 
 // LWJGL3 version and native classifier configuration
 val lwjglVersion = "3.3.3"
-val lwjglNatives = Pair(
+val hostLwjglNatives = Pair(
     System.getProperty("os.name")!!,
     System.getProperty("os.arch")!!
 ).let { (name, arch) ->
@@ -76,6 +78,21 @@ val lwjglNatives = Pair(
     }
 }
 
+// A distributable jar must run on every desktop platform, not just the machine that built
+// it. -PallNatives=true (the default on CI) bundles every platform's LWJGL natives; local
+// builds stay small with only the host's.
+val bundleAllNatives = (providers.gradleProperty("allNatives").orNull ?: System.getenv("CI"))?.toBoolean() ?: false
+val lwjglNativesList = if (bundleAllNatives)
+    listOf("natives-linux", "natives-linux-arm64", "natives-macos", "natives-macos-arm64", "natives-windows", "natives-windows-arm64")
+else
+    listOf(hostLwjglNatives)
+
+// Recorded in the jar manifest so the About panel and bug reports can say which build this is.
+val gitCommit: String = System.getenv("CI_COMMIT_SHORT_SHA")
+    ?: runCatching {
+        providers.exec { commandLine("git", "rev-parse", "--short", "HEAD") }.standardOutput.asText.get().trim()
+    }.getOrDefault("unknown")
+
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
@@ -88,10 +105,12 @@ dependencies {
     implementation("org.lwjgl", "lwjgl-opengl")
     implementation("org.lwjgl", "lwjgl-glfw")
     implementation("org.lwjgl", "lwjgl-stb")  // For image loading
-    runtimeOnly("org.lwjgl", "lwjgl", classifier = lwjglNatives)
-    runtimeOnly("org.lwjgl", "lwjgl-opengl", classifier = lwjglNatives)
-    runtimeOnly("org.lwjgl", "lwjgl-glfw", classifier = lwjglNatives)
-    runtimeOnly("org.lwjgl", "lwjgl-stb", classifier = lwjglNatives)
+    lwjglNativesList.forEach { natives ->
+        runtimeOnly("org.lwjgl", "lwjgl", classifier = natives)
+        runtimeOnly("org.lwjgl", "lwjgl-opengl", classifier = natives)
+        runtimeOnly("org.lwjgl", "lwjgl-glfw", classifier = natives)
+        runtimeOnly("org.lwjgl", "lwjgl-stb", classifier = natives)
+    }
 
     // JOML - Java OpenGL Math Library (for matrix/vector operations)
     implementation("org.joml:joml:1.10.5")
@@ -130,14 +149,20 @@ tasks {
         options.encoding = "UTF-8"
     }
 
+    val manifestAttributes = mapOf(
+        "Main-Class" to "com.darkan.bot.BotKt",
+        "Implementation-Title" to "Darkan client",
+        "Implementation-Version" to project.version.toString(),
+        "Git-Commit" to gitCommit,
+    )
+
     jar {
-        manifest {
-            attributes(mutableMapOf("Main-Class" to "com.darkan.bot.BotKt"))
-        }
+        manifest { attributes(manifestAttributes) }
     }
 
     shadowJar {
         archiveBaseName.set("darkan-client-shaded")
+        manifest { attributes(manifestAttributes) }
     }
 }
 

@@ -63,6 +63,7 @@ class SettingsPanel(private val botUi: BotUI) : JPanel(BorderLayout()) {
 
         section("About")
         field("Client", label("Darkan client build ${Loader.MAJOR_BUILD}.${Loader.MINOR_BUILD}", secondary = true))
+        field("Build", label(buildDescription(), secondary = true))
         field("Scripts", label("${ScriptExecutor.scripts.size} loaded", secondary = true))
 
         // Push everything to the top.
@@ -99,6 +100,17 @@ class SettingsPanel(private val botUi: BotUI) : JPanel(BorderLayout()) {
             anchor = GridBagConstraints.WEST; fill = GridBagConstraints.HORIZONTAL
             insets = Insets(2, -Spacing.GAP, 2, 0)
         })
+    }
+
+    /** Version and commit recorded in the jar manifest by the build; "development" when run from an IDE. */
+    private fun buildDescription(): String {
+        val manifest = runCatching {
+            val url = SettingsPanel::class.java.getResource("/META-INF/MANIFEST.MF") ?: return@runCatching null
+            url.openStream().use { java.util.jar.Manifest(it) }.mainAttributes
+        }.getOrNull()
+        val version = manifest?.getValue("Implementation-Version") ?: return "development"
+        val commit = manifest.getValue("Git-Commit") ?: "unknown"
+        return "$version ($commit)"
     }
 
     private fun open(dir: File) {

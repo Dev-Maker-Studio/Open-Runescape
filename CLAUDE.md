@@ -84,6 +84,20 @@ com.darkan.bot.BotKt
 - Standard JAR: `build/libs/darkan-bot-2.0.0.jar`
 - Shadow JAR: `build/libs/darkan-client-shaded-2.0.0.jar`
 
+## CI/CD (GitLab)
+
+`.gitlab-ci.yml` builds the fully shadowed jar with LWJGL natives for Linux, macOS and Windows
+(`-PallNatives=true`, automatic on CI) and publishes it:
+
+- Every push to `dev`: latest dev build, overwritten each time
+  `https://gitlab.com/darkanrs/darkan-bot/-/jobs/artifacts/dev/raw/dist/darkan-client.jar?job=build`
+  (also in the generic package registry as `darkan-client/dev-latest/darkan-client.jar`)
+- Every `vX.Y.Z` tag: a GitLab release versioned from the tag, with permalinks
+  `.../-/releases/permalink/latest` and `.../-/releases/permalink/latest/downloads/darkan-client.jar`
+- Cut a release: `git tag v2.1.0 && git push origin v2.1.0`
+- The version and commit land in the jar manifest (`Implementation-Version`, `Git-Commit`) and
+  show in the sidebar's Settings > About. Local builds keep version 2.0.0 and host-only natives.
+
 ## Key Features
 
 ### 1. Bot Scripting Framework
