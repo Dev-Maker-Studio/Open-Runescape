@@ -1205,13 +1205,7 @@ class ModernGLToolkit(
             // models), queued geometry must be flushed under its original VP and the
             // batch re-armed with the new one, or models render offset against terrain.
             if (batcherActive) {
-                val hasGeometry = when {
-                    useOptimizedBatcher ->
-                        optimizedBatcher?.hasPendingGeometry() == true ||
-                            (useInstancing && instancedBatcher?.hasPendingGeometry() == true)
-                    else -> frameBatcher?.hasPendingGeometry() == true
-                }
-                if (hasGeometry) {
+                if (hasPendingSceneGeometry()) {
                     // Flush collected geometry with the VP it was queued under,
                     // then fall through to reopen the batch with the new VP.
                     renderWithModernPipeline()
@@ -1221,16 +1215,11 @@ class ModernGLToolkit(
                     // Batch open but empty: just re-arm the new VP and lighting.
                     if (useOptimizedBatcher) {
                         optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
-                        optimizedBatcher?.setLighting(
-                            sunDirection[0], sunDirection[1], sunDirection[2],
-                            sunBrightness,
-                            sunColorRed, sunColorGreen, sunColorBlue,
-                            sunColorIntensity, antiSunColorIntensity
-                        )
                         if (useInstancing) {
                             instancedBatcher?.setViewProjection(viewProjectionMatrix.elements)
                             snapshotSceneMatrices()
                         }
+                        armBatchLightingAndFog()
                     }
                 }
             }
@@ -1363,51 +1352,17 @@ class ModernGLToolkit(
             optimizedBatcher?.beginFrame()
             // Set VP matrix for GPU-side transformation
             optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
-            // Set lighting parameters for GPU-side lighting
-            // These match the legacy lighting model from ModelGL.kt
-            // -Drender.nolight=true collapses the sun term to identity
-            // (litRGB == vertex colour), isolating how much of the modern/legacy
-            // brightness gap comes from the shader's lighting rather than from the
-            // baked vertex colours.
-            if (noLight) {
-                optimizedBatcher?.setLighting(
-                    sunDirection[0], sunDirection[1], sunDirection[2],
-                    1f, 1f, 1f, 1f, 0f, 0f
-                )
-            } else optimizedBatcher?.setLighting(
-                sunDirection[0], sunDirection[1], sunDirection[2],
-                sunBrightness,
-                sunColorRed, sunColorGreen, sunColorBlue,
-                sunColorIntensity, antiSunColorIntensity  // Contrast factors
-            )
-            // Legacy enables GL_LINEAR fog for every model draw via
-            // setupMatrixRendering(); without it modern geometry never blends
-            // toward the fog colour and the whole scene reads ~25% brighter.
-            optimizedBatcher?.setFog(
-                viewMatrix44.elements, fogEnabled && fogDensity >= 0,
-                fogColor, fogStartPosition, fogEndPosition
-            )
             buildFrameLights()
             optimizedBatcher?.setPointLights(frameLightCount, frameLightPos, frameLightColor)
             gr.setPointLights(frameLightCount, frameLightPos, frameLightColor)
 
-            // Begin instanced batcher for repeated mesh detection
             if (useInstancing) {
                 instancedBatcher?.beginFrame()
                 instancedBatcher?.setViewProjection(viewProjectionMatrix.elements)
                 snapshotSceneMatrices()
-                instancedBatcher?.setLighting(
-                    sunDirection[0], sunDirection[1], sunDirection[2],
-                    sunBrightness,
-                    sunColorRed, sunColorGreen, sunColorBlue,
-                    sunColorIntensity, antiSunColorIntensity
-                )
-                instancedBatcher?.setFog(
-                    viewMatrix44.elements, fogEnabled && fogDensity >= 0,
-                    fogColor, fogStartPosition, fogEndPosition
-                )
                 instancedBatcher?.setPointLights(frameLightCount, frameLightPos, frameLightColor)
             }
+            armBatchLightingAndFog()
 
         } else {
             frameBatcher?.beginFrame()
@@ -2442,6 +2397,81 @@ class ModernGLToolkit(
     // produces no visible output. This happens for sprites created before
     // initializeModernRenderer() (they remain as SpriteGL, not ModernSpriteGL).
 
+    private fun hasPendingSceneGeometry(): Boolean = when {
+        useOptimizedBatcher ->
+            optimizedBatcher?.hasPendingGeometry() == true ||
+                (useInstancing && instancedBatcher?.hasPendingGeometry() == true)
+        else -> frameBatcher?.hasPendingGeometry() == true
+    }
+
+    /**
+     * Arms the open scene batch with the toolkit's CURRENT sun and fog.
+     *
+     * -Drender.nolight=true collapses the sun term to identity (litRGB == vertex
+     * colour). Legacy enables GL_LINEAR fog for every model draw, so the batch
+     * carries the fog too or the scene reads ~25% brighter.
+     */
+    private fun armBatchLightingAndFog() {
+        val fogOn = fogEnabled && fogDensity >= 0
+        val brightness = if (noLight) 1f else sunBrightness
+        val red = if (noLight) 1f else sunColorRed
+        val green = if (noLight) 1f else sunColorGreen
+        val blue = if (noLight) 1f else sunColorBlue
+        val contrastPositive = if (noLight) 0f else sunColorIntensity
+        val contrastNegative = if (noLight) 0f else antiSunColorIntensity
+        optimizedBatcher?.setLighting(
+            sunDirection[0], sunDirection[1], sunDirection[2],
+            brightness, red, green, blue, contrastPositive, contrastNegative
+        )
+        optimizedBatcher?.setFog(viewMatrix44.elements, fogOn, fogColor, fogStartPosition, fogEndPosition)
+        if (useInstancing) {
+            instancedBatcher?.setLighting(
+                sunDirection[0], sunDirection[1], sunDirection[2],
+                brightness, red, green, blue, contrastPositive, contrastNegative
+            )
+            instancedBatcher?.setFog(viewMatrix44.elements, fogOn, fogColor, fogStartPosition, fogEndPosition)
+        }
+    }
+
+    /**
+     * The sun or fog changed while a scene batch is open. Legacy applied both at
+     * draw time, so geometry already queued keeps the state it was queued under
+     * (flush, then reopen) and an empty batch simply takes the new state. Without
+     * this, sun changes made by UI drawing after the scene (item icon rendering
+     * uses a random-intensity sun with fog off) reached the next frame's world
+     * models, because the batch captured its lighting when it opened, before the
+     * client re-applied the scene environment for the frame.
+     */
+    private fun sceneLightingChanged() {
+        if (!canUseModernPipeline() || !isSceneBatchActive()) return
+        if (hasPendingSceneGeometry()) {
+            renderWithModernPipeline()
+            functionMask = 0
+            openSceneBatch()
+        } else {
+            armBatchLightingAndFog()
+        }
+    }
+
+    override fun updateSun(sunBrightness: Float) {
+        val changed = this.sunBrightness != sunBrightness
+        super.updateSun(sunBrightness)
+        if (changed) sceneLightingChanged()
+    }
+
+    override fun applyLighting(sunColor: Int, intensity: Float, antiIntensity: Float, x: Float, y: Float, z: Float) {
+        val changed = sunColorRgb != sunColor || sunColorIntensity != intensity || antiSunColorIntensity != antiIntensity ||
+            sunPreviousPosition[0] != x || sunPreviousPosition[1] != y || sunPreviousPosition[2] != z
+        super.applyLighting(sunColor, intensity, antiIntensity, x, y, z)
+        if (changed) sceneLightingChanged()
+    }
+
+    override fun calculateFog(color: Int, density: Int, offset: Int) {
+        val changed = fogColor != color || fogDensity != density || fogOffset != offset
+        super.calculateFog(color, density, offset)
+        if (changed) sceneLightingChanged()
+    }
+
     /** True while the deferred 3D scene batch (models collected via drawMatrixThreaded) is open. */
     private fun isSceneBatchActive(): Boolean = when {
         useOptimizedBatcher -> optimizedBatcher?.isActive() == true
@@ -2474,13 +2504,7 @@ class ModernGLToolkit(
         // both issued right after setModelMatrix opens the batch): flushing there
         // would close the still-empty batch and every model of the frame would be
         // dropped by the inactive-batcher guard in renderModelGLOptimized.
-        val hasGeometry = when {
-            useOptimizedBatcher ->
-                optimizedBatcher?.hasPendingGeometry() == true ||
-                    (useInstancing && instancedBatcher?.hasPendingGeometry() == true)
-            else -> frameBatcher?.hasPendingGeometry() == true
-        }
-        if (!hasGeometry) return
+        if (!hasPendingSceneGeometry()) return
         // PAINTER'S ORDER: 2D quads submitted BEFORE these batched models must land
         // BENEATH them. Flushing only the scene here (as before) painted the deferred
         // models UNDER quads that were queued earlier but flushed later — the reported
@@ -5583,14 +5607,8 @@ class ModernGLToolkit(
         // Start new batch
         batcher.beginFrame()
 
-        // Re-set VP matrix and lighting for new batch
         batcher.setViewProjection(viewProjectionMatrix.elements)
-        batcher.setLighting(
-            sunDirection[0], sunDirection[1], sunDirection[2],
-            sunBrightness,
-            sunColorRed, sunColorGreen, sunColorBlue,
-            sunColorIntensity, antiSunColorIntensity
-        )
+        armBatchLightingAndFog()
     }
 
     /**
