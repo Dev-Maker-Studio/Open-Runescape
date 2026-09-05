@@ -15,6 +15,7 @@ import com.jagex.game.runetek5.scene.RetainedSceneHook
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.client.Client
+import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 
 /**
@@ -396,7 +397,8 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
     /** Conservative: true unless the chunk's projected AABB lies clearly away from the cursor. */
     private fun chunkNearMouse(chunk: Chunk): Boolean {
         if (!PICK_GATE) return true
-        val mx = Client.mouseX.toFloat(); val my = Client.mouseY.toFloat()
+        val recorder = MouseRecord.recorder ?: return true
+        val mx = recorder.getMouseX().toFloat(); val my = recorder.getMouseY().toFloat()
         var minX = Float.MAX_VALUE; var minY = Float.MAX_VALUE; var maxX = -Float.MAX_VALUE; var maxY = -Float.MAX_VALUE
         val p = mouseProj
         for (corner in 0 until 8) {
