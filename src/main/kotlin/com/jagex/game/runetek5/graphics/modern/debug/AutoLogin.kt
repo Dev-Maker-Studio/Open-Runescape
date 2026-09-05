@@ -5,6 +5,7 @@ import com.darkan.bot.utils.Tile
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.input.camera.Camera
+import com.jagex.game.runetek5.config.rsinterface.Interface
 import com.jagex.game.runetek5.client.login.LoginManager
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.config.TypeLists
@@ -86,6 +87,8 @@ object AutoLogin {
     private var readyFrame = 0
     private var spinAccum = 0f
     private var commandIssued = false
+    private var buttonIssued = false
+    private val pendingCommands = ArrayList<Pair<Int, String>>()
     private var equipIssued = false
     private var bloomForced = false
     private var walkIssued = false
@@ -178,7 +181,24 @@ object AutoLogin {
             val cmdSpec = System.getProperty("autologin.command")?.replace('+', ' ')
             if (cmdSpec != null && !commandIssued && frames - readyFrame == 120) {
                 commandIssued = true
-                try { Bot.command(cmdSpec); System.err.println("[AutoLogin] COMMAND ;;$cmdSpec") } catch (t: Throwable) { System.err.println("[AutoLogin] COMMAND failed: $t") }
+                cmdSpec.split(';').map { it.trim() }.filter { it.isNotEmpty() }.forEachIndexed { index, cmd ->
+                    pendingCommands.add(Pair(frames + index * 60, cmd))
+                }
+            }
+            val buttonSpec = System.getProperty("autologin.ifbutton")
+            if (buttonSpec != null && !buttonIssued && frames - readyFrame == 240) {
+                buttonIssued = true
+                val parts = buttonSpec.split(':').mapNotNull { it.trim().toIntOrNull() }
+                if (parts.size >= 2) {
+                    try {
+                        Interface.ifOptionInteract(parts.getOrNull(2) ?: 1, (parts[0] shl 16) or parts[1], -1, "")
+                        System.err.println("[AutoLogin] IFBUTTON ${parts[0]}:${parts[1]}")
+                    } catch (t: Throwable) { System.err.println("[AutoLogin] IFBUTTON failed: $t") }
+                }
+            }
+            while (pendingCommands.isNotEmpty() && pendingCommands.first().first <= frames) {
+                val cmd = pendingCommands.removeAt(0).second
+                try { Bot.command(cmd); System.err.println("[AutoLogin] COMMAND ;;$cmd") } catch (t: Throwable) { System.err.println("[AutoLogin] COMMAND failed: $t") }
             }
             val equipId = System.getProperty("autologin.equip")?.toIntOrNull()
             if (equipId != null && !equipIssued && frames - readyFrame >= 240 && (frames - readyFrame) % 60 == 0) {
