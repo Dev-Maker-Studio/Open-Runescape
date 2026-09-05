@@ -96,14 +96,14 @@ class GroundSM(
         x: Int,
         y: Int,
         offsetsX: IntArray,
-        heightOffsets: IntArray,
+        heightOffsets: IntArray?,
         offsetsY: IntArray,
-        unused: IntArray,
+        unused: IntArray?,
         trianglesA: IntArray,
         trianglesB: IntArray,
         trianglesC: IntArray,
         primaryColors: IntArray,
-        secondaryColors: IntArray,
+        secondaryColors: IntArray?,
         primaryMaterialIds: IntArray,
         secondaryMaterialIds: IntArray,
         waterTile: WaterTile?
@@ -164,7 +164,7 @@ class GroundSM(
                 val sceneY = offsetY + (y shl tileScale)
                 shapedTile.offsetX!![index] = offsetX.toShort()
                 shapedTile.offsetY!![index] = offsetY.toShort()
-                shapedTile.offsetZ!![index] = (getAverageHeight(sceneX, sceneY) + (heightOffsets[index])).toShort()
+                shapedTile.offsetZ!![index] = (getAverageHeight(sceneX, sceneY) + (heightOffsets?.get(index) ?: 0)).toShort()
 
                 shapedTile.light!![index] = if (light < 2) 2 else light
             }
@@ -172,7 +172,7 @@ class GroundSM(
             var texturedFloor = false
             var triangleCount = 0
             for (index in 0 until colorCount) {
-                if (primaryColors[index] >= 0 || secondaryColors[index] >= 0) {
+                if (primaryColors[index] >= 0 || secondaryColors != null && secondaryColors[index] >= 0) {
                     triangleCount++
                 }
                 val materialId = primaryMaterialIds[index]
@@ -188,7 +188,7 @@ class GroundSM(
             }
 
             shapedTile.primaryColors = IntArray(triangleCount)
-            shapedTile.secondaryColors = IntArray(triangleCount)
+            shapedTile.secondaryColors = if (secondaryColors != null) IntArray(triangleCount) else null
             shapedTile.triangleA = ShortArray(triangleCount)
             shapedTile.triangleB = ShortArray(triangleCount)
             shapedTile.triangleC = ShortArray(triangleCount)
@@ -199,17 +199,19 @@ class GroundSM(
             }
 
             for (triangleIndex in 0 until colorCount) {
-                if (primaryColors[triangleIndex] >= 0 || secondaryColors[triangleIndex] >= 0) {
+                if (primaryColors[triangleIndex] >= 0 || secondaryColors != null && secondaryColors[triangleIndex] >= 0) {
                     shapedTile.primaryColors!![shapedTile.triangleCount.toInt()] = if (primaryColors[triangleIndex] >= 0) {
                         ColorUtil.adjustHsv(primaryColors[triangleIndex]).toInt()
                     } else {
                         -1
                     }
 
-                    shapedTile.secondaryColors!![shapedTile.triangleCount.toInt()] = if (secondaryColors[triangleIndex] != -1) {
-                        ColorUtil.adjustHsv(secondaryColors[triangleIndex]).toInt()
-                    } else {
-                        -1
+                    if (secondaryColors != null) {
+                        shapedTile.secondaryColors!![shapedTile.triangleCount.toInt()] = if (secondaryColors[triangleIndex] != -1) {
+                            ColorUtil.adjustHsv(secondaryColors[triangleIndex]).toInt()
+                        } else {
+                            -1
+                        }
                     }
 
                     shapedTile.triangleA!![shapedTile.triangleCount.toInt()] = trianglesA[triangleIndex].toShort()
@@ -228,14 +230,16 @@ class GroundSM(
                 }
             }
             sceneShapedTiles!![x][y] = shapedTile
-        } else if (primaryColors[0] >= 0 || secondaryColors[0] >= 0) {
+        } else if (primaryColors[0] >= 0 || secondaryColors != null && secondaryColors[0] >= 0) {
             val plainTile = PlainTile()
             val color = primaryColors[0]
             val materialId = primaryMaterialIds[0]
 
-            plainTile.color = ColorUtil.repackHsl(ColorUtil.adjustHsv(secondaryColors[0]).toInt(), directionalTileLight!![x][y] - tileShadowing!![x][y])
-            if (color == -1) {
-                plainTile.functionMask = (plainTile.functionMask.toInt() or HD_LIGHT).toByte()
+            if (secondaryColors != null) {
+                plainTile.color = ColorUtil.repackHsl(ColorUtil.adjustHsv(secondaryColors[0]).toInt(), directionalTileLight!![x][y] - tileShadowing!![x][y])
+                if (color == -1) {
+                    plainTile.functionMask = (plainTile.functionMask.toInt() or HD_LIGHT).toByte()
+                }
             }
 
             if (tileHeights[x][y] == tileHeights[x + 1][y] &&

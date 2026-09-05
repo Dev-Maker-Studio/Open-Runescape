@@ -545,7 +545,7 @@ open class MapLoader(
                         tile.floUnusedOpcode21 = scene.unusedOpcode21(x, y)
                         tile.floUnusedOpcode22 = scene.unusedOpcode22(x, y)
                     }
-                    localHeights.calculateBlockTiles(x, y, sizesX, nextLvlHeightDifference!!, sizesY, localLvlHeightDifference!!, faceVertexA!!, faceVertexB!!, faceVertexC!!, floorColor, minimapColor!!, overlayTextures, textureScale, tile)
+                    localHeights.calculateBlockTiles(x, y, sizesX, nextLvlHeightDifference, sizesY, localLvlHeightDifference, faceVertexA, faceVertexB, faceVertexC, floorColor, minimapColor, overlayTextures, textureScale, tile)
                     scene.loadTiles(plane, x, y)
                 }
             }

@@ -172,14 +172,14 @@ open class GroundGL(
         x: Int,
         y: Int,
         offsetsX: IntArray,
-        heightOffsets: IntArray,
+        heightOffsets: IntArray?,
         offsetsZ: IntArray,
-        unused: IntArray,
+        unused: IntArray?,
         trianglesA: IntArray,
         trianglesB: IntArray,
         trianglesC: IntArray,
         floorColor: IntArray,
-        minimapColor: IntArray,
+        minimapColor: IntArray?,
         overlayTextureIds: IntArray,
         textureScales: IntArray,
         waterTile: WaterTile?
@@ -188,11 +188,11 @@ open class GroundGL(
         val expandedOffsetsX = IntArray(triangleCount * 3)
         val expandedOffsetsZ = IntArray(triangleCount * 3)
         val expandedMainColors = IntArray(triangleCount * 3)
-        val expandedBlendColors = IntArray(triangleCount * 3)
+        val expandedBlendColors = if (minimapColor != null) IntArray(triangleCount * 3) else null
         val expandedOverlayTextures = IntArray(triangleCount * 3)
         val expandedTextureScales = IntArray(triangleCount * 3)
-        val expandedHeightOffsets = IntArray(triangleCount * 3)
-        val expandedUnused = IntArray(triangleCount * 3)
+        val expandedHeightOffsets = if (heightOffsets != null) IntArray(triangleCount * 3) else null
+        val expandedUnused = if (unused != null) IntArray(triangleCount * 3) else null
         var vertexIndex = 0
 
         for (triangleIndex in 0 until triangleCount) {
@@ -204,9 +204,9 @@ open class GroundGL(
             expandedMainColors[vertexIndex] = floorColor[triangleIndex]
             expandedOverlayTextures[vertexIndex] = overlayTextureIds[triangleIndex]
             expandedTextureScales[vertexIndex] = textureScales[triangleIndex]
-            expandedBlendColors[vertexIndex] = minimapColor[triangleIndex]
-            expandedHeightOffsets[vertexIndex] = heightOffsets[vertexA]
-            expandedUnused[vertexIndex] = unused[vertexA]
+            if (expandedBlendColors != null) expandedBlendColors[vertexIndex] = minimapColor!![triangleIndex]
+            if (expandedHeightOffsets != null) expandedHeightOffsets[vertexIndex] = heightOffsets!![vertexA]
+            if (expandedUnused != null) expandedUnused[vertexIndex] = unused!![vertexA]
 
             ++vertexIndex
             expandedOffsetsX[vertexIndex] = offsetsX[vertexB]
@@ -214,9 +214,9 @@ open class GroundGL(
             expandedMainColors[vertexIndex] = floorColor[triangleIndex]
             expandedOverlayTextures[vertexIndex] = overlayTextureIds[triangleIndex]
             expandedTextureScales[vertexIndex] = textureScales[triangleIndex]
-            expandedBlendColors[vertexIndex] = minimapColor[triangleIndex]
-            expandedHeightOffsets[vertexIndex] = heightOffsets[vertexB]
-            expandedUnused[vertexIndex] = unused[vertexB]
+            if (expandedBlendColors != null) expandedBlendColors[vertexIndex] = minimapColor!![triangleIndex]
+            if (expandedHeightOffsets != null) expandedHeightOffsets[vertexIndex] = heightOffsets!![vertexB]
+            if (expandedUnused != null) expandedUnused[vertexIndex] = unused!![vertexB]
 
             ++vertexIndex
             expandedOffsetsX[vertexIndex] = offsetsX[vertexC]
@@ -224,9 +224,9 @@ open class GroundGL(
             expandedMainColors[vertexIndex] = floorColor[triangleIndex]
             expandedOverlayTextures[vertexIndex] = overlayTextureIds[triangleIndex]
             expandedTextureScales[vertexIndex] = textureScales[triangleIndex]
-            expandedBlendColors[vertexIndex] = minimapColor[triangleIndex]
-            expandedHeightOffsets[vertexIndex] = heightOffsets[vertexC]
-            expandedUnused[vertexIndex] = unused[vertexC]
+            if (expandedBlendColors != null) expandedBlendColors[vertexIndex] = minimapColor!![triangleIndex]
+            if (expandedHeightOffsets != null) expandedHeightOffsets[vertexIndex] = heightOffsets!![vertexC]
+            if (expandedUnused != null) expandedUnused[vertexIndex] = unused!![vertexC]
 
             ++vertexIndex
         }
