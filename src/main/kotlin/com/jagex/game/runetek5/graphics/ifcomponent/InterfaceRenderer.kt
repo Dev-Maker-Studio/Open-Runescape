@@ -454,7 +454,7 @@ object InterfaceRenderer {
 
 								if (childComponent.contentType == ComponentContentType.WORLD_MAP_OVERVIEW) {
 									if (leftClickAllowed) {
-										WorldMapDisplay.markDestination(MouseRecord.recorder?.getMouseX() ?: 0 - componentX, MouseRecord.recorder?.getMouseY() ?: 0 - componentY, childComponent.width, childComponent.height)
+										WorldMapDisplay.markDestination((MouseRecord.recorder?.getMouseX() ?: 0) - componentX, (MouseRecord.recorder?.getMouseY() ?: 0) - componentY, childComponent.width, childComponent.height)
 									}
 									continue
 								}
@@ -482,8 +482,8 @@ object InterfaceRenderer {
 								val hookRequest = HookRequest()
 								hookRequest.hasMousePosition = true
 								hookRequest.source = childComponent
-								hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
-								hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
+								hookRequest.mouseX = (MouseRecord.recorder?.getMouseX() ?: 0) - componentX
+								hookRequest.mouseY = (MouseRecord.recorder?.getMouseY() ?: 0) - componentY
 								hookRequest.params = childComponent.onClickRepeat
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
@@ -494,8 +494,8 @@ object InterfaceRenderer {
 									val hookRequest = HookRequest()
 									hookRequest.hasMousePosition = true
 									hookRequest.source = childComponent
-									hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
-									hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
+									hookRequest.mouseX = (MouseRecord.recorder?.getMouseX() ?: 0) - componentX
+									hookRequest.mouseY = (MouseRecord.recorder?.getMouseY() ?: 0) - componentY
 									hookRequest.params = childComponent.onRelease
 									Client.MOUSE_HOOK_REQUESTS.addFirst(hookRequest)
 								}
@@ -505,8 +505,8 @@ object InterfaceRenderer {
 								val hookRequest = HookRequest()
 								hookRequest.hasMousePosition = true
 								hookRequest.source = childComponent
-								hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
-								hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
+								hookRequest.mouseX = (MouseRecord.recorder?.getMouseX() ?: 0) - componentX
+								hookRequest.mouseY = (MouseRecord.recorder?.getMouseY() ?: 0) - componentY
 								hookRequest.params = childComponent.onHold
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
@@ -517,8 +517,8 @@ object InterfaceRenderer {
 									val hookRequest = HookRequest()
 									hookRequest.hasMousePosition = true
 									hookRequest.source = childComponent
-									hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
-									hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
+									hookRequest.mouseX = (MouseRecord.recorder?.getMouseX() ?: 0) - componentX
+									hookRequest.mouseY = (MouseRecord.recorder?.getMouseY() ?: 0) - componentY
 									hookRequest.params = childComponent.onMouseOver
 									Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 								}
@@ -528,8 +528,8 @@ object InterfaceRenderer {
 								val hookRequest = HookRequest()
 								hookRequest.hasMousePosition = true
 								hookRequest.source = childComponent
-								hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
-								hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
+								hookRequest.mouseX = (MouseRecord.recorder?.getMouseX() ?: 0) - componentX
+								hookRequest.mouseY = (MouseRecord.recorder?.getMouseY() ?: 0) - componentY
 								hookRequest.params = childComponent.popupScript
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
@@ -540,8 +540,8 @@ object InterfaceRenderer {
 									val hookRequest = HookRequest()
 									hookRequest.hasMousePosition = true
 									hookRequest.source = childComponent
-									hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
-									hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
+									hookRequest.mouseX = (MouseRecord.recorder?.getMouseX() ?: 0) - componentX
+									hookRequest.mouseY = (MouseRecord.recorder?.getMouseY() ?: 0) - componentY
 									hookRequest.params = childComponent.onMouseLeaveScript
 									Client.MOUSE_HOOK_REQUESTS.addFirst(hookRequest)
 								}
