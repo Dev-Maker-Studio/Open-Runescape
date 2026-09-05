@@ -12,7 +12,7 @@ class OpenGLCubeTextureSampler(
     sizeXy: Int,
     mipmapsGenerated: Boolean,
     materialPixels: Array<IntArray>
-) : MipmapTextureSampler(toolkit, GL_TEXTURE_CUBE_MAP, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, sizeXy * sizeXy * 6, mipmapsGenerated), CubeTextureSampler {
+) : MipmapTextureSampler(toolkit, GL_TEXTURE_CUBE_MAP, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, sizeXy * sizeXy * 6, mipmapsGenerated), CubeTextureSampler {
 
     init {
         super.activeToolkit.setTextureSampler(this)

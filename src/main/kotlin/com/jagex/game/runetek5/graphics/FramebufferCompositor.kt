@@ -88,12 +88,12 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
 
         if (pixelFormatSet) {
             if (multisampleDisplay != null) {
-                hdrRenderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.HDR, format, s, t, activeToolkit.multiSamplesPreference)
+                hdrRenderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.RGBA, format, s, t, activeToolkit.multiSamplesPreference)
             }
 
             textures2d = arrayOfNulls<OpenGl2DTexture>(2)
-            textures2d?.set(0, OpenGl2DTexture(activeToolkit, 34037, GLFormat.HDR, format, s, t))
-            textures2d?.set(1, if (texturedFaceCount > 1) OpenGl2DTexture(activeToolkit, 34037, GLFormat.HDR, format, s, t) else null)
+            textures2d?.set(0, OpenGl2DTexture(activeToolkit, 34037, GLFormat.RGBA, format, s, t))
+            textures2d?.set(1, if (texturedFaceCount > 1) OpenGl2DTexture(activeToolkit, 34037, GLFormat.RGBA, format, s, t) else null)
             pixelFormatSet = false
             isFboAttachmentDirty = true
             isFramebufferDirty = true

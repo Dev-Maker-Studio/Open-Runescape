@@ -151,13 +151,13 @@ class ShadowTileGL(
 
                 if (cachedTexture == null) {
                     cachedTexture = OpenGl2DTexture(
-                        toolkit, 3553, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT,
-                        128, 128, false, toolkit.shadowTextureData, GLFormat.RGBA, false
+                        toolkit, 3553, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT,
+                        128, 128, false, toolkit.shadowTextureData, GLFormat.ALPHA, false
                     )
                     cachedTexture!!.setRepeat(false, false)
                     cachedTexture!!.setLinearTextureFilter(true)
                 } else {
-                    cachedTexture!!.uploadTextureData(0, 128, 128, toolkit.shadowTextureData, GLFormat.RGBA, false)
+                    cachedTexture!!.uploadTextureData(0, 128, 128, toolkit.shadowTextureData, GLFormat.ALPHA, false)
                 }
             }
         }

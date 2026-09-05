@@ -193,7 +193,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val regionBase = Resource.mapRegion?.getBaseCoordinates() ?: return
     val inverseViewProjection = toolkit.getScratchMatrix()
     toolkit.setModelMatrix(cameraMatrix)
-    toolkit.setSunPosition(Camera.sunMatrix)
+    toolkit.setViewMatrix(Camera.sunMatrix)
     toolkit.setClipping(MiniMenu.viewportX, MiniMenu.viewportY, MiniMenu.viewportX + Camera.gameAreaWidth, Camera.gameAreaHeight + MiniMenu.viewportY)
     toolkit.setDrawableArea(MiniMenu.viewportX, MiniMenu.viewportY, Camera.gameAreaWidth, Camera.gameAreaHeight)
     inverseViewProjection.fromMatrix(Camera.sunMatrix)

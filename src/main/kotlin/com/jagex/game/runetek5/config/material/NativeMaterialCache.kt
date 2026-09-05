@@ -36,7 +36,7 @@ class NativeMaterialCache(
         val texture: NativeTextureSampler
         if (material.hdr && toolkit.bloomEnabled()) {
             val pixelsHdr = materialProvider!!.getPixelsHdr(materialId, size, size)
-            texture = toolkit.createHdrTexture(GLFormat.HDR, size, size, pixelsHdr)
+            texture = toolkit.createHdrTexture(GLFormat.RGBA, size, size, pixelsHdr)
         } else {
             val pixels: IntArray
             if (material.effectCombiner != 2 && MaterialTypeList.isOpaqueEffect(material.effectId.toInt())) {

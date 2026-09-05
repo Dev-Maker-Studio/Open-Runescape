@@ -101,7 +101,7 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 }
             }
 
-            normalSampler = activeToolkit.create3DTexture(GLFormat.HDR, bytes2)
+            normalSampler = activeToolkit.create3DTexture(GLFormat.RGBA, bytes2)
         }
 
         return normalSampler != null

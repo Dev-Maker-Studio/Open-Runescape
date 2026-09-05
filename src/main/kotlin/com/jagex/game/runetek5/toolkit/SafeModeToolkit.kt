@@ -1659,8 +1659,8 @@ open class SafeModeToolkit : AbstractToolkit {
         return base or mask
     }
 
-    override fun createGround(sizeX: Int, sizeY: Int, heightsNext: Array<IntArray>, heightsCurrent: Array<IntArray>, unused: Int, tileFunctionMask: Int): Ground {
-        return GroundSM(this, tileFunctionMask, sizeX, sizeY, heightsNext, heightsCurrent)
+    override fun createGround(sizeX: Int, sizeY: Int, heightsNext: Array<IntArray>, heightsCurrent: Array<IntArray>, tileUnits: Int, unused: Int, tileFunctionMask: Int): Ground {
+        return GroundSM(this, tileFunctionMask, sizeX, sizeY, tileUnits, heightsNext, heightsCurrent)
     }
 
 
@@ -2031,12 +2031,12 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-    override fun setSunPosition(sunPosition: Matrix43) {
+    override fun setViewMatrix(sunPosition: Matrix43) {
         this.currentSunPosition = sunPosition
         updateFrustumPlanes()
     }
 
-    override fun copySunPosition(): Matrix43 {
+    override fun copyViewMatrix(): Matrix43 {
         return Matrix43(this.currentSunPosition!!)
     }
 

@@ -527,9 +527,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
 
     fun buildTables() {
         this.openglTextures = arrayOfNulls(this.maxTextureUnits)
-        this.texture2d = OpenGl2DTexture(this, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, 1, 1)
-        OpenGl2DTexture(this, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, 1, 1)
-        OpenGl2DTexture(this, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, 1, 1)
+        this.texture2d = OpenGl2DTexture(this, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, 1, 1)
+        OpenGl2DTexture(this, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, 1, 1)
+        OpenGl2DTexture(this, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, 1, 1)
         for (index in 0 until 7) {
             this.copySrc[index] = ModelGL(this)
             this.copyDst[index] = ModelGL(this)
@@ -1546,7 +1546,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glLoadMatrixf(matrix4x4.elements, 0)
     }
 
-    override fun setSunPosition(viewMatrix: Matrix43) {
+    override fun setViewMatrix(viewMatrix: Matrix43) {
         this.viewMatrix43.copyFrom(viewMatrix)
         this.viewMatrix44.fromMatrix(this.viewMatrix43)
         this.inverseSunMatrix43.copyFrom(viewMatrix)
@@ -1558,7 +1558,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    override fun copySunPosition(): Matrix43 = Matrix43(this.viewMatrix43)
+    override fun copyViewMatrix(): Matrix43 = Matrix43(this.viewMatrix43)
 
     override fun copyModelMatrix(): Matrix44 = Matrix44(this.currentModelMatrix)
 
@@ -1786,7 +1786,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         BUFFER_4F[1] = this.sunColorIntensity * this.sunColorGreen
         BUFFER_4F[2] = this.sunColorIntensity * this.sunColorBlue
         BUFFER_4F[3] = 1.0f
-        OpenGL.glLightfv(GL_COLOR_BUFFER_BIT, GL_DIFFUSE, BUFFER_4F, 0)
+        OpenGL.glLightfv(GL_LIGHT0, GL_DIFFUSE, BUFFER_4F, 0)
         BUFFER_4F[0] = -this.antiSunColorIntensity * this.sunColorRed
         BUFFER_4F[1] = -this.antiSunColorIntensity * this.sunColorGreen
         BUFFER_4F[2] = -this.antiSunColorIntensity * this.sunColorBlue
@@ -1795,7 +1795,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun setLightingSourceParams() {
-        OpenGL.glLightfv(GL_COLOR_BUFFER_BIT, GL_POSITION, this.sunDirection, 0)
+        OpenGL.glLightfv(GL_LIGHT0, GL_POSITION, this.sunDirection, 0)
         OpenGL.glLightfv(GL_LIGHT1, GL_POSITION, this.lightingDirection, 0)
     }
 
@@ -2628,8 +2628,8 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    override fun createGround(regionSizeX: Int, regionSizeY: Int, heightsCurrentLvl: Array<IntArray>, heightsNextLvl: Array<IntArray>, floorFunctionMask: Int, waterFunctionMask: Int): Ground {
-        return GroundGL(this, floorFunctionMask, waterFunctionMask, regionSizeX, regionSizeY, heightsCurrentLvl, heightsNextLvl)
+    override fun createGround(regionSizeX: Int, regionSizeY: Int, heightsCurrentLvl: Array<IntArray>, heightsNextLvl: Array<IntArray>, tileUnits: Int, floorFunctionMask: Int, waterFunctionMask: Int): Ground {
+        return GroundGL(this, floorFunctionMask, waterFunctionMask, regionSizeX, regionSizeY, tileUnits, heightsCurrentLvl, heightsNextLvl)
     }
 
     override fun createDelegatingDisplay(canvas: Canvas, width: Int, height: Int): DelegatingDisplay {
@@ -2668,11 +2668,11 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         val textureCoordV: Float
         val textureCoordU: Float
         if (this.worldMapTexture != null && this.worldMapTexture!!.width >= width && this.worldMapTexture!!.length >= height) {
-            this.worldMapTexture!!.uploadTextureData(0, width, height, pixelData, GLFormat.RGBA, false)
+            this.worldMapTexture!!.uploadTextureData(0, width, height, pixelData, GLFormat.ALPHA, false)
             textureCoordV = this.worldMapTexture!!.t * height / this.worldMapTexture!!.length
             textureCoordU = this.worldMapTexture!!.s * width / this.worldMapTexture!!.width
         } else {
-            this.worldMapTexture = OpenGl2DImageTexture.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, pixelData, GLFormat.RGBA)
+            this.worldMapTexture = OpenGl2DImageTexture.createSurface(this, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT, width, height, pixelData, GLFormat.ALPHA)
             this.worldMapTexture!!.setRepeat(false, false)
             textureCoordV = this.worldMapTexture!!.t
             textureCoordU = this.worldMapTexture!!.s

@@ -137,7 +137,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
                     eyePosition[0] = 0.0f
                     eyePosition[1] = 0.0f
                     eyePosition[2] = 0.0f
-                    toolkit.copySunPosition().calculateEyePosition(eyePosition[0], eyePosition[1], eyePosition[2], eyePosition)
+                    toolkit.copyViewMatrix().calculateEyePosition(eyePosition[0], eyePosition[1], eyePosition[2], eyePosition)
                     shader.uniform3f(eyePositionAttribute!!, eyePosition[0], eyePosition[1], eyePosition[2])
                 }
             }
@@ -180,7 +180,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
             val floats5 = floatArrayOf(0.0f, 0.0f, 0.0f)
             eyePosOsMatrix.transformPoint(floats5)
             val floats6 = floatArrayOf(0.0f, 0.0f, 0.0f)
-            toolkit.copySunPosition().calculatePerspective(0.0f, 0.0f, 0.0f, floats6)
+            toolkit.copyViewMatrix().calculatePerspective(0.0f, 0.0f, 0.0f, floats6)
             matrix44var2.transformPointToInteger(eyePos)
             activeShader!!.uniform3f(eyePositionOS!!, eyePos[0], eyePos[1], eyePos[2])
         }

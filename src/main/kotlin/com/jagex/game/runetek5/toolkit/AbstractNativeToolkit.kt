@@ -648,7 +648,7 @@ abstract class AbstractNativeToolkit(
         return mask1 or mask2
     }
 
-    override fun createGround(regionSizeX: Int, regionSizeY: Int, tileheightsCurrentLvl: Array<IntArray>, tileheightsNextLvl: Array<IntArray>, floorFunctionMask: Int, waterFunctionMask: Int): Ground {
+    override fun createGround(regionSizeX: Int, regionSizeY: Int, tileheightsCurrentLvl: Array<IntArray>, tileheightsNextLvl: Array<IntArray>, tileUnits: Int, floorFunctionMask: Int, waterFunctionMask: Int): Ground {
         throw UnsupportedOperationException("createGround not implemented for this toolkit")
     }
 
@@ -1131,7 +1131,7 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun createNativeTexture(format: GLFormat, width: Int, length: Int, pixels: FloatArray): NativeTextureSampler
 
-    override fun copySunPosition(): Matrix43 {
+    override fun copyViewMatrix(): Matrix43 {
         return viewMatrix43
     }
 
@@ -1288,7 +1288,7 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    override fun setSunPosition(viewMatrix: Matrix43) {
+    override fun setViewMatrix(viewMatrix: Matrix43) {
         viewMatrix43 = viewMatrix
         particleMatrix.fromMatrix(viewMatrix43)
         inverseSunMatrix43.copyFrom(viewMatrix)

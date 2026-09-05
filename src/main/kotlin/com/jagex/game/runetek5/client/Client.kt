@@ -2330,7 +2330,7 @@ class Client : GameShell() {
                     SUN_MATRIX.rotate(0.0f, -1.0f, 0.0f, MathUtils.getTheta(-Camera.cameraRoll and 0x3fff))
                     SUN_MATRIX.rotate(-1.0f, 0.0f, 0.0f, MathUtils.getTheta(-Camera.cameraYaw and 0x3fff))
                     SUN_MATRIX.rotate(0.0f, 0.0f, -1.0f, MathUtils.getTheta(-Camera.cameraPitch and 0x3fff))
-                    Renderers.activeToolkit!!.setSunPosition(SUN_MATRIX)
+                    Renderers.activeToolkit!!.setViewMatrix(SUN_MATRIX)
                     StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (w / 2).toFloat(), (h / 2).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), w, h)
                     Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
                     if (sceneAtmosphere.getSkybox() != null) {

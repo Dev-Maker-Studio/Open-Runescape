@@ -410,7 +410,7 @@ open class MapLoader(
                 waterFunctionMask = waterFunctionMask or TileFunctionMask.DISABLE_TEXTURES
             }
             val nextHeights = if (heightsNextLvl != null && height < heightsNextLvl.size) heightsNextLvl[height] else tileHeights[height]
-            scene.setLocalGround(height, toolkit.createGround(regionSizeX, regionSizeY, tileHeights[height], nextHeights, floorFunctionMask, waterFunctionMask))
+            scene.setLocalGround(height, toolkit.createGround(regionSizeX, regionSizeY, tileHeights[height], nextHeights, 1 shl scene.tileUnits, floorFunctionMask, waterFunctionMask))
         }
     }
 

@@ -309,7 +309,7 @@ class Skybox(
 
     fun applySunRotation(toolkit: AbstractToolkit, rotationY: Int, rotationX: Int, rotationZ: Int, alpha: Int) {
         // Backup the current sun position
-        val originalSunPosition = toolkit.copySunPosition()
+        val originalSunPosition = toolkit.copyViewMatrix()
         // Create a new matrix for the sun position and apply the rotations
         val rotatedSunPosition = Matrix43()
         rotatedSunPosition.setViewPosition(0.0f, 0.0f, 0.0f)
@@ -317,7 +317,7 @@ class Skybox(
         rotatedSunPosition.rotate(-1.0f, 0.0f, 0.0f, MathUtils.getTheta(-rotationY and 0x3fff))
         rotatedSunPosition.rotate(0.0f, 0.0f, -1.0f, MathUtils.getTheta(-rotationZ and 0x3fff))
         // Update the sun position in the toolkit
-        toolkit.setSunPosition(rotatedSunPosition)
+        toolkit.setViewMatrix(rotatedSunPosition)
         // Update the sky model's alpha value if it has changed
         if (alpha != lastAlpha) {
             skyModel!!.applyEnvironmentAlpha(alpha.toByte(), faceAlpha!!)
@@ -327,7 +327,7 @@ class Skybox(
         val drawnMatrix = Matrix43()
         skyModel!!.drawMatrixThreaded(drawnMatrix, null, ModelFunctionMaskGL.EMPTY)
         // Restore the original sun position
-        toolkit.setSunPosition(originalSunPosition)
+        toolkit.setViewMatrix(originalSunPosition)
     }
 
     companion object {

@@ -236,13 +236,13 @@ END
                 this.openglTexture = OpenGl2DTexture(
                     openglToolkit,
                     GL_TEXTURE_2D,
-                    GLFormat.RGBA,
+                    GLFormat.ALPHA,
                     GLActionFormat.PIXEL_FORMAT,
                     2,
                     1,
                     false,
                     byteArrayOf(0.toByte(), (-1).toByte()),
-                    GLFormat.RGBA,
+                    GLFormat.ALPHA,
                     false
                 )
                 this.openglTexture!!.setRepeat(false, false)

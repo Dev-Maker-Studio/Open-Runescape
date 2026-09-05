@@ -62,16 +62,16 @@ object HintRenderer {
         } else {
             val drawHeight = MapRegion.tileheightForAbsolutePosition(absX, absY, plane) - floorOffset
             val toolkit = Renderers.activeToolkit!!
-            Client.SUN_MATRIX.copyFrom(toolkit.copySunPosition())
+            Client.SUN_MATRIX.copyFrom(toolkit.copyViewMatrix())
             Client.SUN_MATRIX.translate(translateSunX.toFloat(), 0.0f, 0.0f)
-            toolkit.setSunPosition(Client.SUN_MATRIX)
+            toolkit.setViewMatrix(Client.SUN_MATRIX)
             if (calculateProjection) {
                 toolkit.calculateProjection(absX.toFloat(), drawHeight.toFloat(), absY.toFloat(), Client.HINT_POSITION)
             } else {
                 toolkit.computeWorldToScreen(absX.toFloat(), drawHeight.toFloat(), absY.toFloat(), Client.HINT_POSITION)
             }
             Client.SUN_MATRIX.translate(-translateSunX.toFloat(), 0.0f, 0.0f)
-            toolkit.setSunPosition(Client.SUN_MATRIX)
+            toolkit.setViewMatrix(Client.SUN_MATRIX)
             Client.HINT_POSITION[0] -= Client.hintArrowOffsetX
             Client.HINT_POSITION[1] -= Client.hintArrowOffsetY
         }

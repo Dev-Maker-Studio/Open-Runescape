@@ -268,9 +268,9 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun renderParticles(particleWrapper: ParticleWrapper)
 
-    abstract fun setSunPosition(viewMatrix: Matrix43)
+    abstract fun setViewMatrix(viewMatrix: Matrix43)
 
-    abstract fun copySunPosition(): Matrix43
+    abstract fun copyViewMatrix(): Matrix43
 
     abstract fun setDepthBuffering(enabled: Boolean)
 
@@ -318,7 +318,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun setSunCubeTexture(cubeTexture: AbstractCubeTextureGenerator?)
 
-    abstract fun createGround(regionSizeX: Int, regionSizeY: Int, tileheightsCurrentLvl: Array<IntArray>, tileheightsNextLvl: Array<IntArray>, floorFunctionMask: Int, waterFunctionMask: Int): Ground
+    abstract fun createGround(regionSizeX: Int, regionSizeY: Int, tileheightsCurrentLvl: Array<IntArray>, tileheightsNextLvl: Array<IntArray>, tileUnits: Int, floorFunctionMask: Int, waterFunctionMask: Int): Ground
 
     abstract fun calculateProjection(width: Float, height: Float, length: Float, matrix: FloatArray)
 

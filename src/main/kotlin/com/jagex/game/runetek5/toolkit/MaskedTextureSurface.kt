@@ -22,7 +22,7 @@ class MaskedTextureSurface : ComponentSurface {
      * @param bytes Pixel data as bytes
      */
     constructor(nativeToolkit: AbstractNativeToolkit, width: Int, height: Int, bytes: ByteArray) {
-        nativeTextureSampler = nativeToolkit.createTextureSampler(GLFormat.RGBA, width, height, false, bytes)
+        nativeTextureSampler = nativeToolkit.createTextureSampler(GLFormat.ALPHA, width, height, false, bytes)
         nativeTextureSampler.setRepeat(false, false)
     }
 
@@ -59,7 +59,7 @@ class MaskedTextureSurface : ComponentSurface {
             rowOffsets: IntArray,
             rowWidths: IntArray
         ): MaskedTextureSurface {
-            return if (nativeToolkit.supportsTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
+            return if (nativeToolkit.supportsTextureFormat(GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT)) {
                 val bytes = ByteArray(height * width)
                 for (row in 0 until height) {
                     var pixelPtr = rowOffsets[row] + row * width

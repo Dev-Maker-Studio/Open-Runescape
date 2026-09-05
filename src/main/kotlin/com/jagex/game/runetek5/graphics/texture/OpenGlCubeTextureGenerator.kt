@@ -14,7 +14,7 @@ class OpenGlCubeTextureGenerator(
 
     @JvmField val cubeTexture: OpenGlArbCubeMapTexture = OpenGlArbCubeMapTexture(
         openglToolkit,
-        GLFormat.HDR,
+        GLFormat.RGBA,
         GLActionFormat.PIXEL_FORMAT,
         largestMaterialSize
     )

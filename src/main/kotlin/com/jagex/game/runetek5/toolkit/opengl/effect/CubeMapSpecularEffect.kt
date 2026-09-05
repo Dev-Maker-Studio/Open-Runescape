@@ -70,9 +70,9 @@ class CubeMapSpecularEffect(
             }
 
             cubeMapTextures = arrayOf(
-                OpenGlArbCubeMapTexture(glToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, specular96, GLFormat.RGBA),
-                OpenGlArbCubeMapTexture(glToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, specular36, GLFormat.RGBA),
-                OpenGlArbCubeMapTexture(glToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, specular12, GLFormat.RGBA)
+                OpenGlArbCubeMapTexture(glToolkit, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT, specular96, GLFormat.ALPHA),
+                OpenGlArbCubeMapTexture(glToolkit, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT, specular36, GLFormat.ALPHA),
+                OpenGlArbCubeMapTexture(glToolkit, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT, specular12, GLFormat.ALPHA)
             )
             initializeCombineLists()
         }

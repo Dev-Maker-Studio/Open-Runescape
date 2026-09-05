@@ -265,56 +265,6 @@ class ShadowMapperGL(
         }
     }
 
-    fun addShadow(shadow: Shadow, shadowX: Int, shadowY: Int) {
-        var adjustedY = shadowY
-        var adjustedX = shadowX
-        val shadowGL = shadow as ShadowGL
-        adjustedX += shadowGL.startX + 1
-        adjustedY += shadowGL.startY + 1
-        var dataOffset = adjustedX + adjustedY * width
-        var srcOffset = 0
-        var clippedHeight = shadowGL.sizeY
-        var clippedWidth = shadowGL.sizeX
-        var dstRowStride = width - clippedWidth
-        var srcRowStride = 0
-        var clippedAmount: Int
-        if (adjustedY <= 0) {
-            clippedAmount = 1 - adjustedY
-            clippedHeight -= clippedAmount
-            srcOffset += clippedAmount * clippedWidth
-            dataOffset += clippedAmount * width
-            adjustedY = 1
-        }
-
-        if (adjustedY + clippedHeight >= length) {
-            clippedAmount = adjustedY + clippedHeight + 1 - length
-            clippedHeight -= clippedAmount
-        }
-
-        if (adjustedX <= 0) {
-            clippedAmount = 1 - adjustedX
-            clippedWidth -= clippedAmount
-            srcOffset += clippedAmount
-            dataOffset += clippedAmount
-            srcRowStride += clippedAmount
-            dstRowStride += clippedAmount
-            adjustedX = 1
-        }
-
-        if (clippedWidth + adjustedX >= width) {
-            clippedAmount = clippedWidth + adjustedX + 1 - width
-            clippedWidth -= clippedAmount
-            srcRowStride += clippedAmount
-            dstRowStride += clippedAmount
-        }
-
-        if (clippedWidth > 0 && clippedHeight > 0) {
-            shadowVersion++
-            addShadowData(shadowMapperData, shadowGL.shade, srcOffset, dataOffset, clippedWidth, clippedHeight, dstRowStride, srcRowStride)
-            invalidateShadowTiles(adjustedX, adjustedY, clippedWidth, clippedHeight)
-        }
-    }
-
     fun removeShadow(shadow: Shadow, shadowX: Int, shadowY: Int) {
         var adjustedY = shadowY
         var adjustedX = shadowX
@@ -365,10 +315,60 @@ class ShadowMapperGL(
         }
     }
 
+    fun addShadow(shadow: Shadow, shadowX: Int, shadowY: Int) {
+        var adjustedY = shadowY
+        var adjustedX = shadowX
+        val shadowGL = shadow as ShadowGL
+        adjustedX += shadowGL.startX + 1
+        adjustedY += shadowGL.startY + 1
+        var dataOffset = adjustedX + adjustedY * width
+        var srcOffset = 0
+        var clippedHeight = shadowGL.sizeY
+        var clippedWidth = shadowGL.sizeX
+        var dstRowStride = width - clippedWidth
+        var srcRowStride = 0
+        var clippedAmount: Int
+        if (adjustedY <= 0) {
+            clippedAmount = 1 - adjustedY
+            clippedHeight -= clippedAmount
+            srcOffset += clippedAmount * clippedWidth
+            dataOffset += clippedAmount * width
+            adjustedY = 1
+        }
+
+        if (adjustedY + clippedHeight >= length) {
+            clippedAmount = adjustedY + clippedHeight + 1 - length
+            clippedHeight -= clippedAmount
+        }
+
+        if (adjustedX <= 0) {
+            clippedAmount = 1 - adjustedX
+            clippedWidth -= clippedAmount
+            srcOffset += clippedAmount
+            dataOffset += clippedAmount
+            srcRowStride += clippedAmount
+            dstRowStride += clippedAmount
+            adjustedX = 1
+        }
+
+        if (clippedWidth + adjustedX >= width) {
+            clippedAmount = clippedWidth + adjustedX + 1 - width
+            clippedWidth -= clippedAmount
+            srcRowStride += clippedAmount
+            dstRowStride += clippedAmount
+        }
+
+        if (clippedWidth > 0 && clippedHeight > 0) {
+            shadowVersion++
+            addShadowData(shadowMapperData, shadowGL.shade, srcOffset, dataOffset, clippedWidth, clippedHeight, dstRowStride, srcRowStride)
+            invalidateShadowTiles(adjustedX, adjustedY, clippedWidth, clippedHeight)
+        }
+    }
+
     companion object {
         const val MAX_DIRTY_RECTS = 32
         @JvmStatic
-        fun subtractShadowData(dstData: ByteArray, srcData: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
+        fun addShadowData(dstData: ByteArray, srcData: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
             var dstPos = dstOffset
             var srcPos = srcOffset
             val unrolledCount = -(width shr 2)
@@ -401,7 +401,7 @@ class ShadowMapperGL(
         }
 
         @JvmStatic
-        fun addShadowData(dst: ByteArray, shade: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
+        fun subtractShadowData(dst: ByteArray, shade: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
             var dstPos = dstOffset
             var srcPos = srcOffset
             val unrolledCount = -(width shr 2)

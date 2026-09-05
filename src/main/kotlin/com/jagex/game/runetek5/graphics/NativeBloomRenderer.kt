@@ -87,11 +87,11 @@ class NativeBloomRenderer(
         }
 
         this.directDisplay = this.toolkit.getImageProducer()
-        this.pingTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
+        this.pingTextureSampler = this.toolkit.createRectangleTexture(GLFormat.RGBA, this.format, this.width, this.height)
         this.pingFramebuffer = this.pingTextureSampler!!.getFramebuffer()
-        this.pongTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
+        this.pongTextureSampler = this.toolkit.createRectangleTexture(GLFormat.RGBA, this.format, this.width, this.height)
         this.pongFramebuffer = this.pongTextureSampler!!.getFramebuffer()
-        this.compositeTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
+        this.compositeTextureSampler = this.toolkit.createRectangleTexture(GLFormat.RGBA, this.format, this.width, this.height)
         this.compositeFramebuffer = this.compositeTextureSampler!!.getFramebuffer()
         this.depthRenderBuffer = this.toolkit.getRenderBuffer(this.width, this.height)
         val count = this.bloomVector.size

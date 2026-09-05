@@ -24,9 +24,10 @@ class GroundSM(
     @JvmField val groundFunctionMask: Int,
     regionSizeX: Int,
     regionSizeY: Int,
+    tileUnits: Int,
     otherTileHeights: Array<IntArray>,
     tileHeights: Array<IntArray>
-) : Ground(regionSizeX, regionSizeY, 512, otherTileHeights) {
+) : Ground(regionSizeX, regionSizeY, tileUnits, otherTileHeights) {
 
     /** Tiles that render as squares [MIN] */
     @JvmField var scenePlainTiles: Array<Array<PlainTile?>>? = null

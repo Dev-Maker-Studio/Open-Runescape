@@ -454,7 +454,7 @@ object InterfaceComponentRenderer {
                                         modelY += focalY * component.originY shr 9
                                     }
                                     Client.SUN_MATRIX.reset()
-                                    Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
+                                    Renderers.activeToolkit!!.setViewMatrix(Client.SUN_MATRIX)
                                     val perspectiveMatrix = Renderers.activeToolkit!!.getScratchMatrix()
                                     val viewRangeStart = Resource.mapRegion!!.viewRangeStart
                                     var viewRangeEnd = Resource.mapRegion!!.viewRangeEnd

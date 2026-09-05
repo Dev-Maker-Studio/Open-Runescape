@@ -16,7 +16,7 @@ class SpriteSurfaceGL(
     @JvmField val surface: OpenGl2DImageTexture
 
     init {
-        this.surface = OpenGl2DImageTexture.createSurface(class505Sub11, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, length, pixels, GLFormat.RGBA)
+        this.surface = OpenGl2DImageTexture.createSurface(class505Sub11, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT, width, length, pixels, GLFormat.ALPHA)
         this.surface.setRepeat(false, false)
     }
 

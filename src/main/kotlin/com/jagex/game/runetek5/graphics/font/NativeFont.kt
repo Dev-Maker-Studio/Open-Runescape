@@ -75,7 +75,7 @@ class NativeFont(
                 }
             }
 
-            if (!toolkit.supportsTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
+            if (!toolkit.supportsTextureFormat(GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT)) {
                 val argbPixels = IntArray(pixels.size)
 
                 for (i in pixels.indices) {
@@ -84,7 +84,7 @@ class NativeFont(
 
                 glyphAtlasSampler = toolkit.createTexture(atlasSize, atlasSize, false, argbPixels)
             } else {
-                glyphAtlasSampler = toolkit.createTextureSampler(GLFormat.RGBA, atlasSize, atlasSize, false, pixels)
+                glyphAtlasSampler = toolkit.createTextureSampler(GLFormat.ALPHA, atlasSize, atlasSize, false, pixels)
             }
         } else {
             val pixels = IntArray(atlasSize * atlasSize)

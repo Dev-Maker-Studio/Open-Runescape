@@ -21,7 +21,7 @@ class MipmapTextureSampler2D : MipmapTextureSampler, RectangleTextureSampler {
         pixels: IntArray,
         offset: Int,
         rowLength: Int
-    ) : super(toolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, height * width, mipmapsGenerated) {
+    ) : super(toolkit, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, height * width, mipmapsGenerated) {
         this.width = width
         this.height = height
         activeToolkit.setTextureSampler(this)

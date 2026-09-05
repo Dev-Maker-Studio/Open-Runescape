@@ -35,9 +35,10 @@ open class GroundGL(
     waterFunctionMask: Int,
     regionSizeX: Int,
     regionSizeY: Int,
+    tileUnits: Int,
     heightsCurrentLvl: Array<IntArray>,
     heightsNextLvl: Array<IntArray>
-) : Ground(regionSizeX, regionSizeY, 512, heightsCurrentLvl) {
+) : Ground(regionSizeX, regionSizeY, tileUnits, heightsCurrentLvl) {
 
     companion object {
         @JvmStatic var shadowProbeTick = 0
@@ -928,7 +929,7 @@ open class GroundGL(
         if (shadowMapper != null && shadow != null) {
             val shadowX = scaledX - (averageHeight * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
             val shadowY = scaledY - (averageHeight * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            shadowMapper!!.removeShadow(shadow, shadowX, shadowY)
+            shadowMapper!!.addShadow(shadow, shadowX, shadowY)
         }
     }
 
@@ -945,7 +946,7 @@ open class GroundGL(
         if (shadowMapper != null && shadow != null) {
             val shadowX = x - (groundOffset * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
             val shadowY = y - (groundOffset * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            shadowMapper!!.addShadow(shadow, shadowX, shadowY)
+            shadowMapper!!.removeShadow(shadow, shadowX, shadowY)
         }
     }
 

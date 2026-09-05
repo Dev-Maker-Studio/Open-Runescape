@@ -153,7 +153,7 @@ class Sun(
             )
             toolkit.setModelMatrix(projectionMatrix)
             val sunPosition = Matrix43()
-            toolkit.setSunPosition(sunPosition)
+            toolkit.setViewMatrix(sunPosition)
             val renderingMatrix = toolkit.getRenderingMatrix()
             renderingMatrix.setViewPosition(0.0f, 0.0f, (50 - coloredSunModel.getMinZ()).toFloat())
             coloredSunModel.drawMatrixThreaded(renderingMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
@@ -237,7 +237,7 @@ class Sun(
             1024.0f
         )
         toolkit.setModelMatrix(projectionMatrix)
-        toolkit.setSunPosition(Matrix43())
+        toolkit.setViewMatrix(Matrix43())
         val renderingMatrix = Matrix43()
         renderingMatrix.setViewPosition(0.0f, 0.0f, (50 - copiedSunModel!!.getMinZ()).toFloat())
         copiedSunModel!!.drawMatrixThreaded(renderingMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
@@ -268,7 +268,7 @@ class Sun(
             var sunY = (sunPositionY - sunDeltaY shl 15).toFloat()
             var sunZ = (-(sunPositionZ - sunDeltaZ shl 16)).toFloat()
             val sunPosition = FloatArray(3)
-            toolkit.copySunPosition().cacheInto(sunPosition)
+            toolkit.copyViewMatrix().cacheInto(sunPosition)
             sunX += sunPosition[0]
             sunY += sunPosition[1]
             sunZ += sunPosition[2]

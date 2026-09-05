@@ -38,8 +38,8 @@ class OpenGLTextureCache(
         if (material.hdr && toolkit.bloomEnabled()) {
             val pixels = materialProvider!!.getPixelsHdr(textureId, textureSize, textureSize)
             texture = OpenGl2DTexture(
-                toolkit, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB,
-                textureSize, textureSize, material.mipmapping.toInt() != 0, pixels, GLFormat.HDR
+                toolkit, GLFormat.RGBA, GLActionFormat.FLOAT_16_ARB,
+                textureSize, textureSize, material.mipmapping.toInt() != 0, pixels, GLFormat.RGBA
             )
         } else {
             val pixels: IntArray

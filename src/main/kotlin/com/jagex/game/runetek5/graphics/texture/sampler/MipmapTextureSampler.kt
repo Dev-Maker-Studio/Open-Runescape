@@ -246,7 +246,7 @@ abstract class MipmapTextureSampler(
         if (currentHeight > 0 && !OpenGlTexture.isPowerOfTwo(currentHeight)) {
             throw IllegalArgumentException("")
         }
-        if (pixelFormat != GLFormat.HDR) {
+        if (pixelFormat != GLFormat.RGBA) {
             throw IllegalArgumentException("")
         }
         var i5 = 0

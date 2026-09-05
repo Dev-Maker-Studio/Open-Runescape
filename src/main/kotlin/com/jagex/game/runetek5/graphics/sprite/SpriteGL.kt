@@ -53,7 +53,7 @@ open class SpriteGL : NativeSprite {
         toolkit = glToolkit
         texture2d = OpenGl2DImageTexture.createEmpty(
             glToolkit,
-            if (hasAlpha) GLFormat.HDR else GLFormat.RGB,
+            if (hasAlpha) GLFormat.RGBA else GLFormat.RGB,
             GLActionFormat.PIXEL_FORMAT,
             width,
             height

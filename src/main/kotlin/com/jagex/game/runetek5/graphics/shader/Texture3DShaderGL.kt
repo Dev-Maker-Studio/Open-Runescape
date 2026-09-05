@@ -68,7 +68,7 @@ class Texture3DShaderGL(
         toolkit.setActiveTexture(hdrTexture3d)
         OpenGL.glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
         OpenGL.glTexImage3Dub(
-            GL_TEXTURE_3D, 0, OpenGlToolkit.getInternalTextureFormat(GLFormat.HDR, GLActionFormat.PIXEL_FORMAT),
+            GL_TEXTURE_3D, 0, OpenGlToolkit.getInternalTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT),
             w, h, outDepth, 0, GL_RGBA, GL_FLOAT, bytes, 0
         )
         return true
@@ -103,7 +103,7 @@ class Texture3DShaderGL(
             return false
         }
         val openglDisplay = openglToolkit.integratedGraphicsImageProducer!!
-        val openglRenderBuffer = OpenGlRenderBuffer(openglToolkit, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, hdrTexture3d.width, hdrTexture3d.height)
+        val openglRenderBuffer = OpenGlRenderBuffer(openglToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, hdrTexture3d.width, hdrTexture3d.height)
         var ready = false
         openglToolkit.setDisplay(openglDisplay)
         openglDisplay.setFramebuffer(0, openglRenderBuffer)

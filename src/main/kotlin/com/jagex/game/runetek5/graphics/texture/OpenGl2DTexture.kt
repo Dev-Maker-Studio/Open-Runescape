@@ -27,7 +27,7 @@ open class OpenGl2DTexture : OpenGlTexture {
         rowLength: Int,
         size: Int,
         flipVertical: Boolean
-    ) : super(toolkit, textureTarget, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, width * height, mipmapping) {
+    ) : super(toolkit, textureTarget, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width * height, mipmapping) {
         this.width = width
         this.length = height
         var pixelsToUse = pixels

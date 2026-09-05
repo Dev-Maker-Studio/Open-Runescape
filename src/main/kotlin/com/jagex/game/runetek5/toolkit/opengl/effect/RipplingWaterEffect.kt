@@ -28,10 +28,10 @@ class RipplingWaterEffect(
         initializeGLLists()
         texture1d = OpenGl1DTexture(
             glToolkit,
-            GLFormat.RGBA,
+            GLFormat.ALPHA,
             GLActionFormat.PIXEL_FORMAT,
             byteArrayOf(0.toByte(), (-1).toByte()),
-            GLFormat.RGBA
+            GLFormat.ALPHA
         )
         texture1d.setActive()
     }

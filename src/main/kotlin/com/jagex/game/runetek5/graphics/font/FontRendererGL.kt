@@ -81,7 +81,7 @@ class FontRendererGL(
                 }
             }
 
-            this.texture = OpenGl2DImageTexture.createSurface(toolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, atlasSize, atlasSize, pixels, GLFormat.RGBA)
+            this.texture = OpenGl2DImageTexture.createSurface(toolkit, GLFormat.ALPHA, GLActionFormat.PIXEL_FORMAT, atlasSize, atlasSize, pixels, GLFormat.ALPHA)
             this.isAlphaOnlyTexture = true
         } else {
             val pixels = IntArray(atlasSize * atlasSize)

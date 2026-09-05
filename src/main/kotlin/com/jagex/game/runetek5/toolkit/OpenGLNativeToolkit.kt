@@ -1126,7 +1126,7 @@ open class OpenGLNativeToolkit(
             return if (GLARBTextureRectangle) {
                 MipmapRectangleTextureSampler(this, width, height, pixels, borderWidth, borderHeight)
             } else {
-                val sampler2d = MipmapTextureSampler2D(this, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, MathUtils.nextPowerOfTwo(width), MathUtils.nextPowerOfTwo(height))
+                val sampler2d = MipmapTextureSampler2D(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, MathUtils.nextPowerOfTwo(width), MathUtils.nextPowerOfTwo(height))
                 sampler2d.updateTextureRegion(0, 0, width, height, pixels, borderWidth, borderHeight)
                 sampler2d
             }

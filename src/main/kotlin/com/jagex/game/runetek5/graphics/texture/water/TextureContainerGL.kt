@@ -47,7 +47,7 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
             val shader = openglToolkit.texture3dShader
             if (shader?.createShader() == true) {
                 buffer = DataBuffer.unpackDataBuffer(databufferHdrTexture, false)!!
-                hdrTexture3d = OpenGl3DTexture(openglToolkit, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT)
+                hdrTexture3d = OpenGl3DTexture(openglToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)
                 val texture3dTemp = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE)
                 if (!shader.activate(hdrTexture3d!!, texture3dTemp, buffer)) {
                     hdrTexture3d!!.dispose()

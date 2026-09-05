@@ -61,7 +61,7 @@ class DisplayModeDetails {
                 val startTime = Utils.time()
                 Renderers.activeToolkit!!.resetClipping()
                 Client.SUN_MATRIX.setViewPosition(0.0f, 256.0f, 0.0f)
-                Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
+                Renderers.activeToolkit!!.setViewMatrix(Client.SUN_MATRIX)
                 val renderMatrix = Renderers.activeToolkit!!.getScratchMatrix()
                 renderMatrix.setPerspective(
                     (dimension.width / 2f), (dimension.height / 2f), 512.0f, 512.0f,

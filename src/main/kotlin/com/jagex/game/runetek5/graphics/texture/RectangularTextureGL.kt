@@ -179,9 +179,9 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
     override fun createShaders(): Boolean {
         if (activeToolkit.intelGpu && activeToolkit.arbFragmentShader && activeToolkit.arbTextureFloat) {
             display = IntegratedGraphicsDisplayGL(super.activeToolkit)
-            bloomTextureA = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
+            bloomTextureA = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.FLOAT_16_ARB, 256, 256)
             bloomTextureA!!.setRepeat(false, false)
-            bloomTextureB = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
+            bloomTextureB = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.FLOAT_16_ARB, 256, 256)
             bloomTextureB!!.setRepeat(false, false)
             activeToolkit.setDisplay(display!!)
             display!!.setFramebuffer(0, bloomTextureA!!.createFrameBuffer())
@@ -269,7 +269,7 @@ void main() {	vec4 fragCol = texture2D(baseTex, gl_TexCoord[0].xy)*0.091396265;	
                                 break@GenerateMipmaps
                             }
 
-                            mipmaps!![level++] = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, w, h)
+                            mipmaps!![level++] = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.FLOAT_16_ARB, w, h)
                             if (w > 256) {
                                 w = w shr 1
                             }

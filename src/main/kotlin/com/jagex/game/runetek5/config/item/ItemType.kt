@@ -516,7 +516,7 @@ open class ItemType {
         mainToolkit.setModelMatrix(matrix4418)
         mainToolkit.setDrawableArea(0, 0, mainToolkit.getDisplay()!!.getWidth(), mainToolkit.getDisplay()!!.getHeight())
         val sunPosition = Matrix43()
-        mainToolkit.setSunPosition(sunPosition)
+        mainToolkit.setViewMatrix(sunPosition)
         mainToolkit.updateSun(0.95f + (Math.random() / 10.0).toFloat())
         mainToolkit.applyLighting(16777215, 0.95f + (Math.random() / 10.0).toFloat(), 0.95f + (Math.random() / 10.0).toFloat(), -50.0f, -10.0f, -50.0f)
         val itemMatrix = mainToolkit.getRenderingMatrix()

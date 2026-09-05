@@ -104,7 +104,7 @@ class OpenGl2DImageTexture : OpenGl2DTexture {
         totalWidth: Int,
         totalLength: Int,
         pixels: IntArray
-    ) : super(toolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, totalWidth, totalLength) {
+    ) : super(toolkit, GL_TEXTURE_2D, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, totalWidth, totalLength) {
         singleWidth = imageWidth
         singleLength = imageLength
         updateTextureRegion(0, totalLength - imageLength, imageWidth, imageLength, pixels, 0)

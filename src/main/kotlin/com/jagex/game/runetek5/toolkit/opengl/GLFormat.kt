@@ -6,8 +6,8 @@ data class GLFormat(
 ) {
     companion object {
         @JvmField val RGB = GLFormat(5, 3)
-        @JvmField val HDR = GLFormat(6, 4)
-        @JvmField val RGBA = GLFormat(1, 1)
+        @JvmField val RGBA = GLFormat(6, 4)
+        @JvmField val ALPHA = GLFormat(1, 1)
         @JvmField val LUMINANCE = GLFormat(0, 1)
         @JvmField val LUMINANCE_ALPHA = GLFormat(4, 2)
         @JvmField val DEPTH = GLFormat(8, 1)

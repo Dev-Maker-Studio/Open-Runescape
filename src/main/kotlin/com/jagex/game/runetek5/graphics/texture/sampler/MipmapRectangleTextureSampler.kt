@@ -57,7 +57,7 @@ class MipmapRectangleTextureSampler : MipmapTextureSampler, RectangleTextureSamp
         pixels: IntArray,
         offset: Int,
         rowLength: Int
-    ) : super(toolkit, GL_TEXTURE_RECTANGLE, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, height * width, false) {
+    ) : super(toolkit, GL_TEXTURE_RECTANGLE, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, height * width, false) {
         this.width = width
         this.height = height
         activeToolkit.setTextureSampler(this)
