@@ -27,6 +27,7 @@ import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.HookRequest
 import com.jagex.game.runetek5.config.rsinterface.Interface
 import com.jagex.game.runetek5.config.rsinterface.SubInterface
+import com.darkan.crash.CrashHandler
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.config.varc.VarcTypeList
 import com.jagex.game.runetek5.encoding.HuffmanList
@@ -49,8 +50,6 @@ import com.jagex.game.runetek5.tools.Isaac
 import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.TextUtils
 import com.jagex.game.runetek5.utils.Utils
-import java.io.DataInputStream
-import java.net.URL
 
 object PacketEncoder {
 
@@ -521,6 +520,11 @@ object PacketEncoder {
         }
     }
 
+    /**
+     * Records an error the client recovered from. Jagex's client posted these to
+     * `clienterror.ws`; there is no such endpoint here, so the report stays local:
+     * console, the CS2 error log and the next crash report's "recent errors".
+     */
     @JvmStatic
     fun sendErrorToServer(addition: String?, throwable: Throwable?) {
         try {
@@ -535,22 +539,7 @@ object PacketEncoder {
                 errorString += addition
             }
             CS2Executor.logError(errorString)
-            errorString = Utils.formatRequestParameter(errorString)
-            if (StaticMethods.initialApplet != null) {
-                var vendor = "Unknown"
-                var version = "1.1"
-                try {
-                    vendor = System.getProperty("java.vendor")
-                    version = System.getProperty("java.version")
-                } catch (exception: Exception) {
-                    // NOOP
-                }
-                val username = PlayerUpdate.MY_PLAYER_USERNAME
-                val url = URL(StaticMethods.initialApplet!!.getCodeBase(), "clienterror.ws?c=" + SystemInfo.clientBuild + "&cs=" + SystemInfo.clientBuildSub + "&u=" + (if (username != null) Utils.formatRequestParameter(username) else "" + StaticMethods.errorReportUserId) + "&v1=" + Utils.formatRequestParameter(vendor) + "&v2=" + Utils.formatRequestParameter(version) + "&e=" + errorString)
-                val dataInputStream = DataInputStream(url.openStream())
-                dataInputStream.read()
-                dataInputStream.close()
-            }
+            CrashHandler.noteError(addition, throwable)
         } catch (exception: Exception) {
             exception.printStackTrace()
         }

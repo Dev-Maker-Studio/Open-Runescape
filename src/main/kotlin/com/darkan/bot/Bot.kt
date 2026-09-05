@@ -2,6 +2,7 @@ package com.darkan.bot
 
 import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.utils.*
+import com.darkan.crash.CrashHandler
 import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.cache.node.HashTableIterator
 import com.jagex.game.runetek5.client.GameState
@@ -35,6 +36,8 @@ import kotlin.math.floor
 import kotlin.math.pow
 
 fun main(args: Array<String>) {
+    // First, so every later failure ends in a crash report instead of a silent exit.
+    CrashHandler.install()
     // Off by default; pass -Dbot.enabled=true to show the bot sidebar.
     Bot.ENABLED = System.getProperty("bot.enabled")?.toBoolean() ?: false
     ScriptExecutor.loadScripts()

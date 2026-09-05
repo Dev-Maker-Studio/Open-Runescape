@@ -30,6 +30,7 @@ import com.jagex.game.runetek5.client.window.DisplayModeDetails
 import com.jagex.game.runetek5.client.window.ApplicationType
 import com.jagex.game.runetek5.client.window.WindowSettings
 import com.jagex.game.runetek5.client.window.WindowMode
+import com.darkan.crash.CrashHandler
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.utils.Utils
@@ -372,8 +373,8 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             StaticMethods.initialApplet = suppliedApplet
             initializeResources(gameName, buildEnvironmentName, storeId, numIndices)
         } catch (throwable: Throwable) {
-            PacketEncoder.sendErrorToServer(null, throwable)
             raiseErrorScreen("crash")
+            CrashHandler.fatal(throwable, "setting up the game window")
         }
     }
 
@@ -492,7 +493,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 threads[threadIndex]!!.priority = 1
             }
         }
-        val engineThread = Thread(this)
+        val engineThread = Thread(this, CrashHandler.GAME_THREAD_NAME)
         engineThread.isDaemon = true
         engineThread.start()
         engineThread.priority = 1
@@ -694,8 +695,8 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             } catch (threadDeath: ThreadDeath) {
                 throw threadDeath
             } catch (throwable: Throwable) {
-                PacketEncoder.sendErrorToServer(getDebugString(), throwable)
                 raiseErrorScreen("crash")
+                CrashHandler.fatal(throwable, "game loop (${getDebugString() ?: "no debug info"})")
                 prepareExit()
                 return
             }

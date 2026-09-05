@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.client.input.console
 
+import com.darkan.crash.CrashDialog
+import com.darkan.crash.CrashHandler
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import java.awt.image.BufferedImage
 import java.io.File
@@ -32,6 +34,7 @@ import com.jagex.game.runetek5.utils.FileOperations
 import com.jagex.game.runetek5.utils.DirectoryPicker
 import com.jagex.game.runetek5.utils.Utils
 import com.jagex.game.runetek5.vardomain.VarProviders
+import javax.swing.SwingUtilities
 
 object CommandExecutor {
 
@@ -134,6 +137,16 @@ object CommandExecutor {
                 }
                 command.equals("heap", ignoreCase = true) -> {
                     Console.writeLine("Heap: ${GameShell.maxMemory}MB")
+                    return
+                }
+                command.equals("crash", ignoreCase = true) -> {
+                    // Exercises the real crash path on the game thread: report file, dialog, exit.
+                    throw IllegalStateException("Test crash requested from the console")
+                }
+                command.equals("bugreport", ignoreCase = true) -> {
+                    val report = CrashHandler.userReport("bugreport console command")
+                    val file = report.save()
+                    SwingUtilities.invokeLater { CrashDialog.show(report, file, CrashDialog.Mode.REPORT) }
                     return
                 }
                 command.equals("asyncmap", ignoreCase = true) -> {

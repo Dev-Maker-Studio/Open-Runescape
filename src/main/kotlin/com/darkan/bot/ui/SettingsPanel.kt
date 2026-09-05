@@ -3,6 +3,9 @@ package com.darkan.bot.ui
 import com.darkan.bot.BotUI
 import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.scripts.getScriptsDirectory
+import com.darkan.crash.ClientBuild
+import com.darkan.crash.CrashDialog
+import com.darkan.crash.CrashHandler
 import com.jagex.game.launch.Loader
 import java.awt.BorderLayout
 import java.awt.Desktop
@@ -63,8 +66,14 @@ class SettingsPanel(private val botUi: BotUI) : JPanel(BorderLayout()) {
 
         section("About")
         field("Client", label("Darkan client build ${Loader.MAJOR_BUILD}.${Loader.MINOR_BUILD}", secondary = true))
-        field("Build", label(buildDescription(), secondary = true))
+        field("Build", label(ClientBuild.describe(), secondary = true))
         field("Scripts", label("${ScriptExecutor.scripts.size} loaded", secondary = true))
+        actions(
+            button("Report a bug…", "Copy a short report (version, system, recent console output) and open Discord") {
+                val report = CrashHandler.userReport("Report a bug button in the bot sidebar")
+                CrashDialog.show(report, report.save(), CrashDialog.Mode.REPORT)
+            },
+        )
 
         // Push everything to the top.
         form.add(JPanel().apply { isOpaque = false }, GridBagConstraints().apply {
@@ -100,17 +109,6 @@ class SettingsPanel(private val botUi: BotUI) : JPanel(BorderLayout()) {
             anchor = GridBagConstraints.WEST; fill = GridBagConstraints.HORIZONTAL
             insets = Insets(2, -Spacing.GAP, 2, 0)
         })
-    }
-
-    /** Version and commit recorded in the jar manifest by the build; "development" when run from an IDE. */
-    private fun buildDescription(): String {
-        val manifest = runCatching {
-            val url = SettingsPanel::class.java.getResource("/META-INF/MANIFEST.MF") ?: return@runCatching null
-            url.openStream().use { java.util.jar.Manifest(it) }.mainAttributes
-        }.getOrNull()
-        val version = manifest?.getValue("Implementation-Version") ?: return "development"
-        val commit = manifest.getValue("Git-Commit") ?: "unknown"
-        return "$version ($commit)"
     }
 
     private fun open(dir: File) {

@@ -98,6 +98,27 @@ com.darkan.bot.BotKt
 - The version and commit land in the jar manifest (`Implementation-Version`, `Git-Commit`) and
   show in the sidebar's Settings > About. Local builds keep version 2.0.0 and host-only natives.
 
+## Crash Reporting
+
+`com.darkan.crash` owns the player-facing crash flow; the launcher (`~/darkan/client-loader`) reads the
+same files, so the two must stay in sync:
+
+- `CrashHandler.install()` runs first in `main`: wraps stdout/stderr in `ConsoleRecorder` (last 400
+  lines), installs the default uncaught-exception handler and names the engine thread `darkan-game`.
+- Fatal errors (`GameShell.run`/`initializeFrame` catch blocks, uncaught on `main`/`darkan-game`) call
+  `CrashHandler.fatal`: writes `~/.darkanrs/logs/crash-<UTC stamp>.txt`, prints the summary to stderr,
+  shows `CrashDialog` (copy report → open Discord → paste) and exits with status 1 when it closes.
+  `DARKAN_HOME` overrides the root, like the launcher.
+- The file starts with the Discord-sized summary (a fenced block ≤ 1800 chars) followed by the line
+  `==== Full details below …`; the launcher slices on that marker. Don't change the file name pattern
+  or the marker without updating `crates/launcher-core/src/report.rs`.
+- Recoverable errors go through `PacketEncoder.sendErrorToServer` → `CrashHandler.noteError` (no
+  network; Jagex's `clienterror.ws` is gone) and appear in the next report's "recent errors".
+- Account name and password are scrubbed from every report.
+- Test hooks: `-Ddarkan.crashTest=1` crashes at startup; console commands `crash` (real game-thread
+  path) and `bugreport` (dialog without a crash); `-Ddarkan.crashDialog=false` skips the dialog.
+  The bot sidebar's Settings > About has "Report a bug…".
+
 ## Key Features
 
 ### 1. Bot Scripting Framework
