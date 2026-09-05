@@ -1037,7 +1037,10 @@ open class GroundGL(
 
     override fun createShadowAt(tileX: Int, tileY: Int, shadow: Shadow?): Shadow? {
         if ((shadowFunctionMasks[tileX][tileY].toInt() and GroundFunctionMask.CONTAINS_SHADOW) == 0) {
-            return shadow
+            // Tiles without shadow-casting floor geometry produce no shadow. Returning the
+            // caller's scratch shadow here re-stamped the previous tile's shadow onto every
+            // later tile of the plane.
+            return null
         }
         val dimension = tileUnits shr activeToolkit.shadowScale
         val openglShadow = shadow as? ShadowGL

@@ -221,7 +221,7 @@ class Loader : Panel() {
             IP_ADDRESS = if (args.isNotEmpty() && args[0] != null) {
                 args[0]
             } else {
-                if (Bot.PROD) "prod.darkan.org" else "localhost"
+                if (Bot.PROD) "prod.darkan.org" else "dev.darkan.org"
             }
 
             if (args.size > 1 && args[1] != null) {

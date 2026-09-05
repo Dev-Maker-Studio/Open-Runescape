@@ -3217,16 +3217,46 @@ class ModelGL : Model {
                                                 otherMergedNormalsGL.magnitude = otherMagnitudes
                                             }
 
-                                            mergedNormalsX!![thisNormalIdx] = (mergedNormalsX[thisNormalIdx] + normX!![otherNormalIdx]).toShort()
-                                            mergedNormalsY!![thisNormalIdx] = (mergedNormalsY[thisNormalIdx] + normY!![otherNormalIdx]).toShort()
-                                            mergedNormalsZ!![thisNormalIdx] = (mergedNormalsZ[thisNormalIdx] + normZ!![otherNormalIdx]).toShort()
-                                            mergedMagnitudes!![thisNormalIdx] = (mergedMagnitudes[thisNormalIdx] + normMag!![otherNormalIdx]).toByte()
-                                            otherNormalsX!![otherNormalIdx] = (otherNormalsX[otherNormalIdx] + this.normalsX!![thisNormalIdx]).toShort()
-                                            otherNormalsY!![otherNormalIdx] = (otherNormalsY[otherNormalIdx] + this.normalsY!![thisNormalIdx]).toShort()
-                                            otherNormalsZ!![otherNormalIdx] = (otherNormalsZ[otherNormalIdx] + this.normalsZ!![thisNormalIdx]).toShort()
-                                            otherMagnitudes!![otherNormalIdx] = (otherMagnitudes[otherNormalIdx] + this.magnitudes!![thisNormalIdx]).toByte()
+                                            // Every normal slot of the shared vertex (one per colour/texture/alpha
+                                            // combination) receives the other model's ORIGINAL normal, and vice
+                                            // versa. Merging only the first slot left seams on multi-material
+                                            // vertices, and the scan continues so coincident duplicate vertices
+                                            // of the other model all contribute.
+                                            val thisX = this.normalsX!![thisNormalIdx]
+                                            val thisY = this.normalsY!![thisNormalIdx]
+                                            val thisZ = this.normalsZ!![thisNormalIdx]
+                                            val thisMag = this.magnitudes!![thisNormalIdx]
+                                            for (slot in bucketStart until bucketEnd) {
+                                                val slotIdx = otherNormalIndices!![slot] - 1
+                                                if (slotIdx == -1) {
+                                                    break
+                                                }
+                                                if (otherMagnitudes!![slotIdx].toInt() != 0) {
+                                                    otherNormalsX!![slotIdx] = (otherNormalsX[slotIdx] + thisX).toShort()
+                                                    otherNormalsY!![slotIdx] = (otherNormalsY[slotIdx] + thisY).toShort()
+                                                    otherNormalsZ!![slotIdx] = (otherNormalsZ[slotIdx] + thisZ).toShort()
+                                                    otherMagnitudes[slotIdx] = (otherMagnitudes[slotIdx] + thisMag).toByte()
+                                                }
+                                            }
+                                            val otherX = normX!![otherNormalIdx]
+                                            val otherY = normY!![otherNormalIdx]
+                                            val otherZ = normZ!![otherNormalIdx]
+                                            val otherMag = normMag!![otherNormalIdx]
+                                            val thisStart = this.triangles!![vertexIdx]
+                                            val thisEnd = this.triangles!![vertexIdx + 1]
+                                            for (slot in thisStart until thisEnd) {
+                                                val slotIdx = this.vertexNormalIndices!![slot] - 1
+                                                if (slotIdx == -1) {
+                                                    break
+                                                }
+                                                if (mergedMagnitudes!![slotIdx].toInt() != 0) {
+                                                    mergedNormalsX!![slotIdx] = (mergedNormalsX[slotIdx] + otherX).toShort()
+                                                    mergedNormalsY!![slotIdx] = (mergedNormalsY[slotIdx] + otherY).toShort()
+                                                    mergedNormalsZ!![slotIdx] = (mergedNormalsZ[slotIdx] + otherZ).toShort()
+                                                    mergedMagnitudes[slotIdx] = (mergedMagnitudes[slotIdx] + otherMag).toByte()
+                                                }
+                                            }
                                         }
-                                        break
                                     }
                                     searchIdx++
                                 }
