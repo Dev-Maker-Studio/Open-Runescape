@@ -156,6 +156,31 @@ class ModernSpriteGL : SpriteGL {
         )
     }
 
+    fun drawStretchedMask(x: Int, y: Int, width: Int, height: Int, colorArgb: Int) {
+        useFilter(false)
+        if (!useModernPath()) {
+            modernToolkit.countLegacySkip("SpriteGL.drawStretchedMask(skipped)")
+            return
+        }
+        val spriteRenderer = modernToolkit.getSpriteRenderer()!!
+        modernToolkit.ensureSpriteBatchForFont()
+        val textureHandle = texture2d.activeHandle
+        if (textureHandle <= 0) return
+        spriteRenderer.drawSprite(
+            textureId = textureHandle,
+            x0 = x.toFloat(),
+            y0 = y.toFloat(),
+            x1 = (x + width).toFloat(),
+            y1 = (y + height).toFloat(),
+            u0 = 0.0f,
+            v0 = texture2d.t,
+            u1 = texture2d.s,
+            v1 = 0.0f,
+            colorArgb = colorArgb,
+            blendMode = 1
+        )
+    }
+
     // ===== Tiled sprite drawing =====
 
     /**

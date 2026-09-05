@@ -34,6 +34,7 @@ import com.jagex.game.runetek5.graphics.modern.renderer.ModernSpriteRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernSurfaceMaskRenderer
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.sprite.ModernSpriteGL
+import java.util.IdentityHashMap
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteGL
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
@@ -2636,6 +2637,43 @@ class ModernGLToolkit(
 
     override fun generateEmptySprite(width: Int, height: Int, hasAlpha: Boolean, mipmapped: Boolean): NativeSprite {
         return ModernSpriteGL(this, width, height, hasAlpha)
+    }
+
+    private val worldmapTileMasks = IdentityHashMap<ByteArray, ModernSpriteGL>()
+
+    /**
+     * Legacy draws each world map tile as an alpha-mask texture through
+     * GL_INTERPOLATE (overlay colour where the mask is set, underlay colour
+     * elsewhere) in immediate mode. That fixed-function path cannot run inside
+     * the modern pipeline, so the tile becomes an underlay fill plus the mask
+     * drawn as a white sprite tinted with the overlay colour, both in alpha blend
+     * mode so a zoomed-out map does not flush the batch on every tile.
+     */
+    override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixelData: ByteArray, tileWidth: Int, blendMode: Int) {
+        val sr = spriteRenderer
+        if (sr == null || !sr.isReady() || !canUseModernPipeline() || width <= 0 || height <= 0 || tileWidth <= 0) {
+            countLegacySkip("renderWorldmapTile")
+            return
+        }
+        val opaque = blendMode != 1
+        val underlay = if (opaque) colorArgb or 0xff000000.toInt() else colorArgb
+        val overlay = if (opaque) textureEnvColor or 0xff000000.toInt() else textureEnvColor
+        ensureSpriteBatch()
+        sr.drawFilledRect(startX, startY, width, height, underlay, 1)
+        worldmapTileMask(pixelData, tileWidth).drawStretchedMask(startX, startY, width, height, overlay)
+    }
+
+    private fun worldmapTileMask(pixelData: ByteArray, tileWidth: Int): ModernSpriteGL {
+        worldmapTileMasks[pixelData]?.let { return it }
+        if (worldmapTileMasks.size >= 512) worldmapTileMasks.clear()
+        val rows = pixelData.size / tileWidth
+        val pixels = IntArray(pixelData.size)
+        for (i in pixels.indices) {
+            pixels[i] = if (pixelData[i].toInt() != 0) -1 else 0x00ffffff
+        }
+        val sprite = ModernSpriteGL(this, tileWidth, rows, pixels, 0, tileWidth)
+        worldmapTileMasks[pixelData] = sprite
+        return sprite
     }
 
     override fun drawFilledRectangle(x: Int, y: Int, width: Int, height: Int, colorArgb: Int, blendMode: Int) {
