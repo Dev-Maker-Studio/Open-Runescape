@@ -868,7 +868,7 @@ open class ObjectType {
 			}
 		}
 		val baseModel: Model = model
-		val animatedCacheKey = if (sequence != null) createAnimatedModelCacheKey(uid, functionMaskVar, sequence) else null
+		val animatedCacheKey = if (sequence != null && privatePool == null) createAnimatedModelCacheKey(uid, functionMaskVar, sequence) else null
 		if (animatedCacheKey != null) {
 			val cached = lookupCachedAnimatedModel(animatedCacheKey, baseModel)
 			if (cached != null) {
