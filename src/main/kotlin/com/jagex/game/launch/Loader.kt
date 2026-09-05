@@ -218,11 +218,9 @@ class Loader : Panel() {
             System.setProperty("sun.java2d.win.uiScaleY", "1.0")
             System.setProperty("sun.java2d.uiScale.enabled", "false")
 
-            IP_ADDRESS = if (args.isNotEmpty() && args[0] != null) {
-                args[0]
-            } else {
-                if (Bot.PROD) "prod.darkan.org" else "dev.darkan.org"
-            }
+            val host = args.firstOrNull()
+            Bot.PROD = System.getProperty("prod")?.toBoolean() ?: (host == null || host.endsWith("prod.darkan.org"))
+            IP_ADDRESS = host ?: if (Bot.PROD) "prod.darkan.org" else "dev.darkan.org"
 
             if (args.size > 1 && args[1] != null) {
                 LOBBY_PORT = args[1].toInt()
