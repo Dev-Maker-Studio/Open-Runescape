@@ -2852,11 +2852,17 @@ class ModernGLToolkit(
     // so mirroring them keeps the renderer's rect exact.
     private var modernScissorEnabled = false
 
+    private var batchClipLeft = 0
+    private var batchClipTop = 0
+    private var batchClipRight = 0
+    private var batchClipBottom = 0
+
     override fun onTextureDeleted(glTextureId: Int) {
         instancedBatcher?.releaseTextureHandle(glTextureId)
     }
 
     override fun setScissorTestEnabled(enabled: Boolean) {
+        if (enabled != modernScissorEnabled) flushSceneForUiDraw()
         super.setScissorTestEnabled(enabled)
         modernScissorEnabled = enabled
         val sr = spriteRenderer ?: return
@@ -2864,6 +2870,13 @@ class ModernGLToolkit(
     }
 
     override fun defineScissorBox() {
+        if (clipLeft != batchClipLeft || clipTop != batchClipTop || clipRight != batchClipRight || clipBottom != batchClipBottom) {
+            flushSceneForUiDraw()
+            batchClipLeft = clipLeft
+            batchClipTop = clipTop
+            batchClipRight = clipRight
+            batchClipBottom = clipBottom
+        }
         super.defineScissorBox()
         val sr = spriteRenderer ?: return
         if (modernScissorEnabled) pushScissorBoxToSprites(sr)
