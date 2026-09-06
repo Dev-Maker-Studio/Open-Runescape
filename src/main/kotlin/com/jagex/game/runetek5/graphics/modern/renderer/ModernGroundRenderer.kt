@@ -68,6 +68,7 @@ class ModernGroundRenderer {
     private var uTexTextureLocation = -1
     private var uTexHasTextureLocation = -1
     private var uTexCombineModeLocation = -1
+    private var uTexAlphaFromVertexLocation = -1
     private var uTexSunBrightnessLocation = -1
     private var uTexContrastPosLocation = -1
     private var uTexContrastNegLocation = -1
@@ -434,6 +435,7 @@ class ModernGroundRenderer {
         uTexTextureLocation = s.getUniformLocation("uTexture")
         uTexHasTextureLocation = s.getUniformLocation("uHasTexture")
         uTexCombineModeLocation = s.getUniformLocation("uCombineMode")
+        uTexAlphaFromVertexLocation = s.getUniformLocation("uAlphaFromVertex")
         uTexSunBrightnessLocation = s.getUniformLocation("uSunBrightness")
         uTexContrastPosLocation = s.getUniformLocation("uContrastPos")
         uTexContrastNegLocation = s.getUniformLocation("uContrastNeg")
@@ -537,6 +539,7 @@ class ModernGroundRenderer {
         boundTexture = -1
         boundHasNormals = -1
         boundCombineMode = Int.MIN_VALUE
+        boundAlphaFromVertex = null
         boundTextureScale = Float.NaN
         boundStride = -1
         boundTexCoordSize = -1
@@ -551,6 +554,7 @@ class ModernGroundRenderer {
     private var boundHasNormals = -1
     private var boundTexture = -1
     private var boundCombineMode = Int.MIN_VALUE
+    private var boundAlphaFromVertex: Boolean? = null
     private var boundTextureScale = Float.NaN
 
     /**
@@ -845,6 +849,8 @@ class ModernGroundRenderer {
         colorVboId: Int = 0,
         colorData: java.nio.ByteBuffer? = null,
         combineMode: Int = 0,
+        /** Take fragment alpha from the vertex colour instead of the texture (see groundTextured.frag). */
+        alphaFromVertex: Boolean = false,
         /**
          * Resident VBO already holding [vertexData], or 0 to upload into this
          * renderer's own scratch VBO. Terrain geometry is static between ground
@@ -955,6 +961,7 @@ class ModernGroundRenderer {
             boundHasNormals = -1
             boundTexture = -1
             boundCombineMode = Int.MIN_VALUE
+        boundAlphaFromVertex = null
             boundTextureScale = Float.NaN
         }
 
@@ -1009,6 +1016,10 @@ class ModernGroundRenderer {
         if (combineMode != boundCombineMode) {
             s.setUniform(uTexCombineModeLocation, combineMode)
             boundCombineMode = combineMode
+        }
+        if (alphaFromVertex != boundAlphaFromVertex) {
+            s.setUniform(uTexAlphaFromVertexLocation, if (alphaFromVertex) 1 else 0)
+            boundAlphaFromVertex = alphaFromVertex
         }
 
         // Color: from the per-material color VBO (legacy parity — see kdoc above).
@@ -1128,6 +1139,7 @@ class ModernGroundRenderer {
         boundHasNormals = -1
         boundTexture = -1
         boundCombineMode = Int.MIN_VALUE
+        boundAlphaFromVertex = null
         boundTextureScale = Float.NaN
         boundShadowMapper = null
     }

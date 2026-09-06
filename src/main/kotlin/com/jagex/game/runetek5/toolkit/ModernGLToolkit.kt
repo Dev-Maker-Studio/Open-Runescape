@@ -6279,6 +6279,7 @@ class ModernGLToolkit(
             colorVboId = colorVboId,
             colorData = colorData,
             combineMode = combineMode,
+            alphaFromVertex = materialId >= 0 && !MaterialTypeList.isOpaqueEffect(materialProvider?.getMaterial(materialId)?.effectId?.toInt() ?: 0),
             residentVertexVbo = residentGroundVbo(ground, modernData),
             residentIndexIbo = residentIbo
         )

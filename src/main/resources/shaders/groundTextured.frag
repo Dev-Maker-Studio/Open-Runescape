@@ -31,6 +31,10 @@ uniform vec4 uFogColor;
 // reproduces legacy's dark modulated terrain. No GL_RGB_SCALE is applied for
 // ground in legacy (only RipplingWaterEffect uses 2x), so no scale here.
 uniform int uCombineMode;
+// Effects 1 and 7 (CubeMapSpecularEffect, ReflectingTextureEffect) source unit 0's
+// alpha from GL_PRIMARY_COLOR, so their mostly transparent textures never punch
+// through the terrain; every other effect keeps the combiner's alpha.
+uniform bool uAlphaFromVertex;
 
 // Output
 out vec4 fragColor;
@@ -66,6 +70,9 @@ void main() {
         color = vColor;
     }
 
+    if (uAlphaFromVertex) {
+        color.a = vColor.a;
+    }
     if (uGroundShadowEnabled) {
         color.rgb *= 1.0 - texture(uGroundShadowTex, vWorldXZ * uGroundShadowScale).r;
     }
