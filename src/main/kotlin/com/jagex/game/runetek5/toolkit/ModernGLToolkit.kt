@@ -59,6 +59,7 @@ import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.scene.ground.GroundGL
 import com.jagex.game.runetek5.toolkit.opengl.GroundMaterialGL
+import jaggl.OpenGL
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
@@ -1394,6 +1395,7 @@ class ModernGLToolkit(
             // Every exit path, including the early returns, must hand the window its
             // resolved scene back.
             resolveSceneMsaa()
+            setDepthMask()
         }
     }
 
@@ -2886,7 +2888,17 @@ class ModernGLToolkit(
         if (canUseModernPipeline() && isSpriteBatchActive) {
             spriteRenderer?.flush("clear")
         }
+        // The batchers drive glDepthMask directly for their translucent segments, so
+        // the legacy toolkit's cached mask can read "on" while GL has it off; a depth
+        // clear issued in that state is a silent no-op (the chat head then fails the
+        // depth test against the scene behind the dialogue). Assert the real mask.
+        if ((functionMask and 0x2) != 0) {
+            OpenGL.glDepthMask(true)
+        }
         super.applyClearFlags(functionMask, colorArgb)
+        if ((functionMask and 0x2) != 0) {
+            setDepthMask()
+        }
     }
 
     override fun clearRectangle(surface: ComponentSurface, offsetX: Int, offsetY: Int) {

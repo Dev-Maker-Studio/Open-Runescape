@@ -1080,6 +1080,11 @@ class OptimizedFrameBatcher {
         // scene). Asserted HERE rather than in openSceneBatch because state set
         // there is cleared before the draws land. The projection flips Y, which
         // reverses winding, so front faces are CW.
+        // Asserted for the same reason: a batch opened for an interface model (chat
+        // head, equipment screen) is flushed after the 2D pass has already disabled
+        // the depth test, and without it the model's faces land in submission order.
+        GLWrapper.enable(GLWrapper.Constants.DEPTH_TEST)
+        GLWrapper.depthFunc(GLWrapper.Constants.LEQUAL)
         if (CULL_FACE) {
             GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
             GLWrapper.cullFace(CULL_MODE)
