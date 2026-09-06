@@ -46,16 +46,16 @@ import kotlin.math.sqrt
  *   position vec3 (12) + normal vec3 (12) + uv vec2 (8) + rgba u8x4 (4) +
  *   modelIndex float placeholder (4).
  *
- * Face filtering — a VERBATIM port of legacy's count-time filter (ModelGL:402-419)
+ * Face filtering — a port of the legacy ModelGL constructor's count-time filter
  * plus its render-type handling. Verified by GeometryDiff over the whole cache:
  * 157,236 mesh-built models, zero divergence from legacy in face count, vertex
  * position (all four rotations, yaw applied) and per-face RGBA.
  * - faceRenderType 0: smooth-shaded; contributes to per-vertex normals.
  * - faceRenderType 1: flat-shaded; uses the face normal for all three vertices.
  * - any other render type: hidden, skipped entirely.
- * - material.skipTriangles: face dropped (legacy ModelGL:407).
- * - detailsOnly material under [stripDetailLayers]: face DROPPED, not demoted to
- *   untextured (legacy ModelGL:410-412).
+ * - material.skipTriangles: face dropped.
+ * - detailsOnly material under [stripDetailLayers]: face kept and demoted to
+ *   untextured (flat face colour, no UVs), never dropped.
  * - facesAlpha is NOT a filter. RS alpha 255 means GL alpha 0, but legacy draws
  *   opaque scenery with GL_BLEND disabled, which ignores vertex alpha outright, so
  *   those faces rasterize solid. Skipping them deleted Canifis wall and door faces.
@@ -397,22 +397,10 @@ object ModernModelBuilder {
             // SIGNED read: -1 = untextured, 0..N = valid material (including 0).
             var materialId = facesMaterial?.get(face)?.toInt() ?: -1
             if (materialId != -1 && materialProvider != null) {
-                // Port legacy's count-time face filter VERBATIM (ModelGL:402-419):
-                //
-                //   if (!stripDetail || !detailsOnly) { if (skipTriangles) continue }
-                //   else                              { continue }
-                //
-                // Two rules the builder previously lacked. skipTriangles was not
-                // checked at all, and a detailsOnly face under stripDetail was
-                // DEMOTED to untextured and still drawn rather than dropped. Both
-                // emit faces legacy never rasterizes; being untextured they render
-                // as flat quads carrying the raw face tint — the green quads.
                 val material = materialProvider.getMaterial(materialId and 0xffff)
                 if (stripDetailLayers && material.detailsOnly) {
-                    skipMaterialFiltered++
-                    continue
-                }
-                if (material.skipTriangles) {
+                    materialId = -1
+                } else if (material.skipTriangles) {
                     skipMaterialFiltered++
                     continue
                 }

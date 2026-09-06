@@ -600,11 +600,7 @@ class ModelGL : Model {
             if (mesh.faceRenderType == null || mesh.faceRenderType!![faceIndex].toInt() != 2) {
                 if (mesh.facesMaterial != null && mesh.facesMaterial!![faceIndex].toInt() != -1) {
                     val meshMaterial = materialProvider.getMaterial(mesh.facesMaterial!![faceIndex].toInt() and 0xffff)
-                    if ((this.preferenceFlags and 0x40) == 0 || !meshMaterial.detailsOnly) {
-                        if (meshMaterial.skipTriangles) {
-                            continue
-                        }
-                    } else {
+                    if (((this.preferenceFlags and 0x40) == 0 || !meshMaterial.detailsOnly) && meshMaterial.skipTriangles) {
                         continue
                     }
                 }

@@ -4,6 +4,8 @@ import com.darkan.bot.Bot
 import com.darkan.bot.utils.Tile
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.GameState
+import com.jagex.game.runetek5.client.GraphicsCache
+import com.jagex.game.runetek5.client.PreferenceManager
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.rsinterface.Interface
 import com.jagex.game.runetek5.client.login.LoginManager
@@ -92,6 +94,7 @@ object AutoLogin {
     private var equipIssued = false
     private var bloomForced = false
     private var walkIssued = false
+    private var texturesIssued = false
 
     /**
      * Retry spacing. A login round-trip to prod takes seconds; hammering it every
@@ -155,6 +158,16 @@ object AutoLogin {
                 bloomForced = true
                 val ok = Renderers.activeToolkit?.bloomSupported() ?: false
                 System.err.println("[AutoLogin] bloom forced on: supported=$ok enabled=${Renderers.activeToolkit?.bloomEnabled()}")
+            }
+            // "-Dautologin.textures=0|1": flip the Textures graphics option in-game the
+            // way the options interface does (preference + graphics cache reset +
+            // region reload), without saving the preference file.
+            val texturesSpec = System.getProperty("autologin.textures")?.toIntOrNull()
+            if (texturesSpec != null && !texturesIssued && frames - readyFrame == 150) {
+                texturesIssued = true
+                PreferenceManager.preferences?.textures?.setValue(if (texturesSpec == 1) 1 else 0)
+                GraphicsCache.resetGraphicCaches()
+                System.err.println("[AutoLogin] TEXTURES set to $texturesSpec")
             }
             // Debug walk: "-Dautologin.walk=X,Y" (absolute tile) sends one walk request
             // a short while after login, through the bot's own packet path (no input
