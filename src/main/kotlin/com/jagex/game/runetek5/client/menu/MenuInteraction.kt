@@ -495,7 +495,10 @@ object MenuInteraction {
                                 var coloredEntry = queueIterator.nextAndReset() as ColoredMiniMenuEntry?
                                 while (coloredEntry != null) {
                                     if (hoveredIndex == entryCounter) {
-                                        processMenuclick(coloredEntry.nodeQueue!!.current!!.next as MiniMenuEntry, mouseX, mouseY)
+                                        val firstEntry = coloredEntry.nodeQueue.getCurrentNext() as? MiniMenuEntry
+                                        if (firstEntry != null) {
+                                            processMenuclick(firstEntry, mouseX, mouseY)
+                                        }
                                         MiniMenu.close()
                                         break
                                     }
