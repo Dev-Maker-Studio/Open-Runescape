@@ -53,7 +53,7 @@ class Loader : Panel() {
     fun openFrame() = runOnEdt {
         // Swing components must be built, shown and laid out on the event dispatch
         // thread; doing it from main races the sidebar's own timers.
-        clientFrame = JFrame("Darkan Client with Bot").apply {
+        clientFrame = JFrame("Darkan").apply {
             layout = BorderLayout()
 
             // Create client panel for the game
