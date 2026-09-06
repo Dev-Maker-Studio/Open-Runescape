@@ -804,7 +804,10 @@ object InterfaceRenderer {
 
 	@JvmStatic
 	fun resetPendingHooks() {
-		var hook = Client.PENDING_HOOK_REQUESTS.getFirst() as HookRequest?
+		// NodeCollection.first() and getNext() walk the same direction; getFirst() starts
+		// the opposite walk, and pairing it with getNext() bounced between the first two
+		// hooks, so hooks queued by components behind a no-click-through one survived.
+		var hook = Client.PENDING_HOOK_REQUESTS.first() as HookRequest?
 		while (hook != null) {
 			if (hook.hasMousePosition) {
 				hook.unlink()
