@@ -927,9 +927,9 @@ object PlayerUpdate {
         player.movementBaseX[0] = playerX - baseCoordinates.x
         player.movementBaseY[0] = playerY - baseCoordinates.y
         player.setBasePosition(((player.movementBaseX[0] shl 9) + (player.getSize() shl 8)).toFloat(), player.basePosition.coords.y, ((player.movementBaseY[0] shl 9) + (player.getSize() shl 8)).toFloat())
-        MY_PLAYER_PLANE = player.plane.toInt()
         player.plane = playerPlane
         player.collisionPlane = playerPlane
+        MY_PLAYER_PLANE = playerPlane.toInt()
         if (Resource.mapRegion!!.settingsBits.areRoofsHidden(player.movementBaseX[0], player.movementBaseY[0])) {
             player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
         }
