@@ -55,4 +55,8 @@ class NativeHeapBuffer internal constructor(
         }
         bufferAllocated = false
     }
+
+    protected fun finalize() {
+        deallocateBuffer()
+    }
 }
