@@ -3,6 +3,8 @@ package com.jagex.game.runetek5.entity.pathingentity
 import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelGL
+import com.jagex.game.runetek5.toolkit.AbstractToolkit
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 
 /**
  * Order-sensitive 64-bit digest of everything that determines a pathing entity's
@@ -92,6 +94,16 @@ internal class ShadowMemo {
 internal object PoseMemo {
     @JvmStatic
     val ENABLED: Boolean = System.getProperty("render.posememo")?.equals("false", true) != true
+
+    /**
+     * Legacy GL models share their GL buffer wrappers with the base they were copied
+     * from and expect the copy to be gone by the next frame; a slot kept across frames
+     * ends up uploading its own pose into the base's buffers (the blue player after a
+     * fade-out teleport on the classic renderer). Only the modern renderer, which
+     * carries its own per-instance stream, keeps entity poses.
+     */
+    @JvmStatic
+    fun enabledFor(toolkit: AbstractToolkit): Boolean = ENABLED && toolkit is ModernGLToolkit
 
     // Diagnostics (read + reset by the modern toolkit's perf print).
     @JvmField var poseHits = 0L

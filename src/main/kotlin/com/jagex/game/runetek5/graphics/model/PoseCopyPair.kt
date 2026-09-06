@@ -26,6 +26,27 @@ class PoseCopyPair {
     }
     private var ownNxB: ShortArray? = null; private var ownNyB: ShortArray? = null; private var ownNzB: ShortArray? = null; private var ownMagB: ByteArray? = null
 
+    private var baseA: ModelGL? = null
+    private var baseB: ModelGL? = null
+
+    /**
+     * copyModelData treats the source slot's face and billboard arrays as scratch it
+     * may hand to the destination and overwrite. A slot that last copied from [base]
+     * with a mask that did not alter one of those arrays still references the base's
+     * own array, and the two slots swap roles on every copy, so without this the next
+     * pose would animate the base model in place (a fade-out teleport left every later
+     * pose invisible; a torch's billboard scale compounded every loop).
+     */
+    private fun releaseBaseAliases(slot: ModelGL, base: ModelGL) {
+        if (slot.facesColor === base.facesColor) slot.facesColor = null
+        if (slot.facesAlpha === base.facesAlpha) slot.facesAlpha = null
+        if (slot.facesA === base.facesA) slot.facesA = null
+        if (slot.facesB === base.facesB) slot.facesB = null
+        if (slot.facesC === base.facesC) slot.facesC = null
+        if (slot.facesMaterial === base.facesMaterial) slot.facesMaterial = null
+        if (slot.billboardSurfaces === base.billboardSurfaces) slot.billboardSurfaces = null
+    }
+
     /** Copies [base] into the next slot with [functionMask]; the returned object is owned by this pair. */
     fun copy(base: ModelGL, functionMask: Int): ModelGL {
         var slotA = a
@@ -41,12 +62,14 @@ class PoseCopyPair {
         val src = if (flip) slotB else slotA
         dst.ensureSlotBuffers()
         src.ensureSlotBuffers()
+        (if (flip) baseB else baseA)?.let { releaseBaseAliases(src, it) }
         try {
             base.copyModelData(dst, src, functionMask, true)
         } catch (t: Throwable) {
             if (failures++ < 3) { System.err.println("[PoseCopyPair] copy failed: $t"); t.printStackTrace() }
             throw t
         }
+        if (flip) baseA = base else baseB = base
         dst.privatePoseCopy = true
         // Vertex axes the mask does not declare as altered are SHARED with the base
         // (dst.verticesY = base.verticesY). The base is the toolkit's per-type slot,

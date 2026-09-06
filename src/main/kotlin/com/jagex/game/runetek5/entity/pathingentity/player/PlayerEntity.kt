@@ -331,7 +331,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
         // See NpcEntity: the memo model already carries the in-place transforms, so
         // their inputs are keyed; only tints (which compound) are excluded.
-        val memoEligible = PoseMemo.ENABLED && !tintModel && forDraw
+        val memoEligible = PoseMemo.enabledFor(toolkit) && !tintModel && forDraw
         var key = 0L
         if (memoEligible) {
             key = poseKey.reset()

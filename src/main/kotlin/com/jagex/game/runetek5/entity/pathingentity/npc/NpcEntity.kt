@@ -130,7 +130,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         // Only the draw path memoises (applyTypeTint is its marker): picking
         // (calculateProjection, mask 131072) and the particle-init pass (mask 0) keep
         // legacy's shared-slot copies and never touch the memo.
-        val memoEligible = PoseMemo.ENABLED && !hasTint && applyTypeTint
+        val memoEligible = PoseMemo.enabledFor(toolkit) && !hasTint && applyTypeTint
         if (!memoEligible) { if (hasTint) PoseMemo.inelEntityTint++; if (definitions.hasTint) PoseMemo.inelTypeTint++ }
         bodyTintInMemo = memoEligible && definitions.hasTint
         var key = 0L
