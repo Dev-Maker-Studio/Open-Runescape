@@ -1258,7 +1258,7 @@ object QuickChatDisplayOps {
         val pathIndex = executor.intStack[executor.intStackPtr]
         val keyframeCount = executor.intStack[executor.intStackPtr + 1]
         if (pathIndex >= 0 && pathIndex < 2) {
-            Client.cameraSplinePaths!![pathIndex] = Array(4) { IntArray(keyframeCount shl 1) }
+            Client.cameraSplinePaths!![pathIndex] = Array(keyframeCount shl 1) { IntArray(4) }
         }
     }
 
