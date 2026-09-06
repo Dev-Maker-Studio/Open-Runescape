@@ -40,6 +40,8 @@ open class SceneGraph(
 ) : MapLoader(scene, dimensionZ, dimensionX, dimensionY, hideOverlay, TypeLists.FLO!!, TypeLists.FLU!!, regionMap) {
 
     companion object {
+        /** -Drender.hidelocs=1,2,3 keeps those loc ids out of the scene (A/B isolation of a rendering artifact). */
+        private val HIDDEN_LOCS: Set<Int> = System.getProperty("render.hidelocs")?.split(',')?.mapNotNull { it.trim().toIntOrNull() }?.toSet() ?: emptySet()
         @JvmStatic
         var soundsOnly = false
 
@@ -173,6 +175,7 @@ open class SceneGraph(
     var activeLogicHeight = 99
 
     fun addObject(toolkit: AbstractToolkit, locPlane: Int, logicHeight: Int, baseX: Int, baseY: Int, locId: Int, locRotation: Int, locShape: Int, collisionMap: CollisionMap?, sequenceId: Int) {
+        if (locId in HIDDEN_LOCS) return
         if (logicHeight < activeLogicHeight) {
             activeLogicHeight = logicHeight
         }

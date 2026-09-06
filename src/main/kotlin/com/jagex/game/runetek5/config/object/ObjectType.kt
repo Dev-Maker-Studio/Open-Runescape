@@ -757,6 +757,9 @@ open class ObjectType {
 						}
 					}
 					createdModel = toolkit.createModel(mesh!!, adjustedFunctionMask, this.locTypeList!!.preferenceMask, adjustedAmbient, adjustedContrast)
+					if (LOC_DIAG.contains(id)) {
+						System.err.println("[LocDiag] loc=$id shape=$type rot=$rotation models=${modelsByShape.joinToString()} mesh=${mesh!!.numVertices}v/${mesh!!.numFaces}f model=${createdModel.javaClass.simpleName} x[${createdModel.getMinX()},${createdModel.getMaxX()}] y[${createdModel.getMinY()},${createdModel.getMaxY()}] z[${createdModel.getMinZ()},${createdModel.getMaxZ()}] mask=${Integer.toHexString(adjustedFunctionMask)} prefs=${Integer.toHexString(this.locTypeList!!.preferenceMask)} ambient=$adjustedAmbient contrast=$adjustedContrast")
+					}
 					synchronized(this.locTypeList!!.modelsByShapeCache) {
 						this.locTypeList!!.modelsByShapeCache.put(createdModel, uid)
 					}
@@ -1104,6 +1107,8 @@ open class ObjectType {
 	private class CachedAnimatedModel(val base: Model, val model: Model)
 
 	companion object {
+		/** -Drender.locdiag=1,2,3 logs the mesh and model bounds built for those loc ids. */
+		private val LOC_DIAG: Set<Int> = System.getProperty("render.locdiag")?.split(',')?.mapNotNull { it.trim().toIntOrNull() }?.toSet() ?: emptySet()
 		@JvmField
 		var locRecolorPalette: ShortArray = ShortArray(256)
 

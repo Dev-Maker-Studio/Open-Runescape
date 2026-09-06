@@ -3,6 +3,7 @@ package com.jagex.game.runetek5.toolkit.opengl
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.material.MaterialTypeList
+import com.jagex.game.runetek5.config.material.TextureDump
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.*
@@ -48,6 +49,7 @@ class OpenGLTextureCache(
             } else {
                 pixels = materialProvider!!.getPixelsArgb(textureId, textureSize, textureSize)
             }
+            TextureDump.write(textureId, pixels, textureSize, textureSize)
             texture = OpenGl2DTexture(
                 toolkit, GL_TEXTURE_2D, textureSize, textureSize,
                 material.mipmapping.toInt() != 0, pixels, 0, 0, false
