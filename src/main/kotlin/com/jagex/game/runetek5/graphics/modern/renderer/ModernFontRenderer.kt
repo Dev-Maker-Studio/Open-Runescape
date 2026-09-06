@@ -261,11 +261,10 @@ class ModernFontRenderer(
         // - non-plain fonts, non-shadow: GL_REPLACE/GL_REPLACE — the pre-colored glyph
         //   is drawn as-is and the primary color is IGNORED → force opaque white.
         //   (Shadow pass on a colored atlas is approximated as tex*shadowColor.)
-        // Legacy takes glyph alpha from the ATLAS ONLY — the primary color's alpha
-        // byte is ignored by the FFP combiner (callers pass colors with alpha 0x00 or
-        // 0x01, e.g. MiniMenu's mangled `or -0xffffff.inv()`, and legacy still drew
-        // them opaque). Force alpha 255 so tex.a alone controls coverage.
-        val effectiveColor = if (plainFont || isShadow) (colorArgb or 0xFF000000.toInt()) else -1
+        //   The MODULATE alpha half multiplies the atlas coverage by the PRIMARY alpha,
+        //   which is how interface text fades (component transparency arrives in the
+        //   colour's alpha byte); forcing it opaque left every tab tooltip on screen.
+        val effectiveColor = if (plainFont || isShadow) colorArgb else -1
 
         // Draw the glyph as a textured quad.
         // UV layout: the quad vertices are (top-left, bottom-left, bottom-right, top-right)
