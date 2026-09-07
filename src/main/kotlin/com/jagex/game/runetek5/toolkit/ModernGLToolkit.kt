@@ -2444,34 +2444,42 @@ class ModernGLToolkit(
      * models, because the batch captured its lighting when it opened, before the
      * client re-applied the scene environment for the frame.
      */
-    private fun sceneLightingChanged() {
-        if (!canUseModernPipeline() || !isSceneBatchActive()) return
-        if (hasPendingSceneGeometry()) {
-            renderWithModernPipeline()
-            functionMask = 0
+    private fun flushSceneBeforeLightingChange(): Boolean {
+        if (!canUseModernPipeline() || !isSceneBatchActive() || !hasPendingSceneGeometry()) return false
+        renderWithModernPipeline()
+        functionMask = 0
+        return true
+    }
+
+    private fun sceneLightingApplied(flushed: Boolean) {
+        if (!canUseModernPipeline()) return
+        if (flushed) {
             openSceneBatch()
-        } else {
+        } else if (isSceneBatchActive()) {
             armBatchLightingAndFog()
         }
     }
 
     override fun updateSun(sunBrightness: Float) {
         val changed = this.sunBrightness != sunBrightness
+        val flushed = changed && flushSceneBeforeLightingChange()
         super.updateSun(sunBrightness)
-        if (changed) sceneLightingChanged()
+        if (changed) sceneLightingApplied(flushed)
     }
 
     override fun applyLighting(sunColor: Int, intensity: Float, antiIntensity: Float, x: Float, y: Float, z: Float) {
         val changed = sunColorRgb != sunColor || sunColorIntensity != intensity || antiSunColorIntensity != antiIntensity ||
             sunPreviousPosition[0] != x || sunPreviousPosition[1] != y || sunPreviousPosition[2] != z
+        val flushed = changed && flushSceneBeforeLightingChange()
         super.applyLighting(sunColor, intensity, antiIntensity, x, y, z)
-        if (changed) sceneLightingChanged()
+        if (changed) sceneLightingApplied(flushed)
     }
 
     override fun calculateFog(color: Int, density: Int, offset: Int) {
         val changed = fogColor != color || fogDensity != density || fogOffset != offset
+        val flushed = changed && flushSceneBeforeLightingChange()
         super.calculateFog(color, density, offset)
-        if (changed) sceneLightingChanged()
+        if (changed) sceneLightingApplied(flushed)
     }
 
     /** True while the deferred 3D scene batch (models collected via drawMatrixThreaded) is open. */
@@ -6052,6 +6060,23 @@ class ModernGLToolkit(
     ): Boolean {
         val groundStartNs = System.nanoTime()
         try {
+        // Ground draws immediately, but its lighting and fog uniforms used to come from
+        // the last deferred flush. An interface model (chat head, item icon) installs its
+        // own sun colour and fog through prepareLights and its own projection, so a flush
+        // during the UI left the terrain lit and fogged for the interface until the next
+        // flush. Legacy reads the live fixed-function state at draw time; do the same.
+        groundRenderer?.let { g ->
+            val liveDir = Vector3f(sunDirection[0], sunDirection[1], sunDirection[2])
+            if (liveDir.lengthSquared() < 0.001f) liveDir.set(0.5f, 1f, 0.3f)
+            liveDir.normalize()
+            g.setLighting(liveDir, Vector3f(sunColorRed, sunColorGreen, sunColorBlue), 0.4f, 0.6f)
+            if (fogEnabled && fogDensity > 0) {
+                g.setFog(true, fogStartPosition, fogEndPosition,
+                    (fogColor and 0xff0000) / 16711680f, (fogColor and 0xff00) / 65280f, (fogColor and 0xff) / 255f)
+            } else {
+                g.setFog(false, 0f, 0f, 0f, 0f, 0f)
+            }
+        }
         diagGroundCalls++
         val gr = groundRenderer ?: return false
         if (!canUseModernPipeline()) {
