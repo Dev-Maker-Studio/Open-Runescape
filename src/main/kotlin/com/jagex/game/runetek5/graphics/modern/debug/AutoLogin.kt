@@ -98,6 +98,7 @@ object AutoLogin {
     private var walkIssued = false
     private var texturesIssued = false
     private var roofsIssued = false
+    private var skyIssued = false
 
     /**
      * Retry spacing. A login round-trip to prod takes seconds; hammering it every
@@ -189,6 +190,14 @@ object AutoLogin {
                 PreferenceManager.preferences?.removeRoofsOptionOverride?.setValue(roofValue)
                 Scene.setRoofOverride()
                 System.err.println("[AutoLogin] ROOFS set to $roofValue")
+            }
+            // "-Dautologin.skybox=0|1" drives the skybox preference the same way, so a
+            // scene can be captured with and without the sky geometry.
+            val skySpec = System.getProperty("autologin.skybox")?.trim()?.toIntOrNull()
+            if (skySpec != null && !skyIssued && readyNs != 0L && System.nanoTime() - readyNs >= SETTLE_NANOS) {
+                skyIssued = true
+                PreferenceManager.preferences?.skyboxes?.let { PreferenceManager.preferences?.setValue(it, skySpec.coerceIn(0, 1)) }
+                System.err.println("[AutoLogin] SKYBOX set to ${skySpec.coerceIn(0, 1)}")
             }
             // Debug walk: "-Dautologin.walk=X,Y" (absolute tile) sends one walk request
             // a short while after login, through the bot's own packet path (no input
