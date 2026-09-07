@@ -88,6 +88,7 @@ object AutoLogin {
     private var lastAttemptNs = 0L
     private var announcedReady = false
     private var readyFrame = 0
+    private var readyNs = 0L
     private var spinAccum = 0f
     private var commandIssued = false
     private var buttonIssued = false
@@ -117,6 +118,9 @@ object AutoLogin {
      * capture harness's own timeout, so legacy runs never logged in.
      */
     private const val WARMUP_NANOS = 6_000_000_000L
+
+    /** Wall time after READY before a graphics preference is flipped, so the region has settled. */
+    private const val SETTLE_NANOS = 3_000_000_000L
 
     private var frames = 0
     private var firstTickNs = 0L
@@ -158,6 +162,7 @@ object AutoLogin {
                 // The capture script waits for exactly this line.
                 System.err.println("[AutoLogin] READY — logged in to world ${targetWorld ?: "(default)"}")
                 readyFrame = frames
+                readyNs = System.nanoTime()
             }
             // "-Dautologin.bloom=1": switch the toolkit's bloom effect on for this run
             // only (toolkit level, so the preference file is never touched).
@@ -170,14 +175,14 @@ object AutoLogin {
             // way the options interface does (preference + graphics cache reset +
             // region reload), without saving the preference file.
             val texturesSpec = System.getProperty("autologin.textures")?.toIntOrNull()
-            if (texturesSpec != null && !texturesIssued && frames - readyFrame >= 150) {
+            if (texturesSpec != null && !texturesIssued && readyNs != 0L && System.nanoTime() - readyNs >= SETTLE_NANOS) {
                 texturesIssued = true
                 PreferenceManager.preferences?.textures?.setValue(if (texturesSpec == 1) 1 else 0)
                 GraphicsCache.resetGraphicCaches()
                 System.err.println("[AutoLogin] TEXTURES set to $texturesSpec")
             }
             val roofSpec = System.getProperty("autologin.roofs")?.trim()?.toIntOrNull()
-            if (roofSpec != null && !roofsIssued && frames - readyFrame >= 150) {
+            if (roofSpec != null && !roofsIssued && readyNs != 0L && System.nanoTime() - readyNs >= SETTLE_NANOS) {
                 roofsIssued = true
                 val roofValue = roofSpec.coerceIn(0, 2)
                 PreferenceManager.preferences?.removeRoofs?.setValue(roofValue)
