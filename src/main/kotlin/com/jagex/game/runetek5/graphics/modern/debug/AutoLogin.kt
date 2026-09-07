@@ -165,14 +165,14 @@ object AutoLogin {
             // way the options interface does (preference + graphics cache reset +
             // region reload), without saving the preference file.
             val texturesSpec = System.getProperty("autologin.textures")?.toIntOrNull()
-            if (texturesSpec != null && !texturesIssued && frames - readyFrame == 150) {
+            if (texturesSpec != null && !texturesIssued && frames - readyFrame >= 150) {
                 texturesIssued = true
                 PreferenceManager.preferences?.textures?.setValue(if (texturesSpec == 1) 1 else 0)
                 GraphicsCache.resetGraphicCaches()
                 System.err.println("[AutoLogin] TEXTURES set to $texturesSpec")
             }
             val roofSpec = System.getProperty("autologin.roofs")?.trim()?.toIntOrNull()
-            if (roofSpec != null && !roofsIssued && frames - readyFrame == 150) {
+            if (roofSpec != null && !roofsIssued && frames - readyFrame >= 150) {
                 roofsIssued = true
                 val roofValue = roofSpec.coerceIn(0, 2)
                 PreferenceManager.preferences?.removeRoofs?.setValue(roofValue)
