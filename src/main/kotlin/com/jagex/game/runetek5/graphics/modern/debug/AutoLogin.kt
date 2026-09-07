@@ -112,16 +112,21 @@ object AutoLogin {
      * processLobbyTick, and even the direct lobbyLogin produced a handshake the
      * lobby server never answered. The login screen is only genuinely ready some
      * way into startup, and nothing in LoginManager guards against being called
-     * before then.
+     * before then. Measured in wall time, not frames: the legacy toolkit draws the
+     * login screen slowly enough that a frame-count warmup often outlasted the
+     * capture harness's own timeout, so legacy runs never logged in.
      */
-    private const val WARMUP_FRAMES = 600
+    private const val WARMUP_NANOS = 6_000_000_000L
 
     private var frames = 0
+    private var firstTickNs = 0L
 
     /** Call once per frame. Cheap, self-disarming once in-game. */
     fun tick() {
         if (!isEnabled()) return
-        if (frames++ < WARMUP_FRAMES) return
+        frames++
+        if (firstTickNs == 0L) firstTickNs = System.nanoTime()
+        if (System.nanoTime() - firstTickNs < WARMUP_NANOS) return
 
         val state = Client.gameState
         if (state != lastState) {
