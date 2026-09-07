@@ -12,6 +12,7 @@ import com.jagex.game.runetek5.client.login.LoginManager
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.rendering.Renderers
+import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import java.io.File
 
@@ -95,6 +96,7 @@ object AutoLogin {
     private var bloomForced = false
     private var walkIssued = false
     private var texturesIssued = false
+    private var roofsIssued = false
 
     /**
      * Retry spacing. A login round-trip to prod takes seconds; hammering it every
@@ -168,6 +170,15 @@ object AutoLogin {
                 PreferenceManager.preferences?.textures?.setValue(if (texturesSpec == 1) 1 else 0)
                 GraphicsCache.resetGraphicCaches()
                 System.err.println("[AutoLogin] TEXTURES set to $texturesSpec")
+            }
+            val roofSpec = System.getProperty("autologin.roofs")?.trim()?.toIntOrNull()
+            if (roofSpec != null && !roofsIssued && frames - readyFrame == 150) {
+                roofsIssued = true
+                val roofValue = roofSpec.coerceIn(0, 2)
+                PreferenceManager.preferences?.removeRoofs?.setValue(roofValue)
+                PreferenceManager.preferences?.removeRoofsOptionOverride?.setValue(roofValue)
+                Scene.setRoofOverride()
+                System.err.println("[AutoLogin] ROOFS set to $roofValue")
             }
             // Debug walk: "-Dautologin.walk=X,Y" (absolute tile) sends one walk request
             // a short while after login, through the bot's own packet path (no input
