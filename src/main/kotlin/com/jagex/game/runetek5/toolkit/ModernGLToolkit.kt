@@ -1710,9 +1710,8 @@ class ModernGLToolkit(
     @JvmField var retainedTransTpl = 0L
 
     /** Resolves per-draw material words for the retained scene's translucent templates. */
-    fun fillMaterialWords(batcher: InstancedModelBatcher, mats: IntArray, count: Int, out: IntArray) {
+    fun fillMaterialWords(batcher: InstancedModelBatcher, mats: IntArray, count: Int, out: IntArray): Boolean =
         batcher.fillMaterialWords(mats, count, out, ::lookupTextureHandle, ::lookupCombineMode)
-    }
 
     /** Point-light selection for a world position, written to [out] (4 indices, -1 = none). */
     fun selectLightsInto(x: Float, y: Float, z: Float, out: FloatArray) {

@@ -283,8 +283,8 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         if (!transTemplatesValid(chunk, batcher)) buildTransTemplates(chunk, batcher)
                         if (chunk.transValid) {
                             if (chunk.transMatRev != batcher.materialWordsRevision) {
-                                toolkit.fillMaterialWords(batcher, chunk.transMatIds, chunk.transCmdTotal, chunk.transMatWords)
-                                chunk.transMatRev = batcher.materialWordsRevision
+                                val complete = toolkit.fillMaterialWords(batcher, chunk.transMatIds, chunk.transCmdTotal, chunk.transMatWords)
+                                chunk.transMatRev = if (complete) batcher.materialWordsRevision else -1
                             }
                             if (chunk.transLightEpoch != lightEpoch) repackTransLights(chunk, lightEpoch)
                             val tl = chunk.transRecords
@@ -599,6 +599,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
             }
         }
         b.cmdCount = nCmd
+        b.matWordsRevision = -1
         b.floats = chunk.blockFloats
         b.count = chunk.blockRecords.size
         b.layoutRevision = batcher.storeLayoutRevision

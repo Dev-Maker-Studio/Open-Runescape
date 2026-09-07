@@ -501,12 +501,19 @@ class InstancedModelBatcher {
         return true
     }
 
-    /** Resolves the SSBO words of [count] material ids into [out] (4 ints each). */
-    fun fillMaterialWords(mats: IntArray, count: Int, out: IntArray, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int) {
+    /**
+     * Resolves the SSBO words of [count] material ids into [out] (4 ints each).
+     * Returns false when a textured material had no handle yet, in which case the
+     * words are only good for this frame and must not be cached by revision.
+     */
+    fun fillMaterialWords(mats: IntArray, count: Int, out: IntArray, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int): Boolean {
+        var complete = true
         for (k in 0 until count) {
             val slot = resolveMaterial(mats[k], textureCache, combineModeOf)
             out[k * 4] = matEntryLo[slot]; out[k * 4 + 1] = matEntryHi[slot]; out[k * 4 + 2] = matEntryFlags[slot]; out[k * 4 + 3] = 0
+            if (mats[k] >= 0 && matEntryFlags[slot] == 0) complete = false
         }
+        return complete
     }
     /** Item indices in draw order (key descending, then sequence), built by [endFrame]. */
     private var translucentOrder = IntArray(256)
@@ -2189,11 +2196,13 @@ class InstancedModelBatcher {
                 if (b.matWordsRevision != materialWordsRevision || b.matWords.size < words) {
                     if (b.matWords.size < words) b.matWords = IntArray(words)
                     val w = b.matWords
+                    var complete = true
                     for (k in 0 until b.cmdCount) {
                         val slot = resolveMaterial(mats[k], textureCache, combineModeOf)
                         w[k * 4] = matEntryLo[slot]; w[k * 4 + 1] = matEntryHi[slot]; w[k * 4 + 2] = matEntryFlags[slot]; w[k * 4 + 3] = 0
+                        if (mats[k] >= 0 && matEntryFlags[slot] == 0) complete = false
                     }
-                    b.matWordsRevision = materialWordsRevision
+                    b.matWordsRevision = if (complete) materialWordsRevision else -1
                 }
                 if (drawMatCursor + words > drawMatScratch.size) drawMatScratch = drawMatScratch.copyOf(maxOf(drawMatScratch.size * 2, drawMatCursor + words))
                 System.arraycopy(b.matWords, 0, drawMatScratch, drawMatCursor, words)
