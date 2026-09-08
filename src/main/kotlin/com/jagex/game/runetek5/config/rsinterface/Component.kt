@@ -1359,7 +1359,7 @@ class Component {
         }
     }
 
-    fun addOptionName(index: Int, optionName: String) {
+    fun addOptionName(index: Int, optionName: String?) {
         if (this.options == null || this.options!!.size <= index) {
             val replacementOptionNames: Array<String?> = Array(index + 1) { null }
             if (this.options != null) {

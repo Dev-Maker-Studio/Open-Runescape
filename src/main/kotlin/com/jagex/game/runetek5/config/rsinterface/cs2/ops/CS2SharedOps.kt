@@ -1050,7 +1050,7 @@ object CS2SharedOps {
     fun setOp(component: Component, executor: CS2Executor) {
         val opSlot = executor.intStack[--executor.intStackPtr] - 1
         if (opSlot >= 0 && opSlot <= 9) {
-            component!!.addOptionName(opSlot, executor.stringStack[--executor.stringStackPtr] as String)
+            component!!.addOptionName(opSlot, executor.stringStack[--executor.stringStackPtr] as String?)
         } else {
             --executor.stringStackPtr
         }
