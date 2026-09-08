@@ -189,7 +189,7 @@ class GamePreferences : Node<GamePreferences> {
                 water = WaterPreference(stream.readUByte(), this)
                 fixedScreen = ScreenSizePreference(stream.readUByte(), this)
                 fullScreen = ScreenSizePreference(fixedScreen!!.getValue(), this)
-                customCursor = CustomCursorsPreference(this)
+                customCursor = CustomCursorsPreference(stream.readUByte(), this)
                 graphics = GraphicsPreference(stream.readUByte(), this)
                 cpu = CpuMaxMemoryPreference(stream.readUByte(), this)
                 gametipStartStagePreference = GameTipPreference(stream.readUByte(), this)

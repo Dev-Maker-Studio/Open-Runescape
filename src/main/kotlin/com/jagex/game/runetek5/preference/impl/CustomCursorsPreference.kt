@@ -8,7 +8,11 @@ import com.jagex.game.runetek5.preference.Preference
  * @author Steven - 17/09/2023
  *
  */
-class CustomCursorsPreference(gamePreferences: GamePreferences) : Preference(gamePreferences) {
+class CustomCursorsPreference : Preference {
+
+    constructor(value: Int, gamePreferences: GamePreferences) : super(value, gamePreferences)
+
+    constructor(gamePreferences: GamePreferences) : super(gamePreferences)
 
     override fun setValue(value: Int) {
         this.value = value
