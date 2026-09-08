@@ -718,6 +718,16 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
 
             renderingMatrix.copyFrom(projectionMatrix)
             renderingMatrix.translate(0.0f, (-5 - groundContouredOffsetY).toFloat(), 0.0f)
+            if (PLAYER_Y_DIAG && this == PlayerUpdate.MY_PLAYER!!) {
+                val body = models[0]
+                val line = "cyc=${Client.cycles} a=${"%.2f".format(GameShell.renderPulseAlpha)} baseY=${basePosition.coords.y} prevY=$interpPrevY cap=$interpCaptureCycle " +
+                    "projY=${projectionMatrix.yD} renderY=${renderingMatrix.yD} contour=$groundContouredOffsetY tY=$translateY rX=$rotateX rZ=$rotateZ " +
+                    "hit=$lastPoseWasHit minY=${body?.getMinY()} maxY=${body?.getMaxY()} plane=$plane tile=(${absolute.coords.x.toInt() shr 9},${absolute.coords.z.toInt() shr 9})"
+                if (line != playerYDiagLast) {
+                    playerYDiagLast = line
+                    System.err.println("[PlayerY] $line")
+                }
+            }
             if (boundingBoxPolygons == null || boundingBoxPolygons!!.size < models.size) {
                 setupBoundingBox(models.size)
             }
@@ -768,6 +778,10 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     companion object {
         @JvmField
         var sceneUploaded: Boolean = false
+
+        /** -Drender.playerydiag: prints the local player's vertical draw inputs whenever they change. */
+        private val PLAYER_Y_DIAG = System.getProperty("render.playerydiag") != null
+        private var playerYDiagLast = ""
 
         @JvmStatic
         fun createPlayerHint(toolkit: AbstractToolkit, rotationY: Int, rotationX: Int, rotationZ: Int, translateY: Int, fileId: Int): Model? {
