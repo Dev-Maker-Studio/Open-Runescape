@@ -562,7 +562,7 @@ object QuickChatDisplayOps {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = category.mecId
-            val coord = (category!!.plane shl 28) or category.absX + (WorldMap.mapSquareAbsX shl 14) or category.absY + WorldMap.mapSquareAbsY
+            val coord = (category.plane shl 28) or ((category.absX + WorldMap.mapSquareAbsX) shl 14) or (category.absY + WorldMap.mapSquareAbsY)
             executor.intStack[++executor.intStackPtr - 1] = coord
         }
     }
@@ -1000,7 +1000,7 @@ object QuickChatDisplayOps {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = category.mecId
-            val coord = (category!!.plane shl 28) or category.absX + (WorldMap.mapSquareAbsX shl 14) or category.absY + WorldMap.mapSquareAbsY
+            val coord = (category.plane shl 28) or ((category.absX + WorldMap.mapSquareAbsX) shl 14) or (category.absY + WorldMap.mapSquareAbsY)
             executor.intStack[++executor.intStackPtr - 1] = coord
         }
     }

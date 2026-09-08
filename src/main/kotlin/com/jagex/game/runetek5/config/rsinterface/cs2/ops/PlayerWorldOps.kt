@@ -187,7 +187,7 @@ object PlayerWorldOps {
         val baseCoord: CoordGrid? = Resource.mapRegion!!.getBaseCoordinates()
         val x = (pos!!.x.toInt() shr 9) + baseCoord!!.x
         val y = (pos!!.z.toInt() shr 9) + baseCoord!!.y
-        executor.intStack[++executor.intStackPtr - 1] = (x shl 14) + y + plane.toInt() shl 28
+        executor.intStack[++executor.intStackPtr - 1] = (plane.toInt() shl 28) + (x shl 14) + y
     }
 
     @JvmStatic
