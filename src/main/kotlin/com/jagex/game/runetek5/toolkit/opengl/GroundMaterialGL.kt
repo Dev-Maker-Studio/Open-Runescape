@@ -47,6 +47,9 @@ class GroundMaterialGL(
     @JvmField var modernTilesMaskSize: Int = -1
     /** Per 8x8 chunk index lists of this material's triangles (see ModernGLToolkit ground draw). */
     @JvmField var modernChunkIdx: Array<ShortArray?>? = null
+    /** Per chunk: the tile index of each slice of [modernChunkIdx], and the slice's end offset. */
+    @JvmField var modernChunkTiles: Array<IntArray?>? = null
+    @JvmField var modernChunkTileEnd: Array<IntArray?>? = null
     @JvmField var modernChunkRevision: Int = -1
 
     init {

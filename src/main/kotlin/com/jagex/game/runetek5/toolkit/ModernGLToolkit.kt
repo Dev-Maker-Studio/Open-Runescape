@@ -6124,19 +6124,26 @@ class ModernGLToolkit(
             // instead of every visible tile for every material (49 x 10k per frame
             // while the camera moved).
             // Per-material index lists are cached per 8x8 tile chunk (static until the
-            // ground's vertex revision changes); a frame concatenates the lists of the
-            // chunks that contain a visible tile. Chunk granularity draws a few extra
-            // tiles at the visible-set border (ground only, harmless) but replaces the
-            // per-tile loops and per-triangle mask tests that ran for 49 materials
-            // every frame the camera moved.
+            // ground's vertex revision changes), each list tagged with the tile every
+            // slice belongs to. A frame concatenates, from the chunks that contain a
+            // visible tile, only the slices of tiles in the visible set: the visible
+            // set is per tile because the roof test (Scene.drawTiles) excludes the
+            // upper-plane floor over a hidden roof tile by tile, and a chunk-level
+            // copy drew that floor as a flat slab over the world.
             val gw = ground.width
             val chunksX = (gw + 7) shr 3
             val chunkVis = groundChunkVisible(ground, stamp, tileIndices, tileCount, gw, chunksX)
+            val visBits = groundVisibleBits(ground, stamp, tileIndices, tileCount)
             var chunkLists = material.modernChunkIdx
-            if (chunkLists == null || material.modernTilesMaskSize != tileFunctionMasks.size || material.modernChunkRevision != ground.modernVertexRevision) {
+            var chunkTiles = material.modernChunkTiles
+            var chunkTileEnd = material.modernChunkTileEnd
+            if (chunkLists == null || chunkTiles == null || chunkTileEnd == null ||
+                material.modernTilesMaskSize != tileFunctionMasks.size || material.modernChunkRevision != ground.modernVertexRevision
+            ) {
                 val nTiles = tileFunctionMasks.size
                 val nChunks = chunksX * (((nTiles / gw) + 7) shr 3)
                 val counts = IntArray(nChunks)
+                val tileCounts = IntArray(nChunks)
                 for (t in 0 until nTiles) {
                     val mask = tileFunctionMasks[t]
                     if (mask == 0) continue
@@ -6146,10 +6153,18 @@ class ModernGLToolkit(
                     val allSelected = (1 shl triangleCount) - 1
                     if ((mask and allSelected) == allSelected) counts[c] += tri.size
                     else for (k in 0 until triangleCount) if ((mask and (1 shl k)) != 0) counts[c] += 3
+                    tileCounts[c]++
                 }
                 val lists = arrayOfNulls<ShortArray>(nChunks)
+                val tiles = arrayOfNulls<IntArray>(nChunks)
+                val ends = arrayOfNulls<IntArray>(nChunks)
                 val fill = IntArray(nChunks)
-                for (c in 0 until nChunks) if (counts[c] > 0) lists[c] = ShortArray(counts[c])
+                val tileFill = IntArray(nChunks)
+                for (c in 0 until nChunks) if (counts[c] > 0) {
+                    lists[c] = ShortArray(counts[c])
+                    tiles[c] = IntArray(tileCounts[c])
+                    ends[c] = IntArray(tileCounts[c])
+                }
                 for (t in 0 until nTiles) {
                     val mask = tileFunctionMasks[t]
                     if (mask == 0) continue
@@ -6171,18 +6186,48 @@ class ModernGLToolkit(
                             v += 3
                         }
                     }
+                    tiles[c]!![tileFill[c]] = t
+                    ends[c]!![tileFill[c]] = fill[c]
+                    tileFill[c]++
                 }
                 chunkLists = lists
+                chunkTiles = tiles
+                chunkTileEnd = ends
                 material.modernChunkIdx = lists
+                material.modernChunkTiles = tiles
+                material.modernChunkTileEnd = ends
                 material.modernTilesMaskSize = nTiles
                 material.modernChunkRevision = ground.modernVertexRevision
             }
             for (c in chunkLists.indices) {
                 if (c >= chunkVis.size || !chunkVis[c]) continue
                 val l = chunkLists[c] ?: continue
-                if (indexCount + l.size > indexArray.size) break
-                System.arraycopy(l, 0, indexArray, indexCount, l.size)
-                indexCount += l.size
+                val tl = chunkTiles[c] ?: continue
+                val te = chunkTileEnd[c] ?: continue
+                // Copy maximal runs of consecutive visible tiles in one arraycopy each.
+                var runStart = -1
+                var sliceStart = 0
+                for (k in tl.indices) {
+                    val t = tl[k]
+                    val visible = (visBits[t ushr 6] and (1L shl (t and 63))) != 0L
+                    if (visible) {
+                        if (runStart < 0) runStart = sliceStart
+                    } else if (runStart >= 0) {
+                        val len = sliceStart - runStart
+                        if (indexCount + len > indexArray.size) break
+                        System.arraycopy(l, runStart, indexArray, indexCount, len)
+                        indexCount += len
+                        runStart = -1
+                    }
+                    sliceStart = te[k]
+                }
+                if (runStart >= 0) {
+                    val len = sliceStart - runStart
+                    if (indexCount + len <= indexArray.size) {
+                        System.arraycopy(l, runStart, indexArray, indexCount, len)
+                        indexCount += len
+                    }
+                }
             }
             material.modernIndexStamp = stamp
             material.modernIndexCount = indexCount
