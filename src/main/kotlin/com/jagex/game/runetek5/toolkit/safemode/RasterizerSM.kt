@@ -49,6 +49,8 @@ class RasterizerSM(
     @JvmField var textureRepeat: Boolean = true
     @JvmField val textureC: Int = -1
     @JvmField var clipEdges: Boolean = false
+    @JvmField var shadedColorMin: Float = 0f
+    @JvmField var shadedColorMax: Float = 65535f
     @JvmField val scanlineWidth: Int = safemodeToolkit.viewportWidth
     @JvmField val colourBuffer: IntArray? = safemodeToolkit.colourBuffer
     @JvmField val depthBuffer: FloatArray? = safemodeToolkit.depthBuffer
@@ -2805,6 +2807,8 @@ class RasterizerSM(
             safemodeToolkit.drawOpaqueLine(xB.toInt(), yB.toInt(), xC.toInt(), yC.toInt(), ColorUtil.hsvToRgbTable!![colorA.toInt() and 0xffff])
             safemodeToolkit.drawOpaqueLine(xC.toInt(), yC.toInt(), xA.toInt(), yA.toInt(), ColorUtil.hsvToRgbTable!![colorA.toInt() and 0xffff])
         } else {
+            shadedColorMin = minOf(colorA, colorB, colorC)
+            shadedColorMax = maxOf(colorA, colorB, colorC)
             var slopeXBa = xB - xA
             var slopeYBa = yB - yA
             var slopeXCa = xC - xA
@@ -3913,6 +3917,14 @@ class RasterizerSM(
         bufferOffset += startX - 1
         color += slopeColor * startX
         depth += slopeDepth * startX
+        // Sub-pixel slivers sample the gradient outside the triangle, and an HSL index past the vertex range wraps through the table (grey -> red).
+        val colorEnd = color + slopeColor * (endX - startX - 1)
+        if (color < shadedColorMin || color > shadedColorMax || colorEnd < shadedColorMin || colorEnd > shadedColorMax) {
+            val clampedStart = color.coerceIn(shadedColorMin, shadedColorMax)
+            val clampedEnd = colorEnd.coerceIn(shadedColorMin, shadedColorMax)
+            slopeColor = if (endX - startX > 1) (clampedEnd - clampedStart) / (endX - startX - 1) else 0.0f
+            color = clampedStart
+        }
         if (threadResource.zbuffering) {
             if (smoothEdges) {
                 var x = endX - startX shr 2
