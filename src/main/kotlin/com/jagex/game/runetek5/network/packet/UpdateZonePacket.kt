@@ -109,7 +109,7 @@ enum class UpdateZonePacket(val size: Int) {
                     unlink()
                 }
             } else {
-                val scene = Resource.mapRegion!!.getScene()!!
+                val scene = Resource.mapRegion!!.getScene()
                 if (scene != null) {
                     val tileX = x * 512 + 256
                     val tileY = y * 512 + 256
@@ -197,7 +197,7 @@ enum class UpdateZonePacket(val size: Int) {
             xOff in 0 until sceneSize && yOff in 0 until sceneSize &&
             spotAnimId != 65535) {
 
-            val scene = Resource.mapRegion!!.getScene()!!
+            val scene = Resource.mapRegion!!.getScene()
             if (scene != null) {
                 localX = localX * 512 + 256
                 localY = localY * 512 + 256
