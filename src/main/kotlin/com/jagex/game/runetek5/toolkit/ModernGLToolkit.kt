@@ -2401,7 +2401,8 @@ class ModernGLToolkit(
 
     private fun hasPendingSceneGeometry(): Boolean = when {
         useOptimizedBatcher ->
-            optimizedBatcher?.hasPendingGeometry() == true ||
+            dbCount > 0 ||
+                optimizedBatcher?.hasPendingGeometry() == true ||
                 (useInstancing && instancedBatcher?.hasPendingGeometry() == true)
         else -> frameBatcher?.hasPendingGeometry() == true
     }
