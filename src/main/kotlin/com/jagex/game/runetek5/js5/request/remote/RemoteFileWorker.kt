@@ -92,13 +92,16 @@ class RemoteFileWorker(
         val referenceTablePayload = masterIndexRequest!!.getPayload()
         if (masterIndexRequest is LocalRequest) {
             /** ReferenceTable from disk **/
-            if (referenceTablePayload == null) {
-                throw RuntimeException()
+            val local = referenceTablePayload?.let { decodeLocalMasterIndex(it) }
+            if (local == null) {
+                masterIndexRequest = null
+                if (standardRequester.priorityRequestUnavailable()) {
+                    return null
+                }
+                masterIndexRequest = standardRequester.request(255, indexId, 0.toByte(), true)
+                return null
             }
-            masterIndex = Js5MasterIndex(referenceTablePayload, tableCrc, tableDigest)
-            if (masterIndex!!.revision != tableRevision) {
-                throw RuntimeException()
-            }
+            masterIndex = local
         } else {
             /** ReferenceTable from update server **/
             if (referenceTablePayload == null) {
@@ -115,6 +118,15 @@ class RemoteFileWorker(
             filesSuccessfulyReceived = 0
         }
         return masterIndex
+    }
+
+    private fun decodeLocalMasterIndex(payload: ByteArray): Js5MasterIndex? {
+        val table = try {
+            Js5MasterIndex(payload, tableCrc, tableDigest)
+        } catch (stale: RuntimeException) {
+            return null
+        }
+        return table.takeIf { it.revision == tableRevision }
     }
 
     @Synchronized

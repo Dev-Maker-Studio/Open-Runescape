@@ -130,7 +130,9 @@ object ClientStartup {
                 return 0
             }
 
-            Renderers.prepareForRendering(0, null, true)
+            if (!CacheSwitch.inProgress) {
+                Renderers.prepareForRendering(0, null, true)
+            }
             Resource.USING_JAGEX_IMAGE_FORMAT = !NativeSprite.supportsGzippedSprites()
             Resource.FONT = Resource.createProvider(if (Resource.USING_JAGEX_IMAGE_FORMAT) IndexReference.INDEX_34 else IndexReference.INDEX_32, false, 1)
             Resource.GAME_TIPS = Resource.createProvider(IndexReference.INDEX_33, false, 1)
@@ -252,12 +254,14 @@ object ClientStartup {
                 return 0
             }
 
-            decodeTitlescreenMusic(data)
-            SoundEffectPlayer.initializeAudio()
+            if (!CacheSwitch.inProgress) {
+                decodeTitlescreenMusic(data)
+                SoundEffectPlayer.initializeAudio()
+            }
             Client.setGameState(GameState.UNK_1)
         }
 
-        if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_NATIVE_LIBRARY_LOADER) {
+        if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_NATIVE_LIBRARY_LOADER && !AbstractToolkit.nativeLibraryLoaded()) {
             Resource.NATIVE_LIBRARY_LOADER = NativeLibraryLoader(Resource.NATIVE_LIBRARY!!)
             AbstractToolkit.setNativeLibraryLoader(Resource.NATIVE_LIBRARY_LOADER!!)
         }
@@ -287,7 +291,12 @@ object ClientStartup {
                 return 99
             }
 
-            TypeLists.MATERIALS = MaterialTypeList(Resource.MATERIAL!!, Resource.TEXTURE!!, Resource.SPRITES!!)
+            val materials = TypeLists.MATERIALS as? MaterialTypeList
+            if (CacheSwitch.inProgress && materials != null) {
+                materials.rebind(Resource.MATERIAL!!, Resource.TEXTURE!!, Resource.SPRITES!!)
+            } else {
+                TypeLists.MATERIALS = MaterialTypeList(Resource.MATERIAL!!, Resource.TEXTURE!!, Resource.SPRITES!!)
+            }
             TypeLists.PARAMS = ParamTypeList(Resource.CONFIG!!)
             TypeLists.BAS = BasTypeList(Resource.CONFIG!!, TypeLists.EQUIPMENT_DEFAULTS!!)
             TypeLists.CURSOR = CursorTypeList(Resource.CONFIG!!, Resource.SPRITES!!)
@@ -390,7 +399,14 @@ object ClientStartup {
             preparePlayer(true)
         }
 
-        if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_TOOLKIT) {
+        if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_TOOLKIT && CacheSwitch.inProgress) {
+            Resource.FONT = null
+            Resource.GAME_TIPS = null
+            TypeLists.GAME_TIPS = null
+            LoadingStage.gametipsToDisplay = null
+            NativeSprite.resetCache()
+            CacheSwitch.reloadToolkitAssets()
+        } else if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_TOOLKIT) {
             LoadingStage.plainLoginScreenRenderer!!.stop()
             try {
                 LoadingStage.loginScreenRendererThread!!.join()

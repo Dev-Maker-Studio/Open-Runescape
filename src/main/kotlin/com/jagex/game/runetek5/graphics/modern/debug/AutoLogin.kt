@@ -314,7 +314,7 @@ object AutoLogin {
                         "entering world ${targetWorld ?: "(client default)"}"
                 )
                 targetWorld?.let { StaticMethods.selectedWorldId = it }
-                LoginManager.startWorldLogin()
+                if (Client.gameState == GameState.UNK_0) LoginManager.returnToLoginScreen() else LoginManager.startWorldLogin()
             }
 
             LoginManager.LobbyStage.LOBBY_TO_WORLD -> Unit // in flight

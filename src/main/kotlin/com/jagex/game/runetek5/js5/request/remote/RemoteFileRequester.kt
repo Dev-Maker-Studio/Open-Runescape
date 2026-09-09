@@ -139,6 +139,22 @@ class RemoteFileRequester : Js5NetQueue() {
         }
     }
 
+    @Synchronized
+    override fun disconnect() {
+        try {
+            updateServerConnection?.close()
+        } catch (ignored: Exception) {
+            // NOOP
+        }
+        updateServerConnection = null
+        resetWaitingRequests()
+        super.priorityRequests.reset()
+        super.regularRequests.reset()
+        failedRequests = 0
+        connectionStatus = 0
+        incoming.currentPosition = 0
+    }
+
     /**
      * Sends a request to the update server to start
      * a new file update session with this client

@@ -8,15 +8,32 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
 class MaterialTypeList(
     materialResource: Js5ResourceProvider,
-    val textureResource: Js5ResourceProvider,
-    val spriteResource: Js5ResourceProvider
+    textureResource: Js5ResourceProvider,
+    spriteResource: Js5ResourceProvider
 ) : MaterialProvider {
 
     val textureTypeCache = CacheableNodeQueue(256)
-    val numMaterials: Int
-    val materials: Array<MaterialType?>
+    var textureResource: Js5ResourceProvider = textureResource
+        private set
+    var spriteResource: Js5ResourceProvider = spriteResource
+        private set
+    var numMaterials: Int = 0
+        private set
+    var materials: Array<MaterialType?> = emptyArray()
+        private set
 
     init {
+        load(materialResource)
+    }
+
+    fun rebind(materialResource: Js5ResourceProvider, textureResource: Js5ResourceProvider, spriteResource: Js5ResourceProvider) {
+        this.textureResource = textureResource
+        this.spriteResource = spriteResource
+        textureTypeCache.reset()
+        load(materialResource)
+    }
+
+    private fun load(materialResource: Js5ResourceProvider) {
         val materialBuffer = Packet(materialResource.getFile(0, 0)!!)
         numMaterials = materialBuffer.readUShort()
         materials = arrayOfNulls(numMaterials)
