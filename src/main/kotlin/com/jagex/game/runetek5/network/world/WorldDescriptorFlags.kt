@@ -29,4 +29,12 @@ abstract class WorldDescriptorFlags {
     fun hasPort(): Boolean {
         return (flags and 0x40000000) != 0
     }
+
+    fun hasCustomCache(): Boolean {
+        return (flags and CUSTOM_CACHE) != 0
+    }
+
+    companion object {
+        const val CUSTOM_CACHE = 0x20
+    }
 }

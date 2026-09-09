@@ -897,6 +897,38 @@ object LoginManager {
         return buffer
     }
 
+    class Credentials(
+        val username: String,
+        val password: String,
+        val lobbyAuthToken: String?,
+        val selectedWorldId: Int,
+        val hasStoredCredentials: Boolean,
+        val socialNetworkToken: Long,
+        val socialNetworkNonce: Long,
+    )
+
+    @JvmStatic
+    fun captureCredentials(): Credentials = Credentials(
+        StaticMethods.loginUsername,
+        StaticMethods.loginPassword,
+        lobbyAuthToken,
+        StaticMethods.selectedWorldId,
+        StaticMethods.hasStoredCredentials,
+        socialNetworkToken,
+        socialNetworkNonce,
+    )
+
+    @JvmStatic
+    fun restoreCredentials(credentials: Credentials) {
+        StaticMethods.loginUsername = credentials.username
+        StaticMethods.loginPassword = credentials.password
+        lobbyAuthToken = credentials.lobbyAuthToken
+        StaticMethods.selectedWorldId = credentials.selectedWorldId
+        StaticMethods.hasStoredCredentials = credentials.hasStoredCredentials
+        socialNetworkToken = credentials.socialNetworkToken
+        socialNetworkNonce = credentials.socialNetworkNonce
+    }
+
     @JvmStatic
     fun resetCredentials() {
         socialNetworkToken = -1L

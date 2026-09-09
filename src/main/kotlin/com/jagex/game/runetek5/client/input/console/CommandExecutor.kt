@@ -15,6 +15,7 @@ import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.client.*
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.client.login.LoginManager
+import com.jagex.game.runetek5.js5.Js5Endpoint
 import com.jagex.game.runetek5.client.window.WindowMode
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
@@ -318,6 +319,10 @@ object CommandExecutor {
                         if (varpId != null) {
                             Console.writeLine("varp=${VarProviders.PLAYER_VAR_PROVIDER.getVarValue(varpId)}")
                         }
+                        return
+                    }
+                    command.equals("js5", ignoreCase = true) -> {
+                        Console.writeLine("JS5: ${Js5Endpoint.describe(Js5Endpoint.current())}" + if (CacheSwitch.inProgress) " (switching)" else "")
                         return
                     }
                     command.startsWith("directlogin ") -> {

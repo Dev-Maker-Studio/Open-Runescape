@@ -81,6 +81,7 @@ import com.jagex.game.runetek5.interaction.chat.ChatBox
 import com.jagex.game.runetek5.interaction.chat.clanchat.channel.ClanChannel
 import com.jagex.game.runetek5.interaction.chat.clanchat.settings.ClanSettings
 import com.jagex.game.runetek5.interaction.chat.friendschat.FriendsChat
+import com.jagex.game.runetek5.js5.Js5Endpoint
 import com.jagex.game.runetek5.js5.dependency.CacheableDependencies
 import com.jagex.game.runetek5.js5.request.RequestManager
 import com.jagex.game.runetek5.js5.request.local.LocalRequester
@@ -466,7 +467,9 @@ class Client : GameShell() {
                 setComponentsOnTop()
             }
 
-            if (GameState.isOnloginScreen(gameState)) {
+            if (CacheSwitch.drawingProgress()) {
+                MessageBox.draw(CacheSwitch.progressText(), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
+            } else if (GameState.isOnloginScreen(gameState)) {
                 LoadingStage.initialize(drawBackground)
             } else if (isInLobbyOrCreation(gameState)) {
                 drawInterfaceFrame()
@@ -624,7 +627,7 @@ class Client : GameShell() {
 
     fun setupJs5Connection() {
         if (Resource.remoteFileRequesterJs5!!.failedRequests > failedRequests) {
-            LoginManager.GAME_CONNECTION_INFO!!.swap()
+            Js5Endpoint.current().swap()
             pulsesBeforeJs5Reconnect = Resource.remoteFileRequesterJs5!!.failedRequests * 250 - 250
             if (pulsesBeforeJs5Reconnect > 3000) {
                 pulsesBeforeJs5Reconnect = 3000
@@ -675,7 +678,7 @@ class Client : GameShell() {
         }
         try {
             if (updateStage == 0) {
-                clientSocket = LoginManager.GAME_CONNECTION_INFO!!.createSocket()
+                clientSocket = Js5Endpoint.current().createSocket()
                 updateStage++
             }
 
@@ -1712,6 +1715,10 @@ class Client : GameShell() {
 
         fun setGameState(state: GameState) {
             if (state != gameState) {
+                if (CacheSwitch.intercept(state)) {
+                    return
+                }
+                CacheSwitch.stateChanged(state)
                 drawsSinceLastPacket = 0
                 if (state == GameState.UNK_10 || state == GameState.UNK_17) {
                     LoginManager.startWorldLogin()
@@ -2377,7 +2384,7 @@ class Client : GameShell() {
             CutsceneTypeList.resetCutsceneConfigs()
         }
 
-        fun resetGraphicsState() {
+        fun resetGraphicsState(shutdownToolkit: Boolean = true) {
             if (Renderers.activeToolkit != null) {
                 Resource.mapRegion!!.resetInteractiveEntities()
                 ComponentMinimap.reset()
@@ -2410,8 +2417,10 @@ class Client : GameShell() {
                     }
                 }
                 ACTIVE_GFX.clear()
-                Renderers.activeToolkit!!.cleanupAndShutdown()
-                Renderers.activeToolkit = null
+                if (shutdownToolkit) {
+                    Renderers.activeToolkit!!.cleanupAndShutdown()
+                    Renderers.activeToolkit = null
+                }
             }
         }
 
@@ -2527,20 +2536,7 @@ class Client : GameShell() {
             resetGraphicsState()
             buildCanvasComponents()
             Renderers.prepareForRendering(toolkitId, leftTopScreenboxText, verifySettingsPreUpdate)
-            StaticMethods.initializedFontcombos!!.resetFontMap()
-            // Also clear the FontCombo LRU: fonts obtained via listFontCombo (e.g. the
-            // minimenu bold font, FontCombo.kt:69/85) are cached there and were NEVER
-            // evicted on a toolkit switch, so they kept font renderers bound to the
-            // DEAD previous toolkit. Under toolkit 6 those stale legacy FontRendererGL
-            // draws are blocked (standalone rules) — menu text rendered invisible.
-            StaticMethods.initializedFontcombos!!.resetCache()
-            StaticMethods.initializedFontcombos!!.initializeFontMap(FONT_PROVIDER)
-            FontManager.initialize()
-            StaticMedia.loadSprites(Renderers.activeToolkit!!, Resource.SPRITES!!)
-            StaticMedia.resetChatMediaAndIcons()
-            StaticMedia.initializeChatIcons(StaticMedia.nameIconSprites!!)
-            setComponentsOnTop()
-            GraphicsCache.resetGraphicCaches()
+            reloadToolkitAssets()
             if (gameState == GameState.UNK_5) {
                 setGameState(GameState.UNK_11)
             } else if (gameState == GameState.UNK_0) {
@@ -2556,6 +2552,19 @@ class Client : GameShell() {
             } else {
                 initializeTips()
             }
+        }
+
+        @JvmStatic
+        fun reloadToolkitAssets() {
+            StaticMethods.initializedFontcombos!!.resetFontMap()
+            StaticMethods.initializedFontcombos!!.resetCache()
+            StaticMethods.initializedFontcombos!!.initializeFontMap(FONT_PROVIDER)
+            FontManager.initialize()
+            StaticMedia.loadSprites(Renderers.activeToolkit!!, Resource.SPRITES!!)
+            StaticMedia.resetChatMediaAndIcons()
+            StaticMedia.initializeChatIcons(StaticMedia.nameIconSprites!!)
+            setComponentsOnTop()
+            GraphicsCache.resetGraphicCaches()
         }
 
         @JvmStatic

@@ -68,6 +68,27 @@ class LoadingStage(
         @JvmField var LOADING_STAGE: LoadingStage? = null
         @JvmField var plainLoginScreenRenderer: AssetLoadingScreenRenderer? = null
 
+        @JvmField var bannerOverride: String? = null
+
+        @JvmStatic
+        fun bannerFor(stage: LoadingStage, secondary: Boolean = false): String =
+            bannerOverride ?: (if (secondary) stage.secondaryTextDisplay else stage.primaryTextDisplay).translate(Client.CURRENT_LANGUAGE!!)
+
+        @JvmStatic
+        fun restart(banner: String) {
+            plainLoginScreenRenderer?.stop()
+            plainLoginScreenRenderer = null
+            loginScreenRendererThread = null
+            gametipsToDisplay = null
+            lastDisplayedGametip = -1
+            displayedLoadingPercentage = 0
+            bannerOverride = banner
+            LOADING_TEXT = banner + "0%"
+            LOADING_STAGES = getValues()
+            LOADING_STAGE = LOADING_STAGES!![0]
+            LOADING_STAGE_CHANGED = Utils.time()
+        }
+
         @JvmStatic
         fun initialize(requestBackgroundFillrect: Boolean) {
             if (plainLoginScreenRenderer == null) {
@@ -98,7 +119,7 @@ class LoadingStage(
                 plainLoginScreenRenderer = AssetLoadingScreenRenderer()
                 plainLoginScreenRenderer!!.initialize(
                     LOADING_STAGE_CHANGED,
-                    stage.primaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!),
+                    bannerFor(stage),
                     stage.primaryCompletionDisplay,
                     stage
                 )
@@ -114,7 +135,7 @@ class LoadingStage(
                 LOADING_STAGE = LOADING_STAGES!![0]
                 LOADING_STAGE_CHANGED = Utils.time()
             }
-            if (plainLoginScreenRenderer == null) {
+            if (plainLoginScreenRenderer == null && !CacheSwitch.inProgress) {
                 initialize()
             }
 
@@ -122,7 +143,7 @@ class LoadingStage(
             val loadingPercent = ClientStartup.initialize()
 
             if (loadingStage === LOADING_STAGE) {
-                LOADING_TEXT = LOADING_STAGE!!.primaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!)
+                LOADING_TEXT = bannerFor(LOADING_STAGE!!)
                 if (LOADING_STAGE!!.hasProgressTracking) {
                     displayedLoadingPercentage = loadingPercent * (LOADING_STAGE!!.secondaryCompletionDisplay - LOADING_STAGE!!.primaryCompletionDisplay) / 100 + LOADING_STAGE!!.primaryCompletionDisplay
                 }
@@ -139,9 +160,12 @@ class LoadingStage(
                 // the client at "Please wait - changing renderer".
                 plainLoginScreenRenderer?.stop()
                 plainLoginScreenRenderer = null
-                Client.setGameState(GameState.UNK_5)
+                bannerOverride = null
+                if (!CacheSwitch.finish()) {
+                    Client.setGameState(GameState.UNK_5)
+                }
             } else {
-                LOADING_TEXT = loadingStage!!.secondaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!)
+                LOADING_TEXT = bannerFor(loadingStage!!, secondary = true)
                 if (LOADING_STAGE!!.showPercentage) {
                     LOADING_TEXT = "$LOADING_TEXT${loadingStage.secondaryCompletionDisplay}%"
                 }
