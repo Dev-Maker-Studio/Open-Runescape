@@ -128,9 +128,9 @@ class CrashReport private constructor(
             val active = runCatching { PreferenceManager.preferences?.activeToolkit?.getValue() }.getOrNull()
             val id = active ?: requested?.toIntOrNull()
             val name = when (id) {
-                6 -> "modern renderer"
-                1, 2, 3 -> "legacy OpenGL"
-                0 -> "software renderer"
+                3 -> "modern OpenGL"
+                1 -> "legacy OpenGL"
+                0 -> "safe mode"
                 null -> "renderer unknown"
                 else -> "renderer $id"
             }

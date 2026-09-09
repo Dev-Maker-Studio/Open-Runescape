@@ -728,7 +728,7 @@ open class GroundGL(
             // active toolkit is ModernGLToolkit, regardless of whether the modern
             // renderer has lazily initialized yet (init happens after the first render;
             // the map can be built before that). Without this snapshot the modern ground
-            // path cannot draw AT ALL (no legacy fallback exists under toolkit 6), so
+            // path cannot draw AT ALL (no legacy fallback exists under toolkit 3), so
             // failures here must be loud.
             val dataSize = nativeStream.written()
             if (activeToolkit is ModernGLToolkit) {
@@ -744,11 +744,11 @@ open class GroundGL(
                         modernVertexCount = totalMaterializedTiles
                         modernVertexRevision++
                     } else {
-                        println("[GroundGL] MODERN SNAPSHOT MISSING: nativeAddr=$nativeAddr dataSize=$dataSize — terrain for this ground will not render under toolkit 6")
+                        println("[GroundGL] MODERN SNAPSHOT MISSING: nativeAddr=$nativeAddr dataSize=$dataSize — terrain for this ground will not render under toolkit 3")
                     }
                 } catch (e: Exception) {
                     modernVertexData = null
-                    println("[GroundGL] MODERN SNAPSHOT FAILED: ${e.message} — terrain for this ground will not render under toolkit 6")
+                    println("[GroundGL] MODERN SNAPSHOT FAILED: ${e.message} — terrain for this ground will not render under toolkit 3")
                     e.printStackTrace()
                 }
             }

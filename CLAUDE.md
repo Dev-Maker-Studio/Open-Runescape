@@ -39,6 +39,10 @@ The original Jagex client code, extensively deobfuscated and refactored:
   - `movement/`: Pathfinding and route calculation
   - `js5/`: JS5 archive format (Jagex's asset format)
   - `toolkit/`: Graphics toolkit abstraction layer
+    Toolkit ids (`AbstractToolkit.toolkitForType`, `ToolkitPreference.AVAILABLE`): 0 safe mode,
+    1 legacy OpenGL, 3 modern OpenGL (LWJGL3; it took DirectX's old id so the cache's per-toolkit
+    option bitmasks and scripts apply unchanged), 5 the native HD GL path (not offered).
+    Software (2) and DirectX are gone: the Graphics Options interface lists only the three.
 
 - **launch/**: Client loader and initialization
 - **addon/**: Client addon system

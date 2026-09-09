@@ -92,9 +92,6 @@ object Renderers {
                     }
                 } catch (throwable: Throwable) {
                     val toolkitSetting = PreferenceManager.preferences!!.activeToolkit!!.getValue()
-                    if (toolkitSetting == 2) {
-                        Client.renderWithCpu = true
-                    }
                     PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.activeToolkit!!, 0)
                     prepareForRendering(toolkitSetting, topleftScreenText, verifySettingsPreUpdate)
                     if (generatedToolkit != null) {

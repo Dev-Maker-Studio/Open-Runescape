@@ -266,20 +266,7 @@ class Client : GameShell() {
     }
 
     public override fun onPulse() {
-        if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == 2) {
-            try {
-                pulse()
-            } catch (threadDeath: ThreadDeath) {
-                throw threadDeath
-            } catch (throwable: Throwable) {
-                //was added throwable.printStackTrace();
-                PacketEncoder.sendErrorToServer(throwable.message + " " + getDebugString(), throwable)
-                renderWithCpu = true
-                loadAssets(0, false)
-            }
-        } else {
-            pulse()
-        }
+        pulse()
     }
 
     fun pulse() {
@@ -769,19 +756,7 @@ class Client : GameShell() {
     }
 
     public override fun mainRedraw() {
-        if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == 2) {
-            try {
-                redraw()
-            } catch (threadDeath: ThreadDeath) {
-                throw threadDeath
-            } catch (throwable: Throwable) {
-                PacketEncoder.sendErrorToServer(throwable.message + " " + getDebugString(), throwable)
-                renderWithCpu = true
-                loadAssets(0, false)
-            }
-        } else {
-            redraw()
-        }
+        redraw()
     }
 
     public override fun shutdown() {
@@ -1227,7 +1202,6 @@ class Client : GameShell() {
         @JvmField
         var gameState: GameState = GameState.UNK_4
         @JvmField
-        var renderWithCpu: Boolean = false
         var TEST_ENVIRONMENT_APPEARANCE_OVERRIDES: Int = 0
         @JvmField
         var cycles: Int = 0

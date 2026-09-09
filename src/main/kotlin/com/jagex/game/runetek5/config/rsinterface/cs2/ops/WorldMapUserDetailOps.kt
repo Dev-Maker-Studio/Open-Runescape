@@ -121,6 +121,7 @@ import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Interpreter
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2CallFrame
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Script
 import com.jagex.game.runetek5.config.rsinterface.cs2.ClientScriptOpCode
+import com.jagex.game.runetek5.preference.impl.ToolkitPreference
 
 object WorldMapUserDetailOps {
 
@@ -404,12 +405,10 @@ object WorldMapUserDetailOps {
 
     @JvmStatic
     fun computeGraphicsMode() {
-        if (CS2Interpreter.lastEnteredGraphicsMode == 2) {
-            GameShell.softwareMode = true
-        } else if (CS2Interpreter.lastEnteredGraphicsMode == 1) {
-            GameShell.openglMode = true
-        } else if (CS2Interpreter.lastEnteredGraphicsMode == 3) {
-            GameShell.directxMode = true
+        if (CS2Interpreter.lastEnteredGraphicsMode == ToolkitPreference.LEGACY_OPENGL) {
+            GameShell.legacyOpenglTried = true
+        } else if (CS2Interpreter.lastEnteredGraphicsMode == ToolkitPreference.MODERN_OPENGL) {
+            GameShell.modernOpenglTried = true
         }
     }
 

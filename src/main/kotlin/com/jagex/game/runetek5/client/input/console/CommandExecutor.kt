@@ -35,6 +35,7 @@ import com.jagex.game.runetek5.utils.DirectoryPicker
 import com.jagex.game.runetek5.utils.Utils
 import com.jagex.game.runetek5.vardomain.VarProviders
 import javax.swing.SwingUtilities
+import com.jagex.game.runetek5.preference.impl.ToolkitPreference
 
 object CommandExecutor {
 
@@ -89,8 +90,8 @@ object CommandExecutor {
                 command.equals("toolkit", ignoreCase = true) || command.startsWith("toolkit ", ignoreCase = true) -> {
                     val currentToolkitId = PreferenceManager.preferences!!.activeToolkit!!.getValue()
                     val toolkitId = command.substringAfter(' ', "").trim().toIntOrNull()
-                    if (toolkitId == null || toolkitId < 0 || toolkitId > 6) {
-                        Console.writeLine("Usage: toolkit <0-6> (current: $currentToolkitId, 6 = modern shader renderer)")
+                    if (toolkitId == null || toolkitId !in ToolkitPreference.AVAILABLE) {
+                        Console.writeLine("Usage: toolkit <0|1|3> (current: $currentToolkitId; 0 safe mode, 1 legacy OpenGL, 3 modern OpenGL)")
                         return
                     }
                     if (toolkitId == currentToolkitId) {

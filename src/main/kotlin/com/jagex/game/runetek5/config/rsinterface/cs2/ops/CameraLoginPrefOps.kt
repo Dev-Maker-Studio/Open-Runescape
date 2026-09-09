@@ -121,6 +121,7 @@ import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Interpreter
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2CallFrame
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Script
 import com.jagex.game.runetek5.config.rsinterface.cs2.ClientScriptOpCode
+import com.jagex.game.runetek5.preference.impl.ToolkitPreference
 
 object CameraLoginPrefOps {
 
@@ -549,7 +550,7 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun detailGetToolkitDefault(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (SystemInfo.SYSTEM_INFO!!.ram >= 512 && !Client.isForcedSafemode && !Client.renderWithCpu) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (SystemInfo.SYSTEM_INFO!!.ram >= 512 && !Client.isForcedSafemode) 1 else 0
     }
 
     @JvmStatic
@@ -1045,8 +1046,8 @@ object CameraLoginPrefOps {
     @JvmStatic
     fun changeRender(executor: CS2Executor) {
         var toolkitId = executor.intStack[--executor.intStackPtr]
-        if (toolkitId < 0 || toolkitId > 5) {
-            toolkitId = 2
+        if (toolkitId !in ToolkitPreference.AVAILABLE) {
+            toolkitId = ToolkitPreference.SAFE_MODE
         }
         Client.loadAssets(toolkitId, false)
     }

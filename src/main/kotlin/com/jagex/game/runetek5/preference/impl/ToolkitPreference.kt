@@ -4,7 +4,9 @@ import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 
 /**
- * Preference for selecting the graphics toolkit (Software, OpenGL).
+ * Preference for selecting the graphics toolkit: 0 safe mode, 1 legacy OpenGL, 3 modern OpenGL
+ * (the id DirectX had; the cache's option bitmasks and scripts already know it as a hardware
+ * renderer). Software (2) and DirectX no longer exist in this client.
  *
  * @author Steven - 17/09/2023
  */
@@ -17,11 +19,8 @@ class ToolkitPreference : Preference {
 
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)
 
-    /**
-     * Ensures the toolkit value is within valid range (0-5).
-     */
     fun ensureValid() {
-        if (value < 0 || value > 5) {
+        if (value !in AVAILABLE) {
             value = getDefaultValue()
         }
     }
@@ -37,7 +36,7 @@ class ToolkitPreference : Preference {
 
     override fun getDefaultValue(): Int {
         isDefault = true
-        return 2
+        return LEGACY_OPENGL
     }
 
     override fun setValue(value: Int) {
@@ -46,7 +45,7 @@ class ToolkitPreference : Preference {
     }
 
     override fun canModify(value: Int): Int {
-        return 2
+        return if (value in AVAILABLE) 2 else 3
     }
 
     override fun getValue(): Int {
@@ -69,5 +68,13 @@ class ToolkitPreference : Preference {
      */
     fun setVerifySettings(verifySettings: Boolean) {
         this.verifySettings = verifySettings
+    }
+
+    companion object {
+        const val SAFE_MODE = 0
+        const val LEGACY_OPENGL = 1
+        const val MODERN_OPENGL = 3
+
+        @JvmField val AVAILABLE = setOf(SAFE_MODE, LEGACY_OPENGL, MODERN_OPENGL)
     }
 }

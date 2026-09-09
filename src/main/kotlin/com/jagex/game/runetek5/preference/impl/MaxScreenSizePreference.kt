@@ -36,12 +36,9 @@ class MaxScreenSizePreference : Preference {
     }
 
     companion object {
-        /**
-         * Safe mode / Software mode
-         */
         @JvmStatic
         fun nonHardwareMode(mode: Int): Boolean {
-            return mode == 0 || mode == 2
+            return mode == ToolkitPreference.SAFE_MODE
         }
     }
 }

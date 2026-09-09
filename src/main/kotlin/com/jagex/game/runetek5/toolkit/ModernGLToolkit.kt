@@ -2495,7 +2495,7 @@ class ModernGLToolkit(
      * The frame draws the scene first (models are only COLLECTED into the batcher),
      * then chat/interfaces/minimap/console, then render(). Legacy-path UI elements
      * (SpriteGL sprites and FontRendererGL text created while the modern pipeline was
-     * unavailable — e.g. everything recreated during a runtime `toolkit 6` switch)
+     * unavailable — e.g. everything recreated during a runtime `toolkit 3` switch)
      * draw immediately, so if the batched scene geometry were only flushed in
      * render(), the 3D flush would paint models OVER the already-drawn UI. Flushing
      * here, at the first 2D setup call of the frame, keeps the painter's order:
@@ -2605,7 +2605,7 @@ class ModernGLToolkit(
         spriteTypes: Array<SpriteType>?,
         isPlain: Boolean
     ): AbstractFontRenderer {
-        // UNCONDITIONALLY modern under toolkit 6. Construction only builds the glyph
+        // UNCONDITIONALLY modern under toolkit 3. Construction only builds the glyph
         // atlas through the legacy texture-creation path (resource upload, no FFP
         // drawing) — identical GL requirements to constructing a FontRendererGL, so
         // it is safe even before the modern renderer's initialize(). drawChar()
@@ -2623,7 +2623,7 @@ class ModernGLToolkit(
      *
      * Falls back to SpriteGL during early startup before the modern renderer is ready.
      */
-    // Sprite creation is UNCONDITIONALLY modern under toolkit 6. The ModernSpriteGL
+    // Sprite creation is UNCONDITIONALLY modern under toolkit 3. The ModernSpriteGL
     // constructor is byte-for-byte the SpriteGL constructor (legacy texture upload —
     // a resource operation, not FFP drawing), so it is safe on any thread/state where
     // legacy sprite creation was safe. Modern-vs-skip is decided at DRAW time.
@@ -5881,7 +5881,7 @@ class ModernGLToolkit(
      * @return true when the modern path handled the draw (including "nothing to draw"),
      *         false when it cannot run — the caller must fall back to the legacy path.
      *         Reachable false-states on this branch: the modern renderer is not yet
-     *         initialized (first frames after a runtime `toolkit 6` switch; init happens
+     *         initialized (first frames after a runtime `toolkit 3` switch; init happens
      *         after the first render()), a non-owner thread (login screen renderer), a
      *         non-ingame game state, or a GroundGL built without the modern vertex
      *         snapshot (scene built while a different toolkit was active).

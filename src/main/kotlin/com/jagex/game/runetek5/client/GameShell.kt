@@ -34,6 +34,7 @@ import com.darkan.crash.CrashHandler
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.utils.Utils
+import com.jagex.game.runetek5.preference.impl.ToolkitPreference
 
 abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
 
@@ -149,13 +150,10 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         var appletHasFocus: Boolean = false
 
         @JvmField
-        var directxMode: Boolean = false
+        var modernOpenglTried: Boolean = false
 
         @JvmField
-        var openglMode: Boolean = false
-
-        @JvmField
-        var softwareMode: Boolean = false
+        var legacyOpenglTried: Boolean = false
 
         @JvmField
         var mainRedrawCachePos: Int = 0
@@ -165,79 +163,34 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
 
         @JvmStatic
         fun calculateGraphics(): Int {
-            var profileSoftware = true
-            var profileOpengl = false
-            var profileDirectx = false
-            if (SystemInfo.SYSTEM_INFO!!.ram < 512 && SystemInfo.SYSTEM_INFO!!.ram != 0) {
-                profileSoftware = false
-            }
-            if (SystemInfo.operatingSystemLowercase!!.startsWith("win")) {
-                profileDirectx = true
-                profileOpengl = true
-            } else {
-                profileOpengl = true
-            }
-            if (softwareMode) {
-                profileSoftware = false
-            }
-            if (openglMode) {
-                profileOpengl = false
-            }
-            if (directxMode) {
-                profileDirectx = false
-            }
-            if (!profileSoftware && !profileOpengl && !profileDirectx) {
+            val profileModern = !modernOpenglTried
+            val profileLegacy = !legacyOpenglTried
+            if (!profileModern && !profileLegacy) {
                 return PreferenceManager.calculateDisplayMode()
-            } else {
-                var performanceSoftware = -1
-                var performanceOpengl = -1
-                var performanceDirectx = -1
-                if (profileSoftware) {
-                    try {
-                        performanceSoftware = DisplayModeDetails.getProfilingPerformance(2, 1000)
-                    } catch (exception: Exception) {
-                        // NOOP
-                    }
-                }
-                if (profileDirectx) {
-                    try {
-                        performanceDirectx = DisplayModeDetails.getProfilingPerformance(3, 1000)
-                        if (PreferenceManager.preferences?.activeToolkit?.getValue() == 3) {
-                            val renderInfo = Renderers.activeToolkit?.getRenderInfo()
-                            val driverVersion = renderInfo?.driverVersion?.and(0xffffffffffffL)
-                            when (renderInfo?.vendor) {
-                                4098 -> {
-                                    profileOpengl = profileOpengl and (driverVersion != null && driverVersion >= 60129613779L)
-                                }
-                                4318 -> {
-                                    profileOpengl = profileOpengl and (driverVersion != null && driverVersion >= 64425238954L)
-                                }
-                            }
-                        }
-                    } catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                }
-                if (profileOpengl) {
-                    try {
-                        performanceOpengl = DisplayModeDetails.getProfilingPerformance(1, 1000)
-                    } catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                }
-                if (performanceSoftware == -1 && performanceOpengl == -1 && performanceDirectx == -1) {
-                    return PreferenceManager.calculateDisplayMode()
-                }
-                performanceDirectx = (performanceDirectx * 1.1f).toInt()
-                performanceOpengl = (performanceOpengl * 1.1f).toInt()
-                return if (performanceSoftware > performanceDirectx && performanceSoftware > performanceOpengl)
-                    PreferenceManager.setSoftwaremodePerformance(performanceSoftware)
-                else
-                    if (performanceDirectx > performanceOpengl)
-                        PreferenceManager.setHardwarePerformance(3, performanceDirectx)
-                    else
-                        PreferenceManager.setHardwarePerformance(1, performanceOpengl)
             }
+            var performanceModern = -1
+            var performanceLegacy = -1
+            if (profileModern) {
+                try {
+                    performanceModern = DisplayModeDetails.getProfilingPerformance(ToolkitPreference.MODERN_OPENGL, 1000)
+                } catch (exception: Exception) {
+                    exception.printStackTrace()
+                }
+            }
+            if (profileLegacy) {
+                try {
+                    performanceLegacy = DisplayModeDetails.getProfilingPerformance(ToolkitPreference.LEGACY_OPENGL, 1000)
+                } catch (exception: Exception) {
+                    exception.printStackTrace()
+                }
+            }
+            if (performanceModern == -1 && performanceLegacy == -1) {
+                return PreferenceManager.calculateDisplayMode()
+            }
+            return if (performanceModern >= performanceLegacy)
+                PreferenceManager.setHardwarePerformance(ToolkitPreference.MODERN_OPENGL, performanceModern)
+            else
+                PreferenceManager.setHardwarePerformance(ToolkitPreference.LEGACY_OPENGL, performanceLegacy)
         }
 
         @JvmStatic

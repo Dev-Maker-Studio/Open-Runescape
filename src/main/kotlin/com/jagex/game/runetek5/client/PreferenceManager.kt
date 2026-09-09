@@ -104,36 +104,6 @@ object PreferenceManager {
     }
 
     @JvmStatic
-    fun setSoftwaremodePerformance(profilingPerformance: Int): Int {
-        val mode = when {
-            profilingPerformance > 12097 -> {
-                loadHighDetailPreferences()
-                4
-            }
-            profilingPerformance > 5098 -> {
-                loadMidDetailPreferences()
-                3
-            }
-            profilingPerformance > 2012 -> {
-                loadLowDetailPreferences()
-                2
-            }
-            else -> {
-                loadMinDetailPreferences()
-                1
-            }
-        }
-        if (preferences!!.activeToolkit!!.getValue() != 2) {
-            preferences!!.setValue(preferences!!.toolkit!!, 2)
-            Client.loadAssets(2, false)
-        } else {
-            preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
-        }
-        savePreferences()
-        return mode
-    }
-
-    @JvmStatic
     fun setHardwarePerformance(renderMode: Int, profilingPerformance: Int): Int {
         val mode = when {
             profilingPerformance > 20077 -> {

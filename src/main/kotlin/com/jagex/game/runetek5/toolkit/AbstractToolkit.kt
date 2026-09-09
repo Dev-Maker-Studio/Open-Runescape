@@ -491,15 +491,15 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
             val mode = when (renderMode) {
                 0 -> "SM"
                 1, 5 -> "GL"
-                6 -> "Modern GL"
+                3 -> "Modern GL"
                 else -> "UNKNOWN"
             }
             println("[AbstractToolkit] Entering render mode: $renderMode = $mode")
             return when (renderMode) {
                 0 -> SafeModeToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
                 1 -> OpenGlToolkit.createToolkitLd(gameCanvas, materialProvider, multiSamples)
+                3 -> ModernGLToolkit.createToolkit(gameCanvas, materialProvider, multiSamples)
                 5 -> OpenGlToolkit.createToolkitHd(gameCanvas, materialProvider, shaderIndex, multiSamples)
-                6 -> ModernGLToolkit.createToolkit(gameCanvas, materialProvider, multiSamples)
                 else -> throw IllegalArgumentException("Invalid toolkit option: $renderMode")
             }
         }
