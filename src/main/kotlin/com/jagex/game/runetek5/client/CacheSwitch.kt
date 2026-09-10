@@ -4,6 +4,7 @@ import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.client.login.LoginManager
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.rsinterface.Interface
+import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.js5.Js5Endpoint
 import com.jagex.game.runetek5.network.Connection
 import com.jagex.game.runetek5.network.ConnectionInfo
@@ -63,6 +64,7 @@ object CacheSwitch {
             Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
         }
         closeInterfaces()
+        CS2Executor.CS2_CACHE.reset()
         Js5Endpoint.active = target
         dropUpdateServer()
         LoadingStage.restart(if (toWorld) "Loading World ${target.worldId}'s files - " else "Loading Darkan's files - ")
@@ -97,6 +99,7 @@ object CacheSwitch {
     @JvmStatic
     fun reloadToolkitAssets() {
         Client.resetGraphicsState(shutdownToolkit = false)
+        GraphicsCache.resetWorldmapCaches(false)
         (Renderers.activeToolkit as? OpenGlToolkit)?.textureCache?.resetBloomCache()
         Client.reloadToolkitAssets()
     }

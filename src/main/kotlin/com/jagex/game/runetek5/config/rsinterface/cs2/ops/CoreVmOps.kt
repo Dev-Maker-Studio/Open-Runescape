@@ -472,6 +472,9 @@ object CoreVmOps {
         if (script == null) {
             throw RuntimeException()
         } else {
+            if (executor.intStackPtr < script!!.intArgsCount || executor.stringStackPtr < script.stringArgsCount || executor.longStackPtr < script.longArgsCount) {
+                throw RuntimeException("script $scriptId takes ${script.intArgsCount}i ${script.stringArgsCount}s ${script.longArgsCount}l, stack has ${executor.intStackPtr}i ${executor.stringStackPtr}s ${executor.longStackPtr}l at ${executor.instrPtr}")
+            }
             val stack: IntArray? = IntArray(script!!.intLocalsCount)
             val stringLocals: Array<Any?>? = arrayOfNulls<Any>(script!!.stringLocalsCount)
             val longLocals: LongArray? = LongArray(script!!.longLocalsCount)
