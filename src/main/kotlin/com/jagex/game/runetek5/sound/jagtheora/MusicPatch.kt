@@ -21,7 +21,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         val patchBuffer = Packet(fileData)
 
         var loopModeRunCount: Int
-        var loopModeScanPos = patchBuffer.currentPosition
+        var loopModeScanPos = 0
         while (patchBuffer.buffer[loopModeScanPos + patchBuffer.currentPosition] != 0.toByte()) {
             loopModeScanPos++
         }
@@ -41,7 +41,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         patchBuffer.currentPosition += loopModeRunCount
 
         var panRunCount = 0
-        var panScanPos = patchBuffer.currentPosition
+        var panScanPos = 0
         while (patchBuffer.buffer[panScanPos + patchBuffer.currentPosition] != 0.toByte()) {
             panScanPos++
         }
@@ -61,7 +61,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         patchBuffer.currentPosition += panRunCount
 
         var patchInfoRunCount = 0
-        var patchInfoScanPos = patchBuffer.currentPosition
+        var patchInfoScanPos = 0
         while (patchBuffer.buffer[patchInfoScanPos + patchBuffer.currentPosition] != 0.toByte()) {
             patchInfoScanPos++
         }
@@ -89,10 +89,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
                 if (patchInfoRef == 0) {
                     patchInfoIndex = patchInfoCount++
                 } else {
-                    if (patchInfoRef <= patchInfoIndex) {
-                        (patchInfoRef - 1).also { }
-                    }
-                    patchInfoIndex = patchInfoRef
+                    patchInfoIndex = if (patchInfoRef <= patchInfoIndex) patchInfoRef - 1 else patchInfoRef
                 }
 
                 runPatchInfoIndices[entryIdx] = patchInfoIndex.toByte()
@@ -125,7 +122,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         val panCurve = if (curvePointCount > 0) ByteArray(curvePointCount * 2) else null
 
         var keyRunCount = 0
-        var keyScanPos = patchBuffer.currentPosition
+        var keyScanPos = 0
         while (patchBuffer.buffer[keyScanPos + patchBuffer.currentPosition] != 0.toByte()) {
             keyScanPos++
         }
@@ -293,24 +290,14 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         }
 
         if (volumeCurve != null) {
-            for (i in 0 until 128) {
-                idx = i
-                if (idx >= 1 && idx < volumeCurve.size) {
-                    if (idx % 2 == 1) {
-                        volumeCurve[idx] = patchBuffer.readByte()
-                    }
-                }
+            for (curveIdx in 1 until volumeCurve.size step 2) {
+                volumeCurve[curveIdx] = patchBuffer.readByte()
             }
         }
 
         if (panCurve != null) {
-            for (i in 0 until 128) {
-                idx = i
-                if (idx >= 1 && idx < panCurve.size) {
-                    if (idx % 2 == 1) {
-                        panCurve[idx] = patchBuffer.readByte()
-                    }
-                }
+            for (curveIdx in 1 until panCurve.size step 2) {
+                panCurve[curveIdx] = patchBuffer.readByte()
             }
         }
 
@@ -344,119 +331,67 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
             }
         }
 
-        var endKey: Byte
-        var interpAcc: Int
-        var segKey: Int
-        var interpValue: Int
-        var startKey: Byte
         if (volumeCurve != null) {
             accum = patchBuffer.readUByte()
             volumeCurve[0] = accum.toByte()
+            for (curveIdx in 2 until volumeCurve.size step 2) {
+                accum = 1 + accum + patchBuffer.readUByte()
+                volumeCurve[curveIdx] = accum.toByte()
+            }
 
-            for (i in 0 until 128) {
-                idx = i
-                if (idx >= 2 && idx < volumeCurve.size && idx % 2 == 0) {
-                    accum = 1 + accum + patchBuffer.readUByte()
-                    volumeCurve[idx] = accum.toByte()
+            var startKey = volumeCurve[0].toInt()
+            var startVolume = volumeCurve[1].toInt()
+            for (key in 0 until startKey) {
+                this.volumeOffset[key] = (startVolume * this.volumeOffset[key] + 32 shr 6).toByte()
+            }
+
+            for (curveIdx in 2 until volumeCurve.size step 2) {
+                val endKey = volumeCurve[curveIdx].toInt()
+                val endVolume = volumeCurve[curveIdx + 1].toInt()
+                var interpAcc = startVolume * (endKey - startKey) + (endKey - startKey) / 2
+                for (key in startKey until endKey) {
+                    val interpValue = divideRounded(interpAcc, endKey - startKey)
+                    this.volumeOffset[key] = (interpValue * this.volumeOffset[key] + 32 shr 6).toByte()
+                    interpAcc += endVolume - startVolume
                 }
+                startKey = endKey
+                startVolume = endVolume
             }
 
-            startKey = volumeCurve[0]
-            val startVolume = volumeCurve[1]
-
-            for (key in 0 until startKey.toInt()) {
-                this.volumeOffset[key] = (startVolume.toInt() * this.volumeOffset[key] + 32 shr 6).toByte()
-            }
-
-            for (i in 0 until 128) {
-                idx = i
-                if (idx >= 2 && idx < volumeCurve.size && idx % 2 == 0) {
-                    endKey = volumeCurve[idx]
-                    val endVolume = volumeCurve[idx + 1]
-                    interpAcc = startVolume.toInt() * (endKey.toInt() - startKey.toInt()) + (endKey.toInt() - startKey.toInt()) / 2
-
-                    for (key in startKey.toInt() until endKey.toInt()) {
-                        interpValue = divideRounded(interpAcc, endKey.toInt() - startKey.toInt())
-                        this.volumeOffset[key] = (interpValue * this.volumeOffset[key] + 32 shr 6).toByte()
-                        interpAcc += endVolume.toInt() - startVolume.toInt()
-                    }
-
-                    startKey = endKey
-                }
-            }
-
-            for (key in startKey.toInt() until 128) {
-                this.volumeOffset[key] = (startVolume.toInt() * this.volumeOffset[key] + 32 shr 6).toByte()
+            for (key in startKey until 128) {
+                this.volumeOffset[key] = (startVolume * this.volumeOffset[key] + 32 shr 6).toByte()
             }
         }
 
         if (panCurve != null) {
             accum = patchBuffer.readUByte()
             panCurve[0] = accum.toByte()
-
-            for (i in 0 until 128) {
-                idx = i
-                if (idx >= 2 && idx < panCurve.size && idx % 2 == 0) {
-                    accum = 1 + accum + patchBuffer.readUByte()
-                    panCurve[idx] = accum.toByte()
-                }
+            for (curveIdx in 2 until panCurve.size step 2) {
+                accum = 1 + accum + patchBuffer.readUByte()
+                panCurve[curveIdx] = accum.toByte()
             }
 
-            startKey = panCurve[0]
-            var startPan = (panCurve[1].toInt() shl 1)
-
-            var pan: Int
-            for (key in 0 until startKey.toInt()) {
-                pan = startPan + (this.panOffset[key].toInt() and 0xff)
-                if (pan < 0) {
-                    pan = 0
-                }
-
-                if (pan > 128) {
-                    pan = 128
-                }
-
-                this.panOffset[key] = pan.toByte()
+            var startKey = panCurve[0].toInt()
+            var startPan = panCurve[1].toInt() shl 1
+            for (key in 0 until startKey) {
+                this.panOffset[key] = (startPan + (this.panOffset[key].toInt() and 0xff)).coerceIn(0, 128).toByte()
             }
 
-            for (i in 0 until 128) {
-                idx = i
-                if (idx >= 2 && idx < panCurve.size && idx % 2 == 0) {
-                    endKey = panCurve[idx]
-                    val endPan = (panCurve[idx + 1].toInt() shl 1)
-                    interpAcc = startPan * (endKey.toInt() - startKey.toInt()) + (endKey.toInt() - startKey.toInt()) / 2
-
-                    for (key in startKey.toInt() until endKey.toInt()) {
-                        interpValue = divideRounded(interpAcc, endKey.toInt() - startKey.toInt())
-                        var scaledPan = interpValue + (this.panOffset[key].toInt() and 0xff)
-                        if (scaledPan < 0) {
-                            scaledPan = 0
-                        }
-
-                        if (scaledPan > 128) {
-                            scaledPan = 128
-                        }
-
-                        this.panOffset[key] = scaledPan.toByte()
-                        interpAcc += endPan - startPan
-                    }
-
-                    startKey = endKey
-                    startPan = endPan
+            for (curveIdx in 2 until panCurve.size step 2) {
+                val endKey = panCurve[curveIdx].toInt()
+                val endPan = panCurve[curveIdx + 1].toInt() shl 1
+                var interpAcc = (endKey - startKey) * startPan + (endKey - startKey) / 2
+                for (key in startKey until endKey) {
+                    val interpValue = divideRounded(interpAcc, endKey - startKey)
+                    this.panOffset[key] = ((this.panOffset[key].toInt() and 0xff) + interpValue).coerceIn(0, 128).toByte()
+                    interpAcc += endPan - startPan
                 }
+                startKey = endKey
+                startPan = endPan
             }
 
-            for (key in startKey.toInt() until 128) {
-                pan = startPan + (this.panOffset[key].toInt() and 0xff)
-                if (pan < 0) {
-                    pan = 0
-                }
-
-                if (pan > 128) {
-                    pan = 128
-                }
-
-                this.panOffset[key] = pan.toByte()
+            for (key in startKey until 128) {
+                this.panOffset[key] = ((this.panOffset[key].toInt() and 0xff) + startPan).coerceIn(0, 128).toByte()
             }
         }
 
