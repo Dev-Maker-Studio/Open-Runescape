@@ -133,7 +133,7 @@ open class Culling(
         interactiveCullingCursorPos = 0
         diagonalWallCulling = arrayOfNulls(1027)
         wallCullingCursorPosition = 0
-        frustumClusters = arrayOfNulls(1005)
+        frustumClusters = arrayOfNulls(tileCullingCluster.size + interactiveCulling.size + diagonalWallCulling.size)
         frusumCullingCursorPos = 0
         tileDrawCycles = Array(scene.regionSizeZ) {
             Array(scene.sceneDimensionX + 1) {
