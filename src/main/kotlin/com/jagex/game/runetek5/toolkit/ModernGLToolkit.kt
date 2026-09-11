@@ -42,6 +42,7 @@ import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.modern.util.GpuTimer
 import com.jagex.game.runetek5.graphics.modern.util.MeshConverter
 import com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder
+import com.jagex.game.runetek5.graphics.modern.material.TextureScroll
 import com.jagex.game.runetek5.graphics.modern.scene.RetainedStaticScene
 import com.jagex.game.runetek5.utils.MathUtils
 import com.jagex.game.runetek5.graphics.model.Mesh
@@ -757,10 +758,12 @@ class ModernGLToolkit(
 
             optimizedBatcher = OptimizedFrameBatcher()
             optimizedBatcher!!.initialize()
+            optimizedBatcher!!.setTextureScrollLookup(::lookupTextureScroll)
 
             // Initialize instanced model batcher for repeated meshes
             instancedBatcher = InstancedModelBatcher()
             instancedBatcher!!.initialize()
+            instancedBatcher!!.setTextureScrollLookup(::lookupTextureScroll)
 
             // Initialize model cache for avoiding per-face CPU work
             // Entry count must exceed the live unique-mesh count (inst[unique=] runs
@@ -2429,12 +2432,15 @@ class ModernGLToolkit(
             brightness, red, green, blue, contrastPositive, contrastNegative
         )
         optimizedBatcher?.setFog(viewMatrix44.elements, fogOn, fogColor, fogStartPosition, fogEndPosition)
+        val textureTime = TextureScroll.seconds(textureAnimatingProgression)
+        optimizedBatcher?.setTextureTime(textureTime)
         if (useInstancing) {
             instancedBatcher?.setLighting(
                 sunDirection[0], sunDirection[1], sunDirection[2],
                 brightness, red, green, blue, contrastPositive, contrastNegative
             )
             instancedBatcher?.setFog(viewMatrix44.elements, fogOn, fogColor, fogStartPosition, fogEndPosition)
+            instancedBatcher?.setTextureTime(textureTime)
         }
     }
 
@@ -3252,6 +3258,12 @@ class ModernGLToolkit(
         // Material 0 is valid/textured — only -1 is untextured (matches lookupTextureHandle).
         if (materialId < 0) return 0
         return materialProvider?.getMaterial(materialId)?.combineMode?.toInt() ?: 0
+    }
+
+    private fun lookupTextureScroll(materialId: Int): Int {
+        if (materialId < 0) return TextureScroll.NONE
+        val material = materialProvider?.getMaterial(materialId) ?: return TextureScroll.NONE
+        return TextureScroll.pack(material)
     }
 
     /**
@@ -6265,6 +6277,10 @@ class ModernGLToolkit(
 
         // Get texture handle
         val textureHandle = lookupTextureHandle(materialId)
+        val groundMaterial = if (materialId >= 0) materialProvider?.getMaterial(materialId) else null
+        val textureTime = TextureScroll.seconds(textureAnimatingProgression)
+        val textureScrollU = if (groundMaterial != null) TextureScroll.offset(textureTime, groundMaterial.textureSpeedU) else 0f
+        val textureScrollV = if (groundMaterial != null) TextureScroll.offset(textureTime, groundMaterial.textureSpeedV) else 0f
 
         // Get the combined view-projection matrix
         val vpMatrix = viewProjectionMatrix
@@ -6371,6 +6387,8 @@ class ModernGLToolkit(
             indexCount = indexCount,
             textureHandle = textureHandle,
             textureScale = 1.0f / textureScale,
+            textureScrollU = textureScrollU,
+            textureScrollV = textureScrollV,
             hasNormals = hasNormals,
             viewProjection = vpMatrix,
             colorVboId = colorVboId,

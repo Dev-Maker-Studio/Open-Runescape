@@ -4,6 +4,7 @@ import com.jagex.game.runetek5.graphics.modern.core.IndexBuffer
 import com.jagex.game.runetek5.graphics.modern.core.ShaderProgram
 import com.jagex.game.runetek5.graphics.modern.core.VertexArray
 import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
+import com.jagex.game.runetek5.graphics.modern.material.TextureScroll
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.FLOAT
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TEXTURE_2D
@@ -194,6 +195,10 @@ class InstancedModelBatcher {
     private var uTexAlphaLocation = -1
     /** Per-material: does this texture actually carry an alpha channel? */
     private var texHasAlpha: (Int) -> Boolean = { true }
+    private var uTextureSpeedLocation = -1
+    private var uTextureTimeLocation = -1
+    private var textureScrollOf: (Int) -> Int = { TextureScroll.NONE }
+    private var textureTime = 0f
     private var uAlphaThresholdLocation = -1
     private var uViewProjectionLocation = -1
     private var uSunDirectionLocation = -1
@@ -510,7 +515,7 @@ class InstancedModelBatcher {
         var complete = true
         for (k in 0 until count) {
             val slot = resolveMaterial(mats[k], textureCache, combineModeOf)
-            out[k * 4] = matEntryLo[slot]; out[k * 4 + 1] = matEntryHi[slot]; out[k * 4 + 2] = matEntryFlags[slot]; out[k * 4 + 3] = 0
+            out[k * 4] = matEntryLo[slot]; out[k * 4 + 1] = matEntryHi[slot]; out[k * 4 + 2] = matEntryFlags[slot]; out[k * 4 + 3] = matEntryScroll[slot]
             if (mats[k] >= 0 && matEntryFlags[slot] == 0) complete = false
         }
         return complete
@@ -754,6 +759,7 @@ class InstancedModelBatcher {
     private var matEntryLo = IntArray(4096)
     private var matEntryHi = IntArray(4096)
     private var matEntryFlags = IntArray(4096)
+    private var matEntryScroll = IntArray(4096)
     private var matEntryStamp = IntArray(4096)
     private var matEntryPass = 0
 
@@ -792,48 +798,32 @@ class InstancedModelBatcher {
     /** Resolves (and caches for this pass) the SSBO words of [texId]; returns the cache slot. */
     private fun resolveMaterial(texId: Int, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int): Int {
         val slot = texId + 1
-        if (slot >= matEntryLo.size) {
-            val n = maxOf(slot + 1, matEntryLo.size * 2)
-            matEntryLo = matEntryLo.copyOf(n); matEntryHi = matEntryHi.copyOf(n)
-            matEntryFlags = matEntryFlags.copyOf(n); matEntryStamp = matEntryStamp.copyOf(n)
-        }
+        if (slot >= matEntryLo.size) growMaterialEntries(slot + 1)
         if (matEntryStamp[slot] != matEntryPass) {
             val glTex = if (texId >= 0) textureCache(texId) else 0
             val h = if (glTex > 0) textureHandle64(glTex) else 0L
             var f = 0
             if (h != 0L) f = 1 or ((combineModeOf(texId) and 7) shl 1) or (if (TEX_ALPHA && texHasAlpha(texId)) 16 else 0)
             matEntryLo[slot] = h.toInt(); matEntryHi[slot] = (h ushr 32).toInt(); matEntryFlags[slot] = f
+            matEntryScroll[slot] = if (h != 0L) textureScrollOf(texId) else TextureScroll.NONE
             matEntryStamp[slot] = matEntryPass
         }
         return slot
     }
 
+    private fun growMaterialEntries(minSize: Int) {
+        val n = maxOf(minSize, matEntryLo.size * 2)
+        matEntryLo = matEntryLo.copyOf(n); matEntryHi = matEntryHi.copyOf(n)
+        matEntryFlags = matEntryFlags.copyOf(n); matEntryScroll = matEntryScroll.copyOf(n)
+        matEntryStamp = matEntryStamp.copyOf(n)
+    }
+
     private fun appendDrawMaterial(texId: Int, textureCache: (Int) -> Int, combineModeOf: (Int) -> Int) {
-        val slot = texId + 1 // -1 (untextured) -> 0
-        if (slot >= matEntryLo.size) {
-            val n = maxOf(slot + 1, matEntryLo.size * 2)
-            matEntryLo = matEntryLo.copyOf(n); matEntryHi = matEntryHi.copyOf(n)
-            matEntryFlags = matEntryFlags.copyOf(n); matEntryStamp = matEntryStamp.copyOf(n)
-        }
-        val lo: Int
-        val hi: Int
-        val flags: Int
-        if (matEntryStamp[slot] != matEntryPass) {
-            val glTex = if (texId >= 0) textureCache(texId) else 0
-            val h = if (glTex > 0) textureHandle64(glTex) else 0L
-            var f = 0
-            if (h != 0L) {
-                f = 1 or ((combineModeOf(texId) and 7) shl 1) or (if (TEX_ALPHA && texHasAlpha(texId)) 16 else 0)
-            }
-            lo = h.toInt(); hi = (h ushr 32).toInt(); flags = f
-            matEntryLo[slot] = lo; matEntryHi[slot] = hi; matEntryFlags[slot] = flags
-            matEntryStamp[slot] = matEntryPass
-        } else {
-            lo = matEntryLo[slot]; hi = matEntryHi[slot]; flags = matEntryFlags[slot]
-        }
+        val slot = resolveMaterial(texId, textureCache, combineModeOf)
         if (drawMatCursor + 4 > drawMatScratch.size) drawMatScratch = drawMatScratch.copyOf(drawMatScratch.size * 2)
         val b = drawMatScratch
-        b[drawMatCursor] = lo; b[drawMatCursor + 1] = hi; b[drawMatCursor + 2] = flags; b[drawMatCursor + 3] = 0
+        b[drawMatCursor] = matEntryLo[slot]; b[drawMatCursor + 1] = matEntryHi[slot]
+        b[drawMatCursor + 2] = matEntryFlags[slot]; b[drawMatCursor + 3] = matEntryScroll[slot]
         drawMatCursor += 4
     }
 
@@ -920,6 +910,8 @@ class InstancedModelBatcher {
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
         uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
         uTexAlphaLocation = shader!!.getUniformLocation("uTexAlpha")
+        uTextureSpeedLocation = shader!!.getUniformLocation("uTextureSpeed")
+        uTextureTimeLocation = shader!!.getUniformLocation("uTextureTime")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
@@ -1151,10 +1143,12 @@ class InstancedModelBatcher {
             uniform vec3 uFogColor2;
 
             uniform float uAlphaThreshold;
+            uniform float uTextureTime;
             ${if (bindless) """
-            // Per-draw material: (texture handle lo, hi, flags, 0). flags bit0 = textured,
-            // bits1-3 = legacy combine mode, bit4 = texture alpha rule. Indexed by the
-            // multi-draw command index plus uDrawBase (the group's first command).
+            // Per-draw material: (texture handle lo, hi, flags, scroll). flags bit0 = textured,
+            // bits1-3 = legacy combine mode, bit4 = texture alpha rule; scroll packs the
+            // material's textureSpeedU (bits 0-7) and textureSpeedV (bits 8-15) bytes.
+            // Indexed by the multi-draw command index plus uDrawBase (the group's first command).
             layout(std430, binding = 0) readonly buffer DrawMaterials { uvec4 drawMat[]; };
             flat in int vDrawId;
             uniform int uDrawBase;
@@ -1166,6 +1160,7 @@ class InstancedModelBatcher {
             // or textured faces with junk face colors render tinted (green-quad bug).
             uniform int uCombineMode;
             uniform bool uTexAlpha;
+            uniform vec2 uTextureSpeed;
             """}
 
             out vec4 fragColor;
@@ -1177,9 +1172,12 @@ class InstancedModelBatcher {
                 bool uTextureEnabled = (m.z & 1u) != 0u;
                 int uCombineMode = int((m.z >> 1u) & 7u);
                 bool uTexAlpha = (m.z & 16u) != 0u;
+                vec2 uTextureSpeed = vec2(int(m.w << 24u) >> 24, int(m.w << 16u) >> 24);
                 """ else ""}
                 if (uTextureEnabled) {
-                    ${if (bindless) "vec4 texColor = texture(sampler2D(m.xy), vTexCoord);" else "vec4 texColor = texture(uTexture, vTexCoord);"}
+                    vec2 scroll = uTextureTime * uTextureSpeed / 64.0;
+                    vec2 texCoord = vTexCoord + scroll - trunc(scroll);
+                    ${if (bindless) "vec4 texColor = texture(sampler2D(m.xy), texCoord);" else "vec4 texColor = texture(uTexture, texCoord);"}
                     if (uCombineMode == 1) {
                         color = texColor;
                     } else if (uCombineMode == 3) {
@@ -1255,6 +1253,15 @@ class InstancedModelBatcher {
 
     /** [count] lights; [pos] is xyzw per light (w = 1/size2d^2), [color] is rgb per light. */
     fun setTextureAlphaPredicate(p: (Int) -> Boolean) { texHasAlpha = p }
+
+    fun setTextureScrollLookup(packedSpeedOf: (Int) -> Int) { textureScrollOf = packedSpeedOf }
+
+    fun setTextureTime(seconds: Float) { textureTime = seconds }
+
+    private fun setTextureSpeedUniform(sh: ShaderProgram, texId: Int) {
+        val packed = textureScrollOf(texId)
+        sh.setUniform(uTextureSpeedLocation, TextureScroll.speedU(packed), TextureScroll.speedV(packed))
+    }
 
     fun setPointLights(count: Int, pos: FloatArray, color: FloatArray) {
         val n = if (count > MAX_POINT_LIGHTS) MAX_POINT_LIGHTS else count
@@ -1988,6 +1995,7 @@ class InstancedModelBatcher {
             GLWrapper.disable(GLWrapper.Constants.CULL_FACE)
         }
         sh.setUniform(uTextureLocation, 0)
+        sh.setUniform(uTextureTimeLocation, textureTime)
         // -1 disables the shader's `color.a <= uAlphaThreshold` discard entirely,
         // so geometry lost to a zero alpha becomes visible (render alphatest).
         // Legacy: glAlphaFunc(GL_GREATER, 0) -> keep a > 0, discard a <= 0.
@@ -2199,7 +2207,7 @@ class InstancedModelBatcher {
                     var complete = true
                     for (k in 0 until b.cmdCount) {
                         val slot = resolveMaterial(mats[k], textureCache, combineModeOf)
-                        w[k * 4] = matEntryLo[slot]; w[k * 4 + 1] = matEntryHi[slot]; w[k * 4 + 2] = matEntryFlags[slot]; w[k * 4 + 3] = 0
+                        w[k * 4] = matEntryLo[slot]; w[k * 4 + 1] = matEntryHi[slot]; w[k * 4 + 2] = matEntryFlags[slot]; w[k * 4 + 3] = matEntryScroll[slot]
                         if (mats[k] >= 0 && matEntryFlags[slot] == 0) complete = false
                     }
                     b.matWordsRevision = if (complete) materialWordsRevision else -1
@@ -2303,6 +2311,7 @@ class InstancedModelBatcher {
                 // Legacy per-material combine mode (REPLACE ignores vColor).
                 sh.setUniform(uCombineModeLocation, combineModeOf(texId))
                 sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                setTextureSpeedUniform(sh, texId)
             } else {
                 sh.setUniform(uTextureEnabledLocation, 0)
             }
@@ -2563,6 +2572,7 @@ class InstancedModelBatcher {
                             sh.setUniform(uTextureEnabledLocation, 1)
                             sh.setUniform(uCombineModeLocation, combineModeOf(texId))
                             sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                            setTextureSpeedUniform(sh, texId)
                         } else {
                             sh.setUniform(uTextureEnabledLocation, 0)
                         }
@@ -2613,6 +2623,7 @@ class InstancedModelBatcher {
                             sh.setUniform(uTextureEnabledLocation, 1)
                             sh.setUniform(uCombineModeLocation, combineModeOf(texId))
                             sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                            setTextureSpeedUniform(sh, texId)
                         } else {
                             sh.setUniform(uTextureEnabledLocation, 0)
                         }

@@ -56,6 +56,7 @@ class ModernGroundRenderer {
     // Uniform locations for textured shader
     private var uTexViewProjectionLocation = -1
     private var uTexTextureScaleLocation = -1
+    private var uTexTextureScrollLocation = -1
     private var uTexHasNormalsLocation = -1
     private var uTexSunDirectionLocation = -1
     private var uTexSunColorLocation = -1
@@ -423,6 +424,7 @@ class ModernGroundRenderer {
         s.bind()
         uTexViewProjectionLocation = s.getUniformLocation("uViewProjection")
         uTexTextureScaleLocation = s.getUniformLocation("uTextureScale")
+        uTexTextureScrollLocation = s.getUniformLocation("uTextureScroll")
         uTexHasNormalsLocation = s.getUniformLocation("uHasNormals")
         uTexSunDirectionLocation = s.getUniformLocation("uSunDirection")
         uTexSunColorLocation = s.getUniformLocation("uSunColor")
@@ -541,6 +543,8 @@ class ModernGroundRenderer {
         boundCombineMode = Int.MIN_VALUE
         boundAlphaFromVertex = null
         boundTextureScale = Float.NaN
+        boundTextureScrollU = Float.NaN
+        boundTextureScrollV = Float.NaN
         boundStride = -1
         boundTexCoordSize = -1
     }
@@ -556,6 +560,8 @@ class ModernGroundRenderer {
     private var boundCombineMode = Int.MIN_VALUE
     private var boundAlphaFromVertex: Boolean? = null
     private var boundTextureScale = Float.NaN
+    private var boundTextureScrollU = Float.NaN
+    private var boundTextureScrollV = Float.NaN
 
     /**
      * Draws terrain with the provided vertex and index data.
@@ -716,6 +722,7 @@ class ModernGroundRenderer {
 
         // Set texture scaling
         s.setUniform(uTexTextureScaleLocation, textureScale)
+        s.setUniform(uTexTextureScrollLocation, 0f, 0f)
 
         // Set lighting parameters
         s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
@@ -844,6 +851,8 @@ class ModernGroundRenderer {
         indexCount: Int,
         textureHandle: Int,
         textureScale: Float,
+        textureScrollU: Float,
+        textureScrollV: Float,
         hasNormals: Boolean,
         viewProjection: Matrix44,
         colorVboId: Int = 0,
@@ -961,8 +970,10 @@ class ModernGroundRenderer {
             boundHasNormals = -1
             boundTexture = -1
             boundCombineMode = Int.MIN_VALUE
-        boundAlphaFromVertex = null
+            boundAlphaFromVertex = null
             boundTextureScale = Float.NaN
+            boundTextureScrollU = Float.NaN
+            boundTextureScrollV = Float.NaN
         }
 
         // ---- Per-GROUND state: the interleaved attribute layout ----
@@ -999,6 +1010,11 @@ class ModernGroundRenderer {
         if (textureScale != boundTextureScale) {
             s.setUniform(uTexTextureScaleLocation, textureScale)
             boundTextureScale = textureScale
+        }
+        if (textureScrollU != boundTextureScrollU || textureScrollV != boundTextureScrollV) {
+            s.setUniform(uTexTextureScrollLocation, textureScrollU, textureScrollV)
+            boundTextureScrollU = textureScrollU
+            boundTextureScrollV = textureScrollV
         }
         val hasTexture = textureHandle > 0
         if (textureHandle != boundTexture) {
@@ -1097,6 +1113,7 @@ class ModernGroundRenderer {
         s.setUniform(uTexHasTextureLocation, 0)
         s.setUniform(uTexCombineModeLocation, 0)
         s.setUniform(uTexTextureScaleLocation, 1f)
+        s.setUniform(uTexTextureScrollLocation, 0f, 0f)
         s.setUniform(uTexFogEnabledLocation, 0)
         s.setUniform("uRawColorDebug", 0)
         val en = s.getUniformLocation("uGroundShadowEnabled")
@@ -1141,6 +1158,8 @@ class ModernGroundRenderer {
         boundCombineMode = Int.MIN_VALUE
         boundAlphaFromVertex = null
         boundTextureScale = Float.NaN
+        boundTextureScrollU = Float.NaN
+        boundTextureScrollV = Float.NaN
         boundShadowMapper = null
     }
 

@@ -4,6 +4,7 @@ import com.jagex.game.runetek5.graphics.modern.core.IndexBuffer
 import com.jagex.game.runetek5.graphics.modern.core.ShaderProgram
 import com.jagex.game.runetek5.graphics.modern.core.VertexArray
 import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
+import com.jagex.game.runetek5.graphics.modern.material.TextureScroll
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TEXTURE_2D
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TRIANGLES
@@ -105,6 +106,10 @@ class OptimizedFrameBatcher {
     private var uTexAlphaLocation = -1
     /** Per-material: does this texture actually carry an alpha channel? */
     private var texHasAlpha: (Int) -> Boolean = { true }
+    private var uTextureSpeedLocation = -1
+    private var uTextureTimeLocation = -1
+    private var textureScrollOf: (Int) -> Int = { TextureScroll.NONE }
+    private var textureTime = 0f
     private var uAlphaThresholdLocation = -1
     private var uViewProjectionLocation = -1
 
@@ -242,6 +247,8 @@ class OptimizedFrameBatcher {
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
         uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
         uTexAlphaLocation = shader!!.getUniformLocation("uTexAlpha")
+        uTextureSpeedLocation = shader!!.getUniformLocation("uTextureSpeed")
+        uTextureTimeLocation = shader!!.getUniformLocation("uTextureTime")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         // Lighting uniforms
@@ -409,13 +416,16 @@ class OptimizedFrameBatcher {
             // sign-board / textured-loc bug. Matches groundTextured.frag exactly.
             uniform int uCombineMode;
             uniform bool uTexAlpha;
+            uniform vec2 uTextureSpeed;
+            uniform float uTextureTime;
 
             out vec4 fragColor;
 
             void main() {
                 vec4 color;
                 if (uTextureEnabled) {
-                    vec4 texColor = texture(uTexture, vTexCoord);
+                    vec2 scroll = uTextureTime * uTextureSpeed / 64.0;
+                    vec4 texColor = texture(uTexture, vTexCoord + scroll - trunc(scroll));
                     if (uCombineMode == 1) {
                         color = texColor;
                     } else if (uCombineMode == 3) {
@@ -592,6 +602,15 @@ class OptimizedFrameBatcher {
 
     /** [count] lights; [pos] is xyzw per light (w = 1/size2d^2), [color] is rgb per light. */
     fun setTextureAlphaPredicate(p: (Int) -> Boolean) { texHasAlpha = p }
+
+    fun setTextureScrollLookup(packedSpeedOf: (Int) -> Int) { textureScrollOf = packedSpeedOf }
+
+    fun setTextureTime(seconds: Float) { textureTime = seconds }
+
+    private fun setTextureSpeedUniform(sh: ShaderProgram, texId: Int) {
+        val packed = textureScrollOf(texId)
+        sh.setUniform(uTextureSpeedLocation, TextureScroll.speedU(packed), TextureScroll.speedV(packed))
+    }
 
     fun setPointLights(count: Int, pos: FloatArray, color: FloatArray) {
         val n = if (count > MAX_POINT_LIGHTS) MAX_POINT_LIGHTS else count
@@ -1093,6 +1112,7 @@ class OptimizedFrameBatcher {
             GLWrapper.disable(GLWrapper.Constants.CULL_FACE)
         }
         sh.setUniform(uTextureLocation, 0)
+        sh.setUniform(uTextureTimeLocation, textureTime)
         // -1 disables the shader's `color.a <= uAlphaThreshold` discard entirely,
         // so geometry lost to a zero alpha becomes visible (render alphatest).
         // Legacy: glAlphaFunc(GL_GREATER, 0) -> keep a > 0, discard a <= 0.
@@ -1202,6 +1222,7 @@ class OptimizedFrameBatcher {
                     // render tinted (the green sign-board bug).
                     sh.setUniform(uCombineModeLocation, if (texId >= 0) combineModeOf(texId) else 0)
                     sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                    setTextureSpeedUniform(sh, texId)
                 } else {
                     sh.setUniform(uTextureEnabledLocation, 0)
                 }
@@ -1301,6 +1322,7 @@ class OptimizedFrameBatcher {
                     sh.setUniform(uTextureEnabledLocation, 1)
                     sh.setUniform(uCombineModeLocation, combineModeOf(texId))
                     sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                    setTextureSpeedUniform(sh, texId)
                 } else {
                     sh.setUniform(uTextureEnabledLocation, 0)
                 }

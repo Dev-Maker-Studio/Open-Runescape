@@ -280,6 +280,10 @@ class ShaderProgram private constructor(
         GLWrapper.uniform1f(location, value)
     }
 
+    fun setUniform(location: Int, x: Float, y: Float) {
+        GLWrapper.uniform2f(location, x, y)
+    }
+
     fun setUniform(location: Int, x: Float, y: Float, z: Float) {
         GLWrapper.uniform3f(location, x, y, z)
     }

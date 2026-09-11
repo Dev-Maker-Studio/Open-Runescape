@@ -14,6 +14,7 @@ layout(location = 3) in vec3 aNormal;
 // Uniforms
 uniform mat4 uViewProjection;
 uniform float uTextureScale;  // 1.0 / textureScale for texture coordinate scaling
+uniform vec2 uTextureScroll;
 uniform bool uHasNormals;     // Whether HD lighting normals are present
 
 // Lighting uniforms (used when uHasNormals is true).
@@ -56,7 +57,7 @@ void main() {
 
     vec3 color = aColor.rgb;
     vWorldXZ = aPosition.xz;
-    vTexCoord = aTexCoord * uTextureScale;
+    vTexCoord = aTexCoord * uTextureScale + uTextureScroll;
     vFogFactor = 1.0;
     if (uRawColorDebug == 1) {
         vColor = vec4(color, aColor.a);
