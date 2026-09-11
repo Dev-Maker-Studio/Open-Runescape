@@ -132,9 +132,6 @@ class RemoteFileWorker(
     @Synchronized
     override fun requestArchive(archiveId: Int): ByteArray? {
         val fileRequest = request(archiveId, 0)
-        if (70291 == archiveId) {
-            println("[RemoteFileWorker] $archiveId - $fileRequest")
-        }
         if (fileRequest == null) {
             return null
         }
