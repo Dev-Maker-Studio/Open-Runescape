@@ -176,13 +176,11 @@ open class PcmPlayer {
             var activeVoiceCount = 0
             var priorityBitmask = 255
 
-            var priorityLevel: Int
+            var priorityLevel = 7
             var previousStream: PcmStream?
-            label107@ for (priorityLevel in 7 downTo 0) {
-                if (priorityBitmask == 0) break
-
-                val bucketIndex: Int
-                val voiceThreshold: Int
+            label107@ while (priorityBitmask != 0) {
+                var bucketIndex: Int
+                var voiceThreshold: Int
                 if (priorityLevel < 0) {
                     bucketIndex = priorityLevel and 0x3
                     voiceThreshold = -(priorityLevel shr 2)
@@ -248,8 +246,11 @@ open class PcmPlayer {
                         }
                     }
 
+                    bucketIndex += 4
+                    voiceThreshold++
                     bitmask = bitmask ushr 4
                 }
+                priorityLevel--
             }
 
             for (index in 0 until 8) {
