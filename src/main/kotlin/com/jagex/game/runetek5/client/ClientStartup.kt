@@ -463,7 +463,9 @@ object ClientStartup {
             if (CacheableDependencies.JACLIB.getDependency()!!.getCompletion() != 100) {
                 return 1
             }
-            if (!(CacheableDependencies.JACLIB.getDependency() as CacheableDLL).isReady()) {
+            if (!(CacheableDependencies.JACLIB.getDependency() as CacheableDLL).isReady() &&
+                !activeClient!!.jaclibLoaded
+            ) {
                 activeClient!!.startJaclib()
                 IcmpServiceJaclib.initialize()
                 try {
