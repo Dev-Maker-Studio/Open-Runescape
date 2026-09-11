@@ -1,25 +1,31 @@
 package com.jagex.game.runetek5.client.input.mouse
 
 import java.awt.Component
+import java.awt.Cursor
 import java.awt.Point
 import java.awt.Robot
 import java.awt.image.BufferedImage
 
 class CursorManager {
     @JvmField val positionManager: Robot = Robot()
+    private val argbCursors = X11ArgbCursors.createOrNull()
 
     fun moveToPosition(x: Int, y: Int) {
         positionManager.mouseMove(x, y)
     }
 
     fun setCustomCursor(component: Component, cursorPixelsRgb: IntArray?, width: Int, height: Int, hotspotPoint: Point) {
-        if (cursorPixelsRgb != null) {
-            val bufferedImage = BufferedImage(width, height, 2)
-            bufferedImage.setRGB(0, 0, width, height, cursorPixelsRgb, 0, width)
-            component.cursor = component.toolkit.createCustomCursor(bufferedImage, hotspotPoint, null)
-        } else {
-            component.cursor = null
+        val cursor = cursorPixelsRgb?.let {
+            argbCursors?.create(it, width, height, hotspotPoint) ?: createAwtCursor(component, it, width, height, hotspotPoint)
         }
+        component.cursor = cursor
+        argbCursors?.define(component, cursor)
+    }
+
+    private fun createAwtCursor(component: Component, argb: IntArray, width: Int, height: Int, hotspot: Point): Cursor {
+        val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        bufferedImage.setRGB(0, 0, width, height, argb, 0, width)
+        return component.toolkit.createCustomCursor(bufferedImage, hotspot, null)
     }
 
     companion object {

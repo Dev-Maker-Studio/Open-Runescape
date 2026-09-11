@@ -22,7 +22,7 @@ application {
     // render thread 35-45 ms every couple of seconds (visible hitches, worst while
     // rotating the camera). Generational ZGC keeps pauses under a millisecond.
     // IDE run configurations need the same VM options.
-    applicationDefaultJvmArgs = listOf("-XX:+UseZGC", "-Xmx4g", "-Xms1g")
+    applicationDefaultJvmArgs = listOf("-XX:+UseZGC", "-Xmx4g", "-Xms1g", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-exports=java.desktop/sun.awt.X11=ALL-UNNAMED")
 }
 
 // `./gradlew run -Dbot.enabled=true` sets the property on Gradle's own JVM, not on the
@@ -154,6 +154,8 @@ tasks {
         "Implementation-Title" to "Darkan client",
         "Implementation-Version" to project.version.toString(),
         "Git-Commit" to gitCommit,
+        "Add-Opens" to "java.desktop/java.awt",
+        "Add-Exports" to "java.desktop/sun.awt.X11",
     )
 
     jar {
