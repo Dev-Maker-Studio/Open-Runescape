@@ -6,7 +6,7 @@ import com.jagex.game.runetek5.preference.Preference
 
 /**
  * Preference for enabling asynchronous map loading on multi-core systems.
- * Requires an OpenGL toolkit (1 = GL LD, 5 = GL HD, 6 = Modern GL) and at least 2 CPU cores.
+ * Requires an OpenGL toolkit (1 = legacy GL, 3 = modern GL) and at least 2 CPU cores.
  *
  * @author Steven - 17/09/2023
  */
@@ -40,7 +40,7 @@ class AsyncMaploadingPreference : Preference {
             return 3
         }
         val toolkit = gamePreferences.toolkit!!.getValue()
-        return if (toolkit == 1 || toolkit == 5 || toolkit == 6) 1 else 3
+        return if (toolkit == ToolkitPreference.LEGACY_OPENGL || toolkit == ToolkitPreference.MODERN_OPENGL) 1 else 3
     }
 
     override fun setValue(value: Int) {
