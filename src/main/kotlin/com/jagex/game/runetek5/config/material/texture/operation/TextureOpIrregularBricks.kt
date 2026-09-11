@@ -179,7 +179,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
             } else {
                 cornerRadius = TextureRaster.currentWidth / 8 * offsetVariation shr 12
                 val maxSlotsPerRow = TextureRaster.currentWidth / minWidthPixels + 1
-                val currentRowSlots = Array(maxSlotsPerRow) { IntArray(3) }
+                var currentRowSlots = Array(maxSlotsPerRow) { IntArray(3) }
                 var prevRowSlots = Array(maxSlotsPerRow) { IntArray(3) }
                 val rng = Random(randomSeed.toLong())
                 while (true) {
@@ -277,7 +277,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                         newSlot[2] = brickHeight + brickStartY
                         val swapSlots = prevRowSlots
                         prevRowSlots = currentRowSlots
-                        val newCurrentSlots = swapSlots
+                        currentRowSlots = swapSlots
                         prevRowSlotCount = currentSlotCount
                         currentSlotCount = 0
                         prevPrevRowOffset = currentRowOffset
