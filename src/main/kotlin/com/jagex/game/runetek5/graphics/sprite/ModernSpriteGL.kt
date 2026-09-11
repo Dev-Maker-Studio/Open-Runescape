@@ -569,7 +569,8 @@ class ModernSpriteGL : SpriteGL {
                 x1, y1, 0f, texture2d.t, mu(x1), mv(y1),
                 x3, y3, 0f, 0f, mu(x3), mv(y3),
                 x4, y4, texture2d.s, 0f, mu(x4), mv(y4),
-                x2, y2, texture2d.s, texture2d.t, mu(x2), mv(y2)
+                x2, y2, texture2d.s, texture2d.t, mu(x2), mv(y2),
+                texture2d.linearTextureFilter
             )
         ) {
             modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(skipped)")

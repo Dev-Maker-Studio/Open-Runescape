@@ -2365,7 +2365,8 @@ class ModernGLToolkit(
         x0: Float, y0: Float, b0u: Float, b0v: Float, m0u: Float, m0v: Float,
         x1: Float, y1: Float, b1u: Float, b1v: Float, m1u: Float, m1v: Float,
         x2: Float, y2: Float, b2u: Float, b2v: Float, m2u: Float, m2v: Float,
-        x3: Float, y3: Float, b3u: Float, b3v: Float, m3u: Float, m3v: Float
+        x3: Float, y3: Float, b3u: Float, b3v: Float, m3u: Float, m3v: Float,
+        baseLinearFilter: Boolean? = null
     ): Boolean {
         val smr = surfaceMaskRenderer ?: return false
         if (!smr.isReady() || !canUseModernPipeline()) return false
@@ -2381,7 +2382,8 @@ class ModernGLToolkit(
             x0, y0, b0u, b0v, m0u, m0v,
             x1, y1, b1u, b1v, m1u, m1v,
             x2, y2, b2u, b2v, m2u, m2v,
-            x3, y3, b3u, b3v, m3u, m3v
+            x3, y3, b3u, b3v, m3u, m3v,
+            baseLinearFilter
         )
 
         // Raw GL state changed behind the legacy caches (shader, blend, textures on

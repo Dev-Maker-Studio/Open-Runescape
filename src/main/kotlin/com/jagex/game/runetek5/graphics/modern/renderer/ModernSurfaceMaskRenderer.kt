@@ -123,7 +123,8 @@ class ModernSurfaceMaskRenderer {
         x0: Float, y0: Float, b0u: Float, b0v: Float, m0u: Float, m0v: Float,
         x1: Float, y1: Float, b1u: Float, b1v: Float, m1u: Float, m1v: Float,
         x2: Float, y2: Float, b2u: Float, b2v: Float, m2u: Float, m2v: Float,
-        x3: Float, y3: Float, b3u: Float, b3v: Float, m3u: Float, m3v: Float
+        x3: Float, y3: Float, b3u: Float, b3v: Float, m3u: Float, m3v: Float,
+        baseLinearFilter: Boolean? = null
     ) {
         if (!isInitialized || baseHandle <= 0 || maskHandle <= 0) return
         val s = shader ?: return
@@ -146,6 +147,11 @@ class ModernSurfaceMaskRenderer {
 
         GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
         GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, baseHandle)
+        if (baseLinearFilter != null) {
+            val filter = if (baseLinearFilter) GL_LINEAR else GL_NEAREST
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter)
+        }
         GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + 1)
         GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, maskHandle)
         GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
