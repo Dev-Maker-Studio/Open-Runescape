@@ -336,19 +336,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             cutsceneArea = CutsceneTypeList.CUTSCENE_AREAS.next() as CutsceneArea?
         }
-        var mapIndex: Int = CUTSCENE_MAP_XTEAS!!.size
-        this.regionIds = IntArray(mapIndex)
-        this.surfaceMapArchives = IntArray(mapIndex)
-        this.surfaceLocArchives = IntArray(mapIndex)
-        this.npcSpawnArchives = IntArray(mapIndex) { -1 }
-        this.surfaceMapBuffer = arrayOfNulls<ByteArray>(mapIndex)
-        this.surfaceLocBuffer = arrayOfNulls<ByteArray>(mapIndex)
-        this.npcSpawnBuffer = arrayOfNulls(mapIndex)
-        this.underwaterMapArchives = IntArray(mapIndex)
-        this.underwaterLocArchives = IntArray(mapIndex)
-        this.underwaterMapBuffer = arrayOfNulls<ByteArray>(mapIndex)
-        this.underwaterLocBuffer = arrayOfNulls<ByteArray>(mapIndex)
-        mapIndex = 0
+        val cutsceneRegionIds = ArrayList<Int>()
         var area: CutsceneArea? = CutsceneTypeList.CUTSCENE_AREAS.getFirst() as CutsceneArea?
         while (area != null) {
             val chunkX: Int = area.regionX ushr 3
@@ -364,24 +352,39 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             regionYEnd = regionYEnd ushr 3
             for (regionX in (chunkX ushr 3)..regionXEnd) {
-                LoadMapArchives@ for (regionY in (chunkY ushr 3)..regionYEnd) {
+                for (regionY in (chunkY ushr 3)..regionYEnd) {
                     val regionId: Int = regionX shl 8 or regionY
-                    for (map in 0..<mapIndex) {
-                        if (regionId == this.regionIds[map]) {
-                            continue@LoadMapArchives
-                        }
+                    if (!cutsceneRegionIds.contains(regionId)) {
+                        cutsceneRegionIds.add(regionId)
                     }
-                    this.regionIds[mapIndex] = regionId
-                    this.surfaceMapArchives[mapIndex] = Resource.MAPS!!.getArchiveId(getArchiveName(true, false, regionX, regionY))
-                    this.surfaceLocArchives[mapIndex] = Resource.MAPS!!.getArchiveId(getArchiveName(false, false, regionX, regionY))
-                    this.underwaterMapArchives[mapIndex] = Resource.MAPS!!.getArchiveId(getArchiveName(true, true, regionX, regionY))
-                    this.underwaterLocArchives[mapIndex] = Resource.MAPS!!.getArchiveId(getArchiveName(false, true, regionX, regionY))
-                    mapIndex++
                 }
             }
             area = CutsceneTypeList.CUTSCENE_AREAS.next() as CutsceneArea?
         }
-        this.xteas = CUTSCENE_MAP_XTEAS!!
+        val mapCount: Int = cutsceneRegionIds.size
+        this.regionIds = IntArray(mapCount)
+        this.surfaceMapArchives = IntArray(mapCount)
+        this.surfaceLocArchives = IntArray(mapCount)
+        this.npcSpawnArchives = IntArray(mapCount) { -1 }
+        this.surfaceMapBuffer = arrayOfNulls<ByteArray>(mapCount)
+        this.surfaceLocBuffer = arrayOfNulls<ByteArray>(mapCount)
+        this.npcSpawnBuffer = arrayOfNulls(mapCount)
+        this.underwaterMapArchives = IntArray(mapCount)
+        this.underwaterLocArchives = IntArray(mapCount)
+        this.underwaterMapBuffer = arrayOfNulls<ByteArray>(mapCount)
+        this.underwaterLocBuffer = arrayOfNulls<ByteArray>(mapCount)
+        for (map in 0..<mapCount) {
+            val regionId: Int = cutsceneRegionIds[map]
+            val regionX: Int = regionId ushr 8
+            val regionY: Int = regionId and 0xFF
+            this.regionIds[map] = regionId
+            this.surfaceMapArchives[map] = Resource.MAPS!!.getArchiveId(getArchiveName(true, false, regionX, regionY))
+            this.surfaceLocArchives[map] = Resource.MAPS!!.getArchiveId(getArchiveName(false, false, regionX, regionY))
+            this.underwaterMapArchives[map] = Resource.MAPS!!.getArchiveId(getArchiveName(true, true, regionX, regionY))
+            this.underwaterLocArchives[map] = Resource.MAPS!!.getArchiveId(getArchiveName(false, true, regionX, regionY))
+        }
+        val receivedXteas: Array<IntArray> = CUTSCENE_MAP_XTEAS!!
+        this.xteas = Array(mapCount) { if (it < receivedXteas.size) receivedXteas[it] else IntArray(4) }
         CUTSCENE_MAP_XTEAS = null
         performUpdate(this.sceneSizeX shr 4, this.sceneSizeY shr 4, GameState.LOADING_PLEASE_WAIT, false)
     }
