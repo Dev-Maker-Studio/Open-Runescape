@@ -42,7 +42,7 @@ object PreferenceManager {
 
             prefs = GamePreferences(Packet(fsBytes), Client.CURRENT_GAME!!)
         } catch (exception: Exception) {
-            // NOOP
+            println("[PreferenceManager] stored preferences could not be read, using defaults: $exception")
         }
 
         try {
@@ -89,11 +89,11 @@ object PreferenceManager {
         var preferenceFile: JFS32? = null
 
         try {
-            preferenceFile = loadPreferenceFile("", Client.CURRENT_GAME!!.name, true)
             val preferenceBuffer = preferences!!.encode()
+            preferenceFile = loadPreferenceFile("", Client.CURRENT_GAME!!.name, true)
             preferenceFile.write(preferenceBuffer.buffer, 0, preferenceBuffer.currentPosition)
         } catch (exception: Exception) {
-            // NOOP
+            println("[PreferenceManager] preferences could not be saved: $exception")
         }
 
         try {
