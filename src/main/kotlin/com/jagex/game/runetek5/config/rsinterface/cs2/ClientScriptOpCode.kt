@@ -751,7 +751,7 @@ enum class ClientScriptOpCode(
     CAM_DEC_Y(8, familyId = 12),
     CAM_SETFOLLOWHEIGHT(155, familyId = 12),
     CAM_GETFOLLOWHEIGHT(931, familyId = 12),
-    COORD_CLAMPTOSCENE(722, familyId = 12),
+    CAM_FOLLOWCOORD(722, familyId = 12),
     CAM_RESET(396, familyId = 12), // reset cam shake?
     COORD_CLAMPTOSCENE_ORDEFAULT(365, familyId = 12),
     CAM_MODEISFOLLOWPLAYER(151, familyId = 13),
