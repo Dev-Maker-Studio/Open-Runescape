@@ -238,7 +238,7 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.CAM_DEC_Y -> camDecY()
             ClientScriptOpCode.CAM_SETFOLLOWHEIGHT -> camSetFollowHeight(exec)
             ClientScriptOpCode.CAM_GETFOLLOWHEIGHT -> camGetFollowHeight(exec)
-            ClientScriptOpCode.COORD_CLAMPTOSCENE -> coordClampToScene(exec)
+            ClientScriptOpCode.CAM_FOLLOWCOORD -> camFollowCoord(exec)
             ClientScriptOpCode.CAM_RESET -> camReset()
             ClientScriptOpCode.COORD_CLAMPTOSCENE_ORDEFAULT -> coordClampToSceneOrDefault(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by QuickChatDisplayOps")
@@ -663,7 +663,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun coordClampToScene(executor: CS2Executor) {
+    fun camFollowCoord(executor: CS2Executor) {
         val packedCoord = executor.intStack[--executor.intStackPtr]
         var sceneTileX = (packedCoord shr 14) and 0x3fff
         var sceneTileY = packedCoord and 0x3fff
