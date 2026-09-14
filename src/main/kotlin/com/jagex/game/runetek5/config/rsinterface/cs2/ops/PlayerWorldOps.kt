@@ -132,7 +132,7 @@ object PlayerWorldOps {
             ClientScriptOpCode.INV_GETNUM -> invGetnum(exec)
             ClientScriptOpCode.INV_TOTAL -> invTotal(exec)
             ClientScriptOpCode.INV_SIZE -> invSize(exec)
-            ClientScriptOpCode.INV_TOTALCAT -> invTotalCat(exec)
+            ClientScriptOpCode.INV_STOCKBASE -> invStockBase(exec)
             ClientScriptOpCode.STAT -> stat(exec)
             ClientScriptOpCode.STAT_BASE -> statBase(exec)
             ClientScriptOpCode.STAT_VISIBLE_XP -> statVisibleXp(exec)
@@ -145,7 +145,7 @@ object PlayerWorldOps {
             ClientScriptOpCode.INVOTHER_GETNUM -> invOtherGetnum(exec)
             ClientScriptOpCode.INVOTHER_TOTAL -> invOtherTotal(exec)
             ClientScriptOpCode.STAFFMODLEVEL -> staffModLevel(exec)
-            ClientScriptOpCode.GET_SYSTEM_UPDATE_TIMER -> getSystemUpdateTimer(exec)
+            ClientScriptOpCode.REBOOTTIMER -> rebootTimer(exec)
             ClientScriptOpCode.MAP_WORLD -> getWorldId(exec)
             ClientScriptOpCode.RUNENERGY_VISIBLE -> getRunEnergy(exec)
             ClientScriptOpCode.RUNWEIGHT_VISIBLE -> getRunWeight(exec)
@@ -453,7 +453,7 @@ object PlayerWorldOps {
     }
 
     @JvmStatic
-    fun invTotalCat(executor: CS2Executor) {
+    fun invStockBase(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val containerType: ItemContainerType? = TypeLists.CONTAINER!!.list(executor.intStack[executor.intStackPtr])
         val itemId = executor.intStack[executor.intStackPtr + 1]
@@ -478,7 +478,7 @@ object PlayerWorldOps {
     }
 
     @JvmStatic
-    fun getSystemUpdateTimer(executor: CS2Executor) {
+    fun rebootTimer(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = Client.REBOOT_TIMER
     }
 

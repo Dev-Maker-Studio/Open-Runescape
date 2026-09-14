@@ -153,13 +153,13 @@ object CoreVmOps {
             ClientScriptOpCode.POP_INT_DISCARD -> popInt(exec)
             ClientScriptOpCode.POP_STRING_DISCARD -> popString(exec)
             ClientScriptOpCode.GOSUB_WITH_PARAMS -> callCS2Script(exec)
-            ClientScriptOpCode.LOAD_VARC -> loadVarc(exec)
-            ClientScriptOpCode.STORE_VARC -> storeVarc(exec)
+            ClientScriptOpCode.PUSH_VARC_INT -> pushVarcInt(exec)
+            ClientScriptOpCode.POP_VARC_INT -> popVarcInt(exec)
             ClientScriptOpCode.DEFINE_ARRAY -> arrayNew(exec)
             ClientScriptOpCode.PUSH_ARRAY_INT -> arrayLoad(exec)
             ClientScriptOpCode.POP_ARRAY_INT -> arrayStore(exec)
-            ClientScriptOpCode.LOAD_VARC_STRING -> loadVarcString(exec)
-            ClientScriptOpCode.STORE_VARC_STRING -> storeVarcString(exec)
+            ClientScriptOpCode.PUSH_VARC_STRING -> pushVarcString(exec)
+            ClientScriptOpCode.POP_VARC_STRING -> popVarcString(exec)
             ClientScriptOpCode.SWITCH -> switchInstr(exec)
             ClientScriptOpCode.PUSH_LONG_CONSTANT -> pushLong(exec)
             ClientScriptOpCode.POP_LONG_DISCARD -> popLong(exec)
@@ -173,20 +173,20 @@ object CoreVmOps {
             ClientScriptOpCode.LONG_BRANCH_GREATER_THAN_OR_EQUALS -> longGreaterOrEqual(exec)
             ClientScriptOpCode.BRANCH_IF_TRUE -> branchEq1(exec)
             ClientScriptOpCode.BRANCH_IF_FALSE -> branchEq0(exec)
-            ClientScriptOpCode.LOAD_CLAN_VAR -> loadClanVar(exec)
-            ClientScriptOpCode.LOAD_CLAN_VARBIT -> loadClanVarbit(exec)
+            ClientScriptOpCode.PUSH_VARCLAN -> pushVarClan(exec)
+            ClientScriptOpCode.PUSH_VARCLANBIT -> pushVarClanBit(exec)
             ClientScriptOpCode.LOAD_CLAN_VAR_LONG -> loadClanVarLong(exec)
             ClientScriptOpCode.LOAD_CLAN_VAR_STRING -> loadClanVarString(exec)
-            ClientScriptOpCode.LOAD_CLAN_SETTING_VAR -> loadClanSettingVar(exec)
-            ClientScriptOpCode.LOAD_CLAN_SETTING_VARBIT -> loadClanSettingVarbit(exec)
-            ClientScriptOpCode.LOAD_CLAN_SETTING_VAR_LONG -> loadClanSettingVarLong(exec)
-            ClientScriptOpCode.LOAD_CLAN_SETTING_VAR_STRING -> loadClanSettingVarString(exec)
+            ClientScriptOpCode.PUSH_VARCLANSETTING -> pushVarClanSetting(exec)
+            ClientScriptOpCode.PUSH_VARCLANSETTINGBIT -> pushVarClanSettingBit(exec)
+            ClientScriptOpCode.PUSH_VARCLANSETTING_LONG -> pushVarClanSettingLong(exec)
+            ClientScriptOpCode.PUSH_VARCLANSETTING_STRING -> pushVarClanSettingString(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by CoreVmOps")
         }
     }
 
     @JvmStatic
-    fun loadClanVarbit(executor: CS2Executor) {
+    fun pushVarClanBit(executor: CS2Executor) {
         val clanVarId = executor.intOpValues!![executor.instrPtr]
         val clanVarType: ClanVarType? = TypeLists.CLAN_VAR!!.list(clanVarId)
         if (clanVarType!!.typeChar.code != 1) {
@@ -203,7 +203,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadClanSettingVarLong(executor: CS2Executor) {
+    fun pushVarClanSettingLong(executor: CS2Executor) {
         val value = executor.intOpValues!![executor.instrPtr]
         val longValue: Long? = executor.currentClanSettings!!.getLongVar((Client.CURRENT_GAME!!.id shl 16) or value)
         var result: Long = 0L
@@ -216,7 +216,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadClanSettingVarString(executor: CS2Executor) {
+    fun pushVarClanSettingString(executor: CS2Executor) {
         val value = executor.intOpValues!![executor.instrPtr]
         val stringValue: String? = executor.currentClanSettings!!.getStringVar((Client.CURRENT_GAME!!.id shl 16) or value)
         var result: String? = null
@@ -267,7 +267,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun storeVarc(executor: CS2Executor) {
+    fun popVarcInt(executor: CS2Executor) {
         val value = executor.intOpValues!![executor.instrPtr]
         VarcTypeList.VARC_INT!![value] = executor.intStack[--executor.intStackPtr]
         PulseEventQueue.delayedClientvarcUpdate(value)
@@ -288,7 +288,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun storeVarcString(executor: CS2Executor) {
+    fun popVarcString(executor: CS2Executor) {
         val value = executor.intOpValues!![executor.instrPtr]
         VarcTypeList.VARC_STRING!![value] = executor.stringStack[--executor.stringStackPtr] as String?
         PulseEventQueue.delayedVarcstringUpdate(value)
@@ -346,7 +346,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadVarc(executor: CS2Executor) {
+    fun pushVarcInt(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = VarcTypeList.VARC_INT!![executor.intOpValues!![executor.instrPtr]]
     }
 
@@ -372,7 +372,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadClanSettingVarbit(executor: CS2Executor) {
+    fun pushVarClanSettingBit(executor: CS2Executor) {
         val settingId = executor.intOpValues!![executor.instrPtr]
         val clanVarSettingsType: ClanVarSettingsType? = TypeLists.CLAN_VAR_SETTINGS!!.list(settingId)
         if (clanVarSettingsType == null) {
@@ -390,7 +390,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadVarcString(executor: CS2Executor) {
+    fun pushVarcString(executor: CS2Executor) {
         var text: String? = VarcTypeList.VARC_STRING!![executor.intOpValues!![executor.instrPtr]]
         if (text == null) {
             text = ""
@@ -541,7 +541,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadClanSettingVar(executor: CS2Executor) {
+    fun pushVarClanSetting(executor: CS2Executor) {
         val settingId = executor.intOpValues!![executor.instrPtr]
         val clanVarSettingsType: ClanVarSettingsType? = TypeLists.CLAN_VAR_SETTINGS!!.list(settingId)
         if (clanVarSettingsType == null) {
@@ -563,7 +563,7 @@ object CoreVmOps {
     }
 
     @JvmStatic
-    fun loadClanVar(executor: CS2Executor) {
+    fun pushVarClan(executor: CS2Executor) {
         val param = executor.intOpValues!![executor.instrPtr]
         val intValue: Int? = ClanVarTypeList.CLAN_VARS!![param] as Int?
         if (intValue == null) {

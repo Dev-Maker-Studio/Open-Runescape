@@ -136,7 +136,7 @@ object WorldMapUserDetailOps {
             ClientScriptOpCode.IF_DEBUG_GETCOMCOUNT -> ifDebugGetComCount(exec)
             ClientScriptOpCode.IF_DEBUG_GETCOMNAME -> ifDebugGetComName(exec)
             ClientScriptOpCode.IF_DEBUG_GETSERVERTRIGGERS -> ifDebugGetServerTriggers(exec)
-            ClientScriptOpCode.instr6386 -> noop()
+            ClientScriptOpCode.NOOP -> noop()
             ClientScriptOpCode.IF_DEBUG_BUTTON1 -> ifButton1(exec)
             ClientScriptOpCode.IF_DEBUG_BUTTON2 -> ifButton2(exec)
             ClientScriptOpCode.IF_DEBUG_BUTTON3 -> ifButton3(exec)
@@ -150,7 +150,7 @@ object WorldMapUserDetailOps {
             ClientScriptOpCode.IF_DEBUG_TARGET -> ifButtonT(exec)
             ClientScriptOpCode.OPCOUNT -> opcount(exec)
             ClientScriptOpCode.MEC_TEXT -> mecText(exec)
-            ClientScriptOpCode.MEC_SPRITE -> mecSprite(exec)
+            ClientScriptOpCode.MEC_GRAPHIC -> mecGraphic(exec)
             ClientScriptOpCode.MEC_TEXTSIZE -> mecTextSize(exec)
             ClientScriptOpCode.MEC_CATEGORY -> mecCategory(exec)
             ClientScriptOpCode.MEC_PARAM -> getWorldMapParam(exec)
@@ -170,36 +170,36 @@ object WorldMapUserDetailOps {
             ClientScriptOpCode.USERDETAIL_LOBBY_JCOINS_BALANCE -> getJcoins(exec)
             ClientScriptOpCode.USERDETAIL_LOBBY_LOYALTY_ENABLED -> userDetailLobbyLoyaltyEnabled(exec)
             ClientScriptOpCode.USERDETAIL_LOBBY_LOYALTY_BALANCE -> userDetailLobbyLoyaltyBalance(exec)
-            ClientScriptOpCode.CHOOSE_RENDER_TYPE_ENTER -> enterDisplaymode(exec)
+            ClientScriptOpCode.AUTOSETUP_DOSETUP -> enterDisplaymode(exec)
             ClientScriptOpCode.AUTOSETUP_SETHIGH -> autoSetupSetHigh()
             ClientScriptOpCode.AUTOSETUP_SETMEDIUM -> autoSetupSetMedium()
             ClientScriptOpCode.AUTOSETUP_SETLOW -> autoSetupSetlow()
             ClientScriptOpCode.AUTOSETUP_SETMIN -> autoSetupSetmin()
-            ClientScriptOpCode.DETAIL_GRAPHICS -> detailGraphics()
-            ClientScriptOpCode.CHANGE_RENDER_APPLY -> computeGraphicsMode()
-            ClientScriptOpCode.DETAILGET_GRAPHICS -> detailGetGraphics(exec)
+            ClientScriptOpCode.AUTOSETUP_SETCUSTOM -> autoSetupSetCustom()
+            ClientScriptOpCode.AUTOSETUP_BLACKFLAGLAST -> computeGraphicsMode()
+            ClientScriptOpCode.AUTOSETUP_GETLEVEL -> autoSetupGetLevel(exec)
             ClientScriptOpCode.SOUND_VORBIS_PRELOAD -> soundVorbisPreload(exec)
             ClientScriptOpCode.SOUND_VORBIS_STOP -> soundVorbisStop(exec)
             ClientScriptOpCode.SOUND_VORBIS_PLAY -> soundVorbisPlay(exec)
-            ClientScriptOpCode.instr6863 -> videoAdvertHasFinished(exec)
-            ClientScriptOpCode.BROWSER_AGECHECK -> browserAgeCheck(exec)
-            ClientScriptOpCode.BROWSER_REFRESH -> browserRefresh()
-            ClientScriptOpCode.BROWSER_FOCUS -> browserFocus()
-            ClientScriptOpCode.BROWSER_ISSUPPORTED -> browserIsSupported(exec)
-            ClientScriptOpCode.BROWSER_ISPAGEOPEN -> browserIsPageOpen(exec)
-            ClientScriptOpCode.BROWSER_HASPLUGIN -> browserHasPlugin(exec)
-            ClientScriptOpCode.BROWSER_SETPAGE -> browserSetPage(exec)
+            ClientScriptOpCode.VIDEOADVERT_ISSUPPORTED -> videoAdvertIsSupported(exec)
+            ClientScriptOpCode.VIDEO_ADVERT_PLAY -> videoAdvertPlay(exec)
+            ClientScriptOpCode.VIDEO_ADVERT_FORCE_REMOVE -> videoAdvertForceRemove()
+            ClientScriptOpCode.VIDEO_ADVERT_ALLOW_SKIP -> videoAdvertAllowSkip()
+            ClientScriptOpCode.VIDEO_ADVERT_HAS_FINISHED -> videoAdvertHasFinished(exec)
+            ClientScriptOpCode.BOOST_ADVERT_EXISTS -> boostAdvertExists(exec)
+            ClientScriptOpCode.BOOST_ADVERT_AVAILABLE -> boostAdvertAvailable(exec)
+            ClientScriptOpCode.BOOST_ADVERT_LAUNCH -> boostAdvertLaunch(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by WorldMapUserDetailOps")
         }
     }
 
     @JvmStatic
-    fun browserSetPage(executor: CS2Executor) {
+    fun boostAdvertLaunch(executor: CS2Executor) {
         val pageUrl: String? = executor.stringStack[--executor.stringStackPtr] as String?
     }
 
     @JvmStatic
-    fun mecSprite(executor: CS2Executor) {
+    fun mecGraphic(executor: CS2Executor) {
         val mecId = executor.intStack[--executor.intStackPtr]
         val mecType: MECType? = TypeLists.MEC!!.list(mecId)
         executor.intStack[++executor.intStackPtr - 1] = mecType!!.defaultIconArchive
@@ -232,7 +232,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun browserAgeCheck(executor: CS2Executor) {
+    fun videoAdvertPlay(executor: CS2Executor) {
         val ageCheckPassed = false
         val age = executor.intStack[--executor.intStackPtr]
         executor.intStack[++executor.intStackPtr - 1] = if (ageCheckPassed) 1  else 0
@@ -285,7 +285,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun browserHasPlugin(executor: CS2Executor) {
+    fun boostAdvertAvailable(executor: CS2Executor) {
         val hasPlugin = false
         val pluginName: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStack[++executor.intStackPtr - 1] = if (hasPlugin) 1  else 0
@@ -355,7 +355,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun browserIsPageOpen(executor: CS2Executor) {
+    fun boostAdvertExists(executor: CS2Executor) {
         val isPageOpen = true
         val pageUrl: String? = executor.stringStack[--executor.stringStackPtr] as String?
         executor.intStack[++executor.intStackPtr - 1] = if (isPageOpen) 1  else 0
@@ -422,7 +422,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun detailGraphics() {
+    fun autoSetupSetCustom() {
         PreferenceManager.preferences!!.graphics!!.setValue(0)
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
@@ -463,7 +463,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun detailGetGraphics(executor: CS2Executor) {
+    fun autoSetupGetLevel(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.graphics!!.getValue()
     }
 
@@ -609,7 +609,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun browserRefresh() {
+    fun videoAdvertForceRemove() {
     }
 
     @JvmStatic
@@ -622,12 +622,12 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun videoAdvertHasFinished(executor: CS2Executor) {
+    fun videoAdvertIsSupported(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Resource.NATIVE_LIBRARY_LOADER!!.isJagtheoraLoaded()) 1  else 0
     }
 
     @JvmStatic
-    fun browserFocus() {
+    fun videoAdvertAllowSkip() {
     }
 
     @JvmStatic
@@ -652,7 +652,7 @@ object WorldMapUserDetailOps {
     }
 
     @JvmStatic
-    fun browserIsSupported(executor: CS2Executor) {
+    fun videoAdvertHasFinished(executor: CS2Executor) {
         val isSupported = true
         executor.intStack[++executor.intStackPtr - 1] = if (isSupported) 1  else 0
     }

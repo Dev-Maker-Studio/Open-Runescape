@@ -140,26 +140,26 @@ object InterfaceQueryOps {
             ClientScriptOpCode.IF_GETTEXT -> getCompText(exec)
             ClientScriptOpCode.IF_GETSCROLLWIDTH -> ifGetScrollWidth(exec)
             ClientScriptOpCode.IF_GETSCROLLHEIGHT -> ifGetScrollHeight(exec)
-            ClientScriptOpCode.IF_GETSPRITESCALE -> ifGetSpriteScale(exec)
-            ClientScriptOpCode.IF_GETSPRITEPITCH -> ifGetSpritePitch(exec)
-            ClientScriptOpCode.IF_GETSPRITEYAW -> ifGetSpriteYaw(exec)
-            ClientScriptOpCode.IF_GETSPRITEROLL -> ifGetSpriteRoll(exec)
+            ClientScriptOpCode.IF_GETMODELZOOM -> ifGetModelZoom(exec)
+            ClientScriptOpCode.IF_GETMODELANGLE_X -> ifGetModelAngleX(exec)
+            ClientScriptOpCode.IF_GETMODELANGLE_Z -> ifGetModelAngleZ(exec)
+            ClientScriptOpCode.IF_GETMODELANGLE_Y -> ifGetModelAngleY(exec)
             ClientScriptOpCode.IF_GETTRANS -> ifGetTransparency(exec)
-            ClientScriptOpCode.IF_GETOFFSETX -> ifGetOffsetX(exec)
-            ClientScriptOpCode.IF_GETOFFSETY -> ifGetOffsetY(exec)
+            ClientScriptOpCode.IF_GETMODELXOF -> ifGetModelXof(exec)
+            ClientScriptOpCode.IF_GETMODELYOF -> ifGetModelYof(exec)
             ClientScriptOpCode.IF_GETGRAPHIC -> ifGetGraphic(exec)
             ClientScriptOpCode.IF_GET2DANGLE -> ifGetAngle2D(exec)
             ClientScriptOpCode.IF_GETMODEL -> ifGetModel(exec)
             ClientScriptOpCode.IF_GETFONTGRAPHIC -> ifGetFontGraphic(exec)
             ClientScriptOpCode.IF_GETGRAPHICDIMENSIONS -> ifGetGraphicDimensions(exec)
             ClientScriptOpCode.IF_GETFONTMETRICS -> ifGetFontMetrics(exec)
-            ClientScriptOpCode.IF_GETCONTAINERITEMID -> ifGetContainerItemId(exec)
-            ClientScriptOpCode.IF_GETITEMSTACKSIZE -> ifGetItemStackSize(exec)
-            ClientScriptOpCode.IF_ISSUBOPEN -> ifGetSubId(exec)
-            ClientScriptOpCode.IF_GETSUBCOUNT -> ifGetSubCount(exec)
-            ClientScriptOpCode.IF_ISOPEN -> ifIsopen(exec)
-            ClientScriptOpCode.CC_ISOPEN -> ccIsopen(exec)
-            ClientScriptOpCode.IF_GETOPTIONFLAGS -> ifGetOptionFlags(exec)
+            ClientScriptOpCode.IF_GETINVOBJECT -> ifGetInvObject(exec)
+            ClientScriptOpCode.IF_GETINVCOUNT -> ifGetInvCount(exec)
+            ClientScriptOpCode.IF_HASSUB -> ifGetSubId(exec)
+            ClientScriptOpCode.IF_GETNEXTSUBID -> ifGetNextSubId(exec)
+            ClientScriptOpCode.IF_HASSUBMODAL -> ifHasSubModal(exec)
+            ClientScriptOpCode.IF_HASSUBOVERLAY -> ifHasSubOverlay(exec)
+            ClientScriptOpCode.IF_GETTARGETMASK -> ifGetTargetMask(exec)
             ClientScriptOpCode.IF_GETOP -> ifGetOp(exec)
             ClientScriptOpCode.IF_GETOPBASE -> ifGetOpBase(exec)
             ClientScriptOpCode.IF_CALLONRESIZE -> ifCallonresize(exec)
@@ -186,7 +186,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ccIsopen(executor: CS2Executor) {
+    fun ifHasSubOverlay(executor: CS2Executor) {
         isInterfaceOpen(executor)
     }
 
@@ -254,7 +254,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetSpriteScale(executor: CS2Executor) {
+    fun ifGetModelZoom(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
@@ -270,7 +270,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetItemStackSize(executor: CS2Executor) {
+    fun ifGetInvCount(executor: CS2Executor) {
         val component: Component? = Component.fromHash(executor.intStack[--executor.intStackPtr])
         assert(component != null)
         if (component!!.containerItemId != -1) {
@@ -281,7 +281,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetOffsetX(executor: CS2Executor) {
+    fun ifGetModelXof(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
@@ -319,7 +319,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetSpriteYaw(executor: CS2Executor) {
+    fun ifGetModelAngleZ(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(value)
         assert(component != null)
@@ -359,7 +359,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetSubCount(executor: CS2Executor) {
+    fun ifGetNextSubId(executor: CS2Executor) {
         val component: Component? = Component.fromHash(executor.intStack[--executor.intStackPtr])
         assert(component != null)
         if (component!!.slotChildren == null) {
@@ -439,7 +439,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetContainerItemId(executor: CS2Executor) {
+    fun ifGetInvObject(executor: CS2Executor) {
         val component: Component? = Component.fromHash(executor.intStack[--executor.intStackPtr])
         assert(component != null)
         executor.intStack[++executor.intStackPtr - 1] = component!!.containerItemId
@@ -524,12 +524,12 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifIsopen(executor: CS2Executor) {
+    fun ifHasSubModal(executor: CS2Executor) {
         isInterfaceOpen(executor)
     }
 
     @JvmStatic
-    fun ifGetOptionFlags(executor: CS2Executor) {
+    fun ifGetTargetMask(executor: CS2Executor) {
         val componentHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
@@ -537,7 +537,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetSpriteRoll(executor: CS2Executor) {
+    fun ifGetModelAngleY(executor: CS2Executor) {
         val componentHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
@@ -566,7 +566,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetSpritePitch(executor: CS2Executor) {
+    fun ifGetModelAngleX(executor: CS2Executor) {
         val componentHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(componentHash)
         assert(component != null)
@@ -590,7 +590,7 @@ object InterfaceQueryOps {
     }
 
     @JvmStatic
-    fun ifGetOffsetY(executor: CS2Executor) {
+    fun ifGetModelYof(executor: CS2Executor) {
         val componentHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(componentHash)
         assert(component != null)

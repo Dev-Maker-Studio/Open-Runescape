@@ -128,44 +128,44 @@ object CameraLoginPrefOps {
     @JvmStatic
     fun dispatch(operation: ClientScriptOpCode, exec: CS2Executor) {
         when (operation) {
-            ClientScriptOpCode.CAM_MODEISFOLLOWPLAYER -> camModeIsFollowPlayer(exec)
+            ClientScriptOpCode.CAM2_ISENABLED -> cam2IsEnabled(exec)
             ClientScriptOpCode.LOGIN_REQUEST -> loginRequest(exec)
             ClientScriptOpCode.LOGIN_CONTINUE -> loginContinue()
             ClientScriptOpCode.LOGIN_RESETREPLY -> loginResetReply()
-            ClientScriptOpCode.SEND_VERIFY_EMAIL_PACKET -> sendVerifyEmailPacket(exec)
-            ClientScriptOpCode.SEND_SIGNUP_FORM_PACKET -> sendSignupFormPacket(exec)
-            ClientScriptOpCode.LOGIN_STARTGAME -> loginStartGame()
+            ClientScriptOpCode.CREATE_AVAILABLEREQUEST -> createAvailableRequest(exec)
             ClientScriptOpCode.CREATE_CREATEREQUEST -> createCreateRequest(exec)
-            ClientScriptOpCode.instr6699 -> loginReplyWorldAlt(exec)
-            ClientScriptOpCode.LOGIN_QUEUE_POSITION -> loginGetQueuePosition(exec)
-            ClientScriptOpCode.CREATE_GET_EMAIL -> createGetEmail(exec)
-            ClientScriptOpCode.CREATE_EMAIL_VALIDATE_REPLY -> createEmailValidateReply(exec)
+            ClientScriptOpCode.CREATE_CONNECTREQUEST -> createConnectRequest()
+            ClientScriptOpCode.CREATE_STEP_REACHED -> createStepReached(exec)
+            ClientScriptOpCode.LOGIN_REPLY_WORLD_ALT -> loginReplyWorldAlt(exec)
+            ClientScriptOpCode.LOGIN_HOPTIME -> loginHopTime(exec)
             ClientScriptOpCode.CREATE_REPLY -> createReply(exec)
-            ClientScriptOpCode.LOGIN_REPLY -> loginReply(exec)
-            ClientScriptOpCode.LOGIN_RETURNTOLOGINSCREEN -> loginReturnToLoginScreen()
-            ClientScriptOpCode.LOGIN_REPLY_WORLD -> loginReplyWorld(exec)
-            ClientScriptOpCode.LOGIN_SWITCHWORLD -> loginSwitchWorld(exec)
-            ClientScriptOpCode.LOGOUT -> opLogout()
-            ClientScriptOpCode.LOGIN_REPLY_LOBBY -> loginReplyLobby(exec)
-            ClientScriptOpCode.HAS_BASE64URL -> hasBase64Url(exec)
-            ClientScriptOpCode.GETMACHINEUID -> getMachineUid(exec)
+            ClientScriptOpCode.CREATE_EMAIL_VALIDATE_REPLY -> createEmailValidateReply(exec)
+            ClientScriptOpCode.CREATE_CONNECT_REPLY -> createConnectReply(exec)
+            ClientScriptOpCode.LOGIN_DISALLOWRESULT -> loginDisallowResult(exec)
+            ClientScriptOpCode.LOBBY_ENTERGAME -> lobbyEnterGame()
+            ClientScriptOpCode.LOBBY_ENTERGAMEREPLY -> lobbyEnterGameReply(exec)
+            ClientScriptOpCode.LOBBY_ENTERLOBBY -> lobbyEnterLobby(exec)
+            ClientScriptOpCode.LOBBY_LEAVELOBBY -> lobbyLeaveLobby()
+            ClientScriptOpCode.LOBBY_ENTERLOBBYREPLY -> lobbyEnterLobbyReply(exec)
+            ClientScriptOpCode.HAS_SIGNONKEY -> hasSignOnKey(exec)
+            ClientScriptOpCode.USERFLOWFLAGS -> userFlowFlags(exec)
             ClientScriptOpCode.CREATE_UNDER13 -> createUnder13(exec)
-            ClientScriptOpCode.CREATE_STEP_REACHED -> createStepReached()
-            ClientScriptOpCode.LOGIN_DISCONNECT_REPLY -> loginDisconnectReply(exec)
+            ClientScriptOpCode.CREATE_SETUNDER13 -> createSetUnder13()
+            ClientScriptOpCode.LOGIN_LAST_TRANSFER_REPLY -> loginLastTransferReply(exec)
             ClientScriptOpCode.LOGIN_INPROGRESS -> loginInProgress(exec)
-            ClientScriptOpCode.LOGIN_HANDSHAKE_CODE -> loginHandshakeCode(exec)
+            ClientScriptOpCode.LOGIN_QUEUE_POSITION -> loginQueuePosition(exec)
             ClientScriptOpCode.LOGIN_CANCEL -> loginCancel()
             ClientScriptOpCode.LOGIN_REQUEST_SOCIAL_NETWORK -> loginRequestSocialNetwork(exec)
-            ClientScriptOpCode.LOGIN_SWITCHTOWORLD -> loginSwitchToWorld(exec)
-            ClientScriptOpCode.LOGIN_REPLY_EXTRAINFO -> loginReplyExtraInfo(exec)
-            ClientScriptOpCode.GETCUSTOMSTRINGPARAM -> getCustomStringParam(exec)
+            ClientScriptOpCode.LOBBY_ENTERLOBBY_SOCIAL_NETWORK -> lobbyEnterLobbySocialNetwork(exec)
+            ClientScriptOpCode.LOGIN_DISALLOWTRIGGER -> loginDisallowTrigger(exec)
+            ClientScriptOpCode.CREATE_GET_EMAIL -> createGetEmail(exec)
             ClientScriptOpCode.DETAIL_BRIGHTNESS -> detailBrightness(exec)
             ClientScriptOpCode.DETAIL_REMOVEROOFS_OPTION -> detailRemoveRoofsOption(exec)
             ClientScriptOpCode.DETAIL_GROUNDDECOR_ON -> detailGrounddecorOn(exec)
             ClientScriptOpCode.DETAIL_IDLEANIMS_MANY -> detailIdleAnimsMany(exec)
             ClientScriptOpCode.DETAIL_FLICKERING_ON -> detailFlickeringOn(exec)
             ClientScriptOpCode.DETAIL_SPOTSHADOWS_ON -> detailSpotshadowsOn(exec)
-            ClientScriptOpCode.DETAIL_SCENERYSHADOWS -> detailSceneryShadows(exec)
+            ClientScriptOpCode.DETAIL_HARDSHADOWS -> detailHardShadows(exec)
             ClientScriptOpCode.DETAIL_LIGHTDETAIL_HIGH -> detailLightDetailHigh(exec)
             ClientScriptOpCode.DETAIL_WATERDETAIL_HIGH -> detailWaterDetailHigh(exec)
             ClientScriptOpCode.DETAIL_FOG_ON -> detailFog(exec)
@@ -179,54 +179,54 @@ object CameraLoginPrefOps {
             ClientScriptOpCode.DETAIL_ANTIALIASING_DEFAULT -> saveAntiAliasingPreference(exec)
             ClientScriptOpCode.DETAIL_BUILDAREA -> detailBuildArea(exec)
             ClientScriptOpCode.DETAIL_BLOOM -> setBloom(exec)
-            ClientScriptOpCode.DETAIL_CUSTOMCURSOR -> detailCustomCursor(exec)
+            ClientScriptOpCode.DETAIL_CUSTOMCURSORS -> detailCustomCursors(exec)
             ClientScriptOpCode.DETAIL_IDLEANIMS -> detailIdleAnims(exec)
             ClientScriptOpCode.DETAIL_GROUNDBLENDING -> detailGroundBlending(exec)
-            ClientScriptOpCode.CHANGE_RENDER -> changeRender(exec)
             ClientScriptOpCode.DETAIL_TOOLKIT -> detailToolkit(exec)
-            ClientScriptOpCode.DETAIL_CPU -> detailCpu(exec)
-            ClientScriptOpCode.DETAIL_TEXTURES -> detailTextures(exec)
+            ClientScriptOpCode.DETAIL_TOOLKIT_DEFAULT -> detailToolkitDefault(exec)
+            ClientScriptOpCode.DETAIL_CPUUSAGE -> detailCpuUsage(exec)
+            ClientScriptOpCode.DETAIL_TEXTURING -> detailTexturing(exec)
             ClientScriptOpCode.DETAIL_MAXSCREENSIZE -> detailMaxScreenSize(exec)
-            ClientScriptOpCode.DETAIL_VOICEOVERVOLUME -> detailVoiceOverVolume(exec)
+            ClientScriptOpCode.DETAIL_SPEECHVOL -> detailSpeechVol(exec)
             ClientScriptOpCode.DETAIL_LOGINVOL -> detailLoginVol(exec)
-            ClientScriptOpCode.DETAIL_GAMETIPSTARTSTAGEPREFERENCE -> detailGametipStartStagePreference(exec)
-            ClientScriptOpCode.DETAIL_SKYBOXES -> detailSkyboxes(exec)
+            ClientScriptOpCode.DETAIL_LOADINGSCREENTYPE -> detailLoadingScreenType(exec)
+            ClientScriptOpCode.DETAIL_SKYDETAIL -> detailSkyDetail(exec)
             ClientScriptOpCode.DETAILGET_BRIGHTNESS -> detailGetBrightness(exec)
             ClientScriptOpCode.DETAILGET_REMOVEROOFS_OPTION -> detailGetRemoveRoofsOption(exec)
             ClientScriptOpCode.DETAILGET_GROUNDDECOR_ON -> detailGetGrounddecorOn(exec)
-            ClientScriptOpCode.DETAILGET_IDLEANIMS -> detailGetIdleAnims(exec)
+            ClientScriptOpCode.DETAILGET_IDLEANIMS_MANY -> detailGetIdleAnimsMany(exec)
             ClientScriptOpCode.DETAILGET_FLICKERING_ON -> detailGetFlickeringOn(exec)
             ClientScriptOpCode.DETAILGET_SPOTSHADOWS_ON -> detailGetSpotshadowsOn(exec)
-            ClientScriptOpCode.DETAILGET_SCENERYSHADOWS -> detailGetSceneryShadows(exec)
+            ClientScriptOpCode.DETAILGET_HARDSHADOWS -> detailGetHardShadows(exec)
             ClientScriptOpCode.DETAILGET_LIGHTDETAIL_HIGH -> detailGetLightDetailHigh(exec)
             ClientScriptOpCode.DETAILGET_WATERDETAIL_HIGH -> getWaterPreference(exec)
             ClientScriptOpCode.DETAILGET_FOG_ON -> pushFogPreference(exec)
-            ClientScriptOpCode.DETAILGET_ANTIALIASINGPREVIEW -> detailGetAntialiasingPreview(exec)
-            ClientScriptOpCode.DETAILGET_STEREO -> detailGetStereo(exec)
-            ClientScriptOpCode.DETAILGET_SOUNDEFFECTVOLUME -> detailGetSoundEffectVolume(exec)
-            ClientScriptOpCode.DETAILGET_MUSICVOL -> detailGetMusicVolume(exec)
-            ClientScriptOpCode.DETAILGET_AMBIENTSOUNDVOLUME -> detailGetAmbientSoundVolume(exec)
-            ClientScriptOpCode.DETAILGET_PARTICLES -> detailGetParticles(exec)
             ClientScriptOpCode.DETAILGET_ANTIALIASING -> detailGetAntialiasing(exec)
-            ClientScriptOpCode.DETAILGET_MAPSIZE -> detailGetMapSize(exec)
+            ClientScriptOpCode.DETAILGET_STEREO -> detailGetStereo(exec)
+            ClientScriptOpCode.DETAILGET_SOUNDVOL -> detailGetSoundVol(exec)
+            ClientScriptOpCode.DETAILGET_MUSICVOL -> detailGetMusicVolume(exec)
+            ClientScriptOpCode.DETAILGET_BGSOUNDVOL -> detailGetBgSoundVol(exec)
+            ClientScriptOpCode.DETAILGET_PARTICLES -> detailGetParticles(exec)
+            ClientScriptOpCode.DETAILGET_ANTIALIASING_DEFAULT -> detailGetAntialiasingDefault(exec)
+            ClientScriptOpCode.DETAILGET_BUILDAREA -> detailGetBuildArea(exec)
             ClientScriptOpCode.DETAILGET_BLOOM -> detailGetBloom(exec)
             ClientScriptOpCode.DETAILGET_CUSTOMCURSORS -> detailGetCustomCursors(exec)
-            ClientScriptOpCode.DETAILGET_IDLEANIMS_MANY -> detailGetIdleAnimsMany(exec)
+            ClientScriptOpCode.DETAILGET_IDLEANIMS -> detailGetIdleAnims(exec)
             ClientScriptOpCode.DETAILGET_GROUNDBLENDING -> detailGetGroundBlending(exec)
-            ClientScriptOpCode.DETAILGET_ACTIVETOOLKIT -> detailGetActiveToolkit(exec)
             ClientScriptOpCode.DETAILGET_TOOLKIT -> detailGetToolkit(exec)
-            ClientScriptOpCode.DETAILGET_CPU -> detailGetCpu(exec)
-            ClientScriptOpCode.DETAILGET_TEXTURING -> detailGetTexturing(exec)
+            ClientScriptOpCode.DETAILGET_TOOLKIT_DEFAULT -> detailGetToolkitDefault(exec)
             ClientScriptOpCode.DETAILGET_CPUUSAGE -> detailGetCpuUsage(exec)
+            ClientScriptOpCode.DETAILGET_TEXTURING -> detailGetTexturing(exec)
+            ClientScriptOpCode.PROFILE_TOOLKIT -> profileToolkit(exec)
             ClientScriptOpCode.DETAILGET_MAXSCREENSIZE -> detailGetMaxScreenSize(exec)
-            ClientScriptOpCode.DETAILGET_VOICEOVERVOLUME -> detailGetVoiceOverVolume(exec)
-            ClientScriptOpCode.DETAILGET_SOUNDLEVEL -> detailGetSoundLevel(exec)
-            ClientScriptOpCode.DETAIL_GET_FORCED_SAFEMODE -> detailGetForcedSafeMode(exec)
-            ClientScriptOpCode.DETAILGET_GAMETIPSTARTSTAGEPREFERENCE -> detailGetGameTipStartStagePreference(exec)
+            ClientScriptOpCode.DETAILGET_SPEECHVOL -> detailGetSpeechVol(exec)
+            ClientScriptOpCode.DETAILGET_LOGINVOL -> detailGetLoginVol(exec)
+            ClientScriptOpCode.DETAILGET_SAFEMODE -> detailGetSafeMode(exec)
+            ClientScriptOpCode.DETAILGET_LOADINGSCREENTYPE -> detailGetLoadingScreenType(exec)
             ClientScriptOpCode.DETAILGET_DEFAULTTOOLKIT -> detailGetDefaultToolkit(exec)
-            ClientScriptOpCode.DETAIL_GET_TOOLKIT_DEFAULT -> detailGetToolkitDefault(exec)
-            ClientScriptOpCode.DETAIL_GET_STARTUP_SAFEMODE -> detailGetStartupSafemode(exec)
-            ClientScriptOpCode.DETAILGET_SKYBOXES -> detailGetSkyboxes(exec)
+            ClientScriptOpCode.DETAILGET_CANCHOOSESAFEMODE -> detailGetCanChooseSafeMode(exec)
+            ClientScriptOpCode.DETAILGET_CHOSESAFEMODE -> detailGetChoseSafeMode(exec)
+            ClientScriptOpCode.DETAILGET_SKYDETAIL -> detailGetSkyDetail(exec)
             ClientScriptOpCode.VIEWPORT_SETFOV -> viewportSetFov(exec)
             ClientScriptOpCode.VIEWPORT_SETZOOM -> viewportSetZoom(exec)
             ClientScriptOpCode.VIEWPORT_CLAMPFOV -> viewportClampFov(exec)
@@ -243,10 +243,10 @@ object CameraLoginPrefOps {
             ClientScriptOpCode.WORLDLIST_FETCH -> worldlistFetch(exec)
             ClientScriptOpCode.WORLDLIST_START -> worldlistStart(exec)
             ClientScriptOpCode.WORLDLIST_NEXT -> worldlistNext(exec)
-            ClientScriptOpCode.SETGAMEHOST -> opSetGameHost(exec)
+            ClientScriptOpCode.WORLDLIST_SWITCH -> worldListSwitch(exec)
             ClientScriptOpCode.WORLDLIST_SPECIFIC -> worldlistSpecific(exec)
             ClientScriptOpCode.WORLDLIST_SORT -> worldlistSort(exec)
-            ClientScriptOpCode.PREPAREGAMEHOST -> prepareGameHost()
+            ClientScriptOpCode.WORLDLIST_AUTOWORLD -> worldListAutoWorld()
             else -> throw IllegalStateException("opcode $operation is not handled by CameraLoginPrefOps")
         }
     }
@@ -265,7 +265,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGametipStartStagePreference(executor: CS2Executor) {
+    fun detailLoadingScreenType(executor: CS2Executor) {
         var stage = executor.intStack[--executor.intStackPtr]
         if (stage > 255 || stage < 0) {
             stage = 0
@@ -278,22 +278,22 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginStartGame() {
+    fun createConnectRequest() {
         GameState.startGameLogin()
     }
 
     @JvmStatic
-    fun createStepReached() {
+    fun createSetUnder13() {
         Client.hasJustCreatedAccount = true
     }
 
     @JvmStatic
-    fun detailGetMapSize(executor: CS2Executor) {
+    fun detailGetBuildArea(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.mapSize!!.getValue()
     }
 
     @JvmStatic
-    fun detailGetSoundEffectVolume(executor: CS2Executor) {
+    fun detailGetSoundVol(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.soundEffectVolume!!.getValue()
     }
 
@@ -305,12 +305,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetAntialiasing(executor: CS2Executor) {
+    fun detailGetAntialiasingDefault(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.antiAliasing!!.getValue()
     }
 
     @JvmStatic
-    fun detailCustomCursor(executor: CS2Executor) {
+    fun detailCustomCursors(executor: CS2Executor) {
         PreferenceManager.preferences!!.customCursor!!.setValue(if (executor.intStack[--executor.intStackPtr] != 0) 1 else 0)
         PreferenceManager.savePreferences()
     }
@@ -323,12 +323,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetStartupSafemode(executor: CS2Executor) {
+    fun detailGetChoseSafeMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Client.safemodeForcedDuringStartup) 1  else 0
     }
 
     @JvmStatic
-    fun detailTextures(executor: CS2Executor) {
+    fun detailTexturing(executor: CS2Executor) {
         PreferenceManager.preferences!!.textures!!.setValue(if (executor.intStack[--executor.intStackPtr] == 1) 1 else 0)
         PreferenceManager.savePreferences()
         GraphicsCache.resetGraphicCaches()
@@ -344,7 +344,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetSceneryShadows(executor: CS2Executor) {
+    fun detailGetHardShadows(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.sceneryShadows!!.getValue()
     }
 
@@ -356,12 +356,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetIdleAnimsMany(executor: CS2Executor) {
+    fun detailGetIdleAnims(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.idleAnimations!!.getValue()
     }
 
     @JvmStatic
-    fun detailGetIdleAnims(executor: CS2Executor) {
+    fun detailGetIdleAnimsMany(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.idleAnimations!!.getValue()
     }
 
@@ -371,12 +371,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun opLogout() {
+    fun lobbyLeaveLobby() {
         Client.logout(false)
     }
 
     @JvmStatic
-    fun opSetGameHost(executor: CS2Executor) {
+    fun worldListSwitch(executor: CS2Executor) {
         val world = executor.intStack[--executor.intStackPtr]
         val host: String? = executor.stringStack[--executor.stringStackPtr] as String?
         if (Client.gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress()) {
@@ -387,12 +387,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetSoundLevel(executor: CS2Executor) {
+    fun detailGetLoginVol(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.soundLevel!!.getValue()
     }
 
     @JvmStatic
-    fun loginReplyLobby(executor: CS2Executor) {
+    fun lobbyEnterLobbyReply(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lobbyLoginResponse
     }
 
@@ -426,7 +426,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetActiveToolkit(executor: CS2Executor) {
+    fun detailGetToolkit(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.activeToolkit!!.getValue()
     }
 
@@ -446,7 +446,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun createGetEmail(executor: CS2Executor) {
+    fun createReply(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = currentCreateAccountRequest()!!.getValue()
     }
 
@@ -457,12 +457,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun createCreateRequest(executor: CS2Executor) {
+    fun createStepReached(executor: CS2Executor) {
         PacketEncoder.sendAccountCreationStage(executor.intStack[--executor.intStackPtr])
     }
 
     @JvmStatic
-    fun detailGetSkyboxes(executor: CS2Executor) {
+    fun detailGetSkyDetail(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.skyboxes!!.getValue()
     }
 
@@ -489,7 +489,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetVoiceOverVolume(executor: CS2Executor) {
+    fun detailGetSpeechVol(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.voiceOverVolume!!.getValue()
     }
 
@@ -536,12 +536,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginReplyWorld(executor: CS2Executor) {
+    fun lobbyEnterGameReply(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldLoginResponse
     }
 
     @JvmStatic
-    fun loginSwitchWorld(executor: CS2Executor) {
+    fun lobbyEnterLobby(executor: CS2Executor) {
         executor.stringStackPtr -= 2
         val username: String? = executor.stringStack[executor.stringStackPtr] as String?
         val password: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
@@ -549,7 +549,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetToolkitDefault(executor: CS2Executor) {
+    fun detailGetCanChooseSafeMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (SystemInfo.SYSTEM_INFO!!.ram >= 512 && !Client.isForcedSafemode) 1 else 0
     }
 
@@ -567,7 +567,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginSwitchToWorld(executor: CS2Executor) {
+    fun lobbyEnterLobbySocialNetwork(executor: CS2Executor) {
         val worldId = executor.intStack[--executor.intStackPtr]
         StaticMethods.switchToWorldLogin(worldId)
     }
@@ -580,7 +580,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailSceneryShadows(executor: CS2Executor) {
+    fun detailHardShadows(executor: CS2Executor) {
         PreferenceManager.preferences!!.sceneryShadows!!.setValue(executor.intStack[--executor.intStackPtr])
         Resource.mapRegion!!.reload()
         PreferenceManager.savePreferences()
@@ -610,7 +610,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailCpu(executor: CS2Executor) {
+    fun detailCpuUsage(executor: CS2Executor) {
         PreferenceManager.preferences!!.cpu!!.setValue(executor.intStack[--executor.intStackPtr])
         PreferenceManager.savePreferences()
     }
@@ -622,7 +622,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetAntialiasingPreview(executor: CS2Executor) {
+    fun detailGetAntialiasing(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.antiAliasingPreview!!.getValue()
     }
 
@@ -647,7 +647,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetCpuUsage(executor: CS2Executor) {
+    fun profileToolkit(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = DisplayModeDetails.getProfilingPerformance(PreferenceManager.preferences!!.activeToolkit!!.getValue(), 200)
     }
 
@@ -683,7 +683,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun hasBase64Url(executor: CS2Executor) {
+    fun hasSignOnKey(executor: CS2Executor) {
         if (Client.base64Url != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
@@ -701,7 +701,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginGetQueuePosition(executor: CS2Executor) {
+    fun loginHopTime(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = LoginManager.loginQueuePosition
     }
 
@@ -763,14 +763,14 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailVoiceOverVolume(executor: CS2Executor) {
+    fun detailSpeechVol(executor: CS2Executor) {
         PreferenceManager.preferences!!.voiceOverVolume!!.setValue(executor.intStack[--executor.intStackPtr])
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
     }
 
     @JvmStatic
-    fun detailGetToolkit(executor: CS2Executor) {
+    fun detailGetToolkitDefault(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.toolkit!!.getValue()
     }
 
@@ -817,12 +817,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun prepareGameHost() {
+    fun worldListAutoWorld() {
         LoginManager.prepareHost()
     }
 
     @JvmStatic
-    fun loginHandshakeCode(executor: CS2Executor) {
+    fun loginQueuePosition(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.loginHandshakeCode
     }
 
@@ -833,12 +833,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetForcedSafeMode(executor: CS2Executor) {
+    fun detailGetSafeMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Client.isForcedSafemode) 1  else 0
     }
 
     @JvmStatic
-    fun detailToolkit(executor: CS2Executor) {
+    fun detailToolkitDefault(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val toolkitId = executor.intStack[executor.intStackPtr]
         val keepGraphicsPreset = executor.intStack[executor.intStackPtr + 1] == 1
@@ -851,13 +851,13 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun getMachineUid(executor: CS2Executor) {
+    fun userFlowFlags(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = (Client.machineUid shr 32).toInt()
         executor.intStack[++executor.intStackPtr - 1] = Client.machineUid.toInt()
     }
 
     @JvmStatic
-    fun detailGetCpu(executor: CS2Executor) {
+    fun detailGetCpuUsage(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.cpu!!.getValue()
     }
 
@@ -887,7 +887,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun sendVerifyEmailPacket(executor: CS2Executor) {
+    fun createAvailableRequest(executor: CS2Executor) {
         val email: String? = executor.stringStack[--executor.stringStackPtr] as String?
         PacketEncoder.sendCheckEmailPacket(email)
     }
@@ -918,7 +918,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetGameTipStartStagePreference(executor: CS2Executor) {
+    fun detailGetLoadingScreenType(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.gametipStartStagePreference!!.getValue()
     }
 
@@ -955,12 +955,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginReturnToLoginScreen() {
+    fun lobbyEnterGame() {
         LoginManager.returnToLoginScreen()
     }
 
     @JvmStatic
-    fun createReply(executor: CS2Executor) {
+    fun createConnectReply(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = AccountCreationResponseOpcodes.getReceivedResponse().getValue()
     }
 
@@ -974,7 +974,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailSkyboxes(executor: CS2Executor) {
+    fun detailSkyDetail(executor: CS2Executor) {
         val skyboxes = executor.intStack[--executor.intStackPtr]
         if (skyboxes != PreferenceManager.preferences!!.skyboxes!!.getValue()) {
             PreferenceManager.preferences!!.skyboxes!!.setValue(skyboxes)
@@ -989,7 +989,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginDisconnectReply(executor: CS2Executor) {
+    fun loginLastTransferReply(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectResponse
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectArg2
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectArg1
@@ -1044,7 +1044,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun changeRender(executor: CS2Executor) {
+    fun detailToolkit(executor: CS2Executor) {
         var toolkitId = executor.intStack[--executor.intStackPtr]
         if (toolkitId !in ToolkitPreference.AVAILABLE) {
             toolkitId = ToolkitPreference.SAFE_MODE
@@ -1066,7 +1066,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun getCustomStringParam(executor: CS2Executor) {
+    fun createGetEmail(executor: CS2Executor) {
         if (Client.customStringParam != null) {
             executor.stringStack[++executor.stringStackPtr - 1] = Client.customStringParam
         } else {
@@ -1088,12 +1088,12 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun loginReplyExtraInfo(executor: CS2Executor) {
+    fun loginDisallowTrigger(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = LoginManager.loginResponseExtraInfo
     }
 
     @JvmStatic
-    fun loginReply(executor: CS2Executor) {
+    fun loginDisallowResult(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = LoginManager.loginResponseDetail
     }
 
@@ -1103,7 +1103,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun camModeIsFollowPlayer(executor: CS2Executor) {
+    fun cam2IsEnabled(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (Camera.cameraCalculationType == 2) 1 else 0
     }
 
@@ -1113,7 +1113,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun sendSignupFormPacket(executor: CS2Executor) {
+    fun createCreateRequest(executor: CS2Executor) {
         executor.stringStackPtr -= 2
         executor.intStackPtr -= 2
         PacketEncoder.sendSignUpForm(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1] == 1)
@@ -1133,7 +1133,7 @@ object CameraLoginPrefOps {
     }
 
     @JvmStatic
-    fun detailGetAmbientSoundVolume(executor: CS2Executor) {
+    fun detailGetBgSoundVol(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.ambientSoundVolume!!.getValue()
     }
 

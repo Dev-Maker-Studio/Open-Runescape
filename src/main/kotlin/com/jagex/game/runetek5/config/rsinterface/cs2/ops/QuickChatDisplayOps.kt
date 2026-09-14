@@ -128,44 +128,44 @@ object QuickChatDisplayOps {
     @JvmStatic
     fun dispatch(operation: ClientScriptOpCode, exec: CS2Executor) {
         when (operation) {
-            ClientScriptOpCode.QC_GETNAME -> qcGetName(exec)
             ClientScriptOpCode.CHATCAT_GETDESC -> chatCatGetDesc(exec)
-            ClientScriptOpCode.CHATCAT_GETSUBCAT -> chatCatGetSubCat(exec)
             ClientScriptOpCode.CHATCAT_GETSUBCATCOUNT -> chatCatGetSubCatCount(exec)
-            ClientScriptOpCode.QC_GETMESSAGE -> qcGetMessage(exec)
+            ClientScriptOpCode.CHATCAT_GETSUBCAT -> chatCatGetSubCat(exec)
+            ClientScriptOpCode.CHATCAT_GETPHRASECOUNT -> chatCatGetPhraseCount(exec)
+            ClientScriptOpCode.CHATCAT_GETPHRASE -> chatCatGetPhrase(exec)
             ClientScriptOpCode.CHATPHRASE_GETTEXT -> chatPhraseGetText(exec)
             ClientScriptOpCode.CHATPHRASE_GETAUTORESPONSECOUNT -> chatPhraseGetAutoResponseCount(exec)
             ClientScriptOpCode.CHATPHRASE_GETAUTORESPONSE -> chatPhraseGetAutoResponse(exec)
-            ClientScriptOpCode.QC_SETMESSAGE -> qcSetMessage(exec)
-            ClientScriptOpCode.QC_SENDPUBLICMESSAGE -> qcSendPublicMessage(exec)
-            ClientScriptOpCode.QC_SENDPRIVATEMESSAGE -> qcSendPrivateMessage(exec)
-            ClientScriptOpCode.QC_SENDFRIENDSCHATMESSAGE -> qcSendFriendsChatMessage(exec)
-            ClientScriptOpCode.QC_GETSUBHOTKEY -> qcGetSubHotkey(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_PREPARE -> activeChatPhrasePrepare(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_SENDPUBLIC -> activeChatPhraseSendPublic(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_SENDPRIVATE -> activeChatPhraseSendPrivate(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_SENDCLAN -> activeChatPhraseSendClan(exec)
+            ClientScriptOpCode.CHATCAT_GETSUBCATSHORTCUT -> chatCatGetSubCatShortcut(exec)
             ClientScriptOpCode.CHATCAT_GETPHRASESHORTCUT -> chatCatGetPhraseShortcut(exec)
             ClientScriptOpCode.CHATCAT_FINDSUBCATBYSHORTCUT -> chatCatFindSubCatByShortcut(exec)
             ClientScriptOpCode.CHATCAT_FINDPHRASEBYSHORTCUT -> chatCatFindPhraseByShortcut(exec)
+            ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMANDCOUNT -> chatPhraseGetDynamicCommandCount(exec)
             ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMAND -> chatPhraseGetDynamicCommand(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_SETDYNAMICINT -> activeChatPhraseSetDynamicInt(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_SETDYNAMICOBJ -> activeChatPhraseSetDynamicObj(exec)
             ClientScriptOpCode.CHATPHRASE_GETDYNAMICCOMMANDPARAM_ENUM -> chatPhraseGetDynamicCommandParamEnum(exec)
-            ClientScriptOpCode.QC_SETVALUE -> qcSetValue(exec)
-            ClientScriptOpCode.QC_SETVALUE_ALT -> qcSetValueAlt(exec)
-            ClientScriptOpCode.QC_GETPHRASEVALUE -> qcGetPhraseValue(exec)
             ClientScriptOpCode.CHATPHRASE_FIND -> chatPhraseFind(exec)
             ClientScriptOpCode.CHATPHRASE_FINDNEXT -> chatPhraseFindnext(exec)
-            ClientScriptOpCode.instr6601 -> chatPhraseFindrestart()
-            ClientScriptOpCode.QC_SENDCLANCHATMESSAGE -> qcSendClanChatMessage(exec)
-            ClientScriptOpCode.QC_SENDGUESTCLANCHATMESSAGE -> qcSendGuestClanChatMessage(exec)
+            ClientScriptOpCode.CHATPHRASE_FINDRESTART -> chatPhraseFindrestart()
+            ClientScriptOpCode.ACTIVECHATPHRASE_SENDCLANCHANNEL_AFFINED -> activeChatPhraseSendClanChannelAffined(exec)
+            ClientScriptOpCode.ACTIVECHATPHRASE_SENDCLANCHANNEL_LISTENED -> activeChatPhraseSendClanChannelListened(exec)
+            ClientScriptOpCode.KEYHELD_ALT -> keyHeldAlt(exec)
             ClientScriptOpCode.KEYHELD_CTRL -> keyHeldCtrl(exec)
             ClientScriptOpCode.KEYHELD_SHIFT -> keyHeldShift(exec)
-            ClientScriptOpCode.KEYHELD_ALT -> keyHeldAlt(exec)
             ClientScriptOpCode.WORLDMAP_SETZOOM -> zoomWorldmap(exec)
             ClientScriptOpCode.WORLDMAP_GETZOOM -> worldMapGetZoom(exec)
             ClientScriptOpCode.WORLDMAP_SETMAP -> worldMapSetMap(exec)
             ClientScriptOpCode.WORLDMAP_GETMAP -> worldMapGetMap(exec)
             ClientScriptOpCode.WORLDMAP_GETMAPNAME -> worldMapGetMapName(exec)
-            ClientScriptOpCode.WORLDMAP_GETCONFIGSIZE -> worldMapGetConfigSize(exec)
+            ClientScriptOpCode.WORLDMAP_GETSIZE -> worldMapGetSize(exec)
             ClientScriptOpCode.WORLDMAP_GETDISPLAYPOSITION -> worldMapGetDisplayPosition(exec)
             ClientScriptOpCode.WORLDMAP_GETCONFIGORIGIN -> worldMapGetConfigOrigin(exec)
-            ClientScriptOpCode.WORLDMAP_GETSIZE -> worldMapGetSize(exec)
+            ClientScriptOpCode.WORLDMAP_GETCONFIGSIZE -> worldMapGetConfigSize(exec)
             ClientScriptOpCode.WORLDMAP_LISTELEMENT_START -> worldMapListElementStart(exec)
             ClientScriptOpCode.WORLDMAP_LISTELEMENT_NEXT -> worldMapListElementNext(exec)
             ClientScriptOpCode.WORLDMAP_JUMPTOSOURCECOORD -> worldMapJumpToSourceCoord(exec)
@@ -189,37 +189,37 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.WORLDMAP_GETCURRENTMAP -> worldMapGetCurrentMap(exec)
             ClientScriptOpCode.WORLDMAP_FINDNEARESTELEMENT -> worldMapFindNearestElement(exec)
             ClientScriptOpCode.WORLDMAP_CLOSEMAP -> worldmapCloseMap()
-            ClientScriptOpCode.FULLSCREEN -> fullscreen(exec)
-            ClientScriptOpCode.FULLSCREEN_RESTORE -> fullscreenRestore()
+            ClientScriptOpCode.FULLSCREEN_ENTER -> fullscreenEnter(exec)
+            ClientScriptOpCode.FULLSCREEN_EXIT -> fullscreenExit()
             ClientScriptOpCode.FULLSCREEN_MODECOUNT -> fullscreenModeCount(exec)
             ClientScriptOpCode.FULLSCREEN_GETMODE -> fullscreenGetMode(exec)
             ClientScriptOpCode.FULLSCREEN_LASTMODE -> fullscreenLastMode(exec)
-            ClientScriptOpCode.DETAIL_GET_WINDOWED_MODE -> detailGetWindowedMode(exec)
-            ClientScriptOpCode.CHOOSE_RENDER_TYPE -> chooseRenderType(exec)
-            ClientScriptOpCode.DETAILGET_FIXEDSCREEN -> detailGetFixedScreen(exec)
-            ClientScriptOpCode.DETAIL_SET_SCREENSIZE -> detailScreenSize(exec)
-            ClientScriptOpCode.OPENURL_NOLOGIN -> openUrlNoLogin(exec)
+            ClientScriptOpCode.GETWINDOWMODE -> getWindowMode(exec)
+            ClientScriptOpCode.SETWINDOWMODE -> setWindowMode(exec)
+            ClientScriptOpCode.GETDEFAULTWINDOWMODE -> getDefaultWindowMode(exec)
+            ClientScriptOpCode.SETDEFAULTWINDOWMODE -> setDefaultWindowMode(exec)
+            ClientScriptOpCode.OPENURL -> openUrl(exec)
             ClientScriptOpCode.SETRECOLPALETTE -> setRecolPalette(exec)
             ClientScriptOpCode.SPLINE_NEW -> splineNew(exec)
             ClientScriptOpCode.SPLINE_ADDPOINT -> splineSetPoint(exec)
             ClientScriptOpCode.SPLINE_LENGTH -> camGetSplineLength(exec)
-            ClientScriptOpCode.CLIENT_QUIT -> WindowMode.notifyError()
+            ClientScriptOpCode.QUIT -> WindowMode.notifyError()
             ClientScriptOpCode.GETHOSTNAME -> opGetHostName(exec)
-            ClientScriptOpCode.OPENURL_FULLSCREENSAFE -> openUrlFullscreenSafe(exec)
-            ClientScriptOpCode.CONSOLE_PRINT -> consolePrint(exec)
-            ClientScriptOpCode.SETUP_MENUCHROME -> setupMenuChrome(exec)
-            ClientScriptOpCode.RESET_CHATMEDIA -> resetChatMediaAndFont()
+            ClientScriptOpCode.OPENURL_NOLOGIN -> openUrlNoLogin(exec)
+            ClientScriptOpCode.WRITECONSOLE -> writeConsole(exec)
+            ClientScriptOpCode.FORMATMINIMENU -> formatMiniMenu(exec)
+            ClientScriptOpCode.DEFAULTMINIMENU -> resetChatMediaAndFont()
             ClientScriptOpCode.SETDEFAULTCURSORS -> setDefaultCursors(exec)
-            ClientScriptOpCode.POP_2_INT -> pop2Int(exec)
-            ClientScriptOpCode.IF_GETTOP -> ifGettop(exec)
+            ClientScriptOpCode.SETHARDCODEDOPCURSORS -> setHardcodedOpCursors(exec)
+            ClientScriptOpCode.MINIMENUOPEN -> miniMenuOpen(exec)
             ClientScriptOpCode.DOCHEAT -> doCheat(exec)
-            ClientScriptOpCode.BROWSER_CLOSE -> browserClose()
-            ClientScriptOpCode.BROWSER_OPEN -> browserOpen()
+            ClientScriptOpCode.NOTIFY_ACCOUNTCREATED -> notifyAccountCreated()
+            ClientScriptOpCode.NOTIFY_ACCOUNTCREATESTARTED -> notifyAccountCreateStarted()
             ClientScriptOpCode.GETCLIPBOARD -> getClipboard(exec)
             ClientScriptOpCode.MINIMENU_SETMAXENTRIES -> miniMenuSetMaxEntries(exec)
             ClientScriptOpCode.OPENURL_SHIM -> openUrlShim(exec)
             ClientScriptOpCode.IS_APPLET -> opIsApplet(exec)
-            ClientScriptOpCode.CHECK_JAVA_VERSION -> checkJavaVersion(exec)
+            ClientScriptOpCode.JAVA_VERSION_SUPPORTED -> javaVersionSupported(exec)
             ClientScriptOpCode.IS_GAMESCREEN_STATE -> isGameScreenState(exec)
             ClientScriptOpCode.GETPREFERENCEFILE -> getPreferenceFile(exec)
             ClientScriptOpCode.OPENDIRECTORYPICKER -> openDirectoryPicker(exec)
@@ -228,7 +228,7 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.CAM_MOVETO -> camMoveTo(exec)
             ClientScriptOpCode.CAM_LOOKAT -> camLookat(exec)
             ClientScriptOpCode.CAM_MOVEALONG -> camMoveAlong(exec)
-            ClientScriptOpCode.CAM_SMOOTHRESET -> camSmoothReset()
+            ClientScriptOpCode.CAM_RESET -> camReset()
             ClientScriptOpCode.CAM_FORCEANGLE -> camForceAngle(exec)
             ClientScriptOpCode.CAM_GETANGLE_XA -> camGetAngleXa(exec)
             ClientScriptOpCode.CAM_GETANGLE_YA -> camGetAngleYa(exec)
@@ -239,7 +239,7 @@ object QuickChatDisplayOps {
             ClientScriptOpCode.CAM_SETFOLLOWHEIGHT -> camSetFollowHeight(exec)
             ClientScriptOpCode.CAM_GETFOLLOWHEIGHT -> camGetFollowHeight(exec)
             ClientScriptOpCode.CAM_FOLLOWCOORD -> camFollowCoord(exec)
-            ClientScriptOpCode.CAM_RESET -> camReset()
+            ClientScriptOpCode.CAM_SMOOTHRESET -> camSmoothReset()
             ClientScriptOpCode.COORD_CLAMPTOSCENE_ORDEFAULT -> coordClampToSceneOrDefault(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by QuickChatDisplayOps")
         }
@@ -359,7 +359,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSendClanChatMessage(executor: CS2Executor) {
+    fun activeChatPhraseSendClanChannelAffined(executor: CS2Executor) {
         val connection: BufferedConnectionContext? = Client.connectionContext
         val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
         packet!!.buffer.writeByte(0)
@@ -372,7 +372,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun openUrlFullscreenSafe(executor: CS2Executor) {
+    fun openUrlNoLogin(executor: CS2Executor) {
         if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
         }
@@ -404,7 +404,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun chatCatGetDesc(executor: CS2Executor) {
+    fun chatCatGetSubCatCount(executor: CS2Executor) {
         val categoryId = executor.intStack[--executor.intStackPtr]
         val category: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId)
         if (category!!.subCategories == null) {
@@ -415,7 +415,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun detailGetWindowedMode(executor: CS2Executor) {
+    fun getWindowMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = WindowMode.getWindowMode()
     }
 
@@ -447,7 +447,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun detailGetFixedScreen(executor: CS2Executor) {
+    fun getDefaultWindowMode(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.fixedScreen!!.getValue()
     }
 
@@ -471,7 +471,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun chooseRenderType(executor: CS2Executor) {
+    fun setWindowMode(executor: CS2Executor) {
         val windowMode = executor.intStack[--executor.intStackPtr]
         if (windowMode >= 1 && windowMode <= 2) {
             WindowMode.requestWindowMode(windowMode, -1, -1, false)
@@ -484,7 +484,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSendFriendsChatMessage(executor: CS2Executor) {
+    fun activeChatPhraseSendClan(executor: CS2Executor) {
         val connection: BufferedConnectionContext? = Client.connectionContext
         val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
         packet!!.buffer.writeByte(0)
@@ -497,7 +497,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcGetSubHotkey(executor: CS2Executor) {
+    fun chatCatGetSubCatShortcut(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val categoryId = executor.intStack[executor.intStackPtr]
         val subCatIndex = executor.intStack[executor.intStackPtr + 1]
@@ -537,7 +537,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSendPublicMessage(executor: CS2Executor) {
+    fun activeChatPhraseSendPublic(executor: CS2Executor) {
         val connection: BufferedConnectionContext? = Client.connectionContext
         val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
         packet!!.buffer.writeByte(0)
@@ -627,7 +627,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun fullscreen(executor: CS2Executor) {
+    fun fullscreenEnter(executor: CS2Executor) {
         executor.intStackPtr -= 2
         if (WindowMode.fullScreenSupported) {
             executor.intStack[++executor.intStackPtr - 1] = if (WindowMode.fullScreenFrame != null) 1 else 0
@@ -637,13 +637,13 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun worldMapGetConfigSize(executor: CS2Executor) {
+    fun worldMapGetSize(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldMapViewWidth
         executor.intStack[++executor.intStackPtr - 1] = ComponentMinimap.mapViewportScale
     }
 
     @JvmStatic
-    fun fullscreenRestore() {
+    fun fullscreenExit() {
         if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
         }
@@ -712,7 +712,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun keyHeldShift(executor: CS2Executor) {
+    fun keyHeldCtrl(executor: CS2Executor) {
         if (KeyRecorder.keyRecorder!!.held(82)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
@@ -749,7 +749,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcGetMessage(executor: CS2Executor) {
+    fun chatCatGetPhrase(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val categoryId = executor.intStack[executor.intStackPtr]
         val messageIndex = executor.intStack[executor.intStackPtr + 1]
@@ -776,7 +776,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcGetPhraseValue(executor: CS2Executor) {
+    fun chatPhraseGetDynamicCommandParamEnum(executor: CS2Executor) {
         executor.intStackPtr -= 3
         val messageId = executor.intStack[executor.intStackPtr]
         val valueTypeIndex = executor.intStack[executor.intStackPtr + 1]
@@ -790,17 +790,17 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun camReset() {
+    fun camSmoothReset() {
         Camera.startSmoothTransition()
     }
 
     @JvmStatic
-    fun pop2Int(executor: CS2Executor) {
+    fun setHardcodedOpCursors(executor: CS2Executor) {
         executor.intStackPtr -= 2
     }
 
     @JvmStatic
-    fun qcSetValueAlt(executor: CS2Executor) {
+    fun activeChatPhraseSetDynamicObj(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val valueIndex = executor.intStack[executor.intStackPtr]
         val dynamicValue = executor.intStack[executor.intStackPtr + 1]
@@ -808,11 +808,11 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun browserClose() {
+    fun notifyAccountCreated() {
     }
 
     @JvmStatic
-    fun chatPhraseGetDynamicCommandParamEnum(executor: CS2Executor) {
+    fun chatPhraseGetDynamicCommand(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val messageId = executor.intStack[executor.intStackPtr]
         val valueTypeIndex = executor.intStack[executor.intStackPtr + 1]
@@ -841,11 +841,11 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun browserOpen() {
+    fun notifyAccountCreateStarted() {
     }
 
     @JvmStatic
-    fun chatPhraseGetDynamicCommand(executor: CS2Executor) {
+    fun chatPhraseGetDynamicCommandCount(executor: CS2Executor) {
         val messageId = executor.intStack[--executor.intStackPtr]
         executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId).getValueTypeCount()
     }
@@ -877,7 +877,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun ifGettop(executor: CS2Executor) {
+    fun miniMenuOpen(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val componentHash = executor.intStack[executor.intStackPtr]
         val slotId = executor.intStack[executor.intStackPtr + 1]
@@ -915,7 +915,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun keyHeldCtrl(executor: CS2Executor) {
+    fun keyHeldAlt(executor: CS2Executor) {
         if (KeyRecorder.keyRecorder!!.held(86)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
@@ -945,7 +945,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun chatCatGetSubCatCount(executor: CS2Executor) {
+    fun chatCatGetPhraseCount(executor: CS2Executor) {
         val categoryId = executor.intStack[--executor.intStackPtr]
         val category: QuickChatCategoryType? = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId)
         if (category!!.messages == null) {
@@ -956,7 +956,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcGetName(executor: CS2Executor) {
+    fun chatCatGetDesc(executor: CS2Executor) {
         val categoryId = executor.intStack[--executor.intStackPtr]
         executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_CATEGORY!!.list(categoryId).name
     }
@@ -967,7 +967,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSetValue(executor: CS2Executor) {
+    fun activeChatPhraseSetDynamicInt(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val valueIndex = executor.intStack[executor.intStackPtr]
         val dynamicValue = executor.intStack[executor.intStackPtr + 1]
@@ -975,7 +975,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSendGuestClanChatMessage(executor: CS2Executor) {
+    fun activeChatPhraseSendClanChannelListened(executor: CS2Executor) {
         val connection: BufferedConnectionContext? = Client.connectionContext
         val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, connection!!.isaac)
         packet!!.buffer.writeByte(0)
@@ -988,7 +988,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun consolePrint(executor: CS2Executor) {
+    fun writeConsole(executor: CS2Executor) {
         System.out.println(executor.stringStack[--executor.stringStackPtr])
     }
 
@@ -1006,7 +1006,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun checkJavaVersion(executor: CS2Executor) {
+    fun javaVersionSupported(executor: CS2Executor) {
         if (SystemInfo.SYSTEM_INFO!!.javaBuild < 6) {
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else if (SystemInfo.SYSTEM_INFO!!.javaBuild == 6 && SystemInfo.SYSTEM_INFO!!.javaUpdate < 10) {
@@ -1075,7 +1075,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun setupMenuChrome(executor: CS2Executor) {
+    fun formatMiniMenu(executor: CS2Executor) {
         executor.intStackPtr -= 12
         MiniMenu.close()
         StaticMedia.resetChatMedia()
@@ -1129,7 +1129,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun openUrlNoLogin(executor: CS2Executor) {
+    fun openUrl(executor: CS2Executor) {
         executor.stringStackPtr -= 2
         PacketEncoder.sendLobbyHyperlink(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, "", executor.intStack[--executor.intStackPtr] == 1, false)
     }
@@ -1140,7 +1140,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSendPrivateMessage(executor: CS2Executor) {
+    fun activeChatPhraseSendPrivate(executor: CS2Executor) {
         val recipientName: String? = executor.stringStack[--executor.stringStackPtr] as String?
         val connection: BufferedConnectionContext? = Client.connectionContext
         val packet: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PRIVATE, connection!!.isaac)
@@ -1154,7 +1154,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun keyHeldAlt(executor: CS2Executor) {
+    fun keyHeldShift(executor: CS2Executor) {
         if (KeyRecorder.keyRecorder!!.held(81)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
@@ -1212,7 +1212,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun qcSetMessage(executor: CS2Executor) {
+    fun activeChatPhrasePrepare(executor: CS2Executor) {
         executor.currentQuickChatMessage = QuickChatMessage()
         executor.currentQuickChatMessage!!.id = executor.intStack[--executor.intStackPtr]
         executor.currentQuickChatMessage!!.message = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(executor.currentQuickChatMessage!!.id)
@@ -1248,7 +1248,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun camSmoothReset() {
+    fun camReset() {
         Camera.smoothReset()
     }
 
@@ -1263,7 +1263,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun worldMapGetSize(executor: CS2Executor) {
+    fun worldMapGetConfigSize(executor: CS2Executor) {
         val elementId = executor.intStack[--executor.intStackPtr]
         val mapElement: WorldMapElement? = WorldMap.poll(elementId)
         if (mapElement == null) {
@@ -1304,7 +1304,7 @@ object QuickChatDisplayOps {
     }
 
     @JvmStatic
-    fun detailScreenSize(executor: CS2Executor) {
+    fun setDefaultWindowMode(executor: CS2Executor) {
         val windowMode = executor.intStack[--executor.intStackPtr]
         if (windowMode >= 1 && windowMode <= 2) {
             PreferenceManager.preferences!!.fixedScreen!!.setValue(windowMode)
