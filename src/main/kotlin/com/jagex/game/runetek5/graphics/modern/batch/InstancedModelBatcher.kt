@@ -1425,7 +1425,7 @@ class InstancedModelBatcher {
                     "incoming=${cachedModel.vertexCount}v/${cachedModel.materialBatches.size}batches) — re-appending")
             }
             cachedModel.instanceEntry = null
-            meshEntries.remove(modelId)
+            if (meshEntries[modelId] === entry) meshEntries.remove(modelId)
             val stale = entry
             val iterator = drawsByMaterial.entries.iterator()
             while (iterator.hasNext()) {
@@ -2676,6 +2676,12 @@ class InstancedModelBatcher {
     )
 
     fun destroy() {
+        for (entry in meshEntries.values) entry.resident = false
+        for (entry in activeEntries) entry.resident = false
+        meshEntries.clear()
+        activeEntries.clear()
+        drawsByMaterial.clear()
+        blockDraws.clear()
         shader?.destroy()
         vao?.destroy()
         vbo?.destroy()

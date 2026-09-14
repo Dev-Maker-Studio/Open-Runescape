@@ -405,6 +405,14 @@ class ModernGLToolkit(
 
     companion object {
         /**
+         * Source of per-instance geometry keys for animated models.
+         *
+         * Starts far above zero and only ever increases, so a key is never reused and
+         * never mistaken for "unassigned". Only the render thread assigns keys.
+         */
+        private var streamKeyCounter = 0x4000_0000_0000_0000L
+
+        /**
          * Runtime A/B switches for isolating which stage loses geometry, flipped by
          * the `render` console command. Each removes one suspect from the pipeline
          * without a rebuild, so a missing-geometry question can be bisected in a
@@ -4913,14 +4921,6 @@ class ModernGLToolkit(
     private var animatedGeometryRebuilt = false
 
     /**
-     * Source of per-instance geometry keys for animated models.
-     *
-     * Starts far above zero and only ever increases, so a key is never reused and
-     * never mistaken for "unassigned". Only the render thread assigns keys.
-     */
-    private var streamKeyCounter = 0x4000_0000_0000_0000L
-
-    /**
      * Resolves [model]'s entry in the shared content cache, remembering the result on
      * the model so an unchanged model skips the map lookup entirely.
      *
@@ -5494,6 +5494,7 @@ class ModernGLToolkit(
 
         instancedBatcher?.destroy()
         instancedBatcher = null
+        BufferStaging.destroy()
 
         modelCache?.clear()
         modelCache = null
