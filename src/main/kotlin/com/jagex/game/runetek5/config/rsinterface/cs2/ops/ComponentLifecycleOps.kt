@@ -130,8 +130,8 @@ object ComponentLifecycleOps {
             ClientScriptOpCode.CC_CREATE -> ccCreate(exec)
             ClientScriptOpCode.CC_DELETE -> ccDelete(exec)
             ClientScriptOpCode.CC_DELETEALL -> clearCompChildren(exec)
-            ClientScriptOpCode.CC_SETCHILD_SLOT -> ccSetChildSlot(exec)
-            ClientScriptOpCode.CC_SETCHILD -> ccSetChild(exec)
+            ClientScriptOpCode.CC_FIND -> ccFind(exec)
+            ClientScriptOpCode.IF_FIND -> ifFind(exec)
             ClientScriptOpCode.IF_SENDTOFRONT -> ifSetFront(true, exec)
             ClientScriptOpCode.IF_SENDTOBACK -> ifSetFront(false, exec)
             ClientScriptOpCode.CC_SENDTOFRONT -> ccSetFront(true, exec)
@@ -172,7 +172,7 @@ object ComponentLifecycleOps {
     }
 
     @JvmStatic
-    fun ccSetChildSlot(executor: CS2Executor) {
+    fun ccFind(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val idHash = executor.intStack[executor.intStackPtr]
         val slotId = executor.intStack[executor.intStackPtr + 1]
@@ -284,7 +284,7 @@ object ComponentLifecycleOps {
     }
 
     @JvmStatic
-    fun ccSetChild(executor: CS2Executor) {
+    fun ifFind(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {

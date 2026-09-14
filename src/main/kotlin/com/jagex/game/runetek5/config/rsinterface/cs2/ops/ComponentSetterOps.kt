@@ -162,8 +162,8 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETMAXLINES -> ccSetMaxLines(exec)
             ClientScriptOpCode.CC_SETPARAM_INT -> ccSetParamInt(exec)
             ClientScriptOpCode.CC_SETPARAM_STRING -> ccSetParamString(exec)
-            ClientScriptOpCode.instr6050 -> ccSetVideoSprite(exec)
-            ClientScriptOpCode.instr6051 -> ccSetVideoText(exec)
+            ClientScriptOpCode.CC_SETVIDEO_GRAPHIC -> ccSetVideoGraphic(exec)
+            ClientScriptOpCode.CC_SETVIDEO_TEXT -> ccSetVideoText(exec)
             ClientScriptOpCode.CC_SETRECOL -> ccSetRecol(exec)
             ClientScriptOpCode.CC_SETRETEX -> ccSetRetex(exec)
             ClientScriptOpCode.CC_SETFONTMONO -> ccSetfontMono(exec)
@@ -179,12 +179,12 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETMODELLIGHTING_SUNROTATION -> ccSetModelLightingSunRotation(exec)
             ClientScriptOpCode.CC_SETOBJECT_WEARCOL -> ccSetItemWearCol(exec)
             ClientScriptOpCode.CC_SETOBJECT_WEARCOL_NONUM -> ccSetItemWearColNoNum(exec)
-            ClientScriptOpCode.instr6895 -> ccSetModelItemContainer(exec)
+            ClientScriptOpCode.CC_SETMODEL_ITEMCONTAINER -> ccSetModelItemContainer(exec)
             ClientScriptOpCode.CC_SETPLAYERMODEL_SELF -> ccSetPlayerModelSelf(exec)
             ClientScriptOpCode.CC_SETOBJECT_ALWAYSNUM -> ccSetItemAlwaysNum(exec)
             ClientScriptOpCode.CC_SETOBJECT_WEARCOL_ALWAYSNUM -> ccSetItemWearColAlwaysNum(exec)
             ClientScriptOpCode.CC_SETOP -> ccSetop(exec)
-            ClientScriptOpCode.CC_SETDEPTHCHILD -> ccSetDepthChild(exec)
+            ClientScriptOpCode.CC_SETDRAGGABLE -> ccSetDraggable(exec)
             ClientScriptOpCode.CC_SETDRAGRENDERBEHAVIOUR -> ccSetDragRenderBehaviour(exec)
             ClientScriptOpCode.CC_SETDRAGDEADZONE -> ccSetDragDeadZone(exec)
             ClientScriptOpCode.CC_SETDRAGDEADTIME -> ccSetDragDeadTime(exec)
@@ -193,7 +193,7 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_CLEAROPS -> ccClearOps(exec)
             ClientScriptOpCode.CC_SETTARGETCURSORS -> ccSetTargetCursors(exec)
             ClientScriptOpCode.CC_SETOPCURSOR -> ccSetopCursor(exec)
-            ClientScriptOpCode.CC_SETRESUMETEXT -> ccSetResumeText(exec)
+            ClientScriptOpCode.CC_SETPAUSETEXT -> ccSetPauseText(exec)
             ClientScriptOpCode.CC_SETTARGETOPCURSOR -> ccSetTargetOpCursor(exec)
             ClientScriptOpCode.CC_SETOPCHAR -> ccSetopChar(exec)
             ClientScriptOpCode.CC_SETOPTCHAR -> ccSetopTChar(exec)
@@ -203,20 +203,20 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETONCLICK -> ccSetOnClick(exec)
             ClientScriptOpCode.CC_SETONHOLD -> ccSetOnHold(exec)
             ClientScriptOpCode.CC_SETONRELEASE -> ccSetOnRelease(exec)
-            ClientScriptOpCode.CC_HOOK_MOUSE_ENTER -> ccHookMouseEnter(exec)
-            ClientScriptOpCode.CC_HOOK_MOUSE_EXIT -> ccHookMouseExit(exec)
-            ClientScriptOpCode.CC_SETONDRAG -> ccSetOnDrag(exec)
-            ClientScriptOpCode.CC_SETONOP -> ccSetOnOp(exec)
-            ClientScriptOpCode.CC_SETONVARTRANSMIT -> ccSetOnVarTransmit(exec)
-            ClientScriptOpCode.CC_SETONTIMER -> ccSetOnTimer(exec)
-            ClientScriptOpCode.CC_SETONOPT -> ccSetOnOpt(exec)
-            ClientScriptOpCode.CC_SETONDRAGCOMPLETE -> ccSetOnDragComplete(exec)
-            ClientScriptOpCode.CC_SETONCLICKREPEAT -> ccSetOnClickRepeat(exec)
             ClientScriptOpCode.CC_SETONMOUSEOVER -> ccSetOnMouseOver(exec)
             ClientScriptOpCode.CC_SETONMOUSELEAVE -> ccSetOnMouseLeave(exec)
+            ClientScriptOpCode.CC_SETONDRAG -> ccSetOnDrag(exec)
+            ClientScriptOpCode.CC_SETONTARGETLEAVE -> ccSetOnTargetLeave(exec)
+            ClientScriptOpCode.CC_SETONVARTRANSMIT -> ccSetOnVarTransmit(exec)
+            ClientScriptOpCode.CC_SETONTIMER -> ccSetOnTimer(exec)
+            ClientScriptOpCode.CC_SETONOP -> ccSetOnOp(exec)
+            ClientScriptOpCode.CC_SETONDRAGCOMPLETE -> ccSetOnDragComplete(exec)
+            ClientScriptOpCode.CC_SETONCLICKREPEAT -> ccSetOnClickRepeat(exec)
+            ClientScriptOpCode.CC_SETONMOUSEREPEAT -> ccSetOnMouseRepeat(exec)
+            ClientScriptOpCode.CC_SETONINVTRANSMIT -> ccSetOnInvTransmit(exec)
             ClientScriptOpCode.CC_SETONSTATTRANSMIT -> ccSetOnStatTransmit(exec)
             ClientScriptOpCode.CC_SETONTARGETENTER -> ccSetOnTargetEnter(exec)
-            ClientScriptOpCode.CC_SETONMOUSEREPEAT -> ccSetOnMouseRepeat(exec)
+            ClientScriptOpCode.CC_SETONSCROLLWHEEL -> ccSetOnScrollWheel(exec)
             ClientScriptOpCode.CC_SETONCHATTRANSMIT -> ccSetOnChatTransmit(exec)
             ClientScriptOpCode.CC_SETONKEY -> ccSetOnKey(exec)
             ClientScriptOpCode.CC_SETONFRIENDTRANSMIT -> ccSetOnFriendTransmit(exec)
@@ -227,9 +227,9 @@ object ComponentSetterOps {
             ClientScriptOpCode.CC_SETONSTOCKTRANSMIT -> ccSetOnStocktransmit(exec)
             ClientScriptOpCode.CC_SETONCAMFINISHED -> ccSetOnCamfinished(exec)
             ClientScriptOpCode.CC_SETONRESIZE -> ccSetOnResize(exec)
-            ClientScriptOpCode.CC_SETONINVTRANSMIT -> ccSetOnInvTransmit(exec)
-            ClientScriptOpCode.CC_SETONSCROLLWHEEL -> ccSetOnScrollWheel(exec)
-            ClientScriptOpCode.CC_SETONTARGETLEAVE -> ccSetOnTargetLeave(exec)
+            ClientScriptOpCode.CC_SETONVARCTRANSMIT -> ccSetOnVarcTransmit(exec)
+            ClientScriptOpCode.CC_SETONVARCSTRTRANSMIT -> ccSetOnVarcStrTransmit(exec)
+            ClientScriptOpCode.CC_SETONOPT -> ccSetOnOpt(exec)
             ClientScriptOpCode.CC_SETONCLANSETTINGSTRANSMIT -> ccSetOnClanSettingsTransmit(exec)
             ClientScriptOpCode.CC_SETLINKACTIVECLANCHANNEL -> ccSetLinkActiveClanChannel(exec)
             ClientScriptOpCode.CC_SETONVARCLANTRANSMIT -> ccSetOnVarClanTransmit(exec)
@@ -364,7 +364,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnTargetLeave(executor: CS2Executor) {
+    fun ccSetOnOpt(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -372,7 +372,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccHookMouseExit(executor: CS2Executor) {
+    fun ccSetOnMouseLeave(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -404,7 +404,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetVideoSprite(executor: CS2Executor) {
+    fun ccSetVideoGraphic(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -618,7 +618,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnOp(executor: CS2Executor) {
+    fun ccSetOnTargetLeave(executor: CS2Executor) {
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {
             target = executor.hookedInterface2
@@ -668,7 +668,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnOpt(executor: CS2Executor) {
+    fun ccSetOnOp(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -726,7 +726,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnInvTransmit(executor: CS2Executor) {
+    fun ccSetOnVarcTransmit(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -768,7 +768,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetDepthChild(executor: CS2Executor) {
+    fun ccSetDraggable(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -852,7 +852,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetResumeText(executor: CS2Executor) {
+    fun ccSetPauseText(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -908,7 +908,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnMouseRepeat(executor: CS2Executor) {
+    fun ccSetOnScrollWheel(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -980,7 +980,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnMouseOver(executor: CS2Executor) {
+    fun ccSetOnMouseRepeat(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -1012,7 +1012,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnMouseLeave(executor: CS2Executor) {
+    fun ccSetOnInvTransmit(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -1033,7 +1033,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccHookMouseEnter(executor: CS2Executor) {
+    fun ccSetOnMouseOver(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
@@ -1083,7 +1083,7 @@ object ComponentSetterOps {
     }
 
     @JvmStatic
-    fun ccSetOnScrollWheel(executor: CS2Executor) {
+    fun ccSetOnVarcStrTransmit(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter

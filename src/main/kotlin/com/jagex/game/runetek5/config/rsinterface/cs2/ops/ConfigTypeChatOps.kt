@@ -149,7 +149,7 @@ object ConfigTypeChatOps {
             ClientScriptOpCode.ITEM_FIND_PARAMSTR -> itemFindParamStr(exec)
             ClientScriptOpCode.OC_MINIMENU_COLOUR_OVERRIDDEN -> ocMiniMenuColourOverridden(exec)
             ClientScriptOpCode.OC_MINIMENU_COLOUR -> ocMiniMenuColour(exec)
-            ClientScriptOpCode.NPC_PARAM -> getNPCParam(exec)
+            ClientScriptOpCode.NC_PARAM -> ncParam(exec)
             ClientScriptOpCode.OBJECT_PARAM -> getObjectParam(exec)
             ClientScriptOpCode.STRUCT_PARAM -> getStructParam(exec)
             ClientScriptOpCode.SEQ_PARAM -> getAnimationParam(exec)
@@ -160,23 +160,23 @@ object ConfigTypeChatOps {
             ClientScriptOpCode.CHAT_GETFILTER_PUBLIC -> setPublicFilter(exec)
             ClientScriptOpCode.CHAT_SETFILTER -> ChatBox.setFilter(exec)
             ClientScriptOpCode.CHAT_SENDABUSEREPORT -> sendReportAbusePacket(exec)
-            ClientScriptOpCode.CHAT_GETBYLINE -> chatGetByline(exec)
-            ClientScriptOpCode.CHAT_GETTYPEBYLINE -> chatGetTypeByline(exec)
+            ClientScriptOpCode.CHAT_GETHISTORYMESSAGE -> chatGetHistoryMessage(exec)
+            ClientScriptOpCode.CHAT_GETHISTORYTYPE -> chatGetHistoryType(exec)
             ClientScriptOpCode.CHAT_GETFILTER_PRIVATE -> setPrivateFilter(exec)
             ClientScriptOpCode.CHAT_SETMODE -> chatSetMode(exec)
             ClientScriptOpCode.CHAT_SENDPUBLIC -> chatSendPublic(exec)
             ClientScriptOpCode.CHAT_SENDPRIVATE -> chatSendPrivate(exec)
-            ClientScriptOpCode.CHATLINE_GETCROWNEDNAME -> chatlineGetCrownedName(exec)
-            ClientScriptOpCode.CHAT_GETCLAN -> chatGetClan(exec)
-            ClientScriptOpCode.CHATLINE_GETQUICKCHATID -> chatlineGetQuickchatId(exec)
-            ClientScriptOpCode.CHAT_PLAYERNAME -> chatPlayerName(exec)
+            ClientScriptOpCode.CHAT_GETHISTORYNAME -> chatGetHistoryName(exec)
+            ClientScriptOpCode.CHAT_GETHISTORYCLAN -> chatGetHistoryClan(exec)
+            ClientScriptOpCode.CHAT_GETHISTORYPHRASE -> chatGetHistoryPhrase(exec)
+            ClientScriptOpCode.CHAT_PLAYERNAME_UNFILTERED -> chatPlayerNameUnfiltered(exec)
             ClientScriptOpCode.CHAT_GETFILTER_TRADE -> setTradeFilter(exec)
             ClientScriptOpCode.CHAT_GETHISTORYLENGTH -> chatGetHistoryLength(exec)
             ClientScriptOpCode.CHATLINE_GETEFFECTFLAGS -> chatlineGeteffectflags(exec)
-            ClientScriptOpCode.CHATLINE_GETNAME -> chatlineGetName(exec)
-            ClientScriptOpCode.GETMYDISPLAYNAME -> getMyDisplayname(exec)
+            ClientScriptOpCode.UNKNOWN_COMMAND_5019 -> unknownCommand5019(exec)
+            ClientScriptOpCode.CHAT_PLAYERNAME -> chatPlayerName(exec)
             ClientScriptOpCode.CHATLINE_GETUID -> chatlineGetUid(exec)
-            ClientScriptOpCode.CHATLINE_GETCYCLES20MS -> chatLineGetCycles20Ms(exec)
+            ClientScriptOpCode.CHAT_GETPREVUID -> chatGetPrevUid(exec)
             ClientScriptOpCode.CHATLINE_GETSIMPLENAME -> chatlineGetSimpleName(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by ConfigTypeChatOps")
         }
@@ -188,7 +188,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatGetTypeByline(executor: CS2Executor) {
+    fun chatGetHistoryType(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var type = -1
@@ -208,7 +208,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatPlayerName(executor: CS2Executor) {
+    fun chatPlayerNameUnfiltered(executor: CS2Executor) {
         var name: String? = null
         if (PlayerUpdate.MY_PLAYER != null && PlayerUpdate.MY_PLAYER!!.username != null) {
             name = PlayerUpdate.MY_PLAYER!!.getUsernameWithTitle()
@@ -219,7 +219,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatlineGetQuickchatId(executor: CS2Executor) {
+    fun chatGetHistoryPhrase(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var quickchatId = -1
@@ -230,7 +230,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun getNPCParam(executor: CS2Executor) {
+    fun ncParam(executor: CS2Executor) {
         executor.intStackPtr -= 2
         val npcId = executor.intStack[executor.intStackPtr]
         val paramId = executor.intStack[executor.intStackPtr + 1]
@@ -289,7 +289,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatLineGetCycles20Ms(executor: CS2Executor) {
+    fun chatGetPrevUid(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var cycles = -1
@@ -383,7 +383,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun getMyDisplayname(executor: CS2Executor) {
+    fun chatPlayerName(executor: CS2Executor) {
         var displayName: String? = null
         if (PlayerUpdate.MY_PLAYER != null && PlayerUpdate.MY_PLAYER!!.username != null) {
             displayName = PlayerUpdate.MY_PLAYER!!.getDisplayName()
@@ -440,7 +440,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatGetByline(executor: CS2Executor) {
+    fun chatGetHistoryMessage(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var message: String? = ""
@@ -511,7 +511,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatGetClan(executor: CS2Executor) {
+    fun chatGetHistoryClan(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var clan: String? = ""
@@ -522,7 +522,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatlineGetCrownedName(executor: CS2Executor) {
+    fun chatGetHistoryName(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var crownedName: String? = ""
@@ -618,7 +618,7 @@ object ConfigTypeChatOps {
     }
 
     @JvmStatic
-    fun chatlineGetName(executor: CS2Executor) {
+    fun unknownCommand5019(executor: CS2Executor) {
         val index = executor.intStack[--executor.intStackPtr]
         val chatLine: ChatLine? = ChatBox.getLine(index)
         var name: String? = ""

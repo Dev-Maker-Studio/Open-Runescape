@@ -132,7 +132,7 @@ object ComponentQueryOps {
             ClientScriptOpCode.CC_GETWIDTH -> ccGetWidth(exec)
             ClientScriptOpCode.CC_GETHEIGHT -> ccGetHeight(exec)
             ClientScriptOpCode.CC_GETHIDE -> ccGetHide(exec)
-            ClientScriptOpCode.CC_GETPARENTID -> ccGetParentId(exec)
+            ClientScriptOpCode.CC_GETLAYER -> ccGetLayer(exec)
             ClientScriptOpCode.CC_GETPARENTLAYER -> ccGetSubId(exec)
             ClientScriptOpCode.CC_GETCOLOUR -> ccGetColour(exec)
             ClientScriptOpCode.CC_GETSCROLLX -> ccGetScrollX(exec)
@@ -140,24 +140,24 @@ object ComponentQueryOps {
             ClientScriptOpCode.CC_GETTEXT -> ccGetText(exec)
             ClientScriptOpCode.CC_GETSCROLLWIDTH -> ccGetScrollWidth(exec)
             ClientScriptOpCode.CC_GETSCROLLHEIGHT -> ccGetScrollHeight(exec)
-            ClientScriptOpCode.CC_GETSPRITESCALE -> ccGetSpriteScale(exec)
-            ClientScriptOpCode.CC_GETSPRITEPITCH -> ccGetSpritePitch(exec)
-            ClientScriptOpCode.CC_GETSPRITEYAW -> ccGetSpriteYaw(exec)
-            ClientScriptOpCode.CC_GETSPRITEROLL -> ccGetSpriteRoll(exec)
-            ClientScriptOpCode.CC_GETTRANSPARENCY -> ccGetTransparency(exec)
-            ClientScriptOpCode.CC_GETOFFSETX -> ccGetOffsetX(exec)
-            ClientScriptOpCode.CC_GETOFFSETY -> ccGetOffsetY(exec)
+            ClientScriptOpCode.CC_GETMODELZOOM -> ccGetModelZoom(exec)
+            ClientScriptOpCode.CC_GETMODELANGLE_X -> ccGetModelAngleX(exec)
+            ClientScriptOpCode.CC_GETMODELANGLE_Z -> ccGetModelAngleZ(exec)
+            ClientScriptOpCode.CC_GETMODELANGLE_Y -> ccGetModelAngleY(exec)
+            ClientScriptOpCode.CC_GETTRANS -> ccGetTrans(exec)
+            ClientScriptOpCode.CC_GETMODELXOF -> ccGetModelXof(exec)
+            ClientScriptOpCode.CC_GETMODELYOF -> ccGetModelYof(exec)
             ClientScriptOpCode.CC_GETGRAPHIC -> ccGetSpriteId(exec)
-            ClientScriptOpCode.CC_GETINTPARAM -> ccGetGetIntParam(exec)
+            ClientScriptOpCode.CC_PARAM -> ccParam(exec)
             ClientScriptOpCode.CC_GET2DANGLE -> ccGetAngle2D(exec)
             ClientScriptOpCode.CC_GETMODEL -> ccGetModel(exec)
             ClientScriptOpCode.CC_GETFONTGRAPHIC -> ccGetFontGraphic(exec)
             ClientScriptOpCode.CC_GETGRAPHICDIMENSIONS -> ccGetGraphicDimensions(exec)
             ClientScriptOpCode.CC_GETFONTMETRICS -> ccGetFontMetrics(exec)
-            ClientScriptOpCode.CC_CONTAINERITEMID -> ccContainerItemId(exec)
-            ClientScriptOpCode.CC_GETITEMSTACKSIZE -> ccGetItemStackSize(exec)
-            ClientScriptOpCode.CC_GETSLOTID -> ccGetSlotId(exec)
-            ClientScriptOpCode.CC_GETOPTIONFLAGS -> ccGetOptionFlags(exec)
+            ClientScriptOpCode.CC_GETINVOBJECT -> ccGetInvObject(exec)
+            ClientScriptOpCode.CC_GETINVCOUNT -> ccGetInvCount(exec)
+            ClientScriptOpCode.CC_GETID -> ccGetId(exec)
+            ClientScriptOpCode.CC_GETTARGETMASK -> ccGetTargetMask(exec)
             ClientScriptOpCode.CC_GETOP -> ccGetOp(exec)
             ClientScriptOpCode.CC_GETOPBASE -> ccGetOpBase(exec)
             ClientScriptOpCode.CC_CALLONRESIZE -> ccCallonresize(exec)
@@ -168,7 +168,7 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetSpritePitch(executor: CS2Executor) {
+    fun ccGetModelAngleX(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.spritePitch
@@ -207,7 +207,7 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccContainerItemId(executor: CS2Executor) {
+    fun ccGetInvObject(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.containerItemId
@@ -254,7 +254,7 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetOptionFlags(executor: CS2Executor) {
+    fun ccGetTargetMask(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = Client.getComponentSettings(component!!)!!.getUseOptionFlags()
@@ -303,7 +303,7 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetOffsetX(executor: CS2Executor) {
+    fun ccGetModelXof(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.offsetX
@@ -339,28 +339,28 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetOffsetY(executor: CS2Executor) {
+    fun ccGetModelYof(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.offsetY
     }
 
     @JvmStatic
-    fun ccGetParentId(executor: CS2Executor) {
+    fun ccGetLayer(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.parentId
     }
 
     @JvmStatic
-    fun ccGetSpriteRoll(executor: CS2Executor) {
+    fun ccGetModelAngleY(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.spriteRoll
     }
 
     @JvmStatic
-    fun ccGetSpriteScale(executor: CS2Executor) {
+    fun ccGetModelZoom(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.spriteScale
@@ -381,14 +381,14 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetSpriteYaw(executor: CS2Executor) {
+    fun ccGetModelAngleZ(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.spriteYaw
     }
 
     @JvmStatic
-    fun ccGetTransparency(executor: CS2Executor) {
+    fun ccGetTrans(executor: CS2Executor) {
         var target: CS2Interface? = null
         if (executor.hasIntOperand) {
             target = executor.hookedInterface2
@@ -426,14 +426,14 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetSlotId(executor: CS2Executor) {
+    fun ccGetId(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         executor.intStack[++executor.intStackPtr - 1] = component!!.slotId
     }
 
     @JvmStatic
-    fun ccGetItemStackSize(executor: CS2Executor) {
+    fun ccGetInvCount(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         if (component!!.containerItemId != -1) {
@@ -458,7 +458,7 @@ object ComponentQueryOps {
     }
 
     @JvmStatic
-    fun ccGetGetIntParam(executor: CS2Executor) {
+    fun ccParam(executor: CS2Executor) {
         val target: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         val component: Component? = target!!.comp
         val value = executor.intStack[--executor.intStackPtr]

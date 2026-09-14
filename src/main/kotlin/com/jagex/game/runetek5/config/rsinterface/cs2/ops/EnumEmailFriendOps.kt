@@ -151,28 +151,28 @@ object EnumEmailFriendOps {
             ClientScriptOpCode.IGNORE_DEL -> ignoreDel(exec)
             ClientScriptOpCode.FRIEND_TEST -> friendTest(exec)
             ClientScriptOpCode.FRIEND_GETWORLDNAME -> friendGetWorldName(exec)
-            ClientScriptOpCode.FC_GETCHATDISPLAYNAME -> loadFriendchatName(exec)
-            ClientScriptOpCode.FC_GETCHATCOUNT -> fcGetChatCount(exec)
-            ClientScriptOpCode.FC_GETCHATUSERNAME -> fcGetChatUserName(exec)
-            ClientScriptOpCode.FC_GETCHATUSERWORLD -> fcGetChatUserWorld(exec)
-            ClientScriptOpCode.FC_GETCHATUSERRANK -> fcGetChatUserRank(exec)
-            ClientScriptOpCode.FC_GETCHATMINKICK -> fcGetChatMinKick(exec)
-            ClientScriptOpCode.FC_KICKUSER -> fcKickUser(exec)
-            ClientScriptOpCode.FC_GETCHATRANK -> fcGetChatRank(exec)
-            ClientScriptOpCode.FC_JOINCHAT -> fcJoinChat(exec)
-            ClientScriptOpCode.FC_LEAVECHAT -> fcLeaveChat()
+            ClientScriptOpCode.CLAN_GETCHATDISPLAYNAME -> loadFriendchatName(exec)
+            ClientScriptOpCode.CLAN_GETCHATCOUNT -> clanGetChatCount(exec)
+            ClientScriptOpCode.CLAN_GETCHATUSERNAME -> clanGetChatUserName(exec)
+            ClientScriptOpCode.CLAN_GETCHATUSERWORLD -> clanGetChatUserWorld(exec)
+            ClientScriptOpCode.CLAN_GETCHATUSERRANK -> clanGetChatUserRank(exec)
+            ClientScriptOpCode.CLAN_GETCHATMINKICK -> clanGetChatMinKick(exec)
+            ClientScriptOpCode.CLAN_KICKUSER -> clanKickUser(exec)
+            ClientScriptOpCode.CLAN_GETCHATRANK -> clanGetChatRank(exec)
+            ClientScriptOpCode.CLAN_JOINCHAT -> clanJoinChat(exec)
+            ClientScriptOpCode.CLAN_LEAVECHAT -> clanLeaveChat()
             ClientScriptOpCode.IGNORE_COUNT -> ignoreCount(exec)
             ClientScriptOpCode.IGNORE_GETNAME -> ignoreGetName(exec)
             ClientScriptOpCode.IGNORE_TEST -> ignoreTest(exec)
-            ClientScriptOpCode.FC_ISSELF -> fcIsself(exec)
-            ClientScriptOpCode.FC_GETCHATOWNERNAME -> fcGetChatOwnerName(exec)
-            ClientScriptOpCode.FC_GETCHATUSERWORLDNAME -> fcGetChatUserWorldName(exec)
+            ClientScriptOpCode.CLAN_ISSELF -> clanIsSelf(exec)
+            ClientScriptOpCode.CLAN_GETCHATOWNERNAME -> clanGetChatOwnerName(exec)
+            ClientScriptOpCode.CLAN_GETCHATUSERWORLDNAME -> clanGetChatUserWorldName(exec)
             ClientScriptOpCode.FRIEND_PLATFORM -> friendPlatform(exec)
             ClientScriptOpCode.FRIEND_GETSLOTFROMNAME -> friendGetSlotFromName(exec)
             ClientScriptOpCode.PLAYERCOUNTRY -> playerCountry(exec)
             ClientScriptOpCode.IGNORE_ADD_TEMP -> ignoreAddTemp(exec)
             ClientScriptOpCode.IGNORE_IS_TEMP -> ignoreIsTemp(exec)
-            ClientScriptOpCode.FC_GETCHATUSERNAME_UNFILTERED -> fcGetChatUserNameUnfiltered(exec)
+            ClientScriptOpCode.CLAN_GETCHATUSERNAME_UNFILTERED -> clanGetChatUserNameUnfiltered(exec)
             ClientScriptOpCode.IGNORE_GETNAME_UNFILTERED -> ignoreGetNameUnfiltered(exec)
             ClientScriptOpCode.FRIEND_IS_REFERRER -> friendIsReferrer(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by EnumEmailFriendOps")
@@ -228,7 +228,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcLeaveChat() {
+    fun clanLeaveChat() {
         PacketEncoder.sendLeaveFriendsChatPacket()
     }
 
@@ -276,7 +276,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatUserRank(executor: CS2Executor) {
+    fun clanGetChatUserRank(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendsChat.FC_NAME != null && value < FriendsChat.FC_PLAYER_COUNT) {
             executor.intStack[++executor.intStackPtr - 1] = FriendsChat.FC_PLAYERS!![value]!!.rank.toInt()
@@ -379,7 +379,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatOwnerName(executor: CS2Executor) {
+    fun clanGetChatOwnerName(executor: CS2Executor) {
         if (FriendsChat.FC_OWNER_NAME != null) {
             executor.stringStack[++executor.stringStackPtr - 1] = FriendsChat.FC_OWNER_NAME
         } else {
@@ -407,7 +407,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatRank(executor: CS2Executor) {
+    fun clanGetChatRank(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = FriendsChat.MY_PLAYER_FC_RANK.toInt()
     }
 
@@ -435,7 +435,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatUserWorldName(executor: CS2Executor) {
+    fun clanGetChatUserWorldName(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendsChat.FC_NAME != null && value < FriendsChat.FC_PLAYER_COUNT) {
             executor.stringStack[++executor.stringStackPtr - 1] = FriendsChat.FC_PLAYERS!![value]!!.worldName
@@ -454,7 +454,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcJoinChat(executor: CS2Executor) {
+    fun clanJoinChat(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         PacketEncoder.sendJoinFriendchat(text)
     }
@@ -476,7 +476,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatUserWorld(executor: CS2Executor) {
+    fun clanGetChatUserWorld(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendsChat.FC_NAME != null && value < FriendsChat.FC_PLAYER_COUNT) {
             executor.intStack[++executor.intStackPtr - 1] = FriendsChat.FC_PLAYERS!![value]!!.worldId
@@ -508,12 +508,12 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatMinKick(executor: CS2Executor) {
+    fun clanGetChatMinKick(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = FriendsChat.FC_MIN_RANK_CAN_KICK.toInt()
     }
 
     @JvmStatic
-    fun fcIsself(executor: CS2Executor) {
+    fun clanIsSelf(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendsChat.FC_PLAYERS != null && value < FriendsChat.FC_PLAYER_COUNT && FriendsChat.FC_PLAYERS!![value]!!.username.equals(PlayerUpdate.MY_PLAYER!!.displayName)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
@@ -533,7 +533,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatUserName(executor: CS2Executor) {
+    fun clanGetChatUserName(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendsChat.FC_NAME != null && value < FriendsChat.FC_PLAYER_COUNT) {
             executor.stringStack[++executor.stringStackPtr - 1] = FriendsChat.FC_PLAYERS!![value]!!.displayName
@@ -591,7 +591,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatCount(executor: CS2Executor) {
+    fun clanGetChatCount(executor: CS2Executor) {
         if (FriendsChat.FC_NAME != null) {
             executor.intStack[++executor.intStackPtr - 1] = FriendsChat.FC_PLAYER_COUNT
         } else {
@@ -671,7 +671,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcKickUser(executor: CS2Executor) {
+    fun clanKickUser(executor: CS2Executor) {
         val text: String? = executor.stringStack[--executor.stringStackPtr] as String?
         FriendsChat.kickPlayer(text!!)
     }
@@ -687,7 +687,7 @@ object EnumEmailFriendOps {
     }
 
     @JvmStatic
-    fun fcGetChatUserNameUnfiltered(executor: CS2Executor) {
+    fun clanGetChatUserNameUnfiltered(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         if (FriendsChat.FC_NAME != null && value < FriendsChat.FC_PLAYER_COUNT) {
             executor.stringStack[++executor.stringStackPtr - 1] = FriendsChat.FC_PLAYERS!![value]!!.username

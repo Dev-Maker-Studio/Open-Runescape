@@ -159,7 +159,7 @@ object ClanStockOps {
             ClientScriptOpCode.ACTIVECLANCHANNEL_KICKUSER -> activeClanChannelKickUser(exec)
             ClientScriptOpCode.ACTIVECLANCHANNEL_GETUSERSLOT -> activeClanChannelGetUserSlot(exec)
             ClientScriptOpCode.ACTIVECLANCHANNEL_GETSORTEDUSERSLOT -> activeClanChannelGetSortedUserSlot(exec)
-            ClientScriptOpCode.CLAN_VARS_ENABLED -> clanVarsEnabled(exec)
+            ClientScriptOpCode.CLANPROFILE_FIND -> clanProfileFind(exec)
             ClientScriptOpCode.STOCKMARKET_GETOFFERTYPE -> stockMarketGetOfferType(exec)
             ClientScriptOpCode.STOCKMARKET_GETOFFERITEM -> getGEOfferItem(exec)
             ClientScriptOpCode.STOCKMARKET_GETOFFERPRICE -> getGEOfferPrice(exec)
@@ -434,7 +434,7 @@ object ClanStockOps {
     }
 
     @JvmStatic
-    fun clanVarsEnabled(executor: CS2Executor) {
+    fun clanProfileFind(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (ClanVarTypeList.CLAN_VARS != null) 1 else 0
     }
 

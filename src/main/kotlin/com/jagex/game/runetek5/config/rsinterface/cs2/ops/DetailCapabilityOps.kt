@@ -139,9 +139,9 @@ object DetailCapabilityOps {
             ClientScriptOpCode.DETAILCANMOD_TEXTURING -> detailCanModTexturing(exec)
             ClientScriptOpCode.DETAILCANMOD_MAXSCREENSIZE -> detailCanModMaxScreenSize(exec)
             ClientScriptOpCode.DETAILCANMOD_FOG -> detailCanModFog(exec)
+            ClientScriptOpCode.DETAILCANMOD_DEFAULTTOOLKIT -> detailCanModDefaultToolkit(exec)
             ClientScriptOpCode.DETAILCANMOD_TOOLKIT_DEFAULT -> detailCanModToolkitDefault(exec)
-            ClientScriptOpCode.DETAILCANMOD_TOOLKIT -> detailCanModToolkit(exec)
-            ClientScriptOpCode.DETAILCANMOD_SKYBOXES -> detailCanModSkyboxes(exec)
+            ClientScriptOpCode.DETAILCANMOD_SKYDETAIL -> detailCanModSkyDetail(exec)
             ClientScriptOpCode.DETAILCANSET_GROUNDDECOR -> detailCanSetGroundDecor(exec)
             ClientScriptOpCode.DETAILCANSET_CHARSHADOWS -> detailCanSetCharShadows(exec)
             ClientScriptOpCode.DETAILCANSET_SPOTSHADOWS -> detailCanSetSpotShadows(exec)
@@ -154,20 +154,20 @@ object DetailCapabilityOps {
             ClientScriptOpCode.DETAILCANSET_TEXTURING -> detailCanSetTexturing(exec)
             ClientScriptOpCode.DETAILCANSET_MAXSCREENSIZE -> detailCanSetMaxScreenSize(exec)
             ClientScriptOpCode.DETAILCANSET_FOG -> detailCanSetFog(exec)
+            ClientScriptOpCode.DETAILCANSET_DEFAULTTOOLKIT -> detailCanSetDefaultToolkit(exec)
             ClientScriptOpCode.DETAILCANSET_TOOLKIT_DEFAULT -> detailCanSetToolkitDefault(exec)
-            ClientScriptOpCode.DETAILCANSET_RENDERER -> detailCanSetRenderer(exec)
-            ClientScriptOpCode.DETAILCANSET_SKYBOXES -> detailCanSetSkyboxes(exec)
+            ClientScriptOpCode.DETAILCANSET_SKYDETAIL -> detailCanSetSkyDetail(exec)
             ClientScriptOpCode.SETENTITYOVERHEADIF -> setEntityOverHeadIf(exec)
             ClientScriptOpCode.GETENTITYOVERHEADIF -> getEntityOverHeadIf(exec)
             ClientScriptOpCode.GET_ENTITY_SAY -> getEntitySay(exec)
             ClientScriptOpCode.GET_DISPLAYNAME_WITHEXTRAS -> getDisplayNameWithExtras(exec)
-            ClientScriptOpCode.instr6905 -> ccLoadEntityModel(exec)
+            ClientScriptOpCode.CC_LOADENTITYMODEL -> ccLoadEntityModel(exec)
             ClientScriptOpCode.IF_CREATE -> ifCreate(exec)
             ClientScriptOpCode.GET_NPC_NAME -> getNpcName(exec)
             ClientScriptOpCode.GET_NPC_VISLEVEL -> getNpcVIsLevel(exec)
             ClientScriptOpCode.GET_ENTITY_SCREEN_POSITION -> pushEntityHintPosition(exec)
             ClientScriptOpCode.IF_GET_GAMESCREEN -> ifGetGameScreen(exec)
-            ClientScriptOpCode.GETENTITYICONHEIGHT -> getEntityIconHeight(exec)
+            ClientScriptOpCode.GET_ENTITY_OVERLAY_HEIGHT -> getEntityOverlayHeight(exec)
             ClientScriptOpCode.GET_NPC_STAT -> getNpcStat(exec)
             ClientScriptOpCode.IS_NPC_ACTIVE -> isNpcActive(exec)
             ClientScriptOpCode.IS_NPC_VISIBLE -> isNpcVisible(exec)
@@ -188,12 +188,12 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun getEntityIconHeight(executor: CS2Executor) {
+    fun getEntityOverlayHeight(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = executor.currentEntity!!.getIconHeight()
     }
 
     @JvmStatic
-    fun detailCanModToolkit(executor: CS2Executor) {
+    fun detailCanModToolkitDefault(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (PreferenceManager.preferences!!.toolkit!!.visible()) 1  else 0
     }
 
@@ -224,7 +224,7 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun detailCanSetSkyboxes(executor: CS2Executor) {
+    fun detailCanSetSkyDetail(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.skyboxes!!.canModify(value)
     }
@@ -434,7 +434,7 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun detailCanSetRenderer(executor: CS2Executor) {
+    fun detailCanSetToolkitDefault(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.toolkit!!.canModify(value)
     }
@@ -460,7 +460,7 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun detailCanModToolkitDefault(executor: CS2Executor) {
+    fun detailCanModDefaultToolkit(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (PreferenceManager.preferences!!.defaultToolkit!!.visible()) 1  else 0
     }
 
@@ -470,7 +470,7 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun detailCanSetToolkitDefault(executor: CS2Executor) {
+    fun detailCanSetDefaultToolkit(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.defaultToolkit!!.canModify(value)
     }
@@ -522,7 +522,7 @@ object DetailCapabilityOps {
     }
 
     @JvmStatic
-    fun detailCanModSkyboxes(executor: CS2Executor) {
+    fun detailCanModSkyDetail(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = if (PreferenceManager.preferences!!.skyboxes!!.display()) 1  else 0
     }
 

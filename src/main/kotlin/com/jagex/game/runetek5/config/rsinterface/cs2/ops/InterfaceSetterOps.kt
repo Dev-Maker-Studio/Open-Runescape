@@ -162,8 +162,8 @@ object InterfaceSetterOps {
             ClientScriptOpCode.IF_SETMAXLINES -> ifSetMaxLines(exec)
             ClientScriptOpCode.IF_SETPARAM_INT -> ifSetParamInt(exec)
             ClientScriptOpCode.IF_SETPARAM_STRING -> ifSetParamString(exec)
-            ClientScriptOpCode.instr6193 -> ifSetVideoSprite(exec)
-            ClientScriptOpCode.instr6194 -> ifSetVideoText(exec)
+            ClientScriptOpCode.IF_SETVIDEO_GRAPHIC -> ifSetVideoGraphic(exec)
+            ClientScriptOpCode.IF_SETVIDEO_TEXT -> ifSetVideoText(exec)
             ClientScriptOpCode.IF_SETRECOL -> ifSetRecol(exec)
             ClientScriptOpCode.IF_SETRETEX -> ifSetRetex(exec)
             ClientScriptOpCode.IF_SETFONTMONO -> ifSetfontMono(exec)
@@ -177,13 +177,13 @@ object InterfaceSetterOps {
             ClientScriptOpCode.IF_SETMODELLIGHTING -> ifSetModelLighting(exec)
             ClientScriptOpCode.IF_SETMODELLIGHTING_SUNROTATION -> ifSetModelLightingSunRotation(exec)
             ClientScriptOpCode.IF_SETOBJECT_WEARCOL -> ifSetItemWearCol(exec)
-            ClientScriptOpCode.instr6208 -> ifSetItemWearColNoNum(exec)
-            ClientScriptOpCode.instr6209 -> ifSetModelItemContainer(exec)
+            ClientScriptOpCode.IF_SETOBJECT_WEARCOL_NONUM -> ifSetObjectWearColNoNum(exec)
+            ClientScriptOpCode.IF_SETMODEL_ITEMCONTAINER -> ifSetModelItemContainer(exec)
             ClientScriptOpCode.IF_SETPLAYERMODEL_SELF -> ifSetPlayerModelSelf(exec)
             ClientScriptOpCode.IF_SETOBJECT_ALWAYSNUM -> ifSetItemAlwaysNum(exec)
-            ClientScriptOpCode.instr6793 -> ifSetItemWearColAlwaysNum(exec)
+            ClientScriptOpCode.IF_SETOBJECT_WEARCOL_ALWAYSNUM -> ifSetObjectWearColAlwaysNum(exec)
             ClientScriptOpCode.IF_SETOP -> ifSetop(exec)
-            ClientScriptOpCode.IF_SETDEPTHCHILD -> ifSetDepthChild(exec)
+            ClientScriptOpCode.IF_SETDRAGGABLE -> ifSetDraggable(exec)
             ClientScriptOpCode.IF_SETDRAGRENDERBEHAVIOUR -> ifSetDragRenderBehaviour(exec)
             ClientScriptOpCode.IF_SETDRAGDEADZONE -> ifSetDragDeadZone(exec)
             ClientScriptOpCode.IF_SETDRAGDEADTIME -> ifSetDragDeadTime(exec)
@@ -192,45 +192,45 @@ object InterfaceSetterOps {
             ClientScriptOpCode.IF_CLEAROPS -> ifClearOps(exec)
             ClientScriptOpCode.IF_SETTARGETCURSORS -> ifSetTargetCursors(exec)
             ClientScriptOpCode.IF_SETOPCURSOR -> ifSetopCursor(exec)
-            ClientScriptOpCode.IF_SETRESUMETEXT -> ifSetResumeText(exec)
+            ClientScriptOpCode.IF_SETPAUSETEXT -> ifSetPauseText(exec)
             ClientScriptOpCode.IF_SETTARGETOPCURSOR -> ifSetTargetOpCursor(exec)
             ClientScriptOpCode.IF_SETOPCHAR -> ifSetopChar(exec)
             ClientScriptOpCode.IF_SETOPTCHAR -> ifSetopTChar(exec)
             ClientScriptOpCode.IF_SETOPKEY -> ifSetopKey(exec)
             ClientScriptOpCode.IF_SETOPTKEY -> ifSetopTKey(exec)
             ClientScriptOpCode.IF_SETMOUSEOVERCURSOR -> ifSetMouseOverCursor(exec)
-            ClientScriptOpCode.HOOK_MOUSE_PRESS -> hookMousePress(exec)
+            ClientScriptOpCode.IF_SETONCLICK -> ifSetOnClick(exec)
             ClientScriptOpCode.IF_SETONHOLD -> ifSetOnHold(exec)
             ClientScriptOpCode.IF_SETONRELEASE -> ifSetOnRelease(exec)
-            ClientScriptOpCode.HOOK_MOUSE_ENTER -> hookMouseEnter(exec)
-            ClientScriptOpCode.HOOK_MOUSE_EXIT -> hookMouseExit(exec)
-            ClientScriptOpCode.IF_SETONDRAG -> ifSetOnDrag(exec)
-            ClientScriptOpCode.IF_SETONOP -> ifSetOnOp(exec)
-            ClientScriptOpCode.IF_SETONVARTRANSMIT -> ifSetOnVarTransmit(exec)
-            ClientScriptOpCode.IF_SETONTIMER -> ifSetOnTimer(exec)
-            ClientScriptOpCode.IF_SETONOPT -> ifSetOnOpt(exec)
-            ClientScriptOpCode.IF_SETONDRAGCOMPLETE -> ifSetOnDragComplete(exec)
-            ClientScriptOpCode.IF_SETONCLICKREPEAT -> ifSetOnClickRepeat(exec)
             ClientScriptOpCode.IF_SETONMOUSEOVER -> ifSetOnMouseOver(exec)
             ClientScriptOpCode.IF_SETONMOUSELEAVE -> ifSetOnMouseLeave(exec)
+            ClientScriptOpCode.IF_SETONDRAG -> ifSetOnDrag(exec)
+            ClientScriptOpCode.IF_SETONTARGETLEAVE -> ifSetOnTargetLeave(exec)
+            ClientScriptOpCode.IF_SETONVARTRANSMIT -> ifSetOnVarTransmit(exec)
+            ClientScriptOpCode.IF_SETONTIMER -> ifSetOnTimer(exec)
+            ClientScriptOpCode.IF_SETONOP -> ifSetOnOp(exec)
+            ClientScriptOpCode.IF_SETONDRAGCOMPLETE -> ifSetOnDragComplete(exec)
+            ClientScriptOpCode.IF_SETONCLICKREPEAT -> ifSetOnClickRepeat(exec)
+            ClientScriptOpCode.IF_SETONMOUSEREPEAT -> ifSetOnMouseRepeat(exec)
+            ClientScriptOpCode.IF_SETONINVTRANSMIT -> ifSetOnInvTransmit(exec)
             ClientScriptOpCode.IF_SETONSTATTRANSMIT -> ifSetOnStatTransmit(exec)
             ClientScriptOpCode.IF_SETONTARGETENTER -> ifSetOnTargetEnter(exec)
-            ClientScriptOpCode.IF_SETONMOUSEREPEAT -> ifSetOnMouseRepeat(exec)
+            ClientScriptOpCode.IF_SETONSCROLLWHEEL -> ifSetOnScrollWheel(exec)
             ClientScriptOpCode.IF_SETONCHATTRANSMIT -> ifSetOnChatTransmit(exec)
             ClientScriptOpCode.IF_SETONKEY -> ifSetOnKey(exec)
             ClientScriptOpCode.IF_SETONFRIENDTRANSMIT -> ifSetOnFriendTransmit(exec)
-            ClientScriptOpCode.IF_SETONCLANCHANNELTRANSMIT -> ifSetOnClanchannelTransmit(exec)
+            ClientScriptOpCode.IF_SETONCLANTRANSMIT -> ifSetOnClanTransmit(exec)
             ClientScriptOpCode.IF_SETONMISCTRANSMIT -> ifSetOnMiscTransmit(exec)
             ClientScriptOpCode.IF_SETONDIALOGABORT -> ifSetOnDialogAbort(exec)
             ClientScriptOpCode.IF_SETONSUBCHANGE -> ifSetOnSubchange(exec)
             ClientScriptOpCode.IF_SETONSTOCKTRANSMIT -> ifSetOnStocktransmit(exec)
             ClientScriptOpCode.IF_SETONCAMFINISHED -> ifSetOnCamfinished(exec)
             ClientScriptOpCode.IF_SETONRESIZE -> ifSetOnResize(exec)
-            ClientScriptOpCode.IF_SETONINVTRANSMIT -> ifSetOnInvTransmit(exec)
-            ClientScriptOpCode.IF_SETONSCROLLWHEEL -> ifSetOnScrollWheel(exec)
-            ClientScriptOpCode.IF_SETONTARGETLEAVE -> ifSetOnTargetLeave(exec)
+            ClientScriptOpCode.IF_SETONVARCTRANSMIT -> ifSetOnVarcTransmit(exec)
+            ClientScriptOpCode.IF_SETONVARCSTRTRANSMIT -> ifSetOnVarcStrTransmit(exec)
+            ClientScriptOpCode.IF_SETONOPT -> ifSetOnOpt(exec)
             ClientScriptOpCode.IF_SETONCLANSETTINGSTRANSMIT -> ifSetOnClanSettingsTransmit(exec)
-            ClientScriptOpCode.IF_SETLINKACTIVECLANCHANNEL -> ifSetLinkActiveClanChannel(exec)
+            ClientScriptOpCode.IF_SETONCLANCHANNELTRANSMIT -> ifSetOnClanChannelTransmit(exec)
             ClientScriptOpCode.IF_SETONVARCLANTRANSMIT -> ifSetOnVarClanTransmit(exec)
             ClientScriptOpCode.IF_CLEARSCRIPTHOOKS -> ifClearscripthooks(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by InterfaceSetterOps")
@@ -314,7 +314,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnScrollWheel(executor: CS2Executor) {
+    fun ifSetOnVarcStrTransmit(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -401,7 +401,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun hookMousePress(executor: CS2Executor) {
+    fun ifSetOnClick(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -409,7 +409,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnOp(executor: CS2Executor) {
+    fun ifSetOnTargetLeave(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -426,7 +426,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetVideoSprite(executor: CS2Executor) {
+    fun ifSetVideoGraphic(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -453,7 +453,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetResumeText(executor: CS2Executor) {
+    fun ifSetPauseText(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -480,7 +480,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnOpt(executor: CS2Executor) {
+    fun ifSetOnOp(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -567,7 +567,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetItemWearColAlwaysNum(executor: CS2Executor) {
+    fun ifSetObjectWearColAlwaysNum(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -576,7 +576,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetDepthChild(executor: CS2Executor) {
+    fun ifSetDraggable(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -625,7 +625,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnMouseLeave(executor: CS2Executor) {
+    fun ifSetOnInvTransmit(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -728,7 +728,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnMouseOver(executor: CS2Executor) {
+    fun ifSetOnMouseRepeat(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -754,7 +754,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnTargetLeave(executor: CS2Executor) {
+    fun ifSetOnOpt(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -796,7 +796,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun hookMouseExit(executor: CS2Executor) {
+    fun ifSetOnMouseLeave(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -864,7 +864,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetLinkActiveClanChannel(executor: CS2Executor) {
+    fun ifSetOnClanChannelTransmit(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -928,7 +928,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun hookMouseEnter(executor: CS2Executor) {
+    fun ifSetOnMouseOver(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -971,7 +971,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnClanchannelTransmit(executor: CS2Executor) {
+    fun ifSetOnClanTransmit(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -988,7 +988,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetItemWearColNoNum(executor: CS2Executor) {
+    fun ifSetObjectWearColNoNum(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -997,7 +997,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnInvTransmit(executor: CS2Executor) {
+    fun ifSetOnVarcTransmit(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
@@ -1132,7 +1132,7 @@ object InterfaceSetterOps {
     }
 
     @JvmStatic
-    fun ifSetOnMouseRepeat(executor: CS2Executor) {
+    fun ifSetOnScrollWheel(executor: CS2Executor) {
         val idHash = executor.intStack[--executor.intStackPtr]
         val component: Component? = Component.fromHash(idHash)
         val parentInterface: Interface? = Interface.INTERFACES!![(idHash shr 16)]
