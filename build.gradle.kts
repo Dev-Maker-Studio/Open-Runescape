@@ -28,7 +28,7 @@ application {
 // `./gradlew run -Dbot.enabled=true` sets the property on Gradle's own JVM, not on the
 // client JVM the run task forks. Forward the client's flags so that command works as expected.
 tasks.named<JavaExec>("run") {
-    val forwarded = listOf("bot.", "render.", "toolkit", "autologin", "window.")
+    val forwarded = listOf("bot.", "render.", "toolkit", "autologin", "window.", "prod")
     System.getProperties().stringPropertyNames()
         .filter { name -> forwarded.any { name.startsWith(it) } }
         .forEach { systemProperty(it, System.getProperty(it)) }
