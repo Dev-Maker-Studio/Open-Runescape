@@ -197,10 +197,8 @@ darkan-bot/
 - CS2 engine split into a package with a two-level JIT-friendly dispatch
 
 ### Remaining Work
-Deobfuscation, not migration. The CS2 engine has been refactored into
-`config/rsinterface/cs2/` with an audit harness in `tools/cs2/` — see
-`tools/cs2/README.md`. 316 of its 1006 opcodes are still unidentified and keep
-their `instrNNNN` names deliberately.
+Deobfuscation, not migration. The CS2 engine lives in `config/rsinterface/cs2/`;
+its 1006 opcode names equal the darkanrs/server `Cs2Op` enum (Jagex's 727 names).
 
 ## Historical Context
 
@@ -219,7 +217,7 @@ This client is designed to work with the Darkan server emulator, which recreates
 - Always run full builds after changes
 - Be extremely careful with nullability (legacy code is null-heavy)
 - Preserve public APIs for compatibility
-- The CS2 engine is critical; run `python3 tools/cs2/verify.py` after touching it
+- The CS2 engine is critical; keep `ClientScriptOpCode` names equal to the server's `Cs2Op`, and never reorder the enum or change its flags
 - Don't use git commands (per migration guidelines)
 
 ### Understanding the Codebase

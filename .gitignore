@@ -88,6 +88,3 @@ target/
 .project
 *.iml
 /.gradle/
-
-# Local one-off scripts (CS2 audit/split, rename passes, capture helper)
-/tools/

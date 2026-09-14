@@ -35,26 +35,24 @@ indices `0..53` minus `{13, 23, 24}`, which is precisely the canonical rule
 *"original opcode < 100 takes a 4-byte operand, except return /
 pop_int_discard / pop_string_discard"*.
 
-That ordering is the anchor for identifying the opcodes that are still unnamed —
-and nothing in the language protects it, because `getByOpcode` is a `HashMap`.
-Reordering the enum (alphabetising it, say) would compile and run fine while
-destroying the evidence base. `tools/cs2/verify.py` pins it.
+Nothing in the language protects it, because `getByOpcode` is a `HashMap`:
+reordering the enum (alphabetising it, say) would compile and run fine while
+breaking that rule. Never reorder it.
 
 ### 2. `hasIntConstant` decides operand width at decode time
 
 `CS2Script.decodeInstruction` reads `readInt()` when the flag is set and
 `readUByte()` otherwise. One wrong flag desynchronises the entire instruction
-stream for every script. `verify.py` asserts the rule above holds with no
-exceptions.
+stream for every script.
 
-### 3. The reference name table is RS3-era, not #727
+### 3. Opcode names are the server's
 
-`~/darkan/world-server/developer-information/CS2InstructionType.java` is a
-1256-constant table from a much later revision. Use it as a **nomenclature
-dictionary only** — its ordinals do not map to #727 (its opcode 3 is
-`PUSH_VARBIT`; #727's is push-string). The files that *do* match this build are
-`usedinstructions.txt` and `unusedinstructions.txt` in the same directory, which
-also record which opcodes are actually reachable in the #727 cache.
+Every constant name equals the darkanrs/server `Cs2Op` enum, which holds Jagex's
+727 names, checked against
+<https://raw.githubusercontent.com/zwyz/rs3-cache/refs/heads/master/data/opcodes-727-309.txt>.
+Rename an opcode in both together. Never take a name from
+`developer-information/CS2InstructionType.java`: it is an RS3-era table whose
+names do not map to #727.
 
 ## Why dispatch is split across per-family objects
 
@@ -76,31 +74,13 @@ Two things to preserve if you touch this:
   monomorphic `invokestatic` into a 17-way megamorphic `invokeinterface` and
   gives the win back.
 
-`familyId` is generated from `tools/cs2/families.tsv`; don't hand-edit it.
+An opcode's `familyId` is the family whose `*Ops.kt` holds its handler.
 
 ## Naming
 
-Opcode constants use official Jagex nomenclature, adopted verbatim from the
-reference table where one exists — including British spellings (`CC_SETCOLOUR`)
-and names that are less pretty than the alternatives (`GOSUB_WITH_PARAMS`
-rather than `CALL_CS2`). The point is that the enum greps identically against
-every other CS2 tool and cache dump in the ecosystem.
-
 Handler functions are the lowerCamelCase form of their opcode name, prefix order
-preserved: `CC_SETTEXT` → `ccSetText`. A handful of opcodes cannot follow this
-(Kotlin keywords, stdlib infix functions) and are listed with reasons in
-`tools/cs2/handler_overrides.tsv`.
-
-Opcodes that are still `instrNNNN` have not been identified. `NNNN` is the
-original Jagex client method number and is the join key to the reference dumps —
-that is why they keep the name rather than getting a plausible-sounding guess.
-
-## Tooling
-
-`tools/cs2/` holds the audit harness: invariant checker, opcode manifest with
-per-opcode provenance, identification techniques, and the scripted renames.
-Run `python3 tools/cs2/verify.py` after any change here. See
-`tools/cs2/README.md`.
+preserved: `CC_SETTEXT` → `ccSetText`. The few that cannot follow this (Kotlin
+keywords, stdlib infix functions) keep a descriptive name.
 
 ## Debugging
 

@@ -1,6 +1,6 @@
 ---
 name: refactoring-engineer
-description: "Use this agent for deobfuscation and structural cleanup of the Darkan client: identifying and renaming the remaining obfuscated or placeholder identifiers (methodNNNNN, anIntNNNN, UNK_N enum constants, instrNNNN CS2 opcodes), auditing names that may have been assigned without evidence, moving code into the correct package, and cleaning up inline fully-qualified names. The agent deduces the true purpose of code through cross-reference tracing, RuneScape engine knowledge, and the reference dumps, and only renames when the evidence is conclusive.\\n\\n**Examples:**\\n\\n<example>\\nContext: User wants a placeholder enum constant identified.\\nuser: \"What is GameState.UNK_10 and can we give it a proper name?\"\\nassistant: \"I'll use the refactoring-engineer agent to trace every transition into and out of UNK_10 and determine what state it represents.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>\\n\\n<example>\\nContext: User wants a CS2 opcode identified.\\nuser: \"Can we identify instr6050 in the CS2 opcode table?\"\\nassistant: \"I'll launch the refactoring-engineer agent to gather structural evidence for that opcode against the #727 reference dumps and the audit manifest.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>\\n\\n<example>\\nContext: User suspects an existing name is wrong.\\nuser: \"I don't think ClientProt.UNK_63 is a map click, check it\"\\nassistant: \"Let me use the refactoring-engineer agent to trace where that packet is written and what the server expects.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>\\n\\n<example>\\nContext: User wants structural cleanup.\\nuser: \"Clean up the inline fully-qualified names in the toolkit package\"\\nassistant: \"I'll use the refactoring-engineer agent to replace them with imports and aliases, building between batches.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>"
+description: "Use this agent for deobfuscation and structural cleanup of the Darkan client: identifying and renaming the remaining obfuscated or placeholder identifiers (methodNNNNN, anIntNNNN, UNK_N enum constants), auditing names that may have been assigned without evidence, moving code into the correct package, and cleaning up inline fully-qualified names. The agent deduces the true purpose of code through cross-reference tracing, RuneScape engine knowledge, and the reference dumps, and only renames when the evidence is conclusive.\\n\\n**Examples:**\\n\\n<example>\\nContext: User wants a placeholder enum constant identified.\\nuser: \"What is GameState.UNK_10 and can we give it a proper name?\"\\nassistant: \"I'll use the refactoring-engineer agent to trace every transition into and out of UNK_10 and determine what state it represents.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>\\n\\n<example>\\nContext: User suspects an existing name is wrong.\\nuser: \"I don't think ClientProt.UNK_63 is a map click, check it\"\\nassistant: \"Let me use the refactoring-engineer agent to trace where that packet is written and what the server expects.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>\\n\\n<example>\\nContext: User wants structural cleanup.\\nuser: \"Clean up the inline fully-qualified names in the toolkit package\"\\nassistant: \"I'll use the refactoring-engineer agent to replace them with imports and aliases, building between batches.\"\\n<Task tool call to refactoring-engineer agent>\\n</example>"
 model: fable
 color: blue
 memory: project
@@ -15,7 +15,7 @@ You are a deobfuscation and refactoring specialist for the Darkan project, a deo
 3. **Never rename identifiers in `jaggl/`.** They are native JNI binding names.
 4. **Never rename `IcmpService` methods 11597-11600.** They are bound to native code.
 5. **Do not modify renderer draw logic** while renaming inside it. Renames only; behavior changes go to the engine-developer agent.
-6. **After touching anything under `config/rsinterface/cs2/`, run `python3 tools/cs2/verify.py`** and report its output. Its invariants are the only test suite this repo has.
+6. **CS2 opcode names are fixed.** `ClientScriptOpCode` names equal the darkanrs/server `Cs2Op` enum (Jagex's 727 names); never rename an opcode here alone. Never reorder the enum or change `hasIntConstant` or `familyId`.
 
 ## THE CARDINAL RULE: CERTAINTY BEFORE RENAMING
 
@@ -36,27 +36,14 @@ The bulk deobfuscation pass is **finished**. There are no `ClassNNN`, `Node_SubN
 | Remaining work | Where | Notes |
 |---|---|---|
 | ~245 `UNK_N` enum placeholders across 19 files | `GameState`, `ClientProt`, `LoadingStage`, `LoginManager`, `PacketDecoder`, `MapRegion`, `Interface`, and others | Highest-value target. Each needs evidence from every transition or write site, and for packets, from the server side. |
-| CS2 opcodes still named `instrNNNN` | `config/rsinterface/cs2/ClientScriptOpCode.kt`, `tools/cs2/manifest.tsv` | Governed entirely by the CS2 audit rules below. |
-| CS2 opcodes with official-looking names but weak tiers | `tools/cs2/manifest.tsv` | ~30 rows whose tier is UNKNOWN or SPECULATIVE. Some are fabrications to revert, some are correct names that never recorded evidence. Tier first, rename second. |
 | ~35 identifiers already judged unrenameable | listed in your memory under "Remaining Unrenameable Identifiers" | 11 `methodNNNNN` (native-bound or comment-only), a few `anIntNNNN`/`aBoolNNNN` with no references. Re-examine only if new evidence appears. |
 | Structural cleanup | anywhere | Inline FQNs, misplaced files, dead code the deobfuscation exposed, `var` locals that should be `val`. |
 
 Naming conventions to match: PascalCase classes, camelCase members (`@JvmField` is required on public fields for interop and must be preserved), UPPER_SNAKE_CASE constants and enum values, `is`/`has`/`should` prefixes on booleans, and established RuneTek terms (`LocType`, `NpcType`, `plane`, `tileX`, `pulse`, `decode`, `unpack`).
 
-## CS2 Opcode Audit Rules
+## Rename Gates
 
-The CS2 engine is critical and has its own harness. Read `tools/cs2/README.md` before touching it. The essentials:
-
-- `tools/cs2/manifest.tsv` is the source of truth. Tiers: `CONFIRMED` (two independent signals, one structural), `INFERRED` (one strong signal, nothing contradicting), `SPECULATIVE`, `UNKNOWN`. **Only CONFIRMED and INFERRED opcodes may carry a name; SPECULATIVE and UNKNOWN must keep `instrNNNN`.** Only CONFIRMED entries may anchor further inference.
-- **The arbiter for "unnamed" is `$CS2_REF_DIR/unusedinstructions.txt`** (default `~/darkan/world-server/developer-information`). If Jagex's own dump declines to name an opcode, `instrNNNN` is its canonical name and any invented name must be reverted.
-- Cross-check every candidate name against `developer-information/CS2InstructionType.java`. A proposed name may already be taken by a legitimately attested opcode; that refutes the proposal.
-- `verify.py` under-reports fabricated names (about 8 at a time). Enumerate the real set directly from the manifest: tier in UNKNOWN/SPECULATIVE and enum name not matching `^instr\d+$`.
-- Enum declaration order and `hasIntConstant` flags are load-bearing. Never reorder the enum; never change a flag.
-- Useful commands: `python3 verify.py`, `python3 fingerprint.py --unknown`, `python3 build_manifest.py` after a rename, `python3 record_provenance.py` to write tier and evidence.
-
-## Rename Tooling and Gates
-
-Use `tools/refactor/apply_renames.py` for anything beyond a single-file edit. It takes a JSON list of `{oldName, newName, scope, file, funcStart, funcEnd}` with scopes `global-token`, `file-local`, and `function-local`; it is dry-run by default and refuses collisions unless forced. Before any `global-token` rename, both gates must pass:
+Before any tree-wide rename, both gates must pass:
 
 1. **Declaration uniqueness.** Count files that *declare* the token (`val|var|fun|class` or a `name:` parameter), not files that mention it. A token declared in more than one place is several symbols, and a tree-wide rename corrupts the others.
 2. **Override family versus distinct symbols.** Multiple declarations are one symbol only if all but one are `override`; then rename them together. Otherwise scope each rename per symbol.
@@ -65,7 +52,7 @@ Further gates learned the hard way:
 
 - **Check comment usage before renaming any short ALL-CAPS name.** `NOOP` was an idiomatic marker in 118 empty catch blocks; renaming the enum constant rewrote all of them.
 - **Sweep non-Kotlin files.** `src/main/resources/shaders/*` carry class names in header comments.
-- **Whole-word matching only.** `Class111` is a substring of `aClass1111109`; the Edit tool's `replace_all` matches substrings. Prefer `sed` with `\b` boundaries or the rename script.
+- **Whole-word matching only.** `Class111` is a substring of `aClass1111109`; the Edit tool's `replace_all` matches substrings. Prefer `sed` with `\b` boundaries.
 - **Never sed-replace short locals file-wide.** The same local name recurs in different scopes with different meanings.
 - Kotlin constructor parameters and `@JvmField` properties cannot share a name; check before renaming either.
 
@@ -76,7 +63,6 @@ Further gates learned the hard way:
 analyze                    reach certainty, or stop and report
 rename                     declaration first, then every reference
 ./gradlew build            green before the next unit
-tools/cs2/verify.py        if the CS2 package was touched
 ```
 
 A unit is one class rename, one method rename across all overrides and call sites, one field across all sites, or a small batch of tightly related identifiers in the same scope (x/y/z, a handful of parameters in one function). Never batch unrelated renames between builds; if the build fails you will not know which rename broke it. Filter build output with `grep "^e:"` and confirm every error is in a file you touched. If the incremental build looks suspicious, `./gradlew clean build`.
@@ -115,7 +101,7 @@ For a rename you are executing:
 **Applied:** yes, build green (or: build failed, with the error)
 ```
 
-End every task with a short summary: what was renamed, what was analyzed but left alone and why, the build result, and the `verify.py` result if CS2 was touched.
+End every task with a short summary: what was renamed, what was analyzed but left alone and why, and the build result.
 
 ## Collaboration
 

@@ -6,7 +6,7 @@ package com.jagex.game.runetek5.config.rsinterface.cs2
 enum class ClientScriptOpCode(
     @JvmField val opcode: Int,
     @JvmField val hasIntConstant: Boolean = false,
-    /** Which ops object handles this opcode; see CS2Dispatch. Generated. */
+    /** Which ops object handles this opcode; see CS2Dispatch. */
     @JvmField val familyId: Int = 0,
 ) {
     PUSH_CONSTANT_INT(79, true, 0),
@@ -113,8 +113,8 @@ enum class ClientScriptOpCode(
     CC_SETMAXLINES(77, familyId = 2),
     CC_SETPARAM_INT(497, familyId = 2),
     CC_SETPARAM_STRING(639, familyId = 2),
-    CC_SETVIDEO_GRAPHIC(513, familyId = 2),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
-    CC_SETVIDEO_TEXT(100, familyId = 2),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    CC_SETVIDEO_GRAPHIC(513, familyId = 2),
+    CC_SETVIDEO_TEXT(100, familyId = 2),
     CC_SETRECOL(589, familyId = 2),
     CC_SETRETEX(579, familyId = 2),
     CC_SETFONTMONO(476, familyId = 2),
@@ -130,7 +130,7 @@ enum class ClientScriptOpCode(
     CC_SETMODELLIGHTING_SUNROTATION(314, familyId = 2),
     CC_SETOBJECT_WEARCOL(878, familyId = 2),
     CC_SETOBJECT_WEARCOL_NONUM(173, familyId = 2),
-    CC_SETMODEL_ITEMCONTAINER(928, familyId = 2),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    CC_SETMODEL_ITEMCONTAINER(928, familyId = 2),
     CC_SETPLAYERMODEL_SELF(443, familyId = 2),
     CC_SETOBJECT_ALWAYSNUM(998, familyId = 2),
     CC_SETOBJECT_WEARCOL_ALWAYSNUM(834, familyId = 2),
@@ -256,8 +256,8 @@ enum class ClientScriptOpCode(
     IF_SETMAXLINES(432, familyId = 4),
     IF_SETPARAM_INT(369, familyId = 4),
     IF_SETPARAM_STRING(198, familyId = 4),
-    IF_SETVIDEO_GRAPHIC(479, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
-    IF_SETVIDEO_TEXT(206, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    IF_SETVIDEO_GRAPHIC(479, familyId = 4),
+    IF_SETVIDEO_TEXT(206, familyId = 4),
     IF_SETRECOL(194, familyId = 4),
     IF_SETRETEX(950, familyId = 4),
     IF_SETFONTMONO(316, familyId = 4),
@@ -271,11 +271,11 @@ enum class ClientScriptOpCode(
     IF_SETMODELLIGHTING(203, familyId = 4),
     IF_SETMODELLIGHTING_SUNROTATION(598, familyId = 4),
     IF_SETOBJECT_WEARCOL(518, familyId = 4),
-    IF_SETOBJECT_WEARCOL_NONUM(352, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
-    IF_SETMODEL_ITEMCONTAINER(744, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    IF_SETOBJECT_WEARCOL_NONUM(352, familyId = 4),
+    IF_SETMODEL_ITEMCONTAINER(744, familyId = 4),
     IF_SETPLAYERMODEL_SELF(499, familyId = 4),
     IF_SETOBJECT_ALWAYSNUM(552, familyId = 4),
-    IF_SETOBJECT_WEARCOL_ALWAYSNUM(898, familyId = 4),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    IF_SETOBJECT_WEARCOL_ALWAYSNUM(898, familyId = 4),
     IF_SETOP(255, familyId = 4),
     IF_SETDRAGGABLE(899, familyId = 4),
     IF_SETDRAGRENDERBEHAVIOUR(495, familyId = 4),
@@ -664,7 +664,7 @@ enum class ClientScriptOpCode(
     CHATPHRASE_GETDYNAMICCOMMANDPARAM_ENUM(349, familyId = 12),
     CHATPHRASE_FIND(711, familyId = 12),
     CHATPHRASE_FINDNEXT(830, familyId = 12),
-    CHATPHRASE_FINDRESTART(227, familyId = 12),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    CHATPHRASE_FINDRESTART(227, familyId = 12),
     ACTIVECHATPHRASE_SENDCLANCHANNEL_AFFINED(285, familyId = 12),
     ACTIVECHATPHRASE_SENDCLANCHANNEL_LISTENED(663, familyId = 12),
     KEYHELD_ALT(290, familyId = 12),
@@ -762,7 +762,7 @@ enum class ClientScriptOpCode(
     CREATE_CREATEREQUEST(686, familyId = 13),
     CREATE_CONNECTREQUEST(362, familyId = 13),
     CREATE_STEP_REACHED(684, familyId = 13),
-    LOGIN_REPLY_WORLD_ALT(1003, familyId = 13),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    LOGIN_REPLY_WORLD_ALT(1003, familyId = 13),
     LOGIN_HOPTIME(9, familyId = 13),
     CREATE_REPLY(92, familyId = 13),
     CREATE_EMAIL_VALIDATE_REPLY(742, familyId = 13),
@@ -926,7 +926,7 @@ enum class ClientScriptOpCode(
     SOUND_VORBIS_PRELOAD(174, familyId = 14),
     SOUND_VORBIS_STOP(88, familyId = 14),
     SOUND_VORBIS_PLAY(762, familyId = 14),
-    VIDEOADVERT_ISSUPPORTED(548, familyId = 14),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    VIDEOADVERT_ISSUPPORTED(548, familyId = 14),
     VIDEO_ADVERT_PLAY(766, familyId = 14),
     VIDEO_ADVERT_FORCE_REMOVE(507, familyId = 14),
     VIDEO_ADVERT_ALLOW_SKIP(576, familyId = 14),
@@ -968,7 +968,7 @@ enum class ClientScriptOpCode(
     GETENTITYOVERHEADIF(282, familyId = 15),
     GET_ENTITY_SAY(378, familyId = 15),
     GET_DISPLAYNAME_WITHEXTRAS(812, familyId = 15),
-    CC_LOADENTITYMODEL(740, familyId = 15),  // listed as UNUSED in developer-information/unusedinstructions.txt; no official name
+    CC_LOADENTITYMODEL(740, familyId = 15),
     IF_CREATE(29, familyId = 15),
     GET_NPC_NAME(660, familyId = 15),
     GET_NPC_VISLEVEL(165, familyId = 15),
