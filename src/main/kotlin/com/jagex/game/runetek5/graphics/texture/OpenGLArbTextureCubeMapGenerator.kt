@@ -20,7 +20,7 @@ class OpenGLArbTextureCubeMapGenerator(
 
     @JvmField var arbCubeMapTexture: OpenGlArbCubeMapTexture? = null
 
-    override fun getCubeTexture(): OpenGlArbCubeMapTexture {
+    override fun getCubeTexture(): OpenGlArbCubeMapTexture? {
         if (arbCubeMapTexture == null) {
             val materialProvider = openglToolkit.materialProvider
             MATERIAL_BUFFER[0] = materialAtPositiveX
@@ -34,7 +34,7 @@ class OpenGLArbTextureCubeMapGenerator(
 
             for (index in 0 until 6) {
                 if (!materialProvider!!.isCached(MATERIAL_BUFFER[index])) {
-                    return arbCubeMapTexture!!
+                    return null
                 }
 
                 val material = materialProvider!!.getMaterial(MATERIAL_BUFFER[index])

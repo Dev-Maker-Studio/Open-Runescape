@@ -19,7 +19,7 @@ class OpenGlCubeTextureGenerator(
         largestMaterialSize
     )
 
-    override fun getCubeTexture(): OpenGlArbCubeMapTexture {
+    override fun getCubeTexture(): OpenGlArbCubeMapTexture? {
         return cubeTexture
     }
 
