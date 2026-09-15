@@ -1226,6 +1226,7 @@ class ModernGLToolkit(
                     batcherActive = false
                 } else {
                     // Batch open but empty: just re-arm the new VP and lighting.
+                    ensureSceneTarget()
                     if (useOptimizedBatcher) {
                         optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
                         if (useInstancing) {
@@ -1292,6 +1293,11 @@ class ModernGLToolkit(
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fb.getId())
         sceneMsaaBound = true
         sceneMsaaActiveSamples = samples
+    }
+
+    // A resolve (bloom capture, offscreen display) can leave an open, empty batch unbound.
+    private fun ensureSceneTarget() {
+        if (!sceneMsaaBound && directDisplayCursorPosition < 0) bindSceneMsaa()
     }
 
     /** Resolves the multisampled scene into the framebuffer that was bound before [bindSceneMsaa]. */
@@ -2473,6 +2479,7 @@ class ModernGLToolkit(
         if (flushed) {
             openSceneBatch()
         } else if (isSceneBatchActive()) {
+            ensureSceneTarget()
             armBatchLightingAndFog()
         }
     }
@@ -6113,6 +6120,7 @@ class ModernGLToolkit(
         // terrain draws over them; otherwise the deferred fog-colored fill is
         // flushed later in the frame and paints over the already-drawn terrain.
         if (isSpriteBatchActive) endSpriteBatch()
+        ensureSceneTarget()
 
         // The index list depends only on the visible tile set and this material's tile
         // masks, so a frame with the same visible set (the camera did not move) reuses
