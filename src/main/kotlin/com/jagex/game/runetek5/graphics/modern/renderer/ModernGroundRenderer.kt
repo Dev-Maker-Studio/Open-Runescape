@@ -108,6 +108,7 @@ class ModernGroundRenderer {
     /** Mapper whose texture the bound program currently samples; null = uniforms stale. */
     private var boundShadowMapper: ShadowMapperGL? = null
     private var shadowTexelSize = 32f
+    private val SHADOW_TEXTURE_UNIT = 4
     private var shadowUploadScratch: ByteBuffer? = null
     private var shadowFrame = 0L
     private var shadowDiagCount = 0
@@ -255,17 +256,16 @@ class ModernGroundRenderer {
         if (en < 0) return
         if (sm == null) { GLWrapper.uniform1i(en, 0); return }
         val e = shadowEntryFor(sm)
+        // The upload binds on the active unit; unit 0 must keep the material texture the pass cached.
+        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + SHADOW_TEXTURE_UNIT)
         syncShadowTexture(e)
+        glBindTexture(GL_TEXTURE_2D, e.tex)
+        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
         GLWrapper.uniform1i(en, 1)
         val sc = s.getUniformLocation("uGroundShadowScale")
         if (sc >= 0) GLWrapper.uniform1f(sc, 1f / (shadowTexelSize * e.w))
         val tx = s.getUniformLocation("uGroundShadowTex")
-        if (tx >= 0) {
-            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + 4)
-            glBindTexture(GL_TEXTURE_2D, e.tex)
-            GLWrapper.uniform1i(tx, 4)
-            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
-        }
+        if (tx >= 0) GLWrapper.uniform1i(tx, SHADOW_TEXTURE_UNIT)
     }
 
     /** Point lights for this frame, evaluated in the ground shaders (no FFP). */
