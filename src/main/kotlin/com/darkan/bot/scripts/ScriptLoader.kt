@@ -46,10 +46,13 @@ class JarDirectoryScanner(
         onSuccess = { it }
     )
 
-    private fun findJarFiles(): Array<String>? =
-        File(directoryPath).list { _, fileName ->
-            fileName.lowercase().endsWith(FileExtensions.JAR)
-        }
+    private fun findJarFiles(): Array<String> =
+        File(directoryPath).walkTopDown()
+            .onEnter { !it.isHidden && it.name != ".git" }
+            .filter { it.isFile && it.name.lowercase().endsWith(FileExtensions.JAR) }
+            .map { it.toRelativeString(File(directoryPath)) }
+            .toList()
+            .toTypedArray()
 
     private fun scanJarFiles(jarPaths: List<String>): List<Class<*>> =
         ClassGraph()

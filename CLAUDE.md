@@ -131,9 +131,11 @@ same files, so the two must stay in sync:
   `darkan-script-dev` skill read this client's API from GitLab raw URLs on `dev`.
 - `java -cp darkan-client.jar com.darkan.bot.scripts.ScriptCheckKt <dir>` compiles a folder of `.kts`
   scripts exactly as the client does (`KotlinScriptScanner.load`) and exits 1 on any failure.
-- `<scripts>/lib/*.kts` is shared code: the loader adds it as `importScripts` for every root script (a
-  `beforeCompiling` refinement skips lib files themselves to avoid the self-import cycle). Root only is
-  scanned for scripts.
+- Scripts load from the whole folder tree (`KotlinScriptScanner.scripts()`), skipping `lib/`, hidden
+  folders and `.git`; a compiled script is named after its file alone, so a duplicate file name
+  anywhere in the tree is skipped with a message instead of shadowing the first.
+- `<scripts>/lib/*.kts` is shared code: the loader adds it as `importScripts` for every script (a
+  `beforeCompiling` refinement skips lib files themselves to avoid the self-import cycle).
 - Script settings: `scripts/ScriptConfig.kt` is pure data (items, `ConfigSection`, `ConfigAction`/
   `withAction`, `ConfigVisibilityProvider`, `ScriptConfigStore`), ported from darkan-3-undercut so
   scripts never touch Swing; `ui/ScriptConfigWrapper.kt` renders the form and calls

@@ -44,32 +44,47 @@ class KotlinScriptScanner(
 
     val libraryDirectory = File(scriptsDirectory, LIBRARY_DIRECTORY)
 
-    fun libraries(): List<File> =
-        libraryDirectory.walkTopDown()
+    fun libraries(): List<File> = ktsFilesIn(libraryDirectory) { true }
+
+    /** Every script in the folder tree: any `.kts` outside `lib/`, so users can group them into folders. */
+    fun scripts(): List<File> = ktsFilesIn(scriptsDirectory) { directory -> !directory.isLibrary() }
+
+    fun relativePath(file: File): String =
+        file.toRelativeString(scriptsDirectory).replace(File.separatorChar, '/')
+
+    private fun ktsFilesIn(root: File, enter: (File) -> Boolean): List<File> {
+        if (!root.isDirectory) return emptyList()
+        return root.walkTopDown()
+            .onEnter { directory -> directory == root || (!directory.isHidden && directory.name != ".git" && enter(directory)) }
             .filter { it.isFile && it.extension.equals("kts", ignoreCase = true) }
-            .sortedBy { it.path }
+            .sortedBy { relativePath(it) }
             .toList()
+    }
+
+    private fun File.isLibrary(): Boolean = canonicalPath == libraryDirectory.canonicalPath
 
     override fun scan(): List<Class<*>> {
         if (!scriptsDirectory.exists() || !scriptsDirectory.isDirectory) {
             return emptyList()
         }
 
-        val ktsFiles = scriptsDirectory.listFiles { file ->
-            file.isFile && file.extension.equals("kts", ignoreCase = true)
-        } ?: return emptyList()
-
         val loadedScripts = mutableListOf<Class<*>>()
+        val loadedFrom = mutableMapOf<String, String>()
 
-        for (file in ktsFiles.sortedBy { it.name }) {
+        for (file in scripts()) {
+            val path = relativePath(file)
             try {
-                val scriptClass = load(file)
-                if (scriptClass != null) {
-                    loadedScripts.add(scriptClass)
-                    println("✓ Loaded KotlinScript: ${file.name}")
+                val scriptClass = load(file) ?: continue
+                val previous = loadedFrom.put(scriptClass.name, path)
+                if (previous != null) {
+                    loadedFrom[scriptClass.name] = previous
+                    println("✗ Skipped KotlinScript $path: its file name collides with $previous, so both compile to ${scriptClass.name}. Rename one of them.")
+                    continue
                 }
+                loadedScripts.add(scriptClass)
+                println("✓ Loaded KotlinScript: $path")
             } catch (e: Exception) {
-                println("✗ Failed to load KotlinScript ${file.name}: ${e.message}")
+                println("✗ Failed to load KotlinScript $path: ${e.message}")
                 e.printStackTrace()
             }
         }
@@ -85,7 +100,7 @@ class KotlinScriptScanner(
             }
 
             val scriptSource = file.toScriptSource()
-            val compilationConfig = configurationImporting(libraries())
+            val compilationConfig = configurationImporting(libraries().filter { it.canonicalPath != file.canonicalPath })
 
             val evalResult = scriptingHost.eval(scriptSource, compilationConfig, null)
 
@@ -143,6 +158,10 @@ class KotlinScriptScanner(
             }
     }
 
+    /**
+     * Imported scripts are compiled alongside the script that imports them, so a library must not
+     * be handed its own import list; that reads as a dependency cycle and fails every compilation.
+     */
     private fun configurationImporting(libraries: List<File>): ScriptCompilationConfiguration {
         val base = BotScriptCompilationConfiguration()
         if (libraries.isEmpty()) return base

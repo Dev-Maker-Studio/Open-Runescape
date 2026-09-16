@@ -6,31 +6,34 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val directory = File(args.firstOrNull() ?: getScriptsDirectory().absolutePath)
-    val files = directory.listFiles { file -> file.extension.equals("kts", ignoreCase = true) }
-        ?.sortedBy { it.name }
-        .orEmpty()
-    if (files.isEmpty()) {
+    val scanner = KotlinScriptScanner(directory)
+    val libraries = scanner.libraries()
+    val files = scanner.scripts()
+    if (files.isEmpty() && libraries.isEmpty()) {
         println("No .kts scripts found in ${directory.absolutePath}")
         exitProcess(1)
     }
 
-    val scanner = KotlinScriptScanner(directory)
     var failures = 0
-    for (library in scanner.libraries()) {
+    for (library in libraries) {
+        val path = scanner.relativePath(library)
         val errors = scanner.compileErrors(library)
         if (errors.isEmpty()) {
-            println("OK   ${library.relativeTo(directory).path} (shared, compiled into every script)")
+            println("OK   $path (shared, compiled into every script)")
         } else {
             failures++
-            println("FAIL ${library.relativeTo(directory).path} (shared, breaks every script)")
+            println("FAIL $path (shared, breaks every script)")
             errors.forEach { println("     $it") }
         }
     }
+
+    val loadedFrom = mutableMapOf<String, String>()
     for (file in files) {
+        val path = scanner.relativePath(file)
         val scriptClass = scanner.load(file)
         if (scriptClass == null) {
             failures++
-            println("FAIL ${file.name}")
+            println("FAIL $path")
             continue
         }
         val problems = mutableListOf<String>()
@@ -39,14 +42,20 @@ fun main(args: Array<String>) {
         if (Modifier.isAbstract(scriptClass.modifiers)) problems += "script class is abstract"
         runCatching { scriptClass.getDeclaredConstructor() }
             .onFailure { problems += "no no-arg constructor, the client cannot start it" }
+        loadedFrom.put(scriptClass.name, path)?.let { previous ->
+            loadedFrom[scriptClass.name] = previous
+            problems += "file name collides with $previous, so both compile to ${scriptClass.name}; the client loads only one. Rename one of them."
+        }
         if (problems.isEmpty()) {
-            println("OK   ${file.name} -> ${description?.name} v${description?.version} by ${description?.author} [${description?.category}]")
+            println("OK   $path -> ${description?.name} v${description?.version} by ${description?.author} [${description?.category}]")
         } else {
             failures++
-            println("FAIL ${file.name}")
+            println("FAIL $path")
             problems.forEach { println("     $it") }
         }
     }
-    println("${files.size + scanner.libraries().size - failures}/${files.size + scanner.libraries().size} file(s) passed")
+
+    val total = files.size + libraries.size
+    println("${total - failures}/$total file(s) passed")
     exitProcess(if (failures == 0) 0 else 1)
 }
