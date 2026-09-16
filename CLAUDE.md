@@ -126,6 +126,24 @@ same files, so the two must stay in sync:
 ## Key Features
 
 ### 1. Bot Scripting Framework
+- Public scripts live in the `darkanrs/bot-scripts` GitLab repo (checked out locally at `~/.darkan/scripts`,
+  the folder the client scans); no scripts ship inside the client. That repo's `CLAUDE.md` and
+  `darkan-script-dev` skill read this client's API from GitLab raw URLs on `dev`.
+- `java -cp darkan-client.jar com.darkan.bot.scripts.ScriptCheckKt <dir>` compiles a folder of `.kts`
+  scripts exactly as the client does (`KotlinScriptScanner.load`) and exits 1 on any failure.
+- `<scripts>/lib/*.kts` is shared code: the loader adds it as `importScripts` for every root script (a
+  `beforeCompiling` refinement skips lib files themselves to avoid the self-import cycle). Root only is
+  scanned for scripts.
+- Script settings: `scripts/ScriptConfig.kt` is pure data (items, `ConfigSection`, `ConfigAction`/
+  `withAction`, `ConfigVisibilityProvider`, `ScriptConfigStore`), ported from darkan-3-undercut so
+  scripts never touch Swing; `ui/ScriptConfigWrapper.kt` renders the form and calls
+  `onConfigUpdated()`. Values persist per class name across reload via `ScriptInstances.instantiate`.
+- `ScriptRepository` (JGit, bundled) keeps the scripts folder a checkout of `darkanrs/bot-scripts` `dev`:
+  `Bot.main` runs it async before the first load when `-Dbot.enabled=true`
+  (`-Dbot.scripts.sync=false` disables, `-Dbot.scripts.remote=<url>` overrides), the sidebar's
+  "Update scripts" button reruns it, and `ScriptRepositoryKt <dir>` is the CLI. Init in place +
+  rename colliding files to `.local`; fast-forward only; never touches dirty trees, other branches or
+  diverged commits. `ScriptExecutor.addReloadListener` refreshes the sidebar after any load.
 - Kotlin-based scripting engine
 - Runtime script compilation
 - Automated gameplay capabilities

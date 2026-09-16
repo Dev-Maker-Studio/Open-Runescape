@@ -1,12 +1,12 @@
 package com.darkan.bot
 
-import com.darkan.bot.scripts.ScriptConfigWrapper
 import com.darkan.bot.scripts.ScriptMetadata
 import com.darkan.bot.ui.BotWorkspace
 import com.darkan.bot.ui.Dockable
 import com.darkan.bot.ui.DockablePane
 import com.darkan.bot.ui.LogBus
 import com.darkan.bot.ui.LogsPanel
+import com.darkan.bot.ui.ScriptConfigWrapper
 import com.darkan.bot.ui.ScriptsPanel
 import com.darkan.bot.ui.SettingsPanel
 import com.darkan.bot.ui.SkillsPanel

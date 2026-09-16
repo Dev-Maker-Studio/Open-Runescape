@@ -3,8 +3,10 @@ package com.darkan.bot.ui
 import com.darkan.bot.scripts.ConfigItem
 import com.darkan.bot.scripts.ConfigurableScript
 import com.darkan.bot.scripts.Script
+import com.darkan.bot.scripts.ScriptConfigStore
 import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.scripts.ScriptMetadata
+import com.darkan.bot.scripts.ScriptRepository
 import com.darkan.bot.scripts.getScriptsDirectory
 import java.awt.BorderLayout
 import java.awt.CardLayout
@@ -78,6 +80,7 @@ object ScriptInstances {
 
     private fun instantiate(metadata: ScriptMetadata): Script =
         metadata.scriptClass.getDeclaredConstructor().also { it.isAccessible = true }.newInstance()
+            .also { ScriptConfigStore.applyTo(it) }
 
     @Suppress("UNCHECKED_CAST")
     fun copyConfig(from: Any, to: Any) {
@@ -105,6 +108,7 @@ class ScriptsPanel(
     private val categoryFilter = JComboBox<String>()
     private val statusFilter = JComboBox(arrayOf("All", "Running", "Stopped"))
     private val stopAllButton: JButton
+    private val updateButton: JButton
     private val list = VerticalListPanel().apply { isOpaque = false }
     private val emptyState = EmptyState("No scripts found")
     private val centerLayout = CardLayout()
@@ -127,6 +131,8 @@ class ScriptsPanel(
             refreshCards()
         }
 
+        updateButton = button("Update scripts", "Fetch the latest scripts from GitLab, then reload") { updateScripts() }
+
         val filters = JPanel().apply {
             isOpaque = false
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
@@ -138,6 +144,7 @@ class ScriptsPanel(
             ).apply { alignmentX = LEFT_ALIGNMENT })
             add(toolbarRow(
                 button("Reload scripts", "Reload every script from disk, including .kts files") { reloadScripts() },
+                updateButton,
                 stopAllButton,
                 button("Open scripts folder", "Open the scripts folder in your file manager") { openScriptsFolder() },
             ).apply { alignmentX = LEFT_ALIGNMENT })
@@ -165,6 +172,12 @@ class ScriptsPanel(
         restoreFilters()
         rebuild()
 
+        ScriptExecutor.addReloadListener {
+            SwingUtilities.invokeLater {
+                populateCategories()
+                rebuild()
+            }
+        }
         Timer(1000) { refreshCards() }.start()
     }
 
@@ -221,6 +234,22 @@ class ScriptsPanel(
         }
     }
 
+    private fun updateScripts() {
+        updateButton.isEnabled = false
+        rebuild()
+        ScriptRepository.syncAsync { outcome ->
+            println(outcome.message)
+            ScriptExecutor.loadScripts()
+            SwingUtilities.invokeLater {
+                updateButton.isEnabled = true
+                JOptionPane.showMessageDialog(
+                    this, outcome.message, "Update scripts",
+                    if (outcome.ok) JOptionPane.INFORMATION_MESSAGE else JOptionPane.ERROR_MESSAGE
+                )
+            }
+        }
+    }
+
     private fun openScriptsFolder() {
         try {
             val dir = getScriptsDirectory()
@@ -270,8 +299,9 @@ class ScriptsPanel(
 
         if (scripts.isEmpty()) {
             emptyState.message = when {
+                ScriptRepository.syncing -> "Updating scripts from GitLab..."
                 ScriptExecutor.scripts.isEmpty() ->
-                    "<html><center>No scripts loaded.<br>Drop .kts or .jar files into<br>${getScriptsDirectory().absolutePath}<br>and press Reload scripts.</center></html>"
+                    "<html><center>No scripts loaded.<br>Press Update scripts to fetch the public ones,<br>or drop .kts or .jar files into<br>${getScriptsDirectory().absolutePath}<br>and press Reload scripts.</center></html>"
                 else -> "No scripts match the current filters."
             }
             centerLayout.show(center, "empty")
