@@ -23,8 +23,10 @@ private object StayloggedInTask: Script() {
 }
 
 object ScriptExecutor {
-    private val _scripts = mutableMapOf<String, ScriptMetadata>()
-    val scripts: Map<String, ScriptMetadata> get() = _scripts
+    @Volatile
+    private var registry: Map<String, ScriptMetadata> = emptyMap()
+    val scripts: Map<String, ScriptMetadata> get() = registry
+    private val reloadListeners = CopyOnWriteArrayList<() -> Unit>()
 
     private val _activeScripts = ConcurrentHashMap<String, Script>()
     val activeScripts: Collection<Script> get() = _activeScripts.values
@@ -127,25 +129,25 @@ object ScriptExecutor {
 
     fun isPaused(): Boolean = pausingScript != null
 
-    private fun clearScripts() {
-        _scripts.clear()
+    private fun metadataOf(scriptClass: Class<out Script>): ScriptMetadata? {
+        val annotation = scriptClass.getAnnotation(ScriptDescription::class.java) ?: return null
+        if (!annotation.visible) return null
+        return ScriptMetadata(
+            scriptClass = scriptClass,
+            name = annotation.name,
+            version = annotation.version,
+            author = annotation.author,
+            description = annotation.description,
+            category = annotation.category
+        )
     }
 
-    private fun registerScript(scriptClass: Class<out Script>) {
-        val annotation = scriptClass.getAnnotation(ScriptDescription::class.java)
-        if (annotation != null && annotation.visible) {
-            val metadata = ScriptMetadata(
-                scriptClass = scriptClass,
-                name = annotation.name,
-                version = annotation.version,
-                author = annotation.author,
-                description = annotation.description,
-                category = annotation.category
-            )
-            _scripts[metadata.toString()] = metadata
-        }
+    /** Called on the loading thread after every [loadScripts]; UI listeners must hop to the EDT themselves. */
+    fun addReloadListener(listener: () -> Unit) {
+        reloadListeners.add(listener)
     }
 
+    @Synchronized
     fun loadScripts() {
         println("🔍 ScriptExecutor.loadScripts() called")
 
@@ -184,10 +186,16 @@ object ScriptExecutor {
             .mapNotNull { isScriptClass(it) }
             .sortedBy { it.getAnnotation(ScriptDescription::class.java).name }
 
-        clearScripts()
-        scripts.forEach(::registerScript)
+        registry = scripts.mapNotNull(::metadataOf).associateBy { it.toString() }
 
-        println("✓ Loaded ${scripts.size} script(s)")
+        println("✓ Loaded ${registry.size} script(s)")
+        reloadListeners.forEach { listener ->
+            try {
+                listener()
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun getScriptsDirectoryFile(): File {

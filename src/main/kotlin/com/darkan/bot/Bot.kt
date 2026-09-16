@@ -1,6 +1,7 @@
 package com.darkan.bot
 
 import com.darkan.bot.scripts.ScriptExecutor
+import com.darkan.bot.scripts.ScriptRepository
 import com.darkan.bot.utils.*
 import com.darkan.crash.CrashHandler
 import com.jagex.game.launch.Loader
@@ -40,7 +41,14 @@ fun main(args: Array<String>) {
     CrashHandler.install()
     // Off by default; pass -Dbot.enabled=true to show the bot sidebar.
     Bot.ENABLED = System.getProperty("bot.enabled")?.toBoolean() ?: false
-    ScriptExecutor.loadScripts()
+    if (Bot.ENABLED && ScriptRepository.syncOnStartup) {
+        ScriptRepository.syncAsync { outcome ->
+            println(outcome.message)
+            ScriptExecutor.loadScripts()
+        }
+    } else {
+        ScriptExecutor.loadScripts()
+    }
     Loader.main(args)
 }
 

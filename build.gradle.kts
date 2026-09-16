@@ -98,6 +98,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("io.github.classgraph:classgraph:4.8.177")
     implementation("com.github.weisj:darklaf-core:3.0.2")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.8.0.202609011348-r")
+    runtimeOnly("org.slf4j:slf4j-nop:2.0.17")
 
     // LWJGL3 - Modern OpenGL bindings (for rendering modernization)
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
