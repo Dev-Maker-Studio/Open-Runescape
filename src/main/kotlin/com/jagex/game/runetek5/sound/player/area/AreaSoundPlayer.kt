@@ -115,7 +115,7 @@ object AreaSoundPlayer {
                                     } else if (currentDistance >= 4096) {
                                         16384
                                     } else {
-                                        (8192 - currentDistance) / 4096 + 8192
+                                        currentDistance * 8192 / 4096 + 8192
                                     }
                                     panValue = (16384 - stereoWidth shr 1) + angle * stereoWidth / 8192
                                 }
