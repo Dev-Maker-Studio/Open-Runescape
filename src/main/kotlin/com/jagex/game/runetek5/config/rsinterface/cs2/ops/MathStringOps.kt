@@ -159,6 +159,7 @@ object MathStringOps {
             ClientScriptOpCode.TOSTRING -> CS2SharedOps.toString(exec)
             ClientScriptOpCode.COMPARE -> stringEqual(exec)
             ClientScriptOpCode.PARAHEIGHT -> paraheight(exec)
+            ClientScriptOpCode.PARAHEIGHT_EXTRA -> paraheightExtra(exec)
             ClientScriptOpCode.PARAWIDTH -> paraWidth(exec)
             ClientScriptOpCode.TEXT_SWITCH -> textSwitch(exec)
             ClientScriptOpCode.ESCAPE -> escape(exec)
@@ -466,6 +467,16 @@ object MathStringOps {
         val fontMetrics: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, fontId)
         assert(fontMetrics != null)
         executor.intStack[++executor.intStackPtr - 1] = fontMetrics!!.getLineCount(text!!, width, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+    }
+
+    @JvmStatic
+    fun paraheightExtra(executor: CS2Executor) {
+        val text = executor.stringStack[--executor.stringStackPtr] as String
+        executor.intStackPtr -= 2
+        val width = executor.intStack[executor.intStackPtr]
+        val fontId = executor.intStack[executor.intStackPtr + 1]
+        val fontMetrics = FontMetrics.getFontMetrics(Resource.FONT_METRICS, fontId)!!
+        executor.intStack[++executor.intStackPtr - 1] = fontMetrics.inlineExtraHeight(text, width)
     }
 
     @JvmStatic

@@ -28,6 +28,9 @@ class ItemContainer : Node<ItemContainer>() {
     @JvmField
     var amounts: IntArray = IntArray(1)
 
+    @JvmField
+    var tooltips: Array<String?> = arrayOfNulls(1)
+
     fun getAnimatedBodyModel(
         toolkit: AbstractToolkit,
         functionMask: Int,
@@ -186,6 +189,29 @@ class ItemContainer : Node<ItemContainer>() {
         }
 
         @JvmStatic
+        fun getTooltipAtSlot(containerId: Int, slot: Int, negativeKey: Boolean): String? {
+            val container = getContainer(containerId, negativeKey) ?: return null
+            return if (slot >= 0 && slot < container.tooltips.size) container.tooltips[slot] else null
+        }
+
+        @JvmStatic
+        fun findTooltipSlot(containerId: Int, preferredSlot: Int, itemId: Int, negativeKey: Boolean): Int {
+            val container = getContainer(containerId, negativeKey) ?: return -1
+            if (preferredSlot >= 0 && preferredSlot < container.itemIds.size && container.itemIds[preferredSlot] == itemId) {
+                return preferredSlot
+            }
+            return container.itemIds.indexOf(itemId)
+        }
+
+        @JvmStatic
+        fun setTooltipInContainer(containerId: Int, slot: Int, tooltip: String?, negativeKey: Boolean) {
+            val container = getContainer(containerId, negativeKey) ?: return
+            if (slot >= 0 && slot < container.tooltips.size) {
+                container.tooltips[slot] = tooltip
+            }
+        }
+
+        @JvmStatic
         fun getContainer(containerId: Int, negativeKey: Boolean): ItemContainer? {
             val key = (containerId.toLong() or if (negativeKey) Int.MIN_VALUE.toLong() else 0)
             return CONTAINER_MAP.get(key) as ItemContainer?
@@ -222,6 +248,7 @@ class ItemContainer : Node<ItemContainer>() {
 
                 container.itemIds = itemIds
                 container.amounts = itemAmounts
+                container.tooltips = container.tooltips.copyOf(slot + 1)
             }
 
             container.itemIds[slot] = itemId
@@ -246,6 +273,7 @@ class ItemContainer : Node<ItemContainer>() {
                     container.itemIds[index] = -1
                     container.amounts[index] = 0
                 }
+                container.tooltips.fill(null)
             }
         }
 

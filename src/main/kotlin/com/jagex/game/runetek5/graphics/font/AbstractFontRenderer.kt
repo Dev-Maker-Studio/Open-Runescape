@@ -37,6 +37,7 @@ abstract class AbstractFontRenderer(
         var justifiedSpaceAccumulator: Int = 0
         @JvmField
         val LINE_BUFFER: Array<String?> = arrayOfNulls(100)
+        private const val EURO_GLYPH = 128
     }
 
     fun renderPlain(text: String?, x: Int, y: Int, color: Int, shadow: Int) {
@@ -129,17 +130,17 @@ abstract class AbstractFontRenderer(
             } else if ("/col" == effect) {
                 argbColorEffect = argbColorEffect and 0xffffff.inv() or (colorArgb and 0xffffff)
             }
-            if ("argb=" == effect) {
+            if (effect.startsWith("argb=")) {
                 argbColorEffect = Utils.parse_int(effect.substring(5))
             } else if ("/argb" == effect) {
                 argbColorEffect = colorArgb
-            } else if ("str=" == effect) {
+            } else if (effect.startsWith("str=")) {
                 strikeThroughEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(4))
             } else if ("str" == effect) {
                 strikeThroughEffect = argbColorEffect and 0xffffff.inv() or 0x800000
             } else if ("/str" == effect) {
                 strikeThroughEffect = -1
-            } else if ("u=" == effect) {
+            } else if (effect.startsWith("u=")) {
                 underlineEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(2))
             } else if ("u" == effect) {
                 underlineEffect = argbColorEffect and 0xffffff.inv()
@@ -147,7 +148,7 @@ abstract class AbstractFontRenderer(
                 underlineEffect = -1
             } else if ("shad=-1".equals(effect, ignoreCase = true)) {
                 shadingEffect = 0
-            } else if ("shad=" == effect) {
+            } else if (effect.startsWith("shad=")) {
                 shadingEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(5))
             } else if ("shad" == effect) {
                 shadingEffect = argbColorEffect and 0xffffff.inv()
@@ -160,6 +161,9 @@ abstract class AbstractFontRenderer(
             // NOOP
         }
     }
+
+    private fun drawInlineSprite(tag: String, x: Int, lineTop: Int): Int =
+        InlineSprites.draw(toolkit, tag, x, lineTop + fontMetrics.verticalSpacing, fontMetrics.topPadding, fontMetrics.lineHeight())
 
     fun calculateJustifiedSpacing(line: String, width: Int) {
         var spaceCount = 0
@@ -204,12 +208,15 @@ abstract class AbstractFontRenderer(
                     } else if ("times" == effect) {
                         ch = 215.toChar()
                     } else if ("euro" == effect) {
-                        ch = 8364.toChar()
+                        ch = EURO_GLYPH.toChar()
                     } else if ("copy" == effect) {
                         ch = 169.toChar()
                     } else {
                         if ("reg" != effect) {
-                            if (effect.startsWith("img=")) {
+                            if (InlineSprites.isTag(effect)) {
+                                currentX += drawInlineSprite(effect, currentX, currentY)
+                                prevChar = -1
+                            } else if (effect.startsWith("img=")) {
                                 try {
                                     val spriteIndex = Utils.parseInt(effect.substring(4))
                                     val sprite = sprites!![spriteIndex]
@@ -292,12 +299,15 @@ abstract class AbstractFontRenderer(
                     } else if ("times" == effect) {
                         ch = 215.toChar()
                     } else if ("euro" == effect) {
-                        ch = 8364.toChar()
+                        ch = EURO_GLYPH.toChar()
                     } else if ("copy" == effect) {
                         ch = 169.toChar()
                     } else {
                         if ("reg" != effect) {
-                            if (effect.startsWith("img=")) {
+                            if (InlineSprites.isTag(effect)) {
+                                currentX += drawInlineSprite(effect, currentX, currentY)
+                                prevChar = -1
+                            } else if (effect.startsWith("img=")) {
                                 try {
                                     val offsetX: Int
                                     val offsetY: Int
@@ -400,22 +410,36 @@ abstract class AbstractFontRenderer(
             LINE_BUFFER[maxLinesToShow - 1] = this.fontMetrics.fitText(LINE_BUFFER[maxLinesToShow - 1]!!, width, sprites as Array<Sprite>?)
             numLines = maxLinesToShow
         }
+        if (numLines <= 0) {
+            return 0
+        }
         if (currentVerticalAlign == 3 && numLines == 1) {
             currentVerticalAlign = 1
         }
+        val above = IntArray(numLines)
+        val below = IntArray(numLines)
+        val extents = IntArray(2)
+        var inlineExtra = 0
+        for (i in 0 until numLines) {
+            InlineSprites.extents(LINE_BUFFER[i]!!, this.fontMetrics.lineHeight(), extents)
+            above[i] = extents[0]
+            below[i] = extents[1]
+            inlineExtra += extents[0] + extents[1]
+        }
+        val firstToLast = currentLineSpacing * (numLines - 1) + inlineExtra - above[0] - below[numLines - 1]
         val startY: Int
         if (currentVerticalAlign == 0) {
-            startY = y + this.fontMetrics.topPadding
+            startY = y + this.fontMetrics.topPadding + above[0]
         } else if (currentVerticalAlign == 1) {
-            startY = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / 2 + y + this.fontMetrics.topPadding
+            startY = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1) - inlineExtra) / 2 + y + this.fontMetrics.topPadding + above[0]
         } else if (currentVerticalAlign == 2) {
-            startY = y + height - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)
+            startY = y + height - this.fontMetrics.bottomPadding - below[numLines - 1] - firstToLast
         } else {
-            var lineSpacingToAdd = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / (numLines + 1)
+            var lineSpacingToAdd = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1) - inlineExtra) / (numLines + 1)
             if (lineSpacingToAdd < 0) {
                 lineSpacingToAdd = 0
             }
-            startY = y + this.fontMetrics.topPadding + lineSpacingToAdd
+            startY = y + this.fontMetrics.topPadding + lineSpacingToAdd + above[0]
             currentLineSpacing += lineSpacingToAdd
         }
         var renderY = startY
@@ -433,7 +457,7 @@ abstract class AbstractFontRenderer(
                 renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
                 justifiedSpaceWidth = 0
             }
-            renderY += currentLineSpacing
+            renderY += currentLineSpacing + below[i] + if (i + 1 < numLines) above[i + 1] else 0
         }
         return numLines
     }

@@ -17,6 +17,7 @@ import com.jagex.game.runetek5.client.input.console.CommandExecutor
 import com.jagex.game.runetek5.client.input.console.Console
 import com.jagex.game.runetek5.client.input.keyboard.KeyRecorder
 import com.jagex.game.runetek5.client.input.mouse.CursorManager
+import com.jagex.game.runetek5.client.input.mouse.Mouse
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.client.login.AccountCreationResponseOpcodes
 import com.jagex.game.runetek5.client.login.AccountCreationStage
@@ -176,6 +177,9 @@ object PlayerWorldOps {
             ClientScriptOpCode.GET_MOUSEBUTTONS -> getMouseButtons(exec)
             ClientScriptOpCode.SELF_PLAYER_UID -> selfPlayerUid(exec)
             ClientScriptOpCode.GET_MINIMENU_TARGET -> getMiniMenuTarget(exec)
+            ClientScriptOpCode.INV_GETTOOLTIP -> invGetTooltip(exec, false)
+            ClientScriptOpCode.INV_OTHER_GETTOOLTIP -> invGetTooltip(exec, true)
+            ClientScriptOpCode.GET_ACTIVE_MINIMENU_INVSLOT -> getActiveMiniMenuInvSlot(exec)
             else -> throw IllegalStateException("opcode $operation is not handled by PlayerWorldOps")
         }
     }
@@ -420,6 +424,42 @@ object PlayerWorldOps {
     @JvmStatic
     fun getActiveMiniMenuEntry(executor: CS2Executor) {
         pushMiniMenuEntry(getActiveEntry(), executor)
+    }
+
+    @JvmStatic
+    fun invGetTooltip(executor: CS2Executor, otherParty: Boolean) {
+        executor.intStackPtr -= 2
+        val containerId = executor.intStack[executor.intStackPtr]
+        val slot = executor.intStack[executor.intStackPtr + 1]
+        executor.stringStack[++executor.stringStackPtr - 1] = ItemContainer.getTooltipAtSlot(containerId, slot, otherParty) ?: ""
+    }
+
+    @JvmStatic
+    fun getActiveMiniMenuInvSlot(executor: CS2Executor) {
+        var containerId = -1
+        var slot = -1
+        var otherParty = false
+        val entry = if (MiniMenu.isOpen) null else getActiveEntry()
+        if (entry != null && entry.itemId != -1 && Mouse.isClicktypeComponent(entry.clickType)) {
+            var component = Component.fromHash(entry.param1)
+            search@ while (component != null) {
+                for (candidate in component.mouseLeaveArrayParams ?: intArrayOf()) {
+                    for (other in booleanArrayOf(false, true)) {
+                        val found = ItemContainer.findTooltipSlot(candidate, entry.param0, entry.itemId, other)
+                        if (found != -1) {
+                            containerId = candidate
+                            slot = found
+                            otherParty = other
+                            break@search
+                        }
+                    }
+                }
+                component = if (component.parentId == -1) null else Component.fromHash(component.parentId)
+            }
+        }
+        executor.intStack[++executor.intStackPtr - 1] = containerId
+        executor.intStack[++executor.intStackPtr - 1] = slot
+        executor.intStack[++executor.intStackPtr - 1] = if (otherParty) 1 else 0
     }
 
     @JvmStatic

@@ -28,6 +28,9 @@ import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 import com.jagex.game.runetek5.config.quickchat.QuickchatMessageTypeList
 import com.jagex.game.runetek5.config.rsinterface.*
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
+import com.jagex.game.runetek5.config.rsinterface.itemcontainer.invSlotFromHeader
+import com.jagex.game.runetek5.config.rsinterface.itemcontainer.readInvSlotTooltip
+import com.jagex.game.runetek5.config.rsinterface.itemcontainer.readInvTooltips
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer
 import com.jagex.game.runetek5.config.sequence.MovementType
 import com.jagex.game.runetek5.config.sequence.PositionedGfx
@@ -211,6 +214,7 @@ object PacketDecoder {
                 val itemId = buffer.readUShortAddLittle()
                 ItemContainer.setItemInContainer(itemContainer, slot, itemId - 1, amount, isNegativeKey)
             }
+            buffer.readInvTooltips(itemContainer, size, flags, isNegativeKey)
             Client.RECENTLY_USED_ITEM_CONTAINERS[++Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = itemContainer
             context.currentPacket = null
             return true
@@ -1440,7 +1444,8 @@ object PacketDecoder {
             var amount: Int
             val isNegativeKey = (flags and 0x1) == 1
             while (buffer.currentPosition < context.currentPacketSize) {
-                slot = buffer.readUSmart()
+                val slotHeader = buffer.readUSmart()
+                slot = invSlotFromHeader(slotHeader, flags)
                 itemId = buffer.readUShort()
                 amount = 0
                 if (itemId != 0) {
@@ -1450,6 +1455,7 @@ object PacketDecoder {
                     }
                 }
                 ItemContainer.setItemInContainer(key, slot, itemId - 1, amount, isNegativeKey)
+                buffer.readInvSlotTooltip(key, slot, slotHeader, flags, isNegativeKey)
             }
             Client.RECENTLY_USED_ITEM_CONTAINERS[++Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = key
             context.currentPacket = null
