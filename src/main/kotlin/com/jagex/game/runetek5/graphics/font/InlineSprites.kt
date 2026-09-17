@@ -28,25 +28,33 @@ object InlineSprites {
     fun isTag(tag: String): Boolean = tag.startsWith(GRAPHIC_TAG) || tag.startsWith(OBJ_TAG)
 
     @JvmStatic
-    fun width(tag: String, lineHeight: Int): Int {
+    fun width(tag: String): Int {
         val parsed = parse(tag) ?: return 0
-        val (width, height) = size(parsed) ?: return 0
-        return fit(width, height, lineHeight).first
+        return size(parsed)?.first ?: 0
     }
 
     @JvmStatic
     fun draw(toolkit: AbstractToolkit, tag: String, x: Int, baselineY: Int, ascent: Int, lineHeight: Int): Int {
         val parsed = parse(tag) ?: return 0
         val (width, height) = size(parsed) ?: return 0
-        val (drawWidth, drawHeight) = fit(width, height, lineHeight)
-        val sprite = sprite(toolkit, parsed)
-        sprite?.drawScaledColored(x, baselineY - ascent + (lineHeight - drawHeight) / 2, drawWidth, drawHeight, 1, 0, 1)
-        return drawWidth
+        sprite(toolkit, parsed)?.draw(x, baselineY - ascent - (height - lineHeight) / 2, 1, 0, 1)
+        return width
     }
 
-    private fun fit(width: Int, height: Int, lineHeight: Int): Pair<Int, Int> {
-        if (height <= lineHeight || lineHeight <= 0) return width to height
-        return (width * lineHeight / height).coerceAtLeast(1) to lineHeight
+    @JvmStatic
+    fun extents(line: String, lineHeight: Int, out: IntArray) {
+        var tallest = 0
+        var start = line.indexOf('<')
+        while (start != -1) {
+            val end = line.indexOf('>', start)
+            if (end == -1) break
+            val tag = line.substring(start + 1, end)
+            if (isTag(tag)) parse(tag)?.let { size(it) }?.let { tallest = maxOf(tallest, it.second) }
+            start = line.indexOf('<', end)
+        }
+        val overflow = maxOf(0, tallest - lineHeight)
+        out[0] = overflow / 2
+        out[1] = overflow - overflow / 2
     }
 
     private fun parse(tag: String): Tag? = tags.getOrPut(tag) {

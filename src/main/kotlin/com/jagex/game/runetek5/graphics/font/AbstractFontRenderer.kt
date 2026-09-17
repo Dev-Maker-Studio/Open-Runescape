@@ -37,6 +37,7 @@ abstract class AbstractFontRenderer(
         var justifiedSpaceAccumulator: Int = 0
         @JvmField
         val LINE_BUFFER: Array<String?> = arrayOfNulls(100)
+        private const val EURO_GLYPH = 128
     }
 
     fun renderPlain(text: String?, x: Int, y: Int, color: Int, shadow: Int) {
@@ -207,7 +208,7 @@ abstract class AbstractFontRenderer(
                     } else if ("times" == effect) {
                         ch = 215.toChar()
                     } else if ("euro" == effect) {
-                        ch = 8364.toChar()
+                        ch = EURO_GLYPH.toChar()
                     } else if ("copy" == effect) {
                         ch = 169.toChar()
                     } else {
@@ -298,7 +299,7 @@ abstract class AbstractFontRenderer(
                     } else if ("times" == effect) {
                         ch = 215.toChar()
                     } else if ("euro" == effect) {
-                        ch = 8364.toChar()
+                        ch = EURO_GLYPH.toChar()
                     } else if ("copy" == effect) {
                         ch = 169.toChar()
                     } else {
@@ -412,19 +413,30 @@ abstract class AbstractFontRenderer(
         if (currentVerticalAlign == 3 && numLines == 1) {
             currentVerticalAlign = 1
         }
+        val above = IntArray(numLines)
+        val below = IntArray(numLines)
+        val extents = IntArray(2)
+        var inlineExtra = 0
+        for (i in 0 until numLines) {
+            InlineSprites.extents(LINE_BUFFER[i]!!, this.fontMetrics.lineHeight(), extents)
+            above[i] = extents[0]
+            below[i] = extents[1]
+            inlineExtra += extents[0] + extents[1]
+        }
+        val firstToLast = currentLineSpacing * (numLines - 1) + inlineExtra - above[0] - below[numLines - 1]
         val startY: Int
         if (currentVerticalAlign == 0) {
-            startY = y + this.fontMetrics.topPadding
+            startY = y + this.fontMetrics.topPadding + above[0]
         } else if (currentVerticalAlign == 1) {
-            startY = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / 2 + y + this.fontMetrics.topPadding
+            startY = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1) - inlineExtra) / 2 + y + this.fontMetrics.topPadding + above[0]
         } else if (currentVerticalAlign == 2) {
-            startY = y + height - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)
+            startY = y + height - this.fontMetrics.bottomPadding - below[numLines - 1] - firstToLast
         } else {
-            var lineSpacingToAdd = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1)) / (numLines + 1)
+            var lineSpacingToAdd = (height - this.fontMetrics.topPadding - this.fontMetrics.bottomPadding - currentLineSpacing * (numLines - 1) - inlineExtra) / (numLines + 1)
             if (lineSpacingToAdd < 0) {
                 lineSpacingToAdd = 0
             }
-            startY = y + this.fontMetrics.topPadding + lineSpacingToAdd
+            startY = y + this.fontMetrics.topPadding + lineSpacingToAdd + above[0]
             currentLineSpacing += lineSpacingToAdd
         }
         var renderY = startY
@@ -442,7 +454,7 @@ abstract class AbstractFontRenderer(
                 renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteHeights, dimensions, surfaceOffsetX, surfaceOffsetY)
                 justifiedSpaceWidth = 0
             }
-            renderY += currentLineSpacing
+            renderY += currentLineSpacing + below[i] + if (i + 1 < numLines) above[i + 1] else 0
         }
         return numLines
     }

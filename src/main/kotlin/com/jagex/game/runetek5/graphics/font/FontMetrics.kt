@@ -137,7 +137,7 @@ class FontMetrics(bytes: ByteArray) {
                         "reg" -> ch = 174.toChar()
                         else -> {
                             if (InlineSprites.isTag(tag)) {
-                                width += InlineSprites.width(tag, lineHeight())
+                                width += InlineSprites.width(tag)
                                 previousChar = -1
                             } else if (tag.startsWith("img=") && sprites != null) {
                                 try {
@@ -153,11 +153,12 @@ class FontMetrics(bytes: ByteArray) {
                 }
 
                 if (tagStart == -1) {
-                    width += glyphWidths[Utils.byteForChar(ch).toInt() and 0xff].toInt() and 0xff
+                    val glyph = Utils.byteForChar(ch).toInt() and 0xff
+                    width += glyphWidths[glyph].toInt() and 0xff
                     if (kerning != null && previousChar != -1) {
-                        width += kerning!![previousChar][ch.code]
+                        width += kerning!![previousChar][glyph]
                     }
-                    previousChar = ch.code
+                    previousChar = glyph
                 }
             }
         }
@@ -257,11 +258,11 @@ class FontMetrics(bytes: ByteArray) {
                             previousChar = 215
                         }
                         "euro" -> {
-                            charWidth += getGlyphWidth(8364)
+                            charWidth += getGlyphWidth(EURO_GLYPH)
                             if (kerning != null && previousChar != -1) {
-                                charWidth += kerning!![previousChar][8364]
+                                charWidth += kerning!![previousChar][EURO_GLYPH]
                             }
-                            previousChar = 8364
+                            previousChar = EURO_GLYPH
                         }
                         "copy" -> {
                             charWidth += getGlyphWidth(169)
@@ -279,7 +280,7 @@ class FontMetrics(bytes: ByteArray) {
                         }
                         else -> {
                             if (InlineSprites.isTag(tag)) {
-                                charWidth += InlineSprites.width(tag, lineHeight())
+                                charWidth += InlineSprites.width(tag)
                                 previousChar = -1
                             } else if (tag.startsWith("img=") && sprites != null) {
                                 try {
@@ -485,7 +486,7 @@ class FontMetrics(bytes: ByteArray) {
                         "reg" -> current = 174.toChar()
                         else -> {
                             if (InlineSprites.isTag(tag)) {
-                                width += InlineSprites.width(tag, lineHeight())
+                                width += InlineSprites.width(tag)
                                 previous = -1
                                 if (width > adjustedWidth) {
                                     return "$prefix..."
@@ -509,15 +510,16 @@ class FontMetrics(bytes: ByteArray) {
                 }
 
                 if (escapeStart == -1) {
-                    width += glyphWidths[Utils.byteForChar(current).toInt() and 0xff].toInt() and 0xff
+                    val glyph = Utils.byteForChar(current).toInt() and 0xff
+                    width += glyphWidths[glyph].toInt() and 0xff
                     if (kerning != null && previous != -1) {
-                        width += kerning!![previous][current.code]
+                        width += kerning!![previous][glyph]
                     }
 
-                    previous = current.code
+                    previous = glyph
                     var total = width
                     if (kerning != null) {
-                        total = width + kerning!![current.code][46]
+                        total = width + kerning!![glyph][46]
                     }
 
                     if (total > adjustedWidth) {
@@ -530,6 +532,17 @@ class FontMetrics(bytes: ByteArray) {
         }
 
         return text
+    }
+
+    fun inlineExtraHeight(text: String, width: Int): Int {
+        val lineCount = splitLinesToBuffer(text, intArrayOf(width), lineBuffer, null)
+        val extents = IntArray(2)
+        var extra = 0
+        for (i in 0 until lineCount) {
+            InlineSprites.extents(lineBuffer[i]!!, lineHeight(), extents)
+            extra += extents[0] + extents[1]
+        }
+        return extra
     }
 
     fun getTextHeightMultiline(text: String, width: Int, lineHeight: Int, sprites: Array<Sprite>?): Int {
@@ -548,6 +561,8 @@ class FontMetrics(bytes: ByteArray) {
     }
 
     companion object {
+        private const val EURO_GLYPH = 128
+
         @JvmField
         val lineBuffer = arrayOfNulls<String>(100)
 

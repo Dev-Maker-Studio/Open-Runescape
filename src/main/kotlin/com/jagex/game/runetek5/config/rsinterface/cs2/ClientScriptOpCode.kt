@@ -575,6 +575,7 @@ enum class ClientScriptOpCode(
     TOSTRING(688, familyId = 10),
     COMPARE(810, familyId = 10),
     PARAHEIGHT(469, familyId = 10),
+    PARAHEIGHT_EXTRA(1009, familyId = 10),
     PARAWIDTH(43, familyId = 10),
     TEXT_SWITCH(15, familyId = 10),
     ESCAPE(49, familyId = 10),
