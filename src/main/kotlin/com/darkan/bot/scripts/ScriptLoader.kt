@@ -86,23 +86,6 @@ class ClassFileScanner(
         resource.path.endsWith(FileExtensions.CLASS)
 }
 
-class CurrentProjectScriptsScanner : AbstractClassScanner.DefaultClassScanner() {
-
-    override fun scan(): List<Class<*>> = runCatching { scanClassFiles() }
-        .fold(
-            onSuccess = { it },
-            onFailure = { emptyList() }
-        )
-
-    private fun scanClassFiles(): List<Class<*>> =
-        ClassGraph()
-            .enableClassInfo()
-            .enableAnnotationInfo()
-            .scan()
-            .getSubclasses(Script::class.java.name)
-            .loadClasses()
-}
-
 class CombinedScanner(
     directoryPath: String
 ) : AbstractClassScanner() {

@@ -39,6 +39,23 @@ fun main(args: Array<String>) {
         val problems = mutableListOf<String>()
         val description = scriptClass.getAnnotation(ScriptDescription::class.java)
         if (description == null) problems += "missing @ScriptDescription, the client will not list it"
+        when (val header = ScriptHeader.parse(file.readText())) {
+            is ScriptHeader.Parsed -> {
+                if (description != null && (header.name != description.name || header.version != description.version ||
+                        header.author != description.author || header.description != description.description ||
+                        header.category != description.category || header.visible != description.visible)) {
+                    problems += "@ScriptDescription was read differently without compiling; use plain literals"
+                }
+                if (header.className != scriptClass.simpleName) {
+                    problems += "the class after @ScriptDescription is ${header.className} but the script returns ${scriptClass.simpleName}"
+                }
+                if (header.configurable != ConfigurableScript::class.java.isAssignableFrom(scriptClass)) {
+                    problems += "implement ConfigurableScript directly on the script class so the Settings button shows before it is compiled"
+                }
+            }
+            is ScriptHeader.Unreadable -> problems += "@ScriptDescription needs plain literals to be listed without compiling (${header.reason}); the client compiles it at startup instead"
+            ScriptHeader.Absent -> if (description != null) problems += "@ScriptDescription could not be found without compiling"
+        }
         if (Modifier.isAbstract(scriptClass.modifiers)) problems += "script class is abstract"
         runCatching { scriptClass.getDeclaredConstructor() }
             .onFailure { problems += "no no-arg constructor, the client cannot start it" }

@@ -35,18 +35,17 @@ class BotScriptCompilationConfiguration : ScriptCompilationConfiguration({
     }
 })
 
+class ScriptCompileResult(val scriptClass: Class<out Script>?, val errors: List<String>)
+
+class ScriptLoadException(message: String) : Exception(message)
+
 class KotlinScriptScanner(
     private val scriptsDirectory: File
-) : AbstractClassScanner.DefaultClassScanner() {
-
-    private val scriptingHost = BasicJvmScriptingHost()
-    private val compiledScripts = mutableMapOf<String, Class<out Script>>()
-
+) {
     val libraryDirectory = File(scriptsDirectory, LIBRARY_DIRECTORY)
 
     fun libraries(): List<File> = ktsFilesIn(libraryDirectory) { true }
 
-    /** Every script in the folder tree: any `.kts` outside `lib/`, so users can group them into folders. */
     fun scripts(): List<File> = ktsFilesIn(scriptsDirectory) { directory -> !directory.isLibrary() }
 
     fun relativePath(file: File): String =
@@ -63,48 +62,70 @@ class KotlinScriptScanner(
 
     private fun File.isLibrary(): Boolean = canonicalPath == libraryDirectory.canonicalPath
 
-    override fun scan(): List<Class<*>> {
-        if (!scriptsDirectory.exists() || !scriptsDirectory.isDirectory) {
-            return emptyList()
-        }
-
-        val loadedScripts = mutableListOf<Class<*>>()
-        val loadedFrom = mutableMapOf<String, String>()
-
-        for (file in scripts()) {
+    fun catalog(): List<ScriptMetadata> {
+        if (!scriptsDirectory.isDirectory) return emptyList()
+        val claimed = mutableMapOf<String, String>()
+        val libraryStamp = stampOf(libraries())
+        return scripts().mapNotNull { file ->
             val path = relativePath(file)
+            val previous = claimed.putIfAbsent(file.nameWithoutExtension, path)
+            if (previous != null) {
+                println("✗ Skipped KotlinScript $path: its file name collides with $previous, so both compile to the same class. Rename one of them.")
+                return@mapNotNull null
+            }
             try {
-                val scriptClass = load(file) ?: continue
-                val previous = loadedFrom.put(scriptClass.name, path)
-                if (previous != null) {
-                    loadedFrom[scriptClass.name] = previous
-                    println("✗ Skipped KotlinScript $path: its file name collides with $previous, so both compile to ${scriptClass.name}. Rename one of them.")
-                    continue
-                }
-                loadedScripts.add(scriptClass)
-                println("✓ Loaded KotlinScript: $path")
+                describe(file, path, libraryStamp)
             } catch (e: Exception) {
-                println("✗ Failed to load KotlinScript $path: ${e.message}")
-                e.printStackTrace()
+                println("✗ Failed to read KotlinScript $path: ${e.message}")
+                null
             }
         }
-
-        return loadedScripts
     }
 
-    fun load(file: File): Class<out Script>? {
-        try {
-            val cachedClass = compiledScripts[file.absolutePath]
-            if (cachedClass != null) {
-                return cachedClass
+    private fun describe(file: File, path: String, libraryStamp: String): ScriptMetadata? {
+        return when (val header = ScriptHeader.parse(file.readText())) {
+            ScriptHeader.Absent -> {
+                println("✗ Skipped KotlinScript $path: no @ScriptDescription")
+                null
             }
+            is ScriptHeader.Unreadable -> {
+                println("… KotlinScript $path: @ScriptDescription must use plain literals to be listed without compiling (${header.reason}); compiling it now")
+                load(file)?.let { ScriptMetadata.of(it, id = path) }
+            }
+            is ScriptHeader.Parsed -> {
+                if (!header.visible) return null
+                ScriptMetadata(
+                    id = path,
+                    className = header.className,
+                    name = header.name,
+                    version = header.version,
+                    author = header.author,
+                    description = header.description,
+                    category = header.category,
+                    declaredConfigurable = header.configurable,
+                    scriptClass = cached(file, libraryStamp),
+                ) {
+                    val result = compile(file)
+                    result.scriptClass ?: throw ScriptLoadException(
+                        result.errors.ifEmpty { listOf("$path did not compile; see the console") }.joinToString("\n")
+                    )
+                }
+            }
+        }
+    }
 
-            val scriptSource = file.toScriptSource()
-            val compilationConfig = configurationImporting(libraries().filter { it.canonicalPath != file.canonicalPath })
+    fun load(file: File): Class<out Script>? = compile(file).scriptClass
 
-            val evalResult = scriptingHost.eval(scriptSource, compilationConfig, null)
+    fun compile(file: File): ScriptCompileResult = synchronized(lock) {
+        val libraries = libraries().filter { it.canonicalPath != file.canonicalPath }
+        val stamp = stampOf(listOf(file)) + stampOf(libraries)
+        compiledScripts[file.canonicalPath]?.takeIf { it.first == stamp }?.let { return ScriptCompileResult(it.second, emptyList()) }
 
-            return when (evalResult) {
+        val started = System.nanoTime()
+        val errors = mutableListOf<String>()
+        try {
+            val evalResult = scriptingHost.eval(file.toScriptSource(), configurationImporting(libraries), null)
+            when (evalResult) {
                 is ResultWithDiagnostics.Success -> {
                     val returnValue = evalResult.value.returnValue
                     val scriptInstance = when (returnValue) {
@@ -112,41 +133,43 @@ class KotlinScriptScanner(
                         else -> returnValue.scriptInstance
                     }
 
-                    if (scriptInstance != null && scriptInstance is Script) {
+                    if (scriptInstance is Script) {
                         @Suppress("UNCHECKED_CAST")
                         val scriptClass = scriptInstance::class.java as Class<out Script>
-                        compiledScripts[file.absolutePath] = scriptClass
-                        scriptClass
-                    } else {
-                        println("Warning: Script ${file.name} did not produce a valid Script instance")
-                        println("  Return value type: ${scriptInstance?.javaClass?.name ?: "null"}")
-                        println("  The file must end with an expression such as MyScript()")
-                        null
+                        compiledScripts[file.canonicalPath] = stamp to scriptClass
+                        println("✓ Compiled KotlinScript ${relativePath(file)} in ${(System.nanoTime() - started) / 1_000_000} ms")
+                        return ScriptCompileResult(scriptClass, emptyList())
                     }
+                    errors += "${file.name} must end with an expression such as MyScript() (got ${scriptInstance?.javaClass?.name ?: "null"})"
                 }
                 is ResultWithDiagnostics.Failure -> {
-                    println("Compilation failed for ${file.name}:")
                     evalResult.reports
                         .filter { it.severity >= ScriptDiagnostic.Severity.WARNING }
                         .forEach { report ->
                             val where = report.sourcePath?.let { File(it).name } ?: file.name
-                            println("  ${report.severity}: ${report.message}")
-                            val location = report.location
-                            if (location != null) {
-                                println("    at $where:${location.start.line}:${location.start.col}")
-                            } else if (where != file.name) {
-                                println("    in $where")
+                            val location = report.location?.let { ":${it.start.line}:${it.start.col}" } ?: ""
+                            if (report.severity >= ScriptDiagnostic.Severity.ERROR) {
+                                errors += "$where$location: ${report.message}"
                             }
+                            println("  ${report.severity}: ${report.message}")
+                            if (location.isNotEmpty() || where != file.name) println("    at $where$location")
                         }
-                    null
                 }
             }
         } catch (e: Exception) {
-            println("Error compiling script ${file.name}: ${e.message}")
             e.printStackTrace()
-            return null
+            errors += "${file.name}: ${e.message}"
         }
+        println("✗ Failed to compile KotlinScript ${relativePath(file)}")
+        errors.forEach { println("  $it") }
+        ScriptCompileResult(null, errors)
     }
+
+    private fun cached(file: File, libraryStamp: String): Class<out Script>? =
+        compiledScripts[file.canonicalPath]?.takeIf { it.first == stampOf(listOf(file)) + libraryStamp }?.second
+
+    private fun stampOf(files: List<File>): String =
+        files.joinToString("") { "${it.canonicalPath}:${it.lastModified()}:${it.length()};" }
 
     fun compileErrors(file: File): List<String> {
         val result = runBlocking { scriptingHost.compiler(file.toScriptSource(), configurationImporting(libraries())) }
@@ -181,12 +204,12 @@ class KotlinScriptScanner(
         }
     }
 
-    fun clearCache() {
-        compiledScripts.clear()
-    }
-
     companion object {
         const val LIBRARY_DIRECTORY = "lib"
+
+        private val lock = Any()
+        private val scriptingHost by lazy { BasicJvmScriptingHost() }
+        private val compiledScripts = HashMap<String, Pair<String, Class<out Script>>>()
     }
 }
 

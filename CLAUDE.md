@@ -130,7 +130,12 @@ same files, so the two must stay in sync:
   the folder the client scans); no scripts ship inside the client. That repo's `CLAUDE.md` and
   `darkan-script-dev` skill read this client's API from GitLab raw URLs on `dev`.
 - `java -cp darkan-client.jar com.darkan.bot.scripts.ScriptCheckKt <dir>` compiles a folder of `.kts`
-  scripts exactly as the client does (`KotlinScriptScanner.load`) and exits 1 on any failure.
+  scripts exactly as the client does (`KotlinScriptScanner.compile`) and exits 1 on any failure.
+- Scripts are listed without compiling: `KotlinScriptScanner.catalog()` reads `ScriptHeader` (the
+  `@ScriptDescription` literals, the class name and a direct `ConfigurableScript`) and the sidebar compiles a
+  script on its first Start/Settings (`ScriptMetadata.load()`, off the EDT, cached per file + lib stamp).
+  A header that is not plain literals falls back to compiling at listing time. Nothing loads unless
+  `-Dbot.enabled=true`. `ScriptCheckKt` flags headers the client cannot read without compiling.
 - Scripts load from the whole folder tree (`KotlinScriptScanner.scripts()`), skipping `lib/`, hidden
   folders and `.git`; a compiled script is named after its file alone, so a duplicate file name
   anywhere in the tree is skipped with a message instead of shadowing the first.

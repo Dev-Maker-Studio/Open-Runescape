@@ -41,13 +41,15 @@ fun main(args: Array<String>) {
     CrashHandler.install()
     // Off by default; pass -Dbot.enabled=true to show the bot sidebar.
     Bot.ENABLED = System.getProperty("bot.enabled")?.toBoolean() ?: false
-    if (Bot.ENABLED && ScriptRepository.syncOnStartup) {
-        ScriptRepository.syncAsync { outcome ->
-            println(outcome.message)
+    if (Bot.ENABLED) {
+        if (ScriptRepository.syncOnStartup) {
+            ScriptRepository.syncAsync { outcome ->
+                println(outcome.message)
+                ScriptExecutor.loadScripts()
+            }
+        } else {
             ScriptExecutor.loadScripts()
         }
-    } else {
-        ScriptExecutor.loadScripts()
     }
     Loader.main(args)
 }

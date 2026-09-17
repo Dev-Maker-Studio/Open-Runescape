@@ -1,10 +1,10 @@
 package com.darkan.bot.ui
 
 import com.darkan.bot.scripts.ConfigItem
-import com.darkan.bot.scripts.ConfigurableScript
 import com.darkan.bot.scripts.Script
 import com.darkan.bot.scripts.ScriptConfigStore
 import com.darkan.bot.scripts.ScriptExecutor
+import com.darkan.bot.scripts.ScriptLoadException
 import com.darkan.bot.scripts.ScriptMetadata
 import com.darkan.bot.scripts.ScriptRepository
 import com.darkan.bot.scripts.getScriptsDirectory
@@ -41,10 +41,9 @@ object ScriptFavorites {
         }
     }
 
-    fun contains(scriptClass: Class<*>) = scriptClass.simpleName in names
+    fun contains(name: String) = name in names
 
-    fun toggle(scriptClass: Class<*>) {
-        val name = scriptClass.simpleName
+    fun toggle(name: String) {
         if (!names.remove(name)) names.add(name)
         try {
             file.parentFile?.mkdirs()
@@ -64,22 +63,25 @@ object ScriptInstances {
     private val configured = HashMap<Class<*>, Script>()
 
     /** The running instance if there is one, otherwise the instance whose settings are being edited. */
-    fun current(metadata: ScriptMetadata): Script =
-        ScriptExecutor.getScriptInstance(metadata.scriptClass)
-            ?: configured.getOrPut(metadata.scriptClass) { instantiate(metadata) }
+    fun current(metadata: ScriptMetadata): Script {
+        val scriptClass = metadata.load()
+        return ScriptExecutor.getScriptInstance(scriptClass)
+            ?: configured.getOrPut(scriptClass) { instantiate(scriptClass) }
+    }
 
     /** An instance that can be started: the configured one if unused, else a fresh copy with the same settings. */
     fun startable(metadata: ScriptMetadata): Script {
-        val existing = configured[metadata.scriptClass]
+        val scriptClass = metadata.load()
+        val existing = configured[scriptClass]
         if (existing != null && !existing.stopped && !existing.started) return existing
-        val fresh = instantiate(metadata)
+        val fresh = instantiate(scriptClass)
         if (existing != null) copyConfig(existing, fresh)
-        configured[metadata.scriptClass] = fresh
+        configured[scriptClass] = fresh
         return fresh
     }
 
-    private fun instantiate(metadata: ScriptMetadata): Script =
-        metadata.scriptClass.getDeclaredConstructor().also { it.isAccessible = true }.newInstance()
+    private fun instantiate(scriptClass: Class<out Script>): Script =
+        scriptClass.getDeclaredConstructor().also { it.isAccessible = true }.newInstance()
             .also { ScriptConfigStore.applyTo(it) }
 
     @Suppress("UNCHECKED_CAST")
@@ -113,21 +115,22 @@ class ScriptsPanel(
     private val emptyState = EmptyState("No scripts found")
     private val centerLayout = CardLayout()
     private val center = JPanel(centerLayout)
-    private val cards = LinkedHashMap<Class<*>, ScriptCard>()
+    private val cards = LinkedHashMap<String, ScriptCard>()
+    private val compiling = HashSet<String>()
     private val rebuildDebounce = Timer(200) { rebuild() }.apply { isRepeats = false }
-    private var lastRunningSet: Set<Class<*>> = emptySet()
+    private var lastRunningSet: Set<String> = emptySet()
     private var restoringFilters = false
 
     val runningCount: Int
-        get() = ScriptExecutor.scripts.values.count { ScriptExecutor.isScriptRunning(it.scriptClass) }
+        get() = ScriptExecutor.scripts.values.count { it.running }
 
     init {
         border = Spacing.panelBorder()
 
         stopAllButton = button("Stop all", "Stop every running script") {
             ScriptExecutor.scripts.values
-                .filter { ScriptExecutor.isScriptRunning(it.scriptClass) }
-                .forEach { ScriptExecutor.deactivate(it.scriptClass) }
+                .mapNotNull { it.runningClass() }
+                .forEach { ScriptExecutor.deactivate(it) }
             refreshCards()
         }
 
@@ -268,7 +271,7 @@ class ScriptsPanel(
         val status = statusFilter.selectedItem as? String ?: "All"
         return ScriptExecutor.scripts.values
             .filter { script ->
-                val running = ScriptExecutor.isScriptRunning(script.scriptClass)
+                val running = script.running
                 (query.isBlank() || script.name.lowercase().contains(query) || script.author.lowercase().contains(query)) &&
                     (category == ALL_CATEGORIES || script.category.readableName == category) &&
                     when (status) {
@@ -278,8 +281,8 @@ class ScriptsPanel(
                     }
             }
             .sortedWith(
-                compareByDescending<ScriptMetadata> { ScriptFavorites.contains(it.scriptClass) }
-                    .thenByDescending { ScriptExecutor.isScriptRunning(it.scriptClass) }
+                compareByDescending<ScriptMetadata> { ScriptFavorites.contains(it.className) }
+                    .thenByDescending { it.running }
                     .thenBy { it.name.lowercase() }
             )
     }
@@ -290,7 +293,7 @@ class ScriptsPanel(
         cards.clear()
         scripts.forEachIndexed { i, metadata ->
             val card = ScriptCard(metadata)
-            cards[metadata.scriptClass] = card
+            cards[metadata.id] = card
             if (i > 0) list.add(Box.createVerticalStrut(Spacing.GAP))
             list.add(card)
         }
@@ -312,8 +315,8 @@ class ScriptsPanel(
         list.repaint()
     }
 
-    private fun runningClasses(): Set<Class<*>> =
-        ScriptExecutor.scripts.values.filter { ScriptExecutor.isScriptRunning(it.scriptClass) }.map { it.scriptClass }.toSet()
+    private fun runningClasses(): Set<String> =
+        ScriptExecutor.scripts.values.filter { it.running }.map { it.id }.toSet()
 
     /** Cheap per-second refresh: runtime counters, and a full rebuild only when running state changed the ordering. */
     private fun refreshCards() {
@@ -329,22 +332,24 @@ class ScriptsPanel(
     }
 
     private inner class ScriptCard(private val metadata: ScriptMetadata) : CardPanel() {
-        private val starButton = flatButton("☆", null) { ScriptFavorites.toggle(metadata.scriptClass); rebuild() }
+        private val starButton = flatButton("☆", null) { ScriptFavorites.toggle(metadata.className); rebuild() }
         private val statusLabel = label("", size = 11f)
         private val toggleButton = JButton().apply {
             preferredSize = Dimension(96, 28)
             addActionListener { toggle() }
         }
         private val settingsButton: JButton? =
-            if (ConfigurableScript::class.java.isAssignableFrom(metadata.scriptClass)) {
+            if (metadata.configurable) {
                 JButton("Settings").apply {
                     preferredSize = Dimension(96, 28)
                     toolTipText = "Configure this script"
                     addActionListener {
-                        try {
-                            openSettings(metadata, ScriptInstances.current(metadata))
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                        whenCompiled {
+                            try {
+                                openSettings(metadata, ScriptInstances.current(metadata))
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
                     }
                 }
@@ -400,24 +405,56 @@ class ScriptsPanel(
         }
 
         private fun toggle() {
-            try {
-                if (ScriptExecutor.isScriptRunning(metadata.scriptClass)) {
-                    ScriptExecutor.deactivate(metadata.scriptClass)
-                } else {
+            val running = metadata.runningClass()
+            if (running != null) {
+                ScriptExecutor.deactivate(running)
+                SwingUtilities.invokeLater { refreshCards() }
+                return
+            }
+            whenCompiled {
+                try {
                     val before = ScriptInstances.current(metadata)
                     val instance = ScriptInstances.startable(metadata)
                     ScriptExecutor.activate(instance)
                     if (instance !== before) onInstanceReplaced(metadata, instance)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+                refreshCards()
             }
-            SwingUtilities.invokeLater { refreshCards() }
+        }
+
+        private fun whenCompiled(action: () -> Unit) {
+            if (metadata.loaded) {
+                action()
+                return
+            }
+            if (!compiling.add(metadata.id)) return
+            refresh()
+            Thread({
+                val failure = runCatching { metadata.load() }.exceptionOrNull()
+                SwingUtilities.invokeLater {
+                    compiling.remove(metadata.id)
+                    if (failure == null) {
+                        action()
+                    } else {
+                        if (failure !is ScriptLoadException) failure.printStackTrace()
+                        JOptionPane.showMessageDialog(
+                            this@ScriptsPanel,
+                            "${metadata.name} failed to compile:\n${failure.message}",
+                            "Script error",
+                            JOptionPane.ERROR_MESSAGE,
+                        )
+                    }
+                    rebuild()
+                }
+            }, "script-compile-${metadata.className}").apply { isDaemon = true }.start()
         }
 
         fun refresh() {
-            val running = ScriptExecutor.isScriptRunning(metadata.scriptClass)
-            val favourite = ScriptFavorites.contains(metadata.scriptClass)
+            val running = metadata.running
+            val building = metadata.id in compiling
+            val favourite = ScriptFavorites.contains(metadata.className)
 
             starButton.text = if (favourite) "★" else "☆"
             starButton.foreground = if (favourite) Palette.favourite else Palette.secondaryText
@@ -427,12 +464,18 @@ class ScriptsPanel(
             toggleButton.toolTipText = if (running) "Stop ${metadata.name}" else "Start ${metadata.name}"
             toggleButton.background = if (running) Palette.dangerFill else Palette.successFill
             toggleButton.foreground = java.awt.Color.WHITE
+            toggleButton.isEnabled = !building
+            settingsButton?.isEnabled = !building
 
             if (running) {
-                val runtime = ScriptExecutor.getScriptRuntimeFormatted(metadata.scriptClass) ?: "00:00:00"
+                val runtime = metadata.runningClass()?.let { ScriptExecutor.getScriptRuntimeFormatted(it) } ?: "00:00:00"
                 statusLabel.text = "●  Running  $runtime"
                 statusLabel.foreground = Palette.success
                 statusLabel.font = statusLabel.font.deriveFont(Font.BOLD)
+            } else if (building) {
+                statusLabel.text = "◌  Compiling..."
+                statusLabel.foreground = Palette.secondaryText
+                statusLabel.font = statusLabel.font.deriveFont(Font.ITALIC)
             } else {
                 statusLabel.text = "○  Stopped"
                 statusLabel.foreground = Palette.secondaryText

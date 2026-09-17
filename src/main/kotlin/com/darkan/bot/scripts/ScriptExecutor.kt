@@ -5,7 +5,6 @@ import com.darkan.bot.formatElapsedTime
 import com.darkan.bot.random
 import com.darkan.bot.scripts.event.Event
 import com.darkan.bot.Bot
-import java.io.File
 import java.lang.reflect.Modifier
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
@@ -129,19 +128,6 @@ object ScriptExecutor {
 
     fun isPaused(): Boolean = pausingScript != null
 
-    private fun metadataOf(scriptClass: Class<out Script>): ScriptMetadata? {
-        val annotation = scriptClass.getAnnotation(ScriptDescription::class.java) ?: return null
-        if (!annotation.visible) return null
-        return ScriptMetadata(
-            scriptClass = scriptClass,
-            name = annotation.name,
-            version = annotation.version,
-            author = annotation.author,
-            description = annotation.description,
-            category = annotation.category
-        )
-    }
-
     /** Called on the loading thread after every [loadScripts]; UI listeners must hop to the EDT themselves. */
     fun addReloadListener(listener: () -> Unit) {
         reloadListeners.add(listener)
@@ -149,46 +135,22 @@ object ScriptExecutor {
 
     @Synchronized
     fun loadScripts() {
-        println("🔍 ScriptExecutor.loadScripts() called")
+        val started = System.nanoTime()
+        val scriptsDir = getScriptsDirectory()
 
-        fun isScriptClass(clazz: Class<*>): Class<out Script>? {
-            return if (
-                Script::class.java.isAssignableFrom(clazz) &&
-                clazz.isAnnotationPresent(ScriptDescription::class.java) &&
-                !Modifier.isAbstract(clazz.modifiers)
-            ) {
-                @Suppress("UNCHECKED_CAST")
-                clazz as Class<out Script>
-            } else
-                null
+        val prebuilt = ClassScannerFactory.create(scriptsDir.absolutePath, ScannerType.BOTH).scan()
+            .mapNotNull(::asScriptClass)
+            .mapNotNull { ScriptMetadata.of(it) }
+        val found = (prebuilt + KotlinScriptScanner(scriptsDir).catalog()).sortedBy { it.name.lowercase() }
+
+        val previous = registry
+        found.forEach { metadata ->
+            val running = previous[metadata.id]?.runningClass() ?: return@forEach
+            if (running !== metadata.scriptClass) metadata.replacedClass = running
         }
+        registry = found.associateBy { it.id }
 
-        val scriptsDir = getScriptsDirectoryFile()
-
-        // Scan for compiled classes (JAR and .class files)
-        val scriptsDirectoryScanner = ClassScannerFactory.create(
-            path = scriptsDir.absolutePath,
-            type = ScannerType.BOTH
-        )
-
-        // Scan for current project scripts
-        val currentProjectScanner = CurrentProjectScriptsScanner()
-
-        // Scan for .kts files
-        val kotlinScriptScanner = KotlinScriptScanner(scriptsDir)
-
-        // Combine all found scripts
-        val foundClassPaths = scriptsDirectoryScanner.scan() +
-                             currentProjectScanner.scan() +
-                             kotlinScriptScanner.scan()
-
-        val scripts = foundClassPaths
-            .mapNotNull { isScriptClass(it) }
-            .sortedBy { it.getAnnotation(ScriptDescription::class.java).name }
-
-        registry = scripts.mapNotNull(::metadataOf).associateBy { it.toString() }
-
-        println("✓ Loaded ${registry.size} script(s)")
+        println("✓ Listed ${registry.size} script(s) in ${(System.nanoTime() - started) / 1_000_000} ms")
         reloadListeners.forEach { listener ->
             try {
                 listener()
@@ -198,18 +160,67 @@ object ScriptExecutor {
         }
     }
 
-    private fun getScriptsDirectoryFile(): File {
-        return getScriptsDirectory()
+    private fun asScriptClass(clazz: Class<*>): Class<out Script>? {
+        if (!Script::class.java.isAssignableFrom(clazz) || Modifier.isAbstract(clazz.modifiers)) return null
+        @Suppress("UNCHECKED_CAST")
+        return clazz as Class<out Script>
     }
 }
 
-data class ScriptMetadata(
-    val scriptClass: Class<out Script>,
+class ScriptMetadata(
+    val id: String,
+    val className: String,
     val name: String,
     val version: String,
     val author: String,
     val description: String,
-    val category: ScriptCategory = ScriptCategory.OTHER
+    val category: ScriptCategory = ScriptCategory.OTHER,
+    private val declaredConfigurable: Boolean,
+    scriptClass: Class<out Script>? = null,
+    private val compile: () -> Class<out Script>,
 ) {
+    @Volatile
+    var scriptClass: Class<out Script>? = scriptClass
+        private set
+
+    @Volatile
+    internal var replacedClass: Class<out Script>? = null
+
+    val loaded: Boolean get() = scriptClass != null
+
+    val configurable: Boolean
+        get() = scriptClass?.let { ConfigurableScript::class.java.isAssignableFrom(it) } ?: declaredConfigurable
+
+    val running: Boolean get() = runningClass() != null
+
+    fun runningClass(): Class<out Script>? =
+        listOfNotNull(scriptClass, replacedClass).firstOrNull { ScriptExecutor.isScriptRunning(it) }
+
+    fun load(): Class<out Script> {
+        scriptClass?.let { return it }
+        synchronized(this) {
+            scriptClass?.let { return it }
+            return compile().also { scriptClass = it }
+        }
+    }
+
     override fun toString(): String = "$name v$version by $author"
+
+    companion object {
+        fun of(scriptClass: Class<out Script>, id: String = scriptClass.name): ScriptMetadata? {
+            val annotation = scriptClass.getAnnotation(ScriptDescription::class.java) ?: return null
+            if (!annotation.visible) return null
+            return ScriptMetadata(
+                id = id,
+                className = scriptClass.simpleName,
+                name = annotation.name,
+                version = annotation.version,
+                author = annotation.author,
+                description = annotation.description,
+                category = annotation.category,
+                declaredConfigurable = ConfigurableScript::class.java.isAssignableFrom(scriptClass),
+                scriptClass = scriptClass,
+            ) { scriptClass }
+        }
+    }
 }

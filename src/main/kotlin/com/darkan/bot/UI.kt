@@ -136,7 +136,7 @@ class BotUI : JPanel(BorderLayout()) {
         if (wasPoppedOut) dock.popOut(id) else if (!wasSelected) scriptsDockable.let { dock.select(it.id) }
     }
 
-    private fun configTabId(scriptMetadata: ScriptMetadata) = "config:${scriptMetadata.scriptClass.name}"
+    private fun configTabId(scriptMetadata: ScriptMetadata) = "config:${scriptMetadata.id}"
 
     // ---- data feeds (safe from any thread) ----
 
