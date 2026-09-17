@@ -93,14 +93,11 @@ class Skybox(
                 }
 
                 if (backgroundSprite != null) {
-                    var yOffset = rotationY * height / -4096
-                    var xOffset = adjustedRotationX * height / 4096 + (width - height) / 2
-
-                    xOffset %= height
-                    yOffset %= height
+                    val yOffset = rotationY * height / -4096
+                    val xOffset = wrapOffset(adjustedRotationX * height / 4096 + (width - height) / 2, height)
 
                     if (backgroundMode != BackgroundMode.COLOR_TRANSITION) {
-                        drawRepeatingBackground(toolkit, x, y, width, height, xOffset, yOffset, invertedAlpha, combineMode)
+                        drawRepeatingBackground(toolkit, x, y, width, height, xOffset, wrapOffset(yOffset, height), invertedAlpha, combineMode)
                     } else {
                         drawTransitioningBackground(toolkit, x, y, width, height, xOffset, yOffset, invertedAlpha, combineMode)
                     }
@@ -120,6 +117,13 @@ class Skybox(
             availableSuns!![index]!!.calculateProjection(toolkit, width, height, positionX, positionY, positionZ, invertedAlpha)
         }
         toolkit.applyClearFlags(2, 0)
+    }
+
+    private fun wrapOffset(offset: Int, height: Int): Int {
+        var wrapped = offset
+        while (wrapped > height) wrapped -= height
+        while (wrapped < 0) wrapped += height
+        return wrapped
     }
 
     private fun drawRepeatingBackground(
@@ -155,7 +159,11 @@ class Skybox(
         invertedAlpha: Int,
         combineMode: Int
     ) {
-        backgroundSprite!!.drawCircle(x + xOffset, y + yOffset, height, height, 0, invertedAlpha shl 24 or 0xffffff, combineMode)
+        var i = xOffset - height
+        while (i < width) {
+            backgroundSprite!!.drawCircle(x + i, y + yOffset, height, height, 0, invertedAlpha shl 24 or 0xffffff, combineMode)
+            i += height
+        }
         if (srcBackgroundColor and 0xffffff.inv() != 0) {
             toolkit.clearPixels(0, 0, width, yOffset + y + 1, srcBackgroundColor)
         }
