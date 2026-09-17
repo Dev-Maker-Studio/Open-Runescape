@@ -95,15 +95,15 @@ class Scene(
      * (Could be wrong, could be: opaque_graph_node)
      * graph_nodes_3d before
      */
-    val depthRenderedEntities: Array<SceneGraphEntity?>
+    var depthRenderedEntities: Array<SceneGraphEntity?>
 
     /**
      * Objects that need to have their face_render_priority
      * taken into account for correct rendering
      * (could be wrong, could be: transparent_graph_node)
      */
-    val priorityRenderedEntities: Array<SceneGraphEntity?>
-    val interactiveObjects: Array<AbstractInteractiveEntity?>
+    var priorityRenderedEntities: Array<SceneGraphEntity?>
+    var interactiveObjects: Array<AbstractInteractiveEntity?>
 
     /**
      * 0 = onscreen
@@ -522,7 +522,7 @@ class Scene(
                 }
             }
             if (cached) {
-                this.interactiveObjects[++this.interactiveObjectCount - 1] = interactive
+                addInteractiveObject(interactive)
                 interactive.scene = this
             } else {
                 val layerIndex = if (this.underwaterHeightmap === this.localHeightmap) 1 else 0
@@ -1087,6 +1087,27 @@ class Scene(
         return null
     }
 
+    private fun addDepthEntity(entity: SceneGraphEntity) {
+        if (this.depthObjectCount == this.depthRenderedEntities.size) {
+            this.depthRenderedEntities = this.depthRenderedEntities.copyOf(this.depthObjectCount * 2)
+        }
+        this.depthRenderedEntities[this.depthObjectCount++] = entity
+    }
+
+    private fun addPriorityEntity(entity: SceneGraphEntity) {
+        if (this.layeredObjectCount == this.priorityRenderedEntities.size) {
+            this.priorityRenderedEntities = this.priorityRenderedEntities.copyOf(this.layeredObjectCount * 2)
+        }
+        this.priorityRenderedEntities[this.layeredObjectCount++] = entity
+    }
+
+    private fun addInteractiveObject(interactive: AbstractInteractiveEntity) {
+        if (this.interactiveObjectCount == this.interactiveObjects.size) {
+            this.interactiveObjects = this.interactiveObjects.copyOf(this.interactiveObjectCount * 2)
+        }
+        this.interactiveObjects[this.interactiveObjectCount++] = interactive
+    }
+
     fun drawTiles(hideInteractives: Boolean, settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte) {
         val layerIndex = if (hideInteractives) 1 else 0
         this.depthObjectCount = 0
@@ -1117,7 +1138,7 @@ class Scene(
                 if (!isHidden(e, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
                     separateFromFloor(e)
                     if (e.floorDepth != -1) {
-                        this.depthRenderedEntities[++this.depthObjectCount - 1] = e
+                        addDepthEntity(e)
                     }
                 }
             }
@@ -1127,7 +1148,7 @@ class Scene(
                 if (!isHidden(e, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
                     separateFromFloor(e)
                     if (e.floorDepth != -1) {
-                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = e
+                        addPriorityEntity(e)
                     }
                 }
             }
@@ -1137,7 +1158,7 @@ class Scene(
                 if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
                     separateFromFloor(entity)
                     if (entity.floorDepth != -1) {
-                        this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
+                        addDepthEntity(entity)
                     }
                 }
                 entity = entity.child
@@ -1147,7 +1168,7 @@ class Scene(
                 if (!isHidden(entity, hideInteractives, settingBits, lowestRenderedPlane, roofPreference)) {
                     separateFromFloor(entity)
                     if (entity.floorDepth != -1) {
-                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
+                        addPriorityEntity(entity)
                     }
                 }
                 entity = entity.child
@@ -1159,9 +1180,9 @@ class Scene(
                 separateFromFloor(entity)
                 if (entity.floorDepth != -1) {
                     if (entity.hasAlpha()) {
-                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
+                        addPriorityEntity(entity)
                     } else {
-                        this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
+                        addDepthEntity(entity)
                     }
                 }
             }
@@ -1175,9 +1196,9 @@ class Scene(
                     separateFromFloor(interactive)
                     if (interactive.floorDepth != -1) {
                         if (interactive.hasAlpha()) {
-                            this.priorityRenderedEntities[++this.layeredObjectCount - 1] = interactive
+                            addPriorityEntity(interactive)
                         } else {
-                            this.depthRenderedEntities[++this.depthObjectCount - 1] = interactive
+                            addDepthEntity(interactive)
                         }
                     }
                 }
