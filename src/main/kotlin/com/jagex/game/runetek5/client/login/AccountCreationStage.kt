@@ -6,6 +6,7 @@ import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Identifiable
 import com.jagex.game.runetek5.network.AsyncConnection
+import com.jagex.game.runetek5.network.BufferedConnectionContext
 import com.jagex.game.runetek5.network.WorldConnection
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.network.packet.TcpPacket
@@ -70,7 +71,7 @@ class AccountCreationStage {
                         Client.LOBBY_CONNECTION_CONTEXT.init(
                             AsyncConnection.createAsyncConnection(
                                 WorldConnection.LOBBY_CONNECTION_INFO!!.createSocket(),
-                                15000
+                                BufferedConnectionContext.PACKET_BUFFER_SIZE
                             ), WorldConnection.LOBBY_CONNECTION_INFO!!.host!!
                         )
                         Client.LOBBY_CONNECTION_CONTEXT.clearAllQueuedPackets()

@@ -27,7 +27,7 @@ class BufferedConnectionContext {
     @JvmField var connection: Connection? = null
     @JvmField val queuedPackets = NodeCollection()
     @JvmField val writeBuffer = Packet(1600)
-    @JvmField val receivedBuffer = Packet.Bit(15000)
+    @JvmField val receivedBuffer = Packet.Bit(PACKET_BUFFER_SIZE)
     @JvmField var currentPacket: ServerProt? = null
     @JvmField var currentPacketSize: Int = 0
     @JvmField var readPadding: Boolean = true
@@ -105,5 +105,9 @@ class BufferedConnectionContext {
     fun reset() {
         connection = null
         pinger.setIp(null)
+    }
+
+    companion object {
+        const val PACKET_BUFFER_SIZE = 65536
     }
 }

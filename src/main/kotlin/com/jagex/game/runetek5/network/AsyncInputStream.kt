@@ -131,7 +131,7 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
                 return true
             }
         }
-        throw IOException()
+        throw IOException("requested $capacityRequired bytes, buffer holds ${capacity - 1}")
     }
 
     /**

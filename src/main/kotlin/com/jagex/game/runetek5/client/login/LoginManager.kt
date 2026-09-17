@@ -150,9 +150,9 @@ object LoginManager {
                 var loginBlockStart: Int
                 if (loginStage == LoginStage.OPENING_CONNECTION) {
                     if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
-                        CURRENT_CONNECTION_CONTEXT!!.init(AsyncConnection.createAsyncConnection(GAME_CONNECTION_INFO!!.createSocket(), 15000), GAME_CONNECTION_INFO!!.host!!)
+                        CURRENT_CONNECTION_CONTEXT!!.init(AsyncConnection.createAsyncConnection(GAME_CONNECTION_INFO!!.createSocket(), BufferedConnectionContext.PACKET_BUFFER_SIZE), GAME_CONNECTION_INFO!!.host!!)
                     } else {
-                        CURRENT_CONNECTION_CONTEXT!!.init(AsyncConnection.createAsyncConnection(WorldConnection.LOBBY_CONNECTION_INFO!!.createSocket(), 15000), WorldConnection.LOBBY_CONNECTION_INFO!!.host!!)
+                        CURRENT_CONNECTION_CONTEXT!!.init(AsyncConnection.createAsyncConnection(WorldConnection.LOBBY_CONNECTION_INFO!!.createSocket(), BufferedConnectionContext.PACKET_BUFFER_SIZE), WorldConnection.LOBBY_CONNECTION_INFO!!.host!!)
                     }
                     CURRENT_CONNECTION_CONTEXT!!.clearAllQueuedPackets()
                     tcpPacket = TcpPacket.createLoginPacket()

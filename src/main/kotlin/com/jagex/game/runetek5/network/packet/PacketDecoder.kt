@@ -92,6 +92,7 @@ object PacketDecoder {
         return try {
             decode(connectionContext)
         } catch (e: IOException) {
+            System.err.println("Dropped connection on ${connectionContext.currentPacket} (${connectionContext.currentPacketSize} bytes)")
             e.printStackTrace()
             if (Client.gameState == GameState.UNK_7) {
                 connectionContext.reset()
@@ -1281,10 +1282,10 @@ object PacketDecoder {
                 soundId = -1
             }
             val flags = buffer.readUByte()
-            val volume = buffer.readUShort()
-            val delay = buffer.readUByte()
+            val delay = buffer.readUShort()
+            val volume = buffer.readUByte()
             val sampleRate = buffer.readUShort()
-            AreaSoundPlayer.playSoundSynth(soundId, flags, volume, delay, sampleRate)
+            AreaSoundPlayer.playSoundSynth(soundId, flags, delay, volume, sampleRate)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SHOW_FACE_HERE) {
