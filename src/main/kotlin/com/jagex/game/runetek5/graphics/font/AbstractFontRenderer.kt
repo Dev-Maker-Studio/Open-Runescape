@@ -410,6 +410,9 @@ abstract class AbstractFontRenderer(
             LINE_BUFFER[maxLinesToShow - 1] = this.fontMetrics.fitText(LINE_BUFFER[maxLinesToShow - 1]!!, width, sprites as Array<Sprite>?)
             numLines = maxLinesToShow
         }
+        if (numLines <= 0) {
+            return 0
+        }
         if (currentVerticalAlign == 3 && numLines == 1) {
             currentVerticalAlign = 1
         }
