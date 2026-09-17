@@ -101,6 +101,8 @@ class FontMetrics(bytes: ByteArray) {
         return glyphWidths[i].toInt() and 0xff
     }
 
+    fun lineHeight(): Int = topPadding + bottomPadding
+
     fun getWidthNoSprites(text: String): Int {
         return getTextWidth(text, null)
     }
@@ -134,7 +136,10 @@ class FontMetrics(bytes: ByteArray) {
                         "copy" -> ch = 169.toChar()
                         "reg" -> ch = 174.toChar()
                         else -> {
-                            if (tag.startsWith("img=") && sprites != null) {
+                            if (InlineSprites.isTag(tag)) {
+                                width += InlineSprites.width(tag, lineHeight())
+                                previousChar = -1
+                            } else if (tag.startsWith("img=") && sprites != null) {
                                 try {
                                     val id = Utils.parseInt(tag.substring(4))
                                     width += sprites[id].getSpriteWidth()
@@ -273,7 +278,10 @@ class FontMetrics(bytes: ByteArray) {
                             previousChar = 174
                         }
                         else -> {
-                            if (tag.startsWith("img=") && sprites != null) {
+                            if (InlineSprites.isTag(tag)) {
+                                charWidth += InlineSprites.width(tag, lineHeight())
+                                previousChar = -1
+                            } else if (tag.startsWith("img=") && sprites != null) {
                                 try {
                                     val id = Utils.parseInt(tag.substring(4))
                                     charWidth += sprites[id].getSpriteWidth()
@@ -476,7 +484,14 @@ class FontMetrics(bytes: ByteArray) {
                         "copy" -> current = 169.toChar()
                         "reg" -> current = 174.toChar()
                         else -> {
-                            if (tag.startsWith("img=") && icons != null) {
+                            if (InlineSprites.isTag(tag)) {
+                                width += InlineSprites.width(tag, lineHeight())
+                                previous = -1
+                                if (width > adjustedWidth) {
+                                    return "$prefix..."
+                                }
+                                prefix = text.substring(0, i + 1)
+                            } else if (tag.startsWith("img=") && icons != null) {
                                 try {
                                     val id = Utils.parseInt(tag.substring(4))
                                     width += icons[id].getSpriteWidth()

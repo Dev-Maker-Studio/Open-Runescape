@@ -129,17 +129,17 @@ abstract class AbstractFontRenderer(
             } else if ("/col" == effect) {
                 argbColorEffect = argbColorEffect and 0xffffff.inv() or (colorArgb and 0xffffff)
             }
-            if ("argb=" == effect) {
+            if (effect.startsWith("argb=")) {
                 argbColorEffect = Utils.parse_int(effect.substring(5))
             } else if ("/argb" == effect) {
                 argbColorEffect = colorArgb
-            } else if ("str=" == effect) {
+            } else if (effect.startsWith("str=")) {
                 strikeThroughEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(4))
             } else if ("str" == effect) {
                 strikeThroughEffect = argbColorEffect and 0xffffff.inv() or 0x800000
             } else if ("/str" == effect) {
                 strikeThroughEffect = -1
-            } else if ("u=" == effect) {
+            } else if (effect.startsWith("u=")) {
                 underlineEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(2))
             } else if ("u" == effect) {
                 underlineEffect = argbColorEffect and 0xffffff.inv()
@@ -147,7 +147,7 @@ abstract class AbstractFontRenderer(
                 underlineEffect = -1
             } else if ("shad=-1".equals(effect, ignoreCase = true)) {
                 shadingEffect = 0
-            } else if ("shad=" == effect) {
+            } else if (effect.startsWith("shad=")) {
                 shadingEffect = argbColorEffect and 0xffffff.inv() or Utils.parse_int(effect.substring(5))
             } else if ("shad" == effect) {
                 shadingEffect = argbColorEffect and 0xffffff.inv()
@@ -160,6 +160,9 @@ abstract class AbstractFontRenderer(
             // NOOP
         }
     }
+
+    private fun drawInlineSprite(tag: String, x: Int, lineTop: Int): Int =
+        InlineSprites.draw(toolkit, tag, x, lineTop + fontMetrics.verticalSpacing, fontMetrics.topPadding, fontMetrics.lineHeight())
 
     fun calculateJustifiedSpacing(line: String, width: Int) {
         var spaceCount = 0
@@ -209,7 +212,10 @@ abstract class AbstractFontRenderer(
                         ch = 169.toChar()
                     } else {
                         if ("reg" != effect) {
-                            if (effect.startsWith("img=")) {
+                            if (InlineSprites.isTag(effect)) {
+                                currentX += drawInlineSprite(effect, currentX, currentY)
+                                prevChar = -1
+                            } else if (effect.startsWith("img=")) {
                                 try {
                                     val spriteIndex = Utils.parseInt(effect.substring(4))
                                     val sprite = sprites!![spriteIndex]
@@ -297,7 +303,10 @@ abstract class AbstractFontRenderer(
                         ch = 169.toChar()
                     } else {
                         if ("reg" != effect) {
-                            if (effect.startsWith("img=")) {
+                            if (InlineSprites.isTag(effect)) {
+                                currentX += drawInlineSprite(effect, currentX, currentY)
+                                prevChar = -1
+                            } else if (effect.startsWith("img=")) {
                                 try {
                                     val offsetX: Int
                                     val offsetY: Int
