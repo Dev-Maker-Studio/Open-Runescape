@@ -75,16 +75,17 @@ class SpriteDrawQueue {
     fun processCycle() {
         var spriteRenderNode = spriteDrawQueue.getNext() as SpriteRenderNode?
         while (spriteRenderNode != null) {
+            val nativeSprite = spriteRenderNode.createNativeSprite()
             if (spriteRenderNode.hasSoftReference()) {
                 /** The native sprite is soft referenced, if it's not reachable we should unlink **/
-                if (spriteRenderNode.createNativeSprite() == null) {
+                if (nativeSprite == null) {
                     spriteRenderNode.unlink()
                     spriteRenderNode.unlinkSub()
                     currentCapacity += spriteRenderNode.size
                 }
-            } else if (++spriteRenderNode.indexReference > 5) {
+            } else if (++spriteRenderNode.indexReference > 5 && nativeSprite != null) {
                 /** We reached the cycles to unlink, lets change that direct reference into a soft reference to save memory **/
-                val referencedRenderNode = ReferencedSpriteRenderNode(spriteRenderNode.itemRenderer, spriteRenderNode.createNativeSprite(), spriteRenderNode.size)
+                val referencedRenderNode = ReferencedSpriteRenderNode(spriteRenderNode.itemRenderer, nativeSprite, spriteRenderNode.size)
                 spriteRenderNodes.put(referencedRenderNode, spriteRenderNode.pointer)
                 CacheableNode.rebuild(referencedRenderNode, spriteRenderNode)
                 spriteRenderNode.unlink()

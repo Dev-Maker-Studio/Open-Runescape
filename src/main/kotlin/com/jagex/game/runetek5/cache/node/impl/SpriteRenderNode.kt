@@ -9,7 +9,7 @@ abstract class SpriteRenderNode(
     @JvmField val size: Int
 ) : CacheableNode() {
 
-    abstract fun createNativeSprite(): NativeSprite
+    abstract fun createNativeSprite(): NativeSprite?
 
     abstract fun hasSoftReference(): Boolean
 }

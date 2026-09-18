@@ -17,7 +17,7 @@ class ReferencedSpriteRenderNode(
         return true
     }
 
-    override fun createNativeSprite(): NativeSprite {
-        return nativeSpriteRef.get()!!
+    override fun createNativeSprite(): NativeSprite? {
+        return nativeSpriteRef.get()
     }
 }
