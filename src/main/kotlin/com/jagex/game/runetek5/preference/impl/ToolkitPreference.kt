@@ -36,7 +36,7 @@ class ToolkitPreference : Preference {
 
     override fun getDefaultValue(): Int {
         isDefault = true
-        return LEGACY_OPENGL
+        return MODERN_OPENGL
     }
 
     override fun setValue(value: Int) {
