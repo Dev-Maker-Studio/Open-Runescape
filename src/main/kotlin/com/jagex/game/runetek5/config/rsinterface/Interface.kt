@@ -302,7 +302,7 @@ class Interface(
             if (INTERFACES!![interId] != null && INTERFACES!![interId]!!.components[compId] != null) {
                 val component = INTERFACES!![interId]!!.components[compId]!!
                 if (slotId == -1 && component.type == ComponentType.CONTAINER) {
-                    var menuEntry = MiniMenu.entryList.first() as MiniMenuEntry?
+                    var menuEntry = MiniMenu.entryList.getFirst() as MiniMenuEntry?
                     while (menuEntry != null) {
                         if (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30) {
                             var component2: Component? = Component.fromHash(menuEntry.param1)
@@ -316,7 +316,7 @@ class Interface(
                         menuEntry = MiniMenu.entryList.next() as MiniMenuEntry?
                     }
                 } else {
-                    var menuEntry = MiniMenu.entryList.first() as MiniMenuEntry?
+                    var menuEntry = MiniMenu.entryList.getFirst() as MiniMenuEntry?
                     while (menuEntry != null) {
                         if (menuEntry.param0 == slotId && component.idHash == menuEntry.param1 && (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30)) {
                             return true
