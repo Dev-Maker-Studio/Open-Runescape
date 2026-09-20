@@ -258,7 +258,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         }
 
         @JvmStatic
-        fun performDummyActionevent(canvas: Canvas) {
+        fun performDummyActionevent(canvas: Canvas?) {
             val eventQueue = SystemInfo.systemEventQueue
             if (eventQueue != null) {
                 var i = 0

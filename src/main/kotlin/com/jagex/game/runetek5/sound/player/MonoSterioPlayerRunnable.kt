@@ -20,7 +20,7 @@ class MonoSterioPlayerRunnable : AbstractMonoSterioPlayerRunnable() {
                     }
 
                     TimeTools.sleep(10L)
-                    GameShell.performDummyActionevent(GameShell.gameCanvas!!)
+                    GameShell.performDummyActionevent(null)
                 }
             } catch (innerException: Exception) {
                 PacketEncoder.sendErrorToServer(null, innerException)
