@@ -717,12 +717,7 @@ object PacketDecoder {
             val bitBuffer = Bit(context.currentPacketSize)
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize)
             Client.resetCutscenes()
-            if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
-                Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
-            } else {
-                Resource.mapRegionLoaderTask?.requestedFrame = null
-                Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
-            }
+            Resource.mapRegionLoaderTask!!.load(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.DEPRECATED_52_CLIENTPACKET_97) {
@@ -1590,12 +1585,7 @@ object PacketDecoder {
             val bitBuffer = Bit(context.currentPacketSize)
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize)
             Client.resetCutscenes()
-            if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
-                Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
-            } else {
-                Resource.mapRegionLoaderTask?.requestedFrame = null
-                Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
-            }
+            Resource.mapRegionLoaderTask!!.load(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.REMOVE_GROUND_ITEM) {

@@ -96,8 +96,6 @@ class GamePreferences : Node<GamePreferences> {
     @JvmField
     var safeMode: SafeModePreference? = null
     @JvmField
-    var asyncMaploading: AsyncMaploadingPreference? = null
-    @JvmField
     var soundEffectVolume: SoundLevelPreference? = null
     @JvmField
     var ambientSoundVolume: SoundLevelPreference? = null
@@ -146,7 +144,7 @@ class GamePreferences : Node<GamePreferences> {
                     setDefaults(true)
                 }
                 setDefaults(false)
-            } else if (version > 27) {
+            } else if (version > 28) {
                 setDefaults(true)
             } else {
                 antiAliasing = AntiAliasingPreference(stream.readUByte(), this)
@@ -194,8 +192,8 @@ class GamePreferences : Node<GamePreferences> {
                 cpu = CpuMaxMemoryPreference(stream.readUByte(), this)
                 gametipStartStagePreference = GameTipPreference(stream.readUByte(), this)
                 safeMode = SafeModePreference(stream.readUByte(), this)
-                if (version >= 26) {
-                    asyncMaploading = AsyncMaploadingPreference(stream.readUByte(), this)
+                if (version == 26 || version == 27) {
+                    stream.readUByte()
                 }
 
                 soundEffectVolume = SoundLevelPreference(stream.readUByte(), this)
@@ -336,10 +334,6 @@ class GamePreferences : Node<GamePreferences> {
 
         if (override || safeMode == null) {
             safeMode = SafeModePreference(this)
-        }
-
-        if (override || asyncMaploading == null) {
-            asyncMaploading = AsyncMaploadingPreference(this)
         }
 
         if (override || soundEffectVolume == null) {
@@ -490,7 +484,7 @@ class GamePreferences : Node<GamePreferences> {
     fun encode(): Packet {
         val stream = Packet(40)
         /*0*/
-        stream.writeByte(27)
+        stream.writeByte(28)
         /*1*/
         stream.writeByte(antiAliasing!!.getValue())
         /*2*/
@@ -548,18 +542,16 @@ class GamePreferences : Node<GamePreferences> {
         /*28*/
         stream.writeByte(safeMode!!.getValue())
         /*29*/
-        stream.writeByte(asyncMaploading!!.getValue())
-        /*30*/
         stream.writeByte(soundEffectVolume!!.getValue())
-        /*31*/
+        /*30*/
         stream.writeByte(ambientSoundVolume!!.getValue())
-        /*32*/
+        /*31*/
         stream.writeByte(voiceOverVolume!!.getValue())
-        /*33*/
+        /*32*/
         stream.writeByte(musicVolume!!.getValue())
-        /*34*/
+        /*33*/
         stream.writeByte(soundLevel!!.getValue())
-        /*35*/
+        /*34*/
         stream.writeByte(monoStereo!!.getValue())
         return stream
     }
@@ -596,7 +588,6 @@ class GamePreferences : Node<GamePreferences> {
         cpu!!.ensureValid()
         gametipStartStagePreference!!.ensureValid()
         safeMode!!.ensureValid()
-        asyncMaploading!!.ensureValid()
         soundEffectVolume!!.ensureValid()
         ambientSoundVolume!!.ensureValid()
         voiceOverVolume!!.ensureValid()

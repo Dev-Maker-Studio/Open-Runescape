@@ -1,8 +1,12 @@
 package com.jagex.game.runetek5.scene
 
 import com.jagex.game.runetek5.cache.node.NodeCollection
+import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.`object`.ObjectTypeList
+import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
+import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.sound.player.area.AmbientSound
+import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 import java.util.LinkedList
 
 /**
@@ -48,7 +52,21 @@ class AsyncMapLoader : Runnable {
     /** Game thread only. The scene the server's zone packets are relative to while it is still being built. */
     @JvmField var requestedFrame: RegionLoadRequest.SceneFrame? = null
 
-    fun requestMapUpdate(regionLoadRequest: RegionLoadRequest) {
+    fun load(request: RegionLoadRequest) {
+        if (Renderers.activeToolkit !is SafeModeToolkit) {
+            requestMapUpdate(request)
+            return
+        }
+        requestedFrame = null
+        if (request.loadingType == RegionLoadingType.RELOAD) {
+            Resource.mapRegion!!.reload()
+            ComponentMinimap.reset()
+        } else {
+            Resource.mapRegion!!.initialize(request)
+        }
+    }
+
+    private fun requestMapUpdate(regionLoadRequest: RegionLoadRequest) {
         regionLoadRequest.peekSceneFrame()?.let { requestedFrame = it }
         // Claimed here, not on the loader thread: the game thread must never observe IDLE with a request queued.
         synchronized(stateLock) {

@@ -1735,12 +1735,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
 
         fun requestDebugMapUpdate() {
-            if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
-                Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.RELOAD, null))
-            } else {
-                Resource.mapRegion!!.reload()
-                ComponentMinimap.reset()
-            }
+            Resource.mapRegionLoaderTask!!.load(RegionLoadRequest(RegionLoadingType.RELOAD, null))
         }
 
         @JvmStatic
