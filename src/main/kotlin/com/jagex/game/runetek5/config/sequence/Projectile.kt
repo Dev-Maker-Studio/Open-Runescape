@@ -308,7 +308,7 @@ class Projectile(
         absolutePosition.quaternion.multiply(quaternion)
         quaternion.store()
         setAbsolutePosition(absolutePosition)
-        if (sequence.progressCycle(1) && sequence.needsReset()) {
+        if (sequence.progressCycle(step) && sequence.needsReset()) {
             sequence.reset()
         }
     }
