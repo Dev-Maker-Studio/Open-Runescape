@@ -1892,9 +1892,12 @@ class Client : GameShell() {
                 if (!MiniMenu.isOpen) {
                     MiniMenu.resetEntries()
                 }
-                var packetCount = 0
-                while (packetCount < 100 && PacketDecoder.decodePacketFromStream(GAME_CONNECTION_CONTEXT)) {
-                    packetCount++
+                // Nothing may be decoded past a REGION packet until the async loader's deferred local-list reset has run.
+                if (Resource.mapRegionLoaderTask?.isLoadingRegion() != true) {
+                    var packetCount = 0
+                    while (packetCount < 100 && PacketDecoder.decodePacketFromStream(GAME_CONNECTION_CONTEXT)) {
+                        packetCount++
+                    }
                 }
                 if (gameState == GameState.LOGGED_INGAME) {
                     while (ReflectionCheckManager.hasPendingChecks()) {

@@ -50,6 +50,12 @@ class AsyncMapLoader : Runnable {
 
     fun requestMapUpdate(regionLoadRequest: RegionLoadRequest) {
         regionLoadRequest.peekSceneFrame()?.let { requestedFrame = it }
+        // Claimed here, not on the loader thread: the game thread must never observe IDLE with a request queued.
+        synchronized(stateLock) {
+            if (state == State.IDLE) {
+                state = State.BUILDING
+            }
+        }
         synchronized(regionLoadRequests) {
             regionLoadRequests.add(regionLoadRequest)
             (regionLoadRequests as Object).notify()
