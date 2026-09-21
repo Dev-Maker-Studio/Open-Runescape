@@ -238,6 +238,7 @@ class ModernBloomPass {
         if (wasActive && scene != null) {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, scene.getId())
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFbo)
+            glDisable(GL_SCISSOR_TEST)
             glBlitFramebuffer(0, 0, scene.width, scene.height, 0, 0, targetW, targetH, GL_COLOR_BUFFER_BIT, GL_LINEAR)
         }
         glBindFramebuffer(GL_FRAMEBUFFER, targetFbo)

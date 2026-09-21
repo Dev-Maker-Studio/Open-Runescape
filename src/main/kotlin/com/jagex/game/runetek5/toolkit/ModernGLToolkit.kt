@@ -1289,10 +1289,18 @@ class ModernGLToolkit(
         sceneMsaaRestoreFbo = GL30.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING)
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, sceneMsaaRestoreFbo)
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.getId())
-        GL30.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST)
+        blitWholeTarget(w, h)
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fb.getId())
         sceneMsaaBound = true
         sceneMsaaActiveSamples = samples
+    }
+
+    // glBlitFramebuffer honours the scissor, which mid-interface is one component's clip.
+    private fun blitWholeTarget(w: Int, h: Int) {
+        val scissored = glIsEnabled(GL_SCISSOR_TEST)
+        if (scissored) glDisable(GL_SCISSOR_TEST)
+        GL30.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST)
+        if (scissored) glEnable(GL_SCISSOR_TEST)
     }
 
     // A resolve (bloom capture, offscreen display) can leave an open, empty batch unbound.
@@ -1307,7 +1315,7 @@ class ModernGLToolkit(
         val fb = sceneMsaa ?: return
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fb.getId())
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, sceneMsaaRestoreFbo)
-        GL30.glBlitFramebuffer(0, 0, fb.width, fb.height, 0, 0, fb.width, fb.height, GL_COLOR_BUFFER_BIT, GL_NEAREST)
+        blitWholeTarget(fb.width, fb.height)
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, sceneMsaaRestoreFbo)
     }
 
