@@ -401,7 +401,7 @@ enum class UpdateZonePacket(val size: Int) {
 
         if (playerId != PlayerUpdate.myPlayerIndex) {
             val withinScene = isWithinScene(localX, localY)
-            if (withinScene || Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations()) {
+            if (withinScene || isWithinRequestedScene(x, y) || Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations()) {
                 GroundItemUpdating.addGroundItem(UPDATE_ZONE_PLANE, x, y, GroundItemNode(id, amount))
                 if (withinScene) {
                     GroundItemUpdating.removeGroundItem(UPDATE_ZONE_PLANE, localX, localY)
@@ -421,7 +421,7 @@ enum class UpdateZonePacket(val size: Int) {
         val x = localX + baseCoords.x
 
         val withinScene = isWithinScene(localX, localY)
-        if (withinScene || Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations()) {
+        if (withinScene || isWithinRequestedScene(x, y) || Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations()) {
             GroundItemUpdating.addGroundItem(UPDATE_ZONE_PLANE, x, y, GroundItemNode(id, amount))
             if (withinScene) {
                 GroundItemUpdating.removeGroundItem(UPDATE_ZONE_PLANE, localX, localY)
@@ -467,7 +467,24 @@ enum class UpdateZonePacket(val size: Int) {
     companion object {
         @JvmField
         var UPDATE_ZONE_PLANE: Int = 0
-        var UPDATE_ZONE_X: Int = 0
-        var UPDATE_ZONE_Y: Int = 0
+        private var zoneAbsX: Int = 0
+        private var zoneAbsY: Int = 0
+
+        val UPDATE_ZONE_X: Int
+            get() = zoneAbsX - Resource.mapRegion!!.getBaseCoordinates().x
+        val UPDATE_ZONE_Y: Int
+            get() = zoneAbsY - Resource.mapRegion!!.getBaseCoordinates().y
+
+        // The server addresses zones from the scene it last sent, which an async build has not swapped in yet.
+        fun setZone(sceneX: Int, sceneY: Int, plane: Int) {
+            val serverBase = Resource.mapRegionLoaderTask?.requestedFrame?.base ?: Resource.mapRegion!!.getBaseCoordinates()
+            zoneAbsX = serverBase.x + sceneX
+            zoneAbsY = serverBase.y + sceneY
+            UPDATE_ZONE_PLANE = plane
+        }
+
+        private fun isWithinRequestedScene(absX: Int, absY: Int): Boolean {
+            return Resource.mapRegionLoaderTask?.requestedFrame?.contains(absX, absY) == true
+        }
     }
 }

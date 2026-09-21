@@ -800,6 +800,10 @@ class MapRegion(var asyncMaploading: Boolean) {
         outgoingRegion.getLoctypeList().resetAll()
         buildRegionBase(outgoingRegion)
         Resource.mapRegion = this
+        val requestedBase = Resource.mapRegionLoaderTask!!.requestedFrame?.base
+        if (requestedBase != null && requestedBase.x == this.baseCoordinates.x && requestedBase.y == this.baseCoordinates.y) {
+            Resource.mapRegionLoaderTask!!.requestedFrame = null
+        }
         Resource.mapRegionLoaderTask!!.setMapRegion(outgoingRegion)
         outgoingRegion.clear()
         setLoadingRegion()

@@ -720,6 +720,7 @@ object PacketDecoder {
             if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
                 Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
             } else {
+                Resource.mapRegionLoaderTask?.requestedFrame = null
                 Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
             }
             context.currentPacket = null
@@ -1224,15 +1225,17 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_FOLLOWS) {
-            UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByteAdd().toInt() shl 3
-            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByteAdd()
-            UpdateZonePacket.UPDATE_ZONE_X = buffer.readByteAdd().toInt() shl 3
+            val zoneY = buffer.readByteAdd().toInt() shl 3
+            val zonePlane = buffer.readUByteAdd()
+            val zoneX = buffer.readByteAdd().toInt() shl 3
+            UpdateZonePacket.setZone(zoneX, zoneY, zonePlane)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_ENCLOSED) {
-            UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByteSubtract().toInt() shl 3
-            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByteAdd()
-            UpdateZonePacket.UPDATE_ZONE_X = buffer.readByte().toInt() shl 3
+            val zoneY = buffer.readByteSubtract().toInt() shl 3
+            val zonePlane = buffer.readUByteAdd()
+            val zoneX = buffer.readByte().toInt() shl 3
+            UpdateZonePacket.setZone(zoneX, zoneY, zonePlane)
             while (buffer.currentPosition < context.currentPacketSize) {
                 val subPacket = UpdateZonePacket.entries[buffer.readUByte()]
                 subPacket.decode()
@@ -1240,9 +1243,10 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_FULL_FOLLOWS) {
-            UpdateZonePacket.UPDATE_ZONE_X = buffer.readByteSubtract().toInt() shl 3
-            UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByte().toInt() shl 3
-            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByte()
+            val zoneX = buffer.readByteSubtract().toInt() shl 3
+            val zoneY = buffer.readByte().toInt() shl 3
+            val zonePlane = buffer.readUByte()
+            UpdateZonePacket.setZone(zoneX, zoneY, zonePlane)
             val base = Resource.mapRegion!!.getBaseCoordinates()
             var groundItems = Client.GROUND_ITEMS.first()
             while (groundItems != null) {
@@ -1589,6 +1593,7 @@ object PacketDecoder {
             if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
                 Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
             } else {
+                Resource.mapRegionLoaderTask?.requestedFrame = null
                 Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
             }
             context.currentPacket = null

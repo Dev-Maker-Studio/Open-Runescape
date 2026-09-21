@@ -45,7 +45,11 @@ class AsyncMapLoader : Runnable {
 
     @JvmField val regionLoadRequests: LinkedList<RegionLoadRequest> = LinkedList()
 
+    /** Game thread only. The scene the server's zone packets are relative to while it is still being built. */
+    @JvmField var requestedFrame: RegionLoadRequest.SceneFrame? = null
+
     fun requestMapUpdate(regionLoadRequest: RegionLoadRequest) {
+        regionLoadRequest.peekSceneFrame()?.let { requestedFrame = it }
         synchronized(regionLoadRequests) {
             regionLoadRequests.add(regionLoadRequest)
             (regionLoadRequests as Object).notify()
