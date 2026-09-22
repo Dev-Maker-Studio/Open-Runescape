@@ -661,9 +661,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         } else {
             decodeServerUnderlayMasks(this.surfaceSceneGraph!!, this.surfaceMapBuffer)
         }
-        if (this.asyncMaploading) {
-            sleep(50)
-        }
         this.environmentManager!!.initializeEnvironment(this.sceneSizeX shr 4, this.sceneSizeY shr 4)
         this.environmentManager!!.updateAtmosphere(this)
         if (hasUnderwaterMap) {
@@ -689,9 +686,6 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.underwaterMap!!.offsetTileHeights(this.surfaceSceneGraph!!.tileHeights[0])
             this.underwaterMap!!.initializeFloor(Renderers.activeToolkit!!, null, null)
             this.scene!!.setUnderwater(false)
-            if (this.asyncMaploading) {
-                sleep(50)
-            }
         }
         this.surfaceSceneGraph!!.initializeFloor(Renderers.activeToolkit!!, if (hasUnderwaterMap) this.underwaterMap!!.tileHeights else null, this.collisionMaps)
         if (!this.loadingType!!.constructedMap()) {
@@ -716,13 +710,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             PingRequester.keepalive(true)
         }
         this.surfaceSceneGraph!!.calculateUnderlayPalette(Renderers.activeToolkit!!, if (hasUnderwaterMap) this.scene!!.underwaterHeightmap!![0] else null, null, this.asyncMaploading)
-        if (this.asyncMaploading) {
-            sleep(75)
-        }
         this.surfaceSceneGraph!!.calculateVisibility(false)
-        if (this.asyncMaploading) {
-            sleep(75)
-        }
         if (!this.asyncMaploading) {
             PingRequester.keepalive(true)
         }
@@ -745,9 +733,6 @@ class MapRegion(var asyncMaploading: Boolean) {
                 PingRequester.keepalive(true)
             }
             this.scene!!.setUnderwater(false)
-            if (this.asyncMaploading) {
-                sleep(50)
-            }
         }
         this.surfaceSceneGraph!!.resetUnderlays()
         if (this.underwaterMap != null) {
@@ -931,9 +916,6 @@ class MapRegion(var asyncMaploading: Boolean) {
                                 }
                             }
                         }
-                    }
-                    if (this.asyncMaploading) {
-                        sleep(5)
                     }
                 }
             }
@@ -1242,14 +1224,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
     }
 
-    fun sleep(ms: Int) {
-        try {
-            Thread.sleep(ms.toLong())
-        } catch (interruptedException: InterruptedException) {
-            // NOOP
-        }
-    }
-
     fun decodeClientUnderlayMasks(sceneGraph: SceneGraph, mapDatas: Array<ByteArray?>) {
         val mapCount = mapDatas.size
         for (mapIndex in 0..<mapCount) {
@@ -1334,9 +1308,6 @@ class MapRegion(var asyncMaploading: Boolean) {
                     SoundEffectPlayer.updatePlayers()
                 }
                 sceneGraph.decodeLocMapClient(Renderers.activeToolkit!!, currentRegionBuffer, chunkX, chunkY, this.collisionMaps as Array<CollisionMap?>)
-                if (this.asyncMaploading) {
-                    sleep(10)
-                }
             }
         }
     }
