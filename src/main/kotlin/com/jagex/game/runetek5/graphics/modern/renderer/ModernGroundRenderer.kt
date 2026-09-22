@@ -34,6 +34,23 @@ import java.nio.ByteBuffer
 /** -Drender.groundcolor=raw: ground vertex colour with no lighting at all (debug). */
 private val RAW_COLOR_DEBUG = System.getProperty("render.groundcolor")?.equals("raw", true) == true
 
+class GroundWater(
+    @JvmField var mode: Int = 0,
+    @JvmField var noiseTexture: Int = 0,
+    @JvmField var time: Float = 0f,
+    @JvmField val stillFog: FloatArray = FloatArray(4),
+    @JvmField var colour: Int = 0,
+    @JvmField var rippleFogStart: Float = 0f,
+    @JvmField var rippleFogDensity: Float = 0f,
+    @JvmField var turbulence: Float = 0f,
+    @JvmField val lapAmbient: FloatArray = floatArrayOf(1f, 1f, 1f),
+    @JvmField var lapNoise: FloatArray? = null,
+) {
+    companion object {
+        @JvmField val NONE = GroundWater()
+    }
+}
+
 class ModernGroundRenderer {
 
     companion object {
@@ -73,6 +90,17 @@ class ModernGroundRenderer {
     private var uTexSunBrightnessLocation = -1
     private var uTexContrastPosLocation = -1
     private var uTexContrastNegLocation = -1
+    private var uTexWaterModeLocation = -1
+    private var uTexWaterNoiseLocation = -1
+    private var uTexHasWaterNoiseLocation = -1
+    private var uTexWaterColourLocation = -1
+    private var uTexStillFogLocation = -1
+    private var uTexLapNoiseLocation = -1
+    private var uTexLapTurbulenceLocation = -1
+    private var uTexLapAmbientLocation = -1
+    private var uTexWaterTimeLocation = -1
+    private var uTexRippleFogLocation = -1
+    private val WATER_TEXTURE_UNIT = 5
 
     // Legacy sun parameters for HD_LIGHT grounds (raw, unnormalized values from
     // OpenGlToolkit.sunDirection / sunBrightness / sunColorIntensity / antiSunColorIntensity)
@@ -441,6 +469,21 @@ class ModernGroundRenderer {
         uTexSunBrightnessLocation = s.getUniformLocation("uSunBrightness")
         uTexContrastPosLocation = s.getUniformLocation("uContrastPos")
         uTexContrastNegLocation = s.getUniformLocation("uContrastNeg")
+        uTexWaterModeLocation = s.getUniformLocation("uWaterMode")
+        uTexWaterNoiseLocation = s.getUniformLocation("uWaterNoise")
+        uTexHasWaterNoiseLocation = s.getUniformLocation("uHasWaterNoise")
+        uTexWaterColourLocation = s.getUniformLocation("uWaterColour")
+        uTexStillFogLocation = s.getUniformLocation("uStillFog")
+        uTexLapNoiseLocation = s.getUniformLocation("uLapNoise")
+        uTexLapTurbulenceLocation = s.getUniformLocation("uLapTurbulence")
+        uTexLapAmbientLocation = s.getUniformLocation("uLapAmbient")
+        uTexWaterTimeLocation = s.getUniformLocation("uWaterTime")
+        uTexRippleFogLocation = s.getUniformLocation("uRippleFog")
+        // A sampler2D and the sampler3D left on the same unit make every draw GL_INVALID_OPERATION.
+        if (uTexTextureLocation >= 0) GLWrapper.uniform1i(uTexTextureLocation, 0)
+        if (uTexWaterNoiseLocation >= 0) GLWrapper.uniform1i(uTexWaterNoiseLocation, WATER_TEXTURE_UNIT)
+        val shadowTex = s.getUniformLocation("uGroundShadowTex")
+        if (shadowTex >= 0) GLWrapper.uniform1i(shadowTex, SHADOW_TEXTURE_UNIT)
         s.unbind()
     }
 
@@ -533,6 +576,13 @@ class ModernGroundRenderer {
         glDisableVertexAttribArray(3)
         externalVao?.unbind()
         if (boundTexture > 0) GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, 0)
+        if (boundWaterNoise > 0) {
+            glActiveTexture(GL_TEXTURE0 + WATER_TEXTURE_UNIT)
+            glBindTexture(GL_TEXTURE_3D, 0)
+            glActiveTexture(GL_TEXTURE0)
+        }
+        boundWaterMode = -1
+        boundWaterNoise = -1
         glBindBuffer(GL_ARRAY_BUFFER, 0)
         // Unbind the program: legacy fixed-function draws interleave with this path
         // (lights, UI, fallbacks), and a bound program hijacks their vertex processing.
@@ -562,6 +612,37 @@ class ModernGroundRenderer {
     private var boundTextureScale = Float.NaN
     private var boundTextureScrollU = Float.NaN
     private var boundTextureScrollV = Float.NaN
+    private var boundWaterMode = -1
+    private var boundWaterNoise = -1
+
+    private fun applyWater(water: GroundWater) {
+        if (water.mode != boundWaterMode) {
+            GLWrapper.uniform1i(uTexWaterModeLocation, water.mode)
+            boundWaterMode = water.mode
+        }
+        if (water.mode == 0) return
+        if (water.noiseTexture != boundWaterNoise) {
+            glActiveTexture(GL_TEXTURE0 + WATER_TEXTURE_UNIT)
+            glBindTexture(GL_TEXTURE_3D, water.noiseTexture)
+            glActiveTexture(GL_TEXTURE0)
+            GLWrapper.uniform1i(uTexHasWaterNoiseLocation, if (water.noiseTexture != 0) 1 else 0)
+            boundWaterNoise = water.noiseTexture
+        }
+        glUniform1f(uTexWaterTimeLocation, water.time)
+        when (water.mode) {
+            3 -> {
+                glUniform4f(uTexStillFogLocation, water.stillFog[0], water.stillFog[1], water.stillFog[2], water.stillFog[3])
+                val c = water.colour
+                glUniform3f(uTexWaterColourLocation, (c shr 16 and 0xff) / 255f, (c shr 8 and 0xff) / 255f, (c and 0xff) / 255f)
+            }
+            4 -> glUniform2f(uTexRippleFogLocation, water.rippleFogStart, water.rippleFogDensity)
+            2 -> {
+                glUniform1f(uTexLapTurbulenceLocation, water.turbulence)
+                glUniform3f(uTexLapAmbientLocation, water.lapAmbient[0], water.lapAmbient[1], water.lapAmbient[2])
+                water.lapNoise?.let { glUniform2fv(uTexLapNoiseLocation, it) }
+            }
+        }
+    }
 
     /**
      * Draws terrain with the provided vertex and index data.
@@ -869,7 +950,8 @@ class ModernGroundRenderer {
          */
         residentVertexVbo: Int = 0,
         /** Element buffer already holding [indexCount] indices, or 0 to upload [indexShorts]. */
-        residentIndexIbo: Int = 0
+        residentIndexIbo: Int = 0,
+        water: GroundWater = GroundWater.NONE
     ) {
         if (indexCount == 0) return
 
@@ -974,6 +1056,8 @@ class ModernGroundRenderer {
             boundTextureScale = Float.NaN
             boundTextureScrollU = Float.NaN
             boundTextureScrollV = Float.NaN
+            boundWaterMode = -1
+            boundWaterNoise = -1
         }
 
         // ---- Per-GROUND state: the interleaved attribute layout ----
@@ -1037,6 +1121,8 @@ class ModernGroundRenderer {
             s.setUniform(uTexAlphaFromVertexLocation, if (alphaFromVertex) 1 else 0)
             boundAlphaFromVertex = alphaFromVertex
         }
+
+        applyWater(water)
 
         // Color: from the per-material color VBO (legacy parity — see kdoc above).
         // Attribute pointers latch the ARRAY_BUFFER binding at specification time,
@@ -1116,6 +1202,7 @@ class ModernGroundRenderer {
         s.setUniform(uTexTextureScrollLocation, 0f, 0f)
         s.setUniform(uTexFogEnabledLocation, 0)
         s.setUniform("uRawColorDebug", 0)
+        GLWrapper.uniform1i(uTexWaterModeLocation, 0)
         val en = s.getUniformLocation("uGroundShadowEnabled")
         if (en >= 0) GLWrapper.uniform1i(en, 0)
         val pl = s.getUniformLocation("uPointLightCount")

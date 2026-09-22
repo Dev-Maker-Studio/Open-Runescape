@@ -5,6 +5,13 @@ in vec4 vColor;
 in vec2 vTexCoord;
 in float vFogFactor;
 in vec2 vWorldXZ;
+in vec3 vWaterNoiseCoord;
+in float vWaterMix;
+
+uniform int uWaterMode;
+uniform sampler3D uWaterNoise;
+uniform bool uHasWaterNoise;
+uniform vec3 uWaterColour;
 
 // Native ground shadow overlay. One R8 texel per shadow cell over the whole ground,
 // holding what legacy's ShadowTileGL.regenerateTexture puts in its per-chunk alpha
@@ -70,7 +77,16 @@ void main() {
         color = vColor;
     }
 
-    if (uAlphaFromVertex) {
+    if (uWaterMode == 4) {
+        vec4 n = uHasWaterNoise ? texture(uWaterNoise, vWaterNoiseCoord) : vec4(0.0, 0.0, 0.0, 1.0);
+        color = vec4(clamp((vColor.rgb + n.rgb) * 2.0, 0.0, 1.0), clamp(vColor.a * n.a + vWaterMix, 0.0, 1.0));
+    } else if (uWaterMode == 2) {
+        if (uHasWaterNoise) color.rgb = clamp(color.rgb + texture(uWaterNoise, vWaterNoiseCoord).rgb, 0.0, 1.0);
+        color.a = 1.0;
+    } else if (uWaterMode == 3) {
+        color.rgb = mix(color.rgb, uWaterColour, vWaterMix);
+    }
+    if (uAlphaFromVertex && uWaterMode != 4 && uWaterMode != 2) {
         color.a = vColor.a;
     }
     if (uGroundShadowEnabled) {

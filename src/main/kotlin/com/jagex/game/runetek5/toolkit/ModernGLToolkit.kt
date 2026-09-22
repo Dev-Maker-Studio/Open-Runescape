@@ -6079,6 +6079,87 @@ class ModernGLToolkit(
         return bits
     }
 
+    private val groundWaterScratch = com.jagex.game.runetek5.graphics.modern.renderer.GroundWater()
+    private var lapNoiseTable: FloatArray? = null
+    private val lapNoiseFrame = FloatArray(128)
+    private var lapNoiseProgression = Int.MIN_VALUE
+
+    private fun groundWater(material: GroundMaterialGL, ground: GroundGL, type: com.jagex.game.runetek5.config.material.MaterialType?): com.jagex.game.runetek5.graphics.modern.renderer.GroundWater {
+        val water = groundWaterScratch
+        val progression = textureAnimatingProgression
+        if (stillWaterToggled) {
+            val tile = material.waterTile
+            val fogFar = fogFarDistance
+            val fogNear = fogMinimumStartPosition
+            water.mode = 3
+            water.stillFog[0] = fogFar - (fogFar - fogNear) * 0.25f
+            water.stillFog[1] = fogFar - (fogFar - fogNear) * 0.125f
+            water.stillFog[2] = 256f / tile.scale
+            water.stillFog[3] = tile.intensity / 255f
+            water.colour = tile.color
+            water.noiseTexture = 0
+            return water
+        }
+        var effect = type?.effectId?.toInt() ?: 0
+        var param1 = type?.effectParam1?.toInt() ?: 0
+        val param2: Int
+        val stillWaterAllowed = (ground.waterFunctionMask and 0x8) != 0
+        if (effect == 8 || effect == 9) effect = 4
+        if (effect == 4 && !stillWaterAllowed) {
+            effect = 2
+            param2 = param1
+        } else {
+            param2 = type?.effectParam2?.toInt() ?: 0
+        }
+        val noise = effectManager?.textureContainer?.texture3d?.activeHandle ?: 0
+        when (effect) {
+            4 -> {
+                water.mode = 4
+                water.noiseTexture = noise
+                water.time = if ((param1 and 0x1) == 1) (progression % 4000) / 4000f else 0f
+                water.rippleFogStart = fogStartPosition
+                water.rippleFogDensity = if (fogDensity > 0) fogDensity.toFloat() else 0f
+            }
+            2 -> {
+                water.mode = 2
+                water.noiseTexture = if ((param1 and 0x80) == 0) noise else 0
+                water.time = if ((param2 and 0x1) == 1) (progression % 4000) / 4000f else 0f
+                if ((param1 and 0x40) == 0) {
+                    water.lapAmbient[0] = sunBrightness * sunColorRed
+                    water.lapAmbient[1] = sunBrightness * sunColorGreen
+                    water.lapAmbient[2] = sunBrightness * sunColorBlue
+                } else {
+                    water.lapAmbient.fill(1f)
+                }
+                water.turbulence = when (param1 and 0x3) { 2 -> 0.05f; 3 -> 0.1f; else -> 0.025f }
+                water.lapNoise = lapNoise(progression)
+            }
+            else -> water.mode = 0
+        }
+        return water
+    }
+
+    private fun lapNoise(progression: Int): FloatArray {
+        val table = lapNoiseTable ?: FloatArray(32768).also { noise ->
+            val mapX = com.jagex.game.runetek5.config.material.texture.operation.TextureOpPerlinNoise.generateNoiseMap()
+            val mapY = com.jagex.game.runetek5.config.material.texture.operation.TextureOpPerlinNoise.generateNoiseMap()
+            var offset = 0
+            for (index in 0 until 256) {
+                for (i in 0 until 64) {
+                    noise[offset++] = mapX[index][i] / 4096f
+                    noise[offset++] = mapY[index][i] / 4096f
+                }
+            }
+            lapNoiseTable = noise
+        }
+        if (progression != lapNoiseProgression) {
+            val start = progression % 5000 * 128 / 5000
+            System.arraycopy(table, start, lapNoiseFrame, 0, 128)
+            lapNoiseProgression = progression
+        }
+        return lapNoiseFrame
+    }
+
     fun renderGroundMaterialModern(
         material: GroundMaterialGL,
         ground: GroundGL,
@@ -6413,7 +6494,8 @@ class ModernGLToolkit(
             combineMode = combineMode,
             alphaFromVertex = materialId >= 0 && !MaterialTypeList.isOpaqueEffect(materialProvider?.getMaterial(materialId)?.effectId?.toInt() ?: 0),
             residentVertexVbo = residentGroundVbo(ground, modernData),
-            residentIndexIbo = residentIbo
+            residentIndexIbo = residentIbo,
+            water = groundWater(material, ground, groundMaterial)
         )
         gpuTimer.end(GPU_PASS_GROUND)
         // The VAO pass toggled generic attribute arrays; on most drivers attribute 0
