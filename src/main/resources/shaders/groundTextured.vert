@@ -8,7 +8,7 @@
 // - Normal: vec3 (12 bytes) at offset 24 or 28 (GL_FLOAT, 3 components) - optional for HD_LIGHT
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec4 aColor;
-layout(location = 2) in vec2 aTexCoord;
+layout(location = 2) in vec3 aTexCoord;
 layout(location = 3) in vec3 aNormal;
 
 // Uniforms
@@ -46,19 +46,55 @@ uniform int uPointLightCount;
 uniform vec4 uPointLightPos[MAX_POINT_LIGHTS];   // xyz world, w = 1/size2d^2
 uniform vec3 uPointLightColor[MAX_POINT_LIGHTS]; // colour * transparency/255
 
+uniform int uWaterMode;
+uniform vec4 uStillFog;
+uniform vec2 uLapNoise[64];
+uniform float uLapTurbulence;
+uniform vec3 uLapAmbient;
+uniform float uWaterTime;
+uniform vec2 uRippleFog;
+
 out vec4 vColor;
 out vec2 vTexCoord;
 out float vFogFactor;
 out vec2 vWorldXZ;   // for the per-fragment ground shadow overlay (see frag)
+out vec3 vWaterNoiseCoord;
+out float vWaterMix;
 
 void main() {
-    // Apply the VP transform
-    gl_Position = uViewProjection * vec4(aPosition, 1.0);
+    vec3 position = aPosition;
+    gl_Position = uViewProjection * vec4(position, 1.0);
+    float viewZ = gl_Position.w;
+    float waterDepth = aTexCoord.z;
+    vWaterMix = 0.0;
+    vWaterNoiseCoord = vec3(0.0);
+    if (uWaterMode == 3) {
+        float blend = (viewZ - uStillFog.x) * 0.001953125;
+        float tint = waterDepth * uStillFog.z + uStillFog.w;
+        float pull = clamp((viewZ - uStillFog.y) * 0.00390625, 0.0, 1.0) * waterDepth;
+        blend = clamp(blend * tint, 0.0, 1.0);
+        tint = clamp(tint, 0.0, 1.0);
+        position.y -= pull;
+        gl_Position = uViewProjection * vec4(position, 1.0);
+        vWaterMix = clamp((max(blend, tint) - 0.25) * 2.0, 0.0, 1.0);
+    } else if (uWaterMode == 4) {
+        vWaterNoiseCoord = vec3(aTexCoord.xy * uTextureScale * 0.25, uWaterTime);
+        if (uRippleFog.y > 0.0) vWaterMix = clamp((viewZ - uRippleFog.x) / uRippleFog.y, 0.0, 1.0);
+    }
 
     vec3 color = aColor.rgb;
-    vWorldXZ = aPosition.xz;
-    vTexCoord = aTexCoord * uTextureScale + uTextureScroll;
+    vWorldXZ = position.xz;
+    vTexCoord = aTexCoord.xy * uTextureScale + uTextureScroll;
     vFogFactor = 1.0;
+    if (uWaterMode == 2) {
+        vec2 n = fract(vec2(position.x + position.z, position.z - position.x) * 0.0001220703125) * 64.0;
+        vec2 offset = vec2(uLapNoise[int(n.x)].x, uLapNoise[int(n.y)].y) * uLapTurbulence;
+        vec2 base = aTexCoord.xy * uTextureScale;
+        vTexCoord = base + offset;
+        vWaterNoiseCoord = vec3(base * 0.125, uWaterTime);
+        vColor = vec4(clamp(aColor.rgb * uLapAmbient, 0.0, 1.0), aColor.a);
+        return;
+    }
     if (uRawColorDebug == 1) {
         vColor = vec4(color, aColor.a);
         return;
