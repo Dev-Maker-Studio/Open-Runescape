@@ -1642,7 +1642,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         fun addCustomisation(z: Int, type: Int, x: Int, y: Int, locCustomisation: ObjectTypeCustomisation?) {
             if (x >= 1 && y >= 1 && x <= Resource.mapRegion!!.sceneSizeX - 2 && y <= Resource.mapRegion!!.sceneSizeY - 2 && Resource.mapRegion!!.getScene() != null) {
                 val gameObject: GameObject? = Resource.mapRegion!!.surfaceSceneGraph!!.getGameObject(z, type, x, y)
-                if (gameObject != null && locCustomisation != null) {
+                if (gameObject != null) {
                     if (gameObject is AnimatedInteractiveObject) {
                         (gameObject as AnimatedInteractiveObject).addCustomisation(locCustomisation)
                     } else if (gameObject is AnimatedGroundDecoration) {

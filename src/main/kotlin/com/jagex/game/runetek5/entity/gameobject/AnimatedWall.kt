@@ -98,7 +98,7 @@ class AnimatedWall(
         return silhouette
     }
 
-    fun addCustomisation(customisation: ObjectTypeCustomisation) {
+    fun addCustomisation(customisation: ObjectTypeCustomisation?) {
         gameObject.addCustomisation(customisation)
     }
 

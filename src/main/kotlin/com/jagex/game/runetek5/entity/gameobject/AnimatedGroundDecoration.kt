@@ -128,7 +128,7 @@ class AnimatedGroundDecoration(
         throw IllegalStateException()
     }
 
-    fun addCustomisation(locCustomisation: ObjectTypeCustomisation) {
+    fun addCustomisation(locCustomisation: ObjectTypeCustomisation?) {
         gameObject.addCustomisation(locCustomisation)
     }
 

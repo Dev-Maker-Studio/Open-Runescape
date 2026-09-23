@@ -379,6 +379,10 @@ class ModernParticleRenderer {
                     break
                 }
 
+                if (particlePtr >= totalParticles) {
+                    particleNode = tree
+                    break
+                }
                 val depth = (particleDepths[particlePtr++] - minDepth) shr bucketShift
                 if (depth < MAX_DEPTH_BUCKETS) {
                     if (bucketCounts[depth] < MAX_PER_BUCKET) {

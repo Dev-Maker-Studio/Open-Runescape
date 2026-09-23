@@ -1555,7 +1555,7 @@ class Scene(
     fun castShadow(entity: SceneGraphEntity, basePlane: Int, startX: Int, startY: Int, width: Int, length: Int) {
         for (px in startX until startX + width) for (py in startY until startY + length) retainedChunkChanged(basePlane, px, py)
         var isSamePlane = true
-        val lowestX = startX
+        var lowestX = startX
         val highestX = startX + width
         val lowestY = startY - 1
         val highestY = startY + length
@@ -1601,6 +1601,7 @@ class Scene(
                         }
                     }
                 }
+                lowestX--
                 isSamePlane = false
             }
         }
