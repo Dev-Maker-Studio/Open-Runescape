@@ -65,6 +65,7 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.KHRDebug
+import java.nio.IntBuffer
 import org.lwjgl.opengl.GL33.*
 import java.awt.Canvas
 
@@ -671,6 +672,11 @@ class ModernGLToolkit(
                     }
                 }
             }, 0L)
+            if (System.getProperty("render.gldebug") == null) {
+                KHRDebug.glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, null as IntBuffer?, false)
+                KHRDebug.glDebugMessageControl(GL_DONT_CARE, KHRDebug.GL_DEBUG_TYPE_ERROR, GL_DONT_CARE, null as IntBuffer?, true)
+                KHRDebug.glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, KHRDebug.GL_DEBUG_SEVERITY_HIGH, null as IntBuffer?, true)
+            }
             println("[ModernGLToolkit] KHR_debug callback installed")
         } catch (e: Throwable) {
             println("[ModernGLToolkit] KHR_debug install failed: $e")
@@ -811,6 +817,7 @@ class ModernGLToolkit(
 
     /** Frames between [ModernDiag]/[ModernPerf] prints. Override with `-Drender.diaginterval=<n>`. */
     private val diagInterval = System.getProperty("render.diaginterval")?.toIntOrNull()?.coerceAtLeast(1) ?: 600
+    private val diagEnabled = System.getProperty("render.diag") != null || System.getProperty("render.diaginterval") != null
 
     /** Times the frame-start guard had to re-make the GL context current on this thread. */
     private var contextReattachCount = 0
@@ -899,7 +906,7 @@ class ModernGLToolkit(
         debugFrameCount++
         // One-line pipeline health diagnostic every ~600 frames. Cheap and easy to
         // delete once the modern renderer is confirmed working on this branch.
-        if (debugFrameCount % diagInterval == 0 || debugFrameCount == 30 || debugFrameCount == 120) {
+        if (diagEnabled && (debugFrameCount % diagInterval == 0 || debugFrameCount == 30 || debugFrameCount == 120)) {
             println(
                 "[ModernDiag] pipeline=${canUseModernPipeline()} init=$isModernRendererInitialized " +
                     "caps=$ownerThreadHasCapabilities gameState=${try { Client.gameState } catch (_: Exception) { "?" }} " +
@@ -1141,6 +1148,7 @@ class ModernGLToolkit(
         spriteRenderer?.resetFrameStats()
         optimizedBatcher?.resetCumulativeStats()
         instancedBatcher?.resetFrameStats()
+        particleRendererModern?.resetFrameStats()
 
         // -Drender.gpusync: block until the GPU has drained before presenting, and
         // report how long that took. A large value here means the frame is GPU-bound
@@ -5550,6 +5558,12 @@ class ModernGLToolkit(
 
         groundRenderer?.destroy()
         groundRenderer = null
+        for ((ground, vbo) in residentGroundVbos) {
+            glDeleteBuffers(vbo)
+            ground.modernVboId = 0
+            ground.modernVboRevision = -1
+        }
+        residentGroundVbos.clear()
 
         spriteRenderer?.destroy()
         spriteRenderer = null

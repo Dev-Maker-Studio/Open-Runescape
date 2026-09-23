@@ -2074,8 +2074,8 @@ class InstancedModelBatcher {
         // had no effect on models at all.
         if (uPointLightCountLocation >= 0) GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
         if (pointLightCount > 0) {
-            if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
-            if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
+            if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos, pointLightCount)
+            if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor, pointLightCount)
         }
         sh.setUniform(uSunBrightnessLocation, sunBrightness)
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)

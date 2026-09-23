@@ -315,8 +315,8 @@ class ModernGroundRenderer {
         if (plCount > 0) {
             val lp = s.getArrayUniformLocation("uPointLightPos")
             val lc = s.getArrayUniformLocation("uPointLightColor")
-            if (lp >= 0) GLWrapper.uniform4fv(lp, plPos)
-            if (lc >= 0) GLWrapper.uniform3fv(lc, plColor)
+            if (lp >= 0) GLWrapper.uniform4fv(lp, plPos, plCount)
+            if (lc >= 0) GLWrapper.uniform3fv(lc, plColor, plCount)
         }
     }
 

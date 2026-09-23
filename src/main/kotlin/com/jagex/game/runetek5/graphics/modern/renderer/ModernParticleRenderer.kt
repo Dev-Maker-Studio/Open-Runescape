@@ -88,6 +88,12 @@ class ModernParticleRenderer {
     // Statistics
     private var drawCallsThisFrame = 0
     private var particlesThisFrame = 0
+    private val vpScratch = FloatArray(16)
+
+    fun resetFrameStats() {
+        drawCallsThisFrame = 0
+        particlesThisFrame = 0
+    }
 
     // Depth sorting arrays (matches legacy GlParticleRenderer structure exactly)
     private val particleDepths = IntArray(MAX_PARTICLES)
@@ -235,8 +241,6 @@ class ModernParticleRenderer {
     ) {
         if (!isInitialized) return
 
-        drawCallsThisFrame = 0
-        particlesThisFrame = 0
 
         // Extract billboard vectors from the view matrix columns.
         // This is exactly what the legacy code does with glGetFloatv(GL_MODELVIEW_MATRIX).
@@ -279,7 +283,7 @@ class ModernParticleRenderer {
         // column-major here yields (V·P)^T in column-major form, so GLSL's M*v
         // reproduces the legacy row-vector clip result (the same "straight upload"
         // trick used by the ground/model batchers).
-        val vpMatrix = FloatArray(16)
+        val vpMatrix = vpScratch
         if (vpOverride != null) {
             System.arraycopy(vpOverride, 0, vpMatrix, 0, 16)
             vpMatrix[1] = -vpMatrix[1]; vpMatrix[5] = -vpMatrix[5]; vpMatrix[9] = -vpMatrix[9]; vpMatrix[13] = -vpMatrix[13]
