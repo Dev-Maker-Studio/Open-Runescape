@@ -783,6 +783,9 @@ class MapRegion(var asyncMaploading: Boolean) {
         // references models cached during the background build, while the outgoing list
         // only backs the scene being torn down. It is handed back to the loader below.
         outgoingRegion.getLoctypeList().resetAll()
+        if (this.environmentManager!!.activeToolkit !== Renderers.activeToolkit) {
+            resetAtmosphere()
+        }
         buildRegionBase(outgoingRegion)
         Resource.mapRegion = this
         val requestedBase = Resource.mapRegionLoaderTask!!.requestedFrame?.base

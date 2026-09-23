@@ -11,6 +11,7 @@ import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.font.FontMetrics
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
+import com.jagex.game.runetek5.scene.AsyncMapLoader
 import com.jagex.game.runetek5.systeminfo.SystemInfo
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
@@ -145,6 +146,15 @@ object Renderers {
         }
         Resource.mapRegion!!.resetAtmosphere()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
+        val mapRegionLoader = Resource.mapRegionLoaderTask
+        if (mapRegionLoader != null) {
+            synchronized(mapRegionLoader.stateLock) {
+                val loaderRegion = mapRegionLoader.getMapRegion()
+                if (mapRegionLoader.state == AsyncMapLoader.State.IDLE && loaderRegion.environmentManager != null) {
+                    loaderRegion.resetAtmosphere()
+                }
+            }
+        }
         Client.preferencesSavedOnServer = false
         Client.needsResize = true
         WindowMode.activeDisplayModeDetails = null
