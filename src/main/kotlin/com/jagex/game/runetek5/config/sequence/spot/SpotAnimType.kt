@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.config.sequence.spot
 
 import com.jagex.game.runetek5.buffer.Packet
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
@@ -105,6 +106,7 @@ class SpotAnimType {
                     retextureDst!![textureIndex] = stream.readUShort().toShort()
                 }
             }
+            else -> UnknownOpcodes.record(opcode)
         }
     }
 

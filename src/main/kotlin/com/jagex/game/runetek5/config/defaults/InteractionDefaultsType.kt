@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.config.defaults
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.DefaultsFile
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.config.inputsubscriber.InputSubscriber
 import com.jagex.game.runetek5.config.inputsubscriber.KeyHoldInputSubscriber
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
@@ -55,6 +56,7 @@ class InteractionDefaultsType(resource: Js5ResourceProvider) {
                 11 -> minimenuCursor = true
                 12 -> tooltipColorP2p = buffer.readInt()
                 13 -> tooltipColorF2p = buffer.readInt()
+                else -> UnknownOpcodes.record(opcode)
             }
         }
     }

@@ -5,6 +5,7 @@ import com.jagex.game.runetek5.cache.node.IntNode
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.utils.MathUtils
 
 class SeqType {
@@ -157,6 +158,8 @@ class SeqType {
                 }
                 parameters!!.put(value, key.toLong())
             }
+        } else {
+            UnknownOpcodes.record(opcode)
         }
     }
 

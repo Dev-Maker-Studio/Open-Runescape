@@ -5,6 +5,7 @@ import com.jagex.game.runetek5.cache.node.IntNode
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerAppearance
@@ -345,6 +346,7 @@ open class ItemType {
                     this.parameters!!.put(parameter, key.toLong())
                 }
             }
+            else -> UnknownOpcodes.record(opcode)
         }
     }
 
