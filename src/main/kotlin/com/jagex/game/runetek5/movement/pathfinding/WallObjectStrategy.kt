@@ -12,7 +12,7 @@ class WallObjectStrategy : RouteStrategy() {
 
     override fun canExit(size: Int, x: Int, y: Int, clipMap: CollisionMap): Boolean {
         return clipMap.canReachLoc(
-            size, x, y,
+            x, y, size,
             super.destinationX, super.destinationY,
             locShape!!.getValue(), rotation
         )

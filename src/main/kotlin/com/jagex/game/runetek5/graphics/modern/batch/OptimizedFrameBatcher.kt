@@ -636,7 +636,9 @@ class OptimizedFrameBatcher {
 
     /** Mirrors legacy's GL_LINEAR fog state for this frame. */
     fun setFog(view: FloatArray, enabled: Boolean, colorRgb: Int, start: Float, end: Float) {
-        viewMatrix = view
+        val snapshot = viewMatrix?.takeIf { it !== view && it.size == view.size } ?: FloatArray(view.size)
+        view.copyInto(snapshot)
+        viewMatrix = snapshot
         fogOn = enabled
         fogR = ((colorRgb shr 16) and 0xff) / 255f
         fogG = ((colorRgb shr 8) and 0xff) / 255f
@@ -1116,7 +1118,7 @@ class OptimizedFrameBatcher {
             for (i in 0 until n) {
                 val keyPart = (Int.MAX_VALUE.toLong() - orderedSegKey[i]) and 0xFFFFFFFFL
                 val seqPart = orderedSegSeq[i].toLong() and 0xFFFFFL
-                scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL)
+                scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL) xor Long.MIN_VALUE
             }
             if (n <= 4096) {
                 java.util.Arrays.sort(scratch, 0, n)
@@ -1141,6 +1143,7 @@ class OptimizedFrameBatcher {
         // the upload has to span the matrix block plus the used light entries.
         matrixBuffer!!.limit(MAX_MODELS * 16 + currentModelIndex * 4)
         glBindBuffer(GL_UNIFORM_BUFFER, matrixUbo)
+        glBufferData(GL_UNIFORM_BUFFER, (MAX_MODELS * 20 * 4).toLong(), GL_STREAM_DRAW)
         glBufferSubData(GL_UNIFORM_BUFFER, 0, matrixBuffer!!)
         glBindBuffer(GL_UNIFORM_BUFFER, 0)
 
@@ -1195,8 +1198,8 @@ class OptimizedFrameBatcher {
         // had no effect on models at all.
         if (uPointLightCountLocation >= 0) GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
         if (pointLightCount > 0) {
-            if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
-            if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
+            if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos, pointLightCount)
+            if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor, pointLightCount)
         }
         sh.setUniform(uContrastPosLocation, contrastPos)
         sh.setUniform(uContrastNegLocation, contrastNeg)

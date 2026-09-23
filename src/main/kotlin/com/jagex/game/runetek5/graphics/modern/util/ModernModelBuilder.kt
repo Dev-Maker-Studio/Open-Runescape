@@ -776,7 +776,8 @@ object ModernModelBuilder {
         val omc = 1.0f - cosA
         val size = sqrt((p * p + n * n).toFloat())
         if (size == 0.0f && cosA == 0.0f) {
-            return rotationMap
+            rotationMap.copyInto(result, 0, 0, 9)
+            return scaleTextureMatrix(result, scaleX, scaleY, scaleZ)
         }
         if (size != 0.0f) {
             x = (-p) / size
@@ -800,6 +801,10 @@ object ModernModelBuilder {
         result[6] = rotationMap[6] * matrix3x3[0] + rotationMap[7] * matrix3x3[3] + rotationMap[8] * matrix3x3[6]
         result[7] = rotationMap[6] * matrix3x3[1] + rotationMap[7] * matrix3x3[4] + rotationMap[8] * matrix3x3[7]
         result[8] = rotationMap[6] * matrix3x3[2] + rotationMap[7] * matrix3x3[5] + rotationMap[8] * matrix3x3[8]
+        return scaleTextureMatrix(result, scaleX, scaleY, scaleZ)
+    }
+
+    private fun scaleTextureMatrix(result: FloatArray, scaleX: Float, scaleY: Float, scaleZ: Float): FloatArray {
         result[0] *= scaleX
         result[1] *= scaleX
         result[2] *= scaleX

@@ -502,7 +502,7 @@ open class ObjectType {
 			opcode in 150..154 -> {
 				this.actions!![opcode - 150] = buffer.readString()
 				if (!this.locTypeList!!.playerIsMember) {
-					this.actions!![opcode - 150] = "null"
+					this.actions!![opcode - 150] = null
 				}
 			}
 			opcode == 160 -> {

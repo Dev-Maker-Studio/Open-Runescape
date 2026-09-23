@@ -521,7 +521,7 @@ class RasterizerSM(
             if (texturePixelsA == null) {
                 blendingAlpha = 255 - (floorColorA shr 24 and 0xff)
                 val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialA)).toInt() and 0xffff]
-                val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
+                val modulatedArgb = 0xff000000.toInt() or ((materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000) or ((floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00) or ((materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8)
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                 return
             }
@@ -538,7 +538,7 @@ class RasterizerSM(
             if (texturePixelsB == null) {
                 blendingAlpha = 255 - (floorColorA shr 24 and 0xff)
                 val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialB)).toInt() and 0xffff]
-                val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
+                val modulatedArgb = 0xff000000.toInt() or ((materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000) or ((floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00) or ((materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8)
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                 return
             }
@@ -554,7 +554,7 @@ class RasterizerSM(
             if (texturePixelsC == null) {
                 blendingAlpha = 255 - (floorColorA shr 24 and 0xff)
                 val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialC)).toInt() and 0xffff]
-                val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000 or (floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8
+                val modulatedArgb = 0xff000000.toInt() or ((materialColorRgb shr 16 and 0xff) * (floorColorA shr 16 and 0xff) shl 8 and 0xff0000) or ((floorColorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00) or ((materialColorRgb and 0xff) * (floorColorA and 0xff) shr 8)
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                 return
             }
@@ -1806,7 +1806,7 @@ class RasterizerSM(
                 if (texturePixelsA == null) {
                     blendingAlpha = 255 - (colorA shr 24 and 0xff)
                     val materialColorRgb = ColorUtil.hsvToRgbTable!![ColorUtil.adjustHsv(safemodeToolkit.getMaterialColor(materialId)).toInt() and 0xffff]
-                    val modulatedArgb = 0xff000000.toInt() or (materialColorRgb shr 16 and 0xff) * (colorA shr 16 and 0xff) shl 8 and 0xff0000 or (colorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00 or (materialColorRgb and 0xff) * (colorA and 0xff) shr 8
+                    val modulatedArgb = 0xff000000.toInt() or ((materialColorRgb shr 16 and 0xff) * (colorA shr 16 and 0xff) shl 8 and 0xff0000) or ((colorA shr 8 and 0xff) * (materialColorRgb shr 8 and 0xff) and 0xff00) or ((materialColorRgb and 0xff) * (colorA and 0xff) shr 8)
                     drawTriangle(true, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(modulatedArgb, fogColor, fogDensityC))
                     return
                 }

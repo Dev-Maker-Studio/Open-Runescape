@@ -544,13 +544,12 @@ object EntityUpdating {
                                     totalWidth += innerLeftWidth
                                 }
                                 val middleFillStartX = totalWidth
-                                val textStartX = totalWidth
+                                var textStartX = totalWidth
                                 var rightCapStartX: Int
                                 if (middleFillWidth > 0) {
                                     rightCapStartX = middleFillWidth * regularTileCount
                                     totalWidth += rightCapStartX
-                                    @Suppress("UNUSED_VALUE")
-                                    val temp = (rightCapStartX - regularWidth) / 2
+                                    textStartX += (rightCapStartX - regularWidth) / 2
                                 } else {
                                     totalWidth += regularWidth
                                 }
@@ -582,8 +581,7 @@ object EntityUpdating {
                                     if (soakMiddleFillWidth > 0) {
                                         remainingCycles = soakTileCount * soakMiddleFillWidth
                                         totalWidth += remainingCycles
-                                        @Suppress("UNUSED_VALUE")
-                                        val temp = (remainingCycles - soakWidth) / 2
+                                        soakTextStartX += (remainingCycles - soakWidth) / 2
                                     } else {
                                         totalWidth += soakWidth
                                     }

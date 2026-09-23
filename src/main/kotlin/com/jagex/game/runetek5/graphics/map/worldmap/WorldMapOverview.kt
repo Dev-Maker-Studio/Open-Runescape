@@ -48,8 +48,8 @@ object WorldMapOverview {
             adjustedY += (height - scaledHeight) / 2
 
             if (ComponentMinimap.worldMapOverviewSprite == null ||
-                ComponentMinimap.worldMapOverviewSprite!!.getSpriteWidth() != width ||
-                ComponentMinimap.worldMapOverviewSprite!!.getSpriteHeight() != height) {
+                ComponentMinimap.worldMapOverviewSprite!!.getSpriteWidth() != scaledWidth ||
+                ComponentMinimap.worldMapOverviewSprite!!.getSpriteHeight() != scaledHeight) {
                 WorldMap.setViewportBounds(
                     WorldMap.mapSquareAbsX,
                     WorldMap.mapSquareAbsY + WorldMap.mapSizeY,

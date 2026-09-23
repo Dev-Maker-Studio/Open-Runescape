@@ -11,6 +11,8 @@ layout(location = 3) in vec4 aColor;
 
 // Uniforms
 uniform mat4 uViewProjection;  // Combined view-projection matrix
+uniform vec2 uTextureScroll;
+uniform vec3 uAmbient;
 
 // Fog uniforms
 uniform bool uFogEnabled;
@@ -27,8 +29,8 @@ void main() {
     // so we only need to apply the view-projection transform.
     gl_Position = uViewProjection * vec4(aPosition, 1.0);
 
-    vTexCoord = aTexCoord;
-    vColor = aColor;
+    vTexCoord = aTexCoord + uTextureScroll;
+    vColor = vec4(clamp(aColor.rgb * uAmbient, 0.0, 1.0), aColor.a);
 
     // Calculate fog factor based on clip-space depth
     if (uFogEnabled) {

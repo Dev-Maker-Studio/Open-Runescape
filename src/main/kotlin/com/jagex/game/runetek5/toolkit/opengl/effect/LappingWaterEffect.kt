@@ -38,7 +38,52 @@ class LappingWaterEffect(
     init {
         if (glToolkit.arbVertexProgram && glToolkit.maxTextureUnits >= 2) {
             program = ProgramGL.generateProgram(
-                glToolkit, """// Vertex Program in ARB_vp1.0 (deprecated)// Enable the ARB_position_invariant option to specify that the vertex program output is position invariant.!!ARBvp1.0OPTION ARB_position_invariant;// Define input attributesATTRIB iPos      = vertex.position; // Input vertex positionATTRIB iColour   = vertex.color;    // Input vertex colorATTRIB iTexCoord = vertex.texcoord[0]; // Input vertex texture coordinates// Define output attributesOUTPUT oColour    = result.color;    // Output vertex colorOUTPUT oTexCoord0 = result.texcoord[0]; // Output vertex texture coordinates for texture unit 0OUTPUT oTexCoord1 = result.texcoord[1]; // Output vertex texture coordinates for texture unit 1OUTPUT oFogCoord  = result.fogcoord;  // Output vertex fog coordinates// Define parameter constants (uniforms)PARAM time         = program.local[65];  // Time parameterPARAM turbulence   = program.local[64];  // Turbulence parameterPARAM lightAmbient = program.local[66];  // Light ambient parameterPARAM pMatrix[4]   = { state.matrix.projection };  // Projection matrixPARAM mvMatrix[4]  = { state.matrix.modelview };   // Model-View matrixPARAM ivMatrix[4]  = { state.matrix.texture[1] };  // Inverse texture matrix for texture unit 1PARAM texMatrix[4] = { state.matrix.texture[0] };  // Texture matrix for texture unit 0PARAM fNoise[64]   = { program.local[0..63] };    // Noise array// Temporary registers for intermediate calculationsTEMP noise, viewPos, worldPos, texCoord;ADDRESS noiseAddr;// Calculate vertex position in view spaceDP4 viewPos.x, mvMatrix[0], iPos;DP4 viewPos.y, mvMatrix[1], iPos;DP4 viewPos.z, mvMatrix[2], iPos;DP4 viewPos.w, mvMatrix[3], iPos;// Output fog coordinate from the z-component of the view positionMOV oFogCoord.x, viewPos.z;// Transform the vertex position from view space to world space using the inverse texture matrixDP4 worldPos.x, ivMatrix[0], viewPos;DP4 worldPos.y, ivMatrix[1], viewPos;DP4 worldPos.z, ivMatrix[2], viewPos;DP4 worldPos.w, ivMatrix[3], viewPos;// Create noise offsets by combining the x and z components of the world positionADD noise.x, worldPos.x, worldPos.z;SUB noise.y, worldPos.z, worldPos.x;// Scale the noise offsets and wrap them around using the fractional part function (FRC)MUL noise, noise, 0.0001220703125; // 1/8192, approximate reciprocal of 8192FRC noise, noise;MUL noise, noise, 64;// Calculate the address for the noise lookup in the fNoise arrayARL noiseAddr.x, noise.x;// Lookup the noise value from the fNoise arrayMOV noise.x, fNoise[noiseAddr.x].x;// Repeat the same process for the y component of the noise offsetARL noiseAddr.x, noise.y;MOV noise.y, fNoise[noiseAddr.x].y;// Apply turbulence to the noise offsetsMUL noise, noise, turbulence.x;// Calculate texture coordinates for texture unit 0DP4 texCoord.x, texMatrix[0], iTexCoord;DP4 texCoord.y, texMatrix[1], iTexCoord;// Apply the noise offsets to the texture coordinates for texture unit 0ADD oTexCoord0.xy, texCoord, noise;MOV oTexCoord0.z, 0;MOV oTexCoord0.w, 1;// Calculate texture coordinates for texture unit 1 (used for animation)MUL oTexCoord1.xy, texCoord, 0.125; // Scaled down by 1/8MOV oTexCoord1.zw, time.xxxw;      // Set the time parameter for animation// Apply lighting by multiplying the input vertex color with the light ambient parameterMUL oColour.xyz, iColour, lightAmbient;// Copy the alpha component of the input vertex color to the output vertex colorMOV oColour.w, iColour.w;// End of the vertex shaderEND"""
+                glToolkit, """!!ARBvp1.0
+OPTION  ARB_position_invariant;
+ATTRIB  iPos         = vertex.position;
+ATTRIB  iColour      = vertex.color;
+ATTRIB  iTexCoord    = vertex.texcoord[0];
+OUTPUT  oColour      = result.color;
+OUTPUT  oTexCoord0   = result.texcoord[0];
+OUTPUT  oTexCoord1   = result.texcoord[1];
+OUTPUT  oFogCoord    = result.fogcoord;
+PARAM   time         = program.local[65];
+PARAM   turbulence   = program.local[64];
+PARAM   lightAmbient = program.local[66]; 
+PARAM   pMatrix[4]   = { state.matrix.projection };
+PARAM   mvMatrix[4]  = { state.matrix.modelview };
+PARAM   ivMatrix[4]  = { state.matrix.texture[1] };
+PARAM   texMatrix[4]  = { state.matrix.texture[0] };
+PARAM   fNoise[64]   = { program.local[0..63] };
+TEMP    noise, viewPos, worldPos, texCoord;
+ADDRESS noiseAddr;
+DP4   viewPos.x, mvMatrix[0], iPos;
+DP4   viewPos.y, mvMatrix[1], iPos;
+DP4   viewPos.z, mvMatrix[2], iPos;
+DP4   viewPos.w, mvMatrix[3], iPos;
+MOV   oFogCoord.x, viewPos.z;
+DP4   worldPos.x, ivMatrix[0], viewPos;
+DP4   worldPos.y, ivMatrix[1], viewPos;
+DP4   worldPos.z, ivMatrix[2], viewPos;
+DP4   worldPos.w, ivMatrix[3], viewPos;
+ADD   noise.x, worldPos.x, worldPos.z;SUB   noise.y, worldPos.z, worldPos.x;MUL   noise, noise, 0.0001220703125;
+FRC   noise, noise;
+MUL   noise, noise, 64;
+ARL   noiseAddr.x, noise.x;
+MOV   noise.x, fNoise[noiseAddr.x].x;
+ARL   noiseAddr.x, noise.y;
+MOV   noise.y, fNoise[noiseAddr.x].y;
+MUL   noise, noise, turbulence.x;
+DP4   texCoord.x, texMatrix[0], iTexCoord;
+DP4   texCoord.y, texMatrix[1], iTexCoord;
+ADD   oTexCoord0.xy, texCoord, noise;
+MOV   oTexCoord0.z, 0;
+MOV   oTexCoord0.w, 1;
+MUL   oTexCoord1.xy, texCoord, 0.125;
+MOV   oTexCoord1.zw, time.xxxw;
+MUL   oColour.xyz, iColour, lightAmbient;
+MOV   oColour.w, iColour.w;
+END"""
             )
             if (program != null) {
                 val noiseMapX = TextureOpPerlinNoise.generateNoiseMap()

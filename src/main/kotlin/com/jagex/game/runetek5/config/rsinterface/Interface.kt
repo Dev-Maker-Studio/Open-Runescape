@@ -24,11 +24,11 @@ class Interface(
 ) {
     var subComponents: Array<Component?>? = null
 
-    fun getComponent(componentId: Int): Component {
+    fun getComponent(componentId: Int): Component? {
         if (componentId ushr 16 != components[0]!!.idHash ushr 16) {
             throw IllegalArgumentException()
         }
-        return components[componentId and 0xffff]!!
+        return components[componentId and 0xffff]
     }
 
     fun getComponents(): Array<Component?> {

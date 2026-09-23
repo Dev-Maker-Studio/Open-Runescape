@@ -260,7 +260,7 @@ class TextureOpPerlinNoise : TextureOperation(0, true) {
             stepMultipliers = ShortArray(numNoiseSteps)
             amplitudeMultipliers = ShortArray(numNoiseSteps)
             for (i in 0 until numNoiseSteps) {
-                stepMultipliers!![i] = ((noiseAmplitude / 4096.0f).pow(i) * 4096.0).toInt().toShort()
+                stepMultipliers!![i] = ((noiseAmplitude / 4096.0f).toDouble().pow(i) * 4096.0).toInt().toShort()
                 amplitudeMultipliers!![i] = 2.0.pow(i).toInt().toShort()
             }
         } else if (stepMultipliers != null && stepMultipliers!!.size == numNoiseSteps) {

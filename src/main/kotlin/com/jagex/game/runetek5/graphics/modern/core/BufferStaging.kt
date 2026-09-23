@@ -32,6 +32,7 @@ object BufferStaging {
     private var stagingId = 0
     private var capacity = 0L
     private var cursor = 0L
+    private var allocated = 0L
 
     /** Copies staged through [BufferStaging] (diag). */
     @JvmStatic var stagedCopies = 0L
@@ -42,10 +43,11 @@ object BufferStaging {
     private fun ensureStaging(bytes: Long) {
         if (stagingId == 0) stagingId = glGenBuffers()
         glBindBuffer(GL_COPY_READ_BUFFER, stagingId)
-        if (capacity < bytes) capacity = maxOf(bytes, 1L shl 20)
-        if (cursor + bytes > capacity || cursor == 0L && capacity == 0L) {
+        if (capacity < bytes) capacity = maxOf(bytes * 2, 4L shl 20)
+        if (allocated != capacity || cursor + bytes > capacity) {
             // Orphan: fresh storage, no dependency on copies queued from the old one.
             glBufferData(GL_COPY_READ_BUFFER, capacity, GL_STREAM_DRAW)
+            allocated = capacity
             cursor = 0
         }
     }
@@ -62,7 +64,6 @@ object BufferStaging {
             return
         }
         ensureStaging(bytes)
-        if (cursor == 0L) glBufferData(GL_COPY_READ_BUFFER, capacity, GL_STREAM_DRAW)
         glBufferSubData(GL_COPY_READ_BUFFER, cursor, data)
         glBindBuffer(GL_COPY_WRITE_BUFFER, targetId)
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, cursor, targetOffset, bytes)
@@ -81,7 +82,6 @@ object BufferStaging {
             return
         }
         ensureStaging(bytes)
-        if (cursor == 0L) glBufferData(GL_COPY_READ_BUFFER, capacity, GL_STREAM_DRAW)
         glBufferSubData(GL_COPY_READ_BUFFER, cursor, data)
         glBindBuffer(GL_COPY_WRITE_BUFFER, targetId)
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, cursor, targetOffset, bytes)
@@ -94,6 +94,7 @@ object BufferStaging {
         if (stagingId != 0) glDeleteBuffers(stagingId)
         stagingId = 0
         capacity = 0
+        allocated = 0
         cursor = 0
     }
 }

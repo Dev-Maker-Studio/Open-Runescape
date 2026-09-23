@@ -64,7 +64,7 @@ class FloType {
             11 -> slot = stream.readUByte()
             12 -> blendsWithUnderlay = true
             13 -> waterColor = stream.readUMedium()
-            14 -> waterFogDepth = stream.readUByte() shl 2
+            14 -> waterFogDepth = stream.readUByte() shl 5
             16 -> waterIntensity = stream.readUByte()
             20 -> opcode20 = stream.readUShort() // water scale?
             21 -> unusedOpcode21 = stream.readUByte()

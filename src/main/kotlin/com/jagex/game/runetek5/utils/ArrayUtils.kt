@@ -540,7 +540,6 @@ object ArrayUtils {
 			array[++index] = dstValue
 			array[++index] = dstValue
 			array[++index] = dstValue
-			index++
 		}
 		while (index <= length) {
 			array[++index] = dstValue

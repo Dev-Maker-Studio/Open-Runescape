@@ -306,7 +306,7 @@ class ModernSpriteRenderer {
 
         // Flush on blend mode change (blend mode affects all quads in the batch)
         if (blendMode != currentBlendMode) {
-            flush("quadsFull")
+            flush("blend")
             applyBlendMode(blendMode)
         }
 
@@ -384,7 +384,7 @@ class ModernSpriteRenderer {
 
         // Flush on blend mode change
         if (blendMode != currentBlendMode) {
-            flush("quadsFull")
+            flush("blend")
             applyBlendMode(blendMode)
         }
 

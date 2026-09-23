@@ -202,7 +202,7 @@ object PlayerWorldOps {
     @JvmStatic
     fun mapIsOwner(executor: CS2Executor) {
         val ownerName: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (Client.mapOwnerIdentifier != null && Client.mapOwnerIdentifier.equals(ownerName!!)) {
+        if (Client.mapOwnerIdentifier != null && Client.mapOwnerIdentifier.equals(ownerName, ignoreCase = true)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -292,7 +292,7 @@ object PlayerWorldOps {
 
     @JvmStatic
     fun getSecondMiniMenuEntry(executor: CS2Executor) {
-        pushMiniMenuEntry(MiniMenu.getSecondaryEntry()!!, executor)
+        pushMiniMenuEntry(MiniMenu.getSecondaryEntry(), executor)
     }
 
     @JvmStatic

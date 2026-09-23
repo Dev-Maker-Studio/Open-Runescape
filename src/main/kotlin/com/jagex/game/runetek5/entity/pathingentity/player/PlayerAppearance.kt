@@ -451,7 +451,7 @@ class PlayerAppearance {
 								model = bodyModelCache.get(this.bodyModelHash) as Model?
 							}
 						}
-						if (model == null || toolkit.mergeFunctionMasks(model!!.getFunctionMask(), displacementFunctionMask) != 0) {
+						if (model == null || toolkit.mismatchingFunctionMask(model!!.getFunctionMask(), displacementFunctionMask) != 0) {
 							return null
 						}
 					} else {
@@ -575,12 +575,13 @@ class PlayerAppearance {
 				}
 			}
 			var sequenceIndex = 0
-			for (submesh in 1 shl 0 until (1 shl index)) {
-				if (sequenceIndex >= index) break
+			var submesh = 1
+			while (sequenceIndex < index) {
 				if (objSequence!![sequenceIndex] != null) {
 					objSequence[sequenceIndex]!!.animateUnrotatedModel(copiedModel, submesh)
 				}
 				sequenceIndex++
+				submesh = submesh shl 1
 			}
 			if (requiresRotation) {
 				for (rotationIndex in rotations!!.indices) {

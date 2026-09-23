@@ -8,6 +8,7 @@ in vec2 vWorldXZ;
 in vec3 vWaterNoiseCoord;
 in float vWaterMix;
 in float vWorldY;
+in vec3 vPointLight;
 
 uniform int uWaterMode;
 uniform sampler3D uWaterNoise;
@@ -112,6 +113,7 @@ void main() {
 
     // Apply fog
     color.rgb = mix(uFogColor.rgb, color.rgb, vFogFactor);
+    color.rgb = clamp(color.rgb * (vec3(1.0) + vFogFactor * vPointLight), 0.0, 1.0);
 
     fragColor = color;
 }

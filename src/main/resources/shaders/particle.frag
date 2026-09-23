@@ -8,6 +8,7 @@ in float vFogFactor;
 // Uniforms
 uniform sampler2D uTexture;
 uniform bool uTextureEnabled;
+uniform int uCombineMode;
 
 // Fog
 uniform vec4 uFogColor;
@@ -21,7 +22,15 @@ void main() {
     if (uTextureEnabled) {
         // Sample texture and modulate with vertex color
         vec4 texColor = texture(uTexture, vTexCoord);
-        color = texColor * vColor;
+        if (uCombineMode == 1) {
+            color = texColor;
+        } else if (uCombineMode == 3) {
+            color = vec4(clamp(texColor.rgb + vColor.rgb, 0.0, 1.0), texColor.a * vColor.a);
+        } else if (uCombineMode == 4) {
+            color = clamp(texColor - vColor, 0.0, 1.0);
+        } else {
+            color = texColor * vColor;
+        }
     } else {
         // Untextured particle - use vertex color directly
         color = vColor;

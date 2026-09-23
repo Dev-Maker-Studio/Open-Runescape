@@ -28,6 +28,7 @@ import jaclib.memory.Stream
 import jaclib.memory.heap.NativeHeapBuffer
 import jaggl.OpenGL
 import org.lwjgl.system.MemoryUtil
+import java.lang.ref.Cleaner
 import com.jagex.game.runetek5.toolkit.opengl.*
 open class GroundGL(
     toolkit: OpenGlToolkit,
@@ -40,7 +41,13 @@ open class GroundGL(
     heightsNextLvl: Array<IntArray>
 ) : Ground(regionSizeX, regionSizeY, tileUnits, heightsCurrentLvl) {
 
+    private class NativeRelease(private val address: Long) : Runnable {
+        override fun run() = MemoryUtil.nmemFree(address)
+    }
+
     companion object {
+        private val NATIVE_RELEASE: Cleaner = Cleaner.create()
+
         @JvmStatic var shadowProbeTick = 0
         private val SUN_PROBE = System.getProperty("render.sunprobe") != null
         /** -Drender.groundshadow=false skips the legacy shadow overlay (A/B aid). */
@@ -66,6 +73,7 @@ open class GroundGL(
     @JvmField var dataArrayBuffer: ArrayBufferGL? = null
     // Modern rendering: raw vertex data stored for LWJGL-only rendering (no legacy VBO dependency)
     @JvmField var modernVertexData: java.nio.ByteBuffer? = null
+    private var modernVertexRelease: Cleaner.Cleanable? = null
     @JvmField var modernVertexStride: Int = 0
     @JvmField var modernVertexCount: Int = 0
 
@@ -335,8 +343,8 @@ open class GroundGL(
             // map BEFORE its materials draw; the ground shader samples it per fragment.
             // No fixed function.
             val sm = shadowMapper
-            if (sm != null && activeToolkit is ModernGLToolkit) {
-                val texelSize = (width * tileUnits).toFloat() / (sm.width - 2).toFloat()
+            if (activeToolkit is ModernGLToolkit) {
+                val texelSize = if (sm != null) (width * tileUnits).toFloat() / (sm.width - 2).toFloat() else 0f
                 (activeToolkit as ModernGLToolkit).groundRendererForShadows()
                     ?.setShadowMapper(sm, texelSize)
             }
@@ -735,11 +743,11 @@ open class GroundGL(
                 try {
                     val nativeAddr = nativeHeapBuffer.getBufferAddress()
                     if (nativeAddr != 0L && dataSize > 0) {
-                        // Free old buffer if exists
-                        modernVertexData?.let { MemoryUtil.memFree(it) }
-                        // Create new buffer and copy data
-                        modernVertexData = MemoryUtil.memAlloc(dataSize)
-                        MemoryUtil.memCopy(nativeAddr, MemoryUtil.memAddress(modernVertexData!!), dataSize.toLong())
+                        modernVertexRelease?.clean()
+                        val snapshot = MemoryUtil.memAlloc(dataSize)
+                        modernVertexData = snapshot
+                        modernVertexRelease = NATIVE_RELEASE.register(this, NativeRelease(MemoryUtil.memAddress(snapshot)))
+                        MemoryUtil.memCopy(nativeAddr, MemoryUtil.memAddress(snapshot), dataSize.toLong())
                         modernVertexStride = bufferEntrySize
                         modernVertexCount = totalMaterializedTiles
                         modernVertexRevision++
@@ -747,6 +755,8 @@ open class GroundGL(
                         println("[GroundGL] MODERN SNAPSHOT MISSING: nativeAddr=$nativeAddr dataSize=$dataSize — terrain for this ground will not render under toolkit 3")
                     }
                 } catch (e: Exception) {
+                    modernVertexRelease?.clean()
+                    modernVertexRelease = null
                     modernVertexData = null
                     println("[GroundGL] MODERN SNAPSHOT FAILED: ${e.message} — terrain for this ground will not render under toolkit 3")
                     e.printStackTrace()

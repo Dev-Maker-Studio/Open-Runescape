@@ -104,10 +104,21 @@ class RemoteFileWorker(
             masterIndex = local
         } else {
             /** ReferenceTable from update server **/
-            if (referenceTablePayload == null) {
-                throw RuntimeException()
+            try {
+                if (referenceTablePayload == null) {
+                    throw RuntimeException()
+                }
+                masterIndex = Js5MasterIndex(referenceTablePayload, tableCrc, tableDigest)
+            } catch (rejected: RuntimeException) {
+                standardRequester.rejectPayload()
+                masterIndex = null
+                masterIndexRequest = if (standardRequester.priorityRequestUnavailable()) {
+                    null
+                } else {
+                    standardRequester.request(255, indexId, 0.toByte(), true)
+                }
+                return null
             }
-            masterIndex = Js5MasterIndex(referenceTablePayload, tableCrc, tableDigest)
             if (masterIndexFile != null) {
                 localRequester.createStoreRequest(indexId, referenceTablePayload, masterIndexFile)
             }
@@ -264,9 +275,9 @@ class RemoteFileWorker(
         return if (fileRequest is LocalRequest) {
             try {
                 if (payload != null && payload.size > 2) {
-                    CRC32.reset()
-                    CRC32.update(payload, 0, payload.size - 2)
-                    val crc = CRC32.value.toInt()
+                    val checksum = CRC32()
+                    checksum.update(payload, 0, payload.size - 2)
+                    val crc = checksum.value.toInt()
                     if (crc != masterIndex!!.crcs[fileId]) {
                         throw RuntimeException()
                     }
@@ -304,22 +315,15 @@ class RemoteFileWorker(
                 }
                 null
             }
-        } else if (payload != null && payload.size > 2) {
-            CRC32.reset()
-            CRC32.update(payload, 0, payload.size - 2)
-            val receivedCrc = CRC32.value.toInt()
-            if (receivedCrc != masterIndex!!.crcs[fileId]) {
-                throw RuntimeException()
-            }
-            val whirlpool = masterIndex!!.whirlpool
-            if (whirlpool != null && whirlpool[fileId] != null) {
-                val pool = whirlpool[fileId]!!
-                val expectedWhirlpool = Whirlpool.calculateDigest(payload, 0, payload.size - 2)
-                for (idx in 0 until 64) {
-                    if (expectedWhirlpool[idx] != pool[idx]) {
-                        throw RuntimeException()
-                    }
+        } else {
+            if (payload == null || !matchesMasterIndex(fileId, payload)) {
+                standardRequester.rejectPayload()
+                fileRequest!!.unlink()
+                if (fileRequest!!.highPriority && !standardRequester.priorityRequestUnavailable()) {
+                    val request = standardRequester.request(indexId, fileId, 2.toByte(), true)
+                    pendingRequests.put(request, fileId.toLong())
                 }
+                return null
             }
             standardRequester.failedRequests = 0
             standardRequester.connectionStatus = 0
@@ -336,9 +340,20 @@ class RemoteFileWorker(
                 fileRequest!!.unlink()
             }
             fileRequest
-        } else {
-            throw RuntimeException()
         }
+    }
+
+    private fun matchesMasterIndex(fileId: Int, payload: ByteArray): Boolean {
+        if (payload.size <= 2) {
+            return false
+        }
+        val crc = CRC32()
+        crc.update(payload, 0, payload.size - 2)
+        if (crc.value.toInt() != masterIndex!!.crcs[fileId]) {
+            return false
+        }
+        val expected = masterIndex!!.whirlpool?.get(fileId) ?: return true
+        return Whirlpool.calculateDigest(payload, 0, payload.size - 2).contentEquals(expected)
     }
 
     @Synchronized
@@ -458,8 +473,4 @@ class RemoteFileWorker(
         return currentRequest?.pointer?.toInt() ?: 0
     }
 
-    companion object {
-        @JvmStatic
-        val CRC32 = CRC32()
-    }
 }

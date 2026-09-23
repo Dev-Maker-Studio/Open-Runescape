@@ -140,7 +140,7 @@ object WorldMapRasterManager {
             edgeBuffer = resized
         }
 
-        val lastPointIndex = pointCount - 2
+        var lastPointIndex = pointCount - 2
 
         i = 0
         while (i < pointCount) {
@@ -158,6 +158,7 @@ object WorldMapRasterManager {
                 edgeBuffer!![edgeBufferSize++] = lastY
             }
 
+            lastPointIndex = i
             i += 2
         }
     }

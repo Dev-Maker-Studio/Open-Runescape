@@ -236,6 +236,16 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     protected var modelMinY: Int = 0
     @JvmField
     var groundContouredOffsetY: Int = 0
+
+    private var groundOffsetEaseCycle = -1
+
+    fun easeGroundContouredOffset(targetOffsetY: Int) {
+        val elapsed = if (groundOffsetEaseCycle < 0) 1 else Client.cycles - groundOffsetEaseCycle
+        groundOffsetEaseCycle = Client.cycles
+        for (step in 0 until elapsed.coerceIn(0, 50)) {
+            groundContouredOffsetY = (groundContouredOffsetY - (groundContouredOffsetY - targetOffsetY) / 10.0f).toInt()
+        }
+    }
     @JvmField
     var hasPreferedPriorities: Boolean = false
     @JvmField
@@ -1416,8 +1426,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                     // [0] 214 [1] 128 [2] 43
                     val srcAlphaModifier = 256 - dstAlphaModifier
                     val faceAlpha = (srcAlphaModifier * alphaSrc + dstAlphaModifier * alphaDst shr 8).toByte()
-                    val faceColor = (((
-                            srcAlphaModifier * (colorSrc and 0xfc00) + dstAlphaModifier * colorDst and 0xfc00) and 0xfc0000) +
+                    val faceColor = (
+                            (srcAlphaModifier * (colorSrc and 0xfc00) + dstAlphaModifier * (colorDst and 0xfc00) and 0xfc0000) +
                             (srcAlphaModifier * (colorSrc and 0x7f) + dstAlphaModifier * (colorDst and 0x7f) and 0x7f00) +
                             (srcAlphaModifier * (colorSrc and 0x380) + dstAlphaModifier * (colorDst and 0x380) and 0x38000) shr 8).toShort()
                     for (face in 0 until totalFaces) {

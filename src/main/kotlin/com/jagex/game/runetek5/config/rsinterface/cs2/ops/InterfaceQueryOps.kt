@@ -310,11 +310,7 @@ object InterfaceQueryOps {
         val stack: IntArray? = executor.intStack
         val stackIdx = ++executor.intStackPtr - 1
         var parentIdHash: Int = 0
-        if (parentLayer!! == null) {
-            parentIdHash = -1
-        } else {
-            parentIdHash = parentLayer!!.idHash
-        }
+        parentIdHash = parentLayer?.idHash ?: -1
         stack!![stackIdx] = parentIdHash
     }
 
@@ -610,7 +606,7 @@ object InterfaceQueryOps {
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (slot >= 0 && slot < npcType!!.modelIds!!.size) {
-                component!!.npcCustomisation!!.modelIds[slot] = modelId
+                component!!.npcCustomisation!!.modelIds!![slot] = modelId
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("" + slot)
@@ -652,7 +648,7 @@ object InterfaceQueryOps {
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (slot >= 0 && slot < npcType!!.headModels!!.size) {
-                component!!.npcCustomisation!!.modelIds[slot] = modelId
+                component!!.npcCustomisation!!.modelIds!![slot] = modelId
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("")
