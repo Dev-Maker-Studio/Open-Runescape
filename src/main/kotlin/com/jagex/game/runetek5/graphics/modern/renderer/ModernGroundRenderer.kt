@@ -161,7 +161,7 @@ class ModernGroundRenderer {
      * Called by GroundGL BEFORE it draws that ground's materials, so the draws that
      * follow sample the right plane's map. [texelSize] = world units per shadow texel.
      */
-    fun setShadowMapper(sm: ShadowMapperGL, texelSize: Float) {
+    fun setShadowMapper(sm: ShadowMapperGL?, texelSize: Float) {
         if (!GROUND_SHADOWS) return
         currentShadowMapper = sm
         shadowTexelSize = texelSize

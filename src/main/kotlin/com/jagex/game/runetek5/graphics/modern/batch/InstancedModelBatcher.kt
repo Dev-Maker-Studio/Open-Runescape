@@ -1261,7 +1261,9 @@ class InstancedModelBatcher {
 
     /** Mirrors legacy's GL_LINEAR fog state for this frame. */
     fun setFog(view: FloatArray, enabled: Boolean, colorRgb: Int, start: Float, end: Float) {
-        viewMatrix = view
+        val snapshot = viewMatrix?.takeIf { it !== view && it.size == view.size } ?: FloatArray(view.size)
+        view.copyInto(snapshot)
+        viewMatrix = snapshot
         fogOn = enabled
         fogR = ((colorRgb shr 16) and 0xff) / 255f
         fogG = ((colorRgb shr 8) and 0xff) / 255f

@@ -1189,6 +1189,42 @@ class ModernGLToolkit(
      * Called before scene rendering begins.
      * This starts the batcher to collect geometry from drawMatrixThreaded calls.
      */
+    override fun setViewMatrix(viewMatrix: Matrix43) {
+        val batchOpen = canUseModernPipeline() && when {
+            useOptimizedBatcher -> optimizedBatcher?.isActive() == true
+            else -> frameBatcher?.isActive() == true
+        }
+        if (!batchOpen || sameMatrix(viewMatrix43, viewMatrix)) {
+            super.setViewMatrix(viewMatrix)
+            return
+        }
+        val pending = hasPendingSceneGeometry()
+        if (pending) {
+            renderWithModernPipeline()
+            functionMask = 0
+        }
+        super.setViewMatrix(viewMatrix)
+        if (pending) {
+            openSceneBatch()
+        } else {
+            ensureSceneTarget()
+            if (useOptimizedBatcher) {
+                optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
+                if (useInstancing) {
+                    instancedBatcher?.setViewProjection(viewProjectionMatrix.elements)
+                    snapshotSceneMatrices()
+                }
+                armBatchLightingAndFog()
+            }
+        }
+    }
+
+    private fun sameMatrix(a: Matrix43, b: Matrix43): Boolean =
+        a.xA == b.xA && a.yA == b.yA && a.zA == b.zA &&
+            a.xB == b.xB && a.yB == b.yB && a.zB == b.zB &&
+            a.xC == b.xC && a.yC == b.yC && a.zC == b.zC &&
+            a.xD == b.xD && a.yD == b.yD && a.zD == b.zD
+
     override fun setModelMatrix(modelMatrix: Matrix44) {
         // Call parent to set up legacy matrix state
         super.setModelMatrix(modelMatrix)
@@ -1275,19 +1311,23 @@ class ModernGLToolkit(
         val w = d.getWidth()
         val h = d.getHeight()
         if (w <= 0 || h <= 0) return
+        val restoreFbo = GL30.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING)
         var fb = sceneMsaa
         if (fb == null || fb.width != w || fb.height != h || fb.samples != samples) {
+            val boundTexture = glGetInteger(GL_TEXTURE_BINDING_2D)
             fb?.destroy()
             fb = MultisampleFramebuffer(w, h, samples)
             if (!fb.create()) {
                 sceneMsaaFailed = true
                 sceneMsaa = null
+                GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, restoreFbo)
                 System.err.println("[ModernGLToolkit] multisampled scene target unavailable ($samples samples); rendering without anti-aliasing")
                 return
             }
             sceneMsaa = fb
+            glBindTexture(GL_TEXTURE_2D, boundTexture)
         }
-        sceneMsaaRestoreFbo = GL30.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING)
+        sceneMsaaRestoreFbo = restoreFbo
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, sceneMsaaRestoreFbo)
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.getId())
         blitWholeTarget(w, h)

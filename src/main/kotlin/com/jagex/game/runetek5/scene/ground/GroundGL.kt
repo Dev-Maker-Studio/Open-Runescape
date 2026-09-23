@@ -335,8 +335,8 @@ open class GroundGL(
             // map BEFORE its materials draw; the ground shader samples it per fragment.
             // No fixed function.
             val sm = shadowMapper
-            if (sm != null && activeToolkit is ModernGLToolkit) {
-                val texelSize = (width * tileUnits).toFloat() / (sm.width - 2).toFloat()
+            if (activeToolkit is ModernGLToolkit) {
+                val texelSize = if (sm != null) (width * tileUnits).toFloat() / (sm.width - 2).toFloat() else 0f
                 (activeToolkit as ModernGLToolkit).groundRendererForShadows()
                     ?.setShadowMapper(sm, texelSize)
             }

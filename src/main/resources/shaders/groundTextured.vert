@@ -60,6 +60,7 @@ out float vFogFactor;
 out vec2 vWorldXZ;   // for the per-fragment ground shadow overlay (see frag)
 out vec3 vWaterNoiseCoord;
 out float vWaterMix;
+out vec3 vPointLight;
 
 void main() {
     vec3 position = aPosition;
@@ -68,6 +69,7 @@ void main() {
     float waterDepth = aTexCoord.z;
     vWaterMix = 0.0;
     vWaterNoiseCoord = vec3(0.0);
+    vPointLight = vec3(0.0);
     if (uWaterMode == 3) {
         float blend = (viewZ - uStillFog.x) * 0.001953125;
         float tint = waterDepth * uStillFog.z + uStillFog.w;
@@ -85,7 +87,7 @@ void main() {
     vec3 color = aColor.rgb;
     vWorldXZ = position.xz;
     vTexCoord = aTexCoord.xy * uTextureScale + uTextureScroll;
-    vFogFactor = 1.0;
+    vFogFactor = uFogEnabled ? clamp((uFogEnd - viewZ) / max(uFogEnd - uFogStart, 1e-4), 0.0, 1.0) : 1.0;
     if (uWaterMode == 2) {
         vec2 n = fract(vec2(position.x + position.z, position.z - position.x) * 0.0001220703125) * 64.0;
         vec2 offset = vec2(uLapNoise[int(n.x)].x, uLapNoise[int(n.y)].y) * uLapTurbulence;
@@ -111,15 +113,14 @@ void main() {
         // sun colour applies). ground.vert already did this for untextured terrain.
         color = clamp(color * uSunColor * intensity, 0.0, 1.0);
     }
-    // Point lights (see ground.vert). Uses the tile normal when HD normals are
-    // present, otherwise straight up -- terrain is essentially flat per tile.
-    vec3 n = uHasNormals ? aNormal : vec3(0.0, 1.0, 0.0);
+    vec3 n = uHasNormals ? normalize(aNormal) : vec3(0.0, 1.0, 0.0);
     for (int i = 0; i < uPointLightCount; ++i) {
         vec3 toLight = uPointLightPos[i].xyz - aPosition;
         float d2 = dot(toLight, toLight);
-        float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6); // legacy: kc=0, kl=0, kq=1/size^2
+        float intensity = max(1.0 - d2 * uPointLightPos[i].w, 0.0);
+        if (intensity <= 0.0) continue;
         float ndotl = max(dot(n, normalize(toLight)), 0.0);
-        color += aColor.rgb * uPointLightColor[i] * (att * ndotl);
+        vPointLight += uPointLightColor[i] * min(2.0 * ndotl * intensity, 1.0);
     }
     vColor = vec4(clamp(color, 0.0, 1.0), aColor.a);
 }

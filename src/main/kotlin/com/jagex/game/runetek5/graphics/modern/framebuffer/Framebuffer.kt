@@ -327,7 +327,6 @@ class MultisampleFramebuffer(
     private var fboId: Int = 0
     private var colorRboId: Int = 0
     private var depthRboId: Int = 0
-    private var resolveFbo: Framebuffer? = null
     private var isCreated = false
 
     /**
@@ -360,11 +359,6 @@ class MultisampleFramebuffer(
             return false
         }
 
-        // Create resolve framebuffer (single-sample for reading)
-        resolveFbo = Framebuffer(width, height)
-            .addColorAttachment(0)
-            .apply { create() }
-
         GLWrapper.bindFramebuffer(FRAMEBUFFER, 0)
         isCreated = true
         return true
@@ -378,29 +372,6 @@ class MultisampleFramebuffer(
         GLWrapper.bindFramebuffer(FRAMEBUFFER, fboId)
         GLWrapper.viewport(0, 0, width, height)
     }
-
-    /**
-     * Unbinds and resolves to the single-sample buffer.
-     */
-    fun unbindAndResolve() {
-        if (!isCreated || resolveFbo == null) return
-
-        // Blit from multisample to resolve buffer
-        GLWrapper.bindFramebuffer(GLWrapper.Constants.READ_FRAMEBUFFER, fboId)
-        GLWrapper.bindFramebuffer(GLWrapper.Constants.DRAW_FRAMEBUFFER, resolveFbo!!.getId())
-        GLWrapper.blitFramebuffer(
-            0, 0, width, height,
-            0, 0, width, height,
-            GLWrapper.Constants.COLOR_BUFFER_BIT,
-            NEAREST
-        )
-        GLWrapper.bindFramebuffer(FRAMEBUFFER, 0)
-    }
-
-    /**
-     * Gets the resolved color texture.
-     */
-    fun getResolvedTexture(): Int = resolveFbo?.getColorTexture(0) ?: 0
 
     /** GL name of the multisampled framebuffer object. */
     fun getId(): Int = fboId
@@ -427,18 +398,12 @@ class MultisampleFramebuffer(
         GLWrapper.renderbufferStorageMultisample(RENDERBUFFER, samples, DEPTH24_STENCIL8, width, height)
 
         GLWrapper.bindRenderbuffer(RENDERBUFFER, 0)
-
-        // Resize resolve buffer
-        resolveFbo?.resize(width, height)
     }
 
     /**
      * Destroys all resources.
      */
     fun destroy() {
-        resolveFbo?.destroy()
-        resolveFbo = null
-
         if (colorRboId != 0) {
             GLWrapper.deleteRenderbuffers(colorRboId)
             colorRboId = 0
