@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.config.param
 
 import com.jagex.game.runetek5.buffer.Packet
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.utils.Utils
 
 class ParamType {
@@ -25,6 +26,7 @@ class ParamType {
             2 -> this.defaultInt = buffer.readInt()
             4 -> this.autoDisable = false
             5 -> this.typeName = buffer.readString()
+            else -> UnknownOpcodes.record(opcode)
         }
     }
 

@@ -8,6 +8,7 @@ import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.light.Skybox
 import com.jagex.game.runetek5.graphics.texture.AbstractCubeTextureGenerator
@@ -280,6 +281,8 @@ class EnvironmentManager(
                     textures[3] = buffer.readUShort()
                     textures[4] = buffer.readUShort()
                     textures[5] = buffer.readUShort()
+                } else {
+                    UnknownOpcodes.record(opcode)
                 }
             }
         }

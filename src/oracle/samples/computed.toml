@@ -1,0 +1,11 @@
+[[sample]]
+suite = "CONF-COLOR"
+kind = "colortable"
+gamma = 0.7
+why = "the gamma lakan-color is checked at"
+
+[[sample]]
+suite = "CONF-COLOR"
+kind = "colortable"
+gamma = 0.685
+why = "the low end of the client's randomised gamma"

@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.config.flu
 
 import com.jagex.game.runetek5.buffer.Packet
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import kotlin.math.sqrt
 
 class FluType {
@@ -30,6 +31,7 @@ class FluType {
             3 -> scale = packet.readUShort() shl 2
             4 -> shadowed = false
             5 -> occlude = false
+            else -> UnknownOpcodes.record(opcode)
         }
     }
 

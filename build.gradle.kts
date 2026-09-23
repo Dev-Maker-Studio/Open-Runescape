@@ -125,6 +125,32 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven:2.2.21")
 }
 
+val oracle: SourceSet by sourceSets.creating {
+    compileClasspath += sourceSets.main.get().output
+    runtimeClasspath += sourceSets.main.get().output
+}
+
+configurations[oracle.implementationConfigurationName].extendsFrom(configurations.implementation.get())
+configurations[oracle.runtimeOnlyConfigurationName].extendsFrom(configurations.runtimeOnly.get())
+
+dependencies {
+    "oracleImplementation"("org.tomlj:tomlj:1.1.1")
+    "oracleImplementation"("com.networknt:json-schema-validator:1.5.6")
+}
+
+tasks.register<JavaExec>("oracleDump") {
+    group = "oracle"
+    description = "Dump canonical decoder snapshots for a Lakan sample list"
+    mainClass.set("com.darkan.oracle.DecoderDumpKt")
+    classpath = oracle.runtimeClasspath
+}
+
+tasks.register<Jar>("oracleJar") {
+    group = "oracle"
+    archiveBaseName.set("darkan-oracle")
+    from(oracle.output)
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {

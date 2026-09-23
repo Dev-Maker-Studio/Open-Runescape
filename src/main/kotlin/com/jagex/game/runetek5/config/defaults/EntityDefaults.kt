@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.config.defaults
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.DefaultsFile
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
 class EntityDefaults(defaultsResource: Js5ResourceProvider) {
@@ -102,6 +103,7 @@ class EntityDefaults(defaultsResource: Js5ResourceProvider) {
                 13 -> maxHitbars = buffer.readUByte()
                 14 -> maxVisibleHitbars = buffer.readUByte()
                 15 -> defaultHitbarHeight = buffer.readUByte()
+                else -> UnknownOpcodes.record(opcode)
             }
         }
     }

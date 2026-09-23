@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.config.identitykit
 
 import com.jagex.game.runetek5.buffer.Packet
+import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.graphics.model.Mesh
 
 class IdkType {
@@ -76,6 +77,7 @@ class IdkType {
             in 60..69 -> {
                 headModels[opcode - 60] = buffer.readBigSmart()
             }
+            else -> UnknownOpcodes.record(opcode)
         }
     }
 
