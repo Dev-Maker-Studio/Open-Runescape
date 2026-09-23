@@ -851,10 +851,6 @@ class InstancedModelBatcher {
     /** Staging for the indirect command list; five ints per command. */
     private var indirectScratch = IntArray(MAX_UNIQUE_MESHES * 8 * INDIRECT_INTS)
 
-    /** Per-material slice of the frame's indirect command list. */
-    private val indirectFirst = HashMap<Int, Int>()
-    private val indirectCount = HashMap<Int, Int>()
-
     /**
      * Points the per-instance attributes at instance [base] within the packed buffer.
      * Only used on the no-base-instance fallback path.
@@ -2173,25 +2169,7 @@ class InstancedModelBatcher {
             // the per-material walk (-1 untextured first).
             var buf = indirectScratch
             var cursor = 0
-            var nCmd = 0
-            for (ei in activeEntries.indices) {
-                val e = activeEntries[ei]
-                if (e.instanceCount == 0) continue
-                val batches = e.materialBatches
-                for (bi in batches.indices) {
-                    if (nCmd >= cmdKeys.size) {
-                        cmdKeys = cmdKeys.copyOf(cmdKeys.size * 2)
-                        cmdEntry = cmdEntry.copyOf(cmdEntry.size * 2)
-                        cmdBatch = cmdBatch.copyOf(cmdBatch.size * 2)
-                    }
-                    val b = batches[bi]
-                    cmdEntry[nCmd] = e
-                    cmdBatch[nCmd] = b
-                    cmdKeys[nCmd] = ((b.materialId + 1).toLong() shl 32) or nCmd.toLong()
-                    nCmd++
-                }
-            }
-            java.util.Arrays.sort(cmdKeys, 0, nCmd)
+            val nCmd = sortActiveCommands()
             for (i in 0 until nCmd) {
                 val seq = (cmdKeys[i] and 0xffffffffL).toInt()
                 val mesh = cmdEntry[seq]!!
@@ -2264,34 +2242,25 @@ class InstancedModelBatcher {
         } else if (indirectSupported) {
             var buf = indirectScratch
             var cursor = 0
-            for (texId in materialOrder) {
-                val refs = drawsByMaterial[texId] ?: continue
-                val first = indirectCommandCount
-                for (r in refs) {
-                    val mesh = r.mesh
-                    val count = mesh.instanceCount
-                    if (count == 0) continue
-                    val matBatch = r.batch
-                    if (bindless) appendDrawMaterial(texId, textureCache, combineModeOf)
-                    if (cursor + INDIRECT_INTS > buf.size) {
-                        // This list used to be a fixed 2048 commands and BROKE out of
-                        // the loop when full — every mesh past the cap in a dense
-                        // scene simply did not draw (the stall canopy that vanished
-                        // whenever enough other meshes sorted ahead of it). Grow.
-                        buf = buf.copyOf(buf.size * 2)
-                        indirectScratch = buf
-                    }
-                    buf[cursor] = matBatch.indexCount        // count
-                    buf[cursor + 1] = count                  // instanceCount
-                    buf[cursor + 2] = matBatch.indexOffset   // firstIndex
-                    buf[cursor + 3] = 0                      // baseVertex (indices are absolute)
-                    buf[cursor + 4] = mesh.instanceBase      // baseInstance
-                    cursor += INDIRECT_INTS
-                    indirectCommandCount++
-                    instancedTriangles += (matBatch.indexCount / 3) * count
+            val nCmd = sortActiveCommands()
+            buildMaterialRuns(nCmd)
+            for (i in 0 until nCmd) {
+                val seq = (cmdKeys[i] and 0xffffffffL).toInt()
+                val mesh = cmdEntry[seq]!!
+                val matBatch = cmdBatch[seq]!!
+                val count = mesh.instanceCount
+                if (cursor + INDIRECT_INTS > buf.size) {
+                    buf = buf.copyOf(buf.size * 2)
+                    indirectScratch = buf
                 }
-                indirectFirst[texId] = first
-                indirectCount[texId] = indirectCommandCount - first
+                buf[cursor] = matBatch.indexCount
+                buf[cursor + 1] = count
+                buf[cursor + 2] = matBatch.indexOffset
+                buf[cursor + 3] = 0
+                buf[cursor + 4] = mesh.instanceBase
+                cursor += INDIRECT_INTS
+                indirectCommandCount++
+                instancedTriangles += (matBatch.indexCount / 3) * count
             }
             if (indirectCommandCount > 0) {
                 if (indirectBuffer!!.capacity() < cursor) {
@@ -2321,16 +2290,14 @@ class InstancedModelBatcher {
             return
         }
 
-        for (texId in materialOrder) {
-            val refs = drawsByMaterial[texId] ?: continue
-
-            // One texture/uniform setup per material, not per draw.
+        if (!indirectSupported) buildMaterialRuns(sortActiveCommands())
+        for (run in 0 until materialRunCount) {
+            val texId = runMaterial[run]
             val textureHandle = if (texId >= 0) textureCache(texId) else 0
             if (textureHandle > 0) {
                 GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
                 GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
                 sh.setUniform(uTextureEnabledLocation, 1)
-                // Legacy per-material combine mode (REPLACE ignores vColor).
                 sh.setUniform(uCombineModeLocation, combineModeOf(texId))
                 sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
                 setTextureSpeedUniform(sh, texId)
@@ -2338,25 +2305,17 @@ class InstancedModelBatcher {
                 sh.setUniform(uTextureEnabledLocation, 0)
             }
 
-            // Per-material blend state is deliberately NOT toggled here: legacy does
-            // not do it for model faces (setBlendMode(1) once in setupMatrixRendering),
-            // and doing it made translucent geometry render solid. The pass-wide state
-            // is established in openSceneBatch.
+            val first = runFirst[run]
+            val commands = runCount[run]
             if (indirectSupported) {
-                // One GL call for the whole material, reading the commands already
-                // resident in the indirect buffer.
-                val commands = indirectCount[texId] ?: 0
-                if (commands > 0) {
-                    val byteOffset = (indirectFirst[texId] ?: 0).toLong() * INDIRECT_INTS * 4
-                    glMultiDrawElementsIndirect(TRIANGLES, UNSIGNED_INT, byteOffset, commands, 0)
-                    instancedDrawCalls++
-                }
+                glMultiDrawElementsIndirect(TRIANGLES, UNSIGNED_INT, first.toLong() * INDIRECT_INTS * 4, commands, 0)
+                instancedDrawCalls++
             } else {
-                for (r in refs) {
-                    val mesh = r.mesh
+                for (i in first until first + commands) {
+                    val seq = (cmdKeys[i] and 0xffffffffL).toInt()
+                    val mesh = cmdEntry[seq]!!
+                    val matBatch = cmdBatch[seq]!!
                     val count = mesh.instanceCount
-                    if (count == 0) continue
-                    val matBatch = r.batch
                     if (baseInstanceSupported) {
                         glDrawElementsInstancedBaseInstance(
                             TRIANGLES,
@@ -2367,9 +2326,6 @@ class InstancedModelBatcher {
                             mesh.instanceBase
                         )
                     } else {
-                        // GL 3.3 fallback: re-point the instance attributes at this mesh's
-                        // slice. Five cheap pointer updates, still no data transfer and
-                        // still no hazard against the buffer.
                         repointInstanceAttributes(mesh.instanceBase)
                         GLWrapper.drawElementsInstanced(
                             TRIANGLES,
@@ -2384,12 +2340,65 @@ class InstancedModelBatcher {
                 }
             }
         }
+        java.util.Arrays.fill(cmdEntry, 0, activeCommandCount, null)
+        java.util.Arrays.fill(cmdBatch, 0, activeCommandCount, null)
+        materialRunCount = 0
         timeDraw += System.nanoTime() - t2
 
         vao!!.unbind()
         sh.unbind()
 
         isFrameActive = false
+    }
+
+    private var activeCommandCount = 0
+    private var materialRunCount = 0
+    private var runMaterial = IntArray(256)
+    private var runFirst = IntArray(256)
+    private var runCount = IntArray(256)
+
+    private fun sortActiveCommands(): Int {
+        var nCmd = 0
+        for (ei in activeEntries.indices) {
+            val e = activeEntries[ei]
+            if (e.instanceCount == 0) continue
+            val batches = e.materialBatches
+            for (bi in batches.indices) {
+                if (nCmd >= cmdKeys.size) {
+                    cmdKeys = cmdKeys.copyOf(cmdKeys.size * 2)
+                    cmdEntry = cmdEntry.copyOf(cmdEntry.size * 2)
+                    cmdBatch = cmdBatch.copyOf(cmdBatch.size * 2)
+                }
+                val b = batches[bi]
+                cmdEntry[nCmd] = e
+                cmdBatch[nCmd] = b
+                cmdKeys[nCmd] = ((b.materialId + 1).toLong() shl 32) or nCmd.toLong()
+                nCmd++
+            }
+        }
+        java.util.Arrays.sort(cmdKeys, 0, nCmd)
+        activeCommandCount = nCmd
+        return nCmd
+    }
+
+    private fun buildMaterialRuns(nCmd: Int) {
+        materialRunCount = 0
+        var i = 0
+        while (i < nCmd) {
+            val material = (cmdKeys[i] ushr 32).toInt() - 1
+            var j = i + 1
+            while (j < nCmd && (cmdKeys[j] ushr 32).toInt() - 1 == material) j++
+            if (materialRunCount == runMaterial.size) {
+                runMaterial = runMaterial.copyOf(materialRunCount * 2)
+                runFirst = runFirst.copyOf(materialRunCount * 2)
+                runCount = runCount.copyOf(materialRunCount * 2)
+            }
+            runMaterial[materialRunCount] = material
+            runFirst[materialRunCount] = i
+            runCount[materialRunCount] = j - i
+            materialRunCount++
+            i = j
+        }
     }
 
     /** Number of translucent items packed by the last [endFrame] and not yet drawn. */

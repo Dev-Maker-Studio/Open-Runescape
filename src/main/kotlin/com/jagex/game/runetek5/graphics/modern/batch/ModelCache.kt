@@ -129,6 +129,9 @@ class ModelCache(
         @JvmField
         var vertexWordCount: Int = 0
 
+        @JvmField
+        var lastUsedFrame: Long = 0L
+
 
         fun free() {
             if (!heapOwned) MemoryUtil.memFree(vertexData)
@@ -158,6 +161,8 @@ class ModelCache(
 
     fun getSize(): Int = cache.size
 
+    val frame: Long get() = currentFrame
+
     fun resetBuildTimer() {
         buildNanos = 0L
         evictions = 0L
@@ -181,6 +186,7 @@ class ModelCache(
         if (existing != null) {
             // Content hash matches - return cached data
             cacheHits++
+            existing.lastUsedFrame = currentFrame
             return existing
         }
 
@@ -193,6 +199,7 @@ class ModelCache(
         val cached = buildCache() ?: return null
         buildNanos += System.nanoTime() - buildStart
         cached.creationFrame = currentFrame
+        cached.lastUsedFrame = currentFrame
 
         // Check if we have space
         val newBytes = cached.getTotalBytes()
@@ -222,8 +229,18 @@ class ModelCache(
     }
 
     private fun evictOldest() {
-        val oldestKey = cache.keys.firstOrNull() ?: return
-        evict(oldestKey)
+        var refreshed: ArrayList<Long>? = null
+        var victim: Long? = null
+        for ((key, entry) in cache) {
+            if (entry.lastUsedFrame >= currentFrame - 1) {
+                (refreshed ?: ArrayList<Long>().also { refreshed = it }).add(key)
+                continue
+            }
+            victim = key
+            break
+        }
+        refreshed?.forEach { cache[it] }
+        evict(victim ?: cache.keys.firstOrNull() ?: return)
     }
 
     /**

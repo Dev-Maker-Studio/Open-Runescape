@@ -382,7 +382,8 @@ class ModernGLToolkit(
     }
 
     // Model cache for avoiding per-face CPU work
-    private var modelCache: ModelCache? = null
+    var modelCache: ModelCache? = null
+        private set
 
     // Matrices
     private val modernProjectionMatrix = Matrix4f()
@@ -4953,7 +4954,10 @@ class ModernGLToolkit(
     ): ModelCache.CachedModel? {
         if (model.modernSharedValid && model.modernSharedKey == key) {
             val memo = model.modernSharedGeometry as? ModelCache.CachedModel
-            if (memo != null && !memo.evicted) return memo
+            if (memo != null && !memo.evicted) {
+                memo.lastUsedFrame = cache.frame
+                return memo
+            }
         }
         val resolved = cache.getOrCreate(model, key, build) ?: return null
         model.modernSharedGeometry = resolved
