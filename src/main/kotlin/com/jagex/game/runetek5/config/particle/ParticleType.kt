@@ -45,13 +45,14 @@ class ParticleType {
                 offsetY = stream.readInt()
                 offsetZ = stream.readInt()
             }
-            4 -> sizeMultiplier = stream.readInt()
+            4 -> {
+                type = stream.readUByte()
+                sizeMultiplier = stream.readInt()
+            }
             6 -> particleHandlingType = stream.readUByte()
             8 -> currentOffset = 1
             9 -> verticeCalculationType = 1
-            10 -> {
-                // NOOP
-            }
+            10 -> invert = true
         }
     }
 

@@ -1165,7 +1165,7 @@ object CS2SharedOps {
         var parentHeight: Int = 0
         if (parentComponent == null) {
             parentWidth = GameShell.screenCanvasWidth
-            parentHeight = GameShell.screenCanvasHeight
+            parentHeight = GameShell.screenCanvasHeight * -969250379
         } else {
             parentWidth = parentComponent!!.width
             parentHeight = parentComponent!!.height

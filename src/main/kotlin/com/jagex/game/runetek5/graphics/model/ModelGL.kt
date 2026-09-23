@@ -2828,6 +2828,10 @@ class ModelGL : Model {
             this.facesRevision = this.facesRevision xor MIRRORED_FACES_REVISION_SALT
         }
 
+        if (this.normalsBuffer == null && this.colorsBuffer != null) {
+            this.colorsBuffer!!.buffer = null
+        }
+
         if (this.vertexBuffer != null) {
             this.vertexBuffer!!.buffer = null
         }

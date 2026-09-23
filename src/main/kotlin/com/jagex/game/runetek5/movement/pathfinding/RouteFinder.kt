@@ -82,7 +82,7 @@ object RouteFinder {
         val graphBaseY = srcY - 64
         var pathExitX = exitX
         var pathExitY = exitY
-        val nearestDistSq: Int
+        var nearestDistSq: Int
         val nearestSteps: Int
 
         if (!canReach) {
@@ -116,6 +116,7 @@ object RouteFinder {
                         }
                         val distSq = dx * dx + dy * dy
                         if (distSq < nearestDistSq || distSq == nearestDistSq && distances[graphX][graphY] < bestSteps) {
+                            nearestDistSq = distSq
                             bestSteps = distances[graphX][graphY]
                             pathExitX = x
                             pathExitY = y

@@ -311,7 +311,7 @@ object NPCUpdate {
                     }
 
                     val uid = npcIndice.toLong() or ((++npc.meshModifierCount - 1).toLong() shl 32)
-                    npc.customisation = NPCTypeCustomisation(uid, models ?: IntArray(0), colors, retextures)
+                    npc.customisation = NPCTypeCustomisation(uid, models, colors, retextures)
                 }
             }
 
@@ -530,7 +530,7 @@ object NPCUpdate {
 
                     val uid = npcIndice.toLong() or ((++npc.headMeshModifierCount - 1).toLong() shl 32)
                     // Note: Creating object but not assigning - matches original Java code
-                    NPCTypeCustomisation(uid, models ?: IntArray(0), recolorDst, retextureDst)
+                    NPCTypeCustomisation(uid, models, recolorDst, retextureDst)
                 }
             }
 

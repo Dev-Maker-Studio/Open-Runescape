@@ -303,7 +303,8 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     fun initializeFrame(windowSettings: WindowSettings, gameName: String, buildEnvironmentName: String, storeId: Int, numIndices: Int, padding: Boolean) {
         try {
             setApplicationType(ApplicationType.BORDERLESS, padding)
-            WindowMode.resizableScreenWidth = screenCanvasWidth.also { screenCanvasWidth = windowSettings.width }
+            screenCanvasWidth = windowSettings.width
+            WindowMode.resizableScreenWidth = screenCanvasWidth
             var windowHeight = windowSettings.height
             // -Dwindow.size=WxH overrides the configured window size (see setFrameTitle).
             System.getProperty("window.size")?.let { spec ->

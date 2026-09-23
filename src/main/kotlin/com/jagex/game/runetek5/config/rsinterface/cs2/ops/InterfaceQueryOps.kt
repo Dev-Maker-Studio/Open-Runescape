@@ -610,7 +610,7 @@ object InterfaceQueryOps {
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (slot >= 0 && slot < npcType!!.modelIds!!.size) {
-                component!!.npcCustomisation!!.modelIds[slot] = modelId
+                component!!.npcCustomisation!!.modelIds!![slot] = modelId
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("" + slot)
@@ -652,7 +652,7 @@ object InterfaceQueryOps {
             }
             component!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (slot >= 0 && slot < npcType!!.headModels!!.size) {
-                component!!.npcCustomisation!!.modelIds[slot] = modelId
+                component!!.npcCustomisation!!.modelIds!![slot] = modelId
                 Component.redrawComponent(component!!)
             } else {
                 throw RuntimeException("")

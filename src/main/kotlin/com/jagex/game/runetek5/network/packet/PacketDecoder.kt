@@ -612,7 +612,7 @@ object PacketDecoder {
             if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             val bytes = ByteArray(context.currentPacketSize - 1)
             val hasFallback = buffer.readUByte() == 1
-            buffer.readBytes(bytes, context.currentPacketSize - 1)
+            buffer.readBytes(bytes, 0, context.currentPacketSize - 1)
             val urlPacket = Packet(bytes)
             val url = urlPacket.readString()
             if (hasFallback) {
@@ -2005,7 +2005,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.WINDOW_CALL_WITH_ARGS) {
             val argsBuffer = ByteArray(context.currentPacketSize)
-            buffer.readBytes(argsBuffer, context.currentPacketSize)
+            buffer.readBytes(argsBuffer, 0, context.currentPacketSize)
             val windowCallParam = Utils.readString(argsBuffer, 0, context.currentPacketSize)
             context.currentPacket = null
             return true
@@ -2369,7 +2369,7 @@ object PacketDecoder {
                 WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             }
             val urlBytes = ByteArray(context.currentPacketSize)
-            buffer.readBytes(urlBytes, context.currentPacketSize)
+            buffer.readBytes(urlBytes, 0, context.currentPacketSize)
             val url = Utils.readString(urlBytes, 0, context.currentPacketSize)
             val openMethod = "opensn"
             if (!Client.isApplet || !Browser.openBrowser(url, 1, openMethod)) {
