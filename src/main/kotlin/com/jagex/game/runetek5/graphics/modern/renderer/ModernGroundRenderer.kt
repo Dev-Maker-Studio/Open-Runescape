@@ -1271,6 +1271,12 @@ class ModernGroundRenderer {
 
         vertexData?.let { MemoryUtil.memFree(it) }
         indexData?.let { MemoryUtil.memFree(it) }
+        shadowUploadScratch?.let { MemoryUtil.memFree(it) }
+        shadowUploadScratch = null
+        for (entry in shadowEntries.values) if (entry.tex != 0) glDeleteTextures(entry.tex)
+        shadowEntries.clear()
+        currentShadowMapper = null
+        boundShadowMapper = null
 
         shader = null
         vao = null

@@ -1089,6 +1089,7 @@ class OptimizedFrameBatcher {
         // the upload has to span the matrix block plus the used light entries.
         matrixBuffer!!.limit(MAX_MODELS * 16 + currentModelIndex * 4)
         glBindBuffer(GL_UNIFORM_BUFFER, matrixUbo)
+        glBufferData(GL_UNIFORM_BUFFER, (MAX_MODELS * 20 * 4).toLong(), GL_STREAM_DRAW)
         glBufferSubData(GL_UNIFORM_BUFFER, 0, matrixBuffer!!)
         glBindBuffer(GL_UNIFORM_BUFFER, 0)
 

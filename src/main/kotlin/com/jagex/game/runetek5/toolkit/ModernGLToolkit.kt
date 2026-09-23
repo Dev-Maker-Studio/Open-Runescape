@@ -1983,7 +1983,6 @@ class ModernGLToolkit(
     @JvmField var recolourBad = 0
     private val VERIFY_RECOLOUR = System.getProperty("render.verifyrecolour") != null
     /** Global index of each uploaded light, for per-entity index lookup. */
-    private val lightIndexOf = HashMap<PointLight, Int>()
     /** Light indices for the entity currently being submitted (-1 = unused). */
     private val currentLightIdx = FloatArray(4) { -1f }
 
@@ -2392,8 +2391,6 @@ class ModernGLToolkit(
             frameLightColor[i * 3 + 1] = ((c shr 8) and 0xff) * a
             frameLightColor[i * 3 + 2] = (c and 0xff) * a
         }
-        lightIndexOf.clear()
-        for (i in 0 until n) lightIndexOf[frameLights[i]] = i
         frameLightCount = n
         if (LIGHT_DIAG && lightDiagBudget > 0 && n > 0) {
             lightDiagBudget--
@@ -6442,6 +6439,7 @@ class ModernGLToolkit(
                     glBufferData(GL_ELEMENT_ARRAY_BUFFER, staging, GL_DYNAMIC_DRAW)
                     material.modernIboCapacity = needed
                 } else {
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, material.modernIboCapacity.toLong(), GL_DYNAMIC_DRAW)
                     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0L, staging)
                 }
                 residentIbo = material.modernIboId

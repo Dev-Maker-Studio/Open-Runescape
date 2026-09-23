@@ -44,7 +44,7 @@ uniform bool uFogEnabled;
 // run here, so the same contribution is computed in-shader instead.
 uniform int uPointLightCount;
 uniform vec4 uPointLightPos[MAX_POINT_LIGHTS];   // xyz world, w = 1/size2d^2
-uniform vec3 uPointLightColor[MAX_POINT_LIGHTS]; // colour * transparency/255
+uniform vec3 uPointLightColor[MAX_POINT_LIGHTS]; // 0..255 colour * transparency/255
 
 uniform int uWaterMode;
 uniform vec4 uStillFog;
@@ -120,7 +120,7 @@ void main() {
         float intensity = max(1.0 - d2 * uPointLightPos[i].w, 0.0);
         if (intensity <= 0.0) continue;
         float ndotl = max(dot(n, normalize(toLight)), 0.0);
-        vPointLight += uPointLightColor[i] * min(2.0 * ndotl * intensity, 1.0);
+        vPointLight += uPointLightColor[i] * (min(2.0 * ndotl * intensity, 1.0) / 255.0);
     }
     vColor = vec4(clamp(color, 0.0, 1.0), aColor.a);
 }
