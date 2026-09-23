@@ -38,6 +38,7 @@ import com.jagex.game.runetek5.scene.SettingsBits
 import com.jagex.game.runetek5.scene.environment.EnvironmentManager
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 import com.jagex.game.runetek5.tools.Language
+import com.jagex.game.runetek5.utils.ColorUtil
 import sun.misc.Unsafe
 import java.io.File
 import java.util.TreeMap
@@ -50,14 +51,17 @@ class Sample(
     val file: Int?,
     val id: Int?,
     val xtea: IntArray?,
+    val gamma: Double?,
 )
 
-class Snapshot(val kind: String, val id: Int, val input: ByteArray, val file: Int?, val value: Map<String, Any>, val unknownOps: List<Int>)
+class Snapshot(val kind: String, val id: Int, val input: ByteArray?, val file: Int?, val value: Map<String, Any>, val unknownOps: List<Int>)
 
-class Context(val cache: DiskCache, private val namesDir: File, val xteaKeys: Map<Int, IntArray>) {
+class Context(private val store: DiskCache?, private val namesDir: File?, val xteaKeys: Map<Int, IntArray>) {
     private val providers = HashMap<Int, Js5ResourceProvider>()
 
-    fun reflector(kind: String) = Reflector(NameTable.load(namesDir, kind))
+    val cache: DiskCache get() = store ?: error("this kind needs --cache")
+
+    fun reflector(kind: String) = Reflector(NameTable.load(namesDir ?: error("this kind needs --names"), kind))
 
     fun provider(index: Int): Js5ResourceProvider = providers.getOrPut(index) { cache.provider(index) }
 }
@@ -97,12 +101,14 @@ object Kinds {
         "component" to Kind(::component),
         "cs2script" to groupRecord(12) { _, _, bytes -> CS2Script.decodeScript(bytes) },
         "region" to Kind(::region),
+        "colortable" to Kind(::colortable),
     )
 
+    val computed = setOf("colortable")
+
     val deferred = mapOf(
-        "colortable" to "the HSL to RGB colour table is computed at startup (ColorUtil), not decoded from a cache group",
-        "multiloc" to "multiloc resolution needs var state from a running client (H-12 world_state), not cache bytes alone",
-        "worldmap" to "WorldMap decodes through global state (MAP_AREA_RESOURCE, the current static element) with no standalone entry point",
+        "multiloc" to "resolution needs a running client's var state; the resolved ids come from H-12 world_state, the multiloc fields from loc records",
+        "worldmap" to "H-33: WorldMap decodes through global state (MAP_AREA_RESOURCE, the current static element) with no standalone entry point yet",
     )
 
     private fun expect(sample: Sample, index: Int) =
@@ -387,5 +393,17 @@ object Kinds {
         component.idHash = file + (sample.group shl 16)
         val (record, ops) = traced { component.also { it.decode(Packet(input)) } }
         return Snapshot(sample.kind, component.idHash, input, file, ctx.reflector(sample.kind).record(record), ops)
+    }
+
+    private fun colortable(sample: Sample, ctx: Context): Snapshot {
+        val gamma = sample.gamma ?: error("colortable samples need a gamma")
+        val (hsl, hslUnsigned) = ColorUtil.hslTables(gamma)
+        val v = Canonical.obj(
+            "gamma" to Canonical.f64(gamma),
+            "hsl" to Canonical.primitiveArray(hsl),
+            "hsl_unsigned" to Canonical.primitiveArray(hslUnsigned),
+            "hsv" to Canonical.primitiveArray(ColorUtil.hsvTable(gamma)),
+        )
+        return Snapshot(sample.kind, sample.id ?: 0, null, null, v, emptyList())
     }
 }

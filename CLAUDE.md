@@ -130,6 +130,9 @@ client's own decoders and writes one canonical JSON snapshot per sample (format 
 `tests/oracle-schema/`; field names come from its `names/*.toml`). Build with `./gradlew oracleJar`, run with
 `./gradlew oracleDump --args="--cache <dir> --samples <file> --names <dir> --out <dir> [--xtea <json>] [--schema <json>]"`.
 `--kinds` lists the implemented and deferred kinds; `--skeleton <class>` prints a name-table skeleton for a new type.
+`src/oracle/verify.sh <samples> <lakan tests/oracle-schema> [--cache <dir> --xtea <json>]` dumps twice, diffs the runs
+and validates every snapshot. CI runs it on `src/oracle/samples/computed.toml` (no cache needed) against the Lakan schema
+at `LAKAN_SCHEMA_REF`; `src/oracle/samples/cache.toml` covers every cache kind and needs a 727 cache and its XTEA keys.
 Config decoders call `UnknownOpcodes.record(opcode)` in their `else` branch so snapshots list skipped opcodes; keep
 that branch when touching a decoder.
 

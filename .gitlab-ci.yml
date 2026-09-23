@@ -72,8 +72,13 @@ oracle:
       - .gradle/caches
       - .gradle/wrapper
     policy: pull
+  variables:
+    LAKAN_SCHEMA_REF: 23bda85c51b20691807bd0e19406eb14d2f40b67
   script:
     - ./gradlew --no-daemon --build-cache oracleJar
+    - mkdir -p build/lakan-schema
+    - curl -sSf "https://gitlab.com/api/v4/projects/darkanrs%2Flakan/repository/archive.tar.gz?sha=$LAKAN_SCHEMA_REF&path=tests/oracle-schema" | tar xz --strip-components=1 -C build/lakan-schema
+    - sh src/oracle/verify.sh src/oracle/samples/computed.toml build/lakan-schema/tests/oracle-schema
 
 # Rolling "latest dev build": the same package version is re-uploaded on every push to dev,
 # so the URL below is a permalink to whatever last built green.

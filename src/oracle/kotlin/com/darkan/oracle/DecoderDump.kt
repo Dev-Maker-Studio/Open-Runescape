@@ -14,7 +14,7 @@ import org.tomlj.TomlTable
 import java.io.File
 import kotlin.system.exitProcess
 
-private const val USAGE = """usage: DecoderDump --cache <dir> --samples <samples.toml> --names <dir> --out <dir> [--xtea <xteaKeys.json>] [--schema <snapshot.schema.json>]
+private const val USAGE = """usage: DecoderDump --samples <samples.toml> --out <dir> [--cache <dir>] [--names <dir>] [--xtea <xteaKeys.json>] [--schema <snapshot.schema.json>]
        DecoderDump --skeleton <class>
        DecoderDump --kinds"""
 
@@ -48,8 +48,8 @@ private fun parse(args: Array<String>): Map<String, String> {
 
 private fun dump(options: Map<String, String>): Int {
     fun path(name: String) = File(options[name] ?: throw IllegalArgumentException("missing --$name\n$USAGE"))
-    val cache = DiskCache(path("cache"))
-    val names = path("names")
+    val cache = options["cache"]?.let { DiskCache(File(it)) }
+    val names = options["names"]?.let { File(it) }
     val out = path("out")
     val xtea = options["xtea"]?.let { loadXtea(File(it)) } ?: emptyMap()
     val schema = options["schema"]?.let { loadSchema(File(it)) }
@@ -81,6 +81,9 @@ private fun dump(options: Map<String, String>): Int {
 }
 
 private fun fileName(sample: Sample): String {
+    if (sample.kind in Kinds.computed) {
+        return "${sample.kind}-${sample.id}.json"
+    }
     val parts = mutableListOf(sample.index, sample.group)
     sample.file?.let { parts.add(it) }
     sample.id?.let { parts.add(it) }
@@ -90,12 +93,14 @@ private fun fileName(sample: Sample): String {
 private fun envelope(sample: Sample, snapshot: Snapshot): Map<String, Any> = Canonical.obj(
     "t" to snapshot.kind,
     "id" to snapshot.id.toLong(),
-    "src" to Canonical.obj(
-        "idx" to sample.index.toLong(),
-        "group" to sample.group.toLong(),
-        "file" to snapshot.file?.toLong(),
-        "sha256" to Canonical.sha256(snapshot.input),
-    ),
+    "src" to snapshot.input?.let { input ->
+        Canonical.obj(
+            "idx" to sample.index.toLong(),
+            "group" to sample.group.toLong(),
+            "file" to snapshot.file?.toLong(),
+            "sha256" to Canonical.sha256(input),
+        )
+    },
     "v" to snapshot.value,
     "unknown_ops" to snapshot.unknownOps.map { it.toLong() },
 )
@@ -107,14 +112,20 @@ private fun loadSamples(file: File): List<Sample> {
     return (0 until entries.size()).map { i ->
         val entry: TomlTable = entries.getTable(i)
         fun int(key: String): Int? = entry.getLong(key)?.toInt()
+        val kind = entry.getString("kind") ?: error("sample $i: missing kind")
+        val gamma = entry.getDouble("gamma")
+        if (kind in Kinds.computed) {
+            require(listOf("index", "group", "file", "id", "xtea").none(entry::contains)) { "sample $i: $kind takes no cache location or id" }
+        }
         Sample(
             suite = entry.getString("suite") ?: error("sample $i: missing suite"),
-            kind = entry.getString("kind") ?: error("sample $i: missing kind"),
-            index = int("index") ?: error("sample $i: missing index"),
-            group = int("group") ?: error("sample $i: missing group"),
+            kind = kind,
+            index = int("index") ?: if (kind in Kinds.computed) -1 else error("sample $i: missing index"),
+            group = int("group") ?: if (kind in Kinds.computed) -1 else error("sample $i: missing group"),
             file = int("file"),
-            id = int("id"),
+            id = int("id") ?: gamma?.let { Math.round(it * 1000).toInt() },
             xtea = entry.getArray("xtea")?.let { a -> IntArray(a.size()) { a.getLong(it).toInt() } },
+            gamma = gamma,
         )
     }
 }

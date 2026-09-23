@@ -1,0 +1,353 @@
+[[sample]]
+suite = "CONF-CACHE-STORE"
+kind = "store"
+index = 2
+group = 4
+why = "config group, 8-byte sector header"
+
+[[sample]]
+suite = "CONF-CACHE-STORE"
+kind = "store"
+index = 7
+group = 70000
+why = "group id above 65535, 10-byte sector header"
+
+[[sample]]
+suite = "CONF-CACHE-STORE"
+kind = "store"
+index = 36
+group = 0
+why = "idx36 is empty"
+
+[[sample]]
+suite = "CONF-CACHE-STORE"
+kind = "store"
+index = 255
+group = 2
+why = "reference table group"
+
+[[sample]]
+suite = "CONF-CACHE-STORE"
+kind = "store"
+index = 5
+group = 1585
+why = "map group spanning several sectors"
+
+[[sample]]
+suite = "CONF-CACHE-STORE"
+kind = "store"
+index = 8
+group = 0
+why = "sprite group"
+
+[[sample]]
+suite = "CONF-CACHE-CONTAINER"
+kind = "container"
+index = 2
+group = 4
+why = "bzip2 or gzip config container"
+
+[[sample]]
+suite = "CONF-CACHE-CONTAINER"
+kind = "container"
+index = 19
+group = 0
+why = "obj container"
+
+[[sample]]
+suite = "CONF-CACHE-CONTAINER"
+kind = "container"
+index = 10
+group = 0
+why = "raw (uncompressed) binary container"
+
+[[sample]]
+suite = "CONF-CACHE-REFTABLE"
+kind = "reftable"
+index = 255
+group = 2
+why = "format 6, flags 0"
+
+[[sample]]
+suite = "CONF-CACHE-REFTABLE"
+kind = "reftable"
+index = 255
+group = 7
+why = "format 7, big-smart ids"
+
+[[sample]]
+suite = "CONF-CACHE-REFTABLE"
+kind = "reftable"
+index = 255
+group = 5
+why = "format 6, flags 0x1 (names)"
+
+[[sample]]
+suite = "CONF-CACHE-REFTABLE"
+kind = "reftable"
+index = 255
+group = 30
+why = "format 7, flags 0x1|0x2 (names, whirlpool)"
+
+[[sample]]
+suite = "CONF-CACHE-XTEA"
+kind = "xtea"
+index = 5
+group = 3993
+why = "l group, trailer inside the decrypt range"
+
+[[sample]]
+suite = "CONF-CACHE-XTEA"
+kind = "xtea"
+index = 5
+group = 4252
+why = "l group, trailer outside the decrypt range"
+
+[[sample]]
+suite = "CONF-CACHE-XTEA"
+kind = "xtea"
+index = 5
+group = 1822
+why = "l group whose key is all zero"
+
+[[sample]]
+suite = "CONF-CACHE-XTEA"
+kind = "xtea"
+index = 5
+group = 1585
+why = "unencrypted m group"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "flu"
+index = 2
+group = 1
+file = 1
+why = "underlay"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "flo"
+index = 2
+group = 4
+file = 1
+why = "overlay"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "idk"
+index = 2
+group = 3
+file = 0
+why = "identity kit"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "param"
+index = 2
+group = 11
+file = 0
+why = "param"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "varp"
+index = 2
+group = 16
+file = 0
+why = "player var"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "struct"
+index = 2
+group = 26
+file = 0
+why = "struct with params"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "bas"
+index = 2
+group = 32
+file = 0
+why = "render anim"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "loc"
+index = 16
+group = 0
+file = 1
+why = "loc 1"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "enum"
+index = 17
+group = 0
+file = 0
+why = "enum 0"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "npc"
+index = 18
+group = 0
+file = 1
+why = "npc 1"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "obj"
+index = 19
+group = 0
+file = 1
+why = "obj 1"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "obj"
+index = 19
+group = 5
+file = 232
+why = "noted logs (1512), cert template applied"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "seq"
+index = 20
+group = 6
+file = 40
+why = "seq 808"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "spotanim"
+index = 21
+group = 0
+file = 1
+why = "spotanim 1"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "varbit"
+index = 22
+group = 0
+file = 0
+why = "varbit 0"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "material"
+index = 26
+group = 0
+file = 0
+id = 1
+why = "material 1 in the columnar file"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "defaults"
+index = 28
+group = 1
+file = 0
+why = "defaults group 1"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "defaults"
+index = 28
+group = 3
+file = 0
+why = "defaults group 3"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "defaults"
+index = 28
+group = 4
+file = 0
+why = "defaults group 4"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "defaults"
+index = 28
+group = 6
+file = 0
+why = "defaults group 6"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "defaults"
+index = 28
+group = 7
+file = 0
+why = "defaults group 7"
+
+[[sample]]
+suite = "CONF-CACHE-CONFIG"
+kind = "defaults"
+index = 28
+group = 8
+file = 0
+why = "defaults group 8"
+
+[[sample]]
+suite = "CONF-CACHE-MODEL"
+kind = "model"
+index = 7
+group = 0
+why = "mesh 0"
+
+[[sample]]
+suite = "CONF-CACHE-ANIM"
+kind = "anim"
+index = 0
+group = 0
+file = 0
+why = "frameset 0"
+
+[[sample]]
+suite = "CONF-CACHE-SPRITE"
+kind = "sprite"
+index = 8
+group = 0
+why = "sprite 0"
+
+[[sample]]
+suite = "CONF-CACHE-FONT"
+kind = "font"
+index = 13
+group = 494
+why = "font metrics"
+
+[[sample]]
+suite = "CONF-CACHE-TEXTURE"
+kind = "texture"
+index = 9
+group = 1
+why = "texture 1"
+
+[[sample]]
+suite = "CONF-CACHE-IFCOMPONENT"
+kind = "component"
+index = 3
+group = 548
+file = 0
+why = "fixed gameframe root component"
+
+[[sample]]
+suite = "CONF-CACHE-CS2SCRIPT"
+kind = "cs2script"
+index = 12
+group = 0
+why = "script 0"
+
+[[sample]]
+suite = "CONF-CACHE-MAP"
+kind = "region"
+index = 5
+group = 1585
+why = "m50_50, Lumbridge terrain"
