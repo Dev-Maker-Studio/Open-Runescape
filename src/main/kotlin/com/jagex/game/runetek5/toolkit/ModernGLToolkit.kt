@@ -4924,7 +4924,7 @@ class ModernGLToolkit(
             if (added) {
                 totalFacesProcessed += b.faceCount
             } else if (batcher != null && batcher.isActive()) {
-                submitStreamedModel(batcher, b, dbMatrix[i])
+                submitStreamedModel(batcher, b, dbMatrix[i], dbTranslucent[i], dbDepthWrite[i], dbSeq[i], dbKey[i])
             }
         }
         deferredBuildMsAcc += (System.nanoTime() - t0) / 1e6
@@ -4971,7 +4971,11 @@ class ModernGLToolkit(
     private fun submitStreamedModel(
         batcher: OptimizedFrameBatcher,
         cached: ModelCache.CachedModel,
-        modelMatrix: Matrix43
+        modelMatrix: Matrix43,
+        translucent: Boolean = Scene.alphaPassActive,
+        depthWrite: Boolean = depthBufferingEnabled,
+        seq: Int = if (translucent) translucentSeqCounter++ else 0,
+        depthKey: Int = if (translucent) (Scene.currentDrawEntity?.floorDepth ?: 0) else 0
     ) {
         selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
         var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
@@ -4982,10 +4986,6 @@ class ModernGLToolkit(
         }
         modelCounter++
         debugModelSuccesses++
-        val translucent = Scene.alphaPassActive
-        val depthWrite = depthBufferingEnabled
-        val seq = if (translucent) translucentSeqCounter++ else 0
-        val depthKey = if (translucent) (Scene.currentDrawEntity?.floorDepth ?: 0) else 0
         var facesAdded = batcher.addCachedModel(cached, modelIndex, translucent, depthWrite, seq, depthKey)
         // addCachedModel returns 0 and DISCARDS the model when its vertex buffer is
         // full; flush and retry once, exactly as submitCachedModel does.

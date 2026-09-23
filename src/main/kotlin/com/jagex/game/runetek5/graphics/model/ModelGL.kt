@@ -2720,11 +2720,30 @@ class ModelGL : Model {
         mvpMatrix.copyFrom(workingMatrix)
         mvpMatrix.multiplyBy(this.toolkit.viewProjectionMatrix)
 
-        // Read the matrix once. This runs for every drawn model every frame, and
-        // `m[i]` per term meant a field load plus a null check
-        // (Intrinsics.checkNotNull showed up in the profile in its own right) for
-        // each of the thirty-odd terms below.
+        val frustumPlanes = this.toolkit.frustumPlanes
+        val scaleBuffer = this.toolkit.lightParameterBuffer
+        workingMatrix.scale(0.0f, this.minY.toFloat(), 0.0f, scaleBuffer)
+        val minWorldX = scaleBuffer[0]
+        val minWorldY = scaleBuffer[1]
+        val minWorldZ = scaleBuffer[2]
+        workingMatrix.scale(0.0f, this.maxY.toFloat(), 0.0f, scaleBuffer)
+        val maxWorldX = scaleBuffer[0]
+        val maxWorldY = scaleBuffer[1]
+        val maxWorldZ = scaleBuffer[2]
+        for (planeIdx in 0 until 6) {
+            val plane = frustumPlanes[planeIdx]
+            val distMin = plane[0] * minWorldX + plane[1] * minWorldY + plane[2] * minWorldZ + plane[3] + this.size2d
+            val distMax = plane[0] * maxWorldX + plane[1] * maxWorldY + plane[2] * maxWorldZ + plane[3] + this.size2d
+            if (distMin < 0.0f && distMax < 0.0f) {
+                return
+            }
+        }
+
         val m = mvpMatrix.elements!!
+        val originX = this.toolkit.viewportOriginX
+        val originY = this.toolkit.viewportOriginY
+        val halfWidth = this.toolkit.imageProducerCenterX
+        val halfHeight = this.toolkit.imageProducerCenterY
 
         val centerX = (this.minX + this.maxX) shr 1
         val centerZ = (this.minZ + this.maxZ) shr 1
@@ -2735,31 +2754,47 @@ class ModelGL : Model {
         val clipZ1 = m[2] * centerX + m[6] * currentY + m[10] * centerZ + m[14]
         val clipW1 = m[3] * centerX + m[7] * currentY + m[11] * centerZ + m[15]
 
-        if (clipZ1 >= -clipW1) {
-            boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX1 / clipW1).toInt()
-            boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY1 / clipW1).toInt()
-        }
-
         currentY = this.maxY
         val clipX2 = m[0] * centerX + m[4] * currentY + m[8] * centerZ + m[12]
         val clipY2 = m[1] * centerX + m[5] * currentY + m[9] * centerZ + m[13]
         val clipZ2 = m[2] * centerX + m[6] * currentY + m[10] * centerZ + m[14]
         val clipW2 = m[3] * centerX + m[7] * currentY + m[11] * centerZ + m[15]
 
-        if (clipZ2 >= -clipW2) {
-            boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX2 / clipW2).toInt()
-            boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY2 / clipW2).toInt()
+        val minBehind = clipZ1 < -clipW1
+        val maxBehind = clipZ2 < -clipW2
+        if (minBehind && maxBehind) {
+            return
+        }
+
+        if (!minBehind) {
+            boundingBox.left = (originX + halfWidth * clipX1 / clipW1).toInt()
+            boundingBox.bottom = (originY + halfHeight * clipY1 / clipW1).toInt()
+        } else {
+            val t = (clipZ1 + clipW1) / (clipZ2 + clipW2) - 1.0f
+            val w = clipW1 + t * (clipW2 - clipW1)
+            boundingBox.left = (originX + halfWidth * (clipX1 + t * (clipX2 - clipX1)) / w).toInt()
+            boundingBox.bottom = (originY + halfHeight * (clipY1 + t * (clipY2 - clipY1)) / w).toInt()
+        }
+
+        if (!maxBehind) {
+            boundingBox.right = (originX + halfWidth * clipX2 / clipW2).toInt()
+            boundingBox.top = (originY + halfHeight * clipY2 / clipW2).toInt()
+        } else {
+            val t = (clipZ2 + clipW2) / (clipZ1 + clipW1) - 1.0f
+            val w = clipW2 + t * (clipW1 - clipW2)
+            boundingBox.right = (originX + halfWidth * (clipX2 + t * (clipX1 - clipX2)) / w).toInt()
+            boundingBox.top = (originY + halfHeight * (clipY2 + t * (clipY1 - clipY2)) / w).toInt()
         }
 
         val currentModelElements = this.toolkit.currentModelMatrix.elements!!
         if (clipZ1 / clipW1 > clipZ2 / clipW2) {
             val interpX = clipX1 + currentModelElements[0] * this.size2d + currentModelElements[12]
             val interpW = clipW1 + currentModelElements[3] * this.size2d + currentModelElements[15]
-            boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+            boundingBox.size = (originX - boundingBox.left + halfWidth * interpX / interpW).toInt()
         } else {
             val interpX = clipX2 + currentModelElements[0] * this.size2d + currentModelElements[12]
             val interpW = clipW2 + currentModelElements[3] * this.size2d + currentModelElements[15]
-            boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+            boundingBox.size = (originX - boundingBox.right + halfWidth * interpX / interpW).toInt()
         }
 
         boundingBox.positionCalculated = true

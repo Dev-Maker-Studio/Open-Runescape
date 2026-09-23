@@ -236,6 +236,16 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     protected var modelMinY: Int = 0
     @JvmField
     var groundContouredOffsetY: Int = 0
+
+    private var groundOffsetEaseCycle = -1
+
+    fun easeGroundContouredOffset(targetOffsetY: Int) {
+        val elapsed = if (groundOffsetEaseCycle < 0) 1 else Client.cycles - groundOffsetEaseCycle
+        groundOffsetEaseCycle = Client.cycles
+        for (step in 0 until elapsed.coerceIn(0, 50)) {
+            groundContouredOffsetY = (groundContouredOffsetY - (groundContouredOffsetY - targetOffsetY) / 10.0f).toInt()
+        }
+    }
     @JvmField
     var hasPreferedPriorities: Boolean = false
     @JvmField

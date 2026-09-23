@@ -1062,7 +1062,7 @@ class OptimizedFrameBatcher {
             for (i in 0 until n) {
                 val keyPart = (Int.MAX_VALUE.toLong() - orderedSegKey[i]) and 0xFFFFFFFFL
                 val seqPart = orderedSegSeq[i].toLong() and 0xFFFFFL
-                scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL)
+                scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL) xor Long.MIN_VALUE
             }
             if (n <= 4096) {
                 java.util.Arrays.sort(scratch, 0, n)

@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.config.sequence
 
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.Client
+import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 import com.jagex.game.runetek5.entity.SceneGraphEntity
@@ -102,6 +103,30 @@ class Projectile(
         this.sequence = EntitySequence(this)
         this.sequence.update(sequenceId)
         this.setupBoundingBox(1)
+    }
+
+    private var pulseDeltaX = 0.0f
+    private var pulseDeltaY = 0.0f
+    private var pulseDeltaZ = 0.0f
+    private var pulseDeltaCycle = -1
+    private val interpolatedSpace = CoordinateSpace()
+    private val interpolatedMatrix = Matrix43()
+
+    override fun getProjectionMatrix(): Matrix43 {
+        val alpha = GameShell.renderPulseAlpha
+        if (!Client.smoothEntityMovement || alpha >= 1.0f || pulseDeltaCycle != Client.cycles) {
+            return super.getProjectionMatrix()
+        }
+        val abs = getAbsolutePosition()
+        val backtrack = 1.0f - alpha
+        interpolatedSpace.copy(abs)
+        interpolatedSpace.coords.set(
+            abs.coords.x - pulseDeltaX * backtrack,
+            abs.coords.y - pulseDeltaY * backtrack,
+            abs.coords.z - pulseDeltaZ * backtrack
+        )
+        interpolatedMatrix.fromCoordinateSpace(interpolatedSpace)
+        return interpolatedMatrix
     }
 
     override fun disregardTextureMovement(): Boolean {
@@ -291,6 +316,9 @@ class Projectile(
     fun animate(step: Int) {
         animating = true
         val absolutePosition = CoordinateSpace(getAbsolutePosition())
+        val previousX = absolutePosition.coords.x
+        val previousY = absolutePosition.coords.y
+        val previousZ = absolutePosition.coords.z
         absolutePosition.coords.x = (absolutePosition.coords.x + stepX * step).toFloat()
         absolutePosition.coords.z = (absolutePosition.coords.z + stepZ * step).toFloat()
         if (adjustToTerrain) {
@@ -308,6 +336,12 @@ class Projectile(
         absolutePosition.quaternion.multiply(quaternion)
         quaternion.store()
         setAbsolutePosition(absolutePosition)
+        if (step > 0) {
+            pulseDeltaX = (absolutePosition.coords.x - previousX) / step
+            pulseDeltaY = (absolutePosition.coords.y - previousY) / step
+            pulseDeltaZ = (absolutePosition.coords.z - previousZ) / step
+            pulseDeltaCycle = Client.cycles
+        }
         if (sequence.progressCycle(step) && sequence.needsReset()) {
             sequence.reset()
         }

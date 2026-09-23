@@ -375,6 +375,9 @@ class InstancedModelBatcher {
         private set
     val bindlessActive: Boolean get() = bindless
     private val blockDraws = ArrayList<BlockDraw>(256)
+    private var templatesQueued = false
+    private var deferredCompactVertices = -1
+    private var deferredCompactIndices = -1
 
     /** True while [b]'s template still describes its meshes' current arena layout. */
     fun blockDrawValid(b: BlockDraw): Boolean {
@@ -391,6 +394,7 @@ class InstancedModelBatcher {
     fun submitBlockDraw(b: BlockDraw): Boolean {
         if (!isFrameActive || !bindless || b.count == 0) return false
         blockDraws.add(b)
+        templatesQueued = true
         val es = b.entries
         for (i in es.indices) es[i].lastUsedFrame = frameCounter
         instancedModels += b.count
@@ -499,6 +503,7 @@ class InstancedModelBatcher {
         translucentKey[i] = depthKey
         translucentSrc[i] = src; translucentSrcOff[i] = srcOff
         translucentTpl[i] = tpl; translucentTplOff[i] = tplOff; translucentTplCount[i] = tplCount
+        templatesQueued = true
         translucentMatW[i] = matW; translucentMatOff[i] = matOff
         entry.lastUsedFrame = frameCounter
         instancedModels++
@@ -1306,6 +1311,12 @@ class InstancedModelBatcher {
         translucentCount = 0
         translucentPacked = 0
         translucentCursor = 0
+        templatesQueued = false
+        if (deferredCompactVertices >= 0) {
+            evictAndCompact(deferredCompactVertices, deferredCompactIndices)
+            deferredCompactVertices = -1
+            deferredCompactIndices = -1
+        }
 
         // NOTE: the presented-frame stats (instancedDrawCalls/Triangles/Models/...)
         // are NOT reset here — beginFrame runs at every mid-frame batch reopen, which
@@ -1439,6 +1450,11 @@ class InstancedModelBatcher {
             entry = null
         }
 
+        if (entry != null && geometryDirty && entry.lastUsedFrame == frameCounter) {
+            sameFrameShapeConflicts++
+            return false
+        }
+
         if (entry != null && geometryDirty) {
             // Same mesh, new contents. Overwrite the resident vertices in place; the
             // index run is unchanged because a pose change rewrites positions,
@@ -1463,6 +1479,12 @@ class InstancedModelBatcher {
             if (totalVertexCount + vertexCount > MAX_TOTAL_VERTICES ||
                 totalIndexCount + meshIndexCount > MAX_TOTAL_INDICES
             ) {
+                if (templatesQueued) {
+                    deferredCompactVertices = maxOf(deferredCompactVertices, vertexCount)
+                    deferredCompactIndices = maxOf(deferredCompactIndices, meshIndexCount)
+                    capacityFallbacks++
+                    return false
+                }
                 if (!evictAndCompact(vertexCount, meshIndexCount)) {
                     // This frame's live meshes alone exceed capacity — nothing is
                     // safe to evict. Stream this mesh via the regular batcher.
@@ -1618,7 +1640,7 @@ class InstancedModelBatcher {
             val keyPart = (Int.MAX_VALUE.toLong() - translucentKey[i]) and 0xFFFFFFFFL
             val seqPart = (translucentSeq[i].toLong() and 0xFFFFFL)
             // (key desc, seq asc, index asc) packed into one long: 32 + 20 + 12 bits.
-            scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL)
+            scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or (i.toLong() and 0xFFFL) xor Long.MIN_VALUE
         }
         if (n <= 4096) {
             java.util.Arrays.sort(scratch, 0, n)

@@ -3,6 +3,7 @@ package com.jagex.game.runetek5.scene
 import com.jagex.game.runetek5.client.PreferenceManager
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
+import com.jagex.game.runetek5.entity.hint.HintTrailGraphNode
 import com.jagex.game.runetek5.entity.gameobject.StationaryInteractiveObject
 import com.jagex.game.runetek5.entity.*
 import com.jagex.game.runetek5.entity.gameobject.AbstractGroundDecoration
@@ -407,6 +408,10 @@ class Scene(
         // Only stationary locs are ever retained. Players, NPCs and animated locs are
         // re-added every frame (clearInteractives), and reporting those would
         // invalidate the chunk under every moving entity each frame.
+        if (interactive is HintTrailGraphNode) {
+            walkRevision++
+            return
+        }
         if (interactive !is StationaryInteractiveObject) return
         walkRevision++
         val hook = retainedHook ?: return

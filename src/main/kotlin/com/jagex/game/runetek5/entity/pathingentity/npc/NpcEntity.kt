@@ -421,10 +421,9 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             val tile = super.scene!!.tiles[super.plane.toInt()][(absPos.coords.x.toInt() shr 9)][(absPos.coords.z.toInt() shr 9)]
             if (tile != null && tile.groundDecoration != null) {
                 val groundDecoration = tile.groundDecoration as? AbstractGroundDecoration
-                val offsetDelta = super.groundContouredOffsetY - (groundDecoration?.floorOffsetY?.toInt() ?: 0)
-                super.groundContouredOffsetY = (super.groundContouredOffsetY - offsetDelta / 10.0F).toInt()
+                easeGroundContouredOffset(groundDecoration?.floorOffsetY?.toInt() ?: 0)
             } else {
-                super.groundContouredOffsetY = (super.groundContouredOffsetY - super.groundContouredOffsetY / 10.0F).toInt()
+                easeGroundContouredOffset(0)
             }
 
             renderingMatrix.copyFrom(projectionMatrix)

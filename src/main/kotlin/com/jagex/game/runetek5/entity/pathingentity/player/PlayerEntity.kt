@@ -644,11 +644,9 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             val rotation = yaw.getRotation()
             val occupiedTile = scene!!.tiles[plane.toInt()][absolute.coords.x.toInt() shr 9][absolute.coords.z.toInt() shr 9]
             if (occupiedTile != null && occupiedTile.groundDecoration != null) {
-                val groundDec = occupiedTile.groundDecoration!!
-                val offsetDelta = groundContouredOffsetY - groundDec.floorOffsetY
-                groundContouredOffsetY = (groundContouredOffsetY - offsetDelta / 10.0f).toInt()
+                easeGroundContouredOffset(occupiedTile.groundDecoration!!.floorOffsetY.toInt())
             } else {
-                groundContouredOffsetY = (groundContouredOffsetY - groundContouredOffsetY / 10.0f).toInt()
+                easeGroundContouredOffset(0)
             }
 
             renderingMatrix.copyFrom(projectionMatrix)

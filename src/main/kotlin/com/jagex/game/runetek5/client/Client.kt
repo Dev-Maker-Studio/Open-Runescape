@@ -1208,6 +1208,9 @@ class Client : GameShell() {
         var TEST_ENVIRONMENT_APPEARANCE_OVERRIDES: Int = 0
         @JvmField
         var cycles: Int = 0
+
+        private val camShakeTransition = IntArray(5)
+        private val camShakeTransitionCycle = IntArray(5) { -1 }
         @JvmField
         var preferencesSavedOnServer: Boolean = true
         @JvmField
@@ -2270,7 +2273,11 @@ class Client : GameShell() {
                     val roll = Camera.cameraRoll
                     for (slot in 0..4) {
                         if (CAM_SHAKING[slot]) {
-                            val transition = (Math.random() * (CAM_SHAKE_JITTER[slot] * 2 + 1) - CAM_SHAKE_JITTER[slot] + sin(CAM_SHAKE_PHASE[slot] * (CAM_SHAKE_FREQUENCY[slot] / 100.0)) * CUSTOM_LOWEST_YAW[slot]).toInt()
+                            if (camShakeTransitionCycle[slot] != cycles) {
+                                camShakeTransitionCycle[slot] = cycles
+                                camShakeTransition[slot] = (Math.random() * (CAM_SHAKE_JITTER[slot] * 2 + 1) - CAM_SHAKE_JITTER[slot] + sin(CAM_SHAKE_PHASE[slot] * (CAM_SHAKE_FREQUENCY[slot] / 100.0)) * CUSTOM_LOWEST_YAW[slot]).toInt()
+                            }
+                            val transition = camShakeTransition[slot]
                             if (slot == 0) {
                                 Camera.cameraPositionAbsoluteX += transition shl 2
                             }

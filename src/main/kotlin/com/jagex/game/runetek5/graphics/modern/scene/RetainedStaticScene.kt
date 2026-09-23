@@ -306,6 +306,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         }
                     }
                     var i = 0
+                    var recaptured = false
                     while (i < records.size) {
                         val r = records[i]
                         i++
@@ -343,11 +344,11 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                             continue
                         }
                         if (r.cached.evicted) {
-                            // The shared cache dropped this geometry; recapture the chunk
-                            // now and restart it (the walk still owns nothing here).
+                            if (recaptured) continue
+                            recaptured = true
                             invalidate(chunk)
                             captureChunk(scene, chunk, plane, cx, cy)
-                            i = 0
+                            i--
                             continue
                         }
                         if (r.billboards < 0) r.billboards = if (r.model.billboardCount > 0) 1 else 0

@@ -9,6 +9,7 @@ import com.jagex.game.runetek5.config.rsinterface.InteractiveComponentSprite
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.gameobject.GameObject
+import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
@@ -92,6 +93,10 @@ object HintRenderer {
             val length = (graphNode.endZ.toInt() - graphNode.startZ.toInt() + 1) shl 9
             absX = width / 2 + (graphNode.startX.toInt() shl 9)
             absY = length / 2 + (graphNode.startZ.toInt() shl 9)
+        } else if (graphNode is PathingEntity) {
+            val drawn = graphNode.getProjectionMatrix()
+            absX = drawn.xD.toInt()
+            absY = drawn.zD.toInt()
         } else {
             val abs = graphNode.getAbsolutePosition().coords
             absX = abs.x.toInt()
