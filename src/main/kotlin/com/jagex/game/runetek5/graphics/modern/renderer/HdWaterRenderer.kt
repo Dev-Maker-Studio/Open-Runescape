@@ -1,7 +1,6 @@
 package com.jagex.game.runetek5.graphics.modern.renderer
 
-import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.vardomain.VarProviders
+import com.jagex.game.runetek5.client.PreferenceManager
 import org.joml.Matrix4f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL40.*
@@ -415,16 +414,12 @@ class HdWaterRenderer {
     }
 
     companion object {
-        private const val UPGRADED_SHADERS_VARBIT = 11804
-        private const val UPGRADED_SHADERS_VARP = 1438
         private val FORCED = System.getProperty("render.hdwater")?.lowercase()?.toBooleanStrictOrNull()
         @JvmField val AVAILABLE = FORCED != false
 
         fun selected(): Boolean {
             FORCED?.let { return it }
-            val varbit = TypeLists.VARPBIT?.list(UPGRADED_SHADERS_VARBIT) ?: return false
-            if (varbit.configIndex != UPGRADED_SHADERS_VARP || !VarProviders.playerVarsReady) return false
-            return VarProviders.PLAYER_VAR_PROVIDER.getVarBitValue(UPGRADED_SHADERS_VARBIT) == 1
+            return PreferenceManager.preferences?.water?.waterShaders() == true
         }
         private const val MAX_POINT_LIGHTS = 128
         private val TESSELLATION = System.getProperty("render.hdwater.tessellation")?.equals("false", true) != true

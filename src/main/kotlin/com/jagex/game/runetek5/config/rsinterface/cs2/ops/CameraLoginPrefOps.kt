@@ -122,6 +122,7 @@ import com.jagex.game.runetek5.config.rsinterface.cs2.CS2CallFrame
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Script
 import com.jagex.game.runetek5.config.rsinterface.cs2.ClientScriptOpCode
 import com.jagex.game.runetek5.preference.impl.ToolkitPreference
+import com.jagex.game.runetek5.preference.impl.WaterPreference
 
 object CameraLoginPrefOps {
 
@@ -261,7 +262,7 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun getWaterPreference(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (PreferenceManager.preferences!!.water!!.getValue() == 2) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.water!!.menuLevel()
     }
 
     @JvmStatic
@@ -560,8 +561,12 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun detailWaterDetailHigh(executor: CS2Executor) {
-        PreferenceManager.preferences!!.water!!.setValue(if (executor.intStack[--executor.intStackPtr] == 1) 2 else 0)
-        Resource.mapRegion!!.reload()
+        val water = PreferenceManager.preferences!!.water!!
+        val wasHighDetail = water.highDetail()
+        water.setValue(WaterPreference.fromMenuLevel(executor.intStack[--executor.intStackPtr]))
+        if (water.highDetail() != wasHighDetail) {
+            Resource.mapRegion!!.reload()
+        }
         PreferenceManager.savePreferences()
         Client.preferencesSavedOnServer = false
     }
