@@ -123,6 +123,16 @@ same files, so the two must stay in sync:
   path) and `bugreport` (dialog without a crash); `-Ddarkan.crashDialog=false` skips the dialog.
   The bot sidebar's Settings > About has "Report a bug…".
 
+## Lakan oracle (`src/oracle/kotlin`)
+
+`com.darkan.oracle.DecoderDumpKt` decodes exactly the entries of a Lakan `tests/samples/samples.toml` with this
+client's own decoders and writes one canonical JSON snapshot per sample (format and schema live in the Lakan repo,
+`tests/oracle-schema/`; field names come from its `names/*.toml`). Build with `./gradlew oracleJar`, run with
+`./gradlew oracleDump --args="--cache <dir> --samples <file> --names <dir> --out <dir> [--xtea <json>] [--schema <json>]"`.
+`--kinds` lists the implemented and deferred kinds; `--skeleton <class>` prints a name-table skeleton for a new type.
+Config decoders call `UnknownOpcodes.record(opcode)` in their `else` branch so snapshots list skipped opcodes; keep
+that branch when touching a decoder.
+
 ## Key Features
 
 ### 1. Bot Scripting Framework

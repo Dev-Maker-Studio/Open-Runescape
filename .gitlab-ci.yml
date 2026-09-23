@@ -63,6 +63,18 @@ build:
       dotenv: dist/build.env
     expire_in: 2 weeks
 
+oracle:
+  stage: build
+  image: eclipse-temurin:17-jdk
+  cache:
+    key: gradle-$CI_COMMIT_REF_SLUG
+    paths:
+      - .gradle/caches
+      - .gradle/wrapper
+    policy: pull
+  script:
+    - ./gradlew --no-daemon --build-cache oracleJar
+
 # Rolling "latest dev build": the same package version is re-uploaded on every push to dev,
 # so the URL below is a permalink to whatever last built green.
 publish-dev:

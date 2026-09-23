@@ -15,7 +15,7 @@ import java.io.File
 import kotlin.system.exitProcess
 
 private const val USAGE = """usage: DecoderDump --cache <dir> --samples <samples.toml> --names <dir> --out <dir> [--xtea <xteaKeys.json>] [--schema <snapshot.schema.json>]
-       DecoderDump --skeleton <kind> <class>
+       DecoderDump --skeleton <class>
        DecoderDump --kinds"""
 
 fun main(args: Array<String>) {
@@ -25,10 +25,7 @@ fun main(args: Array<String>) {
             Kinds.all.keys.forEach { println(it) }
             Kinds.deferred.forEach { (kind, why) -> println("$kind deferred: $why") }
         }
-        options.containsKey("skeleton") -> {
-            val (kind, className) = options.getValue("skeleton").split(' ', limit = 2)
-            print(Reflector.skeleton(kind, Class.forName(className)))
-        }
+        options.containsKey("skeleton") -> print(Reflector.skeleton(Class.forName(options.getValue("skeleton"))))
         else -> exitProcess(dump(options))
     }
 }
@@ -39,11 +36,6 @@ private fun parse(args: Array<String>): Map<String, String> {
     while (i < args.size) {
         when (val arg = args[i]) {
             "--kinds" -> out["kinds"] = ""
-            "--skeleton" -> {
-                require(i + 2 < args.size) { USAGE }
-                out["skeleton"] = "${args[i + 1]} ${args[i + 2]}"
-                i += 2
-            }
             else -> {
                 require(arg.startsWith("--") && i + 1 < args.size) { USAGE }
                 out[arg.removePrefix("--")] = args[++i]

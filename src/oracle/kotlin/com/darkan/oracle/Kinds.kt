@@ -31,9 +31,14 @@ import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.js5.Js5Compression
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
+import com.jagex.game.runetek5.scene.CollisionMap
+import com.jagex.game.runetek5.scene.MapLoader
+import com.jagex.game.runetek5.scene.Scene
+import com.jagex.game.runetek5.scene.SettingsBits
 import com.jagex.game.runetek5.scene.environment.EnvironmentManager
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 import com.jagex.game.runetek5.tools.Language
+import sun.misc.Unsafe
 import java.io.File
 import java.util.TreeMap
 
@@ -85,21 +90,19 @@ object Kinds {
         "material" to Kind(::material),
         "defaults" to Kind(::defaults),
         "model" to groupRecord(7) { _, _, bytes -> Mesh(bytes) },
-        "anim" to groupRecord(0) { ctx, group, _ ->
-            SeqTypeList(ctx.provider(20), ctx.provider(0), ctx.provider(1)).listFrameset(group) ?: error("frameset $group did not decode")
-        },
+        "anim" to Kind(::anim),
         "sprite" to Kind(::sprite),
         "font" to groupRecord(13) { _, _, bytes -> FontMetrics(bytes) },
         "texture" to Kind(::texture),
         "component" to Kind(::component),
         "cs2script" to groupRecord(12) { _, _, bytes -> CS2Script.decodeScript(bytes) },
+        "region" to Kind(::region),
     )
 
     val deferred = mapOf(
-        "colortable" to "darkan-bot has no cache-backed colour table decoder; the HSL palette is computed, not decoded",
-        "mapsquare" to "region decode runs only inside darkan-bot's scene builder, which needs a live toolkit and scene graph",
+        "colortable" to "the HSL to RGB colour table is computed at startup (ColorUtil), not decoded from a cache group",
         "multiloc" to "multiloc resolution needs var state from a running client (H-12 world_state), not cache bytes alone",
-        "worldmap" to "the world map decoder needs a loaded WorldMap area set and toolkit sprites",
+        "worldmap" to "WorldMap decodes through global state (MAP_AREA_RESOURCE, the current static element) with no standalone entry point",
     )
 
     private fun expect(sample: Sample, index: Int) =
@@ -220,6 +223,45 @@ object Kinds {
         return Snapshot(sample.kind, sample.group, payload, null, v, emptyList())
     }
 
+    private fun region(sample: Sample, ctx: Context): Snapshot {
+        expect(sample, 5)
+        val input = fileBytes(ctx, 5, sample.group, sample.file ?: 0)
+        val hash = ctx.cache.masterIndex(5).nameHashes?.getOrNull(sample.group) ?: error("idx5 has no names")
+        val region = (0 until 65536).firstOrNull { Js5ResourceProvider.jaghash("m${it ushr 8}_${it and 0xff}") == hash }
+            ?: error("group ${sample.group} is not an m (terrain) group")
+        val flags = SettingsBits(64, 64)
+        val loader = MapLoader(allocate(Scene::class.java), 4, 64, 64, false, FloTypeList(ctx.provider(2)), FluTypeList(ctx.provider(2)), flags)
+        val clipping = Array(4) {
+            CollisionMap().apply {
+                sizeX = 64
+                sizeY = 64
+                collisionFlags = Array(64) { IntArray(64) }
+                reset()
+            }
+        }
+        loader.decodeTilesClient(Packet(input), 0, 0, (region ushr 8) * 64, (region and 0xff) * 64, clipping)
+        fun planes(of: (Int) -> Any) = Canonical.array((0 until 4).map { of(it) })
+        fun flat(rows: Array<ByteArray>) = Canonical.primitiveArray(rows.reduce { a, b -> a + b })!!
+        fun flat(rows: Array<IntArray>) = Canonical.primitiveArray(rows.reduce { a, b -> a + b })!!
+        val v = Canonical.obj(
+            "region" to region.toLong(),
+            "tile_heights" to planes { flat(loader.tileHeights[it]) },
+            "underlay_ids" to planes { flat(loader.underlayIds[it]) },
+            "overlay_ids" to planes { flat(loader.overlayIds[it]) },
+            "overlay_shapes" to planes { flat(loader.overlayPathShapes[it]) },
+            "overlay_rotations" to planes { flat(loader.overlayRotations[it]) },
+            "tile_flags" to planes { flat(flags.tileFunctionMasks[it]) },
+        )
+        return Snapshot(sample.kind, region, input, sample.file, v, emptyList())
+    }
+
+    // decodeTilesClient never reads the scene, whose constructor needs a live toolkit
+    private fun <T> allocate(type: Class<T>): T {
+        val field = Unsafe::class.java.getDeclaredField("theUnsafe")
+        field.isAccessible = true
+        return type.cast((field.get(null) as Unsafe).allocateInstance(type))
+    }
+
     private fun regionKey(ctx: Context, group: Int): IntArray? {
         val hash = ctx.cache.masterIndex(5).nameHashes?.getOrNull(group) ?: return null
         for ((region, key) in ctx.xteaKeys) {
@@ -261,9 +303,9 @@ object Kinds {
 
     private fun defaults(sample: Sample, ctx: Context): Snapshot {
         expect(sample, 28)
-        val file = fileOf(sample)
-        val input = fileBytes(ctx, 28, sample.group, file)
-        val (v, ops) = when (file) {
+        val which = sample.group
+        val input = ctx.provider(28).getFile(which) ?: error("no defaults group $which")
+        val (v, ops) = when (which) {
             1 -> {
                 EnvironmentManager.cubeTextureIds = null
                 val (_, ops) = traced { EnvironmentManager.decodeCubeTextures(input) }
@@ -275,25 +317,46 @@ object Kinds {
                 Canonical.obj("titlescreen_music_archive" to AreaSoundPlayer.titlescreenMusicArchive.toLong()) to ops
             }
             else -> {
-                val kind = when (file) {
+                val table = when (which) {
                     3 -> "defaults-entity"
                     6 -> "defaults-equipment"
                     7 -> "defaults-interaction"
                     8 -> "defaults-cutscene"
-                    else -> error("defaults file $file has no decoder")
+                    else -> error("defaults group $which has no decoder")
                 }
                 val (record, ops) = traced {
-                    when (file) {
+                    when (which) {
                         3 -> EntityDefaults(ctx.provider(28))
                         6 -> EquipmentDefaultsType(ctx.provider(28))
                         7 -> InteractionDefaultsType(ctx.provider(28))
                         else -> CutsceneDefaultsType(ctx.provider(28))
                     }
                 }
-                ctx.reflector(kind).record(record) to ops
+                ctx.reflector(table).record(record) to ops
             }
         }
-        return Snapshot(sample.kind, file, input, file, v, ops)
+        return Snapshot(sample.kind, which, input, sample.file, v, ops)
+    }
+
+    private fun anim(sample: Sample, ctx: Context): Snapshot {
+        expect(sample, 0)
+        val input = fileBytes(ctx, 0, sample.group, sample.file ?: 0)
+        val frameset = SeqTypeList(ctx.provider(20), ctx.provider(0), ctx.provider(1)).listFrameset(sample.group)
+            ?: error("frameset ${sample.group} did not decode")
+        val reflector = ctx.reflector(sample.kind)
+        val bases = TreeMap<String, Any>()
+        val frames = frameset.frames!!.map { frame ->
+            if (frame == null) {
+                JsonNull
+            } else {
+                bases.getOrPut(frame.base.id.toString()) { reflector.fields(frame.base) }
+                reflector.fields(frame).also { it["base"] = frame.base.id.toLong() }
+            }
+        }
+        val v = reflector.record(frameset)
+        v["frames"] = Canonical.array(frames)
+        v["bases"] = bases
+        return Snapshot(sample.kind, sample.group, input, sample.file, v, emptyList())
     }
 
     private fun sprite(sample: Sample, ctx: Context): Snapshot {

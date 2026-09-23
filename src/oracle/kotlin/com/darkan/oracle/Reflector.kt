@@ -50,7 +50,7 @@ class Reflector(private val names: NameTable) {
         return fields(value)
     }
 
-    private fun fields(value: Any): TreeMap<String, Any> {
+    fun fields(value: Any): TreeMap<String, Any> {
         val className = value.javaClass.name
         val table = names.classes[className] ?: error("${names.kind}: no names for class $className")
         val out = TreeMap<String, Any>()
@@ -84,14 +84,15 @@ class Reflector(private val names: NameTable) {
         is Array<*> -> Canonical.array(value.map { encode(it) ?: JsonNull })
         is List<*> -> Canonical.array(value.map { encode(it) ?: JsonNull })
         is Map<*, *> -> keyed(value.entries.map { it.key to it.value })
-        is IterableNodeMap<*> -> keyed(value.nodes.flatMap { chain(it) })
-        is HashTable -> keyed(value.buckets.flatMap { chain(it) })
+        is IterableNodeMap<*> -> keyed(value.nodes.flatMap { chain(it) }.distinctBy { it.first })
+        is HashTable -> keyed(value.buckets.flatMap { chain(it) }.distinctBy { it.first })
         is IntNode -> value.value.toLong()
         is LongNode -> value.bitpacked.toString()
         is ObjectNode -> encode(value.value)
         else -> Canonical.primitiveArray(value) ?: fields(value)
     }
 
+    // a node map keeps duplicate keys; get() returns the first in chain order, so that one is the value
     private fun chain(head: Node<*>): List<Pair<Any?, Any?>> {
         val out = ArrayList<Pair<Any?, Any?>>()
         var node = head.next
@@ -130,7 +131,7 @@ class Reflector(private val names: NameTable) {
             type.name.startsWith("java.") || type.name.startsWith("kotlin.") ||
                 type.name.startsWith("com.jagex.game.runetek5.cache.node.")
 
-        fun skeleton(kind: String, root: Class<*>): String {
+        fun skeleton(root: Class<*>): String {
             val out = StringBuilder()
             out.append("class = \"${root.name}\"\nskip = []\n\n[fields]\n")
             for (field in dataFields(root).sortedBy { it.name }) {
