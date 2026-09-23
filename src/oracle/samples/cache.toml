@@ -57,9 +57,9 @@ why = "obj container"
 [[sample]]
 suite = "CONF-CACHE-CONTAINER"
 kind = "container"
-index = 10
-group = 0
-why = "raw (uncompressed) binary container"
+index = 8
+group = 414
+why = "raw (uncompressed) container"
 
 [[sample]]
 suite = "CONF-CACHE-REFTABLE"
