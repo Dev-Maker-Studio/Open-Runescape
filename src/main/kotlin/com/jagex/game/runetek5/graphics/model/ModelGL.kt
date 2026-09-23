@@ -3818,7 +3818,7 @@ class ModelGL : Model {
                 originZ = z
             }
         } else if (transformationType == 1) {
-            if (verticesData != null) {
+            if (verticesData.isNotEmpty()) {
                 var transformedX = ((z * verticesData[2] + verticesData[1] * y + x * verticesData[0] + 8192) shr 14)
                 var transformedY = ((x * verticesData[3] + z * verticesData[5] + y * verticesData[4] + 8192) shr 14)
                 var transformedZ = ((x * verticesData[6] + verticesData[7] * y + z * verticesData[8] + 8192) shr 14)
@@ -3846,7 +3846,7 @@ class ModelGL : Model {
                 }
             }
         } else if (transformationType == 2) {
-            if (verticesData != null) {
+            if (verticesData.isNotEmpty()) {
                 val parentOriginX = verticesData[9] shl 4
                 val parentOriginY = verticesData[10] shl 4
                 val parentOriginZ = verticesData[11] shl 4
@@ -4037,7 +4037,7 @@ class ModelGL : Model {
                 }
             }
         } else if (transformationType == 3) {
-            if (verticesData != null) {
+            if (verticesData.isNotEmpty()) {
                 val parentOriginX = verticesData[9] shl 4
                 val parentOriginY = verticesData[10] shl 4
                 val parentOriginZ = verticesData[11] shl 4

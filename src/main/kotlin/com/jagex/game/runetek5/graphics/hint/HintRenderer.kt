@@ -130,8 +130,8 @@ object HintRenderer {
                     if (objectNode != null) {
                         val npc = objectNode.value as NpcEntity
                         val abs = npc.getAbsolutePosition().coords
-                        val x = (abs.x / 128 - offsetX / 128).toInt()
-                        val y = (abs.z / 128 - offsetY / 128).toInt()
+                        val x = abs.x.toInt() / 128 - offsetX / 128
+                        val y = abs.z.toInt() / 128 - offsetY / 128
                         draw(component, sprite, clipLeft, clipTop, x, y, arrow.arrowSprite, 360000L)
                     }
                 }
@@ -148,8 +148,8 @@ object HintRenderer {
                     val player = PlayerUpdate.players[arrow.targetIndex]
                     if (player != null) {
                         val abs = player.getAbsolutePosition().coords
-                        val x = (abs.x / 128 - offsetX / 128).toInt()
-                        val y = (abs.z / 128 - offsetY / 128).toInt()
+                        val x = abs.x.toInt() / 128 - offsetX / 128
+                        val y = abs.z.toInt() / 128 - offsetY / 128
                         draw(component, sprite, clipLeft, clipTop, x, y, arrow.arrowSprite, 360000L)
                     }
                 }
@@ -187,8 +187,8 @@ object HintRenderer {
             val dx = (cosAngle * x + y * sinAngle) shr 14
             val dy = (y * cosAngle - sinAngle * x) shr 14
             val hintSprite = StaticMedia.hintMapmarkerSprites!![arrowSprite]
-            val width = hintSprite.getSpriteWidth()
-            val height = hintSprite.getSpriteHeight()
+            val width = hintSprite.getWidth()
+            val height = hintSprite.getHeight()
             val x1 = dx + component.width / 2 - width / 2
             val x2 = width + x1
             val y1 = -dy + component.height / 2 - height

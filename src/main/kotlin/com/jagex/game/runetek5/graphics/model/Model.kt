@@ -649,7 +649,7 @@ abstract class Model {
         omc = 1.0f - cos
         val size = sqrt((p * p + n * n).toFloat())
         if (size == 0.0f && cos == 0.0f) {
-            return rotationMap
+            rotationMap.copyInto(result, 0, 0, 9)
         } else {
             if (size != 0.0f) {
                 x = (-p) / size

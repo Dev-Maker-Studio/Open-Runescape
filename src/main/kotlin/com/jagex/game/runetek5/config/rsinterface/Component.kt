@@ -456,10 +456,10 @@ class Component {
     var filled: Boolean = false
 
     @JvmField
-    var keyTriggeringAction: Array<ByteArray>? = null
+    var keyTriggeringAction: Array<ByteArray?>? = null
 
     @JvmField
-    var keyTriggerParams: Array<ByteArray>? = null
+    var keyTriggerParams: Array<ByteArray?>? = null
 
     @JvmField
     var cycleSteps: IntArray? = null
@@ -1128,8 +1128,8 @@ class Component {
         var keyTriggerData = buffer.readUByte()
         var decodeTempInt: Int
         if (keyTriggerData != 0) {
-            this.keyTriggeringAction = Array(11) { ByteArray(0) }
-            this.keyTriggerParams = Array(11) { ByteArray(0) }
+            this.keyTriggeringAction = arrayOfNulls(11)
+            this.keyTriggerParams = arrayOfNulls(11)
             this.cycleSteps = IntArray(11)
             this.keyCharCodes = IntArray(11)
             while (keyTriggerData != 0) {
