@@ -1416,8 +1416,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                     // [0] 214 [1] 128 [2] 43
                     val srcAlphaModifier = 256 - dstAlphaModifier
                     val faceAlpha = (srcAlphaModifier * alphaSrc + dstAlphaModifier * alphaDst shr 8).toByte()
-                    val faceColor = (((
-                            srcAlphaModifier * (colorSrc and 0xfc00) + dstAlphaModifier * colorDst and 0xfc00) and 0xfc0000) +
+                    val faceColor = (
+                            (srcAlphaModifier * (colorSrc and 0xfc00) + dstAlphaModifier * (colorDst and 0xfc00) and 0xfc0000) +
                             (srcAlphaModifier * (colorSrc and 0x7f) + dstAlphaModifier * (colorDst and 0x7f) and 0x7f00) +
                             (srcAlphaModifier * (colorSrc and 0x380) + dstAlphaModifier * (colorDst and 0x380) and 0x38000) shr 8).toShort()
                     for (face in 0 until totalFaces) {

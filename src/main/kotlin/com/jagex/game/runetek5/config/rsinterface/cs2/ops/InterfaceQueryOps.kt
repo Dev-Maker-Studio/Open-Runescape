@@ -310,11 +310,7 @@ object InterfaceQueryOps {
         val stack: IntArray? = executor.intStack
         val stackIdx = ++executor.intStackPtr - 1
         var parentIdHash: Int = 0
-        if (parentLayer!! == null) {
-            parentIdHash = -1
-        } else {
-            parentIdHash = parentLayer!!.idHash
-        }
+        parentIdHash = parentLayer?.idHash ?: -1
         stack!![stackIdx] = parentIdHash
     }
 

@@ -79,6 +79,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
     private var poseMemoModel: Model? = null
     private var poseMemoKey = 0L
+    private var poseMemoMinY = 0
     private val poseKey = PoseKey()
     /** Key of the pose handed out THIS draw (0 when it was not memoisable); drives the shadow memo. */
     private var currentPoseKey = 0L
@@ -155,6 +156,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         }
         val memo = poseMemoModel
         val model: Model?
+        var minY = poseMemoMinY
         currentPoseKey = if (memoEligible) key else 0L
         if (memoEligible && memo != null && key == poseMemoKey) {
             PoseMemo.poseHits++
@@ -165,6 +167,8 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             if (memoEligible) PoseMemo.poseMisses++ else PoseMemo.poseIneligible++
             model = definitions.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS!!, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences as Array<Sequence?>?, super.equipmentRotations, yawRotation, this.customisation, getCurrentRenderAnimation(), false, privatePool = if (memoEligible) poseCopies else null)
             if (model != null) {
+                minY = model.getMinY()
+                model.getSize3d()
                 rotate(model)
                 if (modelWidth != 0 || modelLength != 0) {
                     if (super.rotateX != 0) {
@@ -185,6 +189,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
                 PoseMemo.carryGeometry(poseMemoModel, model)
                 poseMemoModel = model
                 poseMemoKey = key
+                poseMemoMinY = minY
             } else {
                 poseMemoModel = null
                 poseMemoKey = 0L
@@ -194,8 +199,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         if (model == null) {
             return false
         }
-        super.modelMinY = model.getMinY()
-        model.getSize3d()
+        super.modelMinY = minY
 
         if (hasTint) {
             model.tint(super.hue.toInt(), super.saturation.toInt(), super.lightness.toInt(), super.opacity.toInt() and 0xff)

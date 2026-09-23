@@ -141,7 +141,7 @@ class MapRegion(var asyncMaploading: Boolean) {
     @JvmField var baseCoordinates: CoordGrid = CoordGrid()
     var worldMapType: WorldMapElement? = null
     @JvmField
-    var staticElements: StaticElements = StaticElements(0)
+    var staticElements: StaticElements? = null
     var underwaterMap: SceneGraph? = null
     var surfaceSceneGraph: SceneGraph? = null
     @JvmField
@@ -1038,7 +1038,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             this.baseCoordinates = CoordGrid(0, (this.baseX - (this.sceneSizeX shr 4)) * 8, (this.baseY - (this.sceneSizeY shr 4)) * 8)
             this.worldMapType = WorldMap.getMapDef(this.baseCoordinates!!.x, this.baseCoordinates!!.y)
-            this.staticElements = StaticElements(0)
+            this.staticElements = null
             if (!this.asyncMaploading) {
                 updateEntities(newGamestate)
             }
@@ -1373,7 +1373,7 @@ class MapRegion(var asyncMaploading: Boolean) {
 
 
     fun getStaticElements(): StaticElements {
-        return this.staticElements
+        return this.staticElements ?: NO_STATIC_ELEMENTS
     }
 
     fun locLoadingPercent(): Int {
@@ -1451,6 +1451,8 @@ class MapRegion(var asyncMaploading: Boolean) {
     }
 
     companion object {
+        private val NO_STATIC_ELEMENTS = StaticElements(0)
+
         /**
          * The color behind the scene / the default background pixel color
          */

@@ -1239,9 +1239,9 @@ object CS2SharedOps {
         executor.intStackPtr -= 2
         val targetOpSlot = 10
         @Suppress("UNCHECKED_CAST")
-        val keyCodes: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr]] as ByteArray?
+        val keyCodes: ByteArray? = byteArrayOf(executor.intStack[executor.intStackPtr].toByte())
         @Suppress("UNCHECKED_CAST")
-        val keyModifiers: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr + 1]] as ByteArray?
+        val keyModifiers: ByteArray? = byteArrayOf(executor.intStack[executor.intStackPtr + 1].toByte())
         setTriggerKey(component!!, targetOpSlot, keyCodes, keyModifiers)
     }
 

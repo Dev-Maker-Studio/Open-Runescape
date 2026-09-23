@@ -299,7 +299,7 @@ object ComponentQueryOps {
         val icomponentdefinitions3: Component? = target!!.comp
         val parentInterface: Interface? = target!!.inter
         val icomponentdefinitions5: Component? = Interface.getSub(parentInterface!!, icomponentdefinitions3!!)
-        executor.intStack[++executor.intStackPtr - 1] = if (icomponentdefinitions5!! == null) -1 else icomponentdefinitions5!!.idHash
+        executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions5?.idHash ?: -1
     }
 
     @JvmStatic

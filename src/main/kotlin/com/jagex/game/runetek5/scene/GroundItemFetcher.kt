@@ -21,7 +21,7 @@ class GroundItemFetcher(
                 var node = wrapper.groundItems.getFirst() as GroundItemNode?
                 while (node != null) {
                     if (node.id == this.groundItemId) {
-                        return Resource.mapRegion!!.getScene()!!.getGroundItem(this.itemPosition.plane, sceneX, sceneY) as GroundItem
+                        return Resource.mapRegion!!.getScene()?.getGroundItem(this.itemPosition.plane, sceneX, sceneY) as? GroundItem
                     }
                     node = wrapper.groundItems.next() as GroundItemNode?
                 }

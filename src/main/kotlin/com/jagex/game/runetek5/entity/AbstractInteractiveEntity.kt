@@ -96,7 +96,7 @@ abstract class AbstractInteractiveEntity(
             var planeIndex = 0
             while (planeIndex < lightCount) {
                 var foundInAdjacent = false
-                var lightUid = scene!!.tileLightUids!![planeIndex][startX_adj][startY_adj]
+                var lightUid = scene!!.tileLightUids!![plane.toInt()][startX_adj][startY_adj]
                 while (lightUid != 0L) {
                     val positionedLight = scene!!.lightSlotOccupant!![ ((lightUid and 0xffffL) - 1L).toInt()]
                     if (cycledLightNodes[planeIndex]!! == positionedLight!!.pointLight) {
@@ -107,7 +107,7 @@ abstract class AbstractInteractiveEntity(
                 }
 
                 if (!foundInAdjacent) {
-                    lightUid = scene!!.tileLightUids!![planeIndex][endX_adj][endY_adj]
+                    lightUid = scene!!.tileLightUids!![plane.toInt()][endX_adj][endY_adj]
                     while (lightUid != 0L) {
                         val positionedLight = scene!!.lightSlotOccupant!![ ((lightUid and 0xffffL) - 1L).toInt()]
                         if (cycledLightNodes[planeIndex]!! == positionedLight!!.pointLight) {
@@ -118,13 +118,12 @@ abstract class AbstractInteractiveEntity(
                     }
                 }
 
-                if (foundInAdjacent) {
-                    planeIndex++
-                } else {
+                if (!foundInAdjacent) {
                     for (i in planeIndex until lightCount - 1)
                         cycledLightNodes[i] = cycledLightNodes[i + 1]
                     lightCount--
                 }
+                planeIndex++
             }
         }
 
