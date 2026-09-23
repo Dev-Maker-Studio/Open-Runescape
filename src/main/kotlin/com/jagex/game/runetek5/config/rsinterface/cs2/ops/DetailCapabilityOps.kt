@@ -98,6 +98,7 @@ import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.network.packet.TcpPacket
 import com.jagex.game.runetek5.network.world.WorldMeta
 import com.jagex.game.runetek5.network.world.WorldDescriptor
+import com.jagex.game.runetek5.preference.impl.WaterPreference
 import com.jagex.game.runetek5.rendering.MessageBox
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.*
@@ -430,7 +431,7 @@ object DetailCapabilityOps {
     @JvmStatic
     fun detailCanSetWaterDetail(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.water!!.canModify(value)
+        executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences!!.water!!.canModify(WaterPreference.fromMenuLevel(value))
     }
 
     @JvmStatic

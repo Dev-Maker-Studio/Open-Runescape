@@ -898,6 +898,8 @@ class InstancedModelBatcher {
     // State
     private var isInitialized = false
     private var isFrameActive = false
+    private var uClipPlaneLocation = -1
+    private var reflectionCommands = 0
 
     // Statistics (per presented frame; reset via resetFrameStats)
     private var instancedDrawCalls = 0
@@ -945,6 +947,7 @@ class InstancedModelBatcher {
         uTextureTimeLocation = shader!!.getUniformLocation("uTextureTime")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
+        uClipPlaneLocation = shader!!.getUniformLocation("uClipPlane")
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
         uPointLightCountLocation = shader!!.getUniformLocation("uPointLightCount")
         uPointLightPosLocation = shader!!.getArrayUniformLocation("uPointLightPos")
@@ -1070,6 +1073,7 @@ class InstancedModelBatcher {
             layout(location = 9) in vec4 aLightIdx;
 
             uniform mat4 uViewProjection;
+            uniform vec4 uClipPlane;
 
             // Lighting uniforms
             uniform vec3 uSunDirection;
@@ -1110,6 +1114,7 @@ class InstancedModelBatcher {
 
                 vec4 worldPos = modelMat * vec4(aPosition, 1.0);
                 gl_Position = uViewProjection * worldPos;
+                gl_ClipDistance[0] = dot(worldPos, uClipPlane);
 
                 vTexCoord = aTexCoord;
 
@@ -1325,6 +1330,33 @@ class InstancedModelBatcher {
     /**
      * Begins a new frame.
      */
+    fun drawReflection(mirroredViewProjection: FloatArray, clipPlane: FloatArray) {
+        if (!bindless || reflectionCommands == 0) return
+        val sh = shader ?: return
+        val vp = vpMatrix ?: return
+        sh.bind()
+        GLWrapper.enable(GLWrapper.Constants.DEPTH_TEST)
+        GLWrapper.depthFunc(GLWrapper.Constants.LEQUAL)
+        if (CULL_FACE) {
+            GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+            GLWrapper.cullFace(CULL_MODE)
+            GLWrapper.frontFace(if (CULL_WIND == 0x0900) 0x0901 else 0x0900)
+        }
+        glUniformMatrix4fv(uViewProjectionLocation, false, mirroredViewProjection)
+        glUniform4f(uClipPlaneLocation, clipPlane[0], clipPlane[1], clipPlane[2], clipPlane[3])
+        vao!!.bind()
+        ibo!!.bind()
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectVbo)
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, drawMatVbo)
+        sh.setUniform(uDrawBaseLocation, 0)
+        glMultiDrawElementsIndirect(TRIANGLES, UNSIGNED_INT, 0L, reflectionCommands, 0)
+        vao!!.unbind()
+        glUniformMatrix4fv(uViewProjectionLocation, false, vp)
+        glUniform4f(uClipPlaneLocation, 0f, 0f, 0f, 0f)
+        GLWrapper.frontFace(CULL_WIND)
+        sh.unbind()
+    }
+
     fun beginFrame() {
         check(isInitialized) { "InstancedModelBatcher not initialized" }
         check(!isFrameActive) { "Frame already active" }
@@ -1333,6 +1365,7 @@ class InstancedModelBatcher {
         // and only for the entries that actually collected instances.
         for (i in activeEntries.indices) activeEntries[i].resetInstances()
         activeEntries.clear()
+        reflectionCommands = 0
         blockDraws.clear()
         instancesThisBatch = 0
         for (i in 0 until translucentCount) translucentEntries[i] = null
@@ -2319,6 +2352,7 @@ class InstancedModelBatcher {
                 glMultiDrawElementsIndirect(TRIANGLES, UNSIGNED_INT, 0L, indirectCommandCount, 0)
                 instancedDrawCalls++
             }
+            reflectionCommands = indirectCommandCount
             timeDraw += System.nanoTime() - t2
             vao!!.unbind()
             sh.unbind()

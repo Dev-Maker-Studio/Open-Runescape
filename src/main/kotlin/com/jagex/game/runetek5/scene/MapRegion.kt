@@ -615,7 +615,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             StaticMethods.resetAllVorbisStreams() // not in 910
         }
         var hasUnderwaterMap = false
-        if (PreferenceManager.preferences!!.water!!.getValue() == 2) {
+        if (PreferenceManager.preferences!!.water!!.highDetail()) {
             for (map in this.surfaceMapBuffer.indices) {
                 if (this.underwaterLocBuffer[map] != null || this.underwaterMapBuffer[map] != null) {
                     hasUnderwaterMap = true
@@ -652,7 +652,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         this.surfaceSceneGraph = SceneGraph(this.scene!!, this.loctypeList!!, 4, this.sceneSizeX, this.sceneSizeY, false, this.tileSettingsBits!!, this.environmentManager!!)
         this.surfaceSceneGraph!!.enableLdShadows()
         this.surfaceSceneGraph!!.hdShadows = PreferenceManager.preferences!!.sceneryShadows!!.getValue()
-        this.surfaceSceneGraph!!.hdWater = PreferenceManager.preferences!!.water!!.getValue() == 2
+        this.surfaceSceneGraph!!.hdWater = PreferenceManager.preferences!!.water!!.highDetail()
         this.surfaceSceneGraph!!.hdLight = PreferenceManager.preferences!!.lightDetail!!.getValue() == 1
         this.surfaceSceneGraph!!.blendFloor = PreferenceManager.preferences!!.goundBlending!!.getValue() == 1
         this.surfaceSceneGraph!!.enableTextures = PreferenceManager.preferences!!.textures!!.getValue() == 1
@@ -668,7 +668,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.underwaterMap = SceneGraph(this.scene!!, this.loctypeList!!, 1, this.sceneSizeX, this.sceneSizeY, true, this.tileSettingsBits!!, this.environmentManager!!)
             this.underwaterMap!!.enableLdShadows()
             this.underwaterMap!!.hdShadows = PreferenceManager.preferences!!.sceneryShadows!!.getValue()
-            this.underwaterMap!!.hdWater = PreferenceManager.preferences!!.water!!.getValue() == 2
+            this.underwaterMap!!.hdWater = PreferenceManager.preferences!!.water!!.highDetail()
             this.underwaterMap!!.hdLight = PreferenceManager.preferences!!.lightDetail!!.getValue() == 1
             this.underwaterMap!!.blendFloor = PreferenceManager.preferences!!.goundBlending!!.getValue() == 1
             this.underwaterMap!!.enableTextures = PreferenceManager.preferences!!.textures!!.getValue() == 1

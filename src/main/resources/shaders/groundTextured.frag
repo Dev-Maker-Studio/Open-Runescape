@@ -7,12 +7,19 @@ in float vFogFactor;
 in vec2 vWorldXZ;
 in vec3 vWaterNoiseCoord;
 in float vWaterMix;
+in float vWorldY;
 in vec3 vPointLight;
 
 uniform int uWaterMode;
 uniform sampler3D uWaterNoise;
 uniform bool uHasWaterNoise;
 uniform vec3 uWaterColour;
+uniform vec4 uStillFog;
+uniform bool uDepthFog;
+uniform sampler2D uSceneDepth;
+uniform mat4 uInvViewProjection;
+uniform vec4 uViewport;
+uniform vec2 uFramebufferSize;
 
 // Native ground shadow overlay. One R8 texel per shadow cell over the whole ground,
 // holding what legacy's ShadowTileGL.regenerateTexture puts in its per-chunk alpha
@@ -81,6 +88,16 @@ void main() {
     if (uWaterMode == 4) {
         vec4 n = uHasWaterNoise ? texture(uWaterNoise, vWaterNoiseCoord) : vec4(0.0, 0.0, 0.0, 1.0);
         color = vec4(clamp((vColor.rgb + n.rgb) * 2.0, 0.0, 1.0), clamp(vColor.a * n.a + vWaterMix, 0.0, 1.0));
+        if (uDepthFog) {
+            float sceneDepth = texture(uSceneDepth, gl_FragCoord.xy / uFramebufferSize).r;
+            vec2 ndc = (gl_FragCoord.xy - uViewport.xy) / uViewport.zw * 2.0 - 1.0;
+            vec4 below = uInvViewProjection * vec4(ndc, sceneDepth * 2.0 - 1.0, 1.0);
+            float submerged = max(below.y / below.w - vWorldY, 0.0);
+            float cover = clamp(submerged * uStillFog.z + uStillFog.w, 0.0, 1.0);
+            float alpha = color.a + (1.0 - color.a) * cover;
+            color.rgb = (color.rgb * color.a + uWaterColour * (1.0 - color.a) * cover) / max(alpha, 0.0001);
+            color.a = alpha;
+        }
     } else if (uWaterMode == 2) {
         if (uHasWaterNoise) color.rgb = clamp(color.rgb + texture(uWaterNoise, vWaterNoiseCoord).rgb, 0.0, 1.0);
         color.a = 1.0;
