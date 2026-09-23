@@ -2,7 +2,6 @@ package com.jagex.game.runetek5.config.inputsubscriber
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.DefaultsFile
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
 class CutsceneDefaultsType(defaultsResource: Js5ResourceProvider) {
@@ -21,8 +20,6 @@ class CutsceneDefaultsType(defaultsResource: Js5ResourceProvider) {
             }
             if (opcode == 1) {
                 exitCutscene = InputSubscriber.decode(buffer)
-            } else {
-                UnknownOpcodes.record(opcode)
             }
         }
     }

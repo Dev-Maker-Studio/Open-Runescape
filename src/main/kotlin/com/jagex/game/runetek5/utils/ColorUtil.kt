@@ -73,150 +73,138 @@ object ColorUtil {
     @JvmStatic
     fun calculateHsvToRgbTable() {
         if (hsvToRgbTable == null) {
-            hsvToRgbTable = hsvTable(0.7 + (Math.random() * 0.03 - 0.015))
-        }
-    }
-
-    @JvmStatic
-    fun hsvTable(gammaCorrection: Double): IntArray {
-        val table = IntArray(65536)
-        var tableIndex = 0
-        for (hueSatIndex in 0 until 512) {
-            val hueAngle = 360.0f * ((hueSatIndex shr 3) / 64.0f + 0.0078125f)
-            val saturation = (hueSatIndex and 0x7) / 8.0f + 0.0625f
-            for (valueIndex in 0 until 128) {
-                val value = valueIndex / 128.0f
-                var red = 0.0f
-                var green = 0.0f
-                var blue = 0.0f
-                val hueSegment = hueAngle / 60.0f
-                val hueSegmentInt = hueSegment.toInt()
-                val hueRegion = hueSegmentInt % 6
-                val fractionalHue = hueSegment - hueSegmentInt
-                val minComponent = value * (1.0f - saturation)
-                val fallingComponent = value * (1.0f - saturation * fractionalHue)
-                val risingComponent = (1.0f - saturation * (1.0f - fractionalHue)) * value
-                when (hueRegion) {
-                    0 -> {
-                        red = value
-                        green = risingComponent
-                        blue = minComponent
+            hsvToRgbTable = IntArray(65536)
+            val gammaCorrection = 0.7 + (Math.random() * 0.03 - 0.015)
+            var tableIndex = 0
+            for (hueSatIndex in 0 until 512) {
+                val hueAngle = 360.0f * ((hueSatIndex shr 3) / 64.0f + 0.0078125f)
+                val saturation = (hueSatIndex and 0x7) / 8.0f + 0.0625f
+                for (valueIndex in 0 until 128) {
+                    val value = valueIndex / 128.0f
+                    var red = 0.0f
+                    var green = 0.0f
+                    var blue = 0.0f
+                    val hueSegment = hueAngle / 60.0f
+                    val hueSegmentInt = hueSegment.toInt()
+                    val hueRegion = hueSegmentInt % 6
+                    val fractionalHue = hueSegment - hueSegmentInt
+                    val minComponent = value * (1.0f - saturation)
+                    val fallingComponent = value * (1.0f - saturation * fractionalHue)
+                    val risingComponent = (1.0f - saturation * (1.0f - fractionalHue)) * value
+                    when (hueRegion) {
+                        0 -> {
+                            red = value
+                            green = risingComponent
+                            blue = minComponent
+                        }
+                        1 -> {
+                            red = fallingComponent
+                            green = value
+                            blue = minComponent
+                        }
+                        2 -> {
+                            red = minComponent
+                            green = value
+                            blue = risingComponent
+                        }
+                        3 -> {
+                            red = minComponent
+                            green = fallingComponent
+                            blue = value
+                        }
+                        4 -> {
+                            red = risingComponent
+                            green = minComponent
+                            blue = value
+                        }
+                        5 -> {
+                            red = value
+                            green = minComponent
+                            blue = fallingComponent
+                        }
                     }
-                    1 -> {
-                        red = fallingComponent
-                        green = value
-                        blue = minComponent
-                    }
-                    2 -> {
-                        red = minComponent
-                        green = value
-                        blue = risingComponent
-                    }
-                    3 -> {
-                        red = minComponent
-                        green = fallingComponent
-                        blue = value
-                    }
-                    4 -> {
-                        red = risingComponent
-                        green = minComponent
-                        blue = value
-                    }
-                    5 -> {
-                        red = value
-                        green = minComponent
-                        blue = fallingComponent
-                    }
+                    red = red.toDouble().pow(gammaCorrection).toFloat()
+                    green = green.toDouble().pow(gammaCorrection).toFloat()
+                    blue = blue.toDouble().pow(gammaCorrection).toFloat()
+                    val redInt = (red * 256.0f).toInt()
+                    val greenInt = (256.0f * green).toInt()
+                    val blueInt = (256.0f * blue).toInt()
+                    val rgb = blueInt + (greenInt shl 8) + (redInt shl 16) + 0xffffff.inv()
+                    hsvToRgbTable!![tableIndex++] = rgb
                 }
-                red = red.toDouble().pow(gammaCorrection).toFloat()
-                green = green.toDouble().pow(gammaCorrection).toFloat()
-                blue = blue.toDouble().pow(gammaCorrection).toFloat()
-                val redInt = (red * 256.0f).toInt()
-                val greenInt = (256.0f * green).toInt()
-                val blueInt = (256.0f * blue).toInt()
-                val rgb = blueInt + (greenInt shl 8) + (redInt shl 16) + 0xffffff.inv()
-                table[tableIndex++] = rgb
             }
         }
-        return table
     }
 
     @JvmStatic
     fun calculateHslToRgbTable() {
         if (hslToRgb == null) {
-            val (bgr, rgb) = hslTables(0.7 + (Math.random() * 0.03 - 0.015))
-            hslToRgb = bgr
-            unsignedHslToRgb = rgb
-        }
-    }
-
-    @JvmStatic
-    fun hslTables(gammaCorrection: Double): Pair<IntArray, IntArray> {
-        val bgrTable = IntArray(65536)
-        val rgbTable = IntArray(65536)
-        for (hslIndex in 0 until 65536) {
-            val hue = (hslIndex shr 10 and 0x3f) / 64.0 + 0.0078125
-            val saturation = 0.0625 + (hslIndex shr 7 and 0x7) / 8.0
-            val lightness = (hslIndex and 0x7f) / 128.0
-            var red = lightness
-            var green = lightness
-            var blue = lightness
-            if (saturation != 0.0) {
-                val chroma: Double
-                if (lightness < 0.5) {
-                    chroma = lightness * (saturation + 1.0)
-                } else {
-                    chroma = saturation + lightness - lightness * saturation
+            hslToRgb = IntArray(65536)
+            unsignedHslToRgb = IntArray(65536)
+            val gammaCorrection = 0.7 + (Math.random() * 0.03 - 0.015)
+            for (hslIndex in 0 until 65536) {
+                val hue = (hslIndex shr 10 and 0x3f) / 64.0 + 0.0078125
+                val saturation = 0.0625 + (hslIndex shr 7 and 0x7) / 8.0
+                val lightness = (hslIndex and 0x7f) / 128.0
+                var red = lightness
+                var green = lightness
+                var blue = lightness
+                if (saturation != 0.0) {
+                    val chroma: Double
+                    if (lightness < 0.5) {
+                        chroma = lightness * (saturation + 1.0)
+                    } else {
+                        chroma = saturation + lightness - lightness * saturation
+                    }
+                    val minComponent = lightness * 2.0 - chroma
+                    var hueRed = 0.3333333333333333 + hue
+                    if (hueRed > 1.0) {
+                        --hueRed
+                    }
+                    var hueBlue = hue - 0.3333333333333333
+                    if (hueBlue < 0.0) {
+                        ++hueBlue
+                    }
+                    if (hueRed * 6.0 < 1.0) {
+                        red = minComponent + (chroma - minComponent) * 6.0 * hueRed
+                    } else if (2.0 * hueRed < 1.0) {
+                        red = chroma
+                    } else if (3.0 * hueRed < 2.0) {
+                        red = minComponent + 6.0 * (0.6666666666666666 - hueRed) * (chroma - minComponent)
+                    } else {
+                        red = minComponent
+                    }
+                    if (6.0 * hue < 1.0) {
+                        green = minComponent + 6.0 * (chroma - minComponent) * hue
+                    } else if (hue * 2.0 < 1.0) {
+                        green = chroma
+                    } else if (3.0 * hue < 2.0) {
+                        green = 6.0 * (0.6666666666666666 - hue) * (chroma - minComponent) + minComponent
+                    } else {
+                        green = minComponent
+                    }
+                    if (hueBlue * 6.0 < 1.0) {
+                        blue = hueBlue * 6.0 * (chroma - minComponent) + minComponent
+                    } else if (hueBlue * 2.0 < 1.0) {
+                        blue = chroma
+                    } else if (hueBlue * 3.0 < 2.0) {
+                        blue = 6.0 * (0.6666666666666666 - hueBlue) * (chroma - minComponent) + minComponent
+                    } else {
+                        blue = minComponent
+                    }
                 }
-                val minComponent = lightness * 2.0 - chroma
-                var hueRed = 0.3333333333333333 + hue
-                if (hueRed > 1.0) {
-                    --hueRed
-                }
-                var hueBlue = hue - 0.3333333333333333
-                if (hueBlue < 0.0) {
-                    ++hueBlue
-                }
-                if (hueRed * 6.0 < 1.0) {
-                    red = minComponent + (chroma - minComponent) * 6.0 * hueRed
-                } else if (2.0 * hueRed < 1.0) {
-                    red = chroma
-                } else if (3.0 * hueRed < 2.0) {
-                    red = minComponent + 6.0 * (0.6666666666666666 - hueRed) * (chroma - minComponent)
-                } else {
-                    red = minComponent
-                }
-                if (6.0 * hue < 1.0) {
-                    green = minComponent + 6.0 * (chroma - minComponent) * hue
-                } else if (hue * 2.0 < 1.0) {
-                    green = chroma
-                } else if (3.0 * hue < 2.0) {
-                    green = 6.0 * (0.6666666666666666 - hue) * (chroma - minComponent) + minComponent
-                } else {
-                    green = minComponent
-                }
-                if (hueBlue * 6.0 < 1.0) {
-                    blue = hueBlue * 6.0 * (chroma - minComponent) + minComponent
-                } else if (hueBlue * 2.0 < 1.0) {
-                    blue = chroma
-                } else if (hueBlue * 3.0 < 2.0) {
-                    blue = 6.0 * (0.6666666666666666 - hueBlue) * (chroma - minComponent) + minComponent
-                } else {
-                    blue = minComponent
-                }
+                red = red.pow(gammaCorrection)
+                green = green.pow(gammaCorrection)
+                blue = blue.pow(gammaCorrection)
+                val redInt = (red * 256.0).toInt()
+                val greenInt = (green * 256.0).toInt()
+                val blueInt = (256.0 * blue).toInt()
+                val rgbBgr = blueInt + (greenInt shl 8) + (redInt shl 16)
+                hslToRgb!![hslIndex] = rgbBgr and 0xffffff
+                val rgbNormal = redInt + (greenInt shl 8) + (blueInt shl 16)
+                unsignedHslToRgb!![hslIndex] = rgbNormal
             }
-            red = red.pow(gammaCorrection)
-            green = green.pow(gammaCorrection)
-            blue = blue.pow(gammaCorrection)
-            val redInt = (red * 256.0).toInt()
-            val greenInt = (green * 256.0).toInt()
-            val blueInt = (256.0 * blue).toInt()
-            val rgbBgr = blueInt + (greenInt shl 8) + (redInt shl 16)
-            bgrTable[hslIndex] = rgbBgr and 0xffffff
-            val rgbNormal = redInt + (greenInt shl 8) + (blueInt shl 16)
-            rgbTable[hslIndex] = rgbNormal
         }
-        return bgrTable to rgbTable
     }
 
     @JvmStatic

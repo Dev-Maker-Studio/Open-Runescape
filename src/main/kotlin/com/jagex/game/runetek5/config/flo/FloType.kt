@@ -1,7 +1,6 @@
 package com.jagex.game.runetek5.config.flo
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.utils.ColorUtil
 
 /**
@@ -70,7 +69,6 @@ class FloType {
             20 -> opcode20 = stream.readUShort() // water scale?
             21 -> unusedOpcode21 = stream.readUByte()
             22 -> unusedOpcode22 = stream.readUShort()
-            else -> UnknownOpcodes.record(opcode)
         }
     }
 

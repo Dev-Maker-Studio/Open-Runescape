@@ -2,7 +2,6 @@ package com.jagex.game.runetek5.config.defaults
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.DefaultsFile
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
 class EquipmentDefaultsType(defaultsResource: Js5ResourceProvider) {
@@ -49,7 +48,6 @@ class EquipmentDefaultsType(defaultsResource: Js5ResourceProvider) {
                         this.hiddenAnimationWeaponSlots!![i] = buffer.readUByte()
                     }
                 }
-                else -> UnknownOpcodes.record(opcode)
             }
         }
     }

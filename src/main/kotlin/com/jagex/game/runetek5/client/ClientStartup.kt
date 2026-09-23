@@ -11,7 +11,6 @@ import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.DefaultsFile
 import com.jagex.game.runetek5.config.IndexReference
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.config.bas.BasTypeList
 import com.jagex.game.runetek5.config.clanvar.ClanVarTypeList
 import com.jagex.game.runetek5.config.clanvarsettings.ClanVarSettingsTypeList
@@ -578,8 +577,6 @@ object ClientStartup {
                 if (AreaSoundPlayer.titlescreenMusicArchive == -1) {
                     AreaSoundPlayer.titlescreenMusicArchive = titlescreenMusicArchive
                 }
-            } else {
-                UnknownOpcodes.record(opcode)
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.jagex.game.runetek5.config.enumtype
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.utils.Utils
 import java.io.Serializable
 import java.util.*
@@ -87,7 +86,6 @@ class EnumType {
                     }
                 }
             }
-            else -> UnknownOpcodes.record(opcode)
         }
     }
 

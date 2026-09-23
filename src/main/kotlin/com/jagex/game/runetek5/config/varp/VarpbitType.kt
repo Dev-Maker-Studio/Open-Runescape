@@ -1,7 +1,6 @@
 package com.jagex.game.runetek5.config.varp
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.config.UnknownOpcodes
 
 class VarpbitType {
 
@@ -29,8 +28,6 @@ class VarpbitType {
             configIndex = buffer.readUShort()
             startBit = buffer.readUByte()
             endBit = buffer.readUByte()
-        } else {
-            UnknownOpcodes.record(opcode)
         }
     }
 }

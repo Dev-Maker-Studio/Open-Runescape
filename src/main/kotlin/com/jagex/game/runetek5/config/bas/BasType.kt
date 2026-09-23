@@ -3,7 +3,6 @@ package com.jagex.game.runetek5.config.bas
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Node
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.utils.MathUtils
 
@@ -204,7 +203,6 @@ class BasType {
                     this.projectionOffset!![slot]!![direction] = buffer.readShort()
                 }
             }
-            else -> UnknownOpcodes.record(opcode)
         }
     }
 

@@ -7,7 +7,6 @@ import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.Game
 import com.jagex.game.runetek5.config.Identifiable
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.config.bas.BasType
 import com.jagex.game.runetek5.config.bas.BasTypeList
 import com.jagex.game.runetek5.config.sequence.MovementType
@@ -893,8 +892,6 @@ open class NPCType {
                 }
                 this.parameters!!.put(parameter, key.toLong())
             }
-        } else {
-            UnknownOpcodes.record(opcode)
         }
     }
 

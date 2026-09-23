@@ -6,7 +6,6 @@ import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
-import com.jagex.game.runetek5.config.UnknownOpcodes
 import com.jagex.game.runetek5.utils.MathUtils
 
 /**
@@ -40,8 +39,6 @@ class StructType : CacheableNode() {
                 }
                 nodeMap!!.put(node, key.toLong())
             }
-        } else {
-            UnknownOpcodes.record(opcode)
         }
     }
 

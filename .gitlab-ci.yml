@@ -63,23 +63,6 @@ build:
       dotenv: dist/build.env
     expire_in: 2 weeks
 
-oracle:
-  stage: build
-  image: eclipse-temurin:17-jdk
-  cache:
-    key: gradle-$CI_COMMIT_REF_SLUG
-    paths:
-      - .gradle/caches
-      - .gradle/wrapper
-    policy: pull
-  variables:
-    LAKAN_SCHEMA_REF: 776679865e4d7eae359dfa12239e4b96a486b915
-  script:
-    - ./gradlew --no-daemon --build-cache oracleJar
-    - mkdir -p build/lakan-schema
-    - curl -sSf "https://gitlab.com/api/v4/projects/darkanrs%2Flakan/repository/archive.tar.gz?sha=$LAKAN_SCHEMA_REF&path=tests/oracle-schema" | tar xz --strip-components=1 -C build/lakan-schema
-    - sh src/oracle/verify.sh src/oracle/samples/computed.toml build/lakan-schema/tests/oracle-schema
-
 # Rolling "latest dev build": the same package version is re-uploaded on every push to dev,
 # so the URL below is a permalink to whatever last built green.
 publish-dev:
