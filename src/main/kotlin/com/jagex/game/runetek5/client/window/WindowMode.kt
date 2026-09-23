@@ -23,15 +23,7 @@ class WindowMode @Throws(Exception::class) constructor() {
         val environment = GraphicsEnvironment.getLocalGraphicsEnvironment()
         graphicsDevice = environment.defaultScreenDevice
         if (!graphicsDevice.isFullScreenSupported) {
-            val devices = environment.screenDevices
-            for (deviceIndex in devices.indices) {
-                val activeDevice = devices[deviceIndex]
-                if (activeDevice != null && activeDevice.isFullScreenSupported) {
-                    graphicsDevice = activeDevice
-                    break
-                }
-            }
-            throw Exception()
+            graphicsDevice = environment.screenDevices.firstOrNull { it != null && it.isFullScreenSupported } ?: throw Exception()
         }
     }
 
@@ -62,7 +54,7 @@ class WindowMode @Throws(Exception::class) constructor() {
         for (modeIndex in allDisplayModes.indices) {
             if (allDisplayModes[modeIndex].width == displayWidth && allDisplayModes[modeIndex].height == displayHeight && allDisplayModes[modeIndex].bitDepth == currentBitDepth) {
                 val displayModeRefreshRate = allDisplayModes[modeIndex].refreshRate
-                if (!replaceRefreshRate || Math.abs(displayModeRefreshRate - refreshRate) < Math.abs(-refreshRate)) {
+                if (!replaceRefreshRate || Math.abs(displayModeRefreshRate - refreshRate) < Math.abs(newRefreshRate - refreshRate)) {
                     newRefreshRate = displayModeRefreshRate
                     replaceRefreshRate = true
                 }
@@ -182,7 +174,7 @@ class WindowMode @Throws(Exception::class) constructor() {
                 val totalDetails = DisplayModeDetails.forWindowMode(windowMode)
                 var found = false
                 for (index in totalDetails.indices) {
-                    if (totalDetails[index].width == displayWidth && displayHeight == totalDetails[index].height && (!found || totalDetails[index].bitDepth > 0)) {
+                    if (totalDetails[index].width == displayWidth && displayHeight == totalDetails[index].height && (!found || totalDetails[index].bitDepth > bitDepthLocal)) {
                         bitDepthLocal = totalDetails[index].bitDepth
                         found = true
                     }

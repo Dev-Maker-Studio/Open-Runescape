@@ -43,8 +43,8 @@ open class AudioBufferStream(
             var outVar = outputIndex
             var leftVol = leftVolume * 128
             var rightVol = rightVolume * 128
-            sampleLimit = outVar + (endPosition + 256 - posVar + step) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition + 256 - posVar + step) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -62,8 +62,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = (outVar shr 1) + (endPosition - posVar + step) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else (outVar shr 1) + (endPosition - posVar + step) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -166,8 +166,8 @@ open class AudioBufferStream(
             var scaledVolume = volume * 128
             var posVar = position
             var outVar = outputIndex
-            sampleLimit = outVar + (step + (endPosition + 256 - posVar)) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (step + (endPosition + 256 - posVar)) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -180,8 +180,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = outVar + (step + (endPosition - posVar)) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (step + (endPosition - posVar)) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -219,8 +219,8 @@ open class AudioBufferStream(
             var posVar = position
             stream.leftChannelVolume -= stream.leftVolumeFadeDelta * outVar
             stream.rightChannelVolume -= stream.rightVolumeFadeDelta * outVar
-            sampleLimit = outVar + (endPosition - posVar + step - 257) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition - posVar + step - 257) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -234,8 +234,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = outVar + (endPosition - posVar + step - 1) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition - posVar + step - 1) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -514,8 +514,6 @@ open class AudioBufferStream(
                 mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos++] * scaledVolume).toInt()
                 bufIdx = outVar++
                 mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos++] * scaledVolume).toInt()
-                bufIdx = outVar++
-                mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos++] * scaledVolume).toInt()
             }
 
             sampleLimit += 3
@@ -554,8 +552,8 @@ open class AudioBufferStream(
             var outVar = outputIndex
             var posVar = position
             stream.currentVolume -= outVar * stream.volumeFadeDelta
-            sampleLimit = outVar + (endPosition - posVar + step - 257) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition - posVar + step - 257) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -575,8 +573,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = (outVar shr 1) + (endPosition - posVar + step - 1) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else (outVar shr 1) + (endPosition - posVar + step - 1) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -624,8 +622,8 @@ open class AudioBufferStream(
             var posVar = position
             stream.leftChannelVolume -= stream.leftVolumeFadeDelta * outVar
             stream.rightChannelVolume -= stream.rightVolumeFadeDelta * outVar
-            sampleLimit = outVar + (endPosition + 256 - posVar + step) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition + 256 - posVar + step) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -639,8 +637,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = outVar + (endPosition - posVar + step) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition - posVar + step) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -685,8 +683,8 @@ open class AudioBufferStream(
             var outVar = outputIndex
             var posVar = position
             stream.currentVolume -= outVar * stream.volumeFadeDelta
-            sampleLimit = outVar + (endPosition + 256 - posVar + step) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition + 256 - posVar + step) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -706,8 +704,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = (outVar shr 1) + (endPosition - posVar + step) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else (outVar shr 1) + (endPosition - posVar + step) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -752,8 +750,8 @@ open class AudioBufferStream(
             var rightVol = rightVolume * 128
             var outVar = outputIndex
             var posVar = position
-            sampleLimit = outVar + (endPosition - posVar + step - 257) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (endPosition - posVar + step - 257) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -771,8 +769,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = (outVar shr 1) + (endPosition - posVar + step - 1) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else (outVar shr 1) + (endPosition - posVar + step - 1) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -810,8 +808,8 @@ open class AudioBufferStream(
             var scaledVolume = volume * 128
             var outVar = outputIndex
             var posVar = position
-            sampleLimit = outVar + (step + (endPosition - posVar) - 257) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (step + (endPosition - posVar) - 257) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -824,8 +822,8 @@ open class AudioBufferStream(
                 posVar += step
             }
 
-            sampleLimit = outVar + (step + (endPosition - posVar) - 1) / step
-            if (step == 0 || sampleLimit > maxOutputIndex) {
+            sampleLimit = if (step == 0) maxOutputIndex else outVar + (step + (endPosition - posVar) - 1) / step
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -931,8 +929,6 @@ open class AudioBufferStream(
             var outVar = outputIndex
             sampleLimit -= 3
             while (outVar < sampleLimit) {
-                bufIdx = outVar++
-                mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos--] * scaledVolume).toInt()
                 bufIdx = outVar++
                 mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos--] * scaledVolume).toInt()
                 bufIdx = outVar++

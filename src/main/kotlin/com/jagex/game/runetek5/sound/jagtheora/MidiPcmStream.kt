@@ -125,12 +125,13 @@ open class MidiPcmStream : PcmStream {
         val audioFile = patchNode.audioFile ?: return
         val stream = patchNode.stream ?: return
         var samples = audioFile.getTotalSamples()
-        val sampleOffset: Int
+        var sampleOffset: Int
         if (reverseLoop && audioFile.enableLoop) {
             val bounceLength = samples + samples - audioFile.start
             sampleOffset = ((this.generalPurpose1[patchNode.currentTrack].toLong()) * bounceLength shr 6).toInt()
             samples = samples shl 8
             if (sampleOffset >= samples) {
+                sampleOffset = samples + samples - 1 - sampleOffset
                 stream.reversePlaybackDirection()
             }
         } else {
@@ -660,9 +661,8 @@ open class MidiPcmStream : PcmStream {
             var track = this.prioritizedTrack
             var length = this.prioritizedTrackLength
 
-            var tickTime: Long
+            var tickTime = this.nextEventTickTime
             while (true) {
-                tickTime = this.nextEventTickTime
                 if (length != this.prioritizedTrackLength) {
                     break
                 }
@@ -697,6 +697,7 @@ open class MidiPcmStream : PcmStream {
                 track = this.fileReader.getPrioritizedTrack()
                 val trackLengths2 = this.fileReader.trackLengths
                 length = if (trackLengths2 != null) trackLengths2[track] else 0
+                tickTime = this.fileReader.getTickTimestamp(length)
             }
 
             this.prioritizedTrack = track

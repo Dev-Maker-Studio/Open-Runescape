@@ -2108,7 +2108,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         } else if (mode == 0) {
             loadTextureCombineMode(GL_MODULATE, GL_MODULATE)
         } else if (mode == 2) {
-            loadTextureCombineMode(GL_INTERPOLATE, GL_INTERPOLATE)
+            loadTextureCombineMode(GL_INTERPOLATE, GL_REPLACE)
         } else if (mode == 3) {
             loadTextureCombineMode(GL_ADD, GL_MODULATE)
         } else if (mode == 4) {

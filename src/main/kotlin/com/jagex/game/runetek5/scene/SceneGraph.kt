@@ -382,10 +382,9 @@ open class SceneGraph(
                                             maxY = regionSizeY
                                         }
                                         while (minX < maxX) {
-                                            var minYVar = minY
-                                            while (minYVar < maxY) {
-                                                lighting!![lightZ]!![minX][minYVar] = 0
-                                                minYVar++
+                                            while (minY < maxY) {
+                                                lighting!![lightZ]!![minX][minY] = 0
+                                                minY++
                                             }
                                             minX++
                                         }
@@ -966,10 +965,9 @@ open class SceneGraph(
                                         maxY = regionSizeY
                                     }
                                     while (minX < maxX) {
-                                        var minYVar = minY
-                                        while (minYVar < maxY) {
-                                            lighting!![plane]!![minX][minYVar] = 0
-                                            minYVar++
+                                        while (minY < maxY) {
+                                            lighting!![plane]!![minX][minY] = 0
+                                            minY++
                                         }
                                         minX++
                                     }
@@ -1019,10 +1017,9 @@ open class SceneGraph(
                                             maxY = regionSizeY
                                         }
                                         while (minX < maxX) {
-                                            var minYVar = minY
-                                            while (minYVar < maxY) {
-                                                lighting!![plane]!![minX][minYVar] = lighting!![plane - 1]!![minX][minYVar]
-                                                minYVar++
+                                            while (minY < maxY) {
+                                                lighting!![plane]!![minX][minY] = lighting!![plane - 1]!![minX][minY]
+                                                minY++
                                             }
                                             minX++
                                         }

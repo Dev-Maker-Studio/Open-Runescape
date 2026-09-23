@@ -300,7 +300,7 @@ class MusicTrack(inputPacket: Packet) : Node<MusicTrack>() {
                                 midiOutput.writeByte(channelXor + 224)
                             }
 
-                            pitchBendAccum += (inputPacket.buffer[pitchBendLowOffset++].toInt() and 0xff)
+                            pitchBendAccum += inputPacket.buffer[pitchBendLowOffset++].toInt()
                             pitchBendAccum += (inputPacket.buffer[pitchBendHighOffset++].toInt() and 0xff) shl 7
                             midiOutput.writeByte(pitchBendAccum and 0x7f)
                             midiOutput.writeByte(pitchBendAccum shr 7 and 0x7f)

@@ -445,7 +445,7 @@ class GamePreferences : Node<GamePreferences> {
         }
 
         if (version >= 11) {
-            customCursor = CustomCursorsPreference(this)
+            customCursor = CustomCursorsPreference(stream.readUByte(), this)
         }
 
         if (version >= 12) {

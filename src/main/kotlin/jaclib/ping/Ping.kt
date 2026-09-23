@@ -41,28 +41,15 @@ class Ping {
                     rawIp2.toInt() and 0xFF,
                     rawIp3.toInt() and 0xFF
                 )
-                val pingCmd: String
-                val timeoutParam: String
-
-                if (System.getProperty("os.name").lowercase().contains("win")) {
-                    pingCmd = "ping"
-                    timeoutParam = "-w"
-                } else {
-                    pingCmd = "ping"
-                    timeoutParam = "-W"
+                val os = System.getProperty("os.name").lowercase()
+                val command = when {
+                    os.contains("win") -> arrayOf("ping", "-n", "1", "-w", timeout.toString(), ip)
+                    os.contains("mac") -> arrayOf("ping", "-c", "1", "-W", timeout.toString(), ip)
+                    else -> arrayOf("ping", "-c", "1", "-W", (timeout / 1000 + 1).toString(), ip)
                 }
 
                 val startTime = System.currentTimeMillis()
-                val process = Runtime.getRuntime().exec(
-                    arrayOf(
-                        pingCmd,
-                        timeoutParam,
-                        (timeout / 1000 + 1).toString(),
-                        "-c",
-                        "1",
-                        ip
-                    )
-                )
+                val process = Runtime.getRuntime().exec(command)
 
                 val exitCode = process.waitFor()
                 val endTime = System.currentTimeMillis()

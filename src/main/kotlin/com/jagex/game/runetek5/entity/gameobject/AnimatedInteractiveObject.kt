@@ -120,7 +120,7 @@ class AnimatedInteractiveObject(
         }
     }
 
-    fun addCustomisation(customisation: ObjectTypeCustomisation) {
+    fun addCustomisation(customisation: ObjectTypeCustomisation?) {
         activeGameObject.addCustomisation(customisation)
     }
 

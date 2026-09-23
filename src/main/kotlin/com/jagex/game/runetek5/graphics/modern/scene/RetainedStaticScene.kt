@@ -196,6 +196,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
 
     override fun sceneReset(scene: Scene) {
         if (scene === this.scene) reset()
+        toolkit.retainedBatcher()?.requestStaleEviction()
     }
 
     override fun submitStatics(
@@ -218,6 +219,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         val picking = scene.interactiveEntities
         val lightEpoch = toolkit.lightEpochNow()
         val batcher = toolkit.retainedBatcher()
+        val cacheFrame = toolkit.modelCache?.frame ?: 0L
         if (DIAG) { diagTick++; diagLines = 0 }
         for (plane in 0 until planes) {
             val planeChunks = chunks[plane]
@@ -249,6 +251,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         toolkit.retainedChunksCulled++
                         continue
                     }
+                    for (k in records.indices) records[k].cached.lastUsedFrame = cacheFrame
                     // A chunk wholly inside the frustum needs no per-instance tests.
                     val chunkInside = toolkit.isWorldAabbFullyInside(chunk.minX, chunk.minY, chunk.minZ, chunk.maxX, chunk.maxY, chunk.maxZ)
                     // Picking data (bounding box + entity ref) only matters for entities the
@@ -256,14 +259,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                     val pickHere = chunkNearMouse(chunk)
                     var usedBlock = false
                     if (BLOCKS && batcher != null) {
-                        // Roof hiding stamps settingBits with the frame byte (roofPreference)
-                        // every frame, so it cannot be part of a key: the block is keyed on
-                        // the window/plane and its per-record visibility is re-derived each
-                        // frame and compared with the mask it was packed for; only a change
-                        // repacks.
-                        val visKey = (winX0.toLong() and 0xff) or ((winX1.toLong() and 0xff) shl 8) or
-                            ((winY0.toLong() and 0xff) shl 16) or ((winY1.toLong() and 0xff) shl 24) or
-                            ((lowestRenderedPlane.toLong() and 0xf) shl 32)
+                        val visKey = lowestRenderedPlane.toLong() and 0xf
                         if (chunk.blockValid && chunk.blockKey == visKey &&
                             !blockMaskUnchanged(chunk, winX0, winX1, winY0, winY1, settingBits, lowestRenderedPlane, roofPreference)
                         ) {
@@ -306,6 +302,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         }
                     }
                     var i = 0
+                    var recaptured = false
                     while (i < records.size) {
                         val r = records[i]
                         i++
@@ -343,11 +340,11 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                             continue
                         }
                         if (r.cached.evicted) {
-                            // The shared cache dropped this geometry; recapture the chunk
-                            // now and restart it (the walk still owns nothing here).
+                            if (recaptured) continue
+                            recaptured = true
                             invalidate(chunk)
                             captureChunk(scene, chunk, plane, cx, cy)
-                            i = 0
+                            i--
                             continue
                         }
                         if (r.billboards < 0) r.billboards = if (r.model.billboardCount > 0) 1 else 0

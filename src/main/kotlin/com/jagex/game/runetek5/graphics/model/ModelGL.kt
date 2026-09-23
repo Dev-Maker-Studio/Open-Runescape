@@ -2720,11 +2720,30 @@ class ModelGL : Model {
         mvpMatrix.copyFrom(workingMatrix)
         mvpMatrix.multiplyBy(this.toolkit.viewProjectionMatrix)
 
-        // Read the matrix once. This runs for every drawn model every frame, and
-        // `m[i]` per term meant a field load plus a null check
-        // (Intrinsics.checkNotNull showed up in the profile in its own right) for
-        // each of the thirty-odd terms below.
+        val frustumPlanes = this.toolkit.frustumPlanes
+        val scaleBuffer = this.toolkit.lightParameterBuffer
+        workingMatrix.scale(0.0f, this.minY.toFloat(), 0.0f, scaleBuffer)
+        val minWorldX = scaleBuffer[0]
+        val minWorldY = scaleBuffer[1]
+        val minWorldZ = scaleBuffer[2]
+        workingMatrix.scale(0.0f, this.maxY.toFloat(), 0.0f, scaleBuffer)
+        val maxWorldX = scaleBuffer[0]
+        val maxWorldY = scaleBuffer[1]
+        val maxWorldZ = scaleBuffer[2]
+        for (planeIdx in 0 until 6) {
+            val plane = frustumPlanes[planeIdx]
+            val distMin = plane[0] * minWorldX + plane[1] * minWorldY + plane[2] * minWorldZ + plane[3] + this.size2d
+            val distMax = plane[0] * maxWorldX + plane[1] * maxWorldY + plane[2] * maxWorldZ + plane[3] + this.size2d
+            if (distMin < 0.0f && distMax < 0.0f) {
+                return
+            }
+        }
+
         val m = mvpMatrix.elements!!
+        val originX = this.toolkit.viewportOriginX
+        val originY = this.toolkit.viewportOriginY
+        val halfWidth = this.toolkit.imageProducerCenterX
+        val halfHeight = this.toolkit.imageProducerCenterY
 
         val centerX = (this.minX + this.maxX) shr 1
         val centerZ = (this.minZ + this.maxZ) shr 1
@@ -2735,31 +2754,47 @@ class ModelGL : Model {
         val clipZ1 = m[2] * centerX + m[6] * currentY + m[10] * centerZ + m[14]
         val clipW1 = m[3] * centerX + m[7] * currentY + m[11] * centerZ + m[15]
 
-        if (clipZ1 >= -clipW1) {
-            boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX1 / clipW1).toInt()
-            boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY1 / clipW1).toInt()
-        }
-
         currentY = this.maxY
         val clipX2 = m[0] * centerX + m[4] * currentY + m[8] * centerZ + m[12]
         val clipY2 = m[1] * centerX + m[5] * currentY + m[9] * centerZ + m[13]
         val clipZ2 = m[2] * centerX + m[6] * currentY + m[10] * centerZ + m[14]
         val clipW2 = m[3] * centerX + m[7] * currentY + m[11] * centerZ + m[15]
 
-        if (clipZ2 >= -clipW2) {
-            boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX2 / clipW2).toInt()
-            boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY2 / clipW2).toInt()
+        val minBehind = clipZ1 < -clipW1
+        val maxBehind = clipZ2 < -clipW2
+        if (minBehind && maxBehind) {
+            return
+        }
+
+        if (!minBehind) {
+            boundingBox.left = (originX + halfWidth * clipX1 / clipW1).toInt()
+            boundingBox.bottom = (originY + halfHeight * clipY1 / clipW1).toInt()
+        } else {
+            val t = (clipZ1 + clipW1) / (clipZ2 + clipW2) - 1.0f
+            val w = clipW1 + t * (clipW2 - clipW1)
+            boundingBox.left = (originX + halfWidth * (clipX1 + t * (clipX2 - clipX1)) / w).toInt()
+            boundingBox.bottom = (originY + halfHeight * (clipY1 + t * (clipY2 - clipY1)) / w).toInt()
+        }
+
+        if (!maxBehind) {
+            boundingBox.right = (originX + halfWidth * clipX2 / clipW2).toInt()
+            boundingBox.top = (originY + halfHeight * clipY2 / clipW2).toInt()
+        } else {
+            val t = (clipZ2 + clipW2) / (clipZ1 + clipW1) - 1.0f
+            val w = clipW2 + t * (clipW1 - clipW2)
+            boundingBox.right = (originX + halfWidth * (clipX2 + t * (clipX1 - clipX2)) / w).toInt()
+            boundingBox.top = (originY + halfHeight * (clipY2 + t * (clipY1 - clipY2)) / w).toInt()
         }
 
         val currentModelElements = this.toolkit.currentModelMatrix.elements!!
         if (clipZ1 / clipW1 > clipZ2 / clipW2) {
             val interpX = clipX1 + currentModelElements[0] * this.size2d + currentModelElements[12]
             val interpW = clipW1 + currentModelElements[3] * this.size2d + currentModelElements[15]
-            boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+            boundingBox.size = (originX - boundingBox.left + halfWidth * interpX / interpW).toInt()
         } else {
             val interpX = clipX2 + currentModelElements[0] * this.size2d + currentModelElements[12]
             val interpW = clipW2 + currentModelElements[3] * this.size2d + currentModelElements[15]
-            boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+            boundingBox.size = (originX - boundingBox.right + halfWidth * interpX / interpW).toInt()
         }
 
         boundingBox.positionCalculated = true
@@ -2826,6 +2861,10 @@ class ModelGL : Model {
             // and so every copy of the same source mirrored the same way shares one
             // stamp and can reuse an already-uploaded dynamic element buffer.
             this.facesRevision = this.facesRevision xor MIRRORED_FACES_REVISION_SALT
+        }
+
+        if (this.normalsBuffer == null && this.colorsBuffer != null) {
+            this.colorsBuffer!!.buffer = null
         }
 
         if (this.vertexBuffer != null) {
@@ -3818,7 +3857,7 @@ class ModelGL : Model {
                 originZ = z
             }
         } else if (transformationType == 1) {
-            if (verticesData != null) {
+            if (verticesData.isNotEmpty()) {
                 var transformedX = ((z * verticesData[2] + verticesData[1] * y + x * verticesData[0] + 8192) shr 14)
                 var transformedY = ((x * verticesData[3] + z * verticesData[5] + y * verticesData[4] + 8192) shr 14)
                 var transformedZ = ((x * verticesData[6] + verticesData[7] * y + z * verticesData[8] + 8192) shr 14)
@@ -3846,7 +3885,7 @@ class ModelGL : Model {
                 }
             }
         } else if (transformationType == 2) {
-            if (verticesData != null) {
+            if (verticesData.isNotEmpty()) {
                 val parentOriginX = verticesData[9] shl 4
                 val parentOriginY = verticesData[10] shl 4
                 val parentOriginZ = verticesData[11] shl 4
@@ -4037,7 +4076,7 @@ class ModelGL : Model {
                 }
             }
         } else if (transformationType == 3) {
-            if (verticesData != null) {
+            if (verticesData.isNotEmpty()) {
                 val parentOriginX = verticesData[9] shl 4
                 val parentOriginY = verticesData[10] shl 4
                 val parentOriginZ = verticesData[11] shl 4
@@ -4444,6 +4483,7 @@ class ModelGL : Model {
                     return
                 }
 
+                invalidateModernBuilt(13)
                 hillChange(currentLvl, sceneX, averageHeight, sceneY, width, length, xan, zan)
             } else if (contourType == 4) {
                 val sizeY = this.maxY - this.minY
@@ -4469,39 +4509,6 @@ class ModelGL : Model {
             }
 
             this.boundsCalculated = false
-        }
-    }
-
-    override fun hillChange(ground: Ground, sceneX: Int, averageHeight: Int, sceneY: Int, width: Int, length: Int, xan: Int, zan: Int) {
-        invalidateModernContent()
-        // Per-tile hillskew reshapes vertices; not matrix-representable.
-        invalidateModernBuilt(13)
-        val sinX = MathUtils.SINE[xan]
-        val cosX = MathUtils.COSINE[xan]
-        val sinZ = MathUtils.SINE[zan]
-        val cosZ = MathUtils.COSINE[zan]
-
-        for (v in 0 until this.maxDepth) {
-            var x = this.verticesX!![v]
-            var y = this.verticesY!![v]
-            var z = this.verticesZ!![v]
-            if (xan != 0) {
-                val tmp = (y * cosX - z * sinX) shr 14
-                z = (y * sinX + z * cosX) shr 14
-                y = tmp
-            }
-
-            if (zan != 0) {
-                val tmp = (z * sinZ + x * cosZ) shr 14
-                z = (z * cosZ - x * sinZ) shr 14
-                x = tmp
-            }
-
-            x += sceneX
-            y += averageHeight
-            z += sceneY
-            val groundHeight = ground.getAverageHeight(x, z)
-            this.verticesY!![v] = this.verticesY!![v] + (groundHeight - y)
         }
     }
 

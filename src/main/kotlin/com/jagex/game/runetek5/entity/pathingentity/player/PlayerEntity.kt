@@ -296,6 +296,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
 
     private var poseMemoModel: Model? = null
     private var poseMemoKey = 0L
+    private var poseMemoMinY = 0
     private val poseKey = PoseKey()
     /** Key of the pose handed out THIS draw (0 when it was not memoisable); drives the shadow memo. */
     private var currentPoseKey = 0L
@@ -354,6 +355,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
         val memo = poseMemoModel
         val model: Model?
+        var minY = poseMemoMinY
         currentPoseKey = if (memoEligible) key else 0L
         if (memoEligible && memo != null && key == poseMemoKey) {
             PoseMemo.poseHits++
@@ -369,6 +371,8 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 equipmentRotations, rotation, TypeLists.EQUIPMENT_DEFAULTS!!, privatePool = if (memoEligible) poseCopies else null
             )
             if (model != null) {
+                minY = model.getMinY()
+                model.getSize3d()
                 rotate(model)
                 if (x != 0 || z != 0) {
                     if (rotateX != 0) {
@@ -386,7 +390,8 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 PoseMemo.carryGeometry(poseMemoModel, model)
                 poseMemoModel = model
                 poseMemoKey = key
-            } else {
+                poseMemoMinY = minY
+            } else if (memoEligible) {
                 poseMemoModel = null
                 poseMemoKey = 0L
             }
@@ -418,8 +423,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         if (model == null) {
             return false
         }
-        modelMinY = model.getMinY()
-        model.getSize3d()
+        modelMinY = minY
 
         if (tintModel) {
             model.tint(hue.toInt(), saturation.toInt(), lightness.toInt(), opacity.toInt() and 0xff)
@@ -640,11 +644,9 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             val rotation = yaw.getRotation()
             val occupiedTile = scene!!.tiles[plane.toInt()][absolute.coords.x.toInt() shr 9][absolute.coords.z.toInt() shr 9]
             if (occupiedTile != null && occupiedTile.groundDecoration != null) {
-                val groundDec = occupiedTile.groundDecoration!!
-                val offsetDelta = groundContouredOffsetY - groundDec.floorOffsetY
-                groundContouredOffsetY = (groundContouredOffsetY - offsetDelta / 10.0f).toInt()
+                easeGroundContouredOffset(occupiedTile.groundDecoration!!.floorOffsetY.toInt())
             } else {
-                groundContouredOffsetY = (groundContouredOffsetY - groundContouredOffsetY / 10.0f).toInt()
+                easeGroundContouredOffset(0)
             }
 
             renderingMatrix.copyFrom(projectionMatrix)

@@ -12,14 +12,7 @@ class RemoteFileRequester : Js5NetQueue() {
     @JvmField
     var updateServerConnection: Connection? = null
 
-    /**
-     * Resets all waiting requests back to pending state so they can be retried.
-     * This should be called whenever a connection error occurs to prevent requests
-     * from being stuck in waiting state forever.
-     */
-    private fun resetWaitingRequests() {
-        // Remove all waiting requests completely - they will be recreated when needed
-        // We need to remove them from both the queue (unlinkSub) and the main map (unlink)
+    private fun dropWaitingRequests() {
         var request: Js5NetQueueRequest?
         while (super.waitingPriorityRequests.getNext().also { request = it as Js5NetQueueRequest? } != null) {
             request!!.unlinkSub() // Remove from queue
@@ -71,7 +64,6 @@ class RemoteFileRequester : Js5NetQueue() {
                                 this.updateServerConnection = null
                                 failedRequests++
                                 connectionStatus = -2
-                                resetWaitingRequests()
                             }
                         }
                         super.lastConnectionInteraction = 0
@@ -101,7 +93,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 updateServerConnection = null
                 failedRequests++
                 connectionStatus = -2
-                resetWaitingRequests()
             }
         }
     }
@@ -122,7 +113,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 updateServerConnection = null
                 failedRequests++
                 connectionStatus = -2
-                resetWaitingRequests()
             }
         }
     }
@@ -147,7 +137,7 @@ class RemoteFileRequester : Js5NetQueue() {
             // NOOP
         }
         updateServerConnection = null
-        resetWaitingRequests()
+        dropWaitingRequests()
         super.priorityRequests.reset()
         super.regularRequests.reset()
         failedRequests = 0
@@ -159,6 +149,18 @@ class RemoteFileRequester : Js5NetQueue() {
      * Sends a request to the update server to start
      * a new file update session with this client
      */
+    @Synchronized
+    override fun rejectPayload() {
+        try {
+            updateServerConnection?.close()
+        } catch (ignored: Exception) {
+            // NOOP
+        }
+        updateServerConnection = null
+        failedRequests++
+        connectionStatus = -1
+    }
+
     fun initializeSession() {
         if (updateServerConnection != null) {
             try {
@@ -176,7 +178,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 updateServerConnection = null
                 failedRequests++
                 connectionStatus = -2
-                resetWaitingRequests()
             }
         }
     }
@@ -208,7 +209,6 @@ class RemoteFileRequester : Js5NetQueue() {
                     // NOOP
                 }
                 updateServerConnection = null
-                resetWaitingRequests()
             }
         }
 
@@ -355,7 +355,6 @@ class RemoteFileRequester : Js5NetQueue() {
             updateServerConnection = null
             failedRequests++
             connectionStatus = -2
-            resetWaitingRequests()
             return priorityRequestCount() == 0 && regularRequestCount() == 0
         }
     }

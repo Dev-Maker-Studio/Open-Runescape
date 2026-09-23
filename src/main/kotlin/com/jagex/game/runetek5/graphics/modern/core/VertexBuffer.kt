@@ -72,6 +72,11 @@ class VertexBuffer(
             // Reallocate buffer
             GLWrapper.bufferData(ARRAY_BUFFER, data, usage.glUsage)
             capacity = sizeBytes
+        } else if (usage == BufferUsage.STREAM) {
+            GLWrapper.bufferData(ARRAY_BUFFER, capacity, usage.glUsage)
+            data.mark()
+            GLWrapper.bufferSubData(ARRAY_BUFFER, 0, data)
+            data.reset()
         } else {
             // Update existing buffer
             data.mark()

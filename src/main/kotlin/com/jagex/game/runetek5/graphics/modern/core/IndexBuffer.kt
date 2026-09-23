@@ -66,6 +66,7 @@ class IndexBuffer(
                 GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, buffer, usage.glUsage)
                 capacity = sizeBytes
             } else {
+                if (usage == BufferUsage.STREAM) GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, capacity, usage.glUsage)
                 GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, 0, buffer)
             }
             indexCount = indices.size
@@ -88,6 +89,7 @@ class IndexBuffer(
                 GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, buffer, usage.glUsage)
                 capacity = sizeBytes
             } else {
+                if (usage == BufferUsage.STREAM) GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, capacity, usage.glUsage)
                 GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, 0, buffer)
             }
             indexCount = indices.size
@@ -109,6 +111,7 @@ class IndexBuffer(
             capacity = sizeBytes
         } else {
             buffer.mark()
+            if (usage == BufferUsage.STREAM) GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, capacity, usage.glUsage)
             GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, 0, buffer)
             buffer.reset()
         }
@@ -128,6 +131,7 @@ class IndexBuffer(
             capacity = sizeBytes
         } else {
             buffer.mark()
+            if (usage == BufferUsage.STREAM) GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, capacity, usage.glUsage)
             GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, 0, buffer)
             buffer.reset()
         }
@@ -145,6 +149,7 @@ class IndexBuffer(
             capacity = sizeBytes
         } else {
             data.mark()
+            if (usage == BufferUsage.STREAM) GLWrapper.bufferData(ELEMENT_ARRAY_BUFFER, capacity, usage.glUsage)
             GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, 0, data)
             data.reset()
         }

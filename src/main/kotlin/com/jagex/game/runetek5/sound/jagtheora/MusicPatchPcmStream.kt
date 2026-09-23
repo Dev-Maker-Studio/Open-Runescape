@@ -77,10 +77,10 @@ class MusicPatchPcmStream(@JvmField val midiPcmStream: MidiPcmStream) : PcmStrea
     }
 
     fun fillPatchNode(patchNode: MusicPatchNode, buffer: IntArray, offset: Int, length: Int, endOffset: Int) {
+        var currentOffset = offset
+        var remainingLength = length
         if ((midiPcmStream.sustain[patchNode.currentTrack] and 0x4) != 0 && patchNode.releaseState < 0) {
             val step = midiPcmStream.effectSpeedScaled[patchNode.currentTrack] / PcmPlayerManager.sampleRate
-            var currentOffset = offset
-            var remainingLength = length
 
             while (true) {
                 val loopCount = (step + 1048575 - patchNode.retriggerPhase) / step
@@ -126,7 +126,7 @@ class MusicPatchPcmStream(@JvmField val midiPcmStream: MidiPcmStream) : PcmStrea
             }
         }
 
-        patchNode.stream!!.fill(buffer, offset, length)
+        patchNode.stream!!.fill(buffer, currentOffset, remainingLength)
     }
 
     override fun getNextStream(): PcmStream? {

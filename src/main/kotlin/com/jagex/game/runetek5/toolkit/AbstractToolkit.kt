@@ -610,7 +610,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
                 for (lightness in 127 downTo 0) {
                     val hsl = (hue and 0x3f shl 10) or (saturation and 0x7 shl 7) or (lightness and 0x7f)
                     ColorUtil.initializeTables(false, true)
-                    val rgb = ColorUtil.unsignedHslToRgb!![hsl]
+                    val rgb = ColorUtil.hslToRgb!![hsl]
                     ColorUtil.resetTables(false, true)
                     toolkit.drawFilledRectangle((lightness * component.width shr 7) + baseLight, baseSaturation + ((7 - saturation) * component.height shr 3), (component.width shr 7) + 1, (component.height shr 3) + 1, rgb, 0)
                 }

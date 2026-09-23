@@ -73,12 +73,7 @@ object GLWrapper {
      *  location. Needed because some drivers return -1 for individual sampler-array
      *  element locations (uTextures[5]); writing the whole array from uTextures[0]
      *  with count=N sets every element regardless. */
-    fun uniform1iv(location: Int, values: IntArray) {
-        MemoryStack.stackPush().use { stack ->
-            val buffer = stack.ints(*values)
-            glUniform1iv(location, buffer)
-        }
-    }
+    fun uniform1iv(location: Int, values: IntArray) = glUniform1iv(location, values)
 
     fun uniform1f(location: Int, value: Float) = glUniform1f(location, value)
 
@@ -88,33 +83,27 @@ object GLWrapper {
 
     fun uniform4f(location: Int, x: Float, y: Float, z: Float, w: Float) = glUniform4f(location, x, y, z, w)
 
-    fun uniform3fv(location: Int, values: FloatArray) {
+    fun uniform3fv(location: Int, values: FloatArray) = glUniform3fv(location, values)
+
+    fun uniform3fv(location: Int, values: FloatArray, count: Int) {
+        if (count <= 0) return
         MemoryStack.stackPush().use { stack ->
-            val buffer = stack.floats(*values)
-            glUniform3fv(location, buffer)
+            glUniform3fv(location, stack.mallocFloat(count * 3).put(values, 0, count * 3).flip())
         }
     }
 
-    fun uniform4fv(location: Int, values: FloatArray) {
+    fun uniform4fv(location: Int, values: FloatArray) = glUniform4fv(location, values)
+
+    fun uniform4fv(location: Int, values: FloatArray, count: Int) {
+        if (count <= 0) return
         MemoryStack.stackPush().use { stack ->
-            val buffer = stack.floats(*values)
-            glUniform4fv(location, buffer)
+            glUniform4fv(location, stack.mallocFloat(count * 4).put(values, 0, count * 4).flip())
         }
     }
 
-    fun uniformMatrix3fv(location: Int, transpose: Boolean, values: FloatArray) {
-        MemoryStack.stackPush().use { stack ->
-            val buffer = stack.floats(*values)
-            glUniformMatrix3fv(location, transpose, buffer)
-        }
-    }
+    fun uniformMatrix3fv(location: Int, transpose: Boolean, values: FloatArray) = glUniformMatrix3fv(location, transpose, values)
 
-    fun uniformMatrix4fv(location: Int, transpose: Boolean, values: FloatArray) {
-        MemoryStack.stackPush().use { stack ->
-            val buffer = stack.floats(*values)
-            glUniformMatrix4fv(location, transpose, buffer)
-        }
-    }
+    fun uniformMatrix4fv(location: Int, transpose: Boolean, values: FloatArray) = glUniformMatrix4fv(location, transpose, values)
 
     // ===== Buffer Functions =====
 

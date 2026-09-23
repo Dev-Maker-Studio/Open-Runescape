@@ -132,14 +132,13 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                     var attackClickType: Short = 0
                     if (Game.RUNESCAPE == Client.CURRENT_GAME &&
                         option.equals(LocalizedText.ATTACK.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
-                        attackClickType = if (Client.REDUCE_ATTACK_PRIORITY && player.combatLevel > PlayerUpdate.MY_PLAYER!!.combatLevel) {
-                            2000
-                        } else if (PlayerUpdate.MY_PLAYER!!.teamId != 0 && player.teamId != 0) {
-                            if (player.teamId == PlayerUpdate.MY_PLAYER!!.teamId) 2000 else 0
+                        if (Client.REDUCE_ATTACK_PRIORITY && player.combatLevel > PlayerUpdate.MY_PLAYER!!.combatLevel) {
+                            attackClickType = 2000
+                        }
+                        if (PlayerUpdate.MY_PLAYER!!.teamId != 0 && player.teamId != 0) {
+                            attackClickType = if (player.teamId == PlayerUpdate.MY_PLAYER!!.teamId) 2000 else 0
                         } else if (player.reduceAttackPriority) {
-                            2000
-                        } else {
-                            0
+                            attackClickType = 2000
                         }
                     } else if (Client.PLAYER_OPTION_REDUCED_PRIORITY[index]) {
                         attackClickType = 2000

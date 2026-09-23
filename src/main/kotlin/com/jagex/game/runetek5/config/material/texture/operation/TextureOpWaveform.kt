@@ -33,7 +33,7 @@ class TextureOpWaveform : TextureOperation(0, true) {
                     waveValue = (horizontalValue - verticalValue) * frequency
                 } else {
                     val distanceSquared = (verticalOffset * verticalOffset + horizontalOffset * horizontalOffset) shr 12
-                    var distance = sqrt((distanceSquared / 4096.0f).toDouble()).toInt() * 4096
+                    var distance = (sqrt((distanceSquared / 4096.0f).toDouble()) * 4096.0).toInt()
                     waveValue = (distance * frequency * PI).toInt()
                 }
 

@@ -43,9 +43,9 @@ class Sun(
     }
 
     fun move(deltaX: Int, deltaY: Int, deltaZ: Int, offsetMultiplier: Int): Boolean {
-        val x: Int
-        val y: Int
-        val z: Int
+        var x: Int
+        var y: Int
+        var z: Int
         if (invertPosition) {
             sunSize2d = 1073741823
             x = sunPositionX
@@ -59,38 +59,37 @@ class Sun(
             if (sunSize2d == 0) {
                 sunSize2d = 1
             }
-            val scaledX = (x shl 8) / sunSize2d
-            val scaledY = (y shl 8) / sunSize2d
-            val scaledZ = (z shl 8) / sunSize2d
-            val sunScaling = (sqrt((scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ).toDouble()) * 256.0).toInt()
-            if (sunScaling > 128) {
-                val normalizedX = (scaledX shl 16) / sunScaling
-                val normalizedY = (scaledY shl 16) / sunScaling
-                val normalizedZ = (scaledZ shl 16) / sunScaling
-                positionOffset = offsetMultiplier * positionOffsetStep / (if (invertPosition) 1024 else sunSize2d)
-            } else {
-                positionOffset = 0
-            }
-            if (positionOffset < 8) {
-                sunSprite = null
-                return false
-            }
-            var dimension = MathUtils.nextPowerOfTwo(positionOffset)
-            if (dimension > offsetMultiplier) {
-                dimension = MathUtils.furtestBitValue(offsetMultiplier)
-            }
-            if (dimension > 512) {
-                dimension = 512
-            }
-            if (dimension != sunUseDimension) {
-                sunUseDimension = dimension
-            }
-            sunRotationX = (asin((scaledY / 256.0f).toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-            sunRotationY = (atan2(scaledX.toDouble(), -scaledZ.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-            sunSprite = null
-            return true
+            x = (x shl 8) / sunSize2d
+            y = (y shl 8) / sunSize2d
+            z = (z shl 8) / sunSize2d
         }
-        return false
+        val sunScaling = (sqrt((x * x + y * y + z * z).toDouble()) * 256.0).toInt()
+        if (sunScaling > 128) {
+            x = (x shl 16) / sunScaling
+            y = (y shl 16) / sunScaling
+            z = (z shl 16) / sunScaling
+            positionOffset = offsetMultiplier * positionOffsetStep / (if (invertPosition) 1024 else sunSize2d)
+        } else {
+            positionOffset = 0
+        }
+        if (positionOffset < 8) {
+            sunSprite = null
+            return false
+        }
+        var dimension = MathUtils.nextPowerOfTwo(positionOffset)
+        if (dimension > offsetMultiplier) {
+            dimension = MathUtils.furtestBitValue(offsetMultiplier)
+        }
+        if (dimension > 512) {
+            dimension = 512
+        }
+        if (dimension != sunUseDimension) {
+            sunUseDimension = dimension
+        }
+        sunRotationX = (asin((y / 256.0f).toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+        sunRotationY = (atan2(x.toDouble(), -z.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+        sunSprite = null
+        return true
     }
 
     fun drawColoredSun(toolkit: AbstractToolkit, sun: Sun?) {
@@ -321,15 +320,16 @@ class Sun(
                         sunMesh.addVertex(x, y, -z)
                     }
                     if (index > 0) {
-                        val faceA = index * 23 + 2
-                        val faceB = faceA - 23
+                        var faceA = index * 23 + 2
+                        var faceB = faceA - 23
                         sunMesh.addFace(0, faceB, faceA, 0.toByte(), 0.toByte(), 127.toShort(), 0.toByte(), 0.toShort())
                         for (faceIndex in 1 until 23) {
                             val faceC = faceB + 1
                             val faceD = faceA + 1
                             sunMesh.addFace(faceB, faceC, faceA, 0.toByte(), 0.toByte(), 127.toShort(), 0.toByte(), 0.toShort())
                             sunMesh.addFace(faceC, faceD, faceA, 0.toByte(), 0.toByte(), 127.toShort(), 0.toByte(), 0.toShort())
-                            // faceB and faceA updated in next iteration
+                            faceB = faceC
+                            faceA = faceD
                         }
                         sunMesh.addFace(faceA, faceB, 1, 0.toByte(), 0.toByte(), 127.toShort(), 0.toByte(), 0.toShort())
                     }

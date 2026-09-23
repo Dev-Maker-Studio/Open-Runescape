@@ -9,6 +9,7 @@ import com.jagex.game.runetek5.config.rsinterface.InteractiveComponentSprite
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.gameobject.GameObject
+import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
@@ -92,6 +93,10 @@ object HintRenderer {
             val length = (graphNode.endZ.toInt() - graphNode.startZ.toInt() + 1) shl 9
             absX = width / 2 + (graphNode.startX.toInt() shl 9)
             absY = length / 2 + (graphNode.startZ.toInt() shl 9)
+        } else if (graphNode is PathingEntity) {
+            val drawn = graphNode.getProjectionMatrix()
+            absX = drawn.xD.toInt()
+            absY = drawn.zD.toInt()
         } else {
             val abs = graphNode.getAbsolutePosition().coords
             absX = abs.x.toInt()
@@ -130,8 +135,8 @@ object HintRenderer {
                     if (objectNode != null) {
                         val npc = objectNode.value as NpcEntity
                         val abs = npc.getAbsolutePosition().coords
-                        val x = (abs.x / 128 - offsetX / 128).toInt()
-                        val y = (abs.z / 128 - offsetY / 128).toInt()
+                        val x = abs.x.toInt() / 128 - offsetX / 128
+                        val y = abs.z.toInt() / 128 - offsetY / 128
                         draw(component, sprite, clipLeft, clipTop, x, y, arrow.arrowSprite, 360000L)
                     }
                 }
@@ -148,8 +153,8 @@ object HintRenderer {
                     val player = PlayerUpdate.players[arrow.targetIndex]
                     if (player != null) {
                         val abs = player.getAbsolutePosition().coords
-                        val x = (abs.x / 128 - offsetX / 128).toInt()
-                        val y = (abs.z / 128 - offsetY / 128).toInt()
+                        val x = abs.x.toInt() / 128 - offsetX / 128
+                        val y = abs.z.toInt() / 128 - offsetY / 128
                         draw(component, sprite, clipLeft, clipTop, x, y, arrow.arrowSprite, 360000L)
                     }
                 }
@@ -187,8 +192,8 @@ object HintRenderer {
             val dx = (cosAngle * x + y * sinAngle) shr 14
             val dy = (y * cosAngle - sinAngle * x) shr 14
             val hintSprite = StaticMedia.hintMapmarkerSprites!![arrowSprite]
-            val width = hintSprite.getSpriteWidth()
-            val height = hintSprite.getSpriteHeight()
+            val width = hintSprite.getWidth()
+            val height = hintSprite.getHeight()
             val x1 = dx + component.width / 2 - width / 2
             val x2 = width + x1
             val y1 = -dy + component.height / 2 - height

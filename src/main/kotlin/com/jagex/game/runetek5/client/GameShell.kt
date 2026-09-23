@@ -260,13 +260,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         @JvmStatic
         fun performDummyActionevent(canvas: Canvas?) {
             val eventQueue = SystemInfo.systemEventQueue
-            if (eventQueue != null) {
-                var i = 0
-                while (i < 50 && eventQueue.peekEvent() != null) {
-                    TimeTools.sleep(1L)
-                    i++
-                }
-
+            if (eventQueue != null && eventQueue.peekEvent() == null) {
                 try {
                     if (canvas != null) {
                         eventQueue.postEvent(ActionEvent(canvas, 1001, "dummy"))
@@ -303,7 +297,8 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     fun initializeFrame(windowSettings: WindowSettings, gameName: String, buildEnvironmentName: String, storeId: Int, numIndices: Int, padding: Boolean) {
         try {
             setApplicationType(ApplicationType.BORDERLESS, padding)
-            WindowMode.resizableScreenWidth = screenCanvasWidth.also { screenCanvasWidth = windowSettings.width }
+            screenCanvasWidth = windowSettings.width
+            WindowMode.resizableScreenWidth = screenCanvasWidth
             var windowHeight = windowSettings.height
             // -Dwindow.size=WxH overrides the configured window size (see setFrameTitle).
             System.getProperty("window.size")?.let { spec ->

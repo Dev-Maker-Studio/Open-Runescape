@@ -73,7 +73,7 @@ class AnimatedWallDecoration(
         return wallDecoration.getNegativeMinY()
     }
 
-    fun addCustomisation(customisation: ObjectTypeCustomisation) {
+    fun addCustomisation(customisation: ObjectTypeCustomisation?) {
         wallDecoration.addCustomisation(customisation)
     }
 

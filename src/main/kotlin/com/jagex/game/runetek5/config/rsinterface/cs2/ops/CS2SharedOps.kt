@@ -154,8 +154,8 @@ object CS2SharedOps {
             if (charCode <= 0) {
                 return
             }
-            component!!.keyTriggeringAction = Array(11) { ByteArray(0) }
-            component!!.keyTriggerParams = Array(11) { ByteArray(0) }
+            component!!.keyTriggeringAction = arrayOfNulls(11)
+            component!!.keyTriggerParams = arrayOfNulls(11)
             component!!.cycleSteps = IntArray(11)
             component!!.keyCharCodes = IntArray(11)
         }
@@ -595,12 +595,12 @@ object CS2SharedOps {
             if (keyCodes == null) {
                 return
             }
-            component!!.keyTriggeringAction = Array(11) { ByteArray(0) }
-            component!!.keyTriggerParams = Array(11) { ByteArray(0) }
+            component!!.keyTriggeringAction = arrayOfNulls(11)
+            component!!.keyTriggerParams = arrayOfNulls(11)
             component!!.cycleSteps = IntArray(11)
             component!!.keyCharCodes = IntArray(11)
         }
-        component!!.keyTriggeringAction!![opSlot] = keyCodes!!
+        component!!.keyTriggeringAction!![opSlot] = keyCodes
         if (keyCodes != null) {
             component!!.hasInteraction = true
         } else {
@@ -612,7 +612,7 @@ object CS2SharedOps {
                 }
             }
         }
-        component!!.keyTriggerParams!![opSlot] = keyModifiers!!
+        component!!.keyTriggerParams!![opSlot] = keyModifiers
     }
 
     @JvmStatic
@@ -1165,7 +1165,7 @@ object CS2SharedOps {
         var parentHeight: Int = 0
         if (parentComponent == null) {
             parentWidth = GameShell.screenCanvasWidth
-            parentHeight = GameShell.screenCanvasHeight
+            parentHeight = GameShell.screenCanvasHeight * -969250379
         } else {
             parentWidth = parentComponent!!.width
             parentHeight = parentComponent!!.height
@@ -1239,9 +1239,9 @@ object CS2SharedOps {
         executor.intStackPtr -= 2
         val targetOpSlot = 10
         @Suppress("UNCHECKED_CAST")
-        val keyCodes: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr]] as ByteArray?
+        val keyCodes: ByteArray? = byteArrayOf(executor.intStack[executor.intStackPtr].toByte())
         @Suppress("UNCHECKED_CAST")
-        val keyModifiers: ByteArray? = executor.globalArrays[executor.intStack[executor.intStackPtr + 1]] as ByteArray?
+        val keyModifiers: ByteArray? = byteArrayOf(executor.intStack[executor.intStackPtr + 1].toByte())
         setTriggerKey(component!!, targetOpSlot, keyCodes, keyModifiers)
     }
 

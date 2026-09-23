@@ -194,6 +194,7 @@ class FontMetrics(bytes: ByteArray) {
         for (i in 0 until length) {
             val charCode = Utils.byteForChar(areaName[i]).toInt() and 0xff
             var charWidth = 0
+            var breakPos = i
 
             if (charCode == 60) {
                 tagStart = i
@@ -203,7 +204,7 @@ class FontMetrics(bytes: ByteArray) {
                         continue
                     }
 
-                    val tagPos = tagStart
+                    breakPos = tagStart
                     val tag = areaName.substring(tagStart + 1, i)
                     tagStart = -1
 
@@ -322,13 +323,13 @@ class FontMetrics(bytes: ByteArray) {
                                 lastSpace = -1
                                 currentWidth -= lastSpaceWidth
                             } else {
-                                buffer[lineCount] = areaName.substring(lineStart, i)
+                                buffer[lineCount] = areaName.substring(lineStart, breakPos)
                                 lineCount++
                                 if (lineCount >= buffer.size) {
                                     return 0
                                 }
 
-                                lineStart = i
+                                lineStart = breakPos
                                 lastSpace = -1
                                 currentWidth = charWidth
                             }

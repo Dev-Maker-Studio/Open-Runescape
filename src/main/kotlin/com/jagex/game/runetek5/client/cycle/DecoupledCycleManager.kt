@@ -17,7 +17,10 @@ class DecoupledCycleManager : AbstractCycleManager() {
     @JvmField
     var nextPulseAt: Long = System.nanoTime()
 
+    private var pulseDuration: Long = 20_000_000L
+
     override fun loopcycle(preferedDuration: Long): Int {
+        pulseDuration = preferedDuration
         val now = System.nanoTime()
         if (now < nextPulseAt) {
             return 0
@@ -70,7 +73,7 @@ class DecoupledCycleManager : AbstractCycleManager() {
     }
 
     override fun reset() {
-        nextPulseAt = System.nanoTime()
+        nextPulseAt = maxOf(nextPulseAt, System.nanoTime() + pulseDuration)
     }
 
     companion object {

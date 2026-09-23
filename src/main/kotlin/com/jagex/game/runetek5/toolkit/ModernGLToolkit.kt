@@ -65,6 +65,7 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.KHRDebug
+import java.nio.IntBuffer
 import org.lwjgl.opengl.GL33.*
 import java.awt.Canvas
 
@@ -382,7 +383,8 @@ class ModernGLToolkit(
     }
 
     // Model cache for avoiding per-face CPU work
-    private var modelCache: ModelCache? = null
+    var modelCache: ModelCache? = null
+        private set
 
     // Matrices
     private val modernProjectionMatrix = Matrix4f()
@@ -670,6 +672,11 @@ class ModernGLToolkit(
                     }
                 }
             }, 0L)
+            if (System.getProperty("render.gldebug") == null) {
+                KHRDebug.glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, null as IntBuffer?, false)
+                KHRDebug.glDebugMessageControl(GL_DONT_CARE, KHRDebug.GL_DEBUG_TYPE_ERROR, GL_DONT_CARE, null as IntBuffer?, true)
+                KHRDebug.glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, KHRDebug.GL_DEBUG_SEVERITY_HIGH, null as IntBuffer?, true)
+            }
             println("[ModernGLToolkit] KHR_debug callback installed")
         } catch (e: Throwable) {
             println("[ModernGLToolkit] KHR_debug install failed: $e")
@@ -810,6 +817,7 @@ class ModernGLToolkit(
 
     /** Frames between [ModernDiag]/[ModernPerf] prints. Override with `-Drender.diaginterval=<n>`. */
     private val diagInterval = System.getProperty("render.diaginterval")?.toIntOrNull()?.coerceAtLeast(1) ?: 600
+    private val diagEnabled = System.getProperty("render.diag") != null || System.getProperty("render.diaginterval") != null
 
     /** Times the frame-start guard had to re-make the GL context current on this thread. */
     private var contextReattachCount = 0
@@ -898,7 +906,7 @@ class ModernGLToolkit(
         debugFrameCount++
         // One-line pipeline health diagnostic every ~600 frames. Cheap and easy to
         // delete once the modern renderer is confirmed working on this branch.
-        if (debugFrameCount % diagInterval == 0 || debugFrameCount == 30 || debugFrameCount == 120) {
+        if (diagEnabled && (debugFrameCount % diagInterval == 0 || debugFrameCount == 30 || debugFrameCount == 120)) {
             println(
                 "[ModernDiag] pipeline=${canUseModernPipeline()} init=$isModernRendererInitialized " +
                     "caps=$ownerThreadHasCapabilities gameState=${try { Client.gameState } catch (_: Exception) { "?" }} " +
@@ -1140,6 +1148,7 @@ class ModernGLToolkit(
         spriteRenderer?.resetFrameStats()
         optimizedBatcher?.resetCumulativeStats()
         instancedBatcher?.resetFrameStats()
+        particleRendererModern?.resetFrameStats()
 
         // -Drender.gpusync: block until the GPU has drained before presenting, and
         // report how long that took. A large value here means the frame is GPU-bound
@@ -1188,6 +1197,42 @@ class ModernGLToolkit(
      * Called before scene rendering begins.
      * This starts the batcher to collect geometry from drawMatrixThreaded calls.
      */
+    override fun setViewMatrix(viewMatrix: Matrix43) {
+        val batchOpen = canUseModernPipeline() && when {
+            useOptimizedBatcher -> optimizedBatcher?.isActive() == true
+            else -> frameBatcher?.isActive() == true
+        }
+        if (!batchOpen || sameMatrix(viewMatrix43, viewMatrix)) {
+            super.setViewMatrix(viewMatrix)
+            return
+        }
+        val pending = hasPendingSceneGeometry()
+        if (pending) {
+            renderWithModernPipeline()
+            functionMask = 0
+        }
+        super.setViewMatrix(viewMatrix)
+        if (pending) {
+            openSceneBatch()
+        } else {
+            ensureSceneTarget()
+            if (useOptimizedBatcher) {
+                optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
+                if (useInstancing) {
+                    instancedBatcher?.setViewProjection(viewProjectionMatrix.elements)
+                    snapshotSceneMatrices()
+                }
+                armBatchLightingAndFog()
+            }
+        }
+    }
+
+    private fun sameMatrix(a: Matrix43, b: Matrix43): Boolean =
+        a.xA == b.xA && a.yA == b.yA && a.zA == b.zA &&
+            a.xB == b.xB && a.yB == b.yB && a.zB == b.zB &&
+            a.xC == b.xC && a.yC == b.yC && a.zC == b.zC &&
+            a.xD == b.xD && a.yD == b.yD && a.zD == b.zD
+
     override fun setModelMatrix(modelMatrix: Matrix44) {
         // Call parent to set up legacy matrix state
         super.setModelMatrix(modelMatrix)
@@ -1274,19 +1319,23 @@ class ModernGLToolkit(
         val w = d.getWidth()
         val h = d.getHeight()
         if (w <= 0 || h <= 0) return
+        val restoreFbo = GL30.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING)
         var fb = sceneMsaa
         if (fb == null || fb.width != w || fb.height != h || fb.samples != samples) {
+            val boundTexture = glGetInteger(GL_TEXTURE_BINDING_2D)
             fb?.destroy()
             fb = MultisampleFramebuffer(w, h, samples)
             if (!fb.create()) {
                 sceneMsaaFailed = true
                 sceneMsaa = null
+                GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, restoreFbo)
                 System.err.println("[ModernGLToolkit] multisampled scene target unavailable ($samples samples); rendering without anti-aliasing")
                 return
             }
             sceneMsaa = fb
+            glBindTexture(GL_TEXTURE_2D, boundTexture)
         }
-        sceneMsaaRestoreFbo = GL30.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING)
+        sceneMsaaRestoreFbo = restoreFbo
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, sceneMsaaRestoreFbo)
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.getId())
         blitWholeTarget(w, h)
@@ -1369,7 +1418,7 @@ class ModernGLToolkit(
 
         // Begin frame for all renderers
         mr.beginFrame()
-        gr.beginFrame()
+        gr.resetFrameCounters()
 
         if (useOptimizedBatcher) {
             // NOTE: cumulative stats are NOT reset here — openSceneBatch runs at every
@@ -1619,21 +1668,10 @@ class ModernGLToolkit(
         }
         transDiagInst = 0; transDiagStream = 0; transDiagMinKey = Int.MAX_VALUE; transDiagMaxKey = Int.MIN_VALUE
         // Particle systems in the same far-to-near (key desc, seq asc) order the batchers use.
-        for (i in 0 until particleCount) deferredParticleOrder[i] = i
-        if (particleCount > 1) {
-            val keys = deferredParticleKey
-            val seqs = deferredParticleSeq
-            val order = (0 until particleCount).sortedWith(compareBy({ -keys[it].toLong() }, { seqs[it] }))
-            for (i in 0 until particleCount) deferredParticleOrder[i] = order[i]
-        }
+        sortFarToNear(deferredParticleKey, deferredParticleSeq, particleCount, deferredParticleOrder)
         // Billboards in the same order, merged with the particle systems below.
         val bbN = bbCount
-        for (i in 0 until bbN) bbOrder[i] = i
-        if (bbN > 1) {
-            val keys = bbKey; val seqs = bbSeq
-            val order = (0 until bbN).sortedWith(compareBy({ -keys[it].toLong() }, { seqs[it] }))
-            for (i in 0 until bbN) bbOrder[i] = order[i]
-        }
+        sortFarToNear(bbKey, bbSeq, bbN, bbOrder)
         if (bbN > 0) {
             val hasFog = fogEnabled && fogDensity > 0
             billboardRendererModern?.setFrame(
@@ -1915,6 +1953,7 @@ class ModernGLToolkit(
             spriteRenderer?.flush("setActiveTexture")
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
         }
+        groundRenderer?.invalidateBoundTexture()
         super.setActiveTexture(replacingCombiner)
     }
 
@@ -1944,7 +1983,6 @@ class ModernGLToolkit(
     @JvmField var recolourBad = 0
     private val VERIFY_RECOLOUR = System.getProperty("render.verifyrecolour") != null
     /** Global index of each uploaded light, for per-entity index lookup. */
-    private val lightIndexOf = HashMap<PointLight, Int>()
     /** Light indices for the entity currently being submitted (-1 = unused). */
     private val currentLightIdx = FloatArray(4) { -1f }
 
@@ -2353,8 +2391,6 @@ class ModernGLToolkit(
             frameLightColor[i * 3 + 1] = ((c shr 8) and 0xff) * a
             frameLightColor[i * 3 + 2] = (c and 0xff) * a
         }
-        lightIndexOf.clear()
-        for (i in 0 until n) lightIndexOf[frameLights[i]] = i
         frameLightCount = n
         if (LIGHT_DIAG && lightDiagBudget > 0 && n > 0) {
             lightDiagBudget--
@@ -3224,7 +3260,14 @@ class ModernGLToolkit(
                 fogStartPosition,
                 fogEndPosition,
                 fR, fG, fB,
-                vp
+                vp,
+                ::lookupCombineMode,
+                ::lookupTextureScroll,
+                TextureScroll.seconds(textureAnimatingProgression),
+                sunBrightness,
+                sunColorRed,
+                sunColorGreen,
+                sunColorBlue
             )
 
             // The particle pass changed raw GL state (shader, blend, depth mask)
@@ -4046,6 +4089,11 @@ class ModernGLToolkit(
      * memo when neither its position nor the frame's light set has changed.
      */
     private fun selectLightsForModel(model: ModelGL, modelMatrix: Matrix43) {
+        if (Scene.currentDrawEntity == null) {
+            currentLightIdx[0] = -1f; currentLightIdx[1] = -1f
+            currentLightIdx[2] = -1f; currentLightIdx[3] = -1f
+            return
+        }
         if (model.modernLightEpoch == lightEpoch &&
             model.modernLightX == modelMatrix.xD &&
             model.modernLightY == modelMatrix.yD &&
@@ -4924,7 +4972,7 @@ class ModernGLToolkit(
             if (added) {
                 totalFacesProcessed += b.faceCount
             } else if (batcher != null && batcher.isActive()) {
-                submitStreamedModel(batcher, b, dbMatrix[i])
+                submitStreamedModel(batcher, b, dbMatrix[i], dbTranslucent[i], dbDepthWrite[i], dbSeq[i], dbKey[i])
             }
         }
         deferredBuildMsAcc += (System.nanoTime() - t0) / 1e6
@@ -4945,6 +4993,27 @@ class ModernGLToolkit(
      * profile. The memo is keyed by the same invalidation stamp as the content hash,
      * plus the entry's own eviction flag so a freed buffer can never be handed back.
      */
+    private var farToNearScratch = LongArray(256)
+
+    private fun sortFarToNear(keys: IntArray, seqs: IntArray, n: Int, order: IntArray) {
+        for (i in 0 until n) order[i] = i
+        if (n < 2) return
+        if (n > 4096) {
+            val sorted = (0 until n).sortedWith(compareBy({ -keys[it].toLong() }, { seqs[it] }))
+            for (i in 0 until n) order[i] = sorted[i]
+            return
+        }
+        if (farToNearScratch.size < n) farToNearScratch = LongArray(n * 2)
+        val scratch = farToNearScratch
+        for (i in 0 until n) {
+            val keyPart = (Int.MAX_VALUE.toLong() - keys[i]) and 0xFFFFFFFFL
+            val seqPart = seqs[i].toLong() and 0xFFFFFL
+            scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or i.toLong() xor Long.MIN_VALUE
+        }
+        java.util.Arrays.sort(scratch, 0, n)
+        for (i in 0 until n) order[i] = (scratch[i] and 0xFFFL).toInt()
+    }
+
     private inline fun sharedGeometryFor(
         model: ModelGL,
         cache: ModelCache,
@@ -4953,7 +5022,10 @@ class ModernGLToolkit(
     ): ModelCache.CachedModel? {
         if (model.modernSharedValid && model.modernSharedKey == key) {
             val memo = model.modernSharedGeometry as? ModelCache.CachedModel
-            if (memo != null && !memo.evicted) return memo
+            if (memo != null && !memo.evicted) {
+                memo.lastUsedFrame = cache.frame
+                return memo
+            }
         }
         val resolved = cache.getOrCreate(model, key, build) ?: return null
         model.modernSharedGeometry = resolved
@@ -4971,7 +5043,11 @@ class ModernGLToolkit(
     private fun submitStreamedModel(
         batcher: OptimizedFrameBatcher,
         cached: ModelCache.CachedModel,
-        modelMatrix: Matrix43
+        modelMatrix: Matrix43,
+        translucent: Boolean = Scene.alphaPassActive,
+        depthWrite: Boolean = depthBufferingEnabled,
+        seq: Int = if (translucent) translucentSeqCounter++ else 0,
+        depthKey: Int = if (translucent) (Scene.currentDrawEntity?.floorDepth ?: 0) else 0
     ) {
         selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
         var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
@@ -4982,10 +5058,6 @@ class ModernGLToolkit(
         }
         modelCounter++
         debugModelSuccesses++
-        val translucent = Scene.alphaPassActive
-        val depthWrite = depthBufferingEnabled
-        val seq = if (translucent) translucentSeqCounter++ else 0
-        val depthKey = if (translucent) (Scene.currentDrawEntity?.floorDepth ?: 0) else 0
         var facesAdded = batcher.addCachedModel(cached, modelIndex, translucent, depthWrite, seq, depthKey)
         // addCachedModel returns 0 and DISCARDS the model when its vertex buffer is
         // full; flush and retry once, exactly as submitCachedModel does.
@@ -5483,6 +5555,12 @@ class ModernGLToolkit(
 
         groundRenderer?.destroy()
         groundRenderer = null
+        for ((ground, vbo) in residentGroundVbos) {
+            glDeleteBuffers(vbo)
+            ground.modernVboId = 0
+            ground.modernVboRevision = -1
+        }
+        residentGroundVbos.clear()
 
         spriteRenderer?.destroy()
         spriteRenderer = null
@@ -6361,6 +6439,7 @@ class ModernGLToolkit(
                     glBufferData(GL_ELEMENT_ARRAY_BUFFER, staging, GL_DYNAMIC_DRAW)
                     material.modernIboCapacity = needed
                 } else {
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, material.modernIboCapacity.toLong(), GL_DYNAMIC_DRAW)
                     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0L, staging)
                 }
                 residentIbo = material.modernIboId

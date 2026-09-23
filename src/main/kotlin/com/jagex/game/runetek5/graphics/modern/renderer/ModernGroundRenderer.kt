@@ -161,7 +161,7 @@ class ModernGroundRenderer {
      * Called by GroundGL BEFORE it draws that ground's materials, so the draws that
      * follow sample the right plane's map. [texelSize] = world units per shadow texel.
      */
-    fun setShadowMapper(sm: ShadowMapperGL, texelSize: Float) {
+    fun setShadowMapper(sm: ShadowMapperGL?, texelSize: Float) {
         if (!GROUND_SHADOWS) return
         currentShadowMapper = sm
         shadowTexelSize = texelSize
@@ -315,8 +315,8 @@ class ModernGroundRenderer {
         if (plCount > 0) {
             val lp = s.getArrayUniformLocation("uPointLightPos")
             val lc = s.getArrayUniformLocation("uPointLightColor")
-            if (lp >= 0) GLWrapper.uniform4fv(lp, plPos)
-            if (lc >= 0) GLWrapper.uniform3fv(lc, plColor)
+            if (lp >= 0) GLWrapper.uniform4fv(lp, plPos, plCount)
+            if (lc >= 0) GLWrapper.uniform3fv(lc, plColor, plCount)
         }
     }
 
@@ -538,11 +538,19 @@ class ModernGroundRenderer {
     /**
      * Begins a render frame.
      */
+    fun invalidateBoundTexture() {
+        boundTexture = -1
+    }
+
+    fun resetFrameCounters() {
+        drawCallsThisFrame = 0
+        trianglesThisFrame = 0
+    }
+
     fun beginFrame() {
         check(isInitialized) { "Renderer not initialized" }
 
-        drawCallsThisFrame = 0
-        trianglesThisFrame = 0
+        resetFrameCounters()
 
         shader!!.bind()
         setLightingUniforms()
@@ -1016,16 +1024,6 @@ class ModernGroundRenderer {
             s.setUniform(uTexFogEndLocation, fogEnd)
             s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
 
-            // Clear depth on the CURRENT FBO before the first ground draw. The depth
-            // buffer here has stale values because the initial clear in setModelMatrix
-            // runs on a different FBO. Ground renders inline during scene traversal
-            // before batched models flush, so this is safe — no valid depth yet.
-            if (drawCallsThisFrame == 0) {
-                glClearDepth(1.0)
-                glDepthMask(true)
-                glClear(GL_DEPTH_BUFFER_BIT)
-            }
-
             // Blend must be on: the per-material color VBO carries a per-vertex alpha
             // MASK (0 for vertices not owned by this material, 255 for owned — written
             // by GroundMaterialGL.appendToNativeStream), and legacy draws ground with
@@ -1273,6 +1271,12 @@ class ModernGroundRenderer {
 
         vertexData?.let { MemoryUtil.memFree(it) }
         indexData?.let { MemoryUtil.memFree(it) }
+        shadowUploadScratch?.let { MemoryUtil.memFree(it) }
+        shadowUploadScratch = null
+        for (entry in shadowEntries.values) if (entry.tex != 0) glDeleteTextures(entry.tex)
+        shadowEntries.clear()
+        currentShadowMapper = null
+        boundShadowMapper = null
 
         shader = null
         vao = null

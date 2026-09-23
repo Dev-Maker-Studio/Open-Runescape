@@ -515,7 +515,7 @@ object EnumEmailFriendOps {
     @JvmStatic
     fun clanIsSelf(executor: CS2Executor) {
         val value = executor.intStack[--executor.intStackPtr]
-        if (FriendsChat.FC_PLAYERS != null && value < FriendsChat.FC_PLAYER_COUNT && FriendsChat.FC_PLAYERS!![value]!!.username.equals(PlayerUpdate.MY_PLAYER!!.displayName)) {
+        if (FriendsChat.FC_PLAYERS != null && value < FriendsChat.FC_PLAYER_COUNT && FriendsChat.FC_PLAYERS!![value]!!.username.equals(PlayerUpdate.MY_PLAYER!!.displayName, ignoreCase = true)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0

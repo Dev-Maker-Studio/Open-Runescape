@@ -11,13 +11,13 @@ class NPCTypeCustomisation {
 
     @JvmField var uid: Long = 0
 
-    @JvmField val modelIds: IntArray
+    @JvmField val modelIds: IntArray?
 
     @JvmField var recolorDst: ShortArray? = null
 
     @JvmField var retextureDst: ShortArray? = null
 
-    constructor(uid: Long, models: IntArray, recolorDst: ShortArray?, retextureDst: ShortArray?) {
+    constructor(uid: Long, models: IntArray?, recolorDst: ShortArray?, retextureDst: ShortArray?) {
         this.uid = uid
         this.modelIds = models
         this.recolorDst = recolorDst

@@ -22,5 +22,5 @@ object PulseEventType {
     const val IF_SETRETEX = 19
     const val IF_SETMONOSPACED = 20
     const val IF_SETCLICKMASK = 21
-    const val IF_SETTEXTANTIMACRO = 21
+    const val IF_SETTEXTANTIMACRO = 22
 }

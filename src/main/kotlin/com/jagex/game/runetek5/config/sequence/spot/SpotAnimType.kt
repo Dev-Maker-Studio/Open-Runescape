@@ -243,8 +243,8 @@ class SpotAnimType {
             model!!.contourToGround(
                 contourType.toInt(),
                 contourModifier,
-                groundCurrentLvl!!,
-                groundNextLvl!!,
+                groundCurrentLvl,
+                groundNextLvl,
                 sceneX,
                 averageHeight,
                 sceneY
