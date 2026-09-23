@@ -46,6 +46,19 @@ class GroundWater(
     @JvmField val lapAmbient: FloatArray = floatArrayOf(1f, 1f, 1f),
     @JvmField var lapNoise: FloatArray? = null,
 ) {
+    fun copyInto(target: GroundWater) {
+        target.mode = mode
+        target.noiseTexture = noiseTexture
+        target.time = time
+        stillFog.copyInto(target.stillFog)
+        target.colour = colour
+        target.rippleFogStart = rippleFogStart
+        target.rippleFogDensity = rippleFogDensity
+        target.turbulence = turbulence
+        lapAmbient.copyInto(target.lapAmbient)
+        target.lapNoise = lapNoise
+    }
+
     companion object {
         @JvmField val NONE = GroundWater()
     }
@@ -91,6 +104,18 @@ class ModernGroundRenderer {
     private var uTexContrastPosLocation = -1
     private var uTexContrastNegLocation = -1
     private var uTexWaterModeLocation = -1
+    private var uTexClipPlaneLocation = -1
+    private var uTexDepthFogLocation = -1
+    private var uTexInvViewProjectionLocation = -1
+    private var uTexViewportLocation = -1
+    private var uTexFramebufferSizeLocation = -1
+    private var depthFogTexture = 0
+    private var depthFogWidth = 0
+    private var depthFogHeight = 0
+    private val depthFogInverse = Matrix4f()
+    private val depthFogInverseArray = FloatArray(16)
+    private val depthFogViewport = IntArray(4)
+    private val clipPlane = FloatArray(4)
     private var uTexWaterNoiseLocation = -1
     private var uTexHasWaterNoiseLocation = -1
     private var uTexWaterColourLocation = -1
@@ -101,6 +126,7 @@ class ModernGroundRenderer {
     private var uTexWaterTimeLocation = -1
     private var uTexRippleFogLocation = -1
     private val WATER_TEXTURE_UNIT = 5
+    private val SCENE_DEPTH_TEXTURE_UNIT = 6
 
     // Legacy sun parameters for HD_LIGHT grounds (raw, unnormalized values from
     // OpenGlToolkit.sunDirection / sunBrightness / sunColorIntensity / antiSunColorIntensity)
@@ -307,6 +333,44 @@ class ModernGroundRenderer {
         plColor = color
     }
 
+    fun setDepthFog(depthTexture: Int, framebufferWidth: Int, framebufferHeight: Int) {
+        closeGroundBatch()
+        depthFogTexture = depthTexture
+        depthFogWidth = framebufferWidth
+        depthFogHeight = framebufferHeight
+        glActiveTexture(GL_TEXTURE0 + SCENE_DEPTH_TEXTURE_UNIT)
+        glBindTexture(GL_TEXTURE_2D, depthTexture)
+        glActiveTexture(GL_TEXTURE0)
+    }
+
+    fun setClipPlane(a: Float, b: Float, c: Float, d: Float) {
+        closeGroundBatch()
+        clipPlane[0] = a
+        clipPlane[1] = b
+        clipPlane[2] = c
+        clipPlane[3] = d
+    }
+
+    val waterPointLightCount: Int get() = if (GROUND_POINT_LIGHTS) plCount else 0
+    val waterPointLightPositions: FloatArray get() = plPos
+    val waterPointLightColours: FloatArray get() = plColor
+
+    fun waterShadowTexture(): Int {
+        if (!GROUND_SHADOWS) return 0
+        val sm = currentShadowMapper ?: return 0
+        val e = shadowEntryFor(sm)
+        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + SHADOW_TEXTURE_UNIT)
+        syncShadowTexture(e)
+        glBindTexture(GL_TEXTURE_2D, e.tex)
+        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+        return e.tex
+    }
+
+    fun waterShadowScale(): Float {
+        val sm = currentShadowMapper ?: return 0f
+        return 1f / (shadowTexelSize * shadowEntryFor(sm).w)
+    }
+
     private fun uploadPointLights(s: ShaderProgram) {
         val loc = s.getUniformLocation("uPointLightCount")
         if (loc < 0) return
@@ -470,6 +534,11 @@ class ModernGroundRenderer {
         uTexContrastPosLocation = s.getUniformLocation("uContrastPos")
         uTexContrastNegLocation = s.getUniformLocation("uContrastNeg")
         uTexWaterModeLocation = s.getUniformLocation("uWaterMode")
+        uTexClipPlaneLocation = s.getUniformLocation("uClipPlane")
+        uTexDepthFogLocation = s.getUniformLocation("uDepthFog")
+        uTexInvViewProjectionLocation = s.getUniformLocation("uInvViewProjection")
+        uTexViewportLocation = s.getUniformLocation("uViewport")
+        uTexFramebufferSizeLocation = s.getUniformLocation("uFramebufferSize")
         uTexWaterNoiseLocation = s.getUniformLocation("uWaterNoise")
         uTexHasWaterNoiseLocation = s.getUniformLocation("uHasWaterNoise")
         uTexWaterColourLocation = s.getUniformLocation("uWaterColour")
@@ -484,6 +553,8 @@ class ModernGroundRenderer {
         if (uTexWaterNoiseLocation >= 0) GLWrapper.uniform1i(uTexWaterNoiseLocation, WATER_TEXTURE_UNIT)
         val shadowTex = s.getUniformLocation("uGroundShadowTex")
         if (shadowTex >= 0) GLWrapper.uniform1i(shadowTex, SHADOW_TEXTURE_UNIT)
+        val sceneDepth = s.getUniformLocation("uSceneDepth")
+        if (sceneDepth >= 0) GLWrapper.uniform1i(sceneDepth, SCENE_DEPTH_TEXTURE_UNIT)
         s.unbind()
     }
 
@@ -635,7 +706,12 @@ class ModernGroundRenderer {
                 val c = water.colour
                 glUniform3f(uTexWaterColourLocation, (c shr 16 and 0xff) / 255f, (c shr 8 and 0xff) / 255f, (c and 0xff) / 255f)
             }
-            4 -> glUniform2f(uTexRippleFogLocation, water.rippleFogStart, water.rippleFogDensity)
+            4 -> {
+                glUniform2f(uTexRippleFogLocation, water.rippleFogStart, water.rippleFogDensity)
+                glUniform4f(uTexStillFogLocation, water.stillFog[0], water.stillFog[1], water.stillFog[2], water.stillFog[3])
+                val c = water.colour
+                glUniform3f(uTexWaterColourLocation, (c shr 16 and 0xff) / 255f, (c shr 8 and 0xff) / 255f, (c and 0xff) / 255f)
+            }
             2 -> {
                 glUniform1f(uTexLapTurbulenceLocation, water.turbulence)
                 glUniform3f(uTexLapAmbientLocation, water.lapAmbient[0], water.lapAmbient[1], water.lapAmbient[2])
@@ -994,6 +1070,15 @@ class ModernGroundRenderer {
             colMajor[9] = -colMajor[9]
             colMajor[13] = -colMajor[13]
             glUniformMatrix4fv(uTexViewProjectionLocation, false, colMajor)
+            glUniform4f(uTexClipPlaneLocation, clipPlane[0], clipPlane[1], clipPlane[2], clipPlane[3])
+            GLWrapper.uniform1i(uTexDepthFogLocation, if (depthFogTexture != 0) 1 else 0)
+            if (depthFogTexture != 0) {
+                depthFogInverse.set(colMajor).invert().get(depthFogInverseArray)
+                glUniformMatrix4fv(uTexInvViewProjectionLocation, false, depthFogInverseArray)
+                glGetIntegerv(GL_VIEWPORT, depthFogViewport)
+                glUniform4f(uTexViewportLocation, depthFogViewport[0].toFloat(), depthFogViewport[1].toFloat(), depthFogViewport[2].toFloat(), depthFogViewport[3].toFloat())
+                glUniform2f(uTexFramebufferSizeLocation, depthFogWidth.toFloat(), depthFogHeight.toFloat())
+            }
 
             // Lighting. HD_LIGHT grounds bake sunDotProduct = 1.0 into the vertex
             // colors and expect runtime sun lighting (GroundGL.kt:457-460), so pass

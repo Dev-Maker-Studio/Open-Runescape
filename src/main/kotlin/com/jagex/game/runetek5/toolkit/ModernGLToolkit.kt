@@ -24,6 +24,7 @@ import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernFontRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernGroundRenderer
+import com.jagex.game.runetek5.graphics.modern.renderer.HdWaterRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernModelRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernBillboardRenderer
 import org.lwjgl.opengl.GL30
@@ -404,6 +405,9 @@ class ModernGLToolkit(
     private var lastBatcherStatus = "not checked"  // Debug status for MCP
 
     companion object {
+        private const val DEFAULT_OVERLAY_WATER_COLOUR = 1190717
+        private const val HD_WATER_FLOW = 16f
+        private const val REFLECTION_CLIP_BIAS = 4f
         /**
          * Source of per-instance geometry keys for animated models.
          *
@@ -742,6 +746,7 @@ class ModernGLToolkit(
 
             groundRenderer = ModernGroundRenderer()
             groundRenderer!!.initialize()
+            if (HdWaterRenderer.AVAILABLE) hdWater.initialize()
 
             spriteRenderer = ModernSpriteRenderer()
             spriteRenderer!!.initialize()
@@ -1504,6 +1509,9 @@ class ModernGLToolkit(
         // If batcher isn't active, we're on login screen or no 3D scene - skip modern rendering
         if (!batcherActive) {
             clearDeferredBuilds()
+            hdWater.clear()
+            groundReplayCount = 0
+            deferredWaterCount = 0
             return
         }
 
@@ -1538,6 +1546,7 @@ class ModernGLToolkit(
             gpuTimer.begin(GPU_PASS_STREAM)
             optimizedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
             gpuTimer.end(GPU_PASS_STREAM)
+            drawHdWater(width, height)
             // Translucent pass LAST, after every opaque draw of both batchers, replayed
             // in scene order — legacy's alpha bucket — with deferred particle systems
             // spliced in at their sequence positions.
@@ -6079,6 +6088,295 @@ class ModernGLToolkit(
         return bits
     }
 
+    private val hdWater = HdWaterRenderer()
+    private var hdWaterActive = false
+    private val hdWaterViewProjection = FloatArray(16)
+    private val hdWaterSunColour = FloatArray(3)
+
+    private fun isHdWaterSurface(material: GroundMaterialGL, type: com.jagex.game.runetek5.config.material.MaterialType?): Boolean {
+        if (!hdWaterActive || stillWaterToggled || type == null) return false
+        return when (type.effectId.toInt()) {
+            4, 8, 9 -> true
+            2 -> material.waterTile.color != DEFAULT_OVERLAY_WATER_COLOUR && material.waterTile.color != com.jagex.game.runetek5.scene.tile.WaterTile().color
+            else -> false
+        }
+    }
+
+    private fun queueHdWater(
+        material: GroundMaterialGL, type: com.jagex.game.runetek5.config.material.MaterialType?,
+        vertexVbo: Int, stride: Int, texCoordSize: Int, colorVbo: Int, indexIbo: Int, indexCount: Int, viewProjection: Matrix44
+    ) {
+        val elements = viewProjection.elements ?: return
+        val vp = hdWaterViewProjection
+        for (i in 0..15) vp[i] = elements[i]
+        vp[1] = -vp[1]
+        vp[5] = -vp[5]
+        vp[9] = -vp[9]
+        vp[13] = -vp[13]
+        val seconds = textureAnimatingProgression / 1000.0
+        val period = HdWaterRenderer.FLOW_PERIOD.toDouble()
+        val gr = groundRenderer
+        hdWater.queue(
+            vertexVbo, stride, texCoordSize, colorVbo, indexIbo, indexCount, vp, material.waterTile.color, material.waterTile.scale,
+            gr?.waterShadowTexture() ?: 0, gr?.waterShadowScale() ?: 0f,
+            ((type?.textureSpeedU?.toInt() ?: 0) * seconds * HD_WATER_FLOW).mod(period).toFloat(),
+            ((type?.textureSpeedV?.toInt() ?: 0) * seconds * HD_WATER_FLOW).mod(period).toFloat(),
+            material.modernWaterPlaneY
+        )
+    }
+
+    private class GroundReplay {
+        var vertexData: java.nio.ByteBuffer? = null
+        var vertexVbo = 0
+        var stride = 0
+        var texCoordSize = 2
+        var colorVbo = 0
+        var indexIbo = 0
+        var indexCount = 0
+        var textureHandle = 0
+        var textureScale = 1f
+        var scrollU = 0f
+        var scrollV = 0f
+        var hasNormals = false
+        var combineMode = 0
+        var alphaFromVertex = false
+        val water = com.jagex.game.runetek5.graphics.modern.renderer.GroundWater()
+    }
+
+    private val groundReplays = ArrayList<GroundReplay>()
+    private var groundReplayCount = 0
+    private val deferredWater = ArrayList<GroundReplay>()
+    private var deferredWaterCount = 0
+    private val mirroredViewProjection = Matrix44()
+    private val mirroredViewProjectionGl = FloatArray(16)
+    private val reflectionClipPlane = FloatArray(4)
+
+    private fun recordGroundReplay(
+        vertexData: java.nio.ByteBuffer, vertexVbo: Int, stride: Int, texCoordSize: Int, colorVbo: Int, indexIbo: Int, indexCount: Int,
+        textureHandle: Int, textureScale: Float, scrollU: Float, scrollV: Float, hasNormals: Boolean, combineMode: Int, alphaFromVertex: Boolean
+    ) {
+        if (groundReplayCount == groundReplays.size) groundReplays.add(GroundReplay())
+        fillReplay(groundReplays[groundReplayCount++], vertexData, vertexVbo, stride, texCoordSize, colorVbo, indexIbo, indexCount,
+            textureHandle, textureScale, scrollU, scrollV, hasNormals, combineMode, alphaFromVertex)
+    }
+
+    private fun deferWater(
+        vertexData: java.nio.ByteBuffer, vertexVbo: Int, stride: Int, texCoordSize: Int, colorVbo: Int, indexIbo: Int, indexCount: Int,
+        textureHandle: Int, textureScale: Float, scrollU: Float, scrollV: Float, hasNormals: Boolean, combineMode: Int, alphaFromVertex: Boolean,
+        water: com.jagex.game.runetek5.graphics.modern.renderer.GroundWater
+    ) {
+        if (deferredWaterCount == 0) captureDeferredWaterState()
+        if (deferredWaterCount == deferredWater.size) deferredWater.add(GroundReplay())
+        val r = deferredWater[deferredWaterCount++]
+        fillReplay(r, vertexData, vertexVbo, stride, texCoordSize, colorVbo, indexIbo, indexCount,
+            textureHandle, textureScale, scrollU, scrollV, hasNormals, combineMode, alphaFromVertex)
+        water.copyInto(r.water)
+    }
+
+    private val deferredWaterSun = FloatArray(6)
+    private val deferredWaterFog = FloatArray(5)
+    private var deferredWaterFogEnabled = false
+
+    private fun captureDeferredWaterState() {
+        deferredWaterSun[0] = sunDirection[0]
+        deferredWaterSun[1] = sunDirection[1]
+        deferredWaterSun[2] = sunDirection[2]
+        deferredWaterSun[3] = sunColorRed
+        deferredWaterSun[4] = sunColorGreen
+        deferredWaterSun[5] = sunColorBlue
+        deferredWaterFogEnabled = fogEnabled && fogDensity > 0
+        deferredWaterFog[0] = fogStartPosition.toFloat()
+        deferredWaterFog[1] = fogEndPosition.toFloat()
+        deferredWaterFog[2] = (fogColor and 0xff0000) / 16711680f
+        deferredWaterFog[3] = (fogColor and 0xff00) / 65280f
+        deferredWaterFog[4] = (fogColor and 0xff) / 255f
+    }
+
+    private fun drawDeferredWater(defaultWidth: Int, defaultHeight: Int) {
+        if (deferredWaterCount == 0) return
+        val gr = groundRenderer
+        if (gr == null) {
+            deferredWaterCount = 0
+            return
+        }
+        gr.closeGroundBatch()
+        val msaa = if (sceneMsaaBound) sceneMsaa else null
+        val width = msaa?.width ?: defaultWidth
+        val height = msaa?.height ?: defaultHeight
+        val sun = deferredWaterSun
+        val liveDir = Vector3f(sun[0], sun[1], sun[2])
+        if (liveDir.lengthSquared() < 0.001f) liveDir.set(0.5f, 1f, 0.3f)
+        liveDir.normalize()
+        gr.setLighting(liveDir, Vector3f(sun[3], sun[4], sun[5]), 0.4f, 0.6f)
+        val fog = deferredWaterFog
+        if (deferredWaterFogEnabled) gr.setFog(true, fog[0], fog[1], fog[2], fog[3], fog[4]) else gr.setFog(false, 0f, 0f, 0f, 0f, 0f)
+        gr.setDepthFog(hdWater.copySceneDepth(width, height), width, height)
+        try {
+            for (i in 0 until deferredWaterCount) {
+                val r = deferredWater[i]
+                val data = r.vertexData ?: continue
+                gr.renderWithModernData(
+                    vertexData = data,
+                    stride = r.stride,
+                    texCoordSize = r.texCoordSize,
+                    indexShorts = groundIndexScratch,
+                    indexCount = r.indexCount,
+                    textureHandle = r.textureHandle,
+                    textureScale = r.textureScale,
+                    textureScrollU = r.scrollU,
+                    textureScrollV = r.scrollV,
+                    hasNormals = r.hasNormals,
+                    viewProjection = viewProjectionMatrix,
+                    colorVboId = r.colorVbo,
+                    combineMode = r.combineMode,
+                    alphaFromVertex = r.alphaFromVertex,
+                    residentVertexVbo = r.vertexVbo,
+                    residentIndexIbo = r.indexIbo,
+                    water = r.water
+                )
+                r.vertexData = null
+            }
+            gr.closeGroundBatch()
+        } finally {
+            gr.setDepthFog(0, 0, 0)
+            deferredWaterCount = 0
+            resetClientArrayCache()
+            currentArrayBuffer = null
+            currentElementsBuffer = null
+        }
+    }
+
+    private fun fillReplay(
+        r: GroundReplay, vertexData: java.nio.ByteBuffer, vertexVbo: Int, stride: Int, texCoordSize: Int, colorVbo: Int, indexIbo: Int, indexCount: Int,
+        textureHandle: Int, textureScale: Float, scrollU: Float, scrollV: Float, hasNormals: Boolean, combineMode: Int, alphaFromVertex: Boolean
+    ) {
+        r.vertexData = vertexData
+        r.vertexVbo = vertexVbo
+        r.stride = stride
+        r.texCoordSize = texCoordSize
+        r.colorVbo = colorVbo
+        r.indexIbo = indexIbo
+        r.indexCount = indexCount
+        r.textureHandle = textureHandle
+        r.textureScale = textureScale
+        r.scrollU = scrollU
+        r.scrollV = scrollV
+        r.hasNormals = hasNormals
+        r.combineMode = combineMode
+        r.alphaFromVertex = alphaFromVertex
+    }
+
+    private fun samplePlaneY(data: java.nio.ByteBuffer, stride: Int, indices: ShortArray, count: Int): Float {
+        val step = maxOf(1, count / 64)
+        var sum = 0f
+        var n = 0
+        var i = 0
+        while (i < count) {
+            val at = (indices[i].toInt() and 0xffff) * stride + 4
+            if (at + 4 <= data.limit()) {
+                sum += data.getFloat(at)
+                n++
+            }
+            i += step
+        }
+        return if (n == 0) Float.NaN else sum / n
+    }
+
+    private fun renderWaterReflection(width: Int, height: Int) {
+        val plane = hdWater.dominantPlane()
+        if (!hdWater.beginReflection(width, height, fogColor, plane)) return
+        try {
+            val source = viewProjectionMatrix.elements
+            val mirrored = mirroredViewProjection.elements
+            for (i in 0..15) mirrored[i] = source[i]
+            for (c in 0..3) {
+                mirrored[4 + c] = -source[4 + c]
+                mirrored[12 + c] = source[12 + c] + 2f * plane * source[4 + c]
+            }
+            val gl = mirroredViewProjectionGl
+            for (i in 0..15) gl[i] = mirrored[i]
+            gl[1] = -gl[1]
+            gl[5] = -gl[5]
+            gl[9] = -gl[9]
+            gl[13] = -gl[13]
+            val clip = reflectionClipPlane
+            clip[0] = 0f
+            clip[1] = -1f
+            clip[2] = 0f
+            clip[3] = plane + REFLECTION_CLIP_BIAS
+
+            val gr = groundRenderer
+            if (gr != null) {
+                gr.setClipPlane(clip[0], clip[1], clip[2], clip[3])
+                for (i in 0 until groundReplayCount) {
+                    val r = groundReplays[i]
+                    val data = r.vertexData ?: continue
+                    gr.renderWithModernData(
+                        vertexData = data,
+                        stride = r.stride,
+                        texCoordSize = r.texCoordSize,
+                        indexShorts = groundIndexScratch,
+                        indexCount = r.indexCount,
+                        textureHandle = r.textureHandle,
+                        textureScale = r.textureScale,
+                        textureScrollU = r.scrollU,
+                        textureScrollV = r.scrollV,
+                        hasNormals = r.hasNormals,
+                        viewProjection = mirroredViewProjection,
+                        colorVboId = r.colorVbo,
+                        combineMode = r.combineMode,
+                        alphaFromVertex = r.alphaFromVertex,
+                        residentVertexVbo = r.vertexVbo,
+                        residentIndexIbo = r.indexIbo
+                    )
+                }
+                gr.setClipPlane(0f, 0f, 0f, 0f)
+            }
+            if (useInstancing) instancedBatcher?.drawReflection(gl, clip)
+            optimizedBatcher?.drawReflection(gl, clip)
+        } finally {
+            hdWater.endReflection()
+            resetClientArrayCache()
+            currentArrayBuffer = null
+            currentElementsBuffer = null
+        }
+    }
+
+    private fun drawHdWater(defaultWidth: Int, defaultHeight: Int) {
+        hdWaterActive = HdWaterRenderer.AVAILABLE && HdWaterRenderer.selected()
+        drawDeferredWater(defaultWidth, defaultHeight)
+        if (!hdWater.hasQueued) {
+            groundReplayCount = 0
+            return
+        }
+        groundRenderer?.closeGroundBatch()
+        val msaa = if (sceneMsaaBound) sceneMsaa else null
+        if (HdWaterRenderer.PLANAR) renderWaterReflection(msaa?.width ?: defaultWidth, msaa?.height ?: defaultHeight)
+        groundReplayCount = 0
+        hdWaterSunColour[0] = sunColorRed
+        hdWaterSunColour[1] = sunColorGreen
+        hdWaterSunColour[2] = sunColorBlue
+        hdWater.render(
+            msaa?.width ?: defaultWidth,
+            msaa?.height ?: defaultHeight,
+            sunDirection,
+            hdWaterSunColour,
+            sunBrightness,
+            fogColor,
+            effectManager?.textureContainer?.texture3d?.activeHandle ?: 0,
+            effectManager?.textureContainer?.billowTexture3d?.activeHandle ?: 0,
+            getCubeMap()?.activeHandle ?: 0,
+            (textureAnimatingProgression % 4000) / 4000f,
+            (textureAnimatingProgression % 32000) / 32000f,
+            fogEnabled && fogDensity > 0,
+            fogStartPosition,
+            fogEndPosition,
+            groundRenderer?.waterPointLightCount ?: 0,
+            groundRenderer?.waterPointLightPositions ?: FloatArray(0),
+            groundRenderer?.waterPointLightColours ?: FloatArray(0)
+        )
+    }
+
     private val groundWaterScratch = com.jagex.game.runetek5.graphics.modern.renderer.GroundWater()
     private var lapNoiseTable: FloatArray? = null
     private val lapNoiseFrame = FloatArray(128)
@@ -6087,6 +6385,10 @@ class ModernGLToolkit(
     private fun groundWater(material: GroundMaterialGL, ground: GroundGL, type: com.jagex.game.runetek5.config.material.MaterialType?): com.jagex.game.runetek5.graphics.modern.renderer.GroundWater {
         val water = groundWaterScratch
         val progression = textureAnimatingProgression
+        if (stillWaterToggled && hdWaterActive) {
+            water.mode = 0
+            return water
+        }
         if (stillWaterToggled) {
             val tile = material.waterTile
             val fogFar = fogFarDistance
@@ -6115,6 +6417,9 @@ class ModernGLToolkit(
         when (effect) {
             4 -> {
                 water.mode = 4
+                water.stillFog[2] = 256f / material.waterTile.scale
+                water.stillFog[3] = material.waterTile.intensity / 255f
+                water.colour = material.waterTile.color
                 water.noiseTexture = noise
                 water.time = if ((param1 and 0x1) == 1) (progression % 4000) / 4000f else 0f
                 water.rippleFogStart = fogStartPosition
@@ -6343,6 +6648,7 @@ class ModernGLToolkit(
             }
             material.modernIndexStamp = stamp
             material.modernIndexCount = indexCount
+            if (indexCount > 0 && HdWaterRenderer.PLANAR) material.modernWaterPlaneY = samplePlaneY(modernData, stride, indexArray, indexCount)
             if (indexCount > 0) {
                 // Upload into the material's own element buffer so later frames bind it.
                 if (material.modernIboId == 0) material.modernIboId = glGenBuffers()
@@ -6475,6 +6781,29 @@ class ModernGLToolkit(
 
         if (verifyLiveGeometry) GeometryDiff.recordGround(materialId, combineMode, colorVboId, colorData != null)
 
+        if (colorVboId != 0 && residentIbo != 0 && isHdWaterSurface(material, groundMaterial)) {
+            queueHdWater(material, groundMaterial, residentGroundVbo(ground, modernData), stride, texCoordSize, colorVboId, residentIbo, indexCount, vpMatrix)
+            return true
+        }
+
+        if (hdWaterActive && HdWaterRenderer.PLANAR && colorVboId != 0 && residentIbo != 0) {
+            recordGroundReplay(
+                modernData, residentGroundVbo(ground, modernData), stride, texCoordSize, colorVboId, residentIbo, indexCount,
+                textureHandle, 1.0f / textureScale, textureScrollU, textureScrollV, hasNormals, combineMode,
+                materialId >= 0 && !MaterialTypeList.isOpaqueEffect(materialProvider?.getMaterial(materialId)?.effectId?.toInt() ?: 0)
+            )
+        }
+
+        val water = groundWater(material, ground, groundMaterial)
+        val alphaFromVertex = materialId >= 0 && !MaterialTypeList.isOpaqueEffect(materialProvider?.getMaterial(materialId)?.effectId?.toInt() ?: 0)
+        if (water.mode == 4 && useOptimizedBatcher && colorVboId != 0 && residentIbo != 0) {
+            deferWater(
+                modernData, residentGroundVbo(ground, modernData), stride, texCoordSize, colorVboId, residentIbo, indexCount,
+                textureHandle, 1.0f / textureScale, textureScrollU, textureScrollV, hasNormals, combineMode, alphaFromVertex, water
+            )
+            return true
+        }
+
         // Render through modern ground renderer (pure LWJGL path)
         gpuTimer.begin(GPU_PASS_GROUND)
         gr.renderWithModernData(
@@ -6492,10 +6821,10 @@ class ModernGLToolkit(
             colorVboId = colorVboId,
             colorData = colorData,
             combineMode = combineMode,
-            alphaFromVertex = materialId >= 0 && !MaterialTypeList.isOpaqueEffect(materialProvider?.getMaterial(materialId)?.effectId?.toInt() ?: 0),
+            alphaFromVertex = alphaFromVertex,
             residentVertexVbo = residentGroundVbo(ground, modernData),
             residentIndexIbo = residentIbo,
-            water = groundWater(material, ground, groundMaterial)
+            water = water
         )
         gpuTimer.end(GPU_PASS_GROUND)
         // The VAO pass toggled generic attribute arrays; on most drivers attribute 0

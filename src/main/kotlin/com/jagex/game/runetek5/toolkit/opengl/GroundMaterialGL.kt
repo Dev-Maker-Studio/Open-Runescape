@@ -41,6 +41,7 @@ class GroundMaterialGL(
     @JvmField var modernIndexCount: Int = -1
     /** Modern path: resident GL element buffer holding the cached index list. */
     @JvmField var modernIboId: Int = 0
+    @JvmField var modernWaterPlaneY: Float = Float.NaN
     @JvmField var modernIboCapacity: Int = 0
     /** Tile indices where this material owns at least one triangle (static per material). */
     @JvmField var modernTiles: IntArray? = null

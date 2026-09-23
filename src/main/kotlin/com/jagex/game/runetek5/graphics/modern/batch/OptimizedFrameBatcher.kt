@@ -199,6 +199,10 @@ class OptimizedFrameBatcher {
     private var currentModelIndex = 0
     private var isInitialized = false
     private var isFrameActive = false
+    private var uClipPlaneLocation = -1
+    private var reflectionMaterials = IntArray(0)
+    private var reflectionTextureCache: ((Int) -> Int)? = null
+    private var reflectionCombineModeOf: ((Int) -> Int)? = null
 
     // View-projection matrix from legacy system
     private var vpMatrix: FloatArray? = null
@@ -251,6 +255,7 @@ class OptimizedFrameBatcher {
         uTextureTimeLocation = shader!!.getUniformLocation("uTextureTime")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
+        uClipPlaneLocation = shader!!.getUniformLocation("uClipPlane")
         // Lighting uniforms
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
         uSunBrightnessLocation = shader!!.getUniformLocation("uSunBrightness")
@@ -306,6 +311,7 @@ class OptimizedFrameBatcher {
             layout(location = 4) in float aModelIndex; // Model matrix index
 
             uniform mat4 uViewProjection;
+            uniform vec4 uClipPlane;
 
             // Lighting uniforms - matches legacy lighting calculation exactly
             uniform vec3 uSunDirection;   // Normalized sun direction
@@ -347,6 +353,7 @@ class OptimizedFrameBatcher {
                 mat4 modelMat = uModelMatrices[modelIdx];
                 vec4 worldPos = modelMat * vec4(aPosition, 1.0);
                 gl_Position = uViewProjection * worldPos;
+                gl_ClipDistance[0] = dot(worldPos, uClipPlane);
 
                 vTexCoord = aTexCoord;
 
@@ -501,11 +508,58 @@ class OptimizedFrameBatcher {
     /**
      * Begins a new frame. Resets all state without allocations.
      */
+    fun drawReflection(mirroredViewProjection: FloatArray, clipPlane: FloatArray) {
+        val sh = shader ?: return
+        val textureCache = reflectionTextureCache ?: return
+        val combineModeOf = reflectionCombineModeOf ?: return
+        val vp = vpMatrix ?: return
+        sh.bind()
+        GLWrapper.enable(GLWrapper.Constants.DEPTH_TEST)
+        GLWrapper.depthFunc(GLWrapper.Constants.LEQUAL)
+        if (CULL_FACE) {
+            GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+            GLWrapper.cullFace(CULL_MODE)
+            GLWrapper.frontFace(if (CULL_WIND == 0x0900) 0x0901 else 0x0900)
+        }
+        glUniformMatrix4fv(uViewProjectionLocation, false, mirroredViewProjection)
+        glUniform4f(uClipPlaneLocation, clipPlane[0], clipPlane[1], clipPlane[2], clipPlane[3])
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, matrixUbo)
+        vao!!.bind()
+        ibo!!.bind()
+        var lastTextureHandle = -1
+        for (slot in reflectionMaterials) {
+            val indexCount = materialIndexCounts[slot]
+            if (indexCount == 0) continue
+            val texId = materialTextureIds[slot]
+            val textureHandle = if (texId >= 0) textureCache(texId) else 0
+            if (textureHandle != lastTextureHandle) {
+                if (textureHandle > 0) {
+                    GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                    GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
+                    sh.setUniform(uTextureEnabledLocation, 1)
+                    sh.setUniform(uCombineModeLocation, combineModeOf(texId))
+                    sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+                    setTextureSpeedUniform(sh, texId)
+                } else {
+                    sh.setUniform(uTextureEnabledLocation, 0)
+                }
+                lastTextureHandle = textureHandle
+            }
+            GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_INT, materialStartIndices[slot].toLong() * 4)
+        }
+        vao!!.unbind()
+        setViewProjectionUniform(sh, vp)
+        glUniform4f(uClipPlaneLocation, 0f, 0f, 0f, 0f)
+        GLWrapper.frontFace(CULL_WIND)
+        sh.unbind()
+    }
+
     fun beginFrame() {
         check(isInitialized) { "OptimizedFrameBatcher not initialized" }
         check(!isFrameActive) { "Frame already active" }
 
         frameStartTime = System.nanoTime()
+        reflectionTextureCache = null
 
         // Reset buffers (just position, no reallocation)
         vertexBuffer!!.clear()
@@ -1202,6 +1256,10 @@ class OptimizedFrameBatcher {
                 "block=$blockIdx binding=${bind[0]} blockSize=${blockSize[0]} attr4[en=${attr4[0]} buf=${attr4buf[0]}] attr0buf=${attr0buf[0]} vboId=${vbo!!.id} " +
                 "m0(gpu)=${m.take(4)}|${m.drop(12).take(4)} m0(cpu)=${(0 until 4).map { mb.get(it) }}|${(12 until 16).map { mb.get(it) }} models=$currentModelIndex verts=$totalVertexCount idx=$totalIndexCount err=${glGetError()}")
         }
+
+        reflectionMaterials = sortedMaterials.toIntArray()
+        reflectionTextureCache = textureCache
+        reflectionCombineModeOf = combineModeOf
 
         // Render each material batch
         for (slot in sortedMaterials) {

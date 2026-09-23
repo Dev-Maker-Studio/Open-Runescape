@@ -13,6 +13,7 @@ layout(location = 3) in vec3 aNormal;
 
 // Uniforms
 uniform mat4 uViewProjection;
+uniform vec4 uClipPlane;
 uniform float uTextureScale;  // 1.0 / textureScale for texture coordinate scaling
 uniform vec2 uTextureScroll;
 uniform bool uHasNormals;     // Whether HD lighting normals are present
@@ -60,10 +61,12 @@ out float vFogFactor;
 out vec2 vWorldXZ;   // for the per-fragment ground shadow overlay (see frag)
 out vec3 vWaterNoiseCoord;
 out float vWaterMix;
+out float vWorldY;
 
 void main() {
     vec3 position = aPosition;
     gl_Position = uViewProjection * vec4(position, 1.0);
+    gl_ClipDistance[0] = dot(vec4(position, 1.0), uClipPlane);
     float viewZ = gl_Position.w;
     float waterDepth = aTexCoord.z;
     vWaterMix = 0.0;
@@ -76,6 +79,7 @@ void main() {
         tint = clamp(tint, 0.0, 1.0);
         position.y -= pull;
         gl_Position = uViewProjection * vec4(position, 1.0);
+        gl_ClipDistance[0] = dot(vec4(position, 1.0), uClipPlane);
         vWaterMix = clamp((max(blend, tint) - 0.25) * 2.0, 0.0, 1.0);
     } else if (uWaterMode == 4) {
         vWaterNoiseCoord = vec3(aTexCoord.xy * uTextureScale * 0.25, uWaterTime);
@@ -84,6 +88,7 @@ void main() {
 
     vec3 color = aColor.rgb;
     vWorldXZ = position.xz;
+    vWorldY = position.y;
     vTexCoord = aTexCoord.xy * uTextureScale + uTextureScroll;
     vFogFactor = 1.0;
     if (uWaterMode == 2) {
