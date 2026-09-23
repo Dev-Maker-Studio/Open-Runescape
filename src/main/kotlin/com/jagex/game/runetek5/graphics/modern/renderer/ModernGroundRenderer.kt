@@ -538,11 +538,19 @@ class ModernGroundRenderer {
     /**
      * Begins a render frame.
      */
+    fun invalidateBoundTexture() {
+        boundTexture = -1
+    }
+
+    fun resetFrameCounters() {
+        drawCallsThisFrame = 0
+        trianglesThisFrame = 0
+    }
+
     fun beginFrame() {
         check(isInitialized) { "Renderer not initialized" }
 
-        drawCallsThisFrame = 0
-        trianglesThisFrame = 0
+        resetFrameCounters()
 
         shader!!.bind()
         setLightingUniforms()
@@ -1015,16 +1023,6 @@ class ModernGroundRenderer {
             s.setUniform(uTexFogStartLocation, fogStart)
             s.setUniform(uTexFogEndLocation, fogEnd)
             s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
-
-            // Clear depth on the CURRENT FBO before the first ground draw. The depth
-            // buffer here has stale values because the initial clear in setModelMatrix
-            // runs on a different FBO. Ground renders inline during scene traversal
-            // before batched models flush, so this is safe — no valid depth yet.
-            if (drawCallsThisFrame == 0) {
-                glClearDepth(1.0)
-                glDepthMask(true)
-                glClear(GL_DEPTH_BUFFER_BIT)
-            }
 
             // Blend must be on: the per-material color VBO carries a per-vertex alpha
             // MASK (0 for vertices not owned by this material, 255 for owned — written

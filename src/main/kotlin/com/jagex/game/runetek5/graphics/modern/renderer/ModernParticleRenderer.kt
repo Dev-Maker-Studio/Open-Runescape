@@ -4,6 +4,7 @@ import com.jagex.game.runetek5.graphics.modern.core.IndexBuffer
 import com.jagex.game.runetek5.graphics.modern.core.ShaderProgram
 import com.jagex.game.runetek5.graphics.modern.core.VertexArray
 import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
+import com.jagex.game.runetek5.graphics.modern.material.TextureScroll
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.model.particle.PointEntity
@@ -77,6 +78,9 @@ class ModernParticleRenderer {
     private var uFogStartLocation = -1
     private var uFogEndLocation = -1
     private var uFogColorLocation = -1
+    private var uCombineModeLocation = -1
+    private var uTextureScrollLocation = -1
+    private var uAmbientLocation = -1
 
     // State
     private var isInitialized = false
@@ -174,6 +178,9 @@ class ModernParticleRenderer {
         uFogStartLocation = s.getUniformLocation("uFogStart")
         uFogEndLocation = s.getUniformLocation("uFogEnd")
         uFogColorLocation = s.getUniformLocation("uFogColor")
+        uCombineModeLocation = s.getUniformLocation("uCombineMode")
+        uTextureScrollLocation = s.getUniformLocation("uTextureScroll")
+        uAmbientLocation = s.getUniformLocation("uAmbient")
         s.unbind()
     }
 
@@ -217,7 +224,14 @@ class ModernParticleRenderer {
         fogG: Float,
         fogB: Float,
         /** The scene's tracked view-projection (row-major, RS clip space); when given it replaces proj x view. */
-        vpOverride: FloatArray? = null
+        vpOverride: FloatArray? = null,
+        lookupCombineMode: (Int) -> Int = { 0 },
+        lookupScroll: (Int) -> Int = { 0 },
+        textureSeconds: Float = 0f,
+        sunBrightness: Float = 1f,
+        sunR: Float = 1f,
+        sunG: Float = 1f,
+        sunB: Float = 1f
     ) {
         if (!isInitialized) return
 
@@ -408,9 +422,20 @@ class ModernParticleRenderer {
                 GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
                 GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
                 s.setUniform(uTextureEnabledLocation, 1)
+                s.setUniform(uCombineModeLocation, lookupCombineMode(currentMaterialId))
+                val scroll = lookupScroll(currentMaterialId)
+                s.setUniform(
+                    uTextureScrollLocation,
+                    textureSeconds * TextureScroll.speedU(scroll) / 64f % 1f,
+                    textureSeconds * TextureScroll.speedV(scroll) / 64f % 1f
+                )
             } else {
                 s.setUniform(uTextureEnabledLocation, 0)
+                s.setUniform(uCombineModeLocation, 0)
+                s.setUniform(uTextureScrollLocation, 0f, 0f)
             }
+            val ambient = if (currentLightAdjust) sunBrightness else 1f
+            s.setUniform(uAmbientLocation, ambient * sunR, ambient * sunG, ambient * sunB)
 
             // Generate billboard quads for this material batch, back-to-front
             val vb = vertexData!!

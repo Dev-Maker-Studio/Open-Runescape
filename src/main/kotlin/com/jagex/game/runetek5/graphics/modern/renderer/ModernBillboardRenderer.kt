@@ -75,6 +75,7 @@ class ModernBillboardRenderer {
         uFogStartLocation = s.getUniformLocation("uFogStart")
         uFogEndLocation = s.getUniformLocation("uFogEnd")
         uFogColorLocation = s.getUniformLocation("uFogColor")
+        s.setUniform(s.getUniformLocation("uAmbient"), 1f, 1f, 1f)
         s.unbind()
         isInitialized = true
     }

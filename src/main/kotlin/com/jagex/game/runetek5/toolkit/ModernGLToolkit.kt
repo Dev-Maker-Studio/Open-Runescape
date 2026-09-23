@@ -1410,7 +1410,7 @@ class ModernGLToolkit(
 
         // Begin frame for all renderers
         mr.beginFrame()
-        gr.beginFrame()
+        gr.resetFrameCounters()
 
         if (useOptimizedBatcher) {
             // NOTE: cumulative stats are NOT reset here — openSceneBatch runs at every
@@ -1945,6 +1945,7 @@ class ModernGLToolkit(
             spriteRenderer?.flush("setActiveTexture")
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
         }
+        groundRenderer?.invalidateBoundTexture()
         super.setActiveTexture(replacingCombiner)
     }
 
@@ -3254,7 +3255,14 @@ class ModernGLToolkit(
                 fogStartPosition,
                 fogEndPosition,
                 fR, fG, fB,
-                vp
+                vp,
+                ::lookupCombineMode,
+                ::lookupTextureScroll,
+                TextureScroll.seconds(textureAnimatingProgression),
+                sunBrightness,
+                sunColorRed,
+                sunColorGreen,
+                sunColorBlue
             )
 
             // The particle pass changed raw GL state (shader, blend, depth mask)
@@ -4076,6 +4084,11 @@ class ModernGLToolkit(
      * memo when neither its position nor the frame's light set has changed.
      */
     private fun selectLightsForModel(model: ModelGL, modelMatrix: Matrix43) {
+        if (Scene.currentDrawEntity == null) {
+            currentLightIdx[0] = -1f; currentLightIdx[1] = -1f
+            currentLightIdx[2] = -1f; currentLightIdx[3] = -1f
+            return
+        }
         if (model.modernLightEpoch == lightEpoch &&
             model.modernLightX == modelMatrix.xD &&
             model.modernLightY == modelMatrix.yD &&

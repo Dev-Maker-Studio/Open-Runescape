@@ -91,7 +91,7 @@ void main() {
     if (uWaterMode == 2) {
         vec2 n = fract(vec2(position.x + position.z, position.z - position.x) * 0.0001220703125) * 64.0;
         vec2 offset = vec2(uLapNoise[int(n.x)].x, uLapNoise[int(n.y)].y) * uLapTurbulence;
-        vec2 base = aTexCoord.xy * uTextureScale;
+        vec2 base = aTexCoord.xy * uTextureScale + uTextureScroll;
         vTexCoord = base + offset;
         vWaterNoiseCoord = vec3(base * 0.125, uWaterTime);
         vColor = vec4(clamp(aColor.rgb * uLapAmbient, 0.0, 1.0), aColor.a);
