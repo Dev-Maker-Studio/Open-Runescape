@@ -514,8 +514,6 @@ open class AudioBufferStream(
                 mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos++] * scaledVolume).toInt()
                 bufIdx = outVar++
                 mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos++] * scaledVolume).toInt()
-                bufIdx = outVar++
-                mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos++] * scaledVolume).toInt()
             }
 
             sampleLimit += 3
@@ -931,8 +929,6 @@ open class AudioBufferStream(
             var outVar = outputIndex
             sampleLimit -= 3
             while (outVar < sampleLimit) {
-                bufIdx = outVar++
-                mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos--] * scaledVolume).toInt()
                 bufIdx = outVar++
                 mixBuffer[bufIdx] = (mixBuffer[bufIdx] + sampleData[samplePos--] * scaledVolume).toInt()
                 bufIdx = outVar++

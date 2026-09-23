@@ -83,18 +83,18 @@ class ConcurrentQueue(capacity: Int) : AbstractQueue<Any>() {
             val forward1 = (currentSlot shl 1) + 1
             val queuedNodeForward1 = queuedObjectNodes[forward1]!!
             val forward2 = (currentSlot shl 1) + 2
-            val queuedNodeForward2 = queuedObjectNodes[forward2]!!
+            val queuedNodeForward2 = queuedObjectNodes[forward2]
 
             val nextSlot = if (queuedObjectComparator != null) {
                 if (forward2 < currentPosition &&
-                    queuedObjectComparator.compare(queuedNodeForward1.`object`, queuedNodeForward2.`object`) > 0
+                    queuedObjectComparator.compare(queuedNodeForward1.`object`, queuedNodeForward2!!.`object`) > 0
                 ) {
                     forward2
                 } else {
                     forward1
                 }
             } else if (forward2 < currentPosition &&
-                (queuedNodeForward1.`object` as Comparable<Any>).compareTo(queuedNodeForward2.`object`) > 0
+                (queuedNodeForward1.`object` as Comparable<Any>).compareTo(queuedNodeForward2!!.`object`) > 0
             ) {
                 forward2
             } else {

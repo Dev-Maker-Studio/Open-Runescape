@@ -82,6 +82,8 @@ abstract class Js5NetQueue {
 
     abstract fun disconnect()
 
+    abstract fun rejectPayload()
+
     @Synchronized
     fun priorityRequestCount(): Int {
         return priorityRequests.size() + waitingPriorityRequests.size()

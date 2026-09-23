@@ -4444,6 +4444,7 @@ class ModelGL : Model {
                     return
                 }
 
+                invalidateModernBuilt(13)
                 hillChange(currentLvl, sceneX, averageHeight, sceneY, width, length, xan, zan)
             } else if (contourType == 4) {
                 val sizeY = this.maxY - this.minY
@@ -4469,39 +4470,6 @@ class ModelGL : Model {
             }
 
             this.boundsCalculated = false
-        }
-    }
-
-    override fun hillChange(ground: Ground, sceneX: Int, averageHeight: Int, sceneY: Int, width: Int, length: Int, xan: Int, zan: Int) {
-        invalidateModernContent()
-        // Per-tile hillskew reshapes vertices; not matrix-representable.
-        invalidateModernBuilt(13)
-        val sinX = MathUtils.SINE[xan]
-        val cosX = MathUtils.COSINE[xan]
-        val sinZ = MathUtils.SINE[zan]
-        val cosZ = MathUtils.COSINE[zan]
-
-        for (v in 0 until this.maxDepth) {
-            var x = this.verticesX!![v]
-            var y = this.verticesY!![v]
-            var z = this.verticesZ!![v]
-            if (xan != 0) {
-                val tmp = (y * cosX - z * sinX) shr 14
-                z = (y * sinX + z * cosX) shr 14
-                y = tmp
-            }
-
-            if (zan != 0) {
-                val tmp = (z * sinZ + x * cosZ) shr 14
-                z = (z * cosZ - x * sinZ) shr 14
-                x = tmp
-            }
-
-            x += sceneX
-            y += averageHeight
-            z += sceneY
-            val groundHeight = ground.getAverageHeight(x, z)
-            this.verticesY!![v] = this.verticesY!![v] + (groundHeight - y)
         }
     }
 
