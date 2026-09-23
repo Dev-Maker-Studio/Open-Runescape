@@ -73,7 +73,7 @@ oracle:
       - .gradle/wrapper
     policy: pull
   variables:
-    LAKAN_SCHEMA_REF: 23bda85c51b20691807bd0e19406eb14d2f40b67
+    LAKAN_SCHEMA_REF: 776679865e4d7eae359dfa12239e4b96a486b915
   script:
     - ./gradlew --no-daemon --build-cache oracleJar
     - mkdir -p build/lakan-schema
