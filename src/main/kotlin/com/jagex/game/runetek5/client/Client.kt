@@ -2434,11 +2434,20 @@ class Client : GameShell() {
             }
         }
 
-        fun drawInterfaceFrame() {
-            ParticleProducer.cycle(Renderers.activeToolkit!!, cycles.toLong())
-            if (BASE_WINDOW_ID != -1) {
+        private var lastParticleCycle = -1
+
+        private fun cycleParticlesAndInterfaces() {
+            if (lastParticleCycle != cycles) {
+                lastParticleCycle = cycles
+                ParticleProducer.cycle(Renderers.activeToolkit!!, cycles.toLong())
+            }
+            if (BASE_WINDOW_ID != -1 && animatingStep > 0) {
                 Component.update(BASE_WINDOW_ID)
             }
+        }
+
+        fun drawInterfaceFrame() {
+            cycleParticlesAndInterfaces()
 
             for (index in 0..<componentBackgroundCount) {
                 PREV_COMPONENT_ON_TOP[index] = IS_COMPONENT_ON_TOP[index]
@@ -2592,10 +2601,7 @@ class Client : GameShell() {
                     Camera.updateFollowPlayerCamera(elapsedMillis)
                 }
             }
-            ParticleProducer.cycle(Renderers.activeToolkit!!, cycles.toLong())
-            if (BASE_WINDOW_ID != -1) {
-                Component.update(BASE_WINDOW_ID)
-            }
+            cycleParticlesAndInterfaces()
             for (index in 0..<componentBackgroundCount) {
                 PREV_COMPONENT_ON_TOP[index] = IS_COMPONENT_ON_TOP[index]
                 IS_COMPONENT_ON_TOP[index] = false

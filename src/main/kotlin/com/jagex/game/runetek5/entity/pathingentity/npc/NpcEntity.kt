@@ -190,7 +190,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
                 poseMemoModel = model
                 poseMemoKey = key
                 poseMemoMinY = minY
-            } else {
+            } else if (memoEligible) {
                 poseMemoModel = null
                 poseMemoKey = 0L
             }

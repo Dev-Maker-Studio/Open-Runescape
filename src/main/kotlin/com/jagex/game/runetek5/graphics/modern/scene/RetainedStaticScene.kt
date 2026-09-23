@@ -196,6 +196,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
 
     override fun sceneReset(scene: Scene) {
         if (scene === this.scene) reset()
+        toolkit.retainedBatcher()?.requestStaleEviction()
     }
 
     override fun submitStatics(

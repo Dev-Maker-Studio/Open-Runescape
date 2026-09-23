@@ -260,13 +260,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         @JvmStatic
         fun performDummyActionevent(canvas: Canvas?) {
             val eventQueue = SystemInfo.systemEventQueue
-            if (eventQueue != null) {
-                var i = 0
-                while (i < 50 && eventQueue.peekEvent() != null) {
-                    TimeTools.sleep(1L)
-                    i++
-                }
-
+            if (eventQueue != null && eventQueue.peekEvent() == null) {
                 try {
                     if (canvas != null) {
                         eventQueue.postEvent(ActionEvent(canvas, 1001, "dummy"))

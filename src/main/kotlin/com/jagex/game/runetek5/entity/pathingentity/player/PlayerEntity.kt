@@ -391,7 +391,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 poseMemoModel = model
                 poseMemoKey = key
                 poseMemoMinY = minY
-            } else {
+            } else if (memoEligible) {
                 poseMemoModel = null
                 poseMemoKey = 0L
             }

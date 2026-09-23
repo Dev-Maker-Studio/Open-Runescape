@@ -1620,21 +1620,10 @@ class ModernGLToolkit(
         }
         transDiagInst = 0; transDiagStream = 0; transDiagMinKey = Int.MAX_VALUE; transDiagMaxKey = Int.MIN_VALUE
         // Particle systems in the same far-to-near (key desc, seq asc) order the batchers use.
-        for (i in 0 until particleCount) deferredParticleOrder[i] = i
-        if (particleCount > 1) {
-            val keys = deferredParticleKey
-            val seqs = deferredParticleSeq
-            val order = (0 until particleCount).sortedWith(compareBy({ -keys[it].toLong() }, { seqs[it] }))
-            for (i in 0 until particleCount) deferredParticleOrder[i] = order[i]
-        }
+        sortFarToNear(deferredParticleKey, deferredParticleSeq, particleCount, deferredParticleOrder)
         // Billboards in the same order, merged with the particle systems below.
         val bbN = bbCount
-        for (i in 0 until bbN) bbOrder[i] = i
-        if (bbN > 1) {
-            val keys = bbKey; val seqs = bbSeq
-            val order = (0 until bbN).sortedWith(compareBy({ -keys[it].toLong() }, { seqs[it] }))
-            for (i in 0 until bbN) bbOrder[i] = order[i]
-        }
+        sortFarToNear(bbKey, bbSeq, bbN, bbOrder)
         if (bbN > 0) {
             val hasFog = fogEnabled && fogDensity > 0
             billboardRendererModern?.setFrame(
@@ -4946,6 +4935,27 @@ class ModernGLToolkit(
      * profile. The memo is keyed by the same invalidation stamp as the content hash,
      * plus the entry's own eviction flag so a freed buffer can never be handed back.
      */
+    private var farToNearScratch = LongArray(256)
+
+    private fun sortFarToNear(keys: IntArray, seqs: IntArray, n: Int, order: IntArray) {
+        for (i in 0 until n) order[i] = i
+        if (n < 2) return
+        if (n > 4096) {
+            val sorted = (0 until n).sortedWith(compareBy({ -keys[it].toLong() }, { seqs[it] }))
+            for (i in 0 until n) order[i] = sorted[i]
+            return
+        }
+        if (farToNearScratch.size < n) farToNearScratch = LongArray(n * 2)
+        val scratch = farToNearScratch
+        for (i in 0 until n) {
+            val keyPart = (Int.MAX_VALUE.toLong() - keys[i]) and 0xFFFFFFFFL
+            val seqPart = seqs[i].toLong() and 0xFFFFFL
+            scratch[i] = (((keyPart shl 20) or seqPart) shl 12) or i.toLong() xor Long.MIN_VALUE
+        }
+        java.util.Arrays.sort(scratch, 0, n)
+        for (i in 0 until n) order[i] = (scratch[i] and 0xFFFL).toInt()
+    }
+
     private inline fun sharedGeometryFor(
         model: ModelGL,
         cache: ModelCache,

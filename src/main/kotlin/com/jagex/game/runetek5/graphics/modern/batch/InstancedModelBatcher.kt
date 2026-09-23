@@ -170,6 +170,7 @@ class InstancedModelBatcher {
          * many inserts that follow.
          */
         private const val EVICT_TARGET_RATIO = 0.65f
+        private const val STALE_ENTRY_FRAMES = 600L
 
         /** -Drender.transsort=false draws translucent items in submission order (A/B aid). */
         @JvmStatic val TRANS_SORT = System.getProperty("render.transsort")?.equals("false", true) != true
@@ -378,6 +379,35 @@ class InstancedModelBatcher {
     private var templatesQueued = false
     private var deferredCompactVertices = -1
     private var deferredCompactIndices = -1
+    @Volatile
+    private var staleEvictionRequested = false
+
+    fun requestStaleEviction() {
+        staleEvictionRequested = true
+    }
+
+    private fun evictStaleEntries() {
+        val horizon = frameCounter - STALE_ENTRY_FRAMES
+        val stale = HashSet<Long>()
+        for (entry in meshEntries.values) {
+            if (entry.lastUsedFrame < horizon) {
+                stale.add(entry.modelId)
+                entry.resident = false
+            }
+        }
+        if (stale.isEmpty()) return
+        meshEntries.keys.removeAll(stale)
+        meshesEvicted += stale.size
+        val iterator = drawsByMaterial.entries.iterator()
+        while (iterator.hasNext()) {
+            val bucket = iterator.next()
+            bucket.value.removeAll { stale.contains(it.mesh.modelId) }
+            if (bucket.value.isEmpty()) iterator.remove()
+        }
+        materialOrderDirty = true
+        activeEntries.removeAll { stale.contains(it.modelId) }
+        compactGeometryStore()
+    }
 
     /** True while [b]'s template still describes its meshes' current arena layout. */
     fun blockDrawValid(b: BlockDraw): Boolean {
@@ -1308,6 +1338,10 @@ class InstancedModelBatcher {
         translucentPacked = 0
         translucentCursor = 0
         templatesQueued = false
+        if (staleEvictionRequested) {
+            staleEvictionRequested = false
+            evictStaleEntries()
+        }
         if (deferredCompactVertices >= 0) {
             evictAndCompact(deferredCompactVertices, deferredCompactIndices)
             deferredCompactVertices = -1
@@ -2724,6 +2758,14 @@ class InstancedModelBatcher {
         }
         indirectBuffer?.let { MemoryUtil.memFree(it) }
         indirectBuffer = null
+        if (drawMatVbo != 0) {
+            glDeleteBuffers(drawMatVbo)
+            drawMatVbo = 0
+        }
+        drawMatBuffer?.let { MemoryUtil.memFree(it) }
+        drawMatBuffer = null
+        for (handle in bindlessHandles.values) glMakeTextureHandleNonResidentARB(handle)
+        bindlessHandles.clear()
 
         vertexBuffer?.let { MemoryUtil.memFree(it) }
         indexBuffer?.let { MemoryUtil.memFree(it) }
