@@ -295,12 +295,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
     companion object {
         @JvmStatic
         fun mixBackwardMonoConstant(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
             var samplePos = position shr 8
             var outVar = outputIndex
-            var scaledVolume = volume shl 2
-            var endPos = endPosition shr 8
-            if ((outVar + samplePos - (endPos - 1)).also { sampleLimit = it } > maxOutputIndex) {
+            val scaledVolume = volume shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outVar + samplePos - (endPos - 1)
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -323,12 +323,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixForwardMonoConstant(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
             var samplePos = position shr 8
             var outVar = outputIndex
-            var scaledVolume = volume shl 2
-            var endPos = endPosition shr 8
-            if ((outVar + endPos - samplePos).also { sampleLimit = it } > maxOutputIndex) {
+            val scaledVolume = volume shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outVar + endPos - samplePos
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
@@ -351,38 +351,74 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixBackwardStereoConstant(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
             var samplePos = position shr 8
-            var outVar = outputIndex
-            var leftVol = leftVolume shl 2
-            var rightVol = rightVolume shl 2
-            var endPos = endPosition shr 8
-            if ((samplePos + outVar - (endPosition - 1)).also { sampleLimit = it } > maxOutputIndex) {
+            val leftVol = leftVolume shl 2
+            val rightVol = rightVolume shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outputIndex + samplePos - (endPos - 1)
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            outVar = outVar shl 1
-            sampleLimit = sampleLimit shl 1
-
-            sampleLimit -= 6
+            var outVar = outputIndex shl 1
+            sampleLimit = (sampleLimit shl 1) - 6
             while (outVar < sampleLimit) {
-                var sample = sampleData[samplePos--]
+                var sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 mixBuffer[outVar++] += sample * rightVol
-                sample = sampleData[samplePos--]
+                sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 mixBuffer[outVar++] += sample * rightVol
-                sample = sampleData[samplePos--]
+                sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 mixBuffer[outVar++] += sample * rightVol
-                sample = sampleData[samplePos--]
+                sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 mixBuffer[outVar++] += sample * rightVol
             }
 
             sampleLimit += 6
             while (outVar < sampleLimit) {
-                val sample = sampleData[samplePos--]
+                val sample = sampleData[samplePos--].toInt()
+                mixBuffer[outVar++] += sample * leftVol
+                mixBuffer[outVar++] += sample * rightVol
+            }
+
+            stream.playbackPosition = samplePos shl 8
+            return outVar shr 1
+        }
+
+        @JvmStatic
+        fun mixForwardStereoConstant(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
+            var samplePos = position shr 8
+            val leftVol = leftVolume shl 2
+            val rightVol = rightVolume shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outputIndex + endPos - samplePos
+            if (sampleLimit > maxOutputIndex) {
+                sampleLimit = maxOutputIndex
+            }
+
+            var outVar = outputIndex shl 1
+            sampleLimit = (sampleLimit shl 1) - 6
+            while (outVar < sampleLimit) {
+                var sample = sampleData[samplePos++].toInt()
+                mixBuffer[outVar++] += sample * leftVol
+                mixBuffer[outVar++] += sample * rightVol
+                sample = sampleData[samplePos++].toInt()
+                mixBuffer[outVar++] += sample * leftVol
+                mixBuffer[outVar++] += sample * rightVol
+                sample = sampleData[samplePos++].toInt()
+                mixBuffer[outVar++] += sample * leftVol
+                mixBuffer[outVar++] += sample * rightVol
+                sample = sampleData[samplePos++].toInt()
+                mixBuffer[outVar++] += sample * leftVol
+                mixBuffer[outVar++] += sample * rightVol
+            }
+
+            sampleLimit += 6
+            while (outVar < sampleLimit) {
+                val sample = sampleData[samplePos++].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 mixBuffer[outVar++] += sample * rightVol
             }
@@ -393,28 +429,28 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixForwardMonoInterpolated(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
             var posVar = position
             var outVar = outputIndex
-            if (step == 0 || (outVar + (step + (endPosition - posVar) - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
+            var sampleLimit = 0
+            if (step == 0 || (outVar + (endPosition - posVar + step - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
             while (outVar < sampleLimit) {
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex]
-                mixBuffer[outVar++] += ((baseSample.toInt() shl 8) + (sampleData[sampleIndex + 1] - baseSample) * (posVar and 0xff)) * volume shr 6
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex].toInt()
+                mixBuffer[outVar++] += ((base shl 8) + (sampleData[sampleIndex + 1] - base) * (posVar and 0xff)) * volume shr 6
                 posVar += step
             }
 
-            if (step == 0 || (outVar + (step + (endPosition - posVar) - 1) / step).also { sampleLimit = it } > maxOutputIndex) {
+            if (step == 0 || (outVar + (endPosition - posVar + step - 1) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            sampleIndex = wrapSample; while (outVar < sampleLimit) { posVar += step;
-                val baseSample = sampleData[posVar shr 8]
-                mixBuffer[outVar++] += ((baseSample.toInt() shl 8) + (sampleIndex - baseSample) * (posVar and 0xff)) * volume shr 6
+            while (outVar < sampleLimit) {
+                val base = sampleData[posVar shr 8].toInt()
+                mixBuffer[outVar++] += ((base shl 8) + (wrapSample - base) * (posVar and 0xff)) * volume shr 6
+                posVar += step
             }
 
             stream.playbackPosition = posVar
@@ -423,29 +459,27 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixBackwardMonoInterpolated(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
             var posVar = position
             var outVar = outputIndex
-            if (step == 0 || (outVar + (step + (endPosition + 256 - posVar)) / step).also { sampleLimit = it } > maxOutputIndex) {
+            var sampleLimit = 0
+            if (step == 0 || (outVar + (endPosition + 256 - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
             while (outVar < sampleLimit) {
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex - 1]
-                mixBuffer[outVar++] += ((baseSample.toInt() shl 8) + (sampleData[sampleIndex] - baseSample) * (posVar and 0xff)) * volume shr 6
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex - 1].toInt()
+                mixBuffer[outVar++] += ((base shl 8) + (sampleData[sampleIndex] - base) * (posVar and 0xff)) * volume shr 6
                 posVar += step
             }
 
-            if (step == 0 || (outVar + (step + (endPosition - posVar)) / step).also { sampleLimit = it } > maxOutputIndex) {
+            if (step == 0 || (outVar + (endPosition - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            var wrapValue = wrapSample
-
-            sampleIndex = step; while (outVar < sampleLimit) { posVar += sampleIndex;
-                mixBuffer[outVar++] += ((wrapValue.toInt() shl 8) + (sampleData[posVar shr 8] - wrapValue) * (posVar and 0xff)) * volume shr 6
+            while (outVar < sampleLimit) {
+                mixBuffer[outVar++] += ((wrapSample shl 8) + (sampleData[posVar shr 8] - wrapSample) * (posVar and 0xff)) * volume shr 6
+                posVar += step
             }
 
             stream.playbackPosition = posVar
@@ -453,24 +487,58 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
         }
 
         @JvmStatic
-        fun mixBackwardStereoInterpolated(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
-            var interpolated = 0
+        fun mixForwardStereoInterpolated(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
             var posVar = position
-            var outVar = outputIndex
-            if (step == 0 || (outVar + (endPosition + 256 - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
+            var sampleLimit = 0
+            if (step == 0 || (outputIndex + (endPosition - posVar + step - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            outVar = outVar shl 1
-
-            sampleLimit = sampleLimit shl 1; while (outVar < sampleLimit) { posVar += step;
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex - 1]
-                interpolated = (sampleData[sampleIndex] - baseSample) * (posVar and 0xff) + (baseSample.toInt() shl 8)
+            var outVar = outputIndex shl 1
+            sampleLimit = sampleLimit shl 1
+            while (outVar < sampleLimit) {
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex].toInt()
+                val interpolated = (base shl 8) + (sampleData[sampleIndex + 1] - base) * (posVar and 0xff)
                 mixBuffer[outVar++] += interpolated * leftVolume shr 6
                 mixBuffer[outVar++] += interpolated * rightVolume shr 6
+                posVar += step
+            }
+
+            if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step - 1) / step).also { sampleLimit = it } > maxOutputIndex) {
+                sampleLimit = maxOutputIndex
+            }
+
+            sampleLimit = sampleLimit shl 1
+            while (outVar < sampleLimit) {
+                val base = sampleData[posVar shr 8].toInt()
+                val interpolated = (base shl 8) + (wrapSample - base) * (posVar and 0xff)
+                mixBuffer[outVar++] += interpolated * leftVolume shr 6
+                mixBuffer[outVar++] += interpolated * rightVolume shr 6
+                posVar += step
+            }
+
+            stream.playbackPosition = posVar
+            return outVar shr 1
+        }
+
+        @JvmStatic
+        fun mixBackwardStereoInterpolated(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
+            var posVar = position
+            var sampleLimit = 0
+            if (step == 0 || (outputIndex + (endPosition + 256 - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
+                sampleLimit = maxOutputIndex
+            }
+
+            var outVar = outputIndex shl 1
+            sampleLimit = sampleLimit shl 1
+            while (outVar < sampleLimit) {
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex - 1].toInt()
+                val interpolated = (base shl 8) + (sampleData[sampleIndex] - base) * (posVar and 0xff)
+                mixBuffer[outVar++] += interpolated * leftVolume shr 6
+                mixBuffer[outVar++] += interpolated * rightVolume shr 6
+                posVar += step
             }
 
             if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
@@ -478,11 +546,11 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             }
 
             sampleLimit = sampleLimit shl 1
-
-            sampleIndex = wrapSample; while (outVar < sampleLimit) { posVar += step;
-                interpolated = (sampleIndex.toInt() shl 8) + (posVar and 0xff) * (sampleData[posVar shr 8] - sampleIndex)
+            while (outVar < sampleLimit) {
+                val interpolated = (wrapSample shl 8) + (sampleData[posVar shr 8] - wrapSample) * (posVar and 0xff)
                 mixBuffer[outVar++] += interpolated * leftVolume shr 6
                 mixBuffer[outVar++] += interpolated * rightVolume shr 6
+                posVar += step
             }
 
             stream.playbackPosition = posVar
@@ -491,20 +559,20 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixForwardMonoConstantFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, volumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
             var samplePos = position shr 8
             var outVar = outputIndex
             var scaledVolume = volume shl 2
-            var scaledDelta = volumeDelta shl 2
-            var endPos = endPosition shr 8
-            if ((outVar + endPosition - samplePos).also { sampleLimit = it } > maxOutputIndex) {
+            val scaledDelta = volumeDelta shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outVar + endPos - samplePos
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
             stream.leftChannelVolume += stream.leftVolumeFadeDelta * (sampleLimit - outVar)
             stream.rightChannelVolume += stream.rightVolumeFadeDelta * (sampleLimit - outVar)
-
-            sampleLimit -= 3; while (outVar < sampleLimit) { scaledVolume += scaledDelta;
+            sampleLimit -= 3
+            while (outVar < sampleLimit) {
                 mixBuffer[outVar++] += sampleData[samplePos++] * scaledVolume
                 scaledVolume += scaledDelta
                 mixBuffer[outVar++] += sampleData[samplePos++] * scaledVolume
@@ -512,10 +580,50 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 mixBuffer[outVar++] += sampleData[samplePos++] * scaledVolume
                 scaledVolume += scaledDelta
                 mixBuffer[outVar++] += sampleData[samplePos++] * scaledVolume
+                scaledVolume += scaledDelta
             }
 
-            sampleLimit += 3; while (outVar < sampleLimit) { scaledVolume += scaledDelta;
+            sampleLimit += 3
+            while (outVar < sampleLimit) {
                 mixBuffer[outVar++] += sampleData[samplePos++] * scaledVolume
+                scaledVolume += scaledDelta
+            }
+
+            stream.currentVolume = scaledVolume shr 2
+            stream.playbackPosition = samplePos shl 8
+            return outVar
+        }
+
+        @JvmStatic
+        fun mixBackwardMonoConstantFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, volumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
+            var samplePos = position shr 8
+            var outVar = outputIndex
+            var scaledVolume = volume shl 2
+            val scaledDelta = volumeDelta shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outVar + samplePos - (endPos - 1)
+            if (sampleLimit > maxOutputIndex) {
+                sampleLimit = maxOutputIndex
+            }
+
+            stream.leftChannelVolume += stream.leftVolumeFadeDelta * (sampleLimit - outVar)
+            stream.rightChannelVolume += stream.rightVolumeFadeDelta * (sampleLimit - outVar)
+            sampleLimit -= 3
+            while (outVar < sampleLimit) {
+                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
+                scaledVolume += scaledDelta
+                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
+                scaledVolume += scaledDelta
+                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
+                scaledVolume += scaledDelta
+                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
+                scaledVolume += scaledDelta
+            }
+
+            sampleLimit += 3
+            while (outVar < sampleLimit) {
+                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
+                scaledVolume += scaledDelta
             }
 
             stream.currentVolume = scaledVolume shr 2
@@ -525,49 +633,50 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixForwardStereoConstantFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, leftVolumeDelta: Int, rightVolumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
             var samplePos = position shr 8
-            var outVar = outputIndex
             var leftVol = leftVolume shl 2
             var rightVol = rightVolume shl 2
-            var leftDelta = leftVolumeDelta shl 2
-            var rightDelta = rightVolumeDelta shl 2
-            var endPos = endPosition shr 8
-            if ((endPosition + outVar - samplePos).also { sampleLimit = it } > maxOutputIndex) {
+            val leftDelta = leftVolumeDelta shl 2
+            val rightDelta = rightVolumeDelta shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outputIndex + endPos - samplePos
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            stream.currentVolume += stream.volumeFadeDelta * (sampleLimit - outVar)
-            outVar = outVar shl 1
-            sampleLimit = sampleLimit shl 1
-
-            sampleLimit -= 6; while (outVar < sampleLimit) { rightVol += rightDelta;
-                var sample = sampleData[samplePos++]
+            stream.currentVolume += stream.volumeFadeDelta * (sampleLimit - outputIndex)
+            var outVar = outputIndex shl 1
+            sampleLimit = (sampleLimit shl 1) - 6
+            while (outVar < sampleLimit) {
+                var sample = sampleData[samplePos++].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
                 rightVol += rightDelta
-                sample = sampleData[samplePos++]
+                sample = sampleData[samplePos++].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
                 rightVol += rightDelta
-                sample = sampleData[samplePos++]
+                sample = sampleData[samplePos++].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
                 rightVol += rightDelta
-                sample = sampleData[samplePos++]
+                sample = sampleData[samplePos++].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
+                rightVol += rightDelta
             }
 
-            sampleLimit += 6; while (outVar < sampleLimit) { rightVol += rightDelta;
-                val sample = sampleData[samplePos++]
+            sampleLimit += 6
+            while (outVar < sampleLimit) {
+                val sample = sampleData[samplePos++].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
+                rightVol += rightDelta
             }
 
             stream.leftChannelVolume = leftVol shr 2
@@ -577,84 +686,51 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
         }
 
         @JvmStatic
-        fun mixBackwardMonoConstantFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, volumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
-            var samplePos = position shr 8
-            var outVar = outputIndex
-            var scaledVolume = volume shl 2
-            var scaledDelta = volumeDelta shl 2
-            var endPos = endPosition shr 8
-            if ((outVar + samplePos - (endPosition - 1)).also { sampleLimit = it } > maxOutputIndex) {
-                sampleLimit = maxOutputIndex
-            }
-
-            stream.leftChannelVolume += stream.leftVolumeFadeDelta * (sampleLimit - outVar)
-            stream.rightChannelVolume += stream.rightVolumeFadeDelta * (sampleLimit - outVar)
-
-            sampleLimit -= 3; while (outVar < sampleLimit) { scaledVolume += scaledDelta;
-                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
-                scaledVolume += scaledDelta
-                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
-                scaledVolume += scaledDelta
-                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
-                scaledVolume += scaledDelta
-                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
-            }
-
-            sampleLimit += 3; while (outVar < sampleLimit) { scaledVolume += scaledDelta;
-                mixBuffer[outVar++] += sampleData[samplePos--] * scaledVolume
-            }
-
-            stream.currentVolume = scaledVolume shr 2
-            stream.playbackPosition = samplePos shl 8
-            return outVar
-        }
-
-        @JvmStatic
         fun mixBackwardStereoConstantFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, leftVolumeDelta: Int, rightVolumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
-            var sampleLimit = 0
             var samplePos = position shr 8
-            var outVar = outputIndex
             var leftVol = leftVolume shl 2
             var rightVol = rightVolume shl 2
-            var leftDelta = leftVolumeDelta shl 2
-            var rightDelta = rightVolumeDelta shl 2
-            var endPos = endPosition shr 8
-            if ((samplePos + outVar - (endPosition - 1)).also { sampleLimit = it } > maxOutputIndex) {
+            val leftDelta = leftVolumeDelta shl 2
+            val rightDelta = rightVolumeDelta shl 2
+            val endPos = endPosition shr 8
+            var sampleLimit = outputIndex + samplePos - (endPos - 1)
+            if (sampleLimit > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            stream.currentVolume += stream.volumeFadeDelta * (sampleLimit - outVar)
-            outVar = outVar shl 1
-            sampleLimit = sampleLimit shl 1
-
-            sampleLimit -= 6; while (outVar < sampleLimit) { rightVol += rightDelta;
-                var sample = sampleData[samplePos--]
+            stream.currentVolume += stream.volumeFadeDelta * (sampleLimit - outputIndex)
+            var outVar = outputIndex shl 1
+            sampleLimit = (sampleLimit shl 1) - 6
+            while (outVar < sampleLimit) {
+                var sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
                 rightVol += rightDelta
-                sample = sampleData[samplePos--]
+                sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
                 rightVol += rightDelta
-                sample = sampleData[samplePos--]
+                sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
                 rightVol += rightDelta
-                sample = sampleData[samplePos--]
+                sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
+                rightVol += rightDelta
             }
 
-            sampleLimit += 6; while (outVar < sampleLimit) { rightVol += rightDelta;
-                val sample = sampleData[samplePos--]
+            sampleLimit += 6
+            while (outVar < sampleLimit) {
+                val sample = sampleData[samplePos--].toInt()
                 mixBuffer[outVar++] += sample * leftVol
                 leftVol += leftDelta
                 mixBuffer[outVar++] += sample * rightVol
+                rightVol += rightDelta
             }
 
             stream.leftChannelVolume = leftVol shr 2
@@ -665,22 +741,21 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
         @JvmStatic
         fun mixForwardMonoInterpolatedFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, volumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
             var posVar = position
             var outVar = outputIndex
-            var scaledVolume = volume
+            var currentVolume = volume
             stream.leftChannelVolume -= stream.leftVolumeFadeDelta * outVar
             stream.rightChannelVolume -= stream.rightVolumeFadeDelta * outVar
+            var sampleLimit = 0
             if (step == 0 || (outVar + (endPosition - posVar + step - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
             while (outVar < sampleLimit) {
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex]
-                mixBuffer[outVar++] += ((baseSample.toInt() shl 8) + (sampleData[sampleIndex + 1] - baseSample) * (posVar and 0xff)) * scaledVolume shr 6
-                scaledVolume += volumeDelta
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex].toInt()
+                mixBuffer[outVar++] += ((base shl 8) + (sampleData[sampleIndex + 1] - base) * (posVar and 0xff)) * currentVolume shr 6
+                currentVolume += volumeDelta
                 posVar += step
             }
 
@@ -688,86 +763,37 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 sampleLimit = maxOutputIndex
             }
 
-            sampleIndex = wrapSample; while (outVar < sampleLimit) { posVar += step;
-                val baseSample = sampleData[posVar shr 8]
-                mixBuffer[outVar++] += ((baseSample.toInt() shl 8) + (sampleIndex - baseSample) * (posVar and 0xff)) * scaledVolume shr 6
-                scaledVolume += volumeDelta
+            while (outVar < sampleLimit) {
+                val base = sampleData[posVar shr 8].toInt()
+                mixBuffer[outVar++] += ((base shl 8) + (wrapSample - base) * (posVar and 0xff)) * currentVolume shr 6
+                currentVolume += volumeDelta
+                posVar += step
             }
 
             stream.leftChannelVolume += stream.leftVolumeFadeDelta * outVar
             stream.rightChannelVolume += stream.rightVolumeFadeDelta * outVar
-            stream.currentVolume = scaledVolume
-            stream.playbackPosition = posVar
-            return outVar
-        }
-
-        @JvmStatic
-        fun mixForwardStereoInterpolatedFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, leftVolumeDelta: Int, rightVolumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
-            var interpolated = 0
-            var posVar = position
-            var outVar = outputIndex
-            var leftVol = leftVolume
-            var rightVol = rightVolume
-            stream.currentVolume -= outVar * stream.volumeFadeDelta
-            if (step == 0 || (outVar + (endPosition - posVar + step - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
-                sampleLimit = maxOutputIndex
-            }
-
-            outVar = outVar shl 1
-
-            sampleLimit = sampleLimit shl 1; while (outVar < sampleLimit) { posVar += step;
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex]
-                interpolated = (baseSample.toInt() shl 8) + (posVar and 0xff) * (sampleData[sampleIndex + 1] - baseSample)
-                mixBuffer[outVar++] += interpolated * leftVol shr 6
-                leftVol += leftVolumeDelta
-                mixBuffer[outVar++] += interpolated * rightVol shr 6
-                rightVol += rightVolumeDelta
-            }
-
-            if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step - 1) / step).also { sampleLimit = it } > maxOutputIndex) {
-                sampleLimit = maxOutputIndex
-            }
-
-            sampleLimit = sampleLimit shl 1
-
-            sampleIndex = wrapSample; while (outVar < sampleLimit) { posVar += step;
-                val baseSample = sampleData[posVar shr 8]
-                interpolated = (baseSample.toInt() shl 8) + (sampleIndex - baseSample) * (posVar and 0xff)
-                mixBuffer[outVar++] += interpolated * leftVol shr 6
-                leftVol += leftVolumeDelta
-                mixBuffer[outVar++] += interpolated * rightVol shr 6
-                rightVol += rightVolumeDelta
-            }
-
-            outVar = outVar shr 1
-            stream.currentVolume += stream.volumeFadeDelta * outVar
-            stream.leftChannelVolume = leftVol
-            stream.rightChannelVolume = rightVol
+            stream.currentVolume = currentVolume
             stream.playbackPosition = posVar
             return outVar
         }
 
         @JvmStatic
         fun mixBackwardMonoInterpolatedFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, volume: Int, volumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
             var posVar = position
             var outVar = outputIndex
-            var scaledVolume = volume
+            var currentVolume = volume
             stream.leftChannelVolume -= stream.leftVolumeFadeDelta * outVar
             stream.rightChannelVolume -= stream.rightVolumeFadeDelta * outVar
+            var sampleLimit = 0
             if (step == 0 || (outVar + (endPosition + 256 - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
             while (outVar < sampleLimit) {
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex - 1]
-                mixBuffer[outVar++] += ((baseSample.toInt() shl 8) + (sampleData[sampleIndex] - baseSample) * (posVar and 0xff)) * scaledVolume shr 6
-                scaledVolume += volumeDelta
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex - 1].toInt()
+                mixBuffer[outVar++] += ((base shl 8) + (sampleData[sampleIndex] - base) * (posVar and 0xff)) * currentVolume shr 6
+                currentVolume += volumeDelta
                 posVar += step
             }
 
@@ -775,58 +801,56 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 sampleLimit = maxOutputIndex
             }
 
-            var wrapValue = wrapSample
-
-            sampleIndex = step; while (outVar < sampleLimit) { posVar += sampleIndex;
-                mixBuffer[outVar++] += ((wrapValue.toInt() shl 8) + (sampleData[posVar shr 8] - wrapValue) * (posVar and 0xff)) * scaledVolume shr 6
-                scaledVolume += volumeDelta
+            while (outVar < sampleLimit) {
+                mixBuffer[outVar++] += ((wrapSample shl 8) + (sampleData[posVar shr 8] - wrapSample) * (posVar and 0xff)) * currentVolume shr 6
+                currentVolume += volumeDelta
+                posVar += step
             }
 
             stream.leftChannelVolume += stream.leftVolumeFadeDelta * outVar
             stream.rightChannelVolume += stream.rightVolumeFadeDelta * outVar
-            stream.currentVolume = scaledVolume
+            stream.currentVolume = currentVolume
             stream.playbackPosition = posVar
             return outVar
         }
 
         @JvmStatic
-        fun mixBackwardStereoInterpolatedFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, leftVolumeDelta: Int, rightVolumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
-            var interpolated = 0
+        fun mixForwardStereoInterpolatedFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, leftVolumeDelta: Int, rightVolumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
             var posVar = position
-            var outVar = outputIndex
             var leftVol = leftVolume
             var rightVol = rightVolume
-            stream.currentVolume -= outVar * stream.volumeFadeDelta
-            if (step == 0 || (outVar + (endPosition + 256 - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
+            stream.currentVolume -= stream.volumeFadeDelta * outputIndex
+            var sampleLimit = 0
+            if (step == 0 || (outputIndex + (endPosition - posVar + step - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            outVar = outVar shl 1
-
-            sampleLimit = sampleLimit shl 1; while (outVar < sampleLimit) { posVar += step;
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex - 1]
-                interpolated = (sampleData[sampleIndex] - baseSample) * (posVar and 0xff) + (baseSample.toInt() shl 8)
+            var outVar = outputIndex shl 1
+            sampleLimit = sampleLimit shl 1
+            while (outVar < sampleLimit) {
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex].toInt()
+                val interpolated = (base shl 8) + (sampleData[sampleIndex + 1] - base) * (posVar and 0xff)
                 mixBuffer[outVar++] += interpolated * leftVol shr 6
                 leftVol += leftVolumeDelta
                 mixBuffer[outVar++] += interpolated * rightVol shr 6
                 rightVol += rightVolumeDelta
+                posVar += step
             }
 
-            if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
+            if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step - 1) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
             sampleLimit = sampleLimit shl 1
-
-            sampleIndex = wrapSample; while (outVar < sampleLimit) { posVar += step;
-                interpolated = (sampleIndex.toInt() shl 8) + (posVar and 0xff) * (sampleData[posVar shr 8] - sampleIndex)
+            while (outVar < sampleLimit) {
+                val base = sampleData[posVar shr 8].toInt()
+                val interpolated = (base shl 8) + (wrapSample - base) * (posVar and 0xff)
                 mixBuffer[outVar++] += interpolated * leftVol shr 6
                 leftVol += leftVolumeDelta
                 mixBuffer[outVar++] += interpolated * rightVol shr 6
                 rightVol += rightVolumeDelta
+                posVar += step
             }
 
             outVar = outVar shr 1
@@ -838,83 +862,49 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
         }
 
         @JvmStatic
-        fun mixForwardStereoInterpolated(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
-            var sampleLimit = 0
-            var sampleIndex = 0
-            var interpolated = 0
+        fun mixBackwardStereoInterpolatedFading(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, leftVolumeDelta: Int, rightVolumeDelta: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream, step: Int, wrapSample: Int): Int {
             var posVar = position
-            var outVar = outputIndex
-            if (step == 0 || (outVar + (endPosition - posVar + step - 257) / step).also { sampleLimit = it } > maxOutputIndex) {
-                sampleLimit = maxOutputIndex
-            }
-
-            outVar = outVar shl 1
-
-            sampleLimit = sampleLimit shl 1; while (outVar < sampleLimit) { posVar += step;
-                sampleIndex = posVar shr 8
-                val baseSample = sampleData[sampleIndex]
-                interpolated = (baseSample.toInt() shl 8) + (posVar and 0xff) * (sampleData[sampleIndex + 1] - baseSample)
-                mixBuffer[outVar++] += interpolated * leftVolume shr 6
-                mixBuffer[outVar++] += interpolated * rightVolume shr 6
-            }
-
-            if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step - 1) / step).also { sampleLimit = it } > maxOutputIndex) {
-                sampleLimit = maxOutputIndex
-            }
-
-            sampleLimit = sampleLimit shl 1
-
-            sampleIndex = wrapSample; while (outVar < sampleLimit) { posVar += step;
-                val baseSample = sampleData[posVar shr 8]
-                interpolated = (baseSample.toInt() shl 8) + (sampleIndex - baseSample) * (posVar and 0xff)
-                mixBuffer[outVar++] += interpolated * leftVolume shr 6
-                mixBuffer[outVar++] += interpolated * rightVolume shr 6
-            }
-
-            stream.playbackPosition = posVar
-            return outVar shr 1
-        }
-
-        @JvmStatic
-        fun mixForwardStereoConstant(sampleData: ByteArray, mixBuffer: IntArray, position: Int, outputIndex: Int, leftVolume: Int, rightVolume: Int, maxOutputIndex: Int, endPosition: Int, stream: MixedAudioStream): Int {
+            var leftVol = leftVolume
+            var rightVol = rightVolume
+            stream.currentVolume -= stream.volumeFadeDelta * outputIndex
             var sampleLimit = 0
-            var samplePos = position shr 8
-            var outVar = outputIndex
-            var leftVol = leftVolume shl 2
-            var rightVol = rightVolume shl 2
-            var endPos = endPosition shr 8
-            if ((outVar + endPosition - samplePos).also { sampleLimit = it } > maxOutputIndex) {
+            if (step == 0 || (outputIndex + (endPosition + 256 - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
                 sampleLimit = maxOutputIndex
             }
 
-            outVar = outVar shl 1
+            var outVar = outputIndex shl 1
             sampleLimit = sampleLimit shl 1
-
-            sampleLimit -= 6
             while (outVar < sampleLimit) {
-                var sample = sampleData[samplePos++]
-                mixBuffer[outVar++] += sample * leftVol
-                mixBuffer[outVar++] += sample * rightVol
-                sample = sampleData[samplePos++]
-                mixBuffer[outVar++] += sample * leftVol
-                mixBuffer[outVar++] += sample * rightVol
-                sample = sampleData[samplePos++]
-                mixBuffer[outVar++] += sample * leftVol
-                mixBuffer[outVar++] += sample * rightVol
-                sample = sampleData[samplePos++]
-                mixBuffer[outVar++] += sample * leftVol
-                mixBuffer[outVar++] += sample * rightVol
+                val sampleIndex = posVar shr 8
+                val base = sampleData[sampleIndex - 1].toInt()
+                val interpolated = (base shl 8) + (sampleData[sampleIndex] - base) * (posVar and 0xff)
+                mixBuffer[outVar++] += interpolated * leftVol shr 6
+                leftVol += leftVolumeDelta
+                mixBuffer[outVar++] += interpolated * rightVol shr 6
+                rightVol += rightVolumeDelta
+                posVar += step
             }
 
-            sampleLimit += 6
-            while (outVar < sampleLimit) {
-                val sample = sampleData[samplePos++]
-                mixBuffer[outVar++] += sample * leftVol
-                mixBuffer[outVar++] += sample * rightVol
+            if (step == 0 || ((outVar shr 1) + (endPosition - posVar + step) / step).also { sampleLimit = it } > maxOutputIndex) {
+                sampleLimit = maxOutputIndex
             }
 
-            stream.playbackPosition = samplePos shl 8
-            return outVar shr 1
+            sampleLimit = sampleLimit shl 1
+            while (outVar < sampleLimit) {
+                val interpolated = (wrapSample shl 8) + (sampleData[posVar shr 8] - wrapSample) * (posVar and 0xff)
+                mixBuffer[outVar++] += interpolated * leftVol shr 6
+                leftVol += leftVolumeDelta
+                mixBuffer[outVar++] += interpolated * rightVol shr 6
+                rightVol += rightVolumeDelta
+                posVar += step
+            }
+
+            outVar = outVar shr 1
+            stream.currentVolume += stream.volumeFadeDelta * outVar
+            stream.leftChannelVolume = leftVol
+            stream.rightChannelVolume = rightVol
+            stream.playbackPosition = posVar
+            return outVar
         }
     }
 }
