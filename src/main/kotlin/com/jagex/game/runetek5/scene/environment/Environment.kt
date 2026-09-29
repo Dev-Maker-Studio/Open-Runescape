@@ -47,6 +47,7 @@ class Environment {
     @JvmField var skybox: Skybox? = null
 
     constructor(mapBuffer: Packet, environmentManager: EnvironmentManager) {
+        reset()
         decode(mapBuffer, environmentManager)
     }
 
