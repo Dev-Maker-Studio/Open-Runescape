@@ -14,6 +14,7 @@ import com.jagex.game.runetek5.graphics.texture.AbstractCubeTextureGenerator
 import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.scene.MapRegion
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
+import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.utils.Utils
 import java.util.Arrays
 
@@ -148,6 +149,10 @@ class EnvironmentManager(
         this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness!!.getValue() * 0.1f + Resource.mapRegion!!.randomColorOffset) * this.environment.sunAmbient)
         this.activeToolkit.applyLighting(this.environment.sunColour, this.environment.sunLight, this.environment.sunBacklight, (this.sunPosition.x.toInt() shl 2).toFloat(), (this.sunPosition.y.toInt() shl 2).toFloat(), (this.sunPosition.z.toInt() shl 2).toFloat())
         this.activeToolkit.setSunCubeTexture(this.environment.sunCubeTexture)
+    }
+
+    fun pinShadowOffsets(toolkit: AbstractToolkit) {
+        (toolkit as? OpenGlToolkit)?.pinShadowOffsets((this.sunPosition.x.toInt() shl 2).toFloat(), (this.sunPosition.y.toInt() shl 2).toFloat(), (this.sunPosition.z.toInt() shl 2).toFloat())
     }
 
     fun getSkybox(skyboxId: Int, x: Int, y: Int, z: Int): Skybox {

@@ -663,6 +663,9 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         this.environmentManager!!.initializeEnvironment(this.sceneSizeX shr 4, this.sceneSizeY shr 4)
         this.environmentManager!!.updateAtmosphere(this)
+        if (this.asyncMaploading) {
+            this.environmentManager!!.pinShadowOffsets(Renderers.activeToolkit!!)
+        }
         if (hasUnderwaterMap) {
             this.scene!!.setUnderwater(true)
             this.underwaterMap = SceneGraph(this.scene!!, this.loctypeList!!, 1, this.sceneSizeX, this.sceneSizeY, true, this.tileSettingsBits!!, this.environmentManager!!)

@@ -1205,14 +1205,14 @@ class ModelGL : Model {
         return (this.numNormals++).toShort()
     }
 
-    fun projectShadow(shadow: ShadowGL) {
+    private fun projectShadow(shadow: ShadowGL, shadowOffsetX: Int, shadowOffsetZ: Int, shadowScale: Int) {
         val scratch = this.toolkit.projectionScratch(this.numNormals)
         val projectedVerticesX = scratch.verticesX
         val projectedVerticesY = scratch.verticesY
 
         for (v in 0 until this.maxDepth) {
-            val x = ((this.verticesX!![v] - (this.toolkit.shadowOffsetX * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadow.startX
-            val y = ((this.verticesZ!![v] - (this.toolkit.shadowOffsetZ * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadow.startY
+            val x = ((this.verticesX!![v] - (shadowOffsetX * this.verticesY!![v] shr 8)) shr shadowScale) - shadow.startX
+            val y = ((this.verticesZ!![v] - (shadowOffsetZ * this.verticesY!![v] shr 8)) shr shadowScale) - shadow.startY
             val triStart = this.triangles!![v]
             val triEnd = this.triangles!![v + 1]
 
@@ -3091,24 +3091,27 @@ class ModelGL : Model {
 
         // Project the model's AABB along the sun direction onto the ground plane
         // (same projection as projectShadow applies per vertex) to size the sprite.
+        val shadowOffsetX = this.toolkit.bakeShadowOffsetX()
+        val shadowOffsetZ = this.toolkit.bakeShadowOffsetZ()
+        val shadowScale = this.toolkit.shadowScale
         val startX: Int
         val endX: Int
-        if (this.toolkit.shadowOffsetX > 0) {
-            startX = (this.minX - (this.toolkit.shadowOffsetX * this.maxY shr 8)) shr this.toolkit.shadowScale
-            endX = (this.maxX - (this.toolkit.shadowOffsetX * this.minY shr 8)) shr this.toolkit.shadowScale
+        if (shadowOffsetX > 0) {
+            startX = (this.minX - (shadowOffsetX * this.maxY shr 8)) shr shadowScale
+            endX = (this.maxX - (shadowOffsetX * this.minY shr 8)) shr shadowScale
         } else {
-            startX = (this.minX - (this.toolkit.shadowOffsetX * this.minY shr 8)) shr this.toolkit.shadowScale
-            endX = (this.maxX - (this.toolkit.shadowOffsetX * this.maxY shr 8)) shr this.toolkit.shadowScale
+            startX = (this.minX - (shadowOffsetX * this.minY shr 8)) shr shadowScale
+            endX = (this.maxX - (shadowOffsetX * this.maxY shr 8)) shr shadowScale
         }
 
         val startY: Int
         val endY: Int
-        if (this.toolkit.shadowOffsetZ > 0) {
-            startY = (this.minZ - (this.toolkit.shadowOffsetZ * this.maxY shr 8)) shr this.toolkit.shadowScale
-            endY = (this.maxZ - (this.toolkit.shadowOffsetZ * this.minY shr 8)) shr this.toolkit.shadowScale
+        if (shadowOffsetZ > 0) {
+            startY = (this.minZ - (shadowOffsetZ * this.maxY shr 8)) shr shadowScale
+            endY = (this.maxZ - (shadowOffsetZ * this.minY shr 8)) shr shadowScale
         } else {
-            startY = (this.minZ - (this.toolkit.shadowOffsetZ * this.minY shr 8)) shr this.toolkit.shadowScale
-            endY = (this.maxZ - (this.toolkit.shadowOffsetZ * this.maxY shr 8)) shr this.toolkit.shadowScale
+            startY = (this.minZ - (shadowOffsetZ * this.minY shr 8)) shr shadowScale
+            endY = (this.maxZ - (shadowOffsetZ * this.maxY shr 8)) shr shadowScale
         }
 
         val sizeX = endX - startX + 1
@@ -3123,7 +3126,7 @@ class ModelGL : Model {
         }
 
         shadowGL.setDimension(startX, startY, endX, endY)
-        projectShadow(shadowGL)
+        projectShadow(shadowGL, shadowOffsetX, shadowOffsetZ, shadowScale)
         return shadowGL
     }
 

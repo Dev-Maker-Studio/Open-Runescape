@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.scene
 
+import com.darkan.crash.CrashHandler
 import com.jagex.game.runetek5.cache.node.NodeCollection
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.`object`.ObjectTypeList
@@ -51,6 +52,9 @@ class AsyncMapLoader : Runnable {
 
     /** Game thread only. The scene the server's zone packets are relative to while it is still being built. */
     @JvmField var requestedFrame: RegionLoadRequest.SceneFrame? = null
+
+    @Volatile
+    private var buildFailed = false
 
     fun load(request: RegionLoadRequest) {
         if (Renderers.activeToolkit !is SafeModeToolkit) {
@@ -114,25 +118,7 @@ class AsyncMapLoader : Runnable {
                 synchronized(stateLock) {
                     state = State.BUILDING
                 }
-                // Buffer loc ambient sounds created during the build; the game thread
-                // iterates the live sound lists every tick, so they are drained into
-                // place by finalizeAsyncRegionSwap instead.
-                region.pendingAmbientSounds = NodeCollection()
-                AmbientSound.DEFERRED_LOC_SOUNDS.set(region.pendingAmbientSounds)
-                try {
-                    if (request.loadingType == RegionLoadingType.RELOAD) {
-                        region.reload()
-                    } else {
-                        region.initialize(request)
-                    }
-                    while (!region.loadRegion()) {
-                        // Re-entrant: false means JS5 data is still downloading; the game
-                        // thread's file requester pumps it, so pace the retries.
-                        Thread.sleep(10)
-                    }
-                } finally {
-                    AmbientSound.DEFERRED_LOC_SOUNDS.set(null)
-                }
+                build(request)
                 synchronized(stateLock) {
                     pendingRegion = region
                     state = State.READY
@@ -141,12 +127,58 @@ class AsyncMapLoader : Runnable {
                     }
                 }
             } catch (t: Throwable) {
-                t.printStackTrace()
+                CrashHandler.noteError("async map build failed", t)
                 synchronized(stateLock) {
                     pendingRegion = null
+                    buildFailed = true
                     state = State.IDLE
                 }
             }
         }
+    }
+
+    private fun build(request: RegionLoadRequest) {
+        val requestStart = request.buffer?.currentPosition ?: 0
+        var attempt = 1
+        while (true) {
+            // Buffer loc ambient sounds created during the build; the game thread
+            // iterates the live sound lists every tick, so they are drained into
+            // place by finalizeAsyncRegionSwap instead.
+            region.pendingAmbientSounds = NodeCollection()
+            AmbientSound.DEFERRED_LOC_SOUNDS.set(region.pendingAmbientSounds)
+            try {
+                if (request.loadingType == RegionLoadingType.RELOAD) {
+                    region.reload()
+                } else {
+                    region.initialize(request)
+                }
+                while (!region.loadRegion()) {
+                    // Re-entrant: false means JS5 data is still downloading; the game
+                    // thread's file requester pumps it, so pace the retries.
+                    Thread.sleep(10)
+                }
+                return
+            } catch (e: Exception) {
+                if (attempt++ == BUILD_ATTEMPTS) {
+                    throw e
+                }
+                e.printStackTrace()
+                request.buffer?.currentPosition = requestStart
+            } finally {
+                AmbientSound.DEFERRED_LOC_SOUNDS.set(null)
+            }
+        }
+    }
+
+    fun takeBuildFailure(): Boolean {
+        if (!buildFailed) {
+            return false
+        }
+        buildFailed = false
+        return true
+    }
+
+    private companion object {
+        const val BUILD_ATTEMPTS = 3
     }
 }

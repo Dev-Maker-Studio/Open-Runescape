@@ -937,16 +937,16 @@ open class GroundGL(
 
     override fun addShadow(shadow: Shadow?, scaledX: Int, averageHeight: Int, scaledY: Int) {
         if (shadowMapper != null && shadow != null) {
-            val shadowX = scaledX - (averageHeight * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
-            val shadowY = scaledY - (averageHeight * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
+            val shadowX = scaledX - (averageHeight * activeToolkit.bakeShadowOffsetX() shr 8) shr activeToolkit.shadowScale
+            val shadowY = scaledY - (averageHeight * activeToolkit.bakeShadowOffsetZ() shr 8) shr activeToolkit.shadowScale
             shadowMapper!!.addShadow(shadow, shadowX, shadowY)
         }
     }
 
     override fun hasRenderingShadows(shadow: Shadow?, x: Int, planesHeightDelta: Int, y: Int): Boolean {
         if (shadowMapper != null && shadow != null) {
-            val shadowX = x - (planesHeightDelta * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
-            val shadowY = y - (planesHeightDelta * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
+            val shadowX = x - (planesHeightDelta * activeToolkit.bakeShadowOffsetX() shr 8) shr activeToolkit.shadowScale
+            val shadowY = y - (planesHeightDelta * activeToolkit.bakeShadowOffsetZ() shr 8) shr activeToolkit.shadowScale
             return shadowMapper!!.applyShadow(shadow, shadowX, shadowY)
         }
         return false
@@ -954,8 +954,8 @@ open class GroundGL(
 
     override fun removeShadow(shadow: Shadow?, x: Int, groundOffset: Int, y: Int) {
         if (shadowMapper != null && shadow != null) {
-            val shadowX = x - (groundOffset * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
-            val shadowY = y - (groundOffset * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
+            val shadowX = x - (groundOffset * activeToolkit.bakeShadowOffsetX() shr 8) shr activeToolkit.shadowScale
+            val shadowY = y - (groundOffset * activeToolkit.bakeShadowOffsetZ() shr 8) shr activeToolkit.shadowScale
             shadowMapper!!.removeShadow(shadow, shadowX, shadowY)
         }
     }

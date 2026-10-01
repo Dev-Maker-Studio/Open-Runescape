@@ -242,6 +242,15 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField var functionMask: Int = 0
     @JvmField var shadowOffsetX: Int = 0
     @JvmField var shadowOffsetZ: Int = 0
+    private val pinnedShadowOffsets: ThreadLocal<IntArray?> = ThreadLocal()
+
+    fun pinShadowOffsets(sunX: Float, sunY: Float, sunZ: Float) {
+        pinnedShadowOffsets.set(intArrayOf((sunX * 256.0f / sunY).toInt(), (sunZ * 256.0f / sunY).toInt()))
+    }
+
+    fun bakeShadowOffsetX(): Int = pinnedShadowOffsets.get()?.get(0) ?: shadowOffsetX
+
+    fun bakeShadowOffsetZ(): Int = pinnedShadowOffsets.get()?.get(1) ?: shadowOffsetZ
     @JvmField var fogEndPosition: Float = 0f
     @JvmField var fogStartPosition: Float = 0f
     @JvmField var currentArrayBuffer: ArrayBufferGL? = null
