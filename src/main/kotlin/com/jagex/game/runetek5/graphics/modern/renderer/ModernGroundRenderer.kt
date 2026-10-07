@@ -196,16 +196,15 @@ class ModernGroundRenderer {
     private fun shadowEntryFor(sm: ShadowMapperGL): ShadowTexEntry {
         var e = shadowEntries[sm]
         if (e == null) {
+            while (shadowEntries.size >= 6) {
+                val oldest = shadowEntries.values.minByOrNull { it.lastUsedFrame } ?: break
+                if (oldest.tex != 0) glDeleteTextures(oldest.tex)
+                shadowEntries.remove(oldest.mapper)
+                if (boundShadowMapper === oldest.mapper) boundShadowMapper = null
+            }
             e = ShadowTexEntry(sm)
             shadowEntries[sm] = e
             sm.markAllDirty()
-            // A session that walks many regions must not accumulate 2.8MB textures.
-            while (shadowEntries.size > 6) {
-                val oldest = shadowEntries.values.minByOrNull { it.lastUsedFrame } ?: break
-                if (oldest === e) break
-                if (oldest.tex != 0) glDeleteTextures(oldest.tex)
-                shadowEntries.remove(oldest.mapper)
-            }
         }
         e.lastUsedFrame = shadowFrame
         return e
