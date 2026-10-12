@@ -96,6 +96,9 @@ class Component {
         @JvmStatic
         fun fromHash(hash: Int): Component? {
             val interfaceId = hash shr 16
+            if (interfaceId !in Interface.INTERFACES!!.indices) {
+                return null
+            }
             if (Interface.INTERFACES!![interfaceId] == null || Interface.INTERFACES!![interfaceId]!!.getComponent(hash) == null) {
                 val loaded = Interface.interfaceLoaded(interfaceId, null)
                 if (!loaded) {

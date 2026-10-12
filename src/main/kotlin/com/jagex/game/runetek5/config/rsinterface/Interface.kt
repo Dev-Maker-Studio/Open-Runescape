@@ -81,6 +81,9 @@ class Interface(
 
         @JvmStatic
         fun interfaceLoaded(interfaceId: Int, xteas: IntArray?): Boolean {
+            if (interfaceId !in INTERFACES_LOADED!!.indices) {
+                return false
+            }
             if (INTERFACES_LOADED!![interfaceId]) {
                 return true
             }
@@ -99,6 +102,9 @@ class Interface(
 
         @JvmStatic
         fun unloadInterface(interfaceId: Int) {
+            if (interfaceId !in INTERFACES_LOADED!!.indices) {
+                return
+            }
             INTERFACES_LOADED!![interfaceId] = false
             clearComponents(interfaceId)
         }
@@ -126,7 +132,7 @@ class Interface(
 
         @JvmStatic
         fun clearComponents(interfaceId: Int) {
-            if (interfaceId != -1 && !INTERFACES_LOADED!![interfaceId]) {
+            if (interfaceId in INTERFACES_LOADED!!.indices && !INTERFACES_LOADED!![interfaceId]) {
                 interfaceResource!!.clearArchiveFiles(interfaceId)
                 INTERFACES!![interfaceId] = null
             }
