@@ -56,6 +56,9 @@ class AsyncMapLoader : Runnable {
     @Volatile
     private var buildFailed = false
 
+    @Volatile
+    private var generation = 0
+
     fun load(request: RegionLoadRequest) {
         if (Renderers.activeToolkit !is SafeModeToolkit) {
             requestMapUpdate(request)
@@ -88,6 +91,32 @@ class AsyncMapLoader : Runnable {
         region = mapRegion
     }
 
+    fun discard() {
+        synchronized(stateLock) {
+            synchronized(regionLoadRequests) {
+                regionLoadRequests.clear()
+            }
+            generation++
+            requestedFrame = null
+            buildFailed = false
+            if (state == State.READY) {
+                pendingRegion = null
+                state = State.IDLE
+                (stateLock as Object).notifyAll()
+            }
+        }
+    }
+
+    fun finishFinalizing() {
+        pendingRegion = null
+        state = if (hasQueuedRequests()) State.BUILDING else State.IDLE
+        (stateLock as Object).notifyAll()
+    }
+
+    private fun hasQueuedRequests(): Boolean {
+        return synchronized(regionLoadRequests) { regionLoadRequests.isNotEmpty() }
+    }
+
     fun isLoadingRegion(): Boolean {
         return state != State.IDLE
     }
@@ -102,6 +131,7 @@ class AsyncMapLoader : Runnable {
 
     override fun run() {
         while (true) {
+            var requestGeneration = 0
             val request = synchronized(regionLoadRequests) {
                 while (regionLoadRequests.isEmpty()) {
                     try {
@@ -110,6 +140,7 @@ class AsyncMapLoader : Runnable {
                         // NOOP
                     }
                 }
+                requestGeneration = generation
                 regionLoadRequests.pollFirst()!!
             }
             try {
@@ -118,26 +149,36 @@ class AsyncMapLoader : Runnable {
                 synchronized(stateLock) {
                     state = State.BUILDING
                 }
-                build(request)
+                build(request, requestGeneration)
                 synchronized(stateLock) {
+                    if (generation != requestGeneration) {
+                        throw BuildCancelled()
+                    }
                     pendingRegion = region
                     state = State.READY
-                    while (state != State.IDLE) {
+                    while (state == State.READY || state == State.FINALIZING) {
                         (stateLock as Object).wait()
                     }
+                }
+            } catch (cancelled: BuildCancelled) {
+                synchronized(stateLock) {
+                    pendingRegion = null
+                    state = if (hasQueuedRequests()) State.BUILDING else State.IDLE
                 }
             } catch (t: Throwable) {
                 CrashHandler.noteError("async map build failed", t)
                 synchronized(stateLock) {
                     pendingRegion = null
-                    buildFailed = true
-                    state = State.IDLE
+                    if (generation == requestGeneration) {
+                        buildFailed = true
+                    }
+                    state = if (hasQueuedRequests()) State.BUILDING else State.IDLE
                 }
             }
         }
     }
 
-    private fun build(request: RegionLoadRequest) {
+    private fun build(request: RegionLoadRequest, requestGeneration: Int) {
         val requestStart = request.buffer?.currentPosition ?: 0
         var attempt = 1
         while (true) {
@@ -152,13 +193,31 @@ class AsyncMapLoader : Runnable {
                 } else {
                     region.initialize(request)
                 }
+                var outstanding = Int.MAX_VALUE
+                var lastProgress = System.currentTimeMillis()
                 while (!region.loadRegion()) {
                     // Re-entrant: false means JS5 data is still downloading; the game
                     // thread's file requester pumps it, so pace the retries.
+                    if (generation != requestGeneration) {
+                        throw BuildCancelled()
+                    }
+                    val remaining = region.missingMapCount + region.locsStillLoading
+                    val now = System.currentTimeMillis()
+                    if (remaining < outstanding) {
+                        outstanding = remaining
+                        lastProgress = now
+                    } else if (now - lastProgress > STALL_TIMEOUT_MS) {
+                        throw IllegalStateException("map files stalled with $remaining outstanding")
+                    }
                     Thread.sleep(10)
                 }
                 return
+            } catch (cancelled: BuildCancelled) {
+                throw cancelled
             } catch (e: Exception) {
+                if (generation != requestGeneration) {
+                    throw BuildCancelled()
+                }
                 if (attempt++ == BUILD_ATTEMPTS) {
                     throw e
                 }
@@ -178,7 +237,10 @@ class AsyncMapLoader : Runnable {
         return true
     }
 
+    private class BuildCancelled : RuntimeException()
+
     private companion object {
         const val BUILD_ATTEMPTS = 3
+        const val STALL_TIMEOUT_MS = 60_000L
     }
 }

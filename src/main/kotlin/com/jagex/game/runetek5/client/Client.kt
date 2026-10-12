@@ -282,9 +282,7 @@ class Client : GameShell() {
                         try {
                             mapRegionLoader.pendingRegion!!.finalizeAsyncRegionSwap()
                         } finally {
-                            mapRegionLoader.pendingRegion = null
-                            mapRegionLoader.state = AsyncMapLoader.State.IDLE
-                            (mapRegionLoader.stateLock as Object).notifyAll()
+                            mapRegionLoader.finishFinalizing()
                         }
                     }
                 }
@@ -1805,6 +1803,7 @@ class Client : GameShell() {
             SongPlayer.resetChannelVolumes()
             AmbientSound.unlinkSounds(true)
             AbstractNativeToolkit.drawLoadingPleaseWaitHardware()
+            Resource.mapRegionLoaderTask?.discard()
             clearWorldMapCaches()
             resetGameState()
             if (reconnect) {
@@ -1948,7 +1947,7 @@ class Client : GameShell() {
                         Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
                         LocAction.transformObjects()
                         AreaSoundPlayer.updateAreaSounds()
-                        if (drawsSinceLastPacket > 10) {
+                        if (drawsSinceLastPacket > 10 && Resource.mapRegionLoaderTask?.isLoadingRegion() != true) {
                             ++GAME_CONNECTION_CONTEXT.idleReadPulses
                         }
                         if (GAME_CONNECTION_CONTEXT.idleReadPulses > 2250) {
