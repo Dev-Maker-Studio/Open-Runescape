@@ -3846,7 +3846,7 @@ class ModernGLToolkit(
         // retained store — the capture must see everything, the store culls per frame)
         val cullStartNs = stageNow()
         captureLegacyMatrix = modelMatrix
-        if (captureList == null && frustumCullEnabled && model.boundsCalculated) {
+        if (captureList == null && frustumCullEnabled && model.boundsCalculated && isPerspectiveProjection()) {
             val vp = viewProjectionMatrix.elements
             if (!isModelVisible(model, modelMatrix, vp)) {
                 if (VERIFY_MODEL_CULL) verifyModelCull(model, modelMatrix, vp)
@@ -5855,6 +5855,8 @@ class ModernGLToolkit(
                     "faces=${model.renderedFaceCount} origin=(${modelMatrix.xD}, ${modelMatrix.yD}, ${modelMatrix.zD})")
         }
     }
+
+    private fun isPerspectiveProjection(): Boolean = currentModelMatrix.elements[11] != 0f
 
     private fun isModelVisible(
         model: ModelGL,
