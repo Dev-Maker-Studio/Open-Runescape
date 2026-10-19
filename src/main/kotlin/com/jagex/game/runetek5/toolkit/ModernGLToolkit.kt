@@ -1373,6 +1373,15 @@ class ModernGLToolkit(
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, sceneMsaaRestoreFbo)
     }
 
+    private fun applyModelBlend() {
+        if (modelBlend) {
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        } else {
+            glDisable(GL_BLEND)
+        }
+    }
+
     private fun openSceneBatch() {
         val mr = modernRenderer ?: return
         val gr = groundRenderer ?: return
@@ -1411,12 +1420,7 @@ class ModernGLToolkit(
         // lampposts SOLID even though their faces carry ~50% alpha (confirmed by
         // visualising per-fragment alpha), so honouring that alpha is what makes
         // them ghostly here.
-        if (modelBlend) {
-            glEnable(GL_BLEND)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        } else {
-            glDisable(GL_BLEND)
-        }
+        applyModelBlend()
         // Cull state for model geometry is asserted at the draw site in the
         // model batchers (state set here does not survive to the draws).
         glDisable(GL_CULL_FACE)
@@ -1584,6 +1588,7 @@ class ModernGLToolkit(
         if (useOptimizedBatcher && optimizedBatcher?.isActive() == true) {
             // Render instanced geometry first (repeated meshes)
             flushDeferredBuilds()
+            applyModelBlend()
             if (useInstancing && instancedBatcher?.isActive() == true) {
                 instancedBatcher?.setTextureAlphaPredicate(::materialTextureHasAlpha)
                 gpuTimer.begin(GPU_PASS_INSTANCED)
@@ -5786,6 +5791,7 @@ class ModernGLToolkit(
      * Called when MAX_MODELS is reached to avoid dropping geometry.
      */
     private fun flushBatchMidFrame(batcher: OptimizedFrameBatcher) {
+        applyModelBlend()
         // Render current batch. A mid-frame flush cannot wait for the rest of the
         // scene, so its translucent stream goes out now, right after its own opaque
         // geometry — the closest to legacy order a capacity overflow allows.
