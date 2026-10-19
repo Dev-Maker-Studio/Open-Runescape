@@ -1,0 +1,12 @@
+[
+  {
+    "itemId": 600,
+    "amount": 1,
+    "tile": {
+      "x": 2438,
+      "y": 3187,
+      "plane": 0
+    },
+    "respawnTicks": 50
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "ids": [
+    3672,
+    3673,
+    5168,
+    5169,
+    5170,
+    12369,
+    12370,
+    12371
+  ],
+  "names": [
+    "Ram"
+  ],
+  "attackAnim": "sheep_update_attack",
+  "attackSound": 757,
+  "defenceAnim": "sheep_update_defend",
+  "defendSound": 759,
+  "deathAnim": "sheep_update_death",
+  "deathDelay": 6,
+  "deathSound": 758,
+  "respawnDelay": 59,
+  "hitpoints": 40,
+  "maxHit": 15,
+  "attackStyle": "MELEE",
+  "combatLevels": {
+    "ATTACK": 1,
+    "RANGE": 1,
+    "STRENGTH": 1,
+    "DEFENSE": 1,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

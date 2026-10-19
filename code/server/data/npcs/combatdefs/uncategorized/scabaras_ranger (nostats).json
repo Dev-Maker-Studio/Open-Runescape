@@ -1,0 +1,26 @@
+{
+  "ids": [
+    6773
+  ],
+  "names": [
+    "Scabaras ranger"
+  ],
+  "attackAnim": "scab_insectoid_attack_archer",
+  "attackSound": -1,
+  "defenceAnim": "scab_insectoid_defend_archer",
+  "defendSound": -1,
+  "deathAnim": "scab_insectoid_death_archer",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 900,
+  "maxHit": 130,
+  "attackStyle": "RANGE",
+  "attackRange": -1,
+  "attackGfx": 20,
+  "attackProjectile": 11,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

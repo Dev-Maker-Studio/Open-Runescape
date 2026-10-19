@@ -1,0 +1,497 @@
+[
+  {
+    "tile": {
+      "plane": 3,
+      "x": 2918,
+      "y": 4950
+    },
+    "comment": "Jaldraocht Pyramid Level 1 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 3,
+      "x": 2902,
+      "y": 4965
+    },
+    "comment": "Jaldraocht Pyramid Level 1 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2838,
+      "y": 4972
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2844,
+      "y": 4969
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2847,
+      "y": 4963
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2769,
+      "y": 4976
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2808,
+      "y": 4974
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2781,
+      "y": 4972
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2764,
+      "y": 4970
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2807,
+      "y": 4968
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2763,
+      "y": 4968
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2767,
+      "y": 4964
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2769,
+      "y": 4964
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2765,
+      "y": 4962
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2801,
+      "y": 4960
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2762,
+      "y": 4956
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2771,
+      "y": 4953
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2778,
+      "y": 4952
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2808,
+      "y": 4950
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2798,
+      "y": 4950
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2796,
+      "y": 4949
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2799,
+      "y": 4948
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2802,
+      "y": 4945
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2791,
+      "y": 4942
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2808,
+      "y": 4941
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2772,
+      "y": 4938
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2764,
+      "y": 4938
+    },
+    "comment": "Jaldraocht Pyramid Level 3 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2835,
+      "y": 4942
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2856,
+      "y": 4942
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2867,
+      "y": 4967
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2830,
+      "y": 4956
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2863,
+      "y": 4954
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2867,
+      "y": 4943
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2841,
+      "y": 4952
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2845,
+      "y": 4942
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2857,
+      "y": 4964
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2829,
+      "y": 4966
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2850,
+      "y": 4951
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2838,
+      "y": 4960
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 2,
+      "x": 2830,
+      "y": 4949
+    },
+    "comment": "Jaldraocht Pyramid Level 2 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3202,
+      "y": 9282
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3241,
+      "y": 9284
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3203,
+      "y": 9309
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3261,
+      "y": 9308
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3261,
+      "y": 9285
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3221,
+      "y": 9283
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3220,
+      "y": 9316
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3219,
+      "y": 9299
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3234,
+      "y": 9299
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3205,
+      "y": 9323
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3205,
+      "y": 9295
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1963
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3246,
+      "y": 9296
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1964
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3249,
+      "y": 9311
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1961
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3205,
+      "y": 9334
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1962
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 3231,
+      "y": 9284
+    },
+    "comment": "Jaldraocht Pyramid Level 4 - Mummy",
+    "npcId": 1963
+  }
+]

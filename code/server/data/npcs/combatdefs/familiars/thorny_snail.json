@@ -1,0 +1,31 @@
+{
+  "ids": [
+    6806,
+    6807
+  ],
+  "attackAnim": "lore_snail_attack",
+  "attackSound": -1,
+  "defenceAnim": "lore_snail_walk",
+  "defendSound": -1,
+  "deathAnim": "lore_snail_attack",
+  "deathDelay": 8,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 280,
+  "maxHit": 40,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 1,
+    "RANGE": 15,
+    "STRENGTH": 1,
+    "DEFENSE": 15,
+    "MAGE": 1
+  },
+  "attackRange": 7,
+  "attackGfx": 1379,
+  "attackProjectile": 1380,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 5,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 30000
+}

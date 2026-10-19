@@ -1,0 +1,65 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2610,
+      "y": 9686
+    },
+    "comment": "Hazeel Cultist (13)",
+    "npcId": 894
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2607,
+      "y": 9680
+    },
+    "comment": "Hazeel Cultist (13)",
+    "npcId": 894
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2609,
+      "y": 9669
+    },
+    "comment": "Hazeel Cultist (13)",
+    "npcId": 894
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2608,
+      "y": 9671
+    },
+    "comment": "Hazeel Cultist (13)",
+    "npcId": 894
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2607,
+      "y": 9673
+    },
+    "comment": "Hazeel Cultist (13)",
+    "npcId": 894
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2566,
+      "y": 9670
+    },
+    "comment": "Claus the chef",
+    "npcId": 15627
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2577,
+      "y": 9690
+    },
+    "comment": "Dungeon rat (12)",
+    "npcId": 88
+  }
+]

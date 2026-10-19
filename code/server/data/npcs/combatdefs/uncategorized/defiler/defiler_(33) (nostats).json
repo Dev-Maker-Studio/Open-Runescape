@@ -1,0 +1,31 @@
+{
+  "ids": [
+    3762,
+    3763
+  ],
+  "attackAnim": "defiler_attack",
+  "attackSound": -1,
+  "defenceAnim": "defiler_defend",
+  "defendSound": -1,
+  "deathAnim": "defiler_death",
+  "deathDelay": 8,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 270,
+  "maxHit": 60,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 0,
+    "RANGE": 46,
+    "STRENGTH": 0,
+    "DEFENSE": 17,
+    "MAGE": 0
+  },
+  "attackRange": -1,
+  "attackGfx": 657,
+  "attackProjectile": 656,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

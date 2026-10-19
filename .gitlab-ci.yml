@@ -49,9 +49,9 @@ build:
       - .gradle/wrapper
   script:
     - *version
-    - ./gradlew --no-daemon --build-cache shadowJar -PreleaseVersion="$VERSION" -PallNatives=true
+    - (cd code/client && ./gradlew --no-daemon --build-cache shadowJar -PreleaseVersion="$VERSION" -PallNatives=true)
     - mkdir -p dist
-    - cp "build/libs/darkan-client-shaded-$VERSION-all.jar" "dist/darkan-client-$VERSION.jar"
+    - cp "code/client/build/libs/darkan-client-shaded-$VERSION-all.jar" "dist/darkan-client-$VERSION.jar"
     - cp "dist/darkan-client-$VERSION.jar" dist/darkan-client.jar
     - echo "VERSION=$VERSION" > dist/build.env
     - ls -la dist

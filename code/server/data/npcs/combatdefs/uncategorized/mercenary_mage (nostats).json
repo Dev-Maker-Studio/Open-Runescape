@@ -1,0 +1,28 @@
+{
+  "ids": [
+    8335,
+    14244,
+    14245
+  ],
+  "names": [
+    "Mercenary mage"
+  ],
+  "attackAnim": "human_staff_pound",
+  "attackSound": -1,
+  "defenceAnim": "human_staff_def",
+  "defendSound": -1,
+  "deathAnim": "luc2_elite_guard_mage_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 1,
+  "maxHit": 1,
+  "attackStyle": "MELEE",
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 4
+}

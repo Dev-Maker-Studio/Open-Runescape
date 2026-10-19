@@ -1,0 +1,31 @@
+{
+  "ids": [
+    1591
+  ],
+  "attackAnim": "dragon_update_09_luc2_mith_dragon_fusing_fire",
+  "attackSound": -1,
+  "defenceAnim": "dragon_update_09_metal_dragon_defend",
+  "defendSound": -1,
+  "deathAnim": "dragon_update_09_metal_dragon_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 1650,
+  "maxHit": 203,
+  "attackStyle": "RANGE",
+  "attackBonus": "SLASH_ATT",
+  "combatLevels": {
+    "ATTACK": 165,
+    "RANGE": 1,
+    "STRENGTH": 165,
+    "DEFENSE": 165,
+    "MAGE": 100
+  },
+  "attackRange": 8,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 6,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 20
+}

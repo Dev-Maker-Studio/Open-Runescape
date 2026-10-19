@@ -1,0 +1,23 @@
+{
+  "name": "Mami Rimba's Shop",
+  "generalStore": false,
+  "buyOnly": false,
+  "currency": 995,
+  "items": [
+    {
+      "item": {
+        "id": 24127,
+        "amount": 50000
+      }
+    },
+    {
+      "item": {
+        "id": 24133,
+        "amount": 50000
+      }
+    }
+  ],
+  "npcIds": [
+    15234
+  ]
+}

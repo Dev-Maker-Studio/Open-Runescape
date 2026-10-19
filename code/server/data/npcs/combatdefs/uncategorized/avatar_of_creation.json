@@ -1,0 +1,34 @@
+{
+  "ids": [
+    8614
+  ],
+  "names": [
+    "Avatar of Creation"
+  ],
+  "attackAnim": "snp_nature_boss_attack",
+  "attackSound": -1,
+  "defenceAnim": "snp_nature_boss_defend",
+  "defendSound": -1,
+  "deathAnim": "snp_nature_boss_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 12500,
+  "maxHit": 96,
+  "attackStyle": "MELEE",
+  "attackBonus": "CRUSH_ATT",
+  "combatLevels": {
+    "ATTACK": 99,
+    "STRENGTH": 99,
+    "DEFENSE": 1,
+    "RANGE": 1,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

@@ -1,0 +1,33 @@
+{
+  "ids": [
+    15208
+  ],
+  "names": [
+    "TokHaar-Jad"
+  ],
+  "attackAnim": 16204,
+  "attackSound": -1,
+  "defenceAnim": "tzhaar_2011_tor_jad_defend",
+  "defendSound": -1,
+  "deathAnim": "tzhaar_2011_tor_jad_death",
+  "deathDelay": 12,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 2500,
+  "maxHit": 1014,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 2000,
+    "RANGE": 2000,
+    "STRENGTH": 1000,
+    "DEFENSE": 1000,
+    "MAGE": 800
+  },
+  "attackRange": 10,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 64,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 80
+}

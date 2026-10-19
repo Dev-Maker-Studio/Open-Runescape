@@ -1,0 +1,43 @@
+{
+  "ids": [
+    186,
+    7106,
+    7107,
+    7108,
+    7109,
+    7110,
+    7111,
+    7112,
+    7113,
+    7114
+  ],
+  "names": [
+    "Thug"
+  ],
+  "attackAnim": "human_sword_stab",
+  "attackSound": 2501,
+  "defenceAnim": "human_sword_def",
+  "defendSound": 513,
+  "deathAnim": "human_death",
+  "deathDelay": 6,
+  "deathSound": 512,
+  "respawnDelay": 39,
+  "hitpoints": 180,
+  "maxHit": 20,
+  "attackStyle": "MELEE",
+  "attackBonus": "STAB_ATT",
+  "combatLevels": {
+    "ATTACK": 7,
+    "RANGE": 1,
+    "STRENGTH": 5,
+    "DEFENSE": 9,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

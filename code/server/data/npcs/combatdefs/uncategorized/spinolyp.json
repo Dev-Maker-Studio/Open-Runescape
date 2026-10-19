@@ -1,0 +1,35 @@
+{
+  "ids": [
+    2892,
+    2894,
+    2896
+  ],
+  "names": [
+    "Spinolyp"
+  ],
+  "attackAnim": "dagannoth_water_creature_attack",
+  "attackSound": -1,
+  "defenceAnim": "dagannoth_water_creature_defend",
+  "defendSound": -1,
+  "deathAnim": "dagannoth_water_creature_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 49,
+  "hitpoints": 750,
+  "maxHit": 100,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 10,
+    "RANGE": 100,
+    "STRENGTH": 10,
+    "DEFENSE": 10,
+    "MAGE": 1
+  },
+  "attackRange": 8,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": 13,
+  "maxDistFromSpawn": 7
+}

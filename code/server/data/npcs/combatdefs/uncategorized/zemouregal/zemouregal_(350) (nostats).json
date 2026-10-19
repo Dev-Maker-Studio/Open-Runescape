@@ -1,0 +1,30 @@
+{
+  "ids": [
+    14271
+  ],
+  "attackAnim": "mah5_azzanadra_magic_attack",
+  "attackSound": -1,
+  "defenceAnim": "mah5_mahjaratt_defend",
+  "defendSound": -1,
+  "deathAnim": "mahjarrat_2010_khazard_giant_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 35000,
+  "maxHit": 750,
+  "attackStyle": "MAGIC",
+  "combatLevels": {
+    "ATTACK": 150,
+    "RANGE": 150,
+    "STRENGTH": 150,
+    "DEFENSE": 160,
+    "MAGE": 160
+  },
+  "attackRange": 9,
+  "attackGfx": 1174,
+  "attackProjectile": 1189,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 64
+}

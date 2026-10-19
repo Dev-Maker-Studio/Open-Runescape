@@ -1,0 +1,33 @@
+{
+  "ids": [
+    6252
+  ],
+  "names": [
+    "Bree"
+  ],
+  "attackAnim": "godwars_centaur_attack_ranged",
+  "attackSound": -1,
+  "defenceAnim": "godwars_centaur_defend",
+  "defendSound": -1,
+  "deathAnim": "godwars_centaur_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 149,
+  "hitpoints": 1620,
+  "maxHit": 210,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 110,
+    "RANGE": 150,
+    "STRENGTH": 80,
+    "DEFENSE": 130,
+    "MAGE": 80
+  },
+  "attackRange": -1,
+  "attackGfx": 1187,
+  "attackProjectile": 1188,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 64,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

@@ -1,0 +1,98 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+.kotlin
+
+# Ignore Gradle build output directory. Anchored to the root and to each module, because an
+# unanchored "build" also matches source package directories such as
+# buildSrc/src/main/kotlin/org/darkan/build/.
+/build/
+/*/build/
+
+# eclipse specific
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+.env
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# Created by https://www.gitignore.io/api/intellij
+
+### Intellij ###
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff:
+.idea/
+
+## File-based project format:
+*.iws
+
+## Plugin-specific files:
+
+# IntelliJ
+/out/
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+### Intellij Patch ###
+# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
+
+# *.iml
+# modules.xml
+
+serverConfig.json
+lobbyConfig.json
+worldConfig.json
+world/data/worldConfig.json
+mainlog.txt
+lobby-server.jar
+cs2-dump
+# Cache write-back backups from the map editor
+cache-backups/
+# ImGui writes its docking/window layout here at runtime (ImGuiLayer setIniFilename)
+darkan-tools-layout.ini
+__pycache__/
+/tools/capture-headless.sh
+/tools/scripts/
+
+# run scripts
+world-server.jar
+*.jar.new
+
+# Default output of `:tools:run --args="gameval dump"`
+/cache-source/gamevals/work/
+# The packed cache built from the cache source tree on startup (CACHE_BUILD_PATH); see docs/cache-source.md
+/data/cache/
+# Runtime state the world server writes on every save (penguin spots, shooting stars); recreated when absent
+/data/world.json
+/data/dev-world.log
+/data/dev-client.log
+
+.env.unit
+.jar.version

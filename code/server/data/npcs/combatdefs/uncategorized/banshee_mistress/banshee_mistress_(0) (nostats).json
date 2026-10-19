@@ -1,0 +1,23 @@
+{
+  "ids": [
+    7794
+  ],
+  "attackAnim": "champions2_banshee_attack",
+  "attackSound": -1,
+  "defenceAnim": "banshee_update_defend",
+  "defendSound": -1,
+  "deathAnim": "smki_banshee_boss_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 2220,
+  "maxHit": 140,
+  "attackStyle": "MELEE",
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

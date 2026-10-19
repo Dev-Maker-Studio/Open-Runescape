@@ -1,0 +1,173 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2204,
+      "y": 4523
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2211,
+      "y": 4520
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2198,
+      "y": 4519
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2223,
+      "y": 4519
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2203,
+      "y": 4516
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2222,
+      "y": 4516
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2218,
+      "y": 4515
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2197,
+      "y": 4514
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2220,
+      "y": 4514
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2215,
+      "y": 4512
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2193,
+      "y": 4509
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2200,
+      "y": 4508
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2203,
+      "y": 4506
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2214,
+      "y": 4505
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2204,
+      "y": 4499
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2210,
+      "y": 4499
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2214,
+      "y": 4499
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2206,
+      "y": 4494
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2213,
+      "y": 4494
+    },
+    "comment": "Gelatinous Abomination",
+    "npcId": 14849
+  }
+]

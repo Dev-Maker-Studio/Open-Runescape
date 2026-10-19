@@ -1,0 +1,27 @@
+{
+  "ids": [
+    14690,
+    14691
+  ],
+  "names": [
+    "Fungal mage"
+  ],
+  "attackAnim": "polypore_fungal_mage_attack",
+  "attackSound": -1,
+  "defenceAnim": "polypore_fungal_mage_defend",
+  "defendSound": -1,
+  "deathAnim": "polypore_fungal_mage_death",
+  "deathDelay": 4,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 1200,
+  "maxHit": 114,
+  "attackStyle": "MAGIC",
+  "attackRange": -1,
+  "attackGfx": 2036,
+  "attackProjectile": 2035,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 20
+}

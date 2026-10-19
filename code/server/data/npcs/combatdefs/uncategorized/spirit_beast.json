@@ -1,0 +1,41 @@
+{
+  "ids": [
+    7995,
+    7996,
+    7997,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132
+  ],
+  "names": [
+    "Spirit Beast"
+  ],
+  "attackAnim": "sum1_spirit_beast_stamp_attack",
+  "attackSound": -1,
+  "defenceAnim": "sum1_spirit_beast_defend",
+  "defendSound": -1,
+  "deathAnim": "sum1_spirit_beast_rising_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 250,
+  "maxHit": 1000,
+  "attackStyle": "MELEE",
+  "attackBonus": "CRUSH_ATT",
+  "combatLevels": {
+    "ATTACK": 1326,
+    "STRENGTH": 1326,
+    "DEFENSE": 1326,
+    "RANGE": 1326,
+    "MAGE": 1326
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 100
+}

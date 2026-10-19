@@ -1,0 +1,34 @@
+{
+  "ids": [
+    878
+  ],
+  "names": [
+    "Colonel Radick"
+  ],
+  "attackAnim": "human_axe_smash",
+  "attackSound": -1,
+  "defenceAnim": "human_axe_def",
+  "defendSound": -1,
+  "deathAnim": "omge_player_mining_collapsed_mine_hooks1_axe",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 710,
+  "maxHit": 40,
+  "attackStyle": "MELEE",
+  "attackBonus": "SLASH_ATT",
+  "combatLevels": {
+    "ATTACK": 25,
+    "RANGE": 1,
+    "STRENGTH": 25,
+    "DEFENSE": 25,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 5
+}

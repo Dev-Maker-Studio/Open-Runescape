@@ -1,0 +1,344 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1066,
+      "y": 5041
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13605
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1035,
+      "y": 5040
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1042,
+      "y": 5039
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13607
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1051,
+      "y": 5039
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1074,
+      "y": 5039
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13606
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1049,
+      "y": 5037
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1060,
+      "y": 5037
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13606
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1059,
+      "y": 5034
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13605
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1068,
+      "y": 5034
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1035,
+      "y": 5033
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13607
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1050,
+      "y": 5033
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1074,
+      "y": 5022
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1034,
+      "y": 5021
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13606
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1042,
+      "y": 5021
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13605
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1052,
+      "y": 5021
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13607
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1055,
+      "y": 5020
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1035,
+      "y": 5017
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1066,
+      "y": 5016
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13607
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1074,
+      "y": 5016
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13605
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1054,
+      "y": 5015
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13606
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1052,
+      "y": 5008
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1043,
+      "y": 5007
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13605
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1070,
+      "y": 5007
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1033,
+      "y": 5006
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13607
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1034,
+      "y": 5003
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13606
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1050,
+      "y": 5002
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1060,
+      "y": 5002
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13605
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1075,
+      "y": 5001
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1066,
+      "y": 4999
+    },
+    "comment": "'Rum'-pumped crab",
+    "npcId": 13606
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1072,
+      "y": 5036
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13601
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1039,
+      "y": 5035
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13602
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1055,
+      "y": 5033
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13601
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1039,
+      "y": 5022
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13602
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1057,
+      "y": 5021
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13601
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1070,
+      "y": 5020
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13602
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1041,
+      "y": 5008
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13601
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1058,
+      "y": 5003
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13602
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1074,
+      "y": 5003
+    },
+    "comment": "General malpractitioner",
+    "npcId": 13601
+  }
+]

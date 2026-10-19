@@ -1,0 +1,35 @@
+{
+  "ids": [
+    3835,
+    3836
+  ],
+  "names": [
+    "Kalphite Queen"
+  ],
+  "attackAnim": "kalphite_attack_claws",
+  "attackSound": -1,
+  "defenceAnim": "kalphite_update_defend",
+  "defendSound": -1,
+  "deathAnim": "kalphite_update_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 4000,
+  "maxHit": 98,
+  "attackStyle": "MELEE",
+  "attackBonus": "CRUSH_ATT",
+  "combatLevels": {
+    "ATTACK": 70,
+    "STRENGTH": 70,
+    "DEFENSE": 70,
+    "RANGE": 70,
+    "MAGE": 70
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

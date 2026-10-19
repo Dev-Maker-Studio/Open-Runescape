@@ -1,0 +1,128 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2541,
+      "y": 3029
+    },
+    "comment": "Watchtower - City guard",
+    "npcId": 862
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2541,
+      "y": 3034
+    },
+    "comment": "Watchtower - City guard",
+    "npcId": 862
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2543,
+      "y": 3031
+    },
+    "comment": "Watchtower - City guard",
+    "npcId": 862
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2507,
+      "y": 3036
+    },
+    "comment": "Watchtower - Enclave guard",
+    "npcId": 870
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2507,
+      "y": 3040
+    },
+    "comment": "Watchtower - Enclave guard",
+    "npcId": 870
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2501,
+      "y": 3012
+    },
+    "comment": "Watchtower - South-western Ogre guard",
+    "npcId": 860
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2503,
+      "y": 3011
+    },
+    "comment": "Watchtower - South-western Ogre guard",
+    "npcId": 860
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2505,
+      "y": 3062
+    },
+    "comment": "Watchtower - Market Munchies Ogre guard",
+    "npcId": 859
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2507,
+      "y": 3062
+    },
+    "comment": "Watchtower - Market Munchies Ogre guard",
+    "npcId": 859
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2526,
+      "y": 3018
+    },
+    "comment": "Watchtower - Toll bridge Ogre guard",
+    "npcId": 861
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2529,
+      "y": 3019
+    },
+    "comment": "Watchtower - Toll bridge Ogre guard",
+    "npcId": 861
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2549,
+      "y": 3029
+    },
+    "comment": "Watchtower - Ogre guard",
+    "npcId": 858
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2551,
+      "y": 3031
+    },
+    "comment": "Watchtower - Ogre guard",
+    "npcId": 858
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2513,
+      "y": 3034
+    },
+    "comment": "Watchtower - Ogre trader",
+    "npcId": 875
+  }
+]

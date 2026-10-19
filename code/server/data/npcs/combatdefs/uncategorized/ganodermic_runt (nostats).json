@@ -1,0 +1,27 @@
+{
+  "ids": [
+    14698,
+    14699
+  ],
+  "names": [
+    "Ganodermic runt"
+  ],
+  "attackAnim": "polypore_ganodermic_runt_magic_attack",
+  "attackSound": -1,
+  "defenceAnim": "polypore_ganodermic_runt_defend",
+  "defendSound": -1,
+  "deathAnim": "polypore_ganodermic_runt_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 1250,
+  "maxHit": 139,
+  "attackStyle": "MAGIC",
+  "attackRange": -1,
+  "attackGfx": 2036,
+  "attackProjectile": 2035,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 20
+}

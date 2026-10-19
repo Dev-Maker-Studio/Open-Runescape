@@ -1,0 +1,38 @@
+{
+  "ids": [
+    3373,
+    3374,
+    3380,
+    3399,
+    3705
+  ],
+  "names": [
+    "Max"
+  ],
+  "attackAnim": "human_dagger_slash",
+  "attackSound": -1,
+  "defenceAnim": "human_dagger_def",
+  "defendSound": -1,
+  "deathAnim": "human_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 250,
+  "maxHit": 1,
+  "attackStyle": "MELEE",
+  "attackBonus": "CRUSH_ATT",
+  "combatLevels": {
+    "ATTACK": 243,
+    "STRENGTH": 243,
+    "DEFENSE": 243,
+    "RANGE": 243,
+    "MAGE": 243
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 6400
+}

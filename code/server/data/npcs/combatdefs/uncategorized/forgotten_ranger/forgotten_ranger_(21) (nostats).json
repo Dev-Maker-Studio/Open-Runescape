@@ -1,0 +1,23 @@
+{
+  "ids": [
+    7141
+  ],
+  "attackAnim": "human_bow",
+  "attackSound": -1,
+  "defenceAnim": "slayer_granite_maul_defend",
+  "defendSound": -1,
+  "deathAnim": "human_death",
+  "deathDelay": 4,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 200,
+  "maxHit": 20,
+  "attackStyle": "RANGE",
+  "attackRange": -1,
+  "attackGfx": 2466,
+  "attackProjectile": 2467,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 120
+}

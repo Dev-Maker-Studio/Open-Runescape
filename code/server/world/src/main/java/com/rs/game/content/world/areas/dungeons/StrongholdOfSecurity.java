@@ -1,0 +1,78 @@
+package com.rs.game.content.world.areas.dungeons;
+
+import com.rs.game.content.skills.magic.Magic;
+import com.rs.game.content.skills.magic.TeleType;
+import com.rs.game.model.entity.player.managers.EmotesManager.Emote;
+import com.rs.game.tasks.Task;
+import com.rs.game.tasks.WorldTasks;
+import org.darkan.core.model.Animation;
+import world.gregs.voidps.type.Tile;
+import com.rs.plugin.annotations.PluginEventHandler;
+import com.rs.plugin.handlers.ItemClickHandler;
+import com.rs.plugin.handlers.ObjectClickHandler;
+
+@PluginEventHandler
+public class StrongholdOfSecurity {
+
+	public static ItemClickHandler handleSkullSceptreTele = new ItemClickHandler(new Object[] { 9013 }, new String[] { "Invoke" }, e -> Magic.sendTeleportSpell(e.getPlayer(), 9601, -1, 1683, -1, 0, 0, Tile.of(3080, 3424, 0), 4, true, TeleType.ITEM, null));
+
+	public static ObjectClickHandler handleEntrance = new ObjectClickHandler(new Object[] { 16154 }, e -> e.getPlayer().tele(Tile.of(1859, 5243, 0)));
+
+	public static ObjectClickHandler handleExitLadders = new ObjectClickHandler(new Object[] { 16148, 16080, 16078, 16112, 16049, 16048 }, e -> e.getPlayer().ladder(Tile.of(3081, 3421, 0)));
+
+	public static ObjectClickHandler handleF1Shortcut = new ObjectClickHandler(new Object[] { 16150 }, e -> {
+		if (e.getPlayer().getEmotesManager().unlockedEmote(Emote.FLAP))
+			e.getPlayer().tele(Tile.of(1907, 5221, 0));
+		else
+			e.getPlayer().sendMessage("The portal does not allow you to enter yet.");
+	});
+
+	public static ObjectClickHandler handleF1DownLadder = new ObjectClickHandler(new Object[] { 16149 }, e -> e.getPlayer().tele(Tile.of(2042, 5245, 0)));
+
+	public static ObjectClickHandler handleF2Shortcut = new ObjectClickHandler(new Object[] { 16082 }, e -> {
+		if (e.getPlayer().getEmotesManager().unlockedEmote(Emote.SLAP_HEAD))
+			e.getPlayer().tele(Tile.of(2022, 5214, 0));
+		else
+			e.getPlayer().sendMessage("The portal does not allow you to enter yet.");
+	});
+
+	public static ObjectClickHandler handleF2DownLadder = new ObjectClickHandler(new Object[] { 16081 }, e -> e.getPlayer().ladder(Tile.of(2123, 5252, 0)));
+
+	public static ObjectClickHandler handleF3Shortcut = new ObjectClickHandler(new Object[] { 16116 }, e -> {
+		if (e.getPlayer().getEmotesManager().unlockedEmote(Emote.IDEA))
+			e.getPlayer().tele(Tile.of(2144, 5279, 0));
+		else
+			e.getPlayer().sendMessage("The portal does not allow you to enter yet.");
+	});
+
+	public static ObjectClickHandler handleF3DownLadder = new ObjectClickHandler(new Object[] { 16115 }, e -> e.getPlayer().ladder(Tile.of(2358, 5215, 0)));
+
+	public static ObjectClickHandler handleF4Shortcut = new ObjectClickHandler(new Object[] { 16050 }, e -> {
+		if (e.getPlayer().getEmotesManager().unlockedEmote(Emote.STOMP))
+			e.getPlayer().tele(Tile.of(2344, 5213, 0));
+		else
+			e.getPlayer().sendMessage("The portal does not allow you to enter yet.");
+	});
+
+	public static ObjectClickHandler handleGates = new ObjectClickHandler(new Object[] { 16123, 16124, 16065, 16066, 16089, 16090, 16043, 16044 }, e -> {
+		e.getPlayer().lock(3);
+		e.getPlayer().setNextAnimation(new Animation(4282));
+		e.getPlayer().soundEffect(2858, true);
+		WorldTasks.schedule(new Task() {
+			@Override
+			public void run() {
+				Tile tile = switch (e.getObj().getRotation()) {
+				case 0 -> Tile.of(e.getObj().getX() == e.getPlayer().getX() ? e.getObj().getX() - 1 : e.getObj().getX(), e.getPlayer().getY(), 0);
+				case 1 -> Tile.of(e.getPlayer().getX(), e.getObj().getY() == e.getPlayer().getY() ? e.getObj().getY() + 1 : e.getObj().getY(), 0);
+				case 2 -> Tile.of(e.getObj().getX() == e.getPlayer().getX() ? e.getObj().getX() + 1 : e.getObj().getX(), e.getPlayer().getY(), 0);
+				case 3 -> Tile.of(e.getPlayer().getX(), e.getObj().getY() == e.getPlayer().getY() ? e.getObj().getY() - 1 : e.getObj().getY(), 0);
+				default -> null;
+				};
+				e.getPlayer().tele(tile);
+				e.getPlayer().setNextAnimation(new Animation(4283));
+				e.getPlayer().faceObject(e.getObj());
+			}
+		}, 0);
+	});
+
+}

@@ -1,0 +1,326 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2774,
+      "y": 3273
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13732
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2775,
+      "y": 3284
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13732
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2770,
+      "y": 3284
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13733
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2793,
+      "y": 3278
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13733
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2778,
+      "y": 3291
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13734
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2781,
+      "y": 3290
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13732
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2785,
+      "y": 3284
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13732
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2768,
+      "y": 3285
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13733
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2784,
+      "y": 3277
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13733
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2773,
+      "y": 3282
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13734
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2787,
+      "y": 3280
+    },
+    "comment": "Fisherman - Fishing Platform",
+    "npcId": 13734
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2763,
+      "y": 3284
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2768,
+      "y": 3274
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2768,
+      "y": 3288
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2770,
+      "y": 3277
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2770,
+      "y": 3290
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2771,
+      "y": 3279
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2774,
+      "y": 3291
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2778,
+      "y": 3285
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2781,
+      "y": 3278
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2781,
+      "y": 3285
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2783,
+      "y": 3275
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2784,
+      "y": 3279
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2785,
+      "y": 3276
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2785,
+      "y": 3287
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2788,
+      "y": 3274
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2793,
+      "y": 3275
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2793,
+      "y": 3280
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2768,
+      "y": 3282
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2770,
+      "y": 3282
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2773,
+      "y": 3291
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2780,
+      "y": 3283
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2780,
+      "y": 3290
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2783,
+      "y": 3286
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2784,
+      "y": 3279
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2785,
+      "y": 3282
+    },
+    "comment": "Sea slug - Fishing Platform",
+    "npcId": 13731
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "ids": [
+    3200
+  ],
+  "names": [
+    "Chaos Elemental"
+  ],
+  "attackAnim": "elemental_update_chaos_attack",
+  "attackSound": -1,
+  "defenceAnim": "elemental_update_chaos_defend",
+  "defendSound": -1,
+  "deathAnim": "elemental_update_chaos_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 119,
+  "hitpoints": 2500,
+  "maxHit": 284,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 270,
+    "RANGE": 270,
+    "STRENGTH": 270,
+    "DEFENSE": 270,
+    "MAGE": 270
+  },
+  "attackRange": 12,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 10,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 45
+}

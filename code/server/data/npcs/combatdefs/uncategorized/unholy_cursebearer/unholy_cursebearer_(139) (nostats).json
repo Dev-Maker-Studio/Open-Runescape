@@ -1,0 +1,23 @@
+{
+  "ids": [
+    10117
+  ],
+  "attackAnim": "fremsaga2_cursebearer_final_being_punched",
+  "attackSound": -1,
+  "defenceAnim": "rand_boss_guard_defend",
+  "defendSound": -1,
+  "deathAnim": "rand_boss_guard_death",
+  "deathDelay": 4,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 5000,
+  "maxHit": 50,
+  "attackStyle": "MAGIC",
+  "attackRange": 7,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 5,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 127
+}

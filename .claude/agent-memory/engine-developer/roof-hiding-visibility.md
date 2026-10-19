@@ -23,6 +23,6 @@ roof geometry; "a few extra border tiles are harmless" is false once roof hiding
 
 **How to apply:** when touching ground index caching or retained visibility, re-run the repro:
 `HW=1 EXTRA="-Dautologin.command=tele+2894+3427+0 -Dautologin.roofs=2 -Dautologin.camera=1600,0"
-tools/capture.sh 6 out.png 20` (Burthorpe bank; toolkit 1 as control, 90 s between runs for the
+code/client/tools/capture.sh 6 out.png 20` (Burthorpe bank; toolkit 1 as control, 90 s between runs for the
 shared account). Black straight-edged slab top-right = regression. Reproduces headlessly too (the
 ground path is not bindless-gated).

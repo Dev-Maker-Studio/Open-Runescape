@@ -1,0 +1,56 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1714,
+      "y": 5602
+    },
+    "comment": "Fiara",
+    "npcId": 7600
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1697,
+      "y": 5605
+    },
+    "comment": "Reggie",
+    "npcId": 7601
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1635,
+      "y": 5610
+    },
+    "comment": "Getorix",
+    "npcId": 7602
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1640,
+      "y": 5597
+    },
+    "comment": "Pontimer",
+    "npcId": 7603
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1620,
+      "y": 5612
+    },
+    "comment": "Alran",
+    "npcId": 7604
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 1699,
+      "y": 5599
+    },
+    "comment": "Banker",
+    "npcId": 7605
+  }
+]

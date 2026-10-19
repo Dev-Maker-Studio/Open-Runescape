@@ -1,0 +1,56 @@
+[
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2734,
+      "y": 3575
+    },
+    "comment": "Anna",
+    "npcId": 814
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2748,
+      "y": 3559
+    },
+    "comment": "Bob",
+    "npcId": 815
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2734,
+      "y": 3581
+    },
+    "comment": "Carol",
+    "npcId": 816
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2739,
+      "y": 3581
+    },
+    "comment": "David",
+    "npcId": 817
+  },
+  {
+    "tile": {
+      "plane": 1,
+      "x": 2746,
+      "y": 3581
+    },
+    "comment": "Elizabeth",
+    "npcId": 818
+  },
+  {
+    "tile": {
+      "plane": 0,
+      "x": 2742,
+      "y": 3577
+    },
+    "comment": "Frank",
+    "npcId": 819
+  }
+]

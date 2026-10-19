@@ -1,0 +1,15 @@
+[Unit]
+Description=Darkan server %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=trent
+WorkingDirectory=/home/trent/%i
+ExecStart=/home/trent/%i/deploy/run.sh
+Restart=always
+RestartSec=5
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

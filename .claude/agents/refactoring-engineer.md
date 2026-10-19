@@ -31,7 +31,7 @@ When any answer is no, do not rename. Produce an analysis with your best hypothe
 
 ## Current State of the Codebase (read this before planning)
 
-The bulk deobfuscation pass is **finished**. There are no `ClassNNN`, `Node_SubNN`, `aClassNNN_NNNN`, `i_N`, `varN`, or `ints_N` identifiers left in `src/main/kotlin`. Your agent memory holds the completed class identifications and Rosetta-Stone mappings for reference; you do not need to re-derive them. What remains, as of 2026-09-03:
+The bulk deobfuscation pass is **finished**. There are no `ClassNNN`, `Node_SubNN`, `aClassNNN_NNNN`, `i_N`, `varN`, or `ints_N` identifiers left in `code/client/src/main/kotlin`. Your agent memory holds the completed class identifications and Rosetta-Stone mappings for reference; you do not need to re-derive them. What remains, as of 2026-09-03:
 
 | Remaining work | Where | Notes |
 |---|---|---|
@@ -51,7 +51,7 @@ Before any tree-wide rename, both gates must pass:
 Further gates learned the hard way:
 
 - **Check comment usage before renaming any short ALL-CAPS name.** `NOOP` was an idiomatic marker in 118 empty catch blocks; renaming the enum constant rewrote all of them.
-- **Sweep non-Kotlin files.** `src/main/resources/shaders/*` carry class names in header comments.
+- **Sweep non-Kotlin files.** `code/client/src/main/resources/shaders/*` carry class names in header comments.
 - **Whole-word matching only.** `Class111` is a substring of `aClass1111109`; the Edit tool's `replace_all` matches substrings. Prefer `sed` with `\b` boundaries.
 - **Never sed-replace short locals file-wide.** The same local name recurs in different scopes with different meanings.
 - Kotlin constructor parameters and `@JvmField` properties cannot share a name; check before renaming either.

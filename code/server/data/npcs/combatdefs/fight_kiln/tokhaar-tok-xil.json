@@ -1,0 +1,33 @@
+{
+  "ids": [
+    15205
+  ],
+  "names": [
+    "TokHaar-Tok-Xil"
+  ],
+  "attackAnim": "tzhaar_2011_tok_xil_melee_attack",
+  "attackSound": -1,
+  "defenceAnim": "tzhaar_2011_tok_xil_defend",
+  "defendSound": -1,
+  "deathAnim": "tzhaar_2011_tok_xil_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 700,
+  "maxHit": 234,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 160,
+    "RANGE": 160,
+    "STRENGTH": 100,
+    "DEFENSE": 150,
+    "MAGE": 160
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 64,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 80
+}

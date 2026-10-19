@@ -1,0 +1,135 @@
+[
+  {
+    "genre": "Air Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      11838,
+      11339
+    ],
+    "songs": [
+      52
+    ]
+  },
+  {
+    "genre": "Mind Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      11083
+    ],
+    "songs": [
+      65
+    ]
+  },
+  {
+    "genre": "Water Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      13899
+    ],
+    "songs": [
+      146
+    ]
+  },
+  {
+    "genre": "Earth Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      10571
+    ],
+    "songs": [
+      143
+    ]
+  },
+  {
+    "genre": "Fire Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      10315
+    ],
+    "songs": [
+      158
+    ]
+  },
+  {
+    "genre": "Body Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      10059
+    ],
+    "songs": [
+      190
+    ]
+  },
+  {
+    "genre": "Cosmic Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      8523
+    ],
+    "songs": [
+      243
+    ]
+  },
+  {
+    "genre": "Chaos Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      9035
+    ],
+    "songs": [
+      142
+    ]
+  },
+  {
+    "genre": "Nature Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      9547
+    ],
+    "songs": [
+      131
+    ]
+  },
+  {
+    "genre": "Law Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      9803
+    ],
+    "songs": [
+      262
+    ]
+  },
+  {
+    "genre": "Death Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      8779
+    ],
+    "songs": [
+      134
+    ]
+  },
+  {
+    "genre": "Blood Altar",
+    "comment": "",
+    "isActive": true,
+    "regionIds": [
+      9804
+    ],
+    "songs": [
+      512
+    ]
+  }
+]

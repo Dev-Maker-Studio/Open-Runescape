@@ -1,0 +1,33 @@
+{
+  "ids": [
+    6870
+  ],
+  "names": [
+    "Wolpertinger"
+  ],
+  "attackAnim": "lore_wolpertinger_attack",
+  "attackSound": -1,
+  "defenceAnim": "lore_wolpertinger_defend",
+  "defendSound": -1,
+  "deathAnim": "lore_wolpertinger_death",
+  "deathDelay": 8,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 6510,
+  "maxHit": 224,
+  "attackStyle": "MAGIC",
+  "combatLevels": {
+    "ATTACK": 85,
+    "RANGE": 85,
+    "STRENGTH": 35,
+    "DEFENSE": 72,
+    "MAGE": 85
+  },
+  "attackRange": 7,
+  "attackGfx": -1,
+  "attackProjectile": 2733,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 30000
+}

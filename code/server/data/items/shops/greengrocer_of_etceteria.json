@@ -1,0 +1,41 @@
+{
+  "name": "Greengrocer of Etceteria",
+  "generalStore": false,
+  "buyOnly": false,
+  "currency": 995,
+  "items": [
+    {
+      "item": {
+        "id": 1965,
+        "amount": 0
+      }
+    },
+    {
+      "item": {
+        "id": 1942,
+        "amount": 0
+      }
+    },
+    {
+      "item": {
+        "id": 1957,
+        "amount": 0
+      }
+    },
+    {
+      "item": {
+        "id": 1982,
+        "amount": 0
+      }
+    },
+    {
+      "item": {
+        "id": 1550,
+        "amount": 0
+      }
+    }
+  ],
+  "npcIds": [
+    1370
+  ]
+}

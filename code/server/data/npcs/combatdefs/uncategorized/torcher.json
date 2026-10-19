@@ -1,0 +1,34 @@
+{
+  "ids": [
+    11534
+  ],
+  "names": [
+    "Torcher"
+  ],
+  "attackAnim": "torcher_attack",
+  "attackSound": -1,
+  "defenceAnim": "torcher_defend",
+  "defendSound": -1,
+  "deathAnim": "torcher_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 250,
+  "maxHit": 12,
+  "attackStyle": "MAGIC",
+  "attackBonus": "MAGIC_ATT",
+  "combatLevels": {
+    "ATTACK": 86,
+    "STRENGTH": 86,
+    "DEFENSE": 86,
+    "RANGE": 86,
+    "MAGE": 86
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

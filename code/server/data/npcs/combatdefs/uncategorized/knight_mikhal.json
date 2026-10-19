@@ -1,0 +1,34 @@
+{
+  "ids": [
+    11545
+  ],
+  "names": [
+    "Knight Mikhal"
+  ],
+  "attackAnim": "pest_void_knight_casting",
+  "attackSound": -1,
+  "defenceAnim": "tutorial2_white_knight_defend_one",
+  "defendSound": -1,
+  "deathAnim": "luc2_elite_black_knight_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 250,
+  "maxHit": 1,
+  "attackStyle": "MELEE",
+  "attackBonus": "CRUSH_ATT",
+  "combatLevels": {
+    "ATTACK": 56,
+    "STRENGTH": 56,
+    "DEFENSE": 56,
+    "RANGE": 56,
+    "MAGE": 56
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 10
+}

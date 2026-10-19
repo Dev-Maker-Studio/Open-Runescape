@@ -1,0 +1,20 @@
+[
+  {
+    "itemId": 3216,
+    "amount": 1,
+    "tile": { "x": 2190, "y": 3144, "plane": 0 },
+    "respawnTicks": 30
+  },
+  {
+    "itemId": 3216,
+    "amount": 1,
+    "tile": { "x": 2184, "y": 3139, "plane": 0 },
+    "respawnTicks": 30
+  },
+  {
+    "itemId": 3216,
+    "amount": 1,
+    "tile": { "x": 2189, "y": 3137, "plane": 0 },
+    "respawnTicks": 30
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "ids": [
+    1692
+  ],
+  "names": [
+    "Undead chicken"
+  ],
+  "attackAnim": "lore_chicken_attack",
+  "attackSound": 355,
+  "defenceAnim": "lore_chicken_defend",
+  "defendSound": 357,
+  "deathAnim": "lore_chicken_death",
+  "deathDelay": 4,
+  "deathSound": 356,
+  "respawnDelay": 59,
+  "hitpoints": 300,
+  "maxHit": 15,
+  "attackStyle": "MELEE",
+  "attackBonus": "STAB_ATT",
+  "combatLevels": {
+    "ATTACK": 1,
+    "RANGE": 1,
+    "STRENGTH": 1,
+    "DEFENSE": 1,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

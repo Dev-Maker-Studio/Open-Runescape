@@ -1,0 +1,35 @@
+{
+  "ids": [
+    2001,
+    4500
+  ],
+  "names": [
+    "Scarab swarm"
+  ],
+  "attackAnim": "scarab_attack",
+  "attackSound": 1481,
+  "defenceAnim": -1,
+  "defendSound": 1843,
+  "deathAnim": "scarab_parry",
+  "deathDelay": 6,
+  "deathSound": 1482,
+  "respawnDelay": 59,
+  "hitpoints": 250,
+  "maxHit": 20,
+  "attackStyle": "MELEE",
+  "attackBonus": "SLASH_ATT",
+  "combatLevels": {
+    "ATTACK": 255,
+    "RANGE": 1,
+    "STRENGTH": 5,
+    "DEFENSE": 30,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

@@ -1,0 +1,34 @@
+{
+  "ids": [
+    7923,
+    7924,
+    7925,
+    7926,
+    7927,
+    7928,
+    9607,
+    9608,
+    9609
+  ],
+  "names": [
+    "Corpse archer"
+  ],
+  "attackAnim": "lumbcat_tomb_wraiths_ranger_ranged_attack",
+  "attackSound": -1,
+  "defenceAnim": "lumbcat_tomb_wraiths_mage_defend",
+  "defendSound": -1,
+  "deathAnim": "lumbcat_tomb_wraiths_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 90,
+  "maxHit": 27,
+  "attackStyle": "RANGE",
+  "attackRange": -1,
+  "attackGfx": 19,
+  "attackProjectile": 10,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

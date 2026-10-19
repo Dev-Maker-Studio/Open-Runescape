@@ -1,0 +1,34 @@
+{
+  "ids": [
+    13711
+  ],
+  "names": [
+    "Troll ranger"
+  ],
+  "attackAnim": "troll_boss_range_attack",
+  "attackSound": -1,
+  "defenceAnim": "update_fris_troll_king_block",
+  "defendSound": -1,
+  "deathAnim": "update_fris_troll_king_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 5,
+  "maxHit": 1,
+  "attackStyle": "RANGE",
+  "attackBonus": "RANGE_ATT",
+  "combatLevels": {
+    "ATTACK": 1,
+    "STRENGTH": 1,
+    "DEFENSE": 1,
+    "RANGE": 1,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 64
+}

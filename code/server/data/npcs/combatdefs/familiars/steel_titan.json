@@ -1,0 +1,33 @@
+{
+  "ids": [
+    7344
+  ],
+  "names": [
+    "Steel titan"
+  ],
+  "attackAnim": "lore_steel_titan_attack",
+  "attackSound": -1,
+  "defenceAnim": "lore_steel_titan_defend",
+  "defendSound": -1,
+  "deathAnim": "lore_steel_titan_death",
+  "deathDelay": 8,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 7540,
+  "maxHit": 244,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 130,
+    "RANGE": 130,
+    "STRENGTH": 130,
+    "DEFENSE": 130,
+    "MAGE": 130
+  },
+  "attackRange": 8,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 6,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

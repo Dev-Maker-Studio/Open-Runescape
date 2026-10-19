@@ -1,0 +1,33 @@
+{
+  "ids": [
+    6832
+  ],
+  "names": [
+    "Desert wyrm"
+  ],
+  "attackAnim": "lore_wyrm_attk",
+  "attackSound": -1,
+  "defenceAnim": "lore_wyrm_defend",
+  "defendSound": -1,
+  "deathAnim": "lore_wyrm_death",
+  "deathDelay": 8,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 470,
+  "maxHit": 42,
+  "attackStyle": "MELEE",
+  "combatLevels": {
+    "ATTACK": 20,
+    "RANGE": 20,
+    "STRENGTH": 20,
+    "DEFENSE": 20,
+    "MAGE": 20
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 30000
+}

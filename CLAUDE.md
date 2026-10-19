@@ -8,7 +8,7 @@ Darkan Bot is a refactored and deobfuscated version of the RuneScape game client
 
 ## Current State
 
-The Java-to-Kotlin migration is **complete**. `src/main/java/` no longer exists;
+The Java-to-Kotlin migration is **complete**. `code/client/src/main/java/` no longer exists;
 the codebase is 100% Kotlin.
 
 Current focus is deobfuscation and structural cleanup of the migrated code
@@ -79,7 +79,7 @@ com.darkan.bot.BotKt
 
 ### Gradle Tasks
 ```bash
-./gradlew build       # Build and create shadow JAR
+cd code/client && ./gradlew build       # Build and create shadow JAR
 ./gradlew shadowJar   # Create fat JAR: build/libs/darkan-client-shaded-2.0.0.jar
 ./gradlew run         # Run the client
 ```
@@ -200,16 +200,23 @@ The project follows an incremental migration approach:
 
 ```
 darkan-bot/
-├── src/main/
-│   └── kotlin/        # All source (100% Kotlin)
-│       ├── com/
-│       │   ├── darkan/    # Bot framework
-│       │   └── jagex/     # Game engine
-│       ├── jaclib/        # Native hardware/memory libs
-│       ├── jaggl/         # OpenGL bindings
-│       └── jagtheora/     # Video codec
-├── build.gradle.kts   # Build configuration
-└── README.md          # Project readme
+├── _APP-SPECIFICATION.md
+├── _MARKDOWN-FORMAT.md
+├── assets/            # Jars and example bot scripts
+├── code/
+│   ├── client/        # Gradle project (run ./gradlew here)
+│   └── server/        # Darkan server
+│   ├── src/main/
+│   │   └── kotlin/    # All source (100% Kotlin)
+│   │       ├── com/
+│   │       │   ├── darkan/    # Bot framework
+│   │       │   └── jagex/     # Game engine
+│   │       ├── jaclib/        # Native hardware/memory libs
+│   │       ├── jaggl/         # OpenGL bindings
+│   │       └── jagtheora/     # Video codec
+│   ├── tools/         # capture.sh
+│   └── build.gradle.kts
+└── src/               # English markdowns (README, plans)
 
 ```
 

@@ -1,0 +1,181 @@
+package com.rs.game.model.entity.npc.combat;
+
+import org.darkan.core.map.pathfinder.PathFinder;
+import com.rs.game.content.Effect;
+import com.rs.game.content.combat.CombatStyle;
+import com.rs.game.content.combat.PlayerCombatKt;
+import com.rs.game.content.skills.summoning.Familiar;
+import com.rs.game.content.skills.summoning.Summoning.ScrollTarget;
+import com.rs.game.model.entity.Entity;
+import com.rs.game.model.entity.npc.NPC;
+import com.rs.game.model.entity.player.Player;
+import org.darkan.core.model.Animation;
+import org.darkan.core.Utils;
+import com.rs.utils.WorldUtil;
+
+public final class NPCCombat {
+
+	private final NPC npc;
+	private int combatDelay;
+	private Entity target;
+
+	public NPCCombat(NPC npc) {
+		this.npc = npc;
+	}
+
+	public int getCombatDelay() {
+		return combatDelay;
+	}
+
+	/*
+	 * returns if under combat
+	 */
+	public boolean process() {
+		if (combatDelay > 0)
+			combatDelay--;
+		if (target != null) {
+			if (!checkAll()) {
+				removeTarget();
+				return false;
+			}
+			if (combatDelay <= 0)
+				combatDelay = combatAttack();
+			return true;
+		}
+		return false;
+	}
+
+	/*
+	 * return combatDelay
+	 */
+	private int combatAttack() {
+		Entity target = this.target; // prevents multithread issues
+		if (target == null)
+			return 0;
+		if (target instanceof Familiar familiar && familiar.getPouch().getScroll().getTarget() == ScrollTarget.COMBAT && Utils.random(3) == 0) {
+			Player player = familiar.getOwner();
+			if (player != null) {
+				target = player;
+				npc.setCombatTarget(target);
+				addAttackedByDelay(target);
+			}
+		}
+		int maxDistance = npc.getAttackRange();
+		boolean los = npc.lineOfSightTo(target, maxDistance == 0) || target.lineOfSightTo(npc, maxDistance == 0);
+		boolean inRange = WorldUtil.isInRange(npc, target, maxDistance + (target.getRun() ? target.hasWalkSteps() ? 2 : 1 : target.hasWalkSteps() ? 1 : 0));
+		//boolean collidesCheck = !npc.isCantFollowUnderCombat() && WorldUtil.collides(npc, target);
+		//add collision check here to enable jagex's cancer NPC walking mechanic
+		if (!los || !inRange)
+			return 0;
+		addAttackedByDelay(target);
+		return CombatScriptsHandler.attack(npc, target);
+	}
+
+	void doDefenceEmote(Entity target) {
+		target.setNextAnimationNoPriority(new Animation(PlayerCombatKt.getDefenceEmote(target)));
+	}
+
+	public Entity getTarget() {
+		return target;
+	}
+
+	public void addAttackedByDelay(Entity target) {
+		target.setAttackedBy(npc);
+		target.setAttackedByDelay(System.currentTimeMillis() + npc.getAttackSpeed() * 600L + 600); // 8seconds
+	}
+
+	public void setTarget(Entity target) {
+		this.target = target;
+		npc.faceEntity(target);
+		if (!checkAll())
+			removeTarget();
+	}
+
+	public boolean checkAll() {
+		Entity target = this.target; // prevents multithread issues
+		if (target == null)
+			return false;
+		if (npc.isDead() || npc.hasFinished() || npc.isForceWalking() || target.isDead() || target.hasFinished() || npc.getPlane() != target.getPlane())
+			return false;
+		if (npc.hasEffect(Effect.FREEZE))
+			return true; // if freeze cant move ofc
+		int distanceX = npc.getX() - npc.getRespawnTile().getX();
+		int distanceY = npc.getY() - npc.getRespawnTile().getY();
+		int size = npc.getSize();
+		int maxDistance;
+		if (!npc.isNoDistanceCheck() && !npc.isCantFollowUnderCombat()) {
+			maxDistance = npc.getCombatDefinitions().getMaxDistFromSpawn();
+			if (!(npc instanceof Familiar))
+				if (distanceX > size + maxDistance || distanceX < -1 - maxDistance || distanceY > size + maxDistance || distanceY < -1 - maxDistance) {
+					npc.forceWalkRespawnTile();
+					return false;
+				}
+			maxDistance = npc.getCombatDefinitions().getDeAggroDistance();
+			distanceX = target.getX() - npc.getX();
+			distanceY = target.getY() - npc.getY();
+			if (distanceX > size + maxDistance || distanceX < -1 - maxDistance || distanceY > size + maxDistance || distanceY < -1 - maxDistance)
+				return false; // if target distance higher 16
+		}
+		if (!npc.canAttackMulti(target) || !target.canAttackMulti(npc))
+			return false;
+		int targetSize = target.getSize();
+		boolean colliding = WorldUtil.collides(npc.getX(), npc.getY(), size, target.getX(), target.getY(), targetSize);
+		if (!npc.isCantFollowUnderCombat()) {
+			if (colliding) {
+				if (!npc.hasWalkSteps() && !target.hasWalkSteps()) {
+					if (!npc.addWalkSteps(target.getX() - size, npc.getY())) { //check west
+						npc.resetWalkSteps();
+						if (!npc.addWalkSteps(target.getX() + targetSize, npc.getY())) { //check east
+							npc.resetWalkSteps();
+							if (!npc.addWalkSteps(npc.getX(), target.getY() - size)) { //check south
+								npc.resetWalkSteps();
+								if (!npc.addWalkSteps(npc.getX(), target.getY() + targetSize)) { //check north
+									return true;
+								}
+							}
+						}
+					}
+				}
+				return true;
+			}
+			if (npc.getCombatStyle() == CombatStyle.MELEE && targetSize == 1 && size == 1 && Math.abs(npc.getX() - target.getX()) == 1 && Math.abs(npc.getY() - target.getY()) == 1 && !target.hasWalkSteps()) {
+				if (!npc.addWalkSteps(target.getX(), npc.getY(), 1))
+					npc.addWalkSteps(npc.getX(), target.getY(), 1);
+				return true;
+			}
+
+			maxDistance = npc.isForceFollowClose() ? 0 : npc.getAttackRange();
+			npc.resetWalkSteps();
+			boolean los = npc.lineOfSightTo(target, maxDistance == 0);
+			boolean inRange = WorldUtil.isInRange(npc.getX(), npc.getY(), size, target.getX(), target.getY(), targetSize, maxDistance);
+			if (!los || !inRange) {
+				npc.calcFollow(target, npc.getRun() ? 2 : 1, npc.isIntelligentRouteFinder());
+				return true;
+			}
+		}
+		return true;
+	}
+
+	public void addCombatDelay(int delay) {
+		combatDelay += delay;
+	}
+
+	public void setCombatDelay(int delay) {
+		combatDelay = delay;
+	}
+
+	public boolean hasTarget() {
+		return target != null;
+	}
+
+	public void removeTarget() {
+		target = null;
+		npc.stopFaceEntity();
+	}
+
+	public void reset() {
+		combatDelay = 0;
+		target = null;
+	}
+
+}

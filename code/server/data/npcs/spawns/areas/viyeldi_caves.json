@@ -1,0 +1,110 @@
+[
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2804,
+      "y": 9309,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2810,
+      "y": 9310,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2811,
+      "y": 9306,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2806,
+      "y": 9304,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2809,
+      "y": 9297,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2812,
+      "y": 9298,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2804,
+      "y": 9296,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2810,
+      "y": 9293,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 79,
+    "tile": {
+      "x": 2808,
+      "y": 9290,
+      "plane": 0
+    },
+    "comment": "Death wing"
+  },
+  {
+    "npcId": 82,
+    "tile": {
+      "x": 2410,
+      "y": 4680,
+      "plane": 0
+    },
+    "comment": "Lesser demon"
+  },
+  {
+    "npcId": 82,
+    "tile": {
+      "x": 2415,
+      "y": 4677,
+      "plane": 0
+    },
+    "comment": "Lesser demon"
+  },
+  {
+    "npcId": 82,
+    "tile": {
+      "x": 2423,
+      "y": 4680,
+      "plane": 0
+    },
+    "comment": "Lesser demon"
+  }
+]

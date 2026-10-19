@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "gitlab": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@zereight/mcp-gitlab"
+      ],
+      "env": {
+        "GITLAB_USE_OAUTH": "true",
+        "GITLAB_OAUTH_CLIENT_ID": "84d55e4e563a935a35874c8c9e1c3cd4e17b6d77bdc7f068482e0be3dacc525f",
+        "GITLAB_OAUTH_REDIRECT_URI": "http://127.0.0.1:8888/callback",
+        "GITLAB_API_URL": "https://gitlab.com/api/v4",
+        "GITLAB_PROJECT_ID": "67255206",
+        "GITLAB_ALLOWED_PROJECT_IDS": "67255206,86047720,75976122",
+        "GITLAB_READ_ONLY_MODE": "false",
+        "GITLAB_TOOLSETS": "users",
+        "GITLAB_TOOLS": "get_project,list_issues,get_issue,create_issue,update_issue,list_issue_discussions,create_issue_note,create_note,get_merge_request,create_merge_request,update_merge_request,get_commit,list_commit_statuses,list_pipelines,list_pipeline_jobs,get_pipeline_job_output,wait_for_pipeline",
+        "GITLAB_DENIED_TOOLS_REGEX": "^(get_users|get_user|list_events|get_project_events)$"
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "ids": [
+    202
+  ],
+  "names": [
+    "Black Heather"
+  ],
+  "attackAnim": "human_sword_slash",
+  "attackSound": 2500,
+  "defenceAnim": "human_sword_def",
+  "defendSound": 513,
+  "deathAnim": "human_death",
+  "deathDelay": 6,
+  "deathSound": 512,
+  "respawnDelay": 59,
+  "hitpoints": 370,
+  "maxHit": 40,
+  "attackStyle": "MELEE",
+  "combatLevels": {
+    "ATTACK": 32,
+    "RANGE": 1,
+    "STRENGTH": 26,
+    "DEFENSE": 27,
+    "MAGE": 1
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

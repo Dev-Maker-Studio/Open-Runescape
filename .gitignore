@@ -88,3 +88,6 @@ target/
 .project
 *.iml
 /.gradle/
+
+# cloned separately: git clone https://gitlab.com/darkanrs/cache-unpacked.git assets/cache
+assets/cache/

@@ -1,0 +1,33 @@
+{
+  "ids": [
+    7336
+  ],
+  "names": [
+    "Forge regent"
+  ],
+  "attackAnim": "flaming_prince_fire_attack",
+  "attackSound": -1,
+  "defenceAnim": "flaming_prince_defend",
+  "defendSound": -1,
+  "deathAnim": "flaming_prince_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 4410,
+  "maxHit": 100,
+  "attackStyle": "MELEE",
+  "combatLevels": {
+    "ATTACK": 72,
+    "RANGE": 72,
+    "STRENGTH": 35,
+    "DEFENSE": 64,
+    "MAGE": 72
+  },
+  "attackRange": 6,
+  "attackGfx": -1,
+  "attackProjectile": 1330,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 30000
+}

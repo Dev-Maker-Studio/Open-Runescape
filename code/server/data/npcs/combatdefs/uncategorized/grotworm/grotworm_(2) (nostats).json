@@ -1,0 +1,30 @@
+{
+  "ids": [
+    15495
+  ],
+  "attackAnim": "qbd1_parasite_tier2_attack",
+  "attackSound": -1,
+  "defenceAnim": "qbd1_parasite_tier1_defend",
+  "defendSound": -1,
+  "deathAnim": "qbd1_parasite_tier2_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 29,
+  "hitpoints": 900,
+  "maxHit": 110,
+  "attackStyle": "MAGIC",
+  "combatLevels": {
+    "ATTACK": 0,
+    "RANGE": 0,
+    "STRENGTH": 0,
+    "DEFENSE": 0,
+    "MAGE": 0
+  },
+  "attackRange": -1,
+  "attackGfx": 3162,
+  "attackProjectile": 3164,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 6
+}

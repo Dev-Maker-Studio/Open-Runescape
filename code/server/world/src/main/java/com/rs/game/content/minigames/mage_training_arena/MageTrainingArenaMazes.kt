@@ -1,0 +1,24 @@
+package com.rs.game.content.minigames.mage_training_arena
+
+class MageTrainingArenaMazes {
+    data class Layout(val plane: Int, val minX: Int, val minY: Int, val startX: Int, val startY: Int, val goalX: Int, val goalY: Int, val entranceX: Int, val entranceY: Int, val walls: String) {
+        fun canStep(x: Int, y: Int, direction: Int): Boolean =
+            x in minX until minX + 10 && y in minY until minY + 10 &&
+                walls[(y - minY) * 10 + x - minX].digitToInt(16) and (1 shl direction) == 0
+    }
+
+    companion object {
+        val layouts = listOf(
+            Layout(0, 10, 11, 15, 16, 14, 20, 26, 26, "9aae98aaac598c1498c55104141045532616326538880888849222612224598c9498c5510414104553261432653aaa63aaa6"),
+            Layout(0, 10, 41, 15, 41, 19, 50, 8, 54, "f9aacdbaacd59c75bac55532a4be5551aaa2aa6575bedbaaa4b2aa49aaa69acf55d9ac5d3a6575d553aae3a6773aaaaaaaae"),
+            Layout(0, 38, 47, 47, 51, 39, 56, 51, 52, "9a8888888c5f1002000418204f102434f10a04f5f1824f3086904f1cf14f120820800e5f14f1006f38008004fdf3222222a6"),
+            Layout(0, 41, 9, 45, 14, 47, 18, 46, 32, "9aaed9888c3aac55324598c551aa2410436188c7532ac3000c3a8c5922659a410498845d5100671416532698043e3aae3226"),
+            Layout(1, 13, 44, 22, 53, 13, 44, 34, 49, "9acd9acd9c5d577d7555551880c5555555514555755553455594553e55551263c945555baa4555553aaa651265baaaa63ae7"),
+            Layout(1, 18, 16, 23, 20, 25, 16, 27, 29, "b8a8888c9c9080000226300200498cd51802041410004d1004100000200410000080041043024514510a080204322a263a67"),
+            Layout(1, 46, 49, 46, 49, 55, 49, 50, 42, "9ac988c98c1c51414514145141045514516304551265d945551ac55145751c555555d5147557575514945908453226322226"),
+            Layout(1, 48, 13, 48, 22, 57, 22, 54, 34, "9888c9c98c100000000410200000041080000004100000000410000000041410204104100080410410000041043222226326"),
+            Layout(2, 11, 10, 20, 10, 11, 19, 40, 16, "98c9aaeddd555188c55555555555555555555555555555555555555555555555555555555555555555555555553632263226"),
+            Layout(2, 15, 45, 18, 54, 17, 54, 31, 37, "9e9888c9cd3824510265d184510886551243000e77382a002e9a84be10ac1c10aa04d5141088045555102024557367b2a636")
+        )
+    }
+}

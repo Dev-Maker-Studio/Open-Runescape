@@ -1,0 +1,23 @@
+{
+  "ids": [
+    11748
+  ],
+  "attackAnim": "fremsaga_necrolord_attack",
+  "attackSound": -1,
+  "defenceAnim": "human_sword_def",
+  "defendSound": -1,
+  "deathAnim": "human_death",
+  "deathDelay": 4,
+  "deathSound": -1,
+  "respawnDelay": 0,
+  "hitpoints": 5000,
+  "maxHit": 50,
+  "attackStyle": "MAGIC",
+  "attackRange": 7,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 5,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 120
+}

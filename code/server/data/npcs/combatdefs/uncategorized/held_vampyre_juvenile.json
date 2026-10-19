@@ -1,0 +1,35 @@
+{
+  "ids": [
+    4778,
+    4779
+  ],
+  "names": [
+    "Held vampyre juvenile"
+  ],
+  "attackAnim": "myq5_juvenile_attack",
+  "attackSound": -1,
+  "defenceAnim": "myq5_juvenile_defend",
+  "defendSound": -1,
+  "deathAnim": "myq5_juvenile_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 30,
+  "maxHit": 4,
+  "attackStyle": "MELEE",
+  "attackBonus": "CRUSH_ATT",
+  "combatLevels": {
+    "ATTACK": 94,
+    "STRENGTH": 94,
+    "DEFENSE": 94,
+    "RANGE": 94,
+    "MAGE": 94
+  },
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

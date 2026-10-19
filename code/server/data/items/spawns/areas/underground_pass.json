@@ -1,0 +1,46 @@
+[
+  {
+    "comment": "Plank in the first Underground Pass cavern",
+    "itemId": 960,
+    "amount": 1,
+    "tile": {
+      "x": 2436,
+      "y": 9725,
+      "plane": 0
+    },
+    "respawnTicks": 30
+  },
+  {
+    "comment": "Rope in the first Underground Pass cavern",
+    "itemId": 954,
+    "amount": 1,
+    "tile": {
+      "x": 2403,
+      "y": 9660,
+      "plane": 0
+    },
+    "respawnTicks": 30
+  },
+  {
+    "comment": "Old journal in the first Underground Pass cavern",
+    "itemId": 1493,
+    "amount": 1,
+    "tile": {
+      "x": 2418,
+      "y": 9675,
+      "plane": 0
+    },
+    "respawnTicks": 30
+  },
+  {
+    "comment": "Bucket beneath Iban's lair",
+    "itemId": 1925,
+    "amount": 1,
+    "tile": {
+      "x": 2309,
+      "y": 9801,
+      "plane": 0
+    },
+    "respawnTicks": 30
+  }
+]

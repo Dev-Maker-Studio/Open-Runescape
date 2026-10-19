@@ -1,0 +1,33 @@
+{
+  "ids": [
+    6778
+  ],
+  "names": [
+    "Locust ranger"
+  ],
+  "attackAnim": "contact_locust_bow_attack",
+  "attackSound": -1,
+  "defenceAnim": "scab_locust_defend",
+  "defendSound": -1,
+  "deathAnim": "scab_locust_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 1000,
+  "maxHit": 210,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 105,
+    "RANGE": 90,
+    "STRENGTH": 90,
+    "DEFENSE": 50,
+    "MAGE": 1
+  },
+  "attackRange": 6,
+  "attackGfx": -1,
+  "attackProjectile": 15,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 7
+}

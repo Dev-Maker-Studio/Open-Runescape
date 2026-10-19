@@ -1,0 +1,33 @@
+{
+  "ids": [
+    15207
+  ],
+  "names": [
+    "TokHaar-Ket-Zek"
+  ],
+  "attackAnim": 16134,
+  "attackSound": -1,
+  "defenceAnim": "tzhaar_2011_ket_zek_defend",
+  "defendSound": -1,
+  "deathAnim": "tzhaar_2011_ket_zek_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 2000,
+  "maxHit": 780,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 400,
+    "RANGE": 0,
+    "STRENGTH": 200,
+    "DEFENSE": 350,
+    "MAGE": 320
+  },
+  "attackRange": 10,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 64,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 80
+}

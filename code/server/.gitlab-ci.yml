@@ -1,0 +1,77 @@
+image: eclipse-temurin:26-jdk-alpine
+
+# Branch model: `dev` is the only long-lived branch. Every push to it publishes dev packages that the
+# bleeding-edge world and the dev lobby pull automatically. Releases are tags cut from `dev`: a tag
+# publishes tag-versioned packages and creates a GitLab Release with a download link per component.
+stages:
+  - build
+  - deploy
+  - release
+
+default:
+  cache:
+    key:
+      files:
+        - settings.gradle.kts
+        - build.gradle.kts
+    policy: pull-push
+    paths:
+      - .gradle
+  before_script:
+    - export GRADLE_USER_HOME="$(pwd)/.gradle"
+    # The alpine JDK image ships without git; the cache-source fetch below needs it.
+    - apk add --no-cache --quiet git
+    # cache-source/ is a submodule holding the whole unpacked cache (GBs). The build needs only its
+    # gamevals/ catalogs (the typed constants are generated from them), so fetch just that directory
+    # at the pinned commit with a blob-less sparse clone instead of a submodule checkout. The repo
+    # comes from .gitmodules so a fork with its own cache repo clones that one.
+    - CACHE_SOURCE_SHA="$(git rev-parse HEAD:cache-source)"
+    - CACHE_SOURCE_REPO="$(git config -f .gitmodules submodule.cache-source.url | sed 's#^\.\./##')"
+    - CACHE_SOURCE_URL="${CI_SERVER_PROTOCOL}://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_NAMESPACE}/${CACHE_SOURCE_REPO}"
+    - rm -rf cache-source && git clone --quiet --filter=blob:none --no-checkout --sparse "$CACHE_SOURCE_URL" cache-source
+    - git -C cache-source sparse-checkout set gamevals
+    - git -C cache-source checkout --quiet "$CACHE_SOURCE_SHA"
+
+compile:
+  stage: build
+  script:
+    - ./gradlew :world:compileKotlin :world:compileJava --build-cache
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+# Every branch and tag gets compiled; nothing is kept from feature branches.
+build:
+  stage: build
+  script:
+    # Serial on purpose: the shared runner cannot hold two Kotlin compilations of this size at once.
+    - ./gradlew assemble --build-cache
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+# Publishes lobby-server and world-server to the package registry:
+#   dev push -> <version>-dev-<pipeline id>   (the channel beta servers follow)
+#   tag      -> <tag>                          (release artifacts)
+deploy:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - ./gradlew publish --build-cache
+  environment: production
+
+# A tag becomes a Release whose assets are the shadow jars just published, one per component.
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  cache: []
+  before_script: []
+  script:
+    - PKG="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/maven/org/darkan"
+    - >
+      release-cli create --name "$CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --ref "$CI_COMMIT_SHA"
+      --description "Release $CI_COMMIT_TAG"
+      --assets-link "{\"name\":\"lobby-server-${CI_COMMIT_TAG}.jar\",\"url\":\"${PKG}/lobby-server/${CI_COMMIT_TAG}/lobby-server-${CI_COMMIT_TAG}.jar\",\"link_type\":\"package\"}"
+      --assets-link "{\"name\":\"world-server-${CI_COMMIT_TAG}.jar\",\"url\":\"${PKG}/world-server/${CI_COMMIT_TAG}/world-server-${CI_COMMIT_TAG}.jar\",\"link_type\":\"package\"}"

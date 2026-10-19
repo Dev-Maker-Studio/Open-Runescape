@@ -1,0 +1,33 @@
+{
+  "ids": [
+    6866
+  ],
+  "names": [
+    "Smoke devil"
+  ],
+  "attackAnim": "lore_dust_devil_attack",
+  "attackSound": -1,
+  "defenceAnim": "lore_dust_devil_defend",
+  "defendSound": -1,
+  "deathAnim": "lore_dust_devil_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 39,
+  "hitpoints": 3000,
+  "maxHit": 150,
+  "attackStyle": "MAGIC",
+  "combatLevels": {
+    "ATTACK": 55,
+    "RANGE": 55,
+    "STRENGTH": 35,
+    "DEFENSE": 49,
+    "MAGE": 55
+  },
+  "attackRange": 7,
+  "attackGfx": -1,
+  "attackProjectile": 1376,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 8,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 30000
+}

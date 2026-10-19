@@ -1,0 +1,33 @@
+{
+  "ids": [
+    5232
+  ],
+  "names": [
+    "Penance Ranger"
+  ],
+  "attackAnim": "barbassault_penance_ranger_attack",
+  "attackSound": -1,
+  "defenceAnim": "barbassault_penance_ranger_defend",
+  "defendSound": -1,
+  "deathAnim": "barbassault_penance_ranger_death",
+  "deathDelay": 3,
+  "deathSound": -1,
+  "respawnDelay": -1,
+  "hitpoints": 340,
+  "maxHit": 50,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 1,
+    "RANGE": 36,
+    "STRENGTH": 1,
+    "DEFENSE": 30,
+    "MAGE": 1
+  },
+  "attackRange": 7,
+  "attackGfx": -1,
+  "attackProjectile": 866,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 15,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": 64
+}

@@ -1,0 +1,26 @@
+{
+  "ids": [
+    3334
+  ],
+  "names": [
+    "WildyWyrm"
+  ],
+  "attackAnim": -1,
+  "attackSound": -1,
+  "defenceAnim": "strykewyrm_npc_defend",
+  "defendSound": -1,
+  "deathAnim": "strykewyrm_npc_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 1,
+  "maxHit": 1,
+  "attackStyle": "MELEE",
+  "attackRange": -1,
+  "attackGfx": -1,
+  "attackProjectile": -1,
+  "agressivenessType": "PASSIVE",
+  "aggroDistance": 4,
+  "deAggroDistance": -1,
+  "maxDistFromSpawn": -1
+}

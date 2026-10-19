@@ -1,0 +1,30 @@
+{
+  "ids": [
+    688
+  ],
+  "attackAnim": "human_bow",
+  "attackSound": -1,
+  "defenceAnim": "human_unarmedblock",
+  "defendSound": -1,
+  "deathAnim": "human_death",
+  "deathDelay": 6,
+  "deathSound": -1,
+  "respawnDelay": 59,
+  "hitpoints": 300,
+  "maxHit": 160,
+  "attackStyle": "RANGE",
+  "combatLevels": {
+    "ATTACK": 10,
+    "RANGE": 10,
+    "STRENGTH": 10,
+    "DEFENSE": 10,
+    "MAGE": 1
+  },
+  "attackRange": 8,
+  "attackGfx": 18,
+  "attackProjectile": 9,
+  "agressivenessType": "AGGRESSIVE",
+  "aggroDistance": 10,
+  "deAggroDistance": 10,
+  "maxDistFromSpawn": -1
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "genre": "Barbarian Assault",
+    "parent": "Barbarian Assault",
+    "comment": "Played in the Barbarian Assault waiting rooms",
+    "isActive": true,
+    "regionIds": [
+      10322
+    ],
+    "songs": [
+      604,
+      211
+    ]
+  }
+]

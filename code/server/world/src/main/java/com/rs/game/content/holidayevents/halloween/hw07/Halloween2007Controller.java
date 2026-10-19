@@ -1,0 +1,177 @@
+package com.rs.game.content.holidayevents.halloween.hw07;
+
+import com.rs.engine.dialogue.Dialogue;
+import com.rs.engine.dialogue.HeadE;
+import com.rs.game.content.skills.magic.TeleType;
+import com.rs.game.model.entity.Teleport;
+import com.rs.game.model.entity.player.Controller;
+import com.rs.game.tasks.Task;
+import com.rs.game.tasks.WorldTasks;
+import org.darkan.core.model.Animation;
+import world.gregs.voidps.type.Tile;
+import org.darkan.core.Utils;
+import java.util.HashSet;
+import java.util.Set;
+import org.darkan.core.gameval.gen.Varbit;
+
+public class Halloween2007Controller extends Controller {
+
+	private static final int[] DEAD_END_WEBS = { 27955946, 28005096, 27661029, 27775726, 27726573, 27628265 };
+
+	private int[] webPath;
+	private Set<Integer> returnedItems = new HashSet<>();
+	private boolean rodeSlide;
+
+	public Halloween2007Controller() {
+		randomizePath();
+	}
+
+	@Override
+	public void start() {
+		player.startConversation(new Dialogue().addPlayer(HeadE.CONFUSED, "Well, I'm still in one peice. A good start.."));
+		player.tele(Halloween2007.START_LOCATION);
+	}
+
+	@Override
+	public boolean checkWalkStep(int lastX, int lastY, int nextX, int nextY) {
+		if (Halloween2007.isPitfall(lastX, lastY)) {
+			player.setNextAnimation(new Animation(1950));
+			player.lock();
+
+			WorldTasks.schedule(new Task() {
+				@Override
+				public void run() {
+					player.tele(Tile.of(1698, 4822, 0));
+					player.setNextAnimation(new Animation(3640));
+					player.fadeScreen(() -> {
+						player.unlock();
+						player.startConversation(new Dialogue()
+								.addNPC(8867, HeadE.CALM_TALK, "That, you will see, was a pitfall trap. You need to walk around them.")
+								.addPlayer(HeadE.ANGRY, "But I didn't even see the trap!")
+								.addNPC(8867, HeadE.CALM_TALK, "Look closely and you should see the joins of the doors on the ground.")
+								.addPlayer(HeadE.SAD, "Ah, okay. Back upstairs it is, then."));
+					});
+				}
+			}, 5);
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean sendDeath() {
+		player.lock(7);
+		player.stopAll();
+		WorldTasks.scheduleLooping(new Task() {
+			int loop;
+
+			@Override
+			public void run() {
+				if (loop == 0)
+					player.setNextAnimation(new Animation(836));
+				else if (loop == 1)
+					player.sendMessage("Oh dear, you have died.");
+				else if (loop == 3) {
+					player.tele(player.getI(Halloween2007.STAGE_KEY) < 10 ? Halloween2007.START_LOCATION : Tile.of(3211, 3424, 0));
+					player.reset();
+					player.setNextAnimation(new Animation(-1));
+				} else if (loop == 4) {
+					if (player.getI(Halloween2007.STAGE_KEY) >= 10)
+						player.getControllerManager().forceStop();
+					player.jingle(90);
+					stop();
+				}
+				loop++;
+			}
+		}, 0, 1);
+		return false;
+	}
+
+	@Override
+	public void process() {
+		refreshSkull();
+	}
+
+	@Override
+	public boolean login() {
+		return false;
+	}
+
+	@Override
+	public boolean logout() {
+		return false;
+	}
+
+	@Override
+	public void onTeleported(TeleType type) {
+		removeItems();
+	}
+
+	@Override
+	public void forceClose() {
+		removeItems();
+	}
+
+	public void removeItems() {
+		for (int itemId : Halloween2007.ALL_ITEMS)
+			if (player.getInventory().containsItem(itemId))
+				player.getInventory().deleteItem(itemId, 28);
+	}
+
+	@Override
+	public boolean processTeleport(Teleport tele) {
+		player.sendMessage("A mysterious force prevents you from teleporting.");
+		return false;
+	}
+
+	public int[] getWebPath() {
+		return webPath;
+	}
+
+	public void randomizePath() {
+		webPath = getRandomWebPath();
+	}
+
+	private static int[] getRandomWebPath() {
+		return Halloween2007.SPIDER_PATHS[Utils.random(Halloween2007.SPIDER_PATHS.length)];
+	}
+
+	public void refreshSkull() {
+		player.getVars().setVarBit(Varbit.hw07_garden_skull_multi, player.getI(Halloween2007.STAGE_KEY) >= 4 || player.getInventory().containsItem(Halloween2007.SERVANT_SKULL) ? 1 : 0);
+	}
+
+	public boolean checkWeb(int tileHash) {
+		for (int check : DEAD_END_WEBS)
+			if (check == tileHash)
+				return true;
+		for (int check : webPath)
+			if (check == tileHash)
+				return true;
+		return false;
+	}
+
+	public boolean isItemsCorrect() {
+		return returnedItems.size() >= 7;
+	}
+
+	public boolean isItemReturned(int itemId) {
+		return returnedItems.contains(itemId);
+	}
+
+	public void resetReturnedItems() {
+		returnedItems = new HashSet<>();
+	}
+
+	public void returnItem(int itemId) {
+		player.getInventory().deleteItem(itemId, 1);
+		returnedItems.add(itemId);
+	}
+
+	public boolean isRodeSlide() {
+		return rodeSlide;
+	}
+
+	public void setRodeSlide(boolean rodeSlide) {
+		this.rodeSlide = rodeSlide;
+	}
+}
