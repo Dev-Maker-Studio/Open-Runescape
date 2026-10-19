@@ -398,7 +398,7 @@ object InterfaceComponentRenderer {
                                     val playerIndex = component.primaryMediaId
                                     if (playerIndex >= 0 && playerIndex < 2048) {
                                         val player = PlayerUpdate.players[playerIndex]
-                                        if (player != null && (playerIndex == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
+                                        if (player != null && (playerIndex == PlayerUpdate.myPlayerIndex || player.displayName?.let(Utils::stringToInt) == component.secondaryMediaId)) {
                                             val toolkit = Renderers.activeToolkit
                                             renderedMediaModel = component.getAnimatedMediaModel(toolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, player.playerAppearance)
                                             if (renderedMediaModel == null && Component.missingMedia) {
@@ -410,8 +410,13 @@ object InterfaceComponentRenderer {
                                     val playerIndex = component.primaryMediaId
                                     if (playerIndex >= 0 && playerIndex < 2048) {
                                         val player = PlayerUpdate.players[playerIndex]
-                                        if (player != null && (playerIndex == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
-                                            renderedMediaModel = player.playerAppearance!!.getBodyModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, null, null, null, 0, TypeLists.EQUIPMENT_DEFAULTS!!)
+                                        if (player != null && (playerIndex == PlayerUpdate.myPlayerIndex || player.displayName?.let(Utils::stringToInt) == component.secondaryMediaId)) {
+                                            val appearance = player.playerAppearance
+                                            if (appearance != null) {
+                                                renderedMediaModel = appearance.getBodyModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, null, null, null, 0, TypeLists.EQUIPMENT_DEFAULTS!!)
+                                            } else {
+                                                Component.redrawComponent(component)
+                                            }
                                         }
                                     }
                                 } else if (component.mediaType != MediaType.ITEM_CONTAINER_MALE && component.mediaType != MediaType.ITEM_CONTAINER_FEMALE) {
