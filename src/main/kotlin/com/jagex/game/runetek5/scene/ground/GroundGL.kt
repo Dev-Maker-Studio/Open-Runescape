@@ -931,6 +931,7 @@ open class GroundGL(
             if (texturesLoaded > 0) {
                 val texture2d = GlElementsArrayBuffer(activeToolkit, textureBuffer.buffer, textureBuffer.currentPosition)
                 activeToolkit.drawElements(texture2d, 0, texturesLoaded)
+                texture2d.release()
             }
         }
     }
