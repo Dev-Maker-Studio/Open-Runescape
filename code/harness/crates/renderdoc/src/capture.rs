@@ -5,16 +5,19 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::time::Duration;
 
-struct Opts {
-    kind: String,
-    frame: Option<String>,
-    seconds: u64,
-    out: PathBuf,
-    display: Option<String>,
-    retries: u32,
-    exe: Option<PathBuf>,
-    api: String,
-    rest: Vec<String>,
+pub struct Opts {
+    pub kind: String,
+    pub frame: Option<String>,
+    pub seconds: Option<u64>,
+    pub out: PathBuf,
+    pub display: Option<String>,
+    pub retries: u32,
+    pub exe: Option<PathBuf>,
+    pub api: String,
+    pub url: Option<String>,
+    pub scene: Option<String>,
+    pub orf: Option<PathBuf>,
+    pub rest: Vec<String>,
 }
 
 fn field(json: &str, key: &str) -> Option<String> {
@@ -26,19 +29,22 @@ fn field(json: &str, key: &str) -> Option<String> {
     .to_string())
 }
 
-fn parse(kind: &str, args: &[String]) -> Res<Opts> {
-    let mut o = Opts { kind: kind.into(), frame: None, seconds: 60, out: env::root().join("code/harness/target/capture").join(kind), display: None, retries: 1, exe: None, api: "vulkan".into(), rest: vec![] };
+pub fn parse(kind: &str, args: &[String]) -> Res<Opts> {
+    let mut o = Opts { kind: kind.into(), frame: None, seconds: None, out: env::root().join("code/harness/target/capture").join(kind), display: None, retries: 1, exe: None, api: "vulkan".into(), url: None, scene: None, orf: None, rest: vec![] };
     let mut it = args.iter();
     while let Some(a) = it.next() {
         let mut val = || it.next().cloned().ok_or(format!("{a} needs a value"));
         match a.as_str() {
             "--frame" => o.frame = Some(val()?),
-            "--seconds" => o.seconds = val()?.parse().map_err(|_| "bad --seconds")?,
-            "--out" => o.out = val()?.into(),
+            "--seconds" => o.seconds = Some(val()?.parse().map_err(|_| "bad --seconds")?),
+            "--out" => o.out = env::absolute(val()?),
             "--display" => o.display = Some(val()?),
             "--retries" => o.retries = val()?.parse().map_err(|_| "bad --retries")?,
-            "--jar" | "--exe" => o.exe = Some(val()?.into()),
+            "--jar" | "--exe" => o.exe = Some(env::absolute(val()?)),
             "--api" => o.api = val()?,
+            "--url" => o.url = Some(val()?),
+            "--scene" => o.scene = Some(val()?),
+            "--orf" => o.orf = Some(env::absolute(val()?)),
             "--" => {
                 o.rest = it.cloned().collect();
                 break;
@@ -118,7 +124,7 @@ fn spawn(o: &Opts, disp: &str, rdc_file: &Path, log: &Path) -> Res<String> {
     let logf = std::fs::File::create(log).map_err(|e| e.to_string())?;
     let _ = std::fs::remove_file(rdc_file);
     let mut c = env::rdc(&["capture", "-o"]);
-    c.arg(rdc_file).args(["--json", "--timeout", &(o.seconds + 60).to_string()]);
+    c.arg(rdc_file).args(["--json", "--timeout", &(o.seconds.unwrap_or(60) + 60).to_string()]);
     match &o.frame {
         Some(f) => c.args(["--frame", f]),
         None => c.arg("--trigger"),
@@ -138,9 +144,21 @@ fn spawn(o: &Opts, disp: &str, rdc_file: &Path, log: &Path) -> Res<String> {
     Ok(json)
 }
 
+pub fn attach(ident: &str) -> Res {
+    env::out(&mut env::rdc(&["attach", ident])).map(drop)
+}
+
+pub fn fire() -> Res {
+    env::out(&mut env::rdc(&["capture-trigger"])).map(drop)
+}
+
 pub fn trigger(ident: &str, rdc_file: &Path) -> Res {
-    env::out(&mut env::rdc(&["attach", ident]))?;
-    env::out(&mut env::rdc(&["capture-trigger"]))?;
+    attach(ident)?;
+    fire()?;
+    collect(rdc_file)
+}
+
+pub fn collect(rdc_file: &Path) -> Res {
     for _ in 0..60 {
         let l = env::out(&mut env::rdc(&["capture-list", "--json", "--timeout", "1"]))?;
         if let Some(p) = field(&l, "path") {
@@ -178,7 +196,7 @@ fn once(o: &Opts, disp: &str, rdc_file: &Path, log: &Path) -> Res {
         return std::fs::rename(&p, rdc_file).map_err(|e| format!("{p}: {e}"));
     }
     let ident = field(&json, "ident").ok_or("no ident")?;
-    std::thread::sleep(Duration::from_secs(o.seconds));
+    std::thread::sleep(Duration::from_secs(o.seconds.unwrap_or(60)));
     let r = trigger(&ident, rdc_file);
     kill(&pid);
     r

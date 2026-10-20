@@ -3,6 +3,11 @@ use std::process::Command;
 
 pub type Res<T = ()> = Result<T, String>;
 
+pub fn absolute(p: impl Into<PathBuf>) -> PathBuf {
+    let p = p.into();
+    if p.is_absolute() { p } else { std::env::current_dir().unwrap_or_default().join(p) }
+}
+
 pub fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).ancestors().nth(4).unwrap().into()
 }

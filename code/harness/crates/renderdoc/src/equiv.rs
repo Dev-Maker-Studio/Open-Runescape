@@ -26,10 +26,11 @@ struct Cfg {
     exe: Option<PathBuf>,
     size: Option<String>,
     pos: Option<String>,
+    browser: bool,
 }
 
 fn parse(args: &[String]) -> Res<Cfg> {
-    let mut c = Cfg { scene: String::new(), live: false, top: "5".into(), min_ssim: "0.99".into(), max_mismatch: "0".into(), reuse: false, cold: false, builtin: false, settle: "4".into(), out: PathBuf::new(), exe: None, size: None, pos: None };
+    let mut c = Cfg { scene: String::new(), live: false, top: "5".into(), min_ssim: "0.99".into(), max_mismatch: "0".into(), reuse: false, cold: false, builtin: false, settle: "4".into(), out: PathBuf::new(), exe: None, size: None, pos: None, browser: false };
     let mut it = args.iter();
     while let Some(a) = it.next() {
         let mut val = || it.next().cloned().ok_or(format!("{a} needs a value"));
@@ -42,9 +43,14 @@ fn parse(args: &[String]) -> Res<Cfg> {
             "--min-ssim" => c.min_ssim = val()?,
             "--max-mismatch" => c.max_mismatch = val()?,
             "--settle" => c.settle = val()?,
-            "--out" => c.out = val()?.into(),
-            "--exe" => c.exe = Some(val()?.into()),
+            "--out" => c.out = env::absolute(val()?),
+            "--exe" => c.exe = Some(env::absolute(val()?)),
             "--size" => c.size = Some(val()?),
+            "--target" => c.browser = match val()?.as_str() {
+                "native" => false,
+                "browser" => true,
+                t => return Err(format!("unknown target {t}, targets: native browser")),
+            },
             s if !s.starts_with("--") && c.scene.is_empty() => c.scene = s.into(),
             _ => return Err(format!("unknown option {a}")),
         }
@@ -61,9 +67,13 @@ fn parse(args: &[String]) -> Res<Cfg> {
         return Err(format!("unknown scene {}, scenes: {}", c.scene, SCENES.map(|s| s.0).join(" ")));
     }
     if c.out.as_os_str().is_empty() {
-        c.out = base().join(&c.scene);
+        c.out = base().join(label(&c));
     }
     Ok(c)
+}
+
+fn label(c: &Cfg) -> String {
+    if c.browser { format!("{}-browser", c.scene) } else { c.scene.clone() }
 }
 
 fn isolate() {
@@ -186,10 +196,12 @@ fn client_side(c: &Cfg, display: &str, dir: &Path, orf: &mpsc::Sender<Option<Pat
         let ready = t.elapsed().as_secs_f32();
         place(c)?;
         std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
-        capture::trigger(&ident, &dir.join("frame.rdc"))?;
         let file = c.out.join("frame.orf");
         let _ = std::fs::remove_file(&file);
+        capture::attach(&ident)?;
+        capture::fire()?;
         let dumped = c.scene != "login" && !c.builtin && control::send("dump-frame", &[file.to_string_lossy().into_owned()]).is_ok() && file.metadata().is_ok_and(|m| m.len() > 0);
+        capture::collect(&dir.join("frame.rdc"))?;
         let _ = orf.send(dumped.then_some(file));
         Ok(ready)
     })();
@@ -204,6 +216,13 @@ fn client_side(c: &Cfg, display: &str, dir: &Path, orf: &mpsc::Sender<Option<Pat
 
 fn web_side(c: &Cfg, display: &str, dir: &Path, orf: Option<PathBuf>) -> Res<(bool, f32)> {
     let t = Instant::now();
+    if c.browser {
+        let mut o = capture::parse("browser", &["--out".into(), dir.to_string_lossy().into_owned(), "--display".into(), display.into()])?;
+        o.orf = orf.clone();
+        crate::browser::capture(&o)?;
+        analyze::run_to(&dir.join("frame.rdc"), dir.into(), false)?;
+        return Ok((orf.is_some(), t.elapsed().as_secs_f32()));
+    }
     let mut args = vec!["--present".to_string(), "--frames".into(), "8".into()];
     if let Some(f) = &orf {
         args.extend(["--replay".into(), f.to_string_lossy().into_owned()]);
@@ -220,7 +239,7 @@ fn report(c: &Cfg, replay: bool, timings: &str) -> i32 {
     let out = c.out.to_string_lossy().into_owned();
     let mut p = env::script("equiv.py", &[]);
     p.arg("report").arg(c.out.join("client")).arg(c.out.join("web")).arg(&out);
-    p.args(["--scene", &c.scene, "--mode", if replay { "replay" } else { "builtin" }, "--top", &c.top, "--min-ssim", &c.min_ssim, "--max-mismatch", &c.max_mismatch, "--timings", timings, "--history", &history_file().to_string_lossy()]);
+    p.args(["--scene", &label(c), "--mode", if replay { "replay" } else { "builtin" }, "--top", &c.top, "--min-ssim", &c.min_ssim, "--max-mismatch", &c.max_mismatch, "--timings", timings, "--history", &history_file().to_string_lossy()]);
     p.status().map_or(2, |s| s.code().unwrap_or(2))
 }
 
@@ -310,6 +329,11 @@ mod tests {
         let c = parse(&args(&["varrock", "--top", "9", "--cold", "--max-mismatch", "2"])).unwrap();
         assert_eq!((c.scene.as_str(), c.top.as_str(), c.cold, c.max_mismatch.as_str()), ("varrock", "9", true, "2"));
         assert!(c.out.ends_with("equiv/varrock"));
+        assert!(!c.browser);
+        let c = parse(&args(&["varrock", "--target", "browser"])).unwrap();
+        assert!(c.browser && c.out.ends_with("equiv/varrock-browser"));
+        assert_eq!(label(&c), "varrock-browser");
+        assert!(parse(&args(&["varrock", "--target", "gl"])).is_err());
     }
 
     #[test]

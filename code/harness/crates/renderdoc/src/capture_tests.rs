@@ -26,10 +26,10 @@ fn field_reads_rdc_json() {
 #[test]
 fn options_parse_with_defaults() {
     let o = parse("client", &[]).unwrap();
-    assert_eq!((o.frame, o.seconds, o.retries, o.api.as_str(), o.display, o.exe, o.rest.len()), (None, 60, 1, "vulkan", None, None, 0));
+    assert_eq!((o.frame, o.seconds, o.retries, o.api.as_str(), o.display, o.exe, o.rest.len()), (None, None, 1, "vulkan", None, None, 0));
     assert!(o.out.ends_with("code/harness/target/capture/client"));
     let o = parse("exec", &s(&["--frame", "5", "--seconds", "9", "--out", "/x", "--display", ":3", "--retries", "2", "--api", "gl", "--", "app", "--frame", "1"])).unwrap();
-    assert_eq!((o.frame.as_deref(), o.seconds, o.out, o.display.as_deref(), o.retries, o.api.as_str()), (Some("5"), 9, PathBuf::from("/x"), Some(":3"), 2, "gl"));
+    assert_eq!((o.frame.as_deref(), o.seconds, o.out, o.display.as_deref(), o.retries, o.api.as_str()), (Some("5"), Some(9), PathBuf::from("/x"), Some(":3"), 2, "gl"));
     assert_eq!(o.rest, s(&["app", "--frame", "1"]));
     assert_eq!(parse("web", &s(&["--exe", "/bin/r"])).unwrap().exe, Some(PathBuf::from("/bin/r")));
     assert_eq!(parse("web", &s(&["--seconds", "x"])).err().unwrap(), "bad --seconds");
@@ -92,5 +92,15 @@ fn gpu_lock_excludes_threads_and_processes() {
     assert!(waiter.join().unwrap() >= std::time::Duration::from_millis(300));
     assert!(std::process::Command::new("flock").args(["-n"]).arg(&path).arg("true").status().unwrap().success());
     let _ = std::fs::remove_file(path);
+}
+
+#[test]
+fn relative_paths_are_resolved_against_the_caller() {
+    let here = std::env::current_dir().unwrap();
+    let o = crate::capture::parse("client", &["--out".into(), "rel/dir".into(), "--jar".into(), "a.jar".into()]).unwrap();
+    assert_eq!(o.out, here.join("rel/dir"));
+    assert_eq!(o.exe, Some(here.join("a.jar")));
+    let o = crate::capture::parse("client", &["--out".into(), "/abs/dir".into()]).unwrap();
+    assert_eq!(o.out, std::path::PathBuf::from("/abs/dir"));
 }
 
