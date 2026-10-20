@@ -11,6 +11,7 @@ RenderDoc is a first-class tool of the repository. It lives in `code/renderdoc` 
 | `code/renderdoc/py/equiv.py` | Equivalence report with verdict, score, grouped mismatches, worst regions and the history |
 | `code/renderdoc/py/overview.py` | One line per draw overview of a capture folder |
 | `code/renderdoc/py/audit.py` | Pass or fail checks on a capture |
+| `code/renderdoc/py/target.py` | Waits for the next capture of any RenderDoc target in a process tree, used for the browser |
 | `code/renderdoc/native/deepbind.c` | `LD_PRELOAD` shim that loads the JVM GL library with `RTLD_DEEPBIND` |
 | `code/renderdoc/patches` | Fixes applied to the pip installed `rdc-cli` |
 | `code/renderdoc/mcp_server` | MCP server exposing `rdc-cli` plus `frame_summary` and `compare_transpilation` |
@@ -43,6 +44,7 @@ flowchart LR
 | --- | --- | --- |
 | `openrs capture client` | Shaded client jar, JVM injected through the deepbind shim | OpenGL |
 | `openrs capture web` | Renderer binary from `code/renderer/target`, or `--exe PATH` or `OPENRS_WEB_EXE` | Vulkan through wgpu |
+| `openrs capture browser` | The wasm renderer in `/usr/bin/chromium`, served from `code/web/static` | WebGPU through Dawn on Vulkan |
 | `openrs capture exec --api gl or vulkan -- cmd args` | Any program | Chosen by `--api` |
 
 Shared options:
@@ -56,6 +58,9 @@ Shared options:
 | `--retries N` | Repeat the capture with a delay between attempts, useful while the client context is being converted |
 | `--jar PATH` | Client jar |
 | `--exe PATH` | Renderer binary |
+| `--orf FILE` | Browser only, replay this frame file in the page |
+| `--scene NAME` | Browser only, built in scene of the page, default `all` |
+| `--url URL` | Browser only, use a page that is already served instead of starting `openrs-web` |
 
 - The real desktop is never used. Wayland is unset, the app runs on Xvfb, and the client gets a null audio sink.
 - Vulkan capture works on Xvfb with the NVIDIA driver. The Vulkan implicit layer is enabled through `VK_ADD_IMPLICIT_LAYER_PATH` and `ENABLE_VULKAN_RENDERDOC_CAPTURE`.
@@ -63,6 +68,61 @@ Shared options:
 - A capture by seconds triggers through `rdc attach` and `rdc capture-trigger`, then polls `rdc capture-list` once per second. The previous single call waited its whole 30 second timeout, so a capture by seconds cost the seconds plus 30. It now costs the seconds plus about one.
 - `openrs capture analyze <rdc> [dir]` normalizes an existing capture, `openrs capture summary <dir> [max-draws]` prints one line per draw.
 - `openrs capture selftest` builds both test apps, captures them and prints the diff, used to prove the toolchain end to end.
+
+# Browser Capture
+
+`openrs capture browser [--frame N | --seconds S] [--out DIR] [--orf FILE | --scene NAME] [--url URL] [-- chromium args]` captures the real web build, the renderer compiled to wasm and running on WebGPU in Chromium, and writes the same capture folder as the other kinds.
+
+```mermaid
+flowchart LR
+  H[openrs capture browser] --> S[openrs-web on a free port]
+  H --> C[Chromium on Xvfb or the harness Xwayland]
+  C --> G[GPU process, Dawn on Vulkan]
+  G --> L[RenderDoc Vulkan layer]
+  H --> P[DevTools: replay_next, capture_at]
+  P --> R[wasm renderer frame with capture markers]
+  R --> L
+  L --> T[target.py receives frame.rdc]
+  T --> A[frame.py, audit.py]
+```
+
+1. `openrs-web` serves `code/web/static`, and the capture folder under `/files/`, so the frame file is fetched from `/files/frame.orf`. The wasm and the server are rebuilt first when stale.
+2. Chromium is started through the `web` crate launcher on the private display, with an isolated profile under `$XDG_RUNTIME_DIR`, `--no-sandbox --disable-gpu-sandbox --disable-gpu-watchdog`, and the Vulkan implicit layer through `VK_ADD_IMPLICIT_LAYER_PATH` and `ENABLE_VULKAN_RENDERDOC_CAPTURE`. Only the GPU process loads Vulkan, so it is the only RenderDoc target. The user's Brave and its profile are never touched.
+3. Over DevTools the harness waits for the first rendered frame, checks the WebGPU adapter and refuses SwiftShader, then loads the frame file with `replay_next`.
+4. `target.py` attaches to the RenderDoc target whose process descends from the browser, then the harness calls `capture_at`.
+5. The renderer brackets the chosen frame with the RenderDoc queue markers `capture-marker,begin_capture` and `capture-marker,end_capture`. Dawn forwards them as Vulkan debug labels, RenderDoc starts and ends the capture on Dawn's device around that submit, and `target.py` moves the file to `frame.rdc`.
+6. Chromium, the server and a private Xvfb are stopped by their process ids, the Chromium log is kept as `app.log`.
+
+| Exported wasm function | Effect |
+| --- | --- |
+| `frames()` | Frames rendered since the page loaded |
+| `capture_at(n)` | Capture frame `n`, or the next one when `n` has passed, returns the frame chosen |
+| `replay_next(bytes)` | Validate a frame file and replay it from the next frame, at the size of the frame |
+
+The functions are free exports of `renderer.js`, so DevTools reaches them with a dynamic import of the same module and `boot.js` needs no change.
+
+## Frame Selection
+
+- `--frame N` captures the Nth frame after the page is ready, or after the frame file is loaded. Without `--frame` and `--seconds`, N is 3.
+- `--seconds S` waits S seconds and captures the next frame.
+- Present based frame counting is not used. Chromium composites through ANGLE on Vulkan and presents its own swapchain, so a trigger or a queued frame could land on a compositor frame. The markers capture exactly one renderer submit on Dawn's device.
+
+## Renderer Draws
+
+- In the wasm build the renderer wraps every frame in the debug group `openrs`. The native build adds no group, so native summaries are unchanged.
+- `frame.py` tags every draw and clear with `origin`: `renderer` inside the group and `browser` outside it, when any draw of the capture is in the group. `meta.browser` counts the browser draws.
+- The final target of a tagged capture is the output of the last renderer draw, since the canvas texture is not a swapchain image.
+- `diff.py` drops browser draws, browser clears and targets that no renderer draw writes, and strips `openrs` from markers, so `capture diff` and `equiv` compare only what the renderer drew.
+- Dawn compiles WGSL with Tint, which lowers every uniform block to an array of `uvec4`. `frame.py` recognizes Tint SPIR-V by its generator id and records such a block as `<block>._words`, each word read as a float, or as an integer when it is below 2^23 or not a number. When either side of a draw has words, the uniforms are compared as the set of non zero values.
+
+## Measured
+
+| Capture | Draws | Size | Time |
+| --- | --- | --- | --- |
+| Page scene `all` | 12, all renderer draws | 1279x843 | 11.8 s end to end |
+| Dumped client frame | 1730 | 765x503 | 39 s, 25 s of it replay |
+
+The same frame file captured natively with `openrs capture web` and diffed against the browser capture is `EQUIVALENT`: 1730 of 1730 draws aligned, no mismatch, identical pixels.
 
 # Capture Folder
 
@@ -90,6 +150,8 @@ Shared options:
 | `clears` | Clear actions with the targets they write |
 | `draws` | Ordered draw and dispatch records |
 
+`meta.browser` is the number of draws and clears outside the renderer group, only non zero for browser captures.
+
 Draw record fields:
 
 | Field | Content |
@@ -104,6 +166,7 @@ Draw record fields:
 | `textures` | Stage, slot, id, size, mips, format, content hash, vertically flipped hash |
 | `buffers` | Bound storage buffers with content hash |
 | `outputs`, `depth` | Render target ids written and the depth target id |
+| `origin` | `renderer` or `browser`, present only in captures that contain the `openrs` group |
 
 Normalization rules that make OpenGL and Vulkan comparable:
 
@@ -180,6 +243,7 @@ flowchart LR
 | `--cold` | Stop the client after the run |
 | `--builtin` | Skip the frame dump and use the renderer built in scene |
 | `--exe PATH`, `--size WxH`, `--out DIR` | Renderer binary, built in scene size, output folder |
+| `--target native` or `browser` | Capture the renderer as the native binary, the default, or as the wasm build in Chromium |
 
 Scenes are `login`, `lumbridge`, `varrock`, `draynor`, `falador` and `edgeville`. `login` waits for the login window and takes the frame after three seconds, the others teleport with the `tele` command, wait for the position and for idle, then wait the settle ticks.
 
@@ -197,6 +261,20 @@ Scenes are `login`, `lumbridge`, `varrock`, `draynor`, `falador` and `edgeville`
 1. After the client capture, `dump-frame` writes the frame as `.orf` at the same player position.
 2. The renderer replays that file with `--present`, so both captures describe the same frame.
 3. When `dump-frame` is missing, fails or writes an empty file, the renderer built in scene `all` is used and the mode shows `builtin`. Scores of the `builtin` mode only measure how far the renderer is from the client in general.
+
+## Browser Target
+
+`openrs equiv --live --target browser` runs the same loop with `openrs capture browser` in place of `renderer-app`. The client is captured, the frame is dumped, and the browser page replays that `.orf` and is captured on its third frame.
+
+- Results land in `code/harness/target/equiv/<scene>-browser`, and the history scene is `<scene>-browser`, so native and browser scores keep separate trends.
+- The verdict, score and report format are the same as for the native target.
+
+| Run on one live position | Score | Final SSIM | Renderer draws | Client draws |
+| --- | --- | --- | --- | --- |
+| `openrs equiv --live` | 73.0 | 0.9691 | 1633 | 1659 |
+| `openrs equiv --live --target browser` | 72.9 | 0.9683 | 1633 | 1652 |
+
+The two runs capture the client separately, and the world moves between them, so the client draw counts differ by a few animated models.
 
 ## Report
 
@@ -222,6 +300,21 @@ Scenes are `login`, `lumbridge`, `varrock`, `draynor`, `falador` and `edgeville`
 - `code/renderdoc/tests/test_equiv.py` runs `equiv.py` over the golden summaries in `code/renderdoc/golden/selftest` and checks the stored verdict and score, a failing strict threshold, a removed draw, injected texture and uniform differences and a painted image region.
 - `openrs equiv test` runs those tests, then `capture selftest`, then a report over the freshly captured selftest folders with `--min-ssim 0.995 --max-mismatch 1`.
 
+# Comparison Conventions
+
+OpenGL and WebGPU describe the same draw differently, so the summary normalizes what is only a convention, and a reported mismatch is a real difference.
+
+| Item | OpenGL capture | WebGPU capture | Normalization |
+| --- | --- | --- | --- |
+| Scissor origin | Bottom left | Top left | An OpenGL scissor is flipped to a top left y with `target height - y - height` |
+| Index values | Absolute into a shared buffer, up to 53931 | Rebased per draw, up to 54 | Indices are recorded relative to the smallest index of the draw, and the vertex data fetched through them is hashed as well |
+| Viewport height | Positive | Negative when flipped | Only width and height are compared, the origin is not |
+
+- A draw whose state, indices and vertex data agree is a match, even though the two APIs hold the data in different buffers.
+- The client capture and the frame dump are armed back to back, `fire` then `dump-frame`, so both cover the same frame or two neighbouring frames. Earlier they were a second apart and time driven values differed.
+- Relative paths given to `--out`, `--exe`, `--jar` and `--orf` are resolved against the directory `openrs` runs in. The client starts from the repository root, so a relative output path used to point RenderDoc at a folder that did not exist and the capture timed out.
+- Still not normalized: the view projection matrix. WebGPU's depth range is 0 to 1 and OpenGL's is minus 1 to 1, so the z row of the matrix differs by `(z + w) / 2` and every draw with that matrix reports a uniform difference.
+
 # MCP Server
 
 - `code/renderdoc/mcp_server/server.py` exposes the `rdc-cli` commands as tools.
@@ -236,6 +329,9 @@ Scenes are `login`, `lumbridge`, `varrock`, `draynor`, `falador` and `edgeville`
 - Shader source differs between languages, so shaders are matched by input signature and uniform values and never by text.
 - `dump-frame` of a client running under RenderDoc was seen to write an empty file or to abort the JVM with a heap error while the command was under development, `equiv` then falls back to the built in scene.
 - Two clients on the same account clash, a client that crashed keeps the session on the server for a while and the next login answers with response 5.
+- The browser capture needs `--enable-unsafe-webgpu` and Chromium's Vulkan feature. Without them WebGPU falls back to SwiftShader and the capture refuses to run.
+- A browser capture with `--url` fetches `--orf` from `/files/frame.orf` of that page, so the server must serve the capture folder there.
+- The browser page reads a frame file only through `replay_next`. The `window.openrs` page bridge of the `web` crate can replace it once it replays frames.
 
 # GPU Memory
 

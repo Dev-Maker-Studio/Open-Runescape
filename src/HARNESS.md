@@ -45,7 +45,7 @@ flowchart LR
 
 1. `openrs up` checks the pack, starts the local lobby and world on ports 44594 and 44595 if they are not running, and logs a local account into the world.
 2. `openrs do`, `look` and `trail` drive the client.
-3. `openrs down` stops the client, and `openrs down all` also stops the local server.
+3. `openrs down` stops the client, and `openrs down all` also stops the web client, the display and the local server.
 
 - The local server is started with `CACHE_BUILD_PATH` set to `assets/cache-packed`, so the server and the client share one pack and the login CRC check always matches.
 - The local world is world 100, started with `WORLD_BOTS_ALLOWED=true` so clients with the bot sidebar list it. Every local client is pinned to it with `-Dautologin.world=100`, and AutoLogin sets the game host for that world before the world login.
@@ -61,9 +61,10 @@ flowchart LR
 | `openrs up`, `down` | One client in the world, ready for commands | `CONTROL_PROTOCOL.md` |
 | `openrs do`, `look`, `trail` | Commands, vision and footprints for one client | `CONTROL_PROTOCOL.md` |
 | `openrs run`, `show`, `hide`, `toggle`, `shot`, `stop` | Private display, null audio and the display toggle | `CONTROL_PROTOCOL.md` |
+| `openrs web up`, `down`, `do`, `look`, `trail`, `run`, `show`, `hide`, `toggle` | The web client in an isolated Chromium on the private display, driven over DevTools | `WEB-HARNESS.md` |
 | `openrs player` | Player files, interfaces and the local lobby and world | `PLAYER-INTERFACES.md` |
 | `openrs fleet` | Up to nine clients in parallel, and `fleet compare` for each slot | `FLEET.md` |
-| `openrs resume` | Restarts what a crash left behind | This page |
+| `openrs resume` | Restarts what a crash left behind, including the web client | This page |
 | `openrs capture` | RenderDoc captures, summaries and diffs | `RENDERDOC.md` |
 | `openrs equiv` | Equivalence loop between the client and the renderer | `RENDERDOC.md` |
 | `openrs doctor` | One fast check of everything the harness needs | This page |
@@ -171,6 +172,7 @@ flowchart LR
 | `RENDERER-FRAME-FORMAT.md` | The `.orf` frame dump and replay format |
 | `MODERN-RENDERER-WEB-TRANSFER.md` | What the modern renderer is and the plan to move it to the web |
 | `WEB.md` | The Rust web server and page |
+| `WEB-HARNESS.md` | `openrs web`, the browser, the page bridge and its commands |
 | `SESSION-START.md` | The prompt for starting a new Claude Code session on this project |
 
 # Transpilation Work Split

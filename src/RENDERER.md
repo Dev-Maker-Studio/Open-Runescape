@@ -133,6 +133,7 @@ The fragment shader is patched for WebGPU's top left origin: `gl_FragCoord.xy` i
 - `sprite.frag` replaces the eight sampler array and its switch by one layered array texture.
 - `groundTextured.vert` writes a varying instead of `gl_ClipDistance` and `groundTextured.frag` discards on it.
 - `hdWater.vert` is synthesized from the tessellation stages and `hdWater.frag` flips its screen coordinates, see the water technique.
+- Every fragment module starts with `diagnostic(off, derivative_uniformity);`. Tint in Chromium rejects implicit derivative sampling in non uniform control flow, which naga accepts, and `hdWater.frag` samples the scene copy and the wave noise inside branches.
 
 ### Result Per Shader
 
