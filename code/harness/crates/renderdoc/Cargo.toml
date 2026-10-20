@@ -6,3 +6,5 @@ version.workspace = true
 [dependencies]
 display = { path = "../display" }
 control = { path = "../control" }
+fresh = { path = "../fresh" }
+web = { path = "../web" }

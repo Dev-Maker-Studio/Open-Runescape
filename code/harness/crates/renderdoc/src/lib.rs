@@ -1,4 +1,5 @@
 mod analyze;
+mod browser;
 mod capture;
 mod env;
 mod equiv;
@@ -21,8 +22,9 @@ pub fn run(args: &[String]) -> i32 {
         Some("diff") if rest.len() >= 2 => analyze::diff(Path::new(&rest[0]), Path::new(&rest[1]), &rest[2..]),
         Some("summary") if !rest.is_empty() => analyze::overview(Path::new(&rest[0]), &rest[1..]),
         Some("selftest") => capture::selftest(),
+        Some("browser") => browser::run(rest),
         Some(k @ ("client" | "web" | "exec")) => capture::run(k, rest),
-        _ => Err("usage: openrs capture setup | verify [--full] | client [opts] [-- java args] | web [opts] [-- app args] | exec [opts] -- cmd args | analyze <rdc> [dir] | summary <dir> [max-draws] | diff <client-dir> <web-dir> [out-dir] [max-lines] | selftest\n  opts: --frame N | --seconds S, --out DIR, --display :N, --retries N, --jar PATH (client), --exe PATH (web), --api gl|vulkan (exec)".into()),
+        _ => Err("usage: openrs capture setup | verify [--full] | client [opts] [-- java args] | web [opts] [-- app args] | browser [opts] [--url URL] [--scene NAME] [--orf FILE] [-- chromium args] | exec [opts] -- cmd args | analyze <rdc> [dir] | summary <dir> [max-draws] | diff <client-dir> <web-dir> [out-dir] [max-lines] | selftest\n  opts: --frame N | --seconds S, --out DIR, --display :N, --retries N, --jar PATH (client), --exe PATH (web), --api gl|vulkan (exec)".into()),
     };
     r.map_or_else(|e| { eprintln!("capture: {e}"); 1 }, |()| 0)
 }
