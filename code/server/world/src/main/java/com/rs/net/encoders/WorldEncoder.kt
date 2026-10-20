@@ -192,6 +192,7 @@ class WorldEncoder(private val player: Player, @JvmField val session: Session) {
     }
 
     fun setIFGraphic(interfaceId: Int, componentId: Int, graphicId: Int) {
+        player.interfaceManager?.tracker?.graphic(interfaceId, componentId, graphicId)
         session.queuePacket(IfSetGraphic(interfaceId, componentId, graphicId))
     }
 
@@ -200,14 +201,17 @@ class WorldEncoder(private val player: Player, @JvmField val session: Session) {
     }
 
     fun setIFModel(interfaceId: Int, componentId: Int, modelId: Int) {
+        player.interfaceManager?.tracker?.model(interfaceId, componentId, modelId)
         session.queuePacket(IfSetModel(interfaceId, componentId, modelId))
     }
 
     fun setIFHidden(interfaceId: Int, componentId: Int, hidden: Boolean) {
+        player.interfaceManager?.tracker?.hidden(interfaceId, componentId, hidden)
         session.queuePacket(IfSetHide(interfaceId, componentId, hidden))
     }
 
     fun setIFEvents(params: IFEventsModel) {
+        player.interfaceManager?.tracker?.events(params.interfaceId, params.componentId, params.fromSlot, params.toSlot, params.settings)
         session.queuePacket(IfSetEvents(params.interfaceId, params.componentId, params.fromSlot, params.toSlot, params.settings))
     }
 
@@ -220,6 +224,7 @@ class WorldEncoder(private val player: Player, @JvmField val session: Session) {
     }
 
     fun setIFText(interfaceId: Int, componentId: Int, text: String) {
+        player.interfaceManager?.tracker?.text(interfaceId, componentId, text)
         session.queuePacket(IfSetText(interfaceId, componentId, text))
     }
 
@@ -240,6 +245,7 @@ class WorldEncoder(private val player: Player, @JvmField val session: Session) {
     }
 
     fun setIFItem(interfaceId: Int, componentId: Int, id: Int, amount: Int) {
+        player.interfaceManager?.tracker?.item(interfaceId, componentId, id, amount)
         session.queuePacket(IfSetItem(interfaceId, componentId, id, amount))
     }
 

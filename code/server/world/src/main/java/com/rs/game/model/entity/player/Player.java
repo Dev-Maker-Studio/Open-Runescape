@@ -952,6 +952,7 @@ public class Player extends Entity {
 			if (getSession().getDisconnected() && !awaitingReconnect())
 				finish();
 			processPackets();
+			interfaceManager.getTracker().tick();
 			cutsceneManager.process();
 			cutscenePresenter.tick();
 			super.processEntity();
@@ -1207,6 +1208,7 @@ public class Player extends Entity {
 		addIP(getSession().getIp());
 		lastIP = getSession().getIp();
 		interfaceManager.sendInterfaces();
+		interfaceManager.getTracker().login();
 		getPackets().sendRunEnergy(runEnergy);
 		refreshAllowChatEffects();
 		refreshMouseButtons();

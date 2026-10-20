@@ -3,6 +3,7 @@ package com.rs.game.model.entity.player.managers
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.Maps
+import com.rs.db.IfaceTracker
 import com.rs.game.content.BuffBar
 import com.rs.game.content.achievements.Achievement
 import com.rs.game.content.achievements.AchievementInterface
@@ -17,6 +18,10 @@ class InterfaceManager(private val player: Player) {
 
     var topInterface = 0
         private set
+
+    val tracker = IfaceTracker(player)
+
+    fun opened(): Map<Int, Int> = synchronized(openedInterfaces) { HashMap(openedInterfaces) }
 
     private val openedInterfaces: BiMap<Int, Int> = Maps.synchronizedBiMap(HashBiMap.create())
 
@@ -141,6 +146,7 @@ class InterfaceManager(private val player: Player) {
         val parentComponentUid = getComponentUId(parentInterfaceId, parentInterfaceComponentId)
         openedInterfaces[parentComponentUid]?.let { clearChilds(it) }
         openedInterfaces[parentComponentUid] = interfaceId
+        tracker.opened(parentComponentUid, interfaceId, clickThrough)
         player.packets.sendInterface(clickThrough, parentInterfaceId, parentInterfaceComponentId, interfaceId)
     }
 
@@ -150,6 +156,7 @@ class InterfaceManager(private val player: Player) {
     fun removeInterfaceByParent(parentUid: Int) {
         val removedInterface = openedInterfaces.remove(parentUid) ?: return
         clearChilds(removedInterface)
+        tracker.closed(removedInterface)
         player.packets.closeInterface(parentUid)
     }
 
@@ -226,6 +233,7 @@ class InterfaceManager(private val player: Player) {
 
     fun sendInterfaces() {
         openedInterfaces.clear()
+        tracker.reset()
         setDefaultTopInterface()
         if (player.familiar != null && player.isRunning)
             player.familiar.sendMainConfigs()
