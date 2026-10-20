@@ -31,6 +31,7 @@ pub const ALL: &[Step<Live>] = &[
     ("iface-close", iface_close),
     ("dump-frame", dump_frame),
     ("renderer-replay", replay),
+    ("twin", twin),
     ("equiv", equiv),
     ("renderdoc-retry", renderdoc_retry),
     ("down", down),
@@ -339,6 +340,24 @@ fn replay(l: &mut Live) -> Result<String, String> {
         return Err(format!("renderer replay failed\n{}", tail(&text, 10)));
     }
     Ok(format!("{} -> {png}", text.lines().next().unwrap_or("")))
+}
+
+fn twin(l: &mut Live) -> Result<String, String> {
+    let out = l.path("twin");
+    let (code, text) = l.sh(&["twin", "lumbridge", "--out", &out], &[]);
+    if !matches!(code, Some(0 | 1)) {
+        return Err(format!("twin errored {code:?}\n{}", tail(&text, 20)));
+    }
+    let res: Value = std::fs::read_to_string(format!("{out}/twin.json")).ok().and_then(|t| serde_json::from_str(&t).ok()).ok_or("twin wrote no twin.json")?;
+    let ssim = res["pixels"]["ssim"].as_f64().ok_or("twin.json has no ssim")?;
+    if res["serialized"]["identical"] != true {
+        return Err(format!("the browser's frame dump differs from the client's frame\n{}", tail(&text, 12)));
+    }
+    if !std::fs::metadata(format!("{out}/twin.png")).is_ok_and(|m| m.len() > 0) {
+        return Err("twin wrote no side by side image".into());
+    }
+    l.metrics.insert("twin".into(), json!({"ssim": ssim, "psnr": res["pixels"]["psnr_db"], "verdict": res["verdict"]}));
+    Ok(format!("{out}/twin.png, ssim {ssim}, serialized frames identical"))
 }
 
 fn equiv(l: &mut Live) -> Result<String, String> {
