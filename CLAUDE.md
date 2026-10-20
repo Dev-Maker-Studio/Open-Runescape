@@ -39,10 +39,19 @@ The original Jagex client code, extensively deobfuscated and refactored:
   - `movement/`: Pathfinding and route calculation
   - `js5/`: JS5 archive format (Jagex's asset format)
   - `toolkit/`: Graphics toolkit abstraction layer
-    Toolkit ids (`AbstractToolkit.toolkitForType`, `ToolkitPreference.AVAILABLE`): 0 safe mode,
-    1 legacy OpenGL, 3 modern OpenGL (LWJGL3; it took DirectX's old id so the cache's per-toolkit
-    option bitmasks and scripts apply unchanged), 5 the native HD GL path (not offered).
-    Software (2) and DirectX are gone: the Graphics Options interface lists only the three.
+    Toolkit ids (`AbstractToolkit.toolkitForType`): 0 (`BOOTSTRAP_MODE`) is `SafeModeToolkit`, used
+    only for the loading screen, the CPU benchmark and the offscreen item icon rasterizer; every
+    other id creates `ModernGLToolkit` (`ToolkitPreference.MODERN_OPENGL` = 3, kept so the cache's
+    per-toolkit option bitmasks and scripts apply unchanged). The legacy OpenGL toolkit
+    (`OpenGLNativeToolkit`, `AbstractNativeToolkit`, the `Native*` shaders, samplers and buffers,
+    `ShaderGL`/`ShaderMappingGL`, the `MipmapTextureSampler*` family, `MaskedTextureSurface`,
+    `NativeParticleRenderer`, `VertexDeclaration*`, the `companion` enums) is deleted; only
+    `OpenGlToolkit` survives as the parent of `ModernGLToolkit`. `toolkit/opengl/OpenGLConventions.kt`
+    holds the GL enum constants the surviving code imports. `ToolkitPreference` is invisible and
+    always reports 3.
+    The GL context is created in `jaggl/OpenGL.kt` through `toolkit/context/GlxContext` (GLX on the
+    AWT canvas's X11 window). Development runs on Linux with Hyprland only; other platforms are
+    reached through the WebGPU build, so there are no Windows or macOS context paths.
 
 - **launch/**: Client loader and initialization
 - **addon/**: Client addon system
@@ -199,25 +208,26 @@ The project follows an incremental migration approach:
 ## Project Structure
 
 ```
-darkan-bot/
+OpenRS-Web/
 ├── _APP-SPECIFICATION.md
 ├── _MARKDOWN-FORMAT.md
-├── assets/            # Jars and example bot scripts
+├── assets/
+│   ├── cache/         # Unpacked cache, cloned separately, gitignored
+│   └── cache-packed/  # Built by `openrs cache build`, gitignored
 ├── code/
-│   ├── client/        # Gradle project (run ./gradlew here)
-│   └── server/        # Darkan server
-│   ├── src/main/
-│   │   └── kotlin/    # All source (100% Kotlin)
-│   │       ├── com/
-│   │       │   ├── darkan/    # Bot framework
-│   │       │   └── jagex/     # Game engine
+│   ├── client/        # Kotlin client, Gradle project (run ./gradlew here)
+│   │   └── src/main/kotlin/
+│   │       ├── com/darkan/    # Bot framework and harness control server
+│   │       ├── com/jagex/     # Game engine
 │   │       ├── jaclib/        # Native hardware/memory libs
-│   │       ├── jaggl/         # OpenGL bindings
+│   │       ├── jaggl/         # OpenGL bindings (LWJGL core context)
 │   │       └── jagtheora/     # Video codec
-│   ├── tools/         # capture.sh
-│   └── build.gradle.kts
-└── src/               # English markdowns (README, plans)
-
+│   ├── server/        # Darkan lobby and world
+│   ├── harness/       # Rust `openrs` harness
+│   ├── renderer/      # Rust WebGPU renderer (wgpu, WGSL via naga)
+│   ├── renderdoc/     # RenderDoc capture and equivalence tooling
+│   └── web/           # Rust web server and page
+└── src/               # English markdowns, start with src/HARNESS.md
 ```
 
 ## Migration Status
