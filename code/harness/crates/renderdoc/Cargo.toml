@@ -1,0 +1,8 @@
+[package]
+name = "renderdoc"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+display = { path = "../display" }
+control = { path = "../control" }
