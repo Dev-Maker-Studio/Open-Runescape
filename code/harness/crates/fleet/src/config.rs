@@ -101,9 +101,9 @@ mod tests {
     fn local_endpoints_shift_per_instance() {
         let cfg = example();
         let ports = |n| { let (_, l, w) = cfg.endpoint(&cfg.slot(n).unwrap()).unwrap(); (l, w) };
-        assert_eq!(ports(3), ("44594".into(), "44595".into()));
-        assert_eq!(ports(4), ("44604".into(), "44605".into()));
-        assert_eq!(ports(9), ("44614".into(), "44615".into()));
+        assert_eq!(ports(3), ("24594".into(), "24595".into()));
+        assert_eq!(ports(4), ("24604".into(), "24605".into()));
+        assert_eq!(ports(9), ("24614".into(), "24615".into()));
     }
 
     #[test]

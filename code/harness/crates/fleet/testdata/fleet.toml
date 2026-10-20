@@ -5,8 +5,8 @@ credentials = "env:OPENRS_TEST_FLEET_PASS"   # comment after value
 
 [server.local]
 host = "127.0.0.1"
-lobby = "44594"
-world = "44595"
+lobby = "24594"
+world = "24595"
 
 [server.partial]
 host = "example.org"

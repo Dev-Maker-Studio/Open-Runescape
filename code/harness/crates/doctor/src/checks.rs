@@ -146,7 +146,7 @@ fn open(host: &str, port: &str) -> bool {
 
 fn ports(root: &Path) -> Vec<Check> {
     let env = |k: &str, d: &str| std::env::var(k).unwrap_or(d.into());
-    let mut targets = vec![("local0".to_string(), "127.0.0.1".to_string(), env("OPENRS_LOBBY_PORT", "44594"), env("OPENRS_WORLD_PORT", "44595"))];
+    let mut targets = vec![("local0".to_string(), "127.0.0.1".to_string(), env("OPENRS_LOBBY_PORT", "24594"), env("OPENRS_WORLD_PORT", "24595"))];
     for t in fleet::validate().unwrap_or_default() {
         if !targets.iter().any(|o| (&o.1, &o.2, &o.3) == (&t.1, &t.2, &t.3)) {
             targets.push(t);

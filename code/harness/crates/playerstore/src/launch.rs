@@ -18,7 +18,7 @@ fn shift(bases: [u16; 3], i: usize) -> [u16; 3] {
 }
 
 pub fn ports(i: usize) -> [u16; 3] {
-    shift([base("OPENRS_LOBBY_PORT", 44594), base("OPENRS_WORLD_PORT", 44595), base("OPENRS_API_PORT", 4140)], i)
+    shift([base("OPENRS_LOBBY_PORT", 24594), base("OPENRS_WORLD_PORT", 24595), base("OPENRS_API_PORT", 4140)], i)
 }
 
 fn tag(role: &str, i: usize) -> String {
@@ -176,17 +176,25 @@ mod tests {
 
     #[test]
     fn instance_ports_step_by_stride() {
-        assert_eq!(shift([44594, 44595, 4140], 0), [44594, 44595, 4140]);
-        assert_eq!(shift([44594, 44595, 4140], 1), [44604, 44605, 4150]);
-        assert_eq!(shift([44594, 44595, 4140], 2), [44614, 44615, 4160]);
+        assert_eq!(shift([24594, 24595, 4140], 0), [24594, 24595, 4140]);
+        assert_eq!(shift([24594, 24595, 4140], 1), [24604, 24605, 4150]);
+        assert_eq!(shift([24594, 24595, 4140], 2), [24614, 24615, 4160]);
     }
 
     #[test]
     fn instance_ports_never_collide() {
-        let mut all: Vec<u16> = (0..MAX).flat_map(|i| shift([44594, 44595, 4140], i)).collect();
+        let mut all: Vec<u16> = (0..MAX).flat_map(|i| shift([24594, 24595, 4140], i)).collect();
         all.sort_unstable();
         all.dedup();
         assert_eq!(all.len(), MAX * 3);
+    }
+
+    #[test]
+    fn default_ports_stay_below_the_ephemeral_range() {
+        let ports = ports(0);
+        assert!(ports.iter().all(|p| *p < 32768), "{ports:?}");
+        let top = (0..MAX).flat_map(|i| shift([24594, 24595, 4140], i)).max().unwrap();
+        assert!(top < 32768, "{top}");
     }
 
     #[test]

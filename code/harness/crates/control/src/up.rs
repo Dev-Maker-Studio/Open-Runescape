@@ -11,7 +11,7 @@ pub fn ingame() -> Option<serde_json::Value> {
 }
 
 fn local_server_up() -> bool {
-    TcpStream::connect_timeout(&format!("127.0.0.1:{}", port("OPENRS_LOBBY_PORT", "44594")).parse().unwrap(), Duration::from_millis(300)).is_ok()
+    TcpStream::connect_timeout(&format!("127.0.0.1:{}", port("OPENRS_LOBBY_PORT", "24594")).parse().unwrap(), Duration::from_millis(300)).is_ok()
 }
 
 fn ensure_cache(root: &std::path::Path) -> String {
@@ -56,7 +56,7 @@ pub fn client_args(shared: bool, rest: Vec<String>) -> Vec<String> {
         player(&["account", name, pass]);
         player(&["create", name]);
         player(&["set", name, "chosenAccountType", "true"]);
-        client_args.extend([format!("-Dautologin={name}:{pass}"), format!("-Dautologin.world={}", playerstore::LOCAL_WORLD), "localhost".into(), port("OPENRS_LOBBY_PORT", "44594"), port("OPENRS_WORLD_PORT", "44595")]);
+        client_args.extend([format!("-Dautologin={name}:{pass}"), format!("-Dautologin.world={}", playerstore::LOCAL_WORLD), "localhost".into(), port("OPENRS_LOBBY_PORT", "24594"), port("OPENRS_WORLD_PORT", "24595")]);
     }
     client_args.extend(rest);
     client_args

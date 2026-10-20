@@ -10,7 +10,7 @@ pub fn lobby(shared: bool) -> String {
     if shared {
         std::env::var("OPENRS_SHARED_LOBBY").unwrap_or("lobby.devmakerstudio.com:43594".into())
     } else {
-        format!("127.0.0.1:{}", std::env::var("OPENRS_LOBBY_PORT").unwrap_or("44594".into()))
+        format!("127.0.0.1:{}", std::env::var("OPENRS_LOBBY_PORT").unwrap_or("24594".into()))
     }
 }
 

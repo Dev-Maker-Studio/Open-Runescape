@@ -8,8 +8,8 @@ credentials = "local"
 
 [server.local]
 host = "127.0.0.1"
-lobby = "44594"
-world = "44595"
+lobby = "24594"
+world = "24595"
 
 [server.shared]
 host = "lobby.devmakerstudio.com"

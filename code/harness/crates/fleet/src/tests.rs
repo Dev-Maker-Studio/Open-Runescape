@@ -55,7 +55,7 @@ fn slots_fall_back_to_defaults_and_builtins() {
 #[test]
 fn servers_and_plain_keys() {
     let cfg = fixture();
-    assert_eq!(cfg.server("local").unwrap(), ("127.0.0.1".into(), "44594".into(), "44595".into()));
+    assert_eq!(cfg.server("local").unwrap(), ("127.0.0.1".into(), "24594".into(), "24595".into()));
     assert_eq!(cfg.server("partial").err().unwrap(), "server partial: missing lobby");
     assert_eq!(cfg.server("nowhere").err().unwrap(), "server nowhere: missing host");
     assert_eq!(cfg.get("defaults.window", "800x600"), "800x600");
