@@ -1,0 +1,29 @@
+# test fleet
+[defaults]
+heap = "256m"
+credentials = "env:OPENRS_TEST_FLEET_PASS"   # comment after value
+
+[server.local]
+host = "127.0.0.1"
+lobby = "44594"
+world = "44595"
+
+[server.partial]
+host = "example.org"
+
+[slot.1]
+role = "model-pass"
+account = "Fleet One"
+start = "3212 3428 0"
+
+[slot.2]
+role = "water"
+account = "fleet2"
+server = "partial"
+credentials = "file:~/pw#2.txt"
+heap = "1g"
+start = "3029 x 3217"
+
+[slot.3]
+account = "fleet3"
+start = "1 2 0"

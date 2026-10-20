@@ -1,0 +1,62 @@
+[defaults]
+heap = "512m"
+window = "800x600"
+fps = "20"
+parallel = "3"
+server = "local"
+credentials = "local"
+
+[server.local]
+host = "127.0.0.1"
+lobby = "44594"
+world = "44595"
+
+[server.shared]
+host = "lobby.devmakerstudio.com"
+lobby = "43594"
+world = "43595"
+
+[slot.1]
+role = "model-pass"
+account = "fleet1"
+start = "3212 3428 0"
+
+[slot.2]
+role = "ground-pass"
+account = "fleet2"
+start = "2920 3445 0"
+
+[slot.3]
+role = "sprite-ui-pass"
+account = "fleet3"
+start = "3222 3218 0"
+
+[slot.4]
+role = "shadow"
+account = "fleet4"
+start = "2964 3381 0"
+
+[slot.5]
+role = "particles"
+account = "fleet5"
+start = "3082 3420 0"
+
+[slot.6]
+role = "water"
+account = "fleet6"
+start = "3029 3217 0"
+
+[slot.7]
+role = "textures-materials"
+account = "fleet7"
+start = "3093 3244 0"
+
+[slot.8]
+role = "scene-camera-lighting"
+account = "fleet8"
+start = "3164 3487 0"
+
+[slot.9]
+role = "equivalence-diff"
+account = "fleet9"
+start = "3234 3228 0"
