@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.graphics.modern.renderer
 
+import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
 import com.jagex.game.runetek5.client.PreferenceManager
 import org.joml.Matrix4f
 import org.lwjgl.opengl.GL
@@ -60,6 +61,7 @@ class HdWaterRenderer {
     fun initialize() {
         if (program != null) return
         program = build("/shaders/hdWater.frag")
+        program?.let { FrameDump.name(it.id, "hdWater") }
         vao = glGenVertexArrays()
         println("[HdWater] ${if (program == null) "unavailable" else if (program!!.tessellated) "tessellated waves" else "flat surface"}")
     }
@@ -287,7 +289,7 @@ class HdWaterRenderer {
             glBindBuffer(GL_ARRAY_BUFFER, draw.colorVbo)
             glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, 4, 0L)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, draw.indexIbo)
-            glDrawElements(if (p.tessellated) GL_PATCHES else GL_TRIANGLES, draw.indexCount, GL_UNSIGNED_SHORT, 0L)
+            FrameDump.elements(if (p.tessellated) GL_PATCHES else GL_TRIANGLES, draw.indexCount, GL_UNSIGNED_SHORT, 0L)
         }
         glDisableVertexAttribArray(0)
         glDisableVertexAttribArray(1)
