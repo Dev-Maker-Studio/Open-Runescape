@@ -1,0 +1,52 @@
+[package]
+name = "renderer"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "renderer-app"
+path = "src/main.rs"
+
+[[bin]]
+name = "shaderc"
+required-features = ["naga"]
+
+[features]
+naga = ["dep:naga"]
+
+[dependencies]
+bytemuck = { version = "1", features = ["min_const_generics"] }
+wgpu = { version = "30", default-features = false, features = ["std", "wgsl"] }
+naga = { version = "30", features = ["glsl-in", "wgsl-out"], optional = true }
+miniz_oxide = "0.9"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wgpu = { version = "30", default-features = false, features = ["std", "wgsl", "parking_lot", "vulkan"] }
+pollster = "1"
+png = "0.18"
+winit = { version = "0.30", default-features = false, features = ["x11", "wayland", "rwh_06"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wgpu = { version = "30", default-features = false, features = ["std", "wgsl", "webgpu", "webgl"] }
+wasm-bindgen = "=0.2.129"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["HtmlCanvasElement"] }
+
+[dev-dependencies]
+naga = { version = "30", features = ["wgsl-in"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.iter]
+inherits = "release"
+lto = false
+codegen-units = 16
+incremental = true
