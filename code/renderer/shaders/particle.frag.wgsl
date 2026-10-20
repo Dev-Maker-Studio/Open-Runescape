@@ -1,3 +1,5 @@
+diagnostic(off, derivative_uniformity);
+
 struct P {
     uViewProjection: mat4x4<f32>,
     uTextureScroll: vec2<f32>,

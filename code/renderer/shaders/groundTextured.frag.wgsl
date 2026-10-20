@@ -1,3 +1,5 @@
+diagnostic(off, derivative_uniformity);
+
 struct P {
     uViewProjection: mat4x4<f32>,
     uClipPlane: vec4<f32>,
@@ -173,115 +175,117 @@ fn main_1() {
                     let _e205 = textureSample(uSceneDepth, uSceneDepth_s, (_e201.xy / _e203));
                     sceneDepth = _e205.x;
                     let _e208 = gl_FragCoord_1;
-                    let _e210 = global.uViewport;
-                    let _e213 = global.uViewport;
-                    ndc = ((((_e208.xy - _e210.xy) / _e213.zw) * 2f) - vec2(1f));
-                    let _e222 = global.uInvViewProjection;
-                    let _e223 = ndc;
-                    let _e224 = sceneDepth;
-                    below = (_e222 * vec4<f32>(_e223.x, _e223.y, ((_e224 * 2f) - 1f), 1f));
-                    let _e235 = below;
-                    let _e237 = below;
-                    let _e240 = vWorldY_1;
-                    submerged = max(((_e235.y / _e237.w) - _e240), 0f);
-                    let _e245 = submerged;
-                    let _e246 = global.uStillFog;
-                    let _e249 = global.uStillFog;
-                    cover = clamp(((_e245 * _e246.z) + _e249.w), 0f, 1f);
-                    let _e256 = color;
-                    let _e259 = color;
-                    let _e262 = cover;
-                    alpha = (_e256.w + ((1f - _e259.w) * _e262));
-                    let _e266 = color;
-                    let _e268 = color;
-                    let _e270 = color;
-                    let _e273 = global.uWaterColour;
-                    let _e275 = color;
-                    let _e279 = cover;
-                    let _e282 = alpha;
-                    let _e286 = (((_e268.xyz * _e270.w) + ((_e273 * (1f - _e275.w)) * _e279)) / vec3(max(_e282, 0.0001f)));
-                    color.x = _e286.x;
-                    color.y = _e286.y;
-                    color.z = _e286.z;
-                    let _e294 = alpha;
-                    color.w = _e294;
+                    let _e210 = global.uFramebufferSize;
+                    let _e212 = gl_FragCoord_1;
+                    let _e216 = global.uViewport;
+                    let _e219 = global.uViewport;
+                    ndc = ((((vec2<f32>(_e208.x, (_e210.y - _e212.y)) - _e216.xy) / _e219.zw) * 2f) - vec2(1f));
+                    let _e228 = global.uInvViewProjection;
+                    let _e229 = ndc;
+                    let _e230 = sceneDepth;
+                    below = (_e228 * vec4<f32>(_e229.x, _e229.y, ((_e230 * 2f) - 1f), 1f));
+                    let _e241 = below;
+                    let _e243 = below;
+                    let _e246 = vWorldY_1;
+                    submerged = max(((_e241.y / _e243.w) - _e246), 0f);
+                    let _e251 = submerged;
+                    let _e252 = global.uStillFog;
+                    let _e255 = global.uStillFog;
+                    cover = clamp(((_e251 * _e252.z) + _e255.w), 0f, 1f);
+                    let _e262 = color;
+                    let _e265 = color;
+                    let _e268 = cover;
+                    alpha = (_e262.w + ((1f - _e265.w) * _e268));
+                    let _e272 = color;
+                    let _e274 = color;
+                    let _e276 = color;
+                    let _e279 = global.uWaterColour;
+                    let _e281 = color;
+                    let _e285 = cover;
+                    let _e288 = alpha;
+                    let _e292 = (((_e274.xyz * _e276.w) + ((_e279 * (1f - _e281.w)) * _e285)) / vec3(max(_e288, 0.0001f)));
+                    color.x = _e292.x;
+                    color.y = _e292.y;
+                    color.z = _e292.z;
+                    let _e300 = alpha;
+                    color.w = _e300;
                 }
             }
         }
     } else {
-        let _e295 = global.uWaterMode;
-        if (_e295 == 2i) {
+        let _e301 = global.uWaterMode;
+        if (_e301 == 2i) {
             {
-                let _e298 = global.uHasWaterNoise_u;
-                if (_e298 != 0u) {
-                    let _e301 = color;
-                    let _e303 = color;
-                    let _e305 = vWaterNoiseCoord_1;
-                    let _e306 = textureSample(uWaterNoise, uWaterNoise_s, _e305);
-                    let _e313 = clamp((_e303.xyz + _e306.xyz), vec3(0f), vec3(1f));
-                    color.x = _e313.x;
-                    color.y = _e313.y;
-                    color.z = _e313.z;
+                let _e304 = global.uHasWaterNoise_u;
+                if (_e304 != 0u) {
+                    let _e307 = color;
+                    let _e309 = color;
+                    let _e311 = vWaterNoiseCoord_1;
+                    let _e312 = textureSample(uWaterNoise, uWaterNoise_s, _e311);
+                    let _e319 = clamp((_e309.xyz + _e312.xyz), vec3(0f), vec3(1f));
+                    color.x = _e319.x;
+                    color.y = _e319.y;
+                    color.z = _e319.z;
                 }
                 color.w = 1f;
             }
         } else {
-            let _e322 = global.uWaterMode;
-            if (_e322 == 3i) {
+            let _e328 = global.uWaterMode;
+            if (_e328 == 3i) {
                 {
-                    let _e325 = color;
-                    let _e327 = color;
-                    let _e329 = global.uWaterColour;
-                    let _e330 = vWaterMix_1;
-                    let _e332 = mix(_e327.xyz, _e329, vec3(_e330));
-                    color.x = _e332.x;
-                    color.y = _e332.y;
-                    color.z = _e332.z;
+                    let _e331 = color;
+                    let _e333 = color;
+                    let _e335 = global.uWaterColour;
+                    let _e336 = vWaterMix_1;
+                    let _e338 = mix(_e333.xyz, _e335, vec3(_e336));
+                    color.x = _e338.x;
+                    color.y = _e338.y;
+                    color.z = _e338.z;
                 }
             }
         }
     }
-    let _e339 = global.uAlphaFromVertex_u;
-    let _e342 = global.uWaterMode;
-    let _e346 = global.uWaterMode;
-    if (((_e339 != 0u) && (_e342 != 4i)) && (_e346 != 2i)) {
+    let _e345 = global.uAlphaFromVertex_u;
+    let _e348 = global.uWaterMode;
+    let _e352 = global.uWaterMode;
+    if (((_e345 != 0u) && (_e348 != 4i)) && (_e352 != 2i)) {
         {
-            let _e351 = vColor_1;
-            color.w = _e351.w;
+            let _e357 = vColor_1;
+            color.w = _e357.w;
         }
     }
-    let _e353 = global.uGroundShadowEnabled_u;
-    if (_e353 != 0u) {
+    let _e359 = global.uGroundShadowEnabled_u;
+    if (_e359 != 0u) {
         {
-            let _e356 = color;
-            let _e358 = color;
-            let _e361 = vWorldXZ_1;
-            let _e362 = global.uGroundShadowScale;
-            let _e364 = textureSample(uGroundShadowTex, uGroundShadowTex_s, (_e361 * _e362));
-            let _e367 = (_e358.xyz * (1f - _e364.x));
-            color.x = _e367.x;
-            color.y = _e367.y;
-            color.z = _e367.z;
+            let _e362 = color;
+            let _e364 = color;
+            let _e367 = vWorldXZ_1;
+            let _e368 = global.uGroundShadowScale;
+            let _e370 = textureSample(uGroundShadowTex, uGroundShadowTex_s, (_e367 * _e368));
+            let _e373 = (_e364.xyz * (1f - _e370.x));
+            color.x = _e373.x;
+            color.y = _e373.y;
+            color.z = _e373.z;
         }
     }
-    let _e374 = color;
-    let _e376 = global.uFogColor;
-    let _e378 = color;
-    let _e380 = vFogFactor_1;
-    let _e382 = mix(_e376.xyz, _e378.xyz, vec3(_e380));
-    color.x = _e382.x;
-    color.y = _e382.y;
-    color.z = _e382.z;
-    let _e389 = color;
-    let _e391 = color;
-    let _e395 = vFogFactor_1;
-    let _e396 = vPointLight_1;
-    let _e404 = clamp((_e391.xyz * (vec3(1f) + (_e395 * _e396))), vec3(0f), vec3(1f));
-    color.x = _e404.x;
-    color.y = _e404.y;
-    color.z = _e404.z;
-    let _e411 = color;
-    fragColor = _e411;
+    let _e380 = color;
+    let _e382 = global.uFogColor;
+    let _e384 = color;
+    let _e386 = vFogFactor_1;
+    let _e388 = mix(_e382.xyz, _e384.xyz, vec3(_e386));
+    color.x = _e388.x;
+    color.y = _e388.y;
+    color.z = _e388.z;
+    let _e395 = color;
+    let _e397 = color;
+    let _e401 = vFogFactor_1;
+    let _e402 = vPointLight_1;
+    let _e410 = clamp((_e397.xyz * (vec3(1f) + (_e401 * _e402))), vec3(0f), vec3(1f));
+    color.x = _e410.x;
+    color.y = _e410.y;
+    color.z = _e410.z;
+    let _e417 = color;
+    fragColor = _e417;
     return;
 }
 

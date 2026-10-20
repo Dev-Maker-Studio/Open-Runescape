@@ -6,7 +6,7 @@ const PAIRS: [&str; 15] = [
     "waterfall", "water", "waterHD", "waterLapping", "waterReflecting", "waterRippling",
 ];
 
-const PATCHES: [(&str, &str, &str); 17] = [
+const PATCHES: [(&str, &str, &str); 18] = [
     ("ground.vert", "texture(uGroundShadowTex, aPosition.xz * uGroundShadowScale)", "textureLod(uGroundShadowTex, aPosition.xz * uGroundShadowScale, 0.0)"),
     ("ground.frag", "texture(uShadowMap, projCoords.xy + offset)", "textureLod(uShadowMap, projCoords.xy + offset, 0.0)"),
     ("sprite.frag", "uniform sampler2D uTextures[8];", "uniform sampler2DArray uTextures;"),
@@ -14,6 +14,7 @@ const PATCHES: [(&str, &str, &str); 17] = [
     ("groundTextured.vert", "gl_ClipDistance[0] = ", "vClipDistance = "),
     ("groundTextured.frag", "vec2 ndc = (gl_FragCoord.xy - uViewport.xy)", "vec2 ndc = (vec2(gl_FragCoord.x, uFramebufferSize.y - gl_FragCoord.y) - uViewport.xy)"),
     ("hdWater.frag", "#version 330 core\n", "#version 330 core\n#define flipUv(p) (vec2((p).x, uFramebufferSize.y - (p).y) / uFramebufferSize)\n"),
+    ("hdWater.frag", "texture(uWaveNoise, vec3(xz / scale + shift, time)).r", "textureLod(uWaveNoise, vec3(xz / scale + shift, time), 0.0).r"),
     ("hdWater.frag", "gl_FragCoord.xy", "vec2(gl_FragCoord.x, uFramebufferSize.y - gl_FragCoord.y)"),
     ("hdWater.frag", "texture(uSceneDepth, fragXY / uFramebufferSize)", "texture(uSceneDepth, flipUv(fragXY))"),
     ("hdWater.frag", "texture(uSceneColor, hit.xy / uFramebufferSize)", "texture(uSceneColor, flipUv(hit.xy))"),
@@ -171,6 +172,7 @@ fn main() {
             }
             let status = match compile(&text, stage) {
                 Ok(w) => {
+                    let w = if stage == ShaderStage::Fragment { format!("diagnostic(off, derivative_uniformity);\n\n{w}") } else { w };
                     fs::write(out.join(format!("{file}.wgsl")), w).unwrap();
                     "ok".to_string()
                 }

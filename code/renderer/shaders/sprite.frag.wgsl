@@ -1,3 +1,5 @@
+diagnostic(off, derivative_uniformity);
+
 struct P {
     uProjection: mat4x4<f32>,
 }

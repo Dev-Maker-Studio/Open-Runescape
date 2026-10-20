@@ -1,3 +1,5 @@
+diagnostic(off, derivative_uniformity);
+
 struct P {
     uTextureEnabled_u: u32,
     uAlphaThreshold: f32,

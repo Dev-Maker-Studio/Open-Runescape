@@ -1,3 +1,5 @@
+diagnostic(off, derivative_uniformity);
+
 struct P {
     uViewProjection: mat4x4<f32>,
     uHasWaveNoise_u: u32,
@@ -179,8 +181,8 @@ fn octave(xz: vec2<f32>, scale: f32, time: f32, shift: vec2<f32>) -> f32 {
     let _e98 = shift_1;
     let _e99 = ((_e94 / vec2(_e95)) + _e98);
     let _e100 = time_1;
-    let _e104 = textureSample(uWaveNoise, uWaveNoise_s, vec3<f32>(_e99.x, _e99.y, _e100));
-    return _e104.x;
+    let _e105 = textureSampleLevel(uWaveNoise, uWaveNoise_s, vec3<f32>(_e99.x, _e99.y, _e100), 0f);
+    return _e105.x;
 }
 
 fn waveHeight(xz_2: vec2<f32>, detail: f32) -> f32 {

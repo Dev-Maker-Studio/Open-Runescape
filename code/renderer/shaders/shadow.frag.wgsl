@@ -1,3 +1,5 @@
+diagnostic(off, derivative_uniformity);
+
 struct P {
     uLightViewProjection: mat4x4<f32>,
     uModelMatrix: mat4x4<f32>,
