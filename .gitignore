@@ -101,3 +101,5 @@ assets/cache-packed/
 /code/client/.claude/
 /code/web/static/renderer.js
 /code/web/static/renderer_bg.wasm
+!/code/renderer/src/bin/
+!/code/server/buildSrc/src/**/build/
