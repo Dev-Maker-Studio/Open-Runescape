@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.graphics.modern.debug
 
 import com.darkan.bot.Bot
 import com.darkan.bot.utils.Tile
+import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.GraphicsCache
@@ -15,39 +16,16 @@ import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import java.io.File
+import java.lang.management.ManagementFactory
 
-/**
- * Drives the client from the login screen into world 1 without a human at the
- * keyboard, so a renderer change can be verified against what is ACTUALLY ON
- * SCREEN rather than against a headless model dump.
- *
- * Geometry-level oracles (see [GeometryDiff]) proved the mesh-built and legacy
- * paths byte-identical while the visible bugs were completely untouched — the
- * defects live in the scene/culling/draw layers, which only a real logged-in
- * frame exercises. Hence this: build, launch, log in, screenshot, compare, kill.
- *
- * Credentials, in priority order:
- *   1. `-Dautologin=user:pass`
- *   2. env `DARKAN_USER` / `DARKAN_PASS`
- *   3. a file (default `~/.darkan_login`, override with `-Dautologin.file=path`)
- *      containing `user:pass` or two lines
- *
- * Nothing is logged that could leak the password — only the username and the
- * state transitions.
- */
 object AutoLogin {
 
     private const val DEFAULT_CREDENTIAL_FILE = ".darkan_login"
 
-    /**
-     * World to join, or null to let the client pick its default.
-     *
-     * Deliberately NOT defaulted to 1. selectedWorldId is written into the login
-     * seed block as a single byte and also switches startWorldLogin() onto the
-     * stored-credentials path; forcing 1 made the world login fall straight back
-     * to the lobby, whereas leaving it at -1 takes the plain worldLogin path and
-     * reaches the server's actual world.
-     */
+    private const val WORLD_LIST_WAIT_NS = 10_000_000_000L
+
+    private var worldWaitStart = 0L
+
     private val targetWorld: Int? by lazy {
         System.getProperty("autologin.world")?.trim()?.toIntOrNull()
     }
@@ -100,59 +78,40 @@ object AutoLogin {
     private var roofsIssued = false
     private var skyIssued = false
 
-    /**
-     * Retry spacing. A login round-trip to prod takes seconds; hammering it every
-     * frame would spam the server and trip its throttling.
-     */
-    private const val RETRY_INTERVAL_NS = 6_000_000_000L
+    private const val RETRY_INTERVAL_NS = 1_000_000_000L
 
-    /**
-     * Frames to let the client finish booting before touching login.
-     *
-     * Two separate failures came from firing on the very first frame: driving
-     * setGameState that early blew up on `lateinit PLAYER_VAR_PROVIDER` inside
-     * processLobbyTick, and even the direct lobbyLogin produced a handshake the
-     * lobby server never answered. The login screen is only genuinely ready some
-     * way into startup, and nothing in LoginManager guards against being called
-     * before then. Measured in wall time, not frames: the legacy toolkit draws the
-     * login screen slowly enough that a frame-count warmup often outlasted the
-     * capture harness's own timeout, so legacy runs never logged in.
-     */
-    private const val WARMUP_NANOS = 6_000_000_000L
-
-    /** Wall time after READY before a graphics preference is flipped, so the region has settled. */
     private const val SETTLE_NANOS = 3_000_000_000L
 
     private var frames = 0
-    private var firstTickNs = 0L
+    private var cacheReady = false
+    private var lobbyMarked = false
+    private var worldMarked = false
 
-    /** Call once per frame. Cheap, self-disarming once in-game. */
+    private fun milestone(name: String) {
+        val elapsed = System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().startTime
+        println("[Milestone] $name ${elapsed}ms")
+    }
+
     fun tick() {
         if (!isEnabled()) return
         frames++
-        if (firstTickNs == 0L) firstTickNs = System.nanoTime()
-        if (System.nanoTime() - firstTickNs < WARMUP_NANOS) return
 
         val state = Client.gameState
         if (state != lastState) {
             System.err.println("[AutoLogin] state=$state lobbyStage=${LoginManager.lobbyStage} loginStage=${LoginManager.loginStage}")
             lastState = state
         }
+        if (!cacheReady) {
+            if (state != GameState.UNK_5) return
+            cacheReady = true
+            milestone("cache ready")
+        }
 
         if (state == GameState.LOGGED_INGAME) {
-            // Pin the camera EVERY frame once in-game. Without this, successive
-            // captures came back at different yaw/pitch, and comparing two renderers
-            // across two different viewpoints is worthless — it already led me to
-            // read a camera difference as "the walls are missing".
-            // cameraYaw/cameraPitch are OUTPUTS of Camera.processCamera, recomputed
-            // every frame from the user-controlled camAngleX/camAngleY (and the zoom),
-            // so pinning them changed nothing. Pin the inputs: "-Dautologin.camera=X,Y[,zoom]".
             System.getProperty("autologin.camera")?.let { spec ->
                 val parts = spec.split(',').mapNotNull { it.trim().toIntOrNull() }
                 if (parts.size >= 2) {
                     Camera.camAngleX = parts[0].toFloat()
-                    // "-Dautologin.spin=N": rotate the yaw N units (of 16384) per frame
-                    // on top of the pinned value, to measure camera rotation cost.
                     spinAccum += System.getProperty("autologin.spin")?.toFloatOrNull() ?: 0f
                     Camera.camAngleY = ((parts[1] + spinAccum) % 16384f + 16384f) % 16384f
                     if (parts.size >= 3) Camera.cameraZoom = parts[2]
@@ -160,21 +119,16 @@ object AutoLogin {
             }
             if (!announcedReady) {
                 announcedReady = true
-                // The capture script waits for exactly this line.
+                milestone("first world frame")
                 System.err.println("[AutoLogin] READY — logged in to world ${targetWorld ?: "(default)"}")
                 readyFrame = frames
                 readyNs = System.nanoTime()
             }
-            // "-Dautologin.bloom=1": switch the toolkit's bloom effect on for this run
-            // only (toolkit level, so the preference file is never touched).
             if (!bloomForced && System.getProperty("autologin.bloom") == "1") {
                 bloomForced = true
                 val ok = Renderers.activeToolkit?.bloomSupported() ?: false
                 System.err.println("[AutoLogin] bloom forced on: supported=$ok enabled=${Renderers.activeToolkit?.bloomEnabled()}")
             }
-            // "-Dautologin.textures=0|1": flip the Textures graphics option in-game the
-            // way the options interface does (preference + graphics cache reset +
-            // region reload), without saving the preference file.
             val texturesSpec = System.getProperty("autologin.textures")?.toIntOrNull()
             if (texturesSpec != null && !texturesIssued && readyNs != 0L && System.nanoTime() - readyNs >= SETTLE_NANOS) {
                 texturesIssued = true
@@ -191,17 +145,12 @@ object AutoLogin {
                 Scene.setRoofOverride()
                 System.err.println("[AutoLogin] ROOFS set to $roofValue")
             }
-            // "-Dautologin.skybox=0|1" drives the skybox preference the same way, so a
-            // scene can be captured with and without the sky geometry.
             val skySpec = System.getProperty("autologin.skybox")?.trim()?.toIntOrNull()
             if (skySpec != null && !skyIssued && readyNs != 0L && System.nanoTime() - readyNs >= SETTLE_NANOS) {
                 skyIssued = true
                 PreferenceManager.preferences?.skyboxes?.let { PreferenceManager.preferences?.setValue(it, skySpec.coerceIn(0, 1)) }
                 System.err.println("[AutoLogin] SKYBOX set to ${skySpec.coerceIn(0, 1)}")
             }
-            // Debug walk: "-Dautologin.walk=X,Y" (absolute tile) sends one walk request
-            // a short while after login, through the bot's own packet path (no input
-            // injection), so captures can be taken under roofs / on other planes.
             val walkSpec = System.getProperty("autologin.walk")
             if (walkSpec != null && !walkIssued && frames - readyFrame == 90) {
                 walkIssued = true
@@ -216,11 +165,6 @@ object AutoLogin {
                     System.err.println("[AutoLogin] WALK failed: $t")
                 }
             }
-            // "-Dautologin.command=item 20767": one server command (";;" prefix is added
-            // by Bot.command) a few seconds after login; "-Dautologin.equip=20767" then
-            // equips that item from the inventory once it arrives. Both go through the
-            // bot's packet path — no input injection.
-            // '+' stands for a space so the value survives the launcher's word splitting.
             val cmdSpec = System.getProperty("autologin.command")?.replace('+', ' ')
             if (cmdSpec != null && !commandIssued && frames - readyFrame == 120) {
                 commandIssued = true
@@ -279,7 +223,6 @@ object AutoLogin {
             return
         }
 
-        // A login is already in flight; let it finish.
         if (LoginManager.loginStage != LoginManager.LoginStage.IDLE) return
 
         val now = System.nanoTime()
@@ -290,34 +233,37 @@ object AutoLogin {
         StaticMethods.loginPassword = creds.pass
 
         when (LoginManager.lobbyStage) {
-            // Not authenticated yet: authenticate against the lobby first, exactly
-            // as the login screen's button does.
             LoginManager.LobbyStage.LOGGED_OUT -> {
                 System.err.println("[AutoLogin] lobby login as '${creds.user}' (state=${Client.gameState})")
                 LoginManager.lobbyLogin(creds.user, creds.pass)
             }
 
             LoginManager.LobbyStage.LOGGING_IN_LOBBY -> {
-                // LOGGING_IN_LOBBY means "logging in", NOT "logged in". Firing the
-                // world login here on stage alone crashed the client:
-                // getSeedBlock dereferences lobbyAuthToken!!, which only exists once
-                // the lobby response has been parsed.
-                //
-                // That same response sets MY_PLAYER_USERNAME two fields after
-                // lobbyAuthToken (LoginManager:525-533), so it is an exact,
-                // observable proxy for "token is present" without touching private
-                // state. Wait for it.
                 if (PlayerUpdate.MY_PLAYER_USERNAME == null) return
+                if (!lobbyMarked) {
+                    lobbyMarked = true
+                    milestone("lobby logged in")
+                }
 
                 System.err.println(
                     "[AutoLogin] lobby ready as '${PlayerUpdate.MY_PLAYER_USERNAME}', " +
                         "entering world ${targetWorld ?: "(client default)"}"
                 )
-                targetWorld?.let { StaticMethods.selectedWorldId = it }
+                targetWorld?.let {
+                    if (!LoginManager.setGameHost(it, Loader.IP_ADDRESS ?: "localhost")) {
+                        if (worldWaitStart == 0L) worldWaitStart = now
+                        if (now - worldWaitStart < WORLD_LIST_WAIT_NS) return
+                        System.err.println("[AutoLogin] world $it is not in the world list after 10s, using the default connection")
+                    }
+                }
+                if (!worldMarked) {
+                    worldMarked = true
+                    milestone("world selected")
+                }
                 if (Client.gameState == GameState.UNK_0) LoginManager.returnToLoginScreen() else LoginManager.startWorldLogin()
             }
 
-            LoginManager.LobbyStage.LOBBY_TO_WORLD -> Unit // in flight
+            LoginManager.LobbyStage.LOBBY_TO_WORLD -> Unit
         }
     }
 }

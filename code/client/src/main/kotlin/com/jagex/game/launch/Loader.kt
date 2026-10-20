@@ -51,12 +51,9 @@ class Loader : Panel() {
     }
 
     fun openFrame() = runOnEdt {
-        // Swing components must be built, shown and laid out on the event dispatch
-        // thread; doing it from main races the sidebar's own timers.
         clientFrame = JFrame("Darkan").apply {
             layout = BorderLayout()
 
-            // Create client panel for the game
             val clientPanel = JPanel().apply {
                 layout = BorderLayout()
                 add(this@Loader)
@@ -66,11 +63,8 @@ class Loader : Panel() {
             var workspace: BotWorkspace? = null
             if (Bot.ENABLED) {
                 initializeUI()
-                // Game on one side, bot sidebar on the other; the workspace owns the
-                // split, remembers its layout and lets the user move or hide the sidebar.
                 workspace = BotWorkspace(this, clientPanel, UI).also { it.install() }
             } else {
-                // Just add the game client without bot UI
                 contentPane.add(clientPanel, BorderLayout.CENTER)
             }
 
@@ -105,7 +99,8 @@ class Loader : Panel() {
 
         const val MAJOR_BUILD = 727
         const val MINOR_BUILD = 1
-        const val WORLD_PORT = 43595
+        @JvmField
+        var WORLD_PORT = 43595
         @JvmField
         var LOBBY_PORT = 43594
         const val LOBBY_WORLD = 1115
@@ -132,10 +127,10 @@ class Loader : Panel() {
         var DEBUG_IF_OPS = false
 
         @JvmField
-        var RENDER_DISTANCE_MULTIPLIER = 2 // Default 1
+        var RENDER_DISTANCE_MULTIPLIER = 2
 
         @JvmField
-        var FOG_DISTANCE_MULTIPLIER = 10 // Default 1
+        var FOG_DISTANCE_MULTIPLIER = 10
 
         @JvmField
         var X10_HITS_MODE = false
@@ -216,6 +211,7 @@ class Loader : Panel() {
             if (args.size > 1 && args[1] != null) {
                 LOBBY_PORT = args[1].toInt()
             }
+            if (args.size > 2) WORLD_PORT = args[2].toInt()
 
             Loader().doFrame()
         }
