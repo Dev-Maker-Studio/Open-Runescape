@@ -2,11 +2,6 @@ package com.darkan.bot.ui
 
 import java.util.concurrent.CopyOnWriteArrayList
 
-/**
- * In-memory fan-out of everything written to stdout/stderr. The Logs panel
- * subscribes here instead of re-reading the log file every 600 ms, which is
- * what made the old log view flicker and lose its scroll position.
- */
 object LogBus {
     class Line(val timestamp: Long, val text: String, val isError: Boolean)
 
@@ -29,7 +24,6 @@ object LogBus {
         listeners.forEach { it(line) }
     }
 
-    /** Registers [listener] and returns a snapshot of the lines it missed. */
     fun subscribe(listener: (Line) -> Unit): List<Line> {
         val snapshot = synchronized(history) { history.toList() }
         listeners.add(listener)

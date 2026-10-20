@@ -28,7 +28,6 @@ import javax.swing.Timer
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
-/** Persisted set of favourite script class names (`~/.cheddarcheese/script-favorites.txt`). */
 object ScriptFavorites {
     private val file = File(UiPreferences.dataDir, "script-favorites.txt")
     private val names = mutableSetOf<String>()
@@ -54,22 +53,15 @@ object ScriptFavorites {
     }
 }
 
-/**
- * Hands out script instances. A [Script] cannot be restarted once stopped, so
- * starting again needs a fresh instance; any configuration the user entered is
- * carried over so their settings are not silently lost.
- */
 object ScriptInstances {
     private val configured = HashMap<Class<*>, Script>()
 
-    /** The running instance if there is one, otherwise the instance whose settings are being edited. */
     fun current(metadata: ScriptMetadata): Script {
         val scriptClass = metadata.load()
         return ScriptExecutor.getScriptInstance(scriptClass)
             ?: configured.getOrPut(scriptClass) { instantiate(scriptClass) }
     }
 
-    /** An instance that can be started: the configured one if unused, else a fresh copy with the same settings. */
     fun startable(metadata: ScriptMetadata): Script {
         val scriptClass = metadata.load()
         val existing = configured[scriptClass]
@@ -97,11 +89,6 @@ object ScriptInstances {
     }
 }
 
-/**
- * Script browser: search, category and status filters, favourites, and one
- * card per script with start/stop and settings. Cards resize with the sidebar
- * and never overlap because widths are driven by the viewport, not guessed.
- */
 class ScriptsPanel(
     private val openSettings: (ScriptMetadata, Script) -> Unit,
     private val onInstanceReplaced: (ScriptMetadata, Script) -> Unit = { _, _ -> },
@@ -184,8 +171,6 @@ class ScriptsPanel(
         Timer(1000) { refreshCards() }.start()
     }
 
-    // ---- filters ----
-
     private fun populateCategories() {
         restoringFilters = true
         try {
@@ -219,8 +204,6 @@ class ScriptsPanel(
         UiPreferences.put("scripts.category", categoryFilter.selectedItem)
         UiPreferences.put("scripts.status", statusFilter.selectedItem)
     }
-
-    // ---- actions ----
 
     private fun reloadScripts() {
         try {
@@ -262,8 +245,6 @@ class ScriptsPanel(
             e.printStackTrace()
         }
     }
-
-    // ---- list ----
 
     private fun visibleScripts(): List<ScriptMetadata> {
         val query = search.text.trim().lowercase()
@@ -318,7 +299,6 @@ class ScriptsPanel(
     private fun runningClasses(): Set<String> =
         ScriptExecutor.scripts.values.filter { it.running }.map { it.id }.toSet()
 
-    /** Cheap per-second refresh: runtime counters, and a full rebuild only when running state changed the ordering. */
     private fun refreshCards() {
         val running = runningClasses()
         if (running != lastRunningSet) {

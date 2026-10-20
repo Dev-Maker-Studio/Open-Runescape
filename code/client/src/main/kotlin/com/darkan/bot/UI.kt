@@ -39,8 +39,6 @@ var SETTING_VARC_DEBUG_ENABLED = false
 fun initializeUI() {
     runOnEdt {
         LafManager.install(DarculaTheme())
-        // The game canvas is a heavyweight AWT component; lightweight popups and
-        // tooltips would otherwise be painted underneath it.
         JPopupMenu.setDefaultLightWeightPopupEnabled(false)
         ToolTipManager.sharedInstance().isLightWeightPopupEnabled = false
         ToolTipManager.sharedInstance().initialDelay = 400
@@ -48,22 +46,15 @@ fun initializeUI() {
     }
 }
 
-/** Runs [block] on the event dispatch thread, synchronously, whichever thread calls it. */
 fun runOnEdt(block: () -> Unit) {
     if (SwingUtilities.isEventDispatchThread()) block() else SwingUtilities.invokeAndWait(block)
 }
 
-/**
- * Root of the bot sidebar: a dockable tab strip holding the Scripts, Logs,
- * Skills, Vars and Settings tools plus one closable tab per open script
- * configuration.
- */
 class BotUI : JPanel(BorderLayout()) {
     val originalOut: PrintStream = System.out
     var logFile: File? = null
         private set
 
-    /** Set by [BotWorkspace.install]; null when the sidebar is shown on its own. */
     var workspace: BotWorkspace? = null
 
     val dock = DockablePane { SwingUtilities.getWindowAncestor(this) }
@@ -101,8 +92,6 @@ class BotUI : JPanel(BorderLayout()) {
         }.start()
     }
 
-    // ---- script configuration tabs ----
-
     fun addConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
         val id = configTabId(scriptMetadata)
         val existing = configTabs[id]
@@ -111,7 +100,6 @@ class BotUI : JPanel(BorderLayout()) {
                 dock.select(id)
                 return
             }
-            // The script was restarted with a fresh instance; rebind the form to it.
             dock.close(id)
         }
         val wrapper = ScriptConfigWrapper(script)
@@ -124,7 +112,6 @@ class BotUI : JPanel(BorderLayout()) {
 
     fun closeConfigTab(scriptMetadata: ScriptMetadata) = dock.close(configTabId(scriptMetadata))
 
-    /** If a settings tab is open for this script, points it at [script] (a restarted script gets a fresh instance). */
     fun rebindConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
         val id = configTabId(scriptMetadata)
         val existing = configTabs[id] ?: return
@@ -138,16 +125,11 @@ class BotUI : JPanel(BorderLayout()) {
 
     private fun configTabId(scriptMetadata: ScriptMetadata) = "config:${scriptMetadata.id}"
 
-    // ---- data feeds (safe from any thread) ----
-
     fun updateXpTable(skill: Skill, xpGained: Int) = skillsPanel.addXp(skill, xpGained)
 
     fun addVarcTableEntry(type: String, id: Int, prevValue: Int, newValue: Int) = varsPanel.record(type, id, prevValue, newValue)
 
-    /** Rates now refresh on a timer; kept so older callers keep compiling. */
     fun updateAllXPPerHour() {}
-
-    // ---- logging ----
 
     private fun redirectSystemOut() {
         try {
@@ -169,10 +151,6 @@ class BotUI : JPanel(BorderLayout()) {
 
 private var fileOutputStream: OutputStream? = null
 
-/**
- * Tees stdout/stderr to the original stream, the session log file and
- * [LogBus] (which feeds the Logs tab) with a timestamp on every line.
- */
 class TextPaneOutputStream(
     private val standardStream: PrintStream,
     logFile: File?,

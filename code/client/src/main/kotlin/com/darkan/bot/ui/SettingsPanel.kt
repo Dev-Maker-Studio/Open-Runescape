@@ -20,7 +20,6 @@ import javax.swing.JScrollPane
 import javax.swing.JSpinner
 import javax.swing.SpinnerNumberModel
 
-/** Sidebar layout, log and data-folder settings. Every control applies immediately. */
 class SettingsPanel(private val botUi: BotUI) : JPanel(BorderLayout()) {
     private val form = ScrollableColumn(GridBagLayout()).apply { isOpaque = false }
     private var row = 0
@@ -75,7 +74,6 @@ class SettingsPanel(private val botUi: BotUI) : JPanel(BorderLayout()) {
             },
         )
 
-        // Push everything to the top.
         form.add(JPanel().apply { isOpaque = false }, GridBagConstraints().apply {
             gridx = 0; gridy = row; gridwidth = 2; weightx = 1.0; weighty = 1.0; fill = GridBagConstraints.BOTH
         })

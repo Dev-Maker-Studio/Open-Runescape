@@ -47,6 +47,7 @@ object PlayerUpdate {
 
     @JvmStatic
     fun decode(buffer: Packet.Bit, size: Int) {
+        com.darkan.bot.Footprints.gameTick++
         numUpdateMaskPlayers = 0
         decodeUpdate(buffer)
         decodeUpdateMasks(buffer)
@@ -320,13 +321,13 @@ object PlayerUpdate {
                             hitsplatId = -1
                             hitText = stream.readUByteInverse()
                         }
-                        32764 -> { // Custom with soaking
+                        32764 -> {
                             hitsplatId = stream.readUSmart()
                             hitCustomText = stream.readString()
                             soakHitsplatId = stream.readUSmart()
                             soakCustomText = stream.readString()
                         }
-                        32765 -> { // Custom without soaking
+                        32765 -> {
                             hitsplatId = stream.readUSmart()
                             hitCustomText = stream.readString()
                         }

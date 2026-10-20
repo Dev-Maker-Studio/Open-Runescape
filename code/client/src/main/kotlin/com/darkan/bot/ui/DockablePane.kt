@@ -24,7 +24,6 @@ import javax.swing.SwingUtilities
 import javax.swing.Timer
 import javax.swing.WindowConstants
 
-/** One tool panel that can live in the sidebar tab strip or in its own floating window. */
 class Dockable(
     val id: String,
     title: String,
@@ -42,11 +41,6 @@ class Dockable(
         }
 }
 
-/**
- * Tab strip whose tabs can be reordered by drag-and-drop, closed, popped out
- * into floating windows and docked back. Order, selection and pop-out state
- * survive restarts through [UiPreferences].
- */
 class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout()) {
     val tabs = ClosableTabbedPane().apply {
         putClientProperty("JTabbedPane.dndEnabled", true)
@@ -58,10 +52,8 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
     private var suppressCloseEvents = 0
     private val persistTimer = Timer(300) { persistLayout() }.apply { isRepeats = false }
 
-    /** Extra entries appended to every tab context menu and the overflow menu. */
     var extraMenuItems: () -> List<JMenuItem> = { emptyList() }
 
-    /** Called after a closable dockable is closed by the user. */
     var onClosed: (Dockable) -> Unit = {}
 
     init {
@@ -73,8 +65,6 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
             override fun tabClosed(e: TabEvent) {
                 if (suppressCloseEvents > 0) return
                 val component = e.component
-                // Drag-and-drop reordering also removes and re-inserts the tab, so
-                // only treat this as a close once the pane has settled.
                 SwingUtilities.invokeLater {
                     if (tabs.indexOfComponent(component) != -1) return@invokeLater
                     val dockable = dockables.values.firstOrNull { it.component === component } ?: return@invokeLater
@@ -114,8 +104,6 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
         }
         tabs.putClientProperty("JTabbedPane.trailingComponent", overflow)
     }
-
-    // ---- public API ----
 
     fun all(): List<Dockable> = dockables.values.toList()
 
@@ -194,7 +182,6 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
 
     fun dockAll() = popOuts.keys.toList().forEach { dock(it) }
 
-    /** Applies the saved order, selection and pop-out state. Call once after the default tabs are added. */
     fun restoreLayout() {
         val savedOrder = UiPreferences.getList("tabs.order")
         if (savedOrder.isNotEmpty()) {
@@ -210,21 +197,17 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
         UiPreferences.getString("tabs.selected")?.let { select(it) }
     }
 
-    /** Re-opens the windows that were popped out last session. Call once the owning frame is showing so they stack above it. */
     fun restorePopOuts() {
         dockables.keys.toList().forEach { id ->
             if (UiPreferences.getBoolean("popout.$id.open", false)) popOut(id)
         }
     }
 
-    /** Forgets every saved layout preference for the tab strip and re-docks all windows. */
     fun resetLayout() {
         dockAll()
         UiPreferences.clear("tabs.")
         UiPreferences.clear("popout.")
     }
-
-    // ---- internals ----
 
     private fun insertTab(dockable: Dockable, index: Int) {
         tabs.insertTab(dockable.title, null, dockable.component, dockable.tooltip, index)
@@ -237,7 +220,6 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
         return dockables.values.firstOrNull { it.component === component }
     }
 
-    /** Where a docked-back tab should land: after the nearest surviving predecessor in the saved order. */
     private fun dockIndexFor(id: String): Int {
         val order = UiPreferences.getList("tabs.order").ifEmpty { dockables.keys.toList() }
         val position = order.indexOf(id)
@@ -272,8 +254,6 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
     private fun schedulePersist() = persistTimer.restart()
 
     private fun persistLayout() {
-        // Docked tabs in their current visual order, then popped-out ones in
-        // their remembered order so they dock back to a sensible spot.
         val docked = (0 until tabs.tabCount).mapNotNull { dockableAt(it)?.id }
         val floating = UiPreferences.getList("tabs.order").filter { it in popOuts } + popOuts.keys.filter { it !in UiPreferences.getList("tabs.order") }
         UiPreferences.put("tabs.order", docked + floating.distinct())
@@ -281,7 +261,6 @@ class DockablePane(private val ownerWindow: () -> Window?) : JPanel(BorderLayout
     }
 }
 
-/** Floating home for a [Dockable]. Closing the window docks the panel back. */
 private class PopOutWindow(
     private val dockable: Dockable,
     owner: Window?,

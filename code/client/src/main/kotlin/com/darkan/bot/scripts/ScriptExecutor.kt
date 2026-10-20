@@ -71,7 +71,6 @@ object ScriptExecutor {
         }
     }
 
-    /** Observes every event as it is pushed, on the pushing thread. Used by the sidebar's var watcher. */
     fun addEventListener(listener: (Event) -> Unit) {
         eventListeners.add(listener)
     }
@@ -128,7 +127,6 @@ object ScriptExecutor {
 
     fun isPaused(): Boolean = pausingScript != null
 
-    /** Called on the loading thread after every [loadScripts]; UI listeners must hop to the EDT themselves. */
     fun addReloadListener(listener: () -> Unit) {
         reloadListeners.add(listener)
     }

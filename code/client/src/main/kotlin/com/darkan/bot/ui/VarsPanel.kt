@@ -23,11 +23,6 @@ import javax.swing.event.DocumentListener
 import javax.swing.table.DefaultTableModel
 import javax.swing.table.TableRowSorter
 
-/**
- * Live watch of varp / varc changes for script authors. Events are captured on
- * the game thread and batched onto the EDT so the watcher never slows the
- * client down.
- */
 class VarsPanel : JPanel(BorderLayout()) {
     private class Change(val time: Long, val type: String, val id: Int, val old: Int, val new: Int)
 
@@ -102,7 +97,6 @@ class VarsPanel : JPanel(BorderLayout()) {
         Timer(150) { flushPending() }.start()
     }
 
-    /** Records a change. Safe to call from any thread; ignored while paused or when nothing changed. */
     fun record(type: String, id: Int, old: Int, new: Int) {
         if (old == new || pauseToggle.isSelected) return
         pending.add(Change(System.currentTimeMillis(), type, id, old, new))

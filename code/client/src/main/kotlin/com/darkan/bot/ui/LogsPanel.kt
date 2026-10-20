@@ -25,16 +25,6 @@ import javax.swing.event.DocumentListener
 import javax.swing.text.DefaultCaret
 import javax.swing.text.DefaultHighlighter
 
-/**
- * Live log viewer fed by [LogBus]. Appends incrementally, keeps your scroll
- * position unless "Follow" is on, and stops following the moment you scroll
- * up. Error and warning lines are tinted. Ctrl + mouse wheel changes the
- * font size.
- *
- * Built on a plain text area rather than a styled pane: with thousands of very
- * long lines the styled views were seen breaking rows inconsistently, while
- * the plain wrapped view is both correct and far cheaper.
- */
 class LogsPanel(private val logFile: () -> File?) : JPanel(BorderLayout()) {
     private val filterField = searchField("Filter lines", 14)
     private val errorsOnly: JToggleButton = toggleSwitch("Errors only", false, "Show only lines that look like errors or stack traces") { rerender() }
@@ -61,7 +51,6 @@ class LogsPanel(private val logFile: () -> File?) : JPanel(BorderLayout()) {
     private val errorPainter = DefaultHighlighter.DefaultHighlightPainter(Color(Palette.danger.red, Palette.danger.green, Palette.danger.blue, 46))
     private val warningPainter = DefaultHighlighter.DefaultHighlightPainter(Color(Palette.warning.red, Palette.warning.green, Palette.warning.blue, 36))
 
-    /** One entry per line currently in the document: its highlight tag, or null. */
     private val lineTags = ArrayDeque<Any?>()
     private val pending = ConcurrentLinkedQueue<LogBus.Line>()
     private val flushTimer = Timer(120) { flushPending() }
@@ -95,7 +84,6 @@ class LogsPanel(private val logFile: () -> File?) : JPanel(BorderLayout()) {
             override fun changedUpdate(e: DocumentEvent) = filterDebounce.restart()
         })
 
-        // Scrolling up by hand pauses following; scrolling back to the bottom resumes it.
         scroll.addMouseWheelListener { e ->
             if (e.isControlDown) {
                 setFontSize(fontSize - e.wheelRotation)
@@ -111,8 +99,6 @@ class LogsPanel(private val logFile: () -> File?) : JPanel(BorderLayout()) {
         LogBus.subscribe { pending.add(it) }.forEach { pending.add(it) }
         flushTimer.start()
     }
-
-    // ---- rendering ----
 
     private fun setFontSize(size: Int) {
         fontSize = size.coerceIn(8, 28)
@@ -197,8 +183,6 @@ class LogsPanel(private val logFile: () -> File?) : JPanel(BorderLayout()) {
             UiPreferences.put("logs.follow", atBottom)
         }
     }
-
-    // ---- actions ----
 
     private fun clearView() {
         LogBus.clear()

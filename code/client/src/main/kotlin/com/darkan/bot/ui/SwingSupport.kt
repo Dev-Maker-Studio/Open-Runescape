@@ -24,10 +24,6 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.border.Border
 
-/**
- * Theme-aware colours for the sidebar. Every accessor falls back to a sane
- * constant so the panels still look reasonable if DarkLaf is not installed.
- */
 object Palette {
     val text: Color get() = UIManager.getColor("textForeground") ?: Color(0xBB, 0xBB, 0xBB)
     val secondaryText: Color get() = UIManager.getColor("textForegroundSecondary") ?: Color(0x91, 0x91, 0x91)
@@ -43,19 +39,12 @@ object Palette {
     val favourite = Color(0xF5, 0xB0, 0x41)
 }
 
-/** Standard control spacing used by every panel so the sidebar reads as one surface. */
 object Spacing {
     const val GAP = 6
     const val PANEL = 8
     fun panelBorder(): Border = BorderFactory.createEmptyBorder(PANEL, PANEL, PANEL, PANEL)
 }
 
-/**
- * A [FlowLayout] that reports a preferred height tall enough for every row it
- * wraps into. Plain FlowLayout always claims a single row, so a wrapped
- * toolbar inside a BorderLayout gets its second row clipped; this is the
- * classic fix.
- */
 class WrapLayout(align: Int = LEFT, hgap: Int = Spacing.GAP, vgap: Int = Spacing.GAP) : FlowLayout(align, hgap, vgap) {
     override fun preferredLayoutSize(target: Container): Dimension = layoutSize(target, true)
     override fun minimumLayoutSize(target: Container): Dimension = layoutSize(target, false).also { it.width -= hgap + 1 }
@@ -64,8 +53,6 @@ class WrapLayout(align: Int = LEFT, hgap: Int = Spacing.GAP, vgap: Int = Spacing
         synchronized(target.treeLock) {
             var targetWidth = target.width
             if (targetWidth == 0) {
-                // Not laid out yet: use the first ancestor that has a width, or a
-                // generous default so the first pass is a single row.
                 var p: Container? = target.parent
                 while (p != null && p.width == 0) p = p.parent
                 targetWidth = p?.width ?: Int.MAX_VALUE
@@ -94,8 +81,6 @@ class WrapLayout(align: Int = LEFT, hgap: Int = Spacing.GAP, vgap: Int = Spacing
             dim.width += horizontalInsets
             dim.height += insets.top + insets.bottom + vgap * 2
 
-            // When inside a scroll pane the viewport width, not the container's own
-            // width, is the real constraint.
             val scrollPane = SwingUtilities.getAncestorOfClass(JScrollPane::class.java, target)
             if (scrollPane != null && target.isValid) dim.width -= hgap + 1
             return dim
@@ -109,11 +94,6 @@ class WrapLayout(align: Int = LEFT, hgap: Int = Spacing.GAP, vgap: Int = Spacing
     }
 }
 
-/**
- * Read-only, transparent, word-wrapping text block whose preferred height
- * follows the width it is given. A `<html>` JLabel needs an explicit width
- * hint to wrap, which is why the old cards wrapped so unpredictably.
- */
 class WrappingText(text: String = "") : JTextArea(text) {
     init {
         lineWrap = true
@@ -123,7 +103,6 @@ class WrappingText(text: String = "") : JTextArea(text) {
         isOpaque = false
         border = null
         cursor = null
-        // Never let this block steal the scroll position of the list it sits in.
         (caret as? javax.swing.text.DefaultCaret)?.updatePolicy = javax.swing.text.DefaultCaret.NEVER_UPDATE
     }
 
@@ -133,8 +112,6 @@ class WrappingText(text: String = "") : JTextArea(text) {
         val widthChanged = w != width
         super.setBounds(x, y, w, h)
         if (widthChanged) {
-            // Our preferred height depends on the width we were just given; ask the
-            // scrollable ancestor to lay out again now that we know it.
             SwingUtilities.invokeLater {
                 val host = SwingUtilities.getAncestorOfClass(JScrollPane::class.java, this) ?: parent
                 (host as? JComponent)?.revalidate() ?: parent?.revalidate()
@@ -143,11 +120,6 @@ class WrappingText(text: String = "") : JTextArea(text) {
     }
 }
 
-/**
- * Scroll-pane content that always spans the viewport width and scrolls only
- * vertically, so forms and lists reflow instead of being clipped when the
- * sidebar is narrow.
- */
 open class ScrollableColumn(layout: java.awt.LayoutManager? = null) : JPanel(layout), Scrollable {
     override fun getPreferredScrollableViewportSize(): Dimension = preferredSize
     override fun getScrollableUnitIncrement(visibleRect: Rectangle, orientation: Int, direction: Int): Int = 24
@@ -157,17 +129,12 @@ open class ScrollableColumn(layout: java.awt.LayoutManager? = null) : JPanel(lay
     override fun getScrollableTracksViewportHeight(): Boolean = false
 }
 
-/**
- * Vertical list of cards that always spans the viewport width. Combine with
- * [CardPanel] children so BoxLayout never stretches them vertically.
- */
 open class VerticalListPanel : ScrollableColumn() {
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
     }
 }
 
-/** A panel that fills the available width but never grows taller than its content. */
 open class CardPanel : JPanel() {
     init {
         alignmentX = LEFT_ALIGNMENT
@@ -199,7 +166,6 @@ fun button(text: String, tooltip: String? = null, action: () -> Unit): JButton =
     addActionListener { action() }
 }
 
-/** Borderless button for secondary actions such as icons in a card header. */
 fun flatButton(text: String, tooltip: String? = null, action: () -> Unit): JButton = button(text, tooltip, action).apply {
     putClientProperty("JButton.variant", "borderless")
     putClientProperty("JButton.square", true)
@@ -207,7 +173,6 @@ fun flatButton(text: String, tooltip: String? = null, action: () -> Unit): JButt
     isFocusable = false
 }
 
-/** DarkLaf slider-style toggle. Falls back to a plain toggle button elsewhere. */
 fun toggleSwitch(text: String, selected: Boolean, tooltip: String? = null, onChange: (Boolean) -> Unit): JToggleButton =
     JToggleButton(text, selected).apply {
         putClientProperty("JToggleButton.variant", "slider")
@@ -227,13 +192,11 @@ fun JComponent.padded(top: Int, left: Int, bottom: Int, right: Int): JComponent 
     border = BorderFactory.createEmptyBorder(top, left, bottom, right)
 }
 
-/** Lays [components] out in a row that wraps instead of clipping when the sidebar is narrow. */
 fun toolbarRow(vararg components: Component): JPanel = JPanel(WrapLayout(FlowLayout.LEFT, Spacing.GAP, 2)).apply {
     isOpaque = false
     components.forEach { add(it) }
 }
 
-/** Header row: [left] hugs the leading edge and stretches, [right] items stay at the trailing edge. */
 fun headerRow(left: Component, vararg right: Component): JPanel = JPanel(java.awt.BorderLayout(Spacing.GAP, 0)).apply {
     isOpaque = false
     add(left, java.awt.BorderLayout.CENTER)
@@ -245,7 +208,6 @@ fun headerRow(left: Component, vararg right: Component): JPanel = JPanel(java.aw
     }
 }
 
-/** Centered hint shown when a list or table has nothing to display. */
 class EmptyState(message: String) : JPanel(java.awt.GridBagLayout()) {
     private val messageLabel = label(message, secondary = true).apply { horizontalAlignment = SwingConstants.CENTER }
 
@@ -261,11 +223,6 @@ class EmptyState(message: String) : JPanel(java.awt.GridBagLayout()) {
         }
 }
 
-/**
- * Table that stretches its columns to the viewport when there is room and
- * otherwise keeps every column at its minimum width and scrolls horizontally,
- * so cells are never truncated to "..." in a narrow sidebar.
- */
 open class AdaptiveTable(model: javax.swing.table.TableModel) : javax.swing.JTable(model) {
     init {
         fillsViewportHeight = true
@@ -273,7 +230,6 @@ open class AdaptiveTable(model: javax.swing.table.TableModel) : javax.swing.JTab
         autoResizeMode = AUTO_RESIZE_ALL_COLUMNS
     }
 
-    /** Sets minimum and preferred width for each column in order. */
     fun columnWidths(vararg widths: Int) {
         widths.forEachIndexed { i, w ->
             if (i < columnModel.columnCount) columnModel.getColumn(i).apply { minWidth = w; preferredWidth = w }
@@ -292,7 +248,6 @@ open class AdaptiveTable(model: javax.swing.table.TableModel) : javax.swing.JTab
     }
 }
 
-/** Makes a scroll pane feel native: no outer border, sensible wheel speed. */
 fun JScrollPane.tidy(): JScrollPane = apply {
     border = null
     viewportBorder = null

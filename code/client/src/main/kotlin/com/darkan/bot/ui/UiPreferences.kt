@@ -5,13 +5,6 @@ import java.io.File
 import java.util.Properties
 import javax.swing.Timer
 
-/**
- * Persisted layout and behaviour preferences for the bot sidebar.
- *
- * Backed by `~/.cheddarcheese/ui.properties`. Writes are coalesced so that a
- * divider drag or a window move does not hammer the disk; the file is flushed
- * half a second after the last change and again when the client exits.
- */
 object UiPreferences {
     val dataDir: File = File(System.getProperty("user.home"), ".cheddarcheese")
     private val file = File(dataDir, "ui.properties")
@@ -71,7 +64,6 @@ object UiPreferences {
         if (previous != encoded) saveTimer.restart()
     }
 
-    /** Removes every key that starts with [prefix]. */
     @Synchronized
     fun clear(prefix: String) {
         val doomed = props.keys.map { it.toString() }.filter { it.startsWith(prefix) }
@@ -79,7 +71,6 @@ object UiPreferences {
         if (doomed.isNotEmpty()) saveTimer.restart()
     }
 
-    /** Wipes every stored preference; the next launch starts from the built-in defaults. */
     @Synchronized
     fun resetAll() {
         props.clear()

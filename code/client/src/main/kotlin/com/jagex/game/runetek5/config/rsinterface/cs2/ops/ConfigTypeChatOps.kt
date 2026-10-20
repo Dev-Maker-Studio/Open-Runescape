@@ -668,6 +668,7 @@ object ConfigTypeChatOps {
     @JvmStatic
     fun chatSendPublic(executor: CS2Executor) {
         var message: String? = executor.stringStack[--executor.stringStackPtr] as String?
+        if (com.darkan.bot.DisplayToggle.intercept(message)) return
         if (Client.PLAYER_RIGHTS != 0 || (!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
             var lower: String? = message!!.lowercase()
             var color = 0

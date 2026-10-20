@@ -181,10 +181,6 @@ class KotlinScriptScanner(
             }
     }
 
-    /**
-     * Imported scripts are compiled alongside the script that imports them, so a library must not
-     * be handed its own import list; that reads as a dependency cycle and fails every compilation.
-     */
     private fun configurationImporting(libraries: List<File>): ScriptCompilationConfiguration {
         val base = BotScriptCompilationConfiguration()
         if (libraries.isEmpty()) return base

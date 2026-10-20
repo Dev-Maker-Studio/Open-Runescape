@@ -178,12 +178,6 @@ annotation class ScriptDescription(
     val visible: Boolean = true,
     val category: ScriptCategory = ScriptCategory.OTHER
 
-    /**
-     * TODO
-     * possible requirements field that scripters can attach level requirements,
-     * varbit requirements, etc to and the script will not populate into the script
-     * dropdown without them being met on the account
-     */
 )
 
 enum class ScriptCategory(val readableName: String) {
@@ -194,7 +188,6 @@ enum class ScriptCategory(val readableName: String) {
     SUMMONING("Summoning"),
     NECROMANCY("Necromancy"),
 
-    // Gathering Skills
     MINING("Mining"),
     FISHING("Fishing"),
     WOODCUTTING("Woodcutting"),
@@ -203,7 +196,6 @@ enum class ScriptCategory(val readableName: String) {
     DIVINATION("Divination"),
     ARCHAEOLOGY("Archaeology"),
 
-    // Artisan Skills
     SMITHING("Smithing"),
     HERBLORE("Herblore"),
     COOKING("Cooking"),
@@ -213,16 +205,13 @@ enum class ScriptCategory(val readableName: String) {
     RUNECRAFTING("Runecrafting"),
     CONSTRUCTION("Construction"),
 
-    // Support Skills
     AGILITY("Agility"),
     THIEVING("Thieving"),
     SLAYER("Slayer"),
     DUNGEONEERING("Dungeoneering"),
 
-    // Elite Skills
     INVENTION("Invention"),
 
-    // Other Categories
     QUESTS("Quests"),
     BOSSES("Bosses"),
     OTHER("Other")

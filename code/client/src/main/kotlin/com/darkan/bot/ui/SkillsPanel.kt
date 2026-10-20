@@ -22,10 +22,6 @@ import javax.swing.Timer
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
 
-/**
- * Session XP tracker. Rates and time-to-level refresh every second rather
- * than only when an XP drop arrives, so idle skills decay honestly.
- */
 class SkillsPanel : JPanel(BorderLayout()) {
     private class Entry(val skill: Skill) {
         var startTime = System.currentTimeMillis()
@@ -109,7 +105,6 @@ class SkillsPanel : JPanel(BorderLayout()) {
 
     private fun columnValue(entry: Entry) = entry.skill.name.lowercase().replaceFirstChar { it.uppercase() }
 
-    /** Records an XP drop. Safe to call from any thread. */
     fun addXp(skill: Skill, gained: Int) {
         SwingUtilities.invokeLater {
             val entry = entries.firstOrNull { it.skill == skill } ?: Entry(skill).also { entries.add(it) }
@@ -139,8 +134,6 @@ class SkillsPanel : JPanel(BorderLayout()) {
         centerLayout.show(center, "empty")
     }
 
-    // ---- skill maths ----
-
     private fun currentLevel(skill: Skill): Int = Client.SKILL_LEVEL_ACTUAL.getOrNull(skill.ordinal) ?: 0
 
     private fun xpToNextLevel(skill: Skill): Int? {
@@ -148,7 +141,6 @@ class SkillsPanel : JPanel(BorderLayout()) {
         val max = SkillConstants.SKILL_MAX_LEVEL.getOrNull(skill.ordinal) ?: 99
         if (level < 1 || level >= max) return null
         val xp = Client.SKILL_XP.getOrNull(skill.ordinal) ?: return null
-        // SKILL_XP_FOR_LEVEL[i] is the XP required for level i + 2.
         val needed = SkillConstants.SKILL_XP_FOR_LEVEL.getOrNull(level - 1) ?: return null
         return (needed - xp).coerceAtLeast(0)
     }

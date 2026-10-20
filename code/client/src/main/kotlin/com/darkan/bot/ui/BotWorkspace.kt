@@ -15,13 +15,6 @@ import javax.swing.JMenuItem
 import javax.swing.JSplitPane
 import javax.swing.SwingUtilities
 
-/**
- * Arranges the game canvas and the bot sidebar inside the client window.
- *
- * The sidebar keeps its width when the window is resized (the game absorbs the
- * change), can sit on either side, can be hidden behind a slim handle, and its
- * width, side, visibility and the window bounds all persist between launches.
- */
 class BotWorkspace(private val frame: JFrame, private val clientPanel: JComponent, private val sidebar: BotUI) {
     enum class Side(val label: String) { LEFT("Left"), RIGHT("Right") }
 
@@ -43,8 +36,6 @@ class BotWorkspace(private val frame: JFrame, private val clientPanel: JComponen
     }
     private var applyingLayout = false
 
-    // Saved values are captured up front: showing the frame fires resize and
-    // divider events that would otherwise overwrite them before they are applied.
     private val savedSidebarWidth = UiPreferences.getInt("sidebar.width", DEFAULT_SIDEBAR_WIDTH).coerceAtLeast(MIN_SIDEBAR_WIDTH)
     private val savedWindowBounds = UiPreferences.getRectangle("window.bounds")
     private val savedMaximized = UiPreferences.getBoolean("window.maximized", false)
@@ -90,7 +81,6 @@ class BotWorkspace(private val frame: JFrame, private val clientPanel: JComponen
         sidebar.dock.extraMenuItems = { workspaceMenuItems() }
     }
 
-    /** Restores window bounds and the divider; call once the frame is packed and visible. */
     fun onFrameShown() {
         if (savedWindowBounds != null && isOnScreen(savedWindowBounds)) frame.bounds = savedWindowBounds
         if (savedMaximized) frame.extendedState = frame.extendedState or Frame.MAXIMIZED_BOTH
@@ -123,8 +113,6 @@ class BotWorkspace(private val frame: JFrame, private val clientPanel: JComponen
             addActionListener { resetLayout() }
         },
     )
-
-    // ---- internals ----
 
     private fun layoutSplit() {
         applyingLayout = true

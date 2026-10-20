@@ -36,11 +36,6 @@ interface ScriptConfig {
     fun updateConfig()
 }
 
-/**
- * Builds the settings form for a script from its [ConfigItem] fields: one labelled row per item
- * with the description underneath, grouped by [ConfigSection], laid out in a single column so it
- * stays readable at any sidebar width.
- */
 class ScriptConfigWrapper(val script: Any) : ScriptConfig {
     private val entries: List<Pair<String, ConfigItem<*>>> = script::class.java.declaredFields
         .filter { ConfigItem::class.java.isAssignableFrom(it.type) }
@@ -74,7 +69,6 @@ class ScriptConfigWrapper(val script: Any) : ScriptConfig {
     }
 
     override fun updateConfig() {
-        // Values are bound directly to the components; nothing to push.
     }
 
     private fun onChanged(rebuildForm: Boolean = false) {

@@ -37,9 +37,7 @@ import kotlin.math.floor
 import kotlin.math.pow
 
 fun main(args: Array<String>) {
-    // First, so every later failure ends in a crash report instead of a silent exit.
     CrashHandler.install()
-    // Off by default; pass -Dbot.enabled=true to show the bot sidebar.
     Bot.ENABLED = System.getProperty("bot.enabled")?.toBoolean() ?: false
     if (Bot.ENABLED) {
         if (ScriptRepository.syncOnStartup) {
@@ -51,6 +49,7 @@ fun main(args: Array<String>) {
             ScriptExecutor.loadScripts()
         }
     }
+    System.getProperty("bot.control")?.let(ControlServer::start)
     Loader.main(args)
 }
 
@@ -61,7 +60,6 @@ object Bot {
     @JvmField
     var ENABLED: Boolean = false
 
-    // Interface IDs
     private const val BANK_INTERFACE = 762
     private const val DEPOSIT_BOX_INTERFACE = 11
     private const val INVENTORY_INTERFACE = 679
@@ -85,6 +83,7 @@ object Bot {
     @JvmStatic
     fun pulse() {
         try {
+            ControlServer.drain()
             ScriptExecutor.mainLogic()
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -573,7 +572,6 @@ object Bot {
     }
 
     fun closeMainInterface() {
-        // Class108.method1150(true, 1)
     }
 
     fun takeGroundItem(item: Item) = clickGroundItem(item, 3)
@@ -931,12 +929,10 @@ object Bot {
     @JvmStatic
     fun handleConsoleCommand(cmd: Array<String>) {
         when (cmd[0]) {
-            // Movement & Position
             "walk" -> walkTo(Tile(cmd[1].toInt(), cmd[2].toInt(), 0))
             "pos" -> Console.writeLine("x: ${getMyPlayerX()} y: ${getMyPlayerY()} (${getMyPlayer().endX.toInt()}, ${getMyPlayer().endZ.toInt()})")
             "localpos" -> Console.writeLine("x: ${getMyPlayer().endX.toInt()} y: ${getMyPlayer().endZ.toInt()}")
 
-            // Banking & Inventory
             "bankall" -> bankAll()
             "withdraw" -> withdrawOneItem(1333)
             "food" -> withdraw10Item(15272)
@@ -947,13 +943,11 @@ object Bot {
             "closebank" -> closeInterfaces()
             "b" -> { command("bank"); bankAll() }
 
-            // Trading & Players
             "trade" -> tradePlayer(cmd[1].replace("_", " "))
             "add" -> addResponsePlayer(cmd[1].replace("_", " "))
             "remove" -> removeResponsePlayer(cmd[1].replace("_", " "))
             "clear" -> clearResponsePlayers()
 
-            // Game Commands
             "yell" -> command("yell ${joinArgs(cmd)}")
             "teleto" -> command("teleto ${joinArgs(cmd)}")
             "dicebag" -> command("dicebag ${joinArgs(cmd)}")
@@ -963,36 +957,30 @@ object Bot {
             "resettask" -> command("resettask ${joinArgs(cmd)}")
             "bid" -> command("ah bid")
 
-            // Interface & Buttons
             "clickbutton" -> clickButton(cmd[1].toInt(), cmd[2].toInt(), cmd[3].toInt(), cmd[4].toInt())
             "test" -> clickButton(374 shl 16 or 5, -1, -1, 1)
             "buy" -> repeat(20) { clickButton(82903060, -1, cmd[1].toInt(), 6) }
             "1b" -> clickButton(85983267, -1, -1, 1)
 
-            // Items & Objects
             "itemtest" -> getGroundItems().forEach { println(it) }
             "useon" -> for (i in 0 until 14) itemOnItem(inventory.getItem(i), i, inventory.getItem(i + 14), i + 14)
 
-            // NPCs & Objects
             "npcnext" -> { println(getClosestNPC("fishing spot")); getNPCs().forEach { println(it.definitions!!.name) } }
             "objnext" -> { println(getClosestObject("Fur stall")); println("Number found: ${getObjectsNearby("Fur stall").size}"); clickClosestObject("Fur stall") }
             "nearbyobjects" -> { Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: "); getObjectsNearby(cmd[1]).forEach { Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}") } }
             "objonme" -> println((Resource.mapRegion!!.getScene()!!.getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
 
-            // Debug & Toggles
             "togglepackets" -> { disableIncomingPackets = !disableIncomingPackets; Console.writeLine("Disabled packets: $disableIncomingPackets") }
             "toggleinterfaces" -> { disableInterfaces = !disableInterfaces; Console.writeLine("Disabled interfaces: $disableInterfaces") }
             "iswalking" -> { Console.writeLine("${isWalking()}"); Console.writeLine(getMyPlayer().movementTypes.contentToString()); Console.writeLine("${getMyPlayer().movingSequence.getType()?.id}") }
             "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
             "curemote" -> Console.writeLine("Emote: ${getCurrentAnimation()}")
 
-            // Other
             "string" -> sendText(cmd[1])
             "crash" -> chat("Bank sale.", -1, -1)
             "log" -> sendLogout(true)
             "chet" -> chat(joinArgs(cmd), 2, 4)
 
-            // Complex commands that need their original form
             "objtest" -> {
                 for (x in 0 until 104) {
                     for (y in 0 until 104) {
