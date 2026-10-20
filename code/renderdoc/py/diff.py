@@ -8,10 +8,31 @@ import numpy as np
 from PIL import Image
 
 TOL = 1e-3
+GROUP = "openrs"
+
+
+def tag(recs):
+    inside = [GROUP in r["marker"].split("/") for r in recs]
+    if any(inside):
+        for r, i in zip(recs, inside):
+            r["origin"] = "renderer" if i else "browser"
+    return recs
+
+
+def renderer_only(s):
+    if not any(x.get("origin") for x in s["draws"]):
+        return s
+    for k in ("draws", "clears"):
+        s[k] = [x for x in s[k] if x.get("origin") != "browser"]
+        for x in s[k]:
+            x["marker"] = "/".join(p for p in x["marker"].split("/") if p != GROUP)
+    outs = {o for x in s["draws"] for o in x["outputs"]}
+    s["targets"] = [t for t in s["targets"] if t["id"] in outs]
+    return s
 
 
 def load(d):
-    return json.loads((Path(d) / "summary.json").read_text())
+    return renderer_only(json.loads((Path(d) / "summary.json").read_text()))
 
 
 def key(d):
@@ -44,7 +65,14 @@ def split(u):
     return named, anon
 
 
+def scalars(u):
+    return {x for v in u.values() for x in v if x != 0}
+
+
 def uniform_diffs(cu, wu):
+    if any(k.endswith("._words") for k in (*cu, *wu)):
+        a, b = scalars(cu), scalars(wu)
+        return [] if a == b else [("uniform", f"values only client={sorted(a - b)[:8]} web={sorted(b - a)[:8]}")]
     (cn, ca), (wn, wa) = split(cu), split(wu)
     out = []
     for k in sorted(set(cn) & set(wn)):

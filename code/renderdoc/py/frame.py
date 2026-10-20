@@ -13,7 +13,10 @@ import numpy as np
 sys.path.insert(0, os.environ["RENDERDOC_PYTHON_PATH"])
 import renderdoc as rd
 
+import diff
+
 VERSION = 3
+TINT = 23
 LIMIT = 4 << 20
 STAGES = {"vs": rd.ShaderStage.Vertex, "fs": rd.ShaderStage.Pixel, "cs": rd.ShaderStage.Compute}
 NULL = rd.ResourceId.Null()
@@ -70,12 +73,32 @@ def actions(ctl):
     return out
 
 
+def tint(refl):
+    raw = bytes(refl.rawBytes)
+    return len(raw) > 12 and int.from_bytes(raw[8:12], "little") >> 16 == TINT
+
+
+def words(raw):
+    u = np.frombuffer(raw[: len(raw) // 4 * 4], "<u4")
+    f = u.view("<f4")
+    with np.errstate(invalid="ignore"):
+        return np.round(np.where((u < 1 << 23) | np.isnan(f), u.view("<i4"), f).astype(np.float64), 4).tolist()
+
+
 def flat(v, prefix=""):
     if v.members:
         return {k: x for m in v.members for k, x in flat(m, f"{prefix}{v.name}.").items()}
     n = max(v.rows, 1) * max(v.columns, 1)
     vals = np.asarray(list(getattr(v.value, VARS.get(v.type, "f32v")))[:n], dtype=np.float64)
     return {prefix + v.name: np.round(vals, 4).tolist()}
+
+
+def top_left_y(y, height, target_height):
+    return target_height - y - height
+
+
+def relative_indices(idx):
+    return idx - idx.min() if len(idx) else idx
 
 
 def decode(raw, off, stride, idx, f):
@@ -141,6 +164,11 @@ class Replay:
         vp, sc = p.GetViewport(0), p.GetScissor(0)
         vx, vy, vw, vh = vp.x, vp.y + min(vp.height, 0), vp.width, abs(vp.height)
         full = not sc.enabled or (sc.x <= 0 and sc.y <= 0 and sc.width >= vw and sc.height >= vh)
+        sy = sc.y
+        if gl:
+            target = next((self.tex[int(o.resource)] for o in p.GetOutputTargets() if o.resource != NULL and int(o.resource) in self.tex), None)
+            if target is not None:
+                sy = top_left_y(sc.y, sc.height, target.height)
         blends = [
             {"src": nm(b.colorBlend.source), "dst": nm(b.colorBlend.destination), "op": nm(b.colorBlend.operation),
              "asrc": nm(b.alphaBlend.source), "adst": nm(b.alphaBlend.destination), "aop": nm(b.alphaBlend.operation), "mask": b.writeMask}
@@ -152,7 +180,7 @@ class Replay:
             "depth": {"write": bool(dwrite), "func": nm(dep.depthFunction)} if dtest else None,
             "stencil": bool(sten),
             "viewport": [round(vx), round(vy), round(vw), round(vh)],
-            "scissor": None if full else [sc.x, sc.y, sc.width, sc.height],
+            "scissor": None if full else [sc.x, sy, sc.width, sc.height],
         }
 
     def vertices(self, p, a, refl):
@@ -166,7 +194,8 @@ class Replay:
             stride_i = ib.byteStride or 2
             raw = np.frombuffer(self.buf(ib.resourceId, ib.byteOffset + a.indexOffset * stride_i, n * stride_i), np.uint8)
             idx = np.frombuffer(raw[: len(raw) // stride_i * stride_i].tobytes(), {1: "u1", 2: "<u2", 4: "<u4"}[stride_i]).astype(np.int64) + a.baseVertex
-            index = {"format": f"u{stride_i * 8}", "hash": h(idx.tobytes()), "max": int(idx.max()) if len(idx) else 0}
+            rel = relative_indices(idx)
+            index = {"format": f"u{stride_i * 8}", "hash": h(rel.tobytes()), "max": int(rel.max()) if len(rel) else 0}
         inst = np.arange(a.instanceOffset, a.instanceOffset + max(a.numInstances, 1))
         attrs, raws = [], {}
         for s in refl.inputSignature if refl else []:
@@ -195,6 +224,9 @@ class Replay:
         out = {}
         for i, cb in enumerate(refl.constantBlocks):
             d = p.GetConstantBlock(stage, i, 0).descriptor
+            if tint(refl):
+                out[f"{cb.name or 'block'}{i}._words"] = words(bytes(self.buf(d.resource, d.byteOffset, d.byteSize)))
+                continue
             pipe = p.GetComputePipelineObject() if stage == rd.ShaderStage.Compute else p.GetGraphicsPipelineObject()
             vs = self.ctl.GetCBufferVariableContents(pipe, p.GetShader(stage), stage, p.GetShaderEntryPoint(stage), i, d.resource, d.byteOffset, d.byteSize)
             for v in vs:
@@ -260,7 +292,7 @@ def export_targets(rp, recs, out, tex_ord):
         for o in r["outputs"]:
             last[o] = r["eid"]
     swap = [int(t.resourceId) for t in rp.tex.values() if t.creationFlags & rd.TextureCategory.SwapBuffer]
-    final = next((s for s in swap if s in last), next((o for r in reversed(recs) for o in r["outputs"][:1]), None))
+    final = next((s for s in swap if s in last), next((o for r in reversed(recs) if r.get("origin") != "browser" for o in r["outputs"][:1]), None))
     (out / "targets").mkdir(parents=True, exist_ok=True)
     targets = []
     for r, eid in last.items():
@@ -324,6 +356,7 @@ def dump(path, out, jobs):
             print(f"parallel replay failed with {jobs} workers, replaying serially", file=sys.stderr)
     if recs is None:
         recs = [rp.draw(i) for i in evs]
+    diff.tag(recs)
     t1 = time.time()
     tex_ord, sh_ord, prog_ord, dep_ord = ordinals("T"), ordinals("S"), ordinals("P"), ordinals("D")
     targets = export_targets(rp, recs, out, tex_ord)
@@ -336,7 +369,7 @@ def dump(path, out, jobs):
             r["program"] = prog_ord(tuple(sorted(r["shaders"].items())))
             for t in r["textures"]:
                 t["id"] = tex_ord(t.pop("rid"))
-    meta = {"schema": VERSION, "api": api, "draws": sum(r["kind"] != "clear" for r in recs), "clears": sum(r["kind"] == "clear" for r in recs), "seconds": {"replay": round(t1 - t0, 2), "export": round(time.time() - t1, 2)}}
+    meta = {"schema": VERSION, "api": api, "draws": sum(r["kind"] != "clear" for r in recs), "clears": sum(r["kind"] == "clear" for r in recs), "browser": sum(r.get("origin") == "browser" for r in recs), "seconds": {"replay": round(t1 - t0, 2), "export": round(time.time() - t1, 2)}}
     return meta, [r for r in recs if r["kind"] != "clear"], [r for r in recs if r["kind"] == "clear"], shaders, targets
 
 
