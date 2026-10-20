@@ -1,0 +1,15 @@
+[package]
+name = "openrs"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+display = { path = "../display" }
+cache = { path = "../cache" }
+control = { path = "../control" }
+renderdoc = { path = "../renderdoc" }
+playerstore = { path = "../playerstore" }
+fleet = { path = "../fleet" }
+fresh = { path = "../fresh" }
+doctor = { path = "../doctor" }
+verify = { path = "../verify" }
