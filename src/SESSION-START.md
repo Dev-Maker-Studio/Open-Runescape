@@ -19,10 +19,10 @@ Step 1, check the environment before anything else:
 
 Step 2, run the live verification:
   cd code/harness && ./target/release/openrs verify
-- It starts the local lobby and world on the shared packed cache (assets/cache-packed), logs a local account into the world, and runs 34 live steps, stopping at the first failure. The report is in code/harness/target/verify/.
+- It starts the local lobby and world on the shared packed cache (assets/cache-packed), logs a local account into the world, and runs 35 live steps, stopping at the first failure. The report is in code/harness/target/verify/.
 - verify takes about 5 minutes, longer than one Bash command may run, so start it detached and poll the log:
   setsid nohup sh -c './target/release/openrs verify > target/verify.log 2>&1; echo verify_exit=$? >> target/verify.log' >/dev/null 2>&1 < /dev/null &
-- All 34 steps passed on 2026-10-20, see the Verified Results in src/HARNESS.md. A failure now is a regression.
+- All 35 steps passed on 2026-10-20, see the Verified Results in src/HARNESS.md. A failure now is a regression.
 - Fix each failure at its root cause, rebuild, and rerun verify until it passes. Tell me what failed and what you changed.
 - Compare measurements with the Verified Results in src/HARNESS.md and update them when they change.
 
@@ -44,4 +44,4 @@ Rules:
 | --- | --- |
 | Sandbox probe | Prints `OK` |
 | `openrs doctor` | No FAIL lines, a stale jar or closed server ports are warnings |
-| `openrs verify` | All 34 steps pass, or the first failing step names what to fix |
+| `openrs verify` | All 35 steps pass, or the first failing step names what to fix |

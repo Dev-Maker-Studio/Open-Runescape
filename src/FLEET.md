@@ -109,11 +109,12 @@ Every slot with `server = "local"` belongs to instance `(N - 1) / 3`.
 
 | Slots | Instance | Lobby port | World port | HTTP and social gateway port |
 | --- | --- | --- | --- | --- |
-| 1 to 3 | 0 | 44594 | 44595 | 4140 |
-| 4 to 6 | 1 | 44604 | 44605 | 4150 |
-| 7 to 9 | 2 | 44614 | 44615 | 4160 |
+| 1 to 3 | 0 | 24594 | 24595 | 4140 |
+| 4 to 6 | 1 | 24604 | 24605 | 4150 |
+| 7 to 9 | 2 | 24614 | 24615 | 4160 |
 
 - The ports of instance `i` are the base ports plus `10 * i`. The base ports come from `OPENRS_LOBBY_PORT`, `OPENRS_WORLD_PORT` and `OPENRS_API_PORT` for the server, and from `[server.local]` for the clients, so the two must agree.
+- The lobby and world ports are below 32768 on purpose. The kernel hands out 32768 to 60999 as the local port of outgoing connections, so a port such as 44604 was sometimes already taken by an unrelated connection and the second lobby failed with "Address already in use". A unit test keeps the defaults under that limit.
 - The client of a slot is started with `host lobby world` of its instance.
 - Slots pointed at any other `[server.<name>]` keep the configured host and ports unchanged.
 

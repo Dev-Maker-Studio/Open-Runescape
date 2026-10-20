@@ -43,7 +43,7 @@ flowchart LR
   C --> W
 ```
 
-1. `openrs up` checks the pack, starts the local lobby and world on ports 44594 and 44595 if they are not running, and logs a local account into the world.
+1. `openrs up` checks the pack, starts the local lobby and world on ports 24594 and 24595 if they are not running, and logs a local account into the world.
 2. `openrs do`, `look` and `trail` drive the client.
 3. `openrs down` stops the client, and `openrs down all` also stops the web client, the display and the local server.
 
@@ -67,6 +67,7 @@ flowchart LR
 | `openrs resume` | Restarts what a crash left behind, including the web client | This page |
 | `openrs capture` | RenderDoc captures, summaries and diffs | `RENDERDOC.md` |
 | `openrs equiv` | Equivalence loop between the client and the renderer | `RENDERDOC.md` |
+| `openrs twin` | The client and the browser on one frame, side by side, with both frames serialized and compared | `TWIN.md` |
 | `openrs doctor` | One fast check of everything the harness needs | This page |
 | `openrs verify` | Scripted live end to end pass of the whole harness | This page |
 | `openrs help` | Every command with one line each | This page |
@@ -148,6 +149,7 @@ flowchart LR
 | `look`, `look-display` | A frame readback, then `look` with `OPENRS_LOOK_VIA=display`, which forces the display screenshot fallback |
 | `iface-open`, `iface-text-look`, `iface-item-model`, `iface-close` | `openrs player iface` opens interface 275, sets text, an item and a model live, `look` sees it, then it closes |
 | `dump-frame`, `renderer-replay` | A `.orf` dump replayed headless by `renderer-app --replay` |
+| `twin` | `openrs twin lumbridge`: the client frame replayed in the browser, both dumped and compared, passing when the serialized frames are identical and the side by side image exists |
 | `equiv` | `openrs equiv --live --cold`, which must run in replay mode on a dumped frame |
 | `renderdoc-retry` | A capture that fails takes the retry path, then a renderer capture with `--retries` succeeds |
 | `down`, `fleet-up`, `fleet-time-to-world`, `fleet-do` | Nine slots, their world entry times and one parallel `fleet do` round |
@@ -173,6 +175,7 @@ flowchart LR
 | `MODERN-RENDERER-WEB-TRANSFER.md` | What the modern renderer is and the plan to move it to the web |
 | `WEB.md` | The Rust web server and page |
 | `WEB-HARNESS.md` | `openrs web`, the browser, the page bridge and its commands |
+| `TWIN.md` | `openrs twin`, the output folder, the verdict and how to read a report |
 | `SESSION-START.md` | The prompt for starting a new Claude Code session on this project |
 
 # Transpilation Work Split
@@ -202,20 +205,21 @@ Nine agents can work on the renderer at once, one per fleet slot.
 
 # Verified Results
 
-The full live pass, `openrs verify`, passed all 34 steps on this machine against the local lobby and world, with the client, lobby and world on one packed cache.
+The full live pass, `openrs verify`, passed all 35 steps on this machine against the local lobby and world, with the client, lobby and world on one packed cache.
 
 | Measure | Value |
 | --- | --- |
-| Cache ready | 3.3 s after process start |
+| Cache ready | 3.2 s after process start |
 | Lobby logged in | 4.3 s |
-| First world frame | 8.1 s |
-| Nine slot fleet up | 74 s, slowest slot in the world after 14.0 s |
-| Nine `fleet do` calls in parallel | 46 ms in total |
-| Nine `fleet compare` runs in parallel | 39 s, SSIM 0.875 to 0.997 |
-| Nine clients | 8.0 GB PSS and 3.9 cores, display 156 MB |
+| First world frame | 8.2 s |
+| Nine slot fleet up | 69 s, slowest slot in the world after 12.9 s |
+| Nine `fleet do` calls in parallel | 133 ms in total |
+| Nine `fleet compare` runs in parallel | 41 s, SSIM 0.875 to 0.995 |
+| Nine clients | 7.9 GB PSS and 3.7 cores, display 154 MB |
 | One local lobby and world pair | Lobby 3.1 GB to 3.5 GB RSS, world 1.9 GB RSS |
-| Equivalence score on a real dumped frame | 73.1, up from the first score of 64.4 |
-| Whole verify run | 360 s, including a renderer rebuild |
+| Equivalence score on a real dumped frame | 73.2, up from the first score of 64.4 |
+| Twin on Lumbridge | SSIM 0.986, PSNR 39.1 dB, serialized frames identical |
+| Whole verify run | 295 s |
 
 ```mermaid
 flowchart LR

@@ -47,6 +47,8 @@ The harness is a Cargo workspace in `code/harness`. Every feature is its own cra
 | `playerstore` | `openrs player` | Player and interface files saved and loaded without Mongo, and the local lobby and world |
 | `fleet` | `openrs fleet` | Up to nine clients in parallel, one per agent |
 | `renderdoc` | `openrs capture`, `openrs equiv` | Captures of the client and the renderer, and the equivalence loop |
+| `web` | `openrs web` | The web client in an isolated Chromium on the private display, driven over DevTools, with audio on the null sink |
+| `twin` | `openrs twin` | The OpenGL client and the browser on one frame, side by side, with the serialized frames compared |
 | `doctor` | `openrs doctor` | Checks every prerequisite in parallel and prints a fix for each failure |
 | `fresh` | Used by `up` and `fleet up` | Rebuilds the client jar and the packed cache only when they are stale |
 | `verify` | `openrs verify` | One scripted live pass over every feature, stopping at the first failure |
@@ -104,12 +106,26 @@ flowchart LR
 - Player files are JSON, saved and loaded without Mongo by the local lobby and world.
 - Open interfaces are part of the player file, with gameval names, and edits to the file are applied live.
 
+## Web Client Harness
+
+- `openrs web up` starts the web server and an isolated Chromium on the private display, with WebGPU on the real GPU and audio on the null sink, never the user's browser.
+- `openrs web do`, `look`, `trail`, `show`, `hide` and `toggle` mirror the native commands, driven over the DevTools protocol through a `window.openrs` page bridge.
+- `openrs capture browser` captures the browser's WebGPU with RenderDoc, and `openrs equiv --target browser` compares it with the OpenGL client on one frame.
+- The browser currently replays frames. Game state arrives with the frame stream described in `src/MODERN-RENDERER-WEB-TRANSFER.md`.
+
+## Twin
+
+- `openrs twin` runs the OpenGL client and the browser on the same frame, serializes the frame on both sides, and writes a side by side image, a difference image and a JSON report.
+- The verdict needs the serialized frames to be identical, so a pixel difference is known to come from rendering and not from lost data. `--renderdoc` adds the RenderDoc comparison.
+- `src/TWIN.md` describes the output and how to read it.
+
 ## Fleet
 
 - `openrs fleet` runs up to nine clients, each with its own control socket, footprints and account.
 - Every slot has a transpilation role and a start tile where that feature is visible.
 - Local accounts are `fleet1` to `fleet9` on the local server. Accounts on the shared lobby are created by the user and named in `code/harness/fleet.toml`, never in the repository.
 - The local world allows three sessions per IP address, so local slots are spread over several local lobby and world pairs, three slots per pair. The login limit is not changed.
+- The local lobby and world ports are 24594 and 24595 plus 10 per pair, below the kernel's range for outgoing connections, so no unrelated connection can hold one.
 
 ## RenderDoc And Equivalence
 
