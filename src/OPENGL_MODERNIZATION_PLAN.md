@@ -1,5 +1,7 @@
 # OpenGL Rendering Pipeline Modernization Plan
 
+This is the original plan and is kept for history. The modern renderer it describes is now the only renderer, on an OpenGL 4.3 core context, and the legacy toolkit is deleted. The current state is in `MODERN-RENDERER-WEB-TRANSFER.md` and `RENDERER.md`.
+
 ## Executive Summary
 
 This document outlines the plan to modernize the RuneTek5 rendering engine from a fixed-function OpenGL pipeline to a modern programmable pipeline with batched draw calls. The goal is to improve performance through GPU utilization while maintaining exact visual output and ensuring future WebGL compatibility.

@@ -1,0 +1,239 @@
+# Renderer Frame Format
+
+This document defines the binary frame description that the Kotlin client can dump and `code/renderer` replays. The format file extension is `.orf`.
+
+## Purpose
+
+- One file holds everything needed to draw one frame: meshes, textures, uniform blocks and draw calls.
+- The same description is produced by the built-in test scenes, so a Kotlin dump and a Rust scene use one code path.
+- Replay lets RenderDoc captures and pixel comparison use identical input on both sides.
+
+```mermaid
+flowchart LR
+  K[Kotlin frame dump] --> F[frame.orf]
+  S[Built in scene] --> M[Frame in memory]
+  F --> L[Replay loader]
+  L --> M
+  M --> R[Renderer]
+  R --> P[PNG or window]
+```
+
+## Encoding Rules
+
+- All integers are unsigned 32 bit little endian, all floats are 32 bit IEEE little endian.
+- Every list is a `u32` count followed by its items, with no padding or alignment.
+- Ids are chosen by the writer and only need to be unique per kind within a file.
+- The reserved id `4294967295` means no texture or no instance buffer, the renderer binds a white 1 by 1 texture or draws one instance.
+
+## File Layout
+
+The file is a header followed by a stream of chunks, so a writer can emit each record as soon as it is complete and never holds a whole frame in memory. The loader accepts the older `ORF2` and `ORF1` files, whose sections were count prefixed lists inside one zlib stream.
+
+| Section | Content |
+| --- | --- |
+| Header | Magic `ORF3`, flags, width, height, clear color as 4 floats |
+| Chunks | One chunk per record, in any order that defines a record before a draw uses it |
+| End | A chunk of kind 5 with both lengths 0, which proves the writer closed the file |
+
+### Chunk
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| kind | `u32` | 0 mesh, 1 texture, 2 uniform, 3 instances, 4 draw, 5 end |
+| raw length | `u32` | Byte length of the record |
+| packed length | `u32` | Byte length of the zlib stream that follows, 0 when the record is stored as is |
+| payload | bytes | The record, or its zlib stream |
+
+The client stores records under 128 bytes and compresses the rest at zlib level 3. A file without an end chunk was cut short and the loader rejects it.
+
+### Flags
+
+| Bit | Name | Meaning |
+| --- | --- | --- |
+| 0 | `GL_DEPTH` | The first 16 floats of every uniform block are an OpenGL clip space matrix, the loader remaps depth from range -1 to 1 into 0 to 1 |
+| 1 | `DEFLATE` | Records are zlib compressed per chunk, in `ORF2` the whole body after the header is one zlib stream |
+
+## Records
+
+### Mesh
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| id | `u32` | Mesh id |
+| pass | `u32` | Pass number, which also selects the vertex layout |
+| vertex count | `u32` | Number of vertices |
+| index count | `u32` | Number of `u32` indices |
+| vertices | bytes | Vertex count times the pass stride |
+| indices | bytes | Index count times 4 |
+
+### Texture
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| id | `u32` | Texture id |
+| width, height | `u32` | Size in texels |
+| layers | `u32` | Layer count, 1 for a plain texture |
+| pixels | bytes | `width * height * layers * 4` bytes of RGBA8, layer major, top row first, no mip levels |
+
+### Uniform
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| id | `u32` | Uniform id |
+| length | `u32` | Byte length |
+| bytes | bytes | One uniform block laid out as the pass table below |
+
+### Instances
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| id | `u32` | Instance buffer id |
+| count | `u32` | Number of instances |
+| length | `u32` | Byte length, count times 80 |
+| bytes | bytes | Five `vec4` per instance at locations 5 to 9, the four model matrix columns and the per instance extra |
+
+### Draw
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| pass | `u32` | Pass number, or 255 for a draw the client skipped |
+| mesh | `u32` | Mesh id |
+| uniform | `u32` | Uniform id |
+| textures | list of `u32` | Texture ids in the shader binding order, missing entries use the white texture |
+| state | `u32` | Pipeline state bits below |
+| viewport | 4 `u32` | x, y, width, height with a top left origin, all zero for the whole target |
+| scissor | 4 `u32` | Same encoding, all zero for no scissor |
+| instances | `u32` | Instance buffer id, or none for one instance |
+| name | `u32` length and bytes | Empty for a drawn record, for a skipped one the shader name and the reason, such as `groundTextured.water` |
+
+Draws execute in file order. The depth buffer is cleared once per frame. Skipped draws keep their place so a replay summary can report what the client drew that the renderer does not cover yet.
+
+### State Bits
+
+| Bits | Meaning |
+| --- | --- |
+| 0 | Depth test |
+| 1 | Depth write |
+| 2 to 3 | Blend, 0 none, 1 source alpha, 2 additive, 3 premultiplied |
+| 4 to 5 | Cull, 0 none, 1 back, 2 front |
+| 6 | Front face is clockwise |
+| 7 and up | Depth compare function as the OpenGL enum minus `GL_NEVER` |
+
+## Passes
+
+| Number | Pass | Shaders | Textures | Depth | Blend | Vertex stride |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 | Model | `model.vert`, `model.frag` | 1 | test and write | none, alpha discard | 36 |
+| 1 | Ground | `ground.vert`, `ground.frag` | 2 | test and write | none | 28 |
+| 2 | Sprite | `sprite.vert`, `sprite.frag` | 1 layered array | always, no write | source alpha | 40 |
+| 3 | Terrain | `groundTextured.vert`, `groundTextured.frag` | 2 | test and write | none | 40 |
+| 4 | Instanced | `instanced.vert`, `instanced.frag` | 1 | test and write | none, alpha discard | 36, plus an instance buffer |
+| 5 | Shadow | `shadow.vert`, `shadow.frag` | 1 | test and write, front faces culled, into the shadow map | none | 36 |
+| 6 | Particle | `particle.vert`, `particle.frag` | 1 | test, no write | source alpha | 24 |
+| 7 | HdWater | `hdWater.vert`, `hdWater.frag` | 5: wave noise volume, foam noise volume, environment cube, shadow, reflection | test and write, less or equal | source alpha | 28 |
+| 8 | Material | `materialCubeSpec.vert`, `materialCubeSpec.frag` | 1 | test and write | none, alpha discard | 36 |
+| 9 | Water | `water.vert`, `water.frag` | 2 | test and write | none | 36 |
+| 10 | WaterHD | `waterHD.vert`, `waterHD.frag` | 2: normal volume, environment cube | test and write | none | 36 |
+| 11 | WaterLapping | `waterLapping.vert`, `waterLapping.frag` | 3: base, overlay volume, overlay | test and write | none | 36 |
+| 12 | WaterReflecting | `waterReflecting.vert`, `waterReflecting.frag` | 2: base, cube | test and write | none | 36 |
+| 13 | WaterRippling | `waterRippling.vert`, `waterRippling.frag` | 2: texture, volume | test and write | none | 36 |
+| 14 | Waterfall | `waterfall.vert`, `waterfall.frag` | 3: texture, volume, waterfall | test and write | none | 36 |
+
+- The scene color and scene depth bindings of HdWater are not in the draw's texture list, the renderer copies its own targets before the first water draw.
+- A texture record bound as a volume is uploaded as a 3D texture with `layers` as its depth. A texture record bound as a cube must have 6 square layers, otherwise a white cube is bound.
+- The reserved texture id `4294967294` in a shadow map slot (`uShadowMap` of Ground, `uShadowTex` of HdWater) binds the shadow map rendered by the Shadow draws of the same frame.
+
+### Vertex Layouts
+
+| Pass | Attribute | Location | Format | Offset |
+| --- | --- | --- | --- | --- |
+| Model | position | 0 | 3 floats | 0 |
+| Model | normal | 1 | 3 floats | 12 |
+| Model | texcoord | 2 | 2 floats | 24 |
+| Model | color | 3 | 4 unorm bytes | 32 |
+| Ground | position | 0 | 3 floats | 0 |
+| Ground | normal | 1 | 3 floats | 12 |
+| Ground | color | 3 | 4 unorm bytes | 24 |
+| Sprite | position | 0 | 2 floats | 0 |
+| Sprite | texcoord | 2 | 2 floats | 8 |
+| Sprite | color | 3 | 4 unorm bytes | 16 |
+| Sprite | texture slot | 4 | 1 float, minus 1 for untextured | 20 |
+| Sprite | clip box | 5 | 4 floats, window pixels with top left origin | 24 |
+| Terrain | position | 0 | 3 floats | 0 |
+| Terrain | color | 1 | 4 unorm bytes | 12 |
+| Terrain | normal | 2 | 3 floats | 16 |
+| Terrain | texcoord | 3 | 3 floats | 28 |
+| Instanced | same as Model | 0 to 3 | | |
+| Particle | position | 0 | 3 floats | 0 |
+| Particle | texcoord | 2 | 2 floats | 12 |
+| Particle | color | 3 | 4 unorm bytes | 20 |
+| HdWater | position | 0 | 3 floats | 0 |
+| HdWater | color, alpha is the shore edge factor | 1 | 4 unorm bytes | 12 |
+| HdWater | texcoord, z is the water depth | 2 | 3 floats | 16 |
+| Shadow, Material, Water passes | same as Model | 0 to 3 | | |
+
+### Uniform Blocks
+
+Blocks follow the std140 layout of the translated shaders, see `src/RENDERER.md`. Matrices are column major, `mat3` is 3 columns padded to 4 floats, booleans are `u32`, and a `vec2` array uses one `vec4` per element.
+
+| Pass | Size in bytes | Member order |
+| --- | --- | --- |
+| Model | 272 | mvp, modelview, normal matrix, sun direction, sun color, ambient, contrast, fog start, fog end, fog enabled, prelit, texture enabled, fog color, alpha threshold |
+| Ground | 4448 | mvp, modelview, normal matrix, sun direction, sun color, ambient, contrast, fog start, fog end, fog enabled, shadow matrix, shadow enabled, point light count, 128 light positions, 128 light colors, ground shadow enabled, ground shadow scale, fog color, shadow bias, shadow intensity, shadow map size |
+| Sprite | 64 | projection |
+| Terrain | 5552 | view projection, clip plane, texture scale, texture scroll, has normals, sun direction, sun color, ambient, contrast, sun brightness, contrast positive, contrast negative, raw color debug, fog start, fog end, fog enabled, point light count, 128 light positions, 128 light colors, water mode, still fog, 64 lap noise, lap turbulence, lap ambient, water time, ripple fog, has water noise, water colour, depth fog, inverse view projection, viewport, framebuffer size, ground shadow enabled, ground shadow scale, has texture, fog color, combine mode, alpha from vertex |
+| Instanced | 4320 | view projection, clip plane, view matrix, sun direction, sun brightness, sun color, contrast positive, contrast negative, fog start, fog end, fog enabled, fog color, alpha threshold, texture time, material flags, texture speed, 128 light positions, 128 light colors |
+| Shadow | 144 | light view projection, model matrix, alpha test enabled, alpha threshold |
+| Particle | 128 | view projection, texture scroll, ambient, fog enabled, fog start, fog end, texture enabled, combine mode, fog color |
+| HdWater | 4432 | view projection, has wave noise, wave scale, time, flow, wave amplitude, has water depth, use planar, planar distort, has foam noise, has env map, shadow enabled, inverse view projection, viewport, framebuffer size, sun direction, sun color, ambient, sky colour, water colour, absorb distance, scatter, refraction, wave strength, slow time, shadow scale, reflection steps, fog enabled, fog start, fog end, point light count, 128 light positions, 128 light colors |
+| Material | 272 | mvp, modelview, normal matrix, sun direction, sun color, ambient, contrast, prelit, fog start, fog end, fog enabled, texture enabled, fog color, alpha threshold, specular level, effect enabled, limited texture units |
+| Water | 384 | modelview, projection, texture matrix, fog params, water plane, use lighting, use depth plane, light 0 direction, light 1 direction, light 0 diffuse, light 1 diffuse, ambient color, water color, has base texture, fog start, fog end, fog color, fog enabled |
+| WaterHD | 336 | modelview, projection, texture matrix, normal matrix, time, scale, fog start, fog end, sun direction, sun colour, sun exponent, break water depth, break water offset, use wave effect, wave intensity, wave exponent, fog color |
+| WaterLapping | 1392 | modelview, projection, texture matrix, inverse view rotation, 64 noise, turbulence, ambient light, time, use 3D texture, has overlay, has base texture, overlay const color, fog start, fog end, fog color, fog enabled |
+| WaterReflecting | 272 | mvp, modelview, normal matrix, view rotation, has base texture, reflection enabled, fog start, fog end, fog color, fog enabled |
+| WaterRippling | 304 | mvp, modelview, normal matrix, sun direction, sun color, ambient, contrast, fog start, fog end, fog enabled, eye plane S, texture scale, fog density, fog position, texture enabled, use 3D texture, anim time, fog color, alpha threshold |
+| Waterfall | 304 | mvp, modelview, normal matrix, sun direction, sun color, ambient, contrast, fog start, fog end, fog enabled, eye plane S, eye plane T, anim time R, use 3D texture, texture enabled, has waterfall texture, fog color, alpha threshold |
+
+`tests/layout.rs` checks every size and member order against the WGSL through naga reflection. The HdWater block is the merged block of the synthesized vertex stage and the fragment stage, so its first members come from `hdWater.tese`.
+
+### Layout Cross-Check
+
+The client writes blocks from `Passes` in `graphics/modern/dump/Layouts.kt`, one entry per pass id with the vertex stride, the attributes and the byte offset of every uniform. The renderer reads them with the WGSL structs. A checked-in fixture ties the two:
+
+1. `client_fixture_matches_pass_table` in `code/renderer/tests/layout.rs` reflects every pass with naga into one JSON line: shader name, pass id, stride, attributes as location, offset and size, block size, and every member with its std140 offset. With `PASS_LAYOUTS_WRITE=1` it writes `code/client/src/test/resources/pass-layouts.json`, otherwise it asserts the file equals the reflected text.
+2. `PassLayoutTest` in the client reads that resource and asserts that `Passes.byName` has exactly the fixture's pass names, and that each entry's id, stride, attributes, block size and slot offsets equal the fixture. A WGSL boolean member ends in `_u`, which the test strips to reach the GLSL uniform name the client reads.
+
+A shader change that moves a member fails the Rust test until the fixture is regenerated, and the regenerated fixture fails the client test until `Layouts.kt` follows.
+
+```
+cd code/renderer && PASS_LAYOUTS_WRITE=1 cargo test --offline --test layout
+cd code/client && ./gradlew test --tests '*PassLayoutTest'
+```
+
+The sprite shader reads the texture slot as a layer of the single array texture, replacing the eight sampler array of the GLSL source.
+
+## Conventions
+
+- Depth range is 0 to 1, set `GL_DEPTH` when dumping OpenGL matrices.
+- Texture rows are stored top row first, the same as OpenGL upload order.
+- Culling is disabled for all passes.
+- The sprite clip box uses a top left origin, unlike the bottom up box of the GLSL source.
+
+## Client Dump
+
+- `dump-frame [path]` on the control server records the next presented frame and answers with the path, the file size and a summary of drawn and skipped draws per shader, or with the error when the dump failed, in which case no file is left behind.
+- `-Drender.dump=<frame>` records that frame number after startup into `frame-<frame>.orf`, or the path in `-Drender.dump.path`.
+- Every draw is read back from OpenGL on the game thread, meshes, textures and uniform blocks are deduplicated by hash, and each record is handed to a writer thread through a bounded queue that compresses and appends it, so the heap holds one draw at a time.
+- A draw is routed by the name of its program: programs built from resources are named after their vertex file, so `shadow.vert` routes to pass 5 and `waterfall.vert` to pass 14, the HD water renderer registers its own program as `hdWater`, and generated programs are classified by their source (`instanced`, `optimized`, `surfaceMask`, `fullscreen`). A name without a `Passes` entry, a draw outside the main target, a non triangle draw such as tessellated water patches, and a textured ground draw in water mode are recorded as skipped with the name and the reason.
+- An attribute narrower than the pass layout, such as a two float water texcoord where the pass stores three, is copied as is and the remaining bytes stay zero.
+- Texture ids of a pass without a dedicated reader are the pass samplers in binding order, each read from the 2D texture bound to the sampler's unit; a volume or cube bound there yields the reserved no texture id.
+- Sprite draws read the bound texture of every slot the vertices use into one layered texture per distinct slot set, and rescale the texture coordinates to the layer size.
+- `code/client/src/test/.../OrfWriterTest.kt` writes a synthetic frame through the same path, and `code/renderer/tests/fixtures/synthetic.orf` is that file, parsed by `cargo test` without a GPU.
+
+## Tools
+
+| Command | Effect |
+| --- | --- |
+| `renderer-app --scene all --dump frame.orf` | Write a built-in scene as a frame file |
+| `renderer-app --replay frame.orf --out out.png` | Render a frame file offscreen |
+| `renderer-app --replay frame.orf` | Render a frame file in a window |
