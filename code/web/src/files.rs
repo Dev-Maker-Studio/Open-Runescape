@@ -44,15 +44,16 @@ fn open(path: &Path, accept: &str) -> Option<(File, &'static str)> {
     File::open(path).ok().map(|file| (file, ""))
 }
 
-pub fn serve(root: &Path, request: Request) {
-    let path = resolve(root, request.url());
+pub fn serve(root: &Path, files: Option<&Path>, request: Request) {
+    let shared = files.zip(request.url().strip_prefix("/files/"));
+    let path = shared.map_or_else(|| resolve(root, request.url()), |(dir, rest)| resolve(dir, rest));
     let found = path.as_ref().and_then(|p| open(p, &accepted(&request)).map(|f| (p, f)));
     let Some((path, (file, encoding))) = found else {
         let _ = request.respond(Response::from_string("not found").with_status_code(404));
         return;
     };
     let name = path.to_string_lossy();
-    let cache = if name.ends_with(".html") { "no-cache" } else { "public, max-age=3600" };
+    let cache = if shared.is_some() { "no-store" } else if name.ends_with(".html") { "no-cache" } else { "public, max-age=3600" };
     let mut response = Response::from_file(file)
         .with_header(header("Content-Type", mime::of(&name)))
         .with_header(header("Cache-Control", cache))

@@ -12,6 +12,7 @@ fn main() {
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".into());
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".into());
     let root = PathBuf::from(std::env::var("STATIC_DIR").unwrap_or_else(|_| "static".into()));
+    let files = std::env::var_os("FILES_DIR").map(PathBuf::from);
     let server = Arc::new(Server::http(format!("{host}:{port}")).expect("bind failed"));
     println!("serving {} on http://{host}:{port}", root.display());
 
@@ -20,10 +21,10 @@ fn main() {
 
     let workers: Vec<_> = (0..WORKERS)
         .map(|_| {
-            let (server, root) = (server.clone(), root.clone());
+            let (server, root, shared) = (server.clone(), root.clone(), files.clone());
             thread::spawn(move || {
                 while let Ok(request) = server.recv() {
-                    files::serve(&root, request);
+                    files::serve(&root, shared.as_deref(), request);
                 }
             })
         })
