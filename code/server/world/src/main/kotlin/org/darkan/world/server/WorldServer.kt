@@ -1,6 +1,7 @@
 package org.darkan.world.server
 
 import com.rs.Settings
+import com.rs.db.PlayerFiles
 import com.rs.db.WorldDB
 import com.rs.game.World
 import com.rs.game.map.ChunkManager
@@ -355,7 +356,7 @@ object WorldServer {
             logError("Failed to decode player save for ${account.username}; refusing login")
             return Admission.Refused(ResponseOpcode.COULD_NOT_COMPLETE_LOGIN)
         }
-        return Admission.Admitted(account, loaded.player() ?: Player(account))
+        return Admission.Admitted(account, loaded.player() ?: PlayerFiles.fresh(account))
     }
 
     private suspend fun logOut(player: Player): Boolean {

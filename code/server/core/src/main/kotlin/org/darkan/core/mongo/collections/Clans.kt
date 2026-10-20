@@ -7,6 +7,8 @@ import com.mongodb.client.model.ReplaceOptions
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import org.darkan.core.EnvVars
+import org.darkan.core.clan.InMemoryClanStore
 import org.darkan.core.model.Clan
 import org.darkan.core.mongo.MongoDB.database
 import org.darkan.core.mongo.dropIndexIfPresent
@@ -53,7 +55,7 @@ object Clans : ClanStore {
 
     /** Swapped by tests for an in-memory store; never reassigned by production code. */
     @Volatile
-    var store: ClanStore = MongoClans
+    var store: ClanStore = if (EnvVars.playerFileDir != null) InMemoryClanStore() else MongoClans
 
     override suspend fun find(name: String): Clan? = store.find(name)
 

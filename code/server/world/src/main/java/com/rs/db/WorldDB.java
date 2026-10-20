@@ -15,9 +15,11 @@ public class WorldDB extends DBConnection {
 	private static final LogManager LOGS = new LogManager();
 
 	public WorldDB() {
-		super(Settings.getConfig().getMongoDb(), Settings.getConfig().getMongoDBName());
+		super(PlayerFiles.getEnabled() ? null : Settings.getConfig().getMongoDb(), Settings.getConfig().getMongoDBName());
 		Logger.info(WorldDB.class, "constructor()", "Connecting to MongoDB and initializing databases...");
 		addItemManager(PLAYERS);
+		if (PlayerFiles.getEnabled())
+			return;
 		addItemManager(HIGHSCORES);
 		addItemManager(GE);
 		addItemManager(LOGS);

@@ -11,6 +11,7 @@ import com.mongodb.client.model.ReplaceOptions
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import org.darkan.core.EnvVars
 import org.darkan.core.crypt.Crypto
 import org.darkan.core.formatPlayerNameForDisplay
 import org.darkan.core.formatPlayerNameForProtocol
@@ -19,6 +20,7 @@ import org.darkan.core.mongo.MongoDB.database
 import org.darkan.core.mongo.dropIndexIfPresent
 import org.darkan.core.net.web.AccountCreateRequest
 import org.darkan.core.net.web.ConflictException
+import java.nio.file.Path
 
 /**
  * The account reads and writes the social layer performs, behind an interface so a test can put an
@@ -32,6 +34,11 @@ interface AccountStore {
     suspend fun save(account: Account)
     suspend fun rename(previousUsername: String, account: Account)
     suspend fun findAll(): List<Account>
+    suspend fun insert(account: Account): Boolean {
+        if (find(account.username) != null) return false
+        save(account)
+        return true
+    }
 }
 
 private val collection by lazy {
@@ -84,13 +91,20 @@ private object MongoAccounts : AccountStore {
     }
 
     override suspend fun findAll(): List<Account> = collection.find().toList()
+
+    override suspend fun insert(account: Account): Boolean = try {
+        collection.insertOne(account)
+        true
+    } catch (e: MongoWriteException) {
+        if (e.error.category == ErrorCategory.DUPLICATE_KEY) false else throw e
+    }
 }
 
 object Accounts : AccountStore {
 
     /** Swapped by tests for an in-memory store; never reassigned by production code. */
     @Volatile
-    var store: AccountStore = MongoAccounts
+    var store: AccountStore = EnvVars.playerFileDir?.let { FileAccounts(Path.of(it, "accounts")) } ?: MongoAccounts
 
     override suspend fun find(usernameOrEmail: String): Account? = store.find(usernameOrEmail)
 
@@ -105,13 +119,7 @@ object Accounts : AccountStore {
     override suspend fun findAll(): List<Account> = store.findAll()
 
     suspend fun exists(usernameOrEmail: String): Boolean {
-        val formatted = usernameOrEmail.formatPlayerNameForProtocol()
-        return collection.find(
-            or(
-                eq(Account::username.name, formatted),
-                eq(Account::email.name, formatted)
-            )
-        ).firstOrNull() != null
+        return store.find(usernameOrEmail) != null
     }
 
     suspend fun createLobby(email: String, password: String): Account? {
@@ -141,13 +149,7 @@ object Accounts : AccountStore {
         val formattedUsername = req.username.formatPlayerNameForProtocol()
         val formattedEmail = req.email.formatPlayerNameForProtocol()
 
-        val existingAccount = collection.find(
-            or(
-                eq(Account::username.name, formattedUsername),
-                eq(Account::email.name, formattedEmail)
-            )
-        ).firstOrNull()
-        if (existingAccount != null) throw ConflictException("Account already exists")
+        if (store.find(formattedUsername) != null || store.find(formattedEmail) != null) throw ConflictException("Account already exists")
 
         return insertNew(Account(
             username = formattedUsername,
@@ -156,10 +158,5 @@ object Accounts : AccountStore {
         ))
     }
 
-    private suspend fun insertNew(account: Account): Account? = try {
-        collection.insertOne(account)
-        account
-    } catch (e: MongoWriteException) {
-        if (e.error.category == ErrorCategory.DUPLICATE_KEY) null else throw e
-    }
+    private suspend fun insertNew(account: Account): Account? = if (store.insert(account)) account else null
 }

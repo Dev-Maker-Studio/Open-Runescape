@@ -79,6 +79,8 @@ object EnvVars {
     val legacyCryptoSecret: String = dotenv.get("LEGACY_CRYPTO_SECRET", "secrettt")
     val legacyCryptoSalt: ByteArray = dotenv.get("LEGACY_CRYPTO_SALT", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0").split(",").map { it.toByte() }.toByteArray()
 
+    val playerFileDir: String? = dotenv.get("PLAYER_FILE_DIR", null)?.takeIf { it.isNotBlank() }
+
     //mongo settings
     val mongoUri: String = dotenv.get("MONGO_URI", "mongodb://localhost:27017/darkan-server?retryWrites=true&w=majority")
 

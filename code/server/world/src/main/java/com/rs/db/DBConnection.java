@@ -19,6 +19,8 @@ public class DBConnection {
     private final List<DBItemManager> itemManagers = new ArrayList<>();
 
     public DBConnection(String connectionString, String databaseName) {
+        if (connectionString == null)
+            return;
         client = MongoClients.create(connectionString);
         database = client.getDatabase(databaseName);
     }

@@ -1,17 +1,16 @@
 package com.rs.db.collection;
 
-import com.google.gson.JsonIOException;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.Indexes;
 import com.rs.game.World;
 import com.rs.game.content.death.GraveStone;
 import com.rs.game.model.entity.player.Player;
 import com.rs.db.DBItemManager;
+import com.rs.db.PlayerFiles;
 import org.darkan.core.JsonFileManager;
 import org.darkan.core.Logger;
 import org.bson.Document;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -24,6 +23,8 @@ public class PlayerManager extends DBItemManager {
 
 	@Override
 	public void initCollection() {
+		if (PlayerFiles.getEnabled())
+			return;
 		getDocs().createIndex(Indexes.ascending("username"));
 		dropIndexIfPresent("username_text");
 	}
@@ -63,7 +64,8 @@ public class PlayerManager extends DBItemManager {
 		try {
 			if (player.hasStarted() && !player.hasFinished())
 				GraveStone.syncRecord(player);
-			return JsonFileManager.toJson(player);
+			String json = JsonFileManager.toJson(player);
+			return PlayerFiles.getEnabled() && player.getInterfaceManager() != null ? player.getInterfaceManager().getTracker().inject(json) : json;
 		} catch (Throwable e) {
 			Logger.handle(PlayerManager.class, "snapshot", "Error serializing player: " + player.getUsername(), e);
 			return null;
@@ -72,6 +74,10 @@ public class PlayerManager extends DBItemManager {
 
 	protected void write(String username, String json) {
 		try {
+			if (PlayerFiles.getEnabled()) {
+				PlayerFiles.write(username, json);
+				return;
+			}
 			getDocs().findOneAndReplace(eq("username", username), Document.parse(json), new FindOneAndReplaceOptions().upsert(true));
 		} catch(Throwable e) {
 			Logger.handle(PlayerManager.class, "write", "Error saving player: " + username, e);
@@ -103,30 +109,33 @@ public class PlayerManager extends DBItemManager {
 		Player loggedIn = World.getPlayerByUsername(username);
 		if (loggedIn != null)
 			return PlayerResult.of(loggedIn);
-		Document accDoc = getDocs().find(eq("username", username)).first();
-		if (accDoc == null)
+		String json = fetch(username);
+		if (json == null)
 			return PlayerResult.of(null);
 		try {
-			return PlayerResult.of(decode(accDoc));
+			return PlayerResult.of(JsonFileManager.fromJSONString(json, Player.class));
 		} catch (Throwable e) {
 			Logger.handle(PlayerManager.class, "loadForLogin", "Failed to load player: " + username, e);
 			return PlayerResult.error();
 		}
 	}
 
-	private Player decode(Document accDoc) throws JsonIOException, IOException {
-		return JsonFileManager.fromJSONString(JsonFileManager.toJson(accDoc), Player.class);
+	private String fetch(String username) {
+		if (PlayerFiles.getEnabled())
+			return PlayerFiles.read(username) instanceof String json && PlayerFiles.complete(json) ? json : null;
+		Document accDoc = getDocs().find(eq("username", username)).first();
+		return accDoc == null ? null : JsonFileManager.toJson(accDoc);
 	}
 
 	public Player getSyncUsername(String username) {
 		Player loggedIn = World.getPlayerByUsername(username);
 		if (loggedIn != null)
 			return loggedIn;
-		Document accDoc = getDocs().find(eq("username", username)).first();
-		if (accDoc == null)
+		String json = fetch(username);
+		if (json == null)
 			return null;
 		try {
-			return decode(accDoc);
+			return JsonFileManager.fromJSONString(json, Player.class);
 		} catch (Throwable e) {
 			Logger.handle(PlayerManager.class, "getSyncUsername", "Failed to load player: " + username, e);
 			return null;
