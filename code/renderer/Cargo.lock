@@ -1402,6 +1402,7 @@ name = "renderer"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
+ "js-sys",
  "miniz_oxide 0.9.1",
  "naga",
  "png",
