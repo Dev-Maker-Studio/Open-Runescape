@@ -10,23 +10,14 @@ plugins {
 }
 
 group = "darkan"
-// CI passes -PreleaseVersion=<tag without v> for tagged releases and dev-<sha> for dev builds;
-// local builds keep the fixed version so tooling that expects the jar name keeps working.
 version = providers.gradleProperty("releaseVersion").orElse("2.0.0").get()
 description = "Darkan Client"
 
 application {
     mainClass.set("com.darkan.bot.BotKt")
-    // The client holds ~400 MB of live model/cache data and allocates steadily while
-    // streaming a region; G1's young collections copy that live set and pause the
-    // render thread 35-45 ms every couple of seconds (visible hitches, worst while
-    // rotating the camera). Generational ZGC keeps pauses under a millisecond.
-    // IDE run configurations need the same VM options.
     applicationDefaultJvmArgs = listOf("-XX:+UseZGC", "-Xmx4g", "-Xms1g", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-exports=java.desktop/sun.awt.X11=ALL-UNNAMED")
 }
 
-// `./gradlew run -Dbot.enabled=true` sets the property on Gradle's own JVM, not on the
-// client JVM the run task forks. Forward the client's flags so that command works as expected.
 tasks.named<JavaExec>("run") {
     val forwarded = listOf("bot.", "render.", "toolkit", "autologin", "window.", "prod")
     System.getProperties().stringPropertyNames()
@@ -51,7 +42,6 @@ repositories {
     mavenCentral()
 }
 
-// LWJGL3 version and native classifier configuration
 val lwjglVersion = "3.3.3"
 val hostLwjglNatives = Pair(
     System.getProperty("os.name")!!,
@@ -78,16 +68,12 @@ val hostLwjglNatives = Pair(
     }
 }
 
-// A distributable jar must run on every desktop platform, not just the machine that built
-// it. -PallNatives=true (the default on CI) bundles every platform's LWJGL natives; local
-// builds stay small with only the host's.
 val bundleAllNatives = (providers.gradleProperty("allNatives").orNull ?: System.getenv("CI"))?.toBoolean() ?: false
 val lwjglNativesList = if (bundleAllNatives)
     listOf("natives-linux", "natives-linux-arm64", "natives-macos", "natives-macos-arm64", "natives-windows", "natives-windows-arm64")
 else
     listOf(hostLwjglNatives)
 
-// Recorded in the jar manifest so the About panel and bug reports can say which build this is.
 val gitCommit: String = System.getenv("CI_COMMIT_SHORT_SHA")
     ?: runCatching {
         providers.exec { commandLine("git", "rev-parse", "--short", "HEAD") }.standardOutput.asText.get().trim()
@@ -101,12 +87,11 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.8.0.202609011348-r")
     runtimeOnly("org.slf4j:slf4j-nop:2.0.17")
 
-    // LWJGL3 - Modern OpenGL bindings (for rendering modernization)
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
     implementation("org.lwjgl", "lwjgl")
     implementation("org.lwjgl", "lwjgl-opengl")
     implementation("org.lwjgl", "lwjgl-glfw")
-    implementation("org.lwjgl", "lwjgl-stb")  // For image loading
+    implementation("org.lwjgl", "lwjgl-stb")
     lwjglNativesList.forEach { natives ->
         runtimeOnly("org.lwjgl", "lwjgl", classifier = natives)
         runtimeOnly("org.lwjgl", "lwjgl-opengl", classifier = natives)
@@ -114,15 +99,19 @@ dependencies {
         runtimeOnly("org.lwjgl", "lwjgl-stb", classifier = natives)
     }
 
-    // JOML - Java OpenGL Math Library (for matrix/vector operations)
     implementation("org.joml:joml:1.10.5")
 
-    //kotlinscript support
     implementation("org.jetbrains.kotlin:kotlin-scripting-common:2.2.21")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:2.2.21")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:2.2.21")
     implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies:2.2.21")
     implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven:2.2.21")
+    testImplementation("junit:junit:4.13.2")
+}
+
+tasks.test {
+    useJUnit()
+    systemProperty("java.io.tmpdir", temporaryDir)
 }
 
 publishing {
@@ -176,13 +165,10 @@ tasks {
 	}
 }
 
-// Task to run the rendering test application
 tasks.register<JavaExec>("runRenderTest") {
     group = "application"
     description = "Run the RuneTek5 Rendering Engine Test Application"
     mainClass.set("com.darkan.rendertest.RenderingTestAppKt")
     classpath = sourceSets["main"].runtimeClasspath
 
-    // Allow passing cache path as argument: ./gradlew runRenderTest --args="path/to/cache"
-    // Default cache path is ~/.darkan/cache
 }

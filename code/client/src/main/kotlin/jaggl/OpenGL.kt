@@ -1,8 +1,9 @@
-/* OpenGL - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaggl
 
+import com.jagex.game.runetek5.toolkit.context.GlxContext
+import org.lwjgl.opengl.*
+import org.lwjgl.system.MemoryStack
+import org.lwjgl.system.MemoryUtil.*
 import java.awt.Canvas
 import java.util.Hashtable
 
@@ -11,551 +12,248 @@ class OpenGL {
         @JvmField
         val ASSOCIATED_THREADS: Hashtable<Thread, OpenGL> = Hashtable()
 
-        @JvmStatic
-        external fun glEnable(capability: Int)
-
-        @JvmStatic
-        external fun glDisable(capability: Int)
-
-        @JvmStatic
-        external fun glCullFace(mode: Int)
-
-        @JvmStatic
-        external fun glPushAttrib(mask: Int)
-
-        @JvmStatic
-        external fun glPopAttrib()
-
-        @JvmStatic
-        external fun glShadeModel(mode: Int)
-
-        @JvmStatic
-        external fun glHint(target: Int, hint: Int)
-
-        @JvmStatic
-        external fun glFinish()
-
-        @JvmStatic
-        external fun glFlush()
-
-        @JvmStatic
-        external fun glClear(mask: Int)
-
-        @JvmStatic
-        external fun glClearColor(red: Float, green: Float, blue: Float, alpha: Float)
-
-        @JvmStatic
-        external fun glClearDepth(depth: Float)
-
-        @JvmStatic
-        external fun glDepthFunc(func: Int)
-
-        @JvmStatic
-        external fun glDepthMask(flag: Boolean)
-
-        @JvmStatic
-        external fun glDepthRange(near: Float, far: Float)
-
-        @JvmStatic
-        external fun glAlphaFunc(func: Int, ref: Float)
-
-        @JvmStatic
-        external fun glColorMask(red: Boolean, green: Boolean, blue: Boolean, alpha: Boolean)
-
-        @JvmStatic
-        external fun glReadBuffer(mode: Int)
-
-        @JvmStatic
-        external fun glDrawBuffer(mode: Int)
-
-        @JvmStatic
-        external fun glDrawBuffersARB(n: Int, buffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glMatrixMode(mode: Int)
-
-        @JvmStatic
-        external fun glPushMatrix()
-
-        @JvmStatic
-        external fun glPopMatrix()
-
-        @JvmStatic
-        external fun glLoadIdentity()
-
-        @JvmStatic
-        external fun glOrtho(left: Double, right: Double, bottom: Double, top: Double, nearVal: Double, farVal: Double)
-
-        @JvmStatic
-        external fun glFrustum(left: Double, right: Double, bottom: Double, top: Double, nearVal: Double, farVal: Double)
-
-        @JvmStatic
-        external fun glTranslatef(x: Float, y: Float, z: Float)
-
-        @JvmStatic
-        external fun glRotatef(angle: Float, x: Float, y: Float, z: Float)
-
-        @JvmStatic
-        external fun glScalef(x: Float, y: Float, z: Float)
-
-        @JvmStatic
-        external fun glLoadMatrixf(matrix: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glMultMatrixf(matrix: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glViewport(x: Int, y: Int, width: Int, height: Int)
-
-        @JvmStatic
-        external fun glScissor(x: Int, y: Int, width: Int, height: Int)
-
-        @JvmStatic
-        external fun glGenLists(range: Int): Int
-
-        @JvmStatic
-        external fun glDeleteLists(list: Int, range: Int)
-
-        @JvmStatic
-        external fun glNewList(list: Int, mode: Int)
-
-        @JvmStatic
-        external fun glEndList()
-
-        @JvmStatic
-        external fun glCallList(list: Int)
-
-        @JvmStatic
-        external fun glBegin(mode: Int)
-
-        @JvmStatic
-        external fun glVertex2i(x: Int, y: Int)
-
-        @JvmStatic
-        external fun glVertex2f(x: Float, y: Float)
-
-        @JvmStatic
-        external fun glVertex3f(x: Float, y: Float, z: Float)
-
-        @JvmStatic
-        external fun glNormal3f(x: Float, y: Float, z: Float)
-
-        @JvmStatic
-        external fun glColor3f(r: Float, g: Float, b: Float)
-
-        @JvmStatic
-        external fun glColor4f(r: Float, g: Float, b: Float, a: Float)
-
-        @JvmStatic
-        external fun glColor3ub(r: Byte, g: Byte, b: Byte)
-
-        @JvmStatic
-        external fun glColor4ub(r: Byte, g: Byte, b: Byte, a: Byte)
-
-        @JvmStatic
-        external fun glTexCoord2i(s: Int, t: Int)
-
-        @JvmStatic
-        external fun glTexCoord3i(s: Int, t: Int, r: Int)
-
-        @JvmStatic
-        external fun glTexCoord2f(s: Float, t: Float)
-
-        @JvmStatic
-        external fun glTexCoord3f(s: Float, t: Float, r: Float)
-
-        @JvmStatic
-        external fun glMultiTexCoord2i(unit: Int, s: Int, t: Int)
-
-        @JvmStatic
-        external fun glMultiTexCoord3i(unit: Int, s: Int, t: Int, r: Int)
-
-        @JvmStatic
-        external fun glMultiTexCoord2f(textureUnit: Int, s: Float, t: Float)
-
-        @JvmStatic
-        external fun glRasterPos2i(x: Int, y: Int)
-
-        @JvmStatic
-        external fun glEnd()
-
-        @JvmStatic
-        external fun glEnableClientState(capability: Int)
-
-        @JvmStatic
-        external fun glDisableClientState(capability: Int)
-
-        @JvmStatic
-        external fun glClientActiveTexture(texture: Int)
-
-        @JvmStatic
-        external fun glVertexPointer(size: Int, type: Int, stride: Int, pointer: Long)
-
-        @JvmStatic
-        external fun glNormalPointer(type: Int, stride: Int, pointer: Long)
-
-        @JvmStatic
-        external fun glColorPointer(size: Int, type: Int, stride: Int, pointer: Long)
-
-        @JvmStatic
-        external fun glTexCoordPointer(size: Int, type: Int, stride: Int, pointer: Long)
-
-        @JvmStatic
-        external fun glVertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, pointer: Long)
-
-        @JvmStatic
-        external fun glEnableVertexAttribArray(index: Int)
-
-        @JvmStatic
-        external fun glDisableVertexAttribArray(index: Int)
-
-        @JvmStatic
-        external fun glBindAttribLocation(program: Int, index: Int, name: String)
-
-        @JvmStatic
-        external fun glGenBuffersARB(n: Int, buffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glBindBufferARB(target: Int, buffer: Int)
-
-        @JvmStatic
-        external fun glBufferDataARBa(target: Int, size: Int, data: Long, usage: Int)
-
-        @JvmStatic
-        external fun glBufferDataARBub(target: Int, size: Int, data: ByteArray?, offset: Int, usage: Int)
-
-        @JvmStatic
-        external fun glBufferSubDataARBa(target: Int, offset: Int, size: Int, data: Long)
-
-        @JvmStatic
-        external fun glBufferSubDataARBub(target: Int, offset: Int, size: Int, data: ByteArray, offset2: Int)
-
-        @JvmStatic
-        external fun glMapBufferARB(target: Int, access: Int): Long
-
-        @JvmStatic
-        external fun glUnmapBufferARB(bufferObjectID: Int): Boolean
-
-        @JvmStatic
-        external fun glDeleteBuffersARB(n: Int, buffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glLineWidth(width: Float)
-
-        @JvmStatic
-        external fun glPointSize(size: Float)
-
-        @JvmStatic
-        external fun glPolygonMode(face: Int, mode: Int)
-
-        @JvmStatic
-        external fun glDrawArrays(mode: Int, first: Int, count: Int)
-
-        @JvmStatic
-        external fun glDrawElements(mode: Int, count: Int, type: Int, indices: Long)
-
-        @JvmStatic
-        external fun glGenTextures(n: Int, textures: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glDeleteTextures(n: Int, textures: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glActiveTexture(texture: Int)
-
-        @JvmStatic
-        external fun glBindTexture(target: Int, texture: Int)
-
-        @JvmStatic
-        external fun glTexEnvi(target: Int, pname: Int, param: Int)
-
-        @JvmStatic
-        external fun glTexEnvf(target: Int, pname: Int, param: Float)
-
-        @JvmStatic
-        external fun glTexEnvfv(target: Int, pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glTexGeni(coord: Int, pname: Int, param: Int)
-
-        @JvmStatic
-        external fun glTexGenfv(coord: Int, pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glTexParameterf(target: Int, pname: Int, param: Float)
-
-        @JvmStatic
-        external fun glTexParameteri(target: Int, pname: Int, param: Int)
-
-        @JvmStatic
-        external fun glGetTexImagei(target: Int, level: Int, format: Int, type: Int, pixels: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glGetTexImageub(target: Int, level: Int, format: Int, type: Int, pixels: ByteArray, offset: Int)
-
-        @JvmStatic
-        external fun glGetTexLevelParameterfv(target: Int, level: Int, pname: Int): Float
-
-        @JvmStatic
-        external fun glGetTexLevelParameteriv(target: Int, level: Int, pname: Int): Int
-
-        @JvmStatic
-        external fun glGetTexImage(target: Int, level: Int, format: Int, type: Int, pixels: ByteArray)
-
-        @JvmStatic
-        external fun glTexImage1Dub(target: Int, level: Int, internalformat: Int, width: Int, border: Int, format: Int, type: Int, pixels: ByteArray, offset: Int)
-
-        @JvmStatic
-        external fun glCopyTexImage2D(target: Int, level: Int, internalFormat: Int, x: Int, y: Int, width: Int, height: Int, border: Int)
-
-        @JvmStatic
-        external fun glCopyTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, x: Int, y: Int, width: Int, height: Int)
-
-        @JvmStatic
-        external fun glTexImage2Di(target: Int, level: Int, internalFormat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glTexImage2Df(target: Int, level: Int, internalFormat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, data: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glTexImage2Dub(target: Int, level: Int, internalFormat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, data: ByteArray?, offset: Int)
-
-        @JvmStatic
-        external fun glTexSubImage2Di(target: Int, level: Int, offsetX: Int, offsetY: Int, width: Int, height: Int, format: Int, type: Int, pixels: IntArray, pixelOffset: Int)
-
-        @JvmStatic
-        external fun glTexSubImage2Df(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, data: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glTexSubImage2Dub(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, data: ByteArray, offset: Int)
-
-        @JvmStatic
-        external fun glCopyTexSubImage3D(target: Int, level: Int, xoffset: Int, yoffset: Int, zoffset: Int, x: Int, y: Int, width: Int, height: Int)
-
-        @JvmStatic
-        external fun glTexImage3Dub(target: Int, level: Int, internal: Int, width: Int, height: Int, depth: Int, border: Int, format: Int, type: Int, data: ByteArray?, offset: Int)
-
-        @JvmStatic
-        external fun glCompressedTexImage2Dub(target: Int, level: Int, internal: Int, width: Int, height: Int, border: Int, imageSize: Int, data: ByteArray, offset: Int)
-
-        @JvmStatic
-        external fun glCopyPixels(x: Int, y: Int, width: Int, height: Int, type: Int)
-
-        @JvmStatic
-        external fun glReadPixelsi(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glReadPixelsub(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteArray, offset: Int)
-
-        @JvmStatic
-        external fun glDrawPixelsi(width: Int, height: Int, format: Int, pixels: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glDrawPixelsub(x: Int, y: Int, width: Int, height: Int, pixels: ByteArray, offset: Int)
-
-        @JvmStatic
-        external fun glPixelZoom(xfactor: Float, yfactor: Float)
-
-        @JvmStatic
-        external fun glPixelStorei(parameter: Int, value: Int)
-
-        @JvmStatic
-        external fun glPixelTransferf(parameter: Int, value: Float)
-
-        @JvmStatic
-        external fun glColorMaterial(face: Int, mode: Int)
-
-        @JvmStatic
-        external fun glLightf(light: Int, pname: Int, param: Float)
-
-        @JvmStatic
-        external fun glLightfv(light: Int, pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glLightModelfv(pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glMaterialfv(face: Int, pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glFogi(pname: Int, param: Int)
-
-        @JvmStatic
-        external fun glFogf(pname: Int, param: Float)
-
-        @JvmStatic
-        external fun glFogfv(pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glBlendFunc(sfactor: Int, dfactor: Int)
-
-        @JvmStatic
-        external fun glBlendFuncSeparate(srcRGB: Int, dstRGB: Int, srcAlpha: Int, dstAlpha: Int)
-
-        @JvmStatic
-        external fun glBlendColor(red: Float, green: Float, blue: Float, alpha: Float)
-
-        @JvmStatic
-        external fun glGenFramebuffersEXT(n: Int, framebuffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glDeleteFramebuffersEXT(n: Int, framebuffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glBindFramebufferEXT(target: Int, framebuffer: Int)
-
-        @JvmStatic
-        external fun glFramebufferTexture2DEXT(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int)
-
-        @JvmStatic
-        external fun glFramebufferTexture3DEXT(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int, zoffset: Int)
-
-        @JvmStatic
-        external fun glFramebufferRenderbufferEXT(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: Int)
-
-        @JvmStatic
-        external fun glCheckFramebufferStatusEXT(target: Int): Int
-
-        @JvmStatic
-        external fun glBlitFramebufferEXT(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
-
-        @JvmStatic
-        external fun glGenerateMipmapEXT(target: Int)
-
-        @JvmStatic
-        external fun glGenRenderbuffersEXT(n: Int, renderbuffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glDeleteRenderbuffersEXT(n: Int, renderbuffers: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glBindRenderbufferEXT(target: Int, renderbuffer: Int)
-
-        @JvmStatic
-        external fun glRenderbufferStorageEXT(target: Int, internalFormat: Int, width: Int, height: Int)
-
-        @JvmStatic
-        external fun glRenderbufferStorageMultisampleEXT(target: Int, samples: Int, internalFormat: Int, width: Int, height: Int)
-
-        @JvmStatic
-        external fun glGenProgramARB(): Int
-
-        @JvmStatic
-        external fun glDeleteProgramARB(program: Int)
-
-        @JvmStatic
-        external fun glBindProgramARB(target: Int, program: Int)
-
-        @JvmStatic
-        external fun glProgramStringARB(target: Int, format: Int, string: String)
-
-        @JvmStatic
-        external fun glProgramRawARB(target: Int, format: Int, string: ByteArray)
-
-        @JvmStatic
-        external fun glProgramLocalParameter4fARB(target: Int, index: Int, x: Float, y: Float, z: Float, w: Float)
-
-        @JvmStatic
-        external fun glProgramLocalParameter4fvARB(target: Int, index: Int, params: FloatArray?, offset: Int)
-
-        @JvmStatic
-        external fun glGetProgramivARB(programHandle: Int, pname: Int, params: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glCreateProgram(): Int
-
-        @JvmStatic
-        external fun glCreateShader(shaderType: Int): Int
-
-        @JvmStatic
-        external fun glDeleteProgram(programHandle: Int)
-
-        @JvmStatic
-        external fun glDeleteShader(shaderHandle: Int)
-
-        @JvmStatic
-        external fun glShaderSource(shaderHandle: Int, shaderSource: String)
-
-        @JvmStatic
-        external fun glCompileShader(shaderHandle: Int)
-
-        @JvmStatic
-        external fun glAttachShader(programHandle: Int, shaderHandle: Int)
-
-        @JvmStatic
-        external fun glDetachShader(programHandle: Int, shaderHandle: Int)
-
-        @JvmStatic
-        external fun glLinkProgram(programHandle: Int)
-
-        @JvmStatic
-        external fun glUseProgram(programHandle: Int)
-
-        @JvmStatic
-        external fun glGetUniformLocation(programHandle: Int, uniformName: String): Int
-
-        @JvmStatic
-        external fun glUniform1i(location: Int, value: Int)
-
-        @JvmStatic
-        external fun glUniform1f(location: Int, value: Float)
-
-        @JvmStatic
-        external fun glUniform2f(location: Int, value1: Float, value2: Float)
-
-        @JvmStatic
-        external fun glUniform3f(location: Int, value1: Float, value2: Float, value3: Float)
-
-        @JvmStatic
-        external fun glUniform4f(location: Int, value1: Float, value2: Float, value3: Float, value4: Float)
-
-        @JvmStatic
-        external fun glUniform2fv(location: Int, count: Int, values: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glUniform3fv(location: Int, count: Int, values: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glUniform4fv(location: Int, count: Int, values: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glUniformMatrix2fv(location: Int, count: Int, transpose: Boolean, values: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glUniformMatrix3fv(location: Int, count: Int, transpose: Boolean, values: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glUniformMatrix4fv(location: Int, count: Int, transpose: Boolean, values: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glGetProgramiv(programHandle: Int, pname: Int, params: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glGetShaderiv(shaderHandle: Int, pname: Int, params: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glGetProgramInfoLog(programHandle: Int, maxLength: Int, length: IntArray, lengthOffset: Int, infoLog: ByteArray, infoLogOffset: Int)
-
-        @JvmStatic
-        external fun glGetShaderInfoLog(shaderHandle: Int, maxLength: Int, length: IntArray, lengthOffset: Int, infoLog: ByteArray, infoLogOffset: Int)
-
-        @JvmStatic
-        external fun glGetError(): Int
-
-        @JvmStatic
-        external fun glGetString(name: Int): String
-
-        @JvmStatic
-        external fun glGetFloatv(pname: Int, params: FloatArray, offset: Int)
-
-        @JvmStatic
-        external fun glGetIntegerv(pname: Int, params: IntArray, offset: Int)
-
-        @JvmStatic
-        external fun glStencilFunc(func: Int, ref: Int, mask: Int)
-
-        @JvmStatic
-        external fun glStencilOp(fail: Int, zfail: Int, zpass: Int)
+        private val legacyCalls = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
+        private fun <T> legacy(name: String, value: T): T {
+            if (legacyCalls.add(name)) {
+                println("[GL] legacy call $name ignored")
+                Thread.dumpStack()
+            }
+            return value
+        }
+
+        private inline fun <R> inInts(a: IntArray, o: Int, n: Int, f: (Long) -> R): R {
+            val b = memAlloc(n * 4)
+            try {
+                b.asIntBuffer().put(a, o, n)
+                return f(memAddress(b))
+            } finally {
+                memFree(b)
+            }
+        }
+
+        private inline fun <R> inFloats(a: FloatArray, o: Int, n: Int, f: (Long) -> R): R {
+            val b = memAlloc(n * 4)
+            try {
+                b.asFloatBuffer().put(a, o, n)
+                return f(memAddress(b))
+            } finally {
+                memFree(b)
+            }
+        }
+
+        private inline fun <R> inBytes(a: ByteArray?, o: Int, n: Int, f: (Long) -> R): R {
+            if (a == null) return f(0L)
+            val b = memAlloc(n)
+            try {
+                b.put(a, o, n).flip()
+                return f(memAddress(b))
+            } finally {
+                memFree(b)
+            }
+        }
+
+        private inline fun outInts(a: IntArray, o: Int, n: Int, f: (Long) -> Unit) {
+            val b = memAlloc(n * 4)
+            try {
+                f(memAddress(b))
+                b.asIntBuffer().get(a, o, n)
+            } finally {
+                memFree(b)
+            }
+        }
+
+        private inline fun outBytes(a: ByteArray, o: Int, n: Int, f: (Long) -> Unit) {
+            val b = memAlloc(n)
+            try {
+                f(memAddress(b))
+                b.get(a, o, n)
+            } finally {
+                memFree(b)
+            }
+        }
+
+        private fun left(size: Int, o: Int, want: Long): Int = minOf((size - o).toLong(), want).toInt()
+
+        @JvmStatic fun glEnable(capability: Int) = if (isCoreCapability(capability)) GL11C.glEnable(capability) else legacy("glEnable(0x${capability.toString(16)})", Unit)
+        @JvmStatic fun glDisable(capability: Int) = if (isCoreCapability(capability)) GL11C.glDisable(capability) else legacy("glDisable(0x${capability.toString(16)})", Unit)
+        @JvmStatic fun glCullFace(mode: Int) = GL11C.glCullFace(mode)
+        @JvmStatic fun glHint(target: Int, hint: Int) = if (target == 0x0C54) legacy("glHint(GL_FOG_HINT)", Unit) else GL11C.glHint(target, hint)
+        @JvmStatic fun glFinish() = GL11C.glFinish()
+        @JvmStatic fun glFlush() = GL11C.glFlush()
+        @JvmStatic fun glClear(mask: Int) = GL11C.glClear(mask)
+        @JvmStatic fun glClearColor(red: Float, green: Float, blue: Float, alpha: Float) = GL11C.glClearColor(red, green, blue, alpha)
+        @JvmStatic fun glClearDepth(depth: Float) = GL11C.glClearDepth(depth.toDouble())
+        @JvmStatic fun glDepthFunc(func: Int) = GL11C.glDepthFunc(func)
+        @JvmStatic fun glDepthMask(flag: Boolean) = GL11C.glDepthMask(flag)
+        @JvmStatic fun glDepthRange(near: Float, far: Float) = GL11C.glDepthRange(near.toDouble(), far.toDouble())
+        @JvmStatic fun glColorMask(red: Boolean, green: Boolean, blue: Boolean, alpha: Boolean) = GL11C.glColorMask(red, green, blue, alpha)
+        @JvmStatic fun glReadBuffer(mode: Int) = GL11C.glReadBuffer(mode)
+        @JvmStatic fun glDrawBuffer(mode: Int) = GL11C.glDrawBuffer(mode)
+        @JvmStatic fun glDrawBuffersARB(n: Int, buffers: IntArray, offset: Int) = inInts(buffers, offset, n) { GL20C.nglDrawBuffers(n, it) }
+        @JvmStatic fun glViewport(x: Int, y: Int, width: Int, height: Int) = GL11C.glViewport(x, y, width, height)
+        @JvmStatic fun glScissor(x: Int, y: Int, width: Int, height: Int) = GL11C.glScissor(x, y, width, height)
+        @JvmStatic fun glVertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, pointer: Long) = GL20C.glVertexAttribPointer(index, size, type, normalized, stride, pointer)
+        @JvmStatic fun glEnableVertexAttribArray(index: Int) = GL20C.glEnableVertexAttribArray(index)
+        @JvmStatic fun glDisableVertexAttribArray(index: Int) = GL20C.glDisableVertexAttribArray(index)
+        @JvmStatic fun glBindAttribLocation(program: Int, index: Int, name: String) = GL20C.glBindAttribLocation(program, index, name)
+        @JvmStatic fun glGenBuffersARB(n: Int, buffers: IntArray, offset: Int) { for (i in 0 until n) buffers[offset + i] = GL15C.glGenBuffers() }
+        @JvmStatic fun glBindBufferARB(target: Int, buffer: Int) = GL15C.glBindBuffer(target, buffer)
+        @JvmStatic fun glBufferDataARBa(target: Int, size: Int, data: Long, usage: Int) = GL15C.nglBufferData(target, size.toLong(), data, usage)
+        @JvmStatic fun glBufferDataARBub(target: Int, size: Int, data: ByteArray?, offset: Int, usage: Int) = inBytes(data, offset, size) { GL15C.nglBufferData(target, size.toLong(), it, usage) }
+        @JvmStatic fun glBufferSubDataARBa(target: Int, offset: Int, size: Int, data: Long) = GL15C.nglBufferSubData(target, offset.toLong(), size.toLong(), data)
+        @JvmStatic fun glBufferSubDataARBub(target: Int, offset: Int, size: Int, data: ByteArray, offset2: Int) = inBytes(data, offset2, size) { GL15C.nglBufferSubData(target, offset.toLong(), size.toLong(), it) }
+        @JvmStatic fun glMapBufferARB(target: Int, access: Int): Long = GL15C.nglMapBuffer(target, access)
+        @JvmStatic fun glUnmapBufferARB(bufferObjectID: Int): Boolean = GL15C.glUnmapBuffer(bufferObjectID)
+        @JvmStatic fun glDeleteBuffersARB(n: Int, buffers: IntArray, offset: Int) { for (i in 0 until n) GL15C.glDeleteBuffers(buffers[offset + i]) }
+        @JvmStatic fun glLineWidth(width: Float) = GL11C.glLineWidth(width)
+        @JvmStatic fun glPointSize(size: Float) = GL11C.glPointSize(size)
+        @JvmStatic fun glPolygonMode(face: Int, mode: Int) = if (face == GL11C.GL_FRONT_AND_BACK) GL11C.glPolygonMode(face, mode) else legacy("glPolygonMode(face 0x${face.toString(16)})", Unit)
+        @JvmStatic fun glDrawArrays(mode: Int, first: Int, count: Int) = GL11C.glDrawArrays(mode, first, count)
+        @JvmStatic fun glDrawElements(mode: Int, count: Int, type: Int, indices: Long) = GL11C.glDrawElements(mode, count, type, indices)
+        @JvmStatic fun glGenTextures(n: Int, textures: IntArray, offset: Int) { for (i in 0 until n) textures[offset + i] = GL11C.glGenTextures() }
+        @JvmStatic fun glDeleteTextures(n: Int, textures: IntArray, offset: Int) { for (i in 0 until n) GL11C.glDeleteTextures(textures[offset + i]) }
+        @JvmStatic fun glActiveTexture(texture: Int) = GL13C.glActiveTexture(texture)
+        @JvmStatic fun glBindTexture(target: Int, texture: Int) = GL11C.glBindTexture(target, texture)
+        @JvmStatic fun glTexParameterf(target: Int, pname: Int, param: Float) = GL11C.glTexParameterf(target, pname, param)
+        @JvmStatic fun glTexParameteri(target: Int, pname: Int, param: Int) = GL11C.glTexParameteri(target, pname, param)
+        @JvmStatic fun glGetTexImagei(target: Int, level: Int, format: Int, type: Int, pixels: IntArray, offset: Int) = outInts(pixels, offset, pixels.size - offset) { GL11C.nglGetTexImage(target, level, format, type, it) }
+        @JvmStatic fun glGetTexImageub(target: Int, level: Int, format: Int, type: Int, pixels: ByteArray, offset: Int) = outBytes(pixels, offset, pixels.size - offset) { GL11C.nglGetTexImage(target, level, format, type, it) }
+        @JvmStatic fun glGetTexImage(target: Int, level: Int, format: Int, type: Int, pixels: ByteArray) = outBytes(pixels, 0, pixels.size) { GL11C.nglGetTexImage(target, level, format, type, it) }
+        @JvmStatic fun glGetTexLevelParameterfv(target: Int, level: Int, pname: Int): Float = GL11C.glGetTexLevelParameterf(target, level, pname)
+        @JvmStatic fun glGetTexLevelParameteriv(target: Int, level: Int, pname: Int): Int = GL11C.glGetTexLevelParameteri(target, level, pname)
+        @JvmStatic fun glTexImage1Dub(target: Int, level: Int, internalformat: Int, width: Int, border: Int, format: Int, type: Int, pixels: ByteArray, offset: Int) = inBytes(pixels, offset, left(pixels.size, offset, width * 16L)) { GL11C.nglTexImage1D(target, level, coreInternal(target, internalformat), width, border, coreFormat(format), type, it) }
+        @JvmStatic fun glCopyTexImage2D(target: Int, level: Int, internalFormat: Int, x: Int, y: Int, width: Int, height: Int, border: Int) = GL11C.glCopyTexImage2D(target, level, coreInternal(target, internalFormat), x, y, width, height, border)
+        @JvmStatic fun glCopyTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, x: Int, y: Int, width: Int, height: Int) = GL11C.glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height)
+        @JvmStatic fun glTexImage2Di(target: Int, level: Int, internalFormat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: IntArray, offset: Int) = inInts(pixels, offset, left(pixels.size, offset, width.toLong() * height)) { GL11C.nglTexImage2D(target, level, coreInternal(target, internalFormat), width, height, border, coreFormat(format), type, it) }
+        @JvmStatic fun glTexImage2Df(target: Int, level: Int, internalFormat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, data: FloatArray, offset: Int) = inFloats(data, offset, left(data.size, offset, width.toLong() * height * 4)) { GL11C.nglTexImage2D(target, level, coreInternal(target, internalFormat), width, height, border, coreFormat(format), type, it) }
+        @JvmStatic fun glTexImage2Dub(target: Int, level: Int, internalFormat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, data: ByteArray?, offset: Int) = inBytes(data, offset, if (data == null) 0 else left(data.size, offset, width.toLong() * height * 16)) { GL11C.nglTexImage2D(target, level, coreInternal(target, internalFormat), width, height, border, coreFormat(format), type, it) }
+        @JvmStatic fun glTexSubImage2Di(target: Int, level: Int, offsetX: Int, offsetY: Int, width: Int, height: Int, format: Int, type: Int, pixels: IntArray, pixelOffset: Int) = inInts(pixels, pixelOffset, left(pixels.size, pixelOffset, width.toLong() * height)) { GL11C.nglTexSubImage2D(target, level, offsetX, offsetY, width, height, coreFormat(format), type, it) }
+        @JvmStatic fun glTexSubImage2Df(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, data: FloatArray, offset: Int) = inFloats(data, offset, left(data.size, offset, width.toLong() * height * 4)) { GL11C.nglTexSubImage2D(target, level, xoffset, yoffset, width, height, coreFormat(format), type, it) }
+        @JvmStatic fun glTexSubImage2Dub(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, data: ByteArray, offset: Int) = inBytes(data, offset, left(data.size, offset, width.toLong() * height * 16)) { GL11C.nglTexSubImage2D(target, level, xoffset, yoffset, width, height, coreFormat(format), type, it) }
+        @JvmStatic fun glCopyTexSubImage3D(target: Int, level: Int, xoffset: Int, yoffset: Int, zoffset: Int, x: Int, y: Int, width: Int, height: Int) = GL12C.glCopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height)
+        @JvmStatic fun glTexImage3Dub(target: Int, level: Int, internal: Int, width: Int, height: Int, depth: Int, border: Int, format: Int, type: Int, data: ByteArray?, offset: Int) = inBytes(data, offset, if (data == null) 0 else left(data.size, offset, width.toLong() * height * depth * 16)) { GL12C.nglTexImage3D(target, level, coreInternal(target, internal), width, height, depth, border, coreFormat(format), type, it) }
+        @JvmStatic fun glCompressedTexImage2Dub(target: Int, level: Int, internal: Int, width: Int, height: Int, border: Int, imageSize: Int, data: ByteArray, offset: Int) = inBytes(data, offset, imageSize) { GL13C.nglCompressedTexImage2D(target, level, internal, width, height, border, imageSize, it) }
+        @JvmStatic fun glReadPixelsi(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: IntArray, offset: Int) = outInts(pixels, offset, left(pixels.size, offset, width.toLong() * height)) { GL11C.nglReadPixels(x, y, width, height, format, type, it) }
+        @JvmStatic fun glReadPixelsub(x: Int, y: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteArray, offset: Int) = outBytes(pixels, offset, left(pixels.size, offset, width.toLong() * height * 4)) { GL11C.nglReadPixels(x, y, width, height, format, type, it) }
+        @JvmStatic fun glPixelStorei(parameter: Int, value: Int) = GL11C.glPixelStorei(parameter, value)
+        @JvmStatic fun glBlendFunc(sfactor: Int, dfactor: Int) = GL11C.glBlendFunc(sfactor, dfactor)
+        @JvmStatic fun glBlendFuncSeparate(srcRGB: Int, dstRGB: Int, srcAlpha: Int, dstAlpha: Int) = GL14C.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha)
+        @JvmStatic fun glBlendColor(red: Float, green: Float, blue: Float, alpha: Float) = GL14C.glBlendColor(red, green, blue, alpha)
+        @JvmStatic fun glGenFramebuffersEXT(n: Int, framebuffers: IntArray, offset: Int) { for (i in 0 until n) framebuffers[offset + i] = GL30C.glGenFramebuffers() }
+        @JvmStatic fun glDeleteFramebuffersEXT(n: Int, framebuffers: IntArray, offset: Int) { for (i in 0 until n) GL30C.glDeleteFramebuffers(framebuffers[offset + i]) }
+        @JvmStatic fun glBindFramebufferEXT(target: Int, framebuffer: Int) = GL30C.glBindFramebuffer(target, framebuffer)
+        @JvmStatic fun glFramebufferTexture2DEXT(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int) = GL30C.glFramebufferTexture2D(target, attachment, textarget, texture, level)
+        @JvmStatic fun glFramebufferTexture3DEXT(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int, zoffset: Int) = GL30C.glFramebufferTextureLayer(target, attachment, texture, level, zoffset)
+        @JvmStatic fun glFramebufferRenderbufferEXT(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: Int) = GL30C.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer)
+        @JvmStatic fun glCheckFramebufferStatusEXT(target: Int): Int = GL30C.glCheckFramebufferStatus(target)
+        @JvmStatic fun glBlitFramebufferEXT(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int) = GL30C.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter)
+        @JvmStatic fun glGenerateMipmapEXT(target: Int) = GL30C.glGenerateMipmap(target)
+        @JvmStatic fun glGenRenderbuffersEXT(n: Int, renderbuffers: IntArray, offset: Int) { for (i in 0 until n) renderbuffers[offset + i] = GL30C.glGenRenderbuffers() }
+        @JvmStatic fun glDeleteRenderbuffersEXT(n: Int, renderbuffers: IntArray, offset: Int) { for (i in 0 until n) GL30C.glDeleteRenderbuffers(renderbuffers[offset + i]) }
+        @JvmStatic fun glBindRenderbufferEXT(target: Int, renderbuffer: Int) = GL30C.glBindRenderbuffer(target, renderbuffer)
+        @JvmStatic fun glRenderbufferStorageEXT(target: Int, internalFormat: Int, width: Int, height: Int) = GL30C.glRenderbufferStorage(target, internalFormat, width, height)
+        @JvmStatic fun glRenderbufferStorageMultisampleEXT(target: Int, samples: Int, internalFormat: Int, width: Int, height: Int) = GL30C.glRenderbufferStorageMultisample(target, samples, internalFormat, width, height)
+        @JvmStatic fun glCreateProgram(): Int = GL20C.glCreateProgram()
+        @JvmStatic fun glCreateShader(shaderType: Int): Int = GL20C.glCreateShader(shaderType)
+        @JvmStatic fun glDeleteProgram(programHandle: Int) = GL20C.glDeleteProgram(programHandle)
+        @JvmStatic fun glDeleteShader(shaderHandle: Int) = GL20C.glDeleteShader(shaderHandle)
+        @JvmStatic fun glShaderSource(shaderHandle: Int, shaderSource: String) = GL20C.glShaderSource(shaderHandle, shaderSource)
+        @JvmStatic fun glCompileShader(shaderHandle: Int) = GL20C.glCompileShader(shaderHandle)
+        @JvmStatic fun glAttachShader(programHandle: Int, shaderHandle: Int) = GL20C.glAttachShader(programHandle, shaderHandle)
+        @JvmStatic fun glDetachShader(programHandle: Int, shaderHandle: Int) = GL20C.glDetachShader(programHandle, shaderHandle)
+        @JvmStatic fun glLinkProgram(programHandle: Int) = GL20C.glLinkProgram(programHandle)
+        @JvmStatic fun glUseProgram(programHandle: Int) = GL20C.glUseProgram(programHandle)
+        @JvmStatic fun glGetUniformLocation(programHandle: Int, uniformName: String): Int = GL20C.glGetUniformLocation(programHandle, uniformName)
+        @JvmStatic fun glUniform1i(location: Int, value: Int) = GL20C.glUniform1i(location, value)
+        @JvmStatic fun glUniform1f(location: Int, value: Float) = GL20C.glUniform1f(location, value)
+        @JvmStatic fun glUniform2f(location: Int, value1: Float, value2: Float) = GL20C.glUniform2f(location, value1, value2)
+        @JvmStatic fun glUniform3f(location: Int, value1: Float, value2: Float, value3: Float) = GL20C.glUniform3f(location, value1, value2, value3)
+        @JvmStatic fun glUniform4f(location: Int, value1: Float, value2: Float, value3: Float, value4: Float) = GL20C.glUniform4f(location, value1, value2, value3, value4)
+        @JvmStatic fun glUniform2fv(location: Int, count: Int, values: FloatArray, offset: Int) = inFloats(values, offset, count * 2) { GL20C.nglUniform2fv(location, count, it) }
+        @JvmStatic fun glUniform3fv(location: Int, count: Int, values: FloatArray, offset: Int) = inFloats(values, offset, count * 3) { GL20C.nglUniform3fv(location, count, it) }
+        @JvmStatic fun glUniform4fv(location: Int, count: Int, values: FloatArray, offset: Int) = inFloats(values, offset, count * 4) { GL20C.nglUniform4fv(location, count, it) }
+        @JvmStatic fun glUniformMatrix2fv(location: Int, count: Int, transpose: Boolean, values: FloatArray, offset: Int) = inFloats(values, offset, count * 4) { GL20C.nglUniformMatrix2fv(location, count, transpose, it) }
+        @JvmStatic fun glUniformMatrix3fv(location: Int, count: Int, transpose: Boolean, values: FloatArray, offset: Int) = inFloats(values, offset, count * 9) { GL20C.nglUniformMatrix3fv(location, count, transpose, it) }
+        @JvmStatic fun glUniformMatrix4fv(location: Int, count: Int, transpose: Boolean, values: FloatArray, offset: Int) = inFloats(values, offset, count * 16) { GL20C.nglUniformMatrix4fv(location, count, transpose, it) }
+        @JvmStatic fun glGetProgramiv(programHandle: Int, pname: Int, params: IntArray, offset: Int) { params[offset] = GL20C.glGetProgrami(programHandle, pname) }
+        @JvmStatic fun glGetShaderiv(shaderHandle: Int, pname: Int, params: IntArray, offset: Int) { params[offset] = GL20C.glGetShaderi(shaderHandle, pname) }
+        @JvmStatic fun glGetProgramInfoLog(programHandle: Int, maxLength: Int, length: IntArray, lengthOffset: Int, infoLog: ByteArray, infoLogOffset: Int) = copyLog(GL20C.glGetProgramInfoLog(programHandle, maxLength), maxLength, length, lengthOffset, infoLog, infoLogOffset)
+        @JvmStatic fun glGetShaderInfoLog(shaderHandle: Int, maxLength: Int, length: IntArray, lengthOffset: Int, infoLog: ByteArray, infoLogOffset: Int) = copyLog(GL20C.glGetShaderInfoLog(shaderHandle, maxLength), maxLength, length, lengthOffset, infoLog, infoLogOffset)
+        @JvmStatic fun glGetError(): Int = GL11C.glGetError()
+        @JvmStatic fun glGetString(name: Int): String = if (name == GL11C.GL_EXTENSIONS) extensionString() else GL11C.glGetString(name) ?: ""
+        @JvmStatic fun glGetFloatv(pname: Int, params: FloatArray, offset: Int) = MemoryStack.stackPush().use {
+            val b = it.mallocFloat(16)
+            GL11C.glGetFloatv(pname, b)
+            b.get(params, offset, minOf(16, params.size - offset))
+        }
+        @JvmStatic fun glGetIntegerv(pname: Int, params: IntArray, offset: Int) = MemoryStack.stackPush().use {
+            val b = it.mallocInt(16)
+            GL11C.glGetIntegerv(pname, b)
+            b.get(params, offset, minOf(16, params.size - offset))
+        }
+        @JvmStatic fun glStencilFunc(func: Int, ref: Int, mask: Int) = GL11C.glStencilFunc(func, ref, mask)
+        @JvmStatic fun glStencilOp(fail: Int, zfail: Int, zpass: Int) = GL11C.glStencilOp(fail, zfail, zpass)
+
+        private fun copyLog(log: String, maxLength: Int, length: IntArray, lengthOffset: Int, infoLog: ByteArray, infoLogOffset: Int) {
+            val bytes = log.toByteArray()
+            val n = minOf(bytes.size, maxLength, infoLog.size - infoLogOffset)
+            System.arraycopy(bytes, 0, infoLog, infoLogOffset, n)
+            length[lengthOffset] = n
+        }
+
+        private fun extensionString(): String {
+            val count = GL11C.glGetInteger(GL30C.GL_NUM_EXTENSIONS)
+            return (0 until count).joinToString(" ") { GL30C.glGetStringi(GL11C.GL_EXTENSIONS, it) ?: "" }
+        }
+
+        private const val GL_R8 = 0x8229
+        private const val GL_RG8 = 0x822B
+        private const val GL_RED = 0x1903
+        private const val GL_GREEN = 0x1904
+        private const val GL_RG = 0x8227
+
+        private class Swizzle(val internal: Int, val rgba: IntArray)
+
+        private val LEGACY_INTERNAL: Map<Int, Swizzle> = mapOf(
+            0x1906 to Swizzle(GL_R8, intArrayOf(0, 0, 0, GL_RED)),
+            0x803C to Swizzle(GL_R8, intArrayOf(0, 0, 0, GL_RED)),
+            0x1909 to Swizzle(GL_R8, intArrayOf(GL_RED, GL_RED, GL_RED, 1)),
+            0x8040 to Swizzle(GL_R8, intArrayOf(GL_RED, GL_RED, GL_RED, 1)),
+            0x190A to Swizzle(GL_RG8, intArrayOf(GL_RED, GL_RED, GL_RED, GL_GREEN)),
+            0x8045 to Swizzle(GL_RG8, intArrayOf(GL_RED, GL_RED, GL_RED, GL_GREEN)),
+            0x8049 to Swizzle(GL_R8, intArrayOf(GL_RED, GL_RED, GL_RED, GL_RED)),
+            0x804B to Swizzle(GL_R8, intArrayOf(GL_RED, GL_RED, GL_RED, GL_RED))
+        )
+
+        private fun coreInternal(target: Int, internal: Int): Int {
+            val swizzle = LEGACY_INTERNAL[internal] ?: return internal
+            for (channel in 0 until 4) {
+                GL11C.glTexParameteri(target, 0x8E42 + channel, swizzle.rgba[channel])
+            }
+            return swizzle.internal
+        }
+
+        private fun coreFormat(format: Int): Int = when (format) {
+            0x1906, 0x1909, 0x8049 -> GL_RED
+            0x190A -> GL_RG
+            else -> format
+        }
+
+        private val CORE_CAPABILITIES = setOf(
+            0x0BE2, 0x0B44, 0x0B71, 0x0BD0, 0x0B20, 0x0B41, 0x0C11, 0x0B90, 0x0BF2, 0x809D, 0x809E, 0x809F, 0x80A0,
+            0x8037, 0x2A02, 0x2A01, 0x8DB9, 0x8642, 0x92E0, 0x8242, 0x884F, 0x8F9D, 0x864F,
+            0x3000, 0x3001, 0x3002, 0x3003, 0x3004, 0x3005, 0x3006, 0x3007
+        )
+
+        private fun isCoreCapability(capability: Int) = capability in CORE_CAPABILITIES
+
+        private val CORE_PROMOTED = setOf(
+            "GL_ARB_multitexture", "GL_ARB_vertex_buffer_object", "GL_ARB_multisample", "GL_ARB_vertex_shader",
+            "GL_ARB_fragment_shader", "GL_EXT_texture3D", "GL_ARB_texture_rectangle", "GL_ARB_texture_cube_map",
+            "GL_ARB_texture_float", "GL_EXT_framebuffer_object", "GL_EXT_framebuffer_blit", "GL_EXT_framebuffer_multisample",
+            "GL_ARB_half_float_pixel"
+        )
 
     }
 
@@ -568,28 +266,16 @@ class OpenGL {
     @JvmField
     var threadPeer: Thread? = null
 
+    private val context = GlxContext()
+    private var drawable = 0L
+    private var capabilities: GLCapabilities? = null
+
     fun supportsExtension(extensionName: String): Boolean {
-        if (this.supportedExtensions == null) {
-            this.supportedExtensions = Hashtable()
-            val oglString = glGetString(7939)
-            var charIndex = 0
-            while (true) {
-                val oglWord = oglString.indexOf(' ' , charIndex)
-                if (oglWord == -1) {
-                    break
-                }
-                val oglWord2 = oglString.substring(charIndex, oglWord).trim()
-                if (oglWord2.isNotEmpty()) {
-                    this.supportedExtensions!![oglWord2] = oglWord2
-                }
-                charIndex = 1 + oglWord
-            }
-            val string8 = oglString.substring(charIndex).trim()
-            if (string8.isNotEmpty()) {
-                this.supportedExtensions!![string8] = string8
-            }
+        if (supportedExtensions == null) {
+            supportedExtensions = Hashtable()
+            glGetString(GL11C.GL_EXTENSIONS).split(' ').filter { it.isNotEmpty() }.forEach { supportedExtensions!![it] = it }
         }
-        return this.supportedExtensions!!.containsKey(extensionName)
+        return extensionName in CORE_PROMOTED || supportedExtensions!!.containsKey(extensionName)
     }
 
     @Synchronized
@@ -600,7 +286,7 @@ class OpenGL {
             if (released != null) {
                 released.threadPeer = null
             }
-            this.threadPeer = thread
+            threadPeer = thread
             return true
         }
         return false
@@ -608,44 +294,69 @@ class OpenGL {
 
     @Synchronized
     fun detach(): Boolean {
-        if (this.threadPeer != Thread.currentThread()) {
+        if (threadPeer != Thread.currentThread()) {
             return false
         }
         detachPeer()
-        val tp = this.threadPeer
-        if (tp != null) {
-            ASSOCIATED_THREADS.remove(tp)
-        }
-        this.threadPeer = null
+        ASSOCIATED_THREADS.remove(threadPeer)
+        threadPeer = null
         return true
     }
 
-    external fun init(canvas: Canvas, redSize: Int, greenSize: Int, blueSize: Int, alphaSize: Int, depthSize: Int, stencilSize: Int): Long
+    fun init(canvas: Canvas, redSize: Int, greenSize: Int, blueSize: Int, alphaSize: Int, depthSize: Int, stencilSize: Int): Long {
+        if (GL.getFunctionProvider() == null) {
+            GL.create()
+        }
+        val debug = System.getProperty("render.gldebug") != null
+        val version = System.getProperty("render.glversion")?.split('.')?.map { it.toInt() } ?: listOf(4, 3)
+        val window = context.create(canvas, redSize, greenSize, blueSize, depthSize, version[0], version[1], debug)
+        if (window == 0L) {
+            return 0L
+        }
+        peer = window
+        drawable = window
+        if (!attach()) {
+            return 0L
+        }
+        capabilities = GL.createCapabilities()
+        GL30C.glBindVertexArray(GL30C.glGenVertexArrays())
+        println("[GL] ${GL11C.glGetString(GL11C.GL_VERSION)} | profile ${if (GL11C.glGetInteger(GL32C.GL_CONTEXT_PROFILE_MASK) and GL32C.GL_CONTEXT_CORE_PROFILE_BIT != 0) "core" else "compatibility"} forward-compatible | ${GL11C.glGetString(GL11C.GL_RENDERER)} | ${context.javaClass.simpleName}")
+        return window
+    }
 
-    external fun arePbuffersAvailable(): Boolean
+    fun arePbuffersAvailable(): Boolean = false
 
-    external fun attachPeer(): Boolean
+    fun attachPeer(): Boolean {
+        if (!context.makeCurrent(drawable)) {
+            return false
+        }
+        capabilities?.let {
+            GL.setCapabilities(it)
+        }
+        return true
+    }
 
-    external fun detachPeer()
+    fun detachPeer() {
+        context.releaseCurrent()
+        GL.setCapabilities(null)
+    }
 
-    external fun prepareSurface(canvas: Canvas): Long
+    fun prepareSurface(canvas: Canvas): Long = context.surface(canvas)
 
-    external fun surfaceResized(surfaceHandle: Long)
+    fun releaseSurface(canvas: Canvas, surfaceHandle: Long) {}
 
-    external fun releaseSurface(canvas: Canvas, surfaceHandle: Long)
+    fun setSurface(surfaceHandle: Long): Boolean {
+        drawable = surfaceHandle
+        return context.makeCurrent(surfaceHandle)
+    }
 
-    external fun setSurface(surfaceHandle: Long): Boolean
+    fun swapBuffers(surfaceHandle: Long) = context.swap(surfaceHandle)
 
-    external fun createPbuffer(width: Int, height: Int): Long
+    fun setSwapInterval(interval: Int) = context.swapInterval(interval)
 
-    external fun releasePbuffer(pbufferHandle: Long)
-
-    external fun setPbuffer(pbufferHandle: Long)
-
-    external fun swapBuffers(surfaceHandle: Long)
-
-    external fun setSwapInterval(interval: Int)
-
-    external fun release()
-
+    fun release() {
+        detachPeer()
+        context.destroy()
+        peer = 0
+    }
 }

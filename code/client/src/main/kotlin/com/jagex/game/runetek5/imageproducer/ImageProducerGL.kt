@@ -79,7 +79,6 @@ class ImageProducerGL : DelegatingDisplay {
         if (isDisposed) {
             throw IllegalStateException()
         } else {
-            openGL.surfaceResized(surfaceHandle)
             updateDimensions()
             if (this == openGlToolkit.getDisplay()) {
                 openGlToolkit.resetOrthoAndDisplay()

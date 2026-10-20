@@ -85,6 +85,14 @@ class X11ArgbCursors private constructor(
         private const val YHOT_OFFSET = 20L
         private const val PIXELS_OFFSET = 32L
 
+        private val canvasPeerField by lazy { peerField() }
+        private val canvasPeerWindow by lazy { peerWindowMethod() }
+
+        fun windowOf(component: Component): Long {
+            val peer = canvasPeerField?.get(component) ?: return 0L
+            return canvasPeerWindow?.invoke(peer) as? Long ?: 0L
+        }
+
         fun createOrNull(): X11ArgbCursors? {
             if (!Pointer.BITS64 || Toolkit.getDefaultToolkit().javaClass.name != "sun.awt.X11.XToolkit") {
                 return null
