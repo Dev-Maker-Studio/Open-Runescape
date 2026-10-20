@@ -1,0 +1,9 @@
+[package]
+name = "twin"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+control = { path = "../control" }
+display = { path = "../display" }
+renderdoc = { path = "../renderdoc" }

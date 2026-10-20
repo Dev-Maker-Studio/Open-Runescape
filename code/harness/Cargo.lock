@@ -181,6 +181,7 @@ dependencies = [
  "fresh",
  "playerstore",
  "renderdoc",
+ "twin",
  "verify",
  "web",
 ]
@@ -373,6 +374,15 @@ dependencies = [
  "rand",
  "sha1",
  "thiserror",
+]
+
+[[package]]
+name = "twin"
+version = "0.1.0"
+dependencies = [
+ "control",
+ "display",
+ "renderdoc",
 ]
 
 [[package]]

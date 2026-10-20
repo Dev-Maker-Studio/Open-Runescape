@@ -3,6 +3,7 @@ mod browser;
 mod capture;
 mod env;
 mod equiv;
+pub use equiv::SCENES;
 mod setup;
 
 pub use setup::problems;

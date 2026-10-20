@@ -8,6 +8,7 @@ display = { path = "../display" }
 cache = { path = "../cache" }
 control = { path = "../control" }
 renderdoc = { path = "../renderdoc" }
+twin = { path = "../twin" }
 playerstore = { path = "../playerstore" }
 fleet = { path = "../fleet" }
 fresh = { path = "../fresh" }

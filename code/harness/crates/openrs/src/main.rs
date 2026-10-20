@@ -19,6 +19,7 @@ const COMMANDS: &[(&str, &str, Run)] = &[
     ("web", "up | down | do | look | trail | run | show | hide | toggle  the web client in chromium on the private display", web::run),
     ("capture", "setup | verify | client | web | browser | exec | analyze | summary | diff | selftest  RenderDoc captures", renderdoc::run),
     ("equiv", "<scene> | --live [--target native|browser] | history | scenes | test | down  client and renderer equivalence", renderdoc::equiv),
+    ("twin", "[scene | --at X Y Z] [--renderdoc] [--keep] [--out DIR]  the OpenGL client and the browser on one frame, side by side", twin::run),
     ("doctor", "check everything the harness needs, PASS WARN FAIL with fixes", doctor::run),
     ("verify", "live end to end pass of the whole harness, JSON summary in code/harness/target/verify", verify::run),
     ("help", "this list", help),
