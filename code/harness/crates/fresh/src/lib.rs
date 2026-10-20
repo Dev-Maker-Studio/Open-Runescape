@@ -70,6 +70,43 @@ fn cargo(root: &Path) -> Result<(), String> {
     if ok { Ok(()) } else { Err("cargo build of code/renderer failed".into()) }
 }
 
+fn modified(p: &Path) -> Option<SystemTime> {
+    std::fs::metadata(p).and_then(|m| m.modified()).ok()
+}
+
+fn exec(dir: &Path, prog: &str, args: &[&str]) -> Result<(), String> {
+    let ok = Command::new(prog).current_dir(dir).args(args).status().map_err(|e| format!("{prog}: {e}"))?.success();
+    if ok { Ok(()) } else { Err(format!("{prog} {} failed in {}", args.join(" "), dir.display())) }
+}
+
+pub fn wasm(root: &Path) -> PathBuf {
+    root.join("code/web/static/renderer_bg.wasm")
+}
+
+pub fn wasm_stale(root: &Path) -> Option<&'static str> {
+    let r = root.join("code/renderer");
+    stale(modified(&wasm(root)), ["src", "shaders", "Cargo.toml"].iter().filter_map(|s| newest(&r.join(s))).max())
+}
+
+pub fn server(root: &Path) -> PathBuf {
+    root.join("code/web/target/release/openrs-web")
+}
+
+pub fn server_stale(root: &Path) -> Option<&'static str> {
+    let w = root.join("code/web");
+    stale(modified(&server(root)), ["src", "Cargo.toml"].iter().filter_map(|s| newest(&w.join(s))).max())
+}
+
+pub fn web(root: &Path) -> Result<(), String> {
+    if let Some(why) = wasm_stale(root) {
+        timed("renderer wasm", why, || exec(&root.join("code/renderer"), "./build-web.sh", &[]))?;
+    }
+    if let Some(why) = server_stale(root) {
+        timed("web server", why, || exec(&root.join("code/web"), "cargo", &["build", "--release", "-q"]))?;
+    }
+    Ok(())
+}
+
 pub fn ensure(root: &Path) -> Result<(), String> {
     if let Some(why) = renderer_stale(root) {
         timed("renderer", why, || cargo(root))?;
