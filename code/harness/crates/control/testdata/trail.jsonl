@@ -1,0 +1,6 @@
+{"t":1000,"tick":-1,"kind":"up","mode":"local"}
+{"t":1100,"tick":5,"kind":"cmd","cmd":"pos"}
+{"t":1200,"tick":10,"kind":"walk","x":3222,"y":3218}
+not json
+{"t":1300,"tick":12,"kind":"cmd","cmd":"describe"}
+{"t":1400,"tick":20,"kind":"shot","path":"/x.png"}

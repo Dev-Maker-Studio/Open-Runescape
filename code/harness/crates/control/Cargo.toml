@@ -1,0 +1,10 @@
+[package]
+name = "control"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+serde_json = "1"
+display = { path = "../display" }
+playerstore = { path = "../playerstore" }
+cache = { path = "../cache" }

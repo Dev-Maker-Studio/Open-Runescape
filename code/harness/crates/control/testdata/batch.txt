@@ -1,0 +1,7 @@
+# setup
+pos
+  # indented comment
+walk 3222 3218
+
+say "hello world" now
+command ""
