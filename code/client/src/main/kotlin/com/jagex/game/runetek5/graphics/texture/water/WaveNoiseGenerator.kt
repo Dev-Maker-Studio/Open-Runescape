@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.graphics.texture.water
 
 import kotlin.math.pow
 
-/**
- * Water texture generator with wave simulation.
- */
 internal open class WaveNoiseGenerator : WaterTextureGenerator(8, 8, 8) {
 
     @JvmField var outputBuffer: ByteArray? = null

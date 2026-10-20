@@ -9,9 +9,6 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 import com.jagex.game.runetek5.toolkit.opengl.*
 import jaggl.OpenGL
 
-/**
- * @author Steven - 16/09/2023
- */
 open class OpenGl2DTexture : OpenGlTexture {
 
     @JvmField val width: Int

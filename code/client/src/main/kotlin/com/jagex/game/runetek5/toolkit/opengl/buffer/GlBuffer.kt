@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import jaclib.memory.Buffer
 import jaclib.memory.heap.NativeHeapBuffer
 
-/**
- *
- * @author Steven - 13/09/2023
- *
- */
 open class GlBuffer {
 
     @JvmField val toolkit: OpenGlToolkit

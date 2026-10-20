@@ -2,10 +2,6 @@ package com.jagex.game.runetek5.graphics.texture.water
 
 import java.util.Random
 
-/**
- * Implements 3D Perlin noise generation for water textures
- * Uses gradient vectors and permutation table for pseudorandom noise
- */
 internal class PerlinNoiseGenerator : NoiseGenerator() {
 
     @JvmField val permutationTable: IntArray = IntArray(512)
@@ -77,23 +73,19 @@ internal class PerlinNoiseGenerator : NoiseGenerator() {
     }
 
     companion object {
-        /** 8 gradient vectors for Perlin noise */
         @JvmField val GRADIENT_VECTORS: Array<FloatArray> = arrayOf(floatArrayOf(-0.333333f, -0.333333f, -0.333333f), floatArrayOf(0.333333f, -0.333333f, -0.333333f), floatArrayOf(-0.333333f, 0.333333f, -0.333333f), floatArrayOf(0.333333f, 0.333333f, -0.333333f), floatArrayOf(-0.333333f, -0.333333f, 0.333333f), floatArrayOf(0.333333f, -0.333333f, 0.333333f), floatArrayOf(-0.333333f, 0.333333f, 0.333333f), floatArrayOf(0.333333f, 0.333333f, 0.333333f))
 
-        /** Linear interpolation between two values */
         @JvmStatic
         fun lerp(a: Float, b: Float, t: Float): Float {
             return a + (b - a) * t
         }
 
-        /** Computes dot product with gradient vector */
         @JvmStatic
         fun gradientDot(gradientIndex: Int, x: Float, y: Float, z: Float): Float {
             val gradient = GRADIENT_VECTORS[gradientIndex]
             return gradient[0] * x + gradient[1] * y + gradient[2] * z
         }
 
-        /** Smoothstep/fade function: 6t⁵ - 15t⁴ + 10t³ */
         @JvmStatic
         fun fade(t: Float): Float {
             return t * t * t * (10.0f + (t * 6.0f - 15.0f) * t)

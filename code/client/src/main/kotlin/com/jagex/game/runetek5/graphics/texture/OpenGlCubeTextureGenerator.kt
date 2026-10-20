@@ -29,12 +29,6 @@ class OpenGlCubeTextureGenerator(
         openglToolkit.getClipping(CLIPPINGS)
         openglToolkit.resetClipping()
         openglToolkit.setOrthoMatrixMode()
-        OpenGL.glMatrixMode(GL_PROJECTION)
-        OpenGL.glLoadIdentity()
-        OpenGL.glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        OpenGL.glMatrixMode(GL_MODELVIEW)
-        OpenGL.glLoadIdentity()
-        OpenGL.glPushAttrib(GL_VIEWPORT_BIT)
         OpenGL.glViewport(0, 0, cubeTexture.largestMaterialSize, cubeTexture.largestMaterialSize)
         openglToolkit.toggleFog(false)
         openglToolkit.setLightingEnabled(false)
@@ -60,95 +54,21 @@ class OpenGlCubeTextureGenerator(
             }
 
             openglToolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
             when (cubeFace) {
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X -> {
-                    OpenGL.glTexCoord3i(65535, 65534, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65535, 65534, 65534)
-                    OpenGL.glVertex2f(0.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65535, 65534, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65535, 65534, -65534)
-                    OpenGL.glVertex2f(1.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65535, -65534, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65535, -65534, -65534)
-                    OpenGL.glVertex2f(1.0f, 1.0f)
-                    OpenGL.glTexCoord3i(65535, -65534, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65535, -65534, 65534)
-                    OpenGL.glVertex2f(0.0f, 1.0f)
                 }
                 GL_TEXTURE_CUBE_MAP_NEGATIVE_X -> {
-                    OpenGL.glTexCoord3i(-65535, 65534, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65535, 65534, -65534)
-                    OpenGL.glVertex2f(0.0f, 0.0f)
-                    OpenGL.glTexCoord3i(-65535, 65534, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65535, 65534, 65534)
-                    OpenGL.glVertex2f(1.0f, 0.0f)
-                    OpenGL.glTexCoord3i(-65535, -65534, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65535, -65534, 65534)
-                    OpenGL.glVertex2f(1.0f, 1.0f)
-                    OpenGL.glTexCoord3i(-65535, -65534, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65535, -65534, -65534)
-                    OpenGL.glVertex2f(0.0f, 1.0f)
                 }
                 GL_TEXTURE_CUBE_MAP_POSITIVE_Y -> {
-                    OpenGL.glTexCoord3i(-65534, 65535, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, 65535, -65534)
-                    OpenGL.glVertex2f(0.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65534, 65535, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, 65535, -65534)
-                    OpenGL.glVertex2f(1.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65534, 65535, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, 65535, 65534)
-                    OpenGL.glVertex2f(1.0f, 1.0f)
-                    OpenGL.glTexCoord3i(-65534, 65535, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, 65535, 65534)
-                    OpenGL.glVertex2f(0.0f, 1.0f)
                 }
                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Y -> {
-                    OpenGL.glTexCoord3i(-65534, -65535, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, -65535, 65534)
-                    OpenGL.glVertex2f(0.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65534, -65535, 65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, -65535, 65534)
-                    OpenGL.glVertex2f(1.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65534, -65535, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, -65535, -65534)
-                    OpenGL.glVertex2f(1.0f, 1.0f)
-                    OpenGL.glTexCoord3i(-65534, -65535, -65534)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, -65535, -65534)
-                    OpenGL.glVertex2f(0.0f, 1.0f)
                 }
                 GL_TEXTURE_CUBE_MAP_POSITIVE_Z -> {
-                    OpenGL.glTexCoord3i(-65534, 65534, 65535)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, 65534, 65535)
-                    OpenGL.glVertex2f(0.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65534, 65534, 65535)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, 65534, 65535)
-                    OpenGL.glVertex2f(1.0f, 0.0f)
-                    OpenGL.glTexCoord3i(65534, -65534, 65535)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, -65534, 65535)
-                    OpenGL.glVertex2f(1.0f, 1.0f)
-                    OpenGL.glTexCoord3i(-65534, -65534, 65535)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, -65534, 65535)
-                    OpenGL.glVertex2f(0.0f, 1.0f)
                 }
                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z -> {
-                    OpenGL.glTexCoord3i(65534, 65534, -65535)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, 65534, -65535)
-                    OpenGL.glVertex2f(0.0f, 0.0f)
-                    OpenGL.glTexCoord3i(-65534, 65534, -65535)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, 65534, -65535)
-                    OpenGL.glVertex2f(1.0f, 0.0f)
-                    OpenGL.glTexCoord3i(-65534, -65534, -65535)
-                    OpenGL.glMultiTexCoord3i(33985, -65534, -65534, -65535)
-                    OpenGL.glVertex2f(1.0f, 1.0f)
-                    OpenGL.glTexCoord3i(65534, -65534, -65535)
-                    OpenGL.glMultiTexCoord3i(33985, 65534, -65534, -65535)
-                    OpenGL.glVertex2f(0.0f, 1.0f)
                 }
             }
 
-            OpenGL.glEnd()
         }
 
         display.setFramebuffer(0, null)
@@ -158,7 +78,6 @@ class OpenGlCubeTextureGenerator(
         openglToolkit.loadTextureCombineMode(GL_MODULATE, GL_MODULATE)
         openglToolkit.activateTexture(0)
         openglToolkit.setActiveTexture(null)
-        OpenGL.glPopAttrib()
         openglToolkit.setClipping(CLIPPINGS[0], CLIPPINGS[1], CLIPPINGS[2], CLIPPINGS[3])
         if (framebuffersReady && !openglToolkit.radeonGpu) {
             cubeTexture.generateMipmaps()

@@ -10,11 +10,6 @@ import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.utils.MathUtils
 import jaggl.OpenGL
 
-/**
- *
- * @author Brainpower - 22/04/2022
- *
- */
 class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) {
 
     var display: IntegratedGraphicsDisplayGL? = null
@@ -32,11 +27,6 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
     var height: Int = 0
 
     override fun draw(texture: OpenGl2DTexture) {
-        OpenGL.glPushAttrib(GL_VIEWPORT_BIT)
-        OpenGL.glMatrixMode(GL_PROJECTION)
-        OpenGL.glPushMatrix()
-        OpenGL.glLoadIdentity()
-        OpenGL.glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
         if (mipmaps != null) {
             activeToolkit.setDisplay(textureDisplay!!)
             var width = MathUtils.furtestBitValue(s)
@@ -49,28 +39,10 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
                 if (mipmapLevel == 0) {
                     activeToolkit.setActiveTexture(texture)
                     activeToolkit.legacyDrawTrace()
-                    OpenGL.glBegin(GL_QUADS)
-                    OpenGL.glTexCoord2f(0.0f, 0.0f)
-                    OpenGL.glVertex2i(0, 0)
-                    OpenGL.glTexCoord2f(s.toFloat(), 0.0f)
-                    OpenGL.glVertex2i(1, 0)
-                    OpenGL.glTexCoord2f(s.toFloat(), t.toFloat())
-                    OpenGL.glVertex2i(1, 1)
-                    OpenGL.glTexCoord2f(0.0f, t.toFloat())
                 } else {
                     activeToolkit.setActiveTexture(mipmaps!![mipmapLevel - 1])
                     activeToolkit.legacyDrawTrace()
-                    OpenGL.glBegin(GL_QUADS)
-                    OpenGL.glTexCoord2f(0.0f, 0.0f)
-                    OpenGL.glVertex2i(0, 0)
-                    OpenGL.glTexCoord2f(1.0f, 0.0f)
-                    OpenGL.glVertex2i(1, 0)
-                    OpenGL.glTexCoord2f(1.0f, 1.0f)
-                    OpenGL.glVertex2i(1, 1)
-                    OpenGL.glTexCoord2f(0.0f, 1.0f)
                 }
-                OpenGL.glVertex2i(0, 1)
-                OpenGL.glEnd()
 
                 if (width > 256) {
                     width = width shr 1
@@ -92,14 +64,6 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
             OpenGL.glUniform1i(OpenGL.glGetUniformLocation(handle, "sceneTex"), 0)
             OpenGL.glUniform3f(OpenGL.glGetUniformLocation(handle, "params"), whitePoint, 0.0f, 0.0f)
             activeToolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(0, 0)
-            OpenGL.glTexCoord2f(1.0f, 0.0f)
-            OpenGL.glVertex2i(1, 0)
-            OpenGL.glTexCoord2f(1.0f, 1.0f)
-            OpenGL.glVertex2i(1, 1)
-            OpenGL.glTexCoord2f(0.0f, 1.0f)
         } else {
             activeToolkit.setActiveTexture(texture)
             activeToolkit.setDisplay(display!!)
@@ -110,17 +74,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
             OpenGL.glUniform1i(OpenGL.glGetUniformLocation(handle, "sceneTex"), 0)
             OpenGL.glUniform3f(OpenGL.glGetUniformLocation(handle, "params"), whitePoint, 0.0f, 0.0f)
             activeToolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(0, 0)
-            OpenGL.glTexCoord2f(s.toFloat(), 0.0f)
-            OpenGL.glVertex2i(1, 0)
-            OpenGL.glTexCoord2f(s.toFloat(), t.toFloat())
-            OpenGL.glVertex2i(1, 1)
-            OpenGL.glTexCoord2f(0.0f, t.toFloat())
         }
-        OpenGL.glVertex2i(0, 1)
-        OpenGL.glEnd()
 
         display!!.drawBuffer(1)
         activeToolkit.setActiveTexture(bloomTextureA)
@@ -129,33 +83,10 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
         OpenGL.glUniform1i(OpenGL.glGetUniformLocation(handle, "baseTex"), 0)
         OpenGL.glUniform3f(OpenGL.glGetUniformLocation(handle, "step"), 0.00390625f, 0.0f, 0.0f)
         activeToolkit.legacyDrawTrace()
-        OpenGL.glBegin(GL_QUADS)
-        OpenGL.glTexCoord2f(0.0f, 0.0f)
-        OpenGL.glVertex2i(0, 0)
-        OpenGL.glTexCoord2f(1.0f, 0.0f)
-        OpenGL.glVertex2i(1, 0)
-        OpenGL.glTexCoord2f(1.0f, 1.0f)
-        OpenGL.glVertex2i(1, 1)
-        OpenGL.glTexCoord2f(0.0f, 1.0f)
-        OpenGL.glVertex2i(0, 1)
-        OpenGL.glEnd()
         display!!.drawBuffer(0)
         activeToolkit.setActiveTexture(bloomTextureB)
         OpenGL.glUniform3f(OpenGL.glGetUniformLocation(handle, "step"), 0.0f, 0.00390625f, 0.0f)
         activeToolkit.legacyDrawTrace()
-        OpenGL.glBegin(GL_QUADS)
-        OpenGL.glTexCoord2f(0.0f, 0.0f)
-        OpenGL.glVertex2i(0, 0)
-        OpenGL.glTexCoord2f(1.0f, 0.0f)
-        OpenGL.glVertex2i(1, 0)
-        OpenGL.glTexCoord2f(1.0f, 1.0f)
-        OpenGL.glVertex2i(1, 1)
-        OpenGL.glTexCoord2f(0.0f, 1.0f)
-        OpenGL.glVertex2i(0, 1)
-        OpenGL.glEnd()
-        OpenGL.glPopAttrib()
-        OpenGL.glPopMatrix()
-        OpenGL.glMatrixMode(GL_MODELVIEW)
         activeToolkit.resizeDisplay(display!!)
         val handle2 = bloomScenetexShader!!.programHandle
         OpenGL.glUseProgram(handle2)

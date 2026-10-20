@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.toolkit.opengl.buffer
 import com.jagex.game.runetek5.buffer.Packet
 import jaclib.memory.Stream
 
-/**
- *
- * @author Brainpower - 07/05/2022
- *
- */
 class GlBitBuffer(size: Int) : Packet(size) {
 
     fun writeFloatLittleEndian(value: Float) {

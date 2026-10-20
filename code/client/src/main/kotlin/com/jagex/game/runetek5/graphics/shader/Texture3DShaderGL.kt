@@ -15,23 +15,9 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 import com.jagex.game.runetek5.toolkit.opengl.*
 import jaggl.OpenGL
 
-/**
- * 3D texture shader for OpenGL.
- *
- * @author Brainpower - 22/04/2022
- */
 class Texture3DShaderGL(
     @JvmField val openglToolkit: OpenGlToolkit
 ) {
-    /**
-     * The modern toolkit's version of [activate]: the same normal-map derivation the
-     * fragment shader performs, done on the CPU and uploaded as float RGBA — no
-     * fixed-function quad. Exactness notes: the shader samples slice z = d/depth,
-     * which with linear filtering is the midpoint between slice centres d-1 and d, so
-     * every output slice is derived from the AVERAGE of those two height slices (with
-     * wrap); the +-sampleSize taps land on neighbouring texel centres, so the
-     * derivative is a plain neighbour difference with wrap-around.
-     */
     private fun deriveOnCpu(toolkit: ModernGLToolkit, hdrTexture3d: OpenGl3DTexture, texture3d: OpenGl3DTexture, heightData: ByteArray): Boolean {
         val w = texture3d.width
         val h = texture3d.height
@@ -39,8 +25,6 @@ class Texture3DShaderGL(
         if (heightData.size < w * h * d) return false
         val outDepth = hdrTexture3d.depth
         val slice = FloatArray(w * h)
-        // Whole texture as native-order float RGBA bytes: uploaded through jaggl (the
-        // toolkit is still being constructed here, before LWJGL capabilities exist).
         val bytes = ByteArray(w * h * outDepth * 4 * 4)
         val bb = ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder())
         val rcpRelief = 0.5f
@@ -108,13 +92,6 @@ class Texture3DShaderGL(
         openglToolkit.setDisplay(openglDisplay)
         openglDisplay.setFramebuffer(0, openglRenderBuffer)
         if (openglDisplay.isFramebufferComplete()) {
-            OpenGL.glPushMatrix()
-            OpenGL.glLoadIdentity()
-            OpenGL.glMatrixMode(GL_PROJECTION)
-            OpenGL.glPushMatrix()
-            OpenGL.glLoadIdentity()
-            OpenGL.glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-            OpenGL.glPushAttrib(GL_VIEWPORT_BIT)
             OpenGL.glViewport(0, 0, hdrTexture3d.width, hdrTexture3d.height)
             OpenGL.glUseProgram(shader!!.programHandle)
             OpenGL.glUniform1i(OpenGL.glGetUniformLocation(shader!!.programHandle, "heightMap"), 0)
@@ -125,24 +102,10 @@ class Texture3DShaderGL(
                 val r = depth.toFloat() / hdrTexture3d.depth
                 openglToolkit.setActiveTexture(texture3d)
                 openglToolkit.legacyDrawTrace()
-                OpenGL.glBegin(7)
-                OpenGL.glTexCoord3f(0.0f, 0.0f, r)
-                OpenGL.glVertex2f(0.0f, 0.0f)
-                OpenGL.glTexCoord3f(1.0f, 0.0f, r)
-                OpenGL.glVertex2f(1.0f, 0.0f)
-                OpenGL.glTexCoord3f(1.0f, 1.0f, r)
-                OpenGL.glVertex2f(1.0f, 1.0f)
-                OpenGL.glTexCoord3f(0.0f, 1.0f, r)
-                OpenGL.glVertex2f(0.0f, 1.0f)
-                OpenGL.glEnd()
                 hdrTexture3d.copy(depth, hdrTexture3d.width, hdrTexture3d.height)
             }
 
             OpenGL.glUseProgram(0)
-            OpenGL.glPopAttrib()
-            OpenGL.glPopMatrix()
-            OpenGL.glMatrixMode(GL_MODELVIEW)
-            OpenGL.glPopMatrix()
             ready = true
         }
 

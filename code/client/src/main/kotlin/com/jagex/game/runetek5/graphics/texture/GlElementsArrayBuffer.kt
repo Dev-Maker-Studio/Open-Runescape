@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.buffer.ElementsBufferGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.buffer.GlBuffer
 
-/**
- *
- * @author Steven - 13/09/2023
- *
- */
 class GlElementsArrayBuffer(
     toolkit: OpenGlToolkit,
     data: ByteArray?,

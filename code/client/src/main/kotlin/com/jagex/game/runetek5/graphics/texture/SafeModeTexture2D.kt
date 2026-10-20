@@ -32,7 +32,6 @@ class SafeModeTexture2D(
             var primaryColorIndex = startCount
             var secondaryColorIndex = startCount
 
-            // First pass: accumulate color components in columns
             for (pass in 2 downTo 0) {
                 for (idx in start downTo 0) {
                     val secondary = colorArgb[--primaryColorIndex]
@@ -49,7 +48,6 @@ class SafeModeTexture2D(
 
             var startColorIndex = initialColorIndex
 
-            // Second pass: process rows with 3x3 box blur
             for (idx in end downTo 0) {
                 var secondary = 1
                 var primary = 1
@@ -58,7 +56,6 @@ class SafeModeTexture2D(
                 var sumRed = 0
                 var sumAlpha = 0
 
-                // Initialize sums with first 3 pixels
                 for (pass in 2 downTo 0) {
                     sumAlpha += a[--primary]
                     sumRed += r[primary]
@@ -69,7 +66,6 @@ class SafeModeTexture2D(
                     }
                 }
 
-                // Apply blur across the row
                 for (rowIdx in start downTo 0) {
                     --primary
                     --secondary
@@ -92,7 +88,6 @@ class SafeModeTexture2D(
                     }
                 }
 
-                // Update accumulated values with difference
                 for (rowIdx in start downTo 0) {
                     val calcedA = colorArgb[--primaryColorIndex]
                     val calcedR = colorArgb[--secondaryColorIndex]
@@ -111,7 +106,6 @@ class SafeModeTexture2D(
                 }
             }
 
-            // Swap the blurred result with the original
             val tempColorArgb = colorArgb
             colorArgb = colorsArgb!!
             colorsArgb = tempColorArgb
@@ -142,7 +136,6 @@ class SafeModeTexture2D(
                 rowStart += totalColorCount
             }
 
-            // Swap arrays
             val tempColorRgb = colorArgb
             colorArgb = colorsArgb!!
             colorsArgb = tempColorRgb

@@ -4,16 +4,8 @@ import com.jagex.game.runetek5.buffer.ArrayBufferGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import jaclib.memory.Buffer
 
-/**
- *
- * @author Steven - 13/09/2023
- *
- */
 class GlArrayBuffer : GlBuffer, ArrayBufferGL {
 
-    /**
-     * Padding between elements
-     */
     @JvmField var stride: Int
 
     constructor(toolkit: OpenGlToolkit, stride: Int, buffer: ByteArray?, initialCapacity: Int) : super(toolkit, buffer, initialCapacity) {

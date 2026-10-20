@@ -7,9 +7,6 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 import com.jagex.game.runetek5.toolkit.opengl.*
 import jaggl.OpenGL
 
-/**
- * OpenGL ARB cube map texture for environment mapping.
- */
 class OpenGlArbCubeMapTexture : OpenGlTexture {
 
     @JvmField val largestMaterialSize: Int

@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 
-/**
- * Generates OpenGL ARB cube map textures from material IDs.
- */
 class OpenGLArbTextureCubeMapGenerator(
     @JvmField val openglToolkit: OpenGlToolkit,
     @JvmField val materialAtPositiveX: Int,

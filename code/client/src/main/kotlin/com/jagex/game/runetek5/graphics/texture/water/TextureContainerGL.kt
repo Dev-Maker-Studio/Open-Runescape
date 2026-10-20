@@ -8,9 +8,6 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 
-/**
- * Container for OpenGL water textures (2D and 3D).
- */
 class TextureContainerGL(openglToolkit: OpenGlToolkit) {
 
     @JvmField var textures2d: Array<OpenGl2DTexture>? = null

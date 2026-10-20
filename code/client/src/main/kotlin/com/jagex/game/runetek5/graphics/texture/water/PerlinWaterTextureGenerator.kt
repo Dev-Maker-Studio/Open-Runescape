@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.graphics.texture.water
 
-/**
- * Generates water textures using Perlin noise with multiple octaves
- */
 internal class PerlinWaterTextureGenerator {
 
     init {
@@ -10,9 +7,6 @@ internal class PerlinWaterTextureGenerator {
     }
 
     companion object {
-        /**
-         * Generates a single octave layer of noise with multiple frequencies
-         */
         @JvmStatic
         fun generateNoiseLayer(layer: Int, noiseGen: NoiseGenerator, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: ByteArray, offset: Int) {
             val octaveSize = 16384
@@ -46,9 +40,6 @@ internal class PerlinWaterTextureGenerator {
             }
         }
 
-        /**
-         * Generates a complete water texture using Perlin noise
-         */
         @JvmStatic
         fun generatePerlinWaterTexture(noiseGen: NoiseGenerator): ByteArray {
             val textureData = ByteArray(262144)
@@ -56,9 +47,6 @@ internal class PerlinWaterTextureGenerator {
             return textureData
         }
 
-        /**
-         * Generates all layers of the water texture
-         */
         @JvmStatic
         fun generatePerlinWaterTextureLayers(noiseGen: NoiseGenerator, output: ByteArray, startOffset: Int) {
             var offset = startOffset

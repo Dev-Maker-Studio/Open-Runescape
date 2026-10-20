@@ -27,11 +27,9 @@ class ShaderLoader(data: ByteArray) {
         this.primaryShaderVariables = Array(decoder.getEntryCount()) { ShaderVariableDecoder() }
         this.secondaryShaderVariables = Array(decoder.getEntryCount()) { ShaderVariableDecoder() }
         this.mappings = Array(decoder.getEntryCount()) { NativeShaderMapping() }
-        /** Those are ALWAYS used **/
         for (index in this.primaryShaderVariables!!.indices) {
             this.primaryShaderVariables!![index].decode(decoder)
         }
-        /** Those are NEVER unused **/
         for (index in this.secondaryShaderVariables!!.indices) {
             this.secondaryShaderVariables!![index].decode(decoder)
         }
