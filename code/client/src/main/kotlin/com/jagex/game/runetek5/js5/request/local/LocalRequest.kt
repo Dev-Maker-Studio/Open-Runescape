@@ -3,10 +3,6 @@ package com.jagex.game.runetek5.js5.request.local
 import com.jagex.game.runetek5.cache.Decompressor
 import com.jagex.game.runetek5.js5.request.Js5WorkerRequestMessage
 
-/**
- * Represents a request to fetch the reference table from the update server
- * @author Brainpower - 21/05/2020
- */
 class LocalRequest : Js5WorkerRequestMessage() {
 
     @JvmField

@@ -77,6 +77,8 @@ import com.jagex.game.runetek5.js5.dependency.CacheableWorldMap
 import com.jagex.game.runetek5.js5.dependency.Dependency
 import com.jagex.game.runetek5.js5.library.NativeLibraryLoader
 import com.jagex.game.runetek5.js5.request.RequestManager
+import com.jagex.game.runetek5.js5.request.local.LocalFileWorker
+import com.jagex.game.runetek5.js5.request.local.PackedCache
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.environment.EnvironmentManager
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
@@ -122,16 +124,20 @@ object ClientStartup {
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.INITIALIZE_JS5) {
-            if (Client.requestManager == null) {
-                Client.requestManager = RequestManager(Resource.remoteFileRequesterJs5!!, Resource.localRequesterJs5!!)
-            }
+            if (PackedCache.present) {
+                LocalFileWorker.warm()
+            } else {
+                if (Client.requestManager == null) {
+                    Client.requestManager = RequestManager(Resource.remoteFileRequesterJs5!!, Resource.localRequesterJs5!!)
+                }
 
-            if (!Client.requestManager!!.initialize()) {
-                return 0
+                if (!Client.requestManager!!.initialize()) {
+                    return 0
+                }
             }
 
             if (!CacheSwitch.inProgress) {
-                Renderers.prepareForRendering(0, null, true)
+                Renderers.prepareForRendering(true, true)
             }
             Resource.USING_JAGEX_IMAGE_FORMAT = !NativeSprite.supportsGzippedSprites()
             Resource.FONT = Resource.createProvider(if (Resource.USING_JAGEX_IMAGE_FORMAT) IndexReference.INDEX_34 else IndexReference.INDEX_32, false, 1)
@@ -423,29 +429,8 @@ object ClientStartup {
             NativeSprite.resetCache()
             Client.isForcedSafemode = PreferenceManager.preferences!!.safeMode!!.getValue() == 1
             PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.safeMode!!, 1)
-            if (Client.isForcedSafemode) {
-                PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, 0)
-            } else if (PreferenceManager.preferences!!.toolkit!!.isDefault && SystemInfo.SYSTEM_INFO!!.ram < 512 && SystemInfo.SYSTEM_INFO!!.ram != 0) {
-                PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, 0)
-            }
             PreferenceManager.savePreferences()
-            // The geometry-diff harness lives on ModernGLToolkit (only it builds
-            // modernBuilt), so it needs the modern toolkit active. Saved preferences boot
-            // into SM/legacy, and the harness has to run at the login screen where
-            // nobody is around to type `toolkit 3`. Guarded by the property so a
-            // normal launch is completely unaffected.
-            // -Dtoolkit=<id> pins the renderer at startup, which is what makes an
-            // unattended legacy-vs-modern comparison possible: same scene, same
-            // camera, one process each. Ids per AbstractToolkit.toolkitForType:
-            // 0 = safe mode, 1 or 5 = legacy GL, 3 = modern GL.
-            // -Dgeodiff implies 3 because its oracle only exists on the modern path.
-            val geodiffToolkit = System.getProperty("toolkit")?.trim()?.toIntOrNull()?.takeIf { it in ToolkitPreference.AVAILABLE }
-                ?: if (System.getProperty("geodiff") != null) ToolkitPreference.MODERN_OPENGL else null
-            if (Client.isForcedSafemode && geodiffToolkit == null) {
-                Client.loadAssets(0, false)
-            } else {
-                Client.loadAssets(geodiffToolkit ?: PreferenceManager.preferences!!.toolkit!!.getValue(), false)
-            }
+            Client.loadAssets(false)
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             StaticMethods.initializedFontcombos!!.initializeFontMap(Client.FONT_PROVIDER)
             FontManager.initialize()
@@ -480,11 +465,8 @@ object ClientStartup {
             fullyCachedDependencies = CacheableDependencies.getAll()
             CacheableDependencies.DEFAULTS.inializeDependency(CacheableResource(Resource.DEFAULTS!!))
             CacheableDependencies.JAGGL.inializeDependency(CacheableDLL("jaggl"))
-            //TODO DirectX deprecation: Remove JAGDX initialization once dependency checking is refactored
             CacheableDependencies.JAGDX.inializeDependency(CacheableDLL("jagdx"))
-            //TODO SW3D deprecation: Remove SW3D initialization once dependency checking is refactored
             CacheableDependencies.SW3D.inializeDependency(CacheableDLL("sw3d"))
-            //TODO SW3D deprecation: Remove HW3D initialization once dependency checking is refactored
             CacheableDependencies.HW3D.inializeDependency(CacheableDLL("hw3d"))
             CacheableDependencies.JAGTHEORA.inializeDependency(CacheableDLL("jagtheora"))
             CacheableDependencies.SHADERS.inializeDependency(CacheableResource(Resource.SHADER!!))

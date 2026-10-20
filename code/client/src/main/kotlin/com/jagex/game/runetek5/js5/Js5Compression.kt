@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.compression.Bzip2Compressor
 import com.jagex.game.runetek5.cache.compression.GzipDecompressor
 
-/**
- * [J]
- * @author Steven - 11/10/2023
- *
- */
 object Js5Compression {
 
     @JvmField val GZIP = GzipDecompressor()

@@ -1,17 +1,11 @@
 package com.jagex.game.runetek5.js5.dependency
 
-/**
- * Defines all cacheable game resource dependencies and their types.
- */
 object CacheableDependencies {
     @JvmField val DEFAULTS = Dependency(DependencyType.CONFIG)
     @JvmField val JACLIB = Dependency(DependencyType.NATIVE)
     @JvmField val JAGGL = Dependency(DependencyType.NATIVE)
-    //TODO DirectX deprecation: Remove JAGDX dependency once dependency checking is refactored
     @JvmField val JAGDX = Dependency(DependencyType.NATIVE)
-    //TODO SW3D deprecation: Remove SW3D dependency once dependency checking is refactored
     @JvmField val SW3D = Dependency(DependencyType.NATIVE)
-    //TODO SW3D deprecation: Remove HW3D dependency once dependency checking is refactored
     @JvmField val HW3D = Dependency(DependencyType.NATIVE)
     @JvmField val JAGTHEORA = Dependency(DependencyType.NATIVE)
     @JvmField val SHADERS = Dependency(DependencyType.CONFIG)
@@ -35,15 +29,8 @@ object CacheableDependencies {
     @JvmField val FONTS = Dependency(DependencyType.CONFIG)
     @JvmField val WORLD_MAP = Dependency(DependencyType.LABELS)
 
-    /**
-     * Returns all dependencies in a single array.
-     *
-     * @return Array of all dependencies
-     */
     @JvmStatic
     fun getAll(): Array<Dependency> {
-        //TODO DirectX deprecation: Remove JAGDX from dependencies array once dependency checking is refactored
-        //TODO SW3D deprecation: Remove SW3D and HW3D from dependencies array once dependency checking is refactored
         return arrayOf(
             DEFAULTS, JACLIB, JAGGL, JAGDX, SW3D, HW3D, JAGTHEORA,
             SHADERS, MATERIALS, CONFIG, LOC, ENUM, NPC, OBJ, SEQ, GFX,

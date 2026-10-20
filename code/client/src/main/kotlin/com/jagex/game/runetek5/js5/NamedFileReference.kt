@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.js5
 
-/**
- *
- * @author Steven - 11/10/2023
- *
- */
 class NamedFileReference(nameHashes: IntArray) {
 
     @JvmField val nameHashes: IntArray
@@ -29,9 +24,6 @@ class NamedFileReference(nameHashes: IntArray) {
         }
     }
 
-    /**
-     * [J]
-     */
     fun getGroupId(nameHash: Int): Int {
         val center = (this.nameHashes.size shr 1) - 1
         var position = nameHash and center

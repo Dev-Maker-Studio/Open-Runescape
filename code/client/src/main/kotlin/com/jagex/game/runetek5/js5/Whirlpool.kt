@@ -2,15 +2,6 @@ package com.jagex.game.runetek5.js5
 
 import java.util.Arrays
 
-/**
- * [J]
- * @author Paulo S.L.M. Barreto
- * @author Vincent Rijmen
- * Reference - https://github.com/gbevin/rife/blob/master/src/main/java/com/uwyn/rife/tools/Whirlpool.java
- *
- * @author Brainpower - Refactored 12/09/2021
- *
- */
 class Whirlpool {
 
     var bufferPos: Int = 0
@@ -23,43 +14,19 @@ class Whirlpool {
     val block: LongArray = LongArray(8)
     val state: LongArray = LongArray(8)
 
-    /**
-     * Initialize the hashing state.
-     */
     fun NESSIEinit() {
         Arrays.fill(this.bitLength, 0.toByte())
         this.bufferPos = 0
         this.bufferBits = this.bufferPos
-        this.buffer[0] = 0 // it's only necessary to cleanup buffer[bufferPos].
-        Arrays.fill(this.hash, 0L) // initial value
+        this.buffer[0] = 0
+        Arrays.fill(this.hash, 0L)
     }
 
-    /**
-     * Delivers input data to the hashing algorithm.
-     *
-     * @param source     plaintext data to hash.
-     * @param sourceBits how many bits of plaintext to process.
-     *
-     * This method maintains the invariant: bufferBits < 512
-     */
     fun NESSIEadd(source: ByteArray, sourceBits: Long) {
-        /*
-                           sourcePos
-                           |
-                           +-------+-------+-------
-                              ||||||||||||||||||||| source
-                           +-------+-------+-------
-        +-------+-------+-------+-------+-------+-------
-        ||||||||||||||||||||||                           buffer
-        +-------+-------+-------+-------+-------+-------
-                        |
-                        bufferPos
-        */
-        var sourcePos = 0 // index of leftmost source byte containing data (1 to 8 bits).
-        val sourceGap = (8 - (sourceBits.toInt() and 7)) and 7 // space on source[sourcePos].
-        val bufferRem = this.bufferBits and 7 // occupied bits on buffer[bufferPos].
+        var sourcePos = 0
+        val sourceGap = (8 - (sourceBits.toInt() and 7)) and 7
+        val bufferRem = this.bufferBits and 7
         var b: Int
-        // tally the length of the added data:
         var value = sourceBits
         var carry = 0
         for (i in 31 downTo 0) {
@@ -68,52 +35,39 @@ class Whirlpool {
             carry = carry ushr 8
             value = value ushr 8
         }
-        // process data in chunks of 8 bits:
         var remainingBits = sourceBits
-        while (remainingBits > 8) { // at least source[sourcePos] and source[sourcePos+1] contain data.
-            // take a byte from the source:
+        while (remainingBits > 8) {
             b = ((source[sourcePos].toInt() shl sourceGap) and 0xff) or
                 ((source[sourcePos + 1].toInt() and 0xff) ushr (8 - sourceGap))
             if (b < 0 || b >= 256) {
                 throw RuntimeException("LOGIC ERROR")
             }
-            // process this byte:
             this.buffer[this.bufferPos++] = (this.buffer[this.bufferPos - 1].toInt() or (b ushr bufferRem)).toByte()
-            this.bufferBits += 8 - bufferRem // bufferBits = 8*bufferPos;
+            this.bufferBits += 8 - bufferRem
             if (this.bufferBits == 512) {
-                // process data block:
                 processBuffer()
-                // reset buffer:
                 this.bufferPos = 0
                 this.bufferBits = this.bufferPos
             }
             this.buffer[this.bufferPos] = ((b shl (8 - bufferRem)) and 0xff).toByte()
             this.bufferBits += bufferRem
-            // proceed to remaining data:
             remainingBits -= 8
             sourcePos++
         }
-        // now 0 <= sourceBits <= 8;
-        // furthermore, all data (if any is left) is in source[sourcePos].
         b = if (remainingBits > 0) {
-            (source[sourcePos].toInt() shl sourceGap) and 0xff // bits are left-justified on b.
+            (source[sourcePos].toInt() shl sourceGap) and 0xff
         } else {
             0
         }
         if (bufferRem + remainingBits < 8) {
-            // all remaining data fits on buffer[bufferPos], and there still remains some space.
             this.buffer[this.bufferPos] = (this.buffer[this.bufferPos].toInt() or (b ushr bufferRem)).toByte()
             this.bufferBits += remainingBits.toInt()
         } else {
-            // buffer[bufferPos] is full:
             this.buffer[this.bufferPos++] = (this.buffer[this.bufferPos - 1].toInt() or (b ushr bufferRem)).toByte()
-            this.bufferBits += 8 - bufferRem // bufferBits = 8*bufferPos;
+            this.bufferBits += 8 - bufferRem
             remainingBits -= (8 - bufferRem).toLong()
-            // now 0 <= sourceBits < 8; furthermore, all data is in source[sourcePos].
             if (this.bufferBits == 512) {
-                // process data block:
                 processBuffer()
-                // reset buffer:
                 this.bufferPos = 0
                 this.bufferBits = this.bufferPos
             }
@@ -122,33 +76,21 @@ class Whirlpool {
         }
     }
 
-    /**
-     * Get the hash value from the hashing state.
-     *
-     * This method uses the invariant: bufferBits < 512
-     */
     fun NESSIEfinalize(digest: ByteArray) {
-        // append a '1'-bit:
         this.buffer[this.bufferPos] = (this.buffer[this.bufferPos].toInt() or (0x80 ushr (this.bufferBits and 7))).toByte()
-        this.bufferPos++ // all remaining bits on the current byte are set to zero.
-        // pad with zero bits to complete 512N + 256 bits:
+        this.bufferPos++
         if (this.bufferPos > 32) {
             while (this.bufferPos < 64) {
                 this.buffer[this.bufferPos++] = 0
             }
-            // process data block:
             processBuffer()
-            // reset buffer:
             this.bufferPos = 0
         }
         while (this.bufferPos < 32) {
             this.buffer[this.bufferPos++] = 0
         }
-        // append bit length of hashed data:
         System.arraycopy(this.bitLength, 0, this.buffer, 32, 32)
-        // process data block:
         processBuffer()
-        // return the completed message digest:
         var j = 0
         for (i in 0..7) {
             val h = this.hash[i]
@@ -165,9 +107,6 @@ class Whirlpool {
     }
 
     fun processBuffer() {
-        /*
-         * map the buffer to a block:
-         */
         var j = 0
         for (i in 0..7) {
             this.block[i] =
@@ -181,19 +120,10 @@ class Whirlpool {
                 ((this.buffer[j + 7].toLong() and 0xffL))
             j += 8
         }
-        /*
-         * compute and apply K^0 to the cipher state:
-         */
         for (i in 0..7) {
             this.state[i] = this.block[i] xor (this.hash[i].also { this.K[i] = it })
         }
-        /*
-         * iterate over all rounds:
-         */
         for (r in 1..ROUNDS) {
-            /*
-             * compute K^r from K^{r-1}:
-             */
             for (i in 0..7) {
                 this.L[i] = 0L
                 var s = 56
@@ -204,9 +134,6 @@ class Whirlpool {
             }
             System.arraycopy(this.L, 0, this.K, 0, 8)
             this.K[0] = this.K[0] xor ROUND_CONSTANTS[r]
-            /*
-             * apply the r-th round transformation:
-             */
             for (i in 0..7) {
                 this.L[i] = this.K[i]
                 var s = 56
@@ -217,18 +144,12 @@ class Whirlpool {
             }
             System.arraycopy(this.L, 0, this.state, 0, 8)
         }
-        /*
-         * apply the Miyaguchi-Preneel compression function:
-         */
         for (i in 0..7) {
             this.hash[i] = this.hash[i] xor this.state[i] xor this.block[i]
         }
     }
 
     companion object {
-        /**
-         * The number of rounds of the internal dedicated block cipher.
-         */
         const val ROUNDS = 10
 
         @JvmField
@@ -237,9 +158,6 @@ class Whirlpool {
         @JvmField
         val ROUND_CONSTANTS = LongArray(11)
 
-        /**
-         * The substitution box.
-         */
         private const val SBOX =
             "\u1823\uc6E8\u87B8\u014F\u36A6\ud2F5\u796F\u9152" +
             "\u60Bc\u9B8E\uA30c\u7B35\u1dE0\ud7c2\u2E4B\uFE57" +
@@ -276,24 +194,15 @@ class Whirlpool {
                     v8 = v8 xor 0x11dL
                 }
                 val v9 = v8 xor v1
-                /*
-                 * build the circulant table C[0][x] = S[x].[1, 1, 4, 1, 8, 5, 2, 9]:
-                 */
                 CIRCULANT_TABLE[0][x] =
                     (v1 shl 56) or (v1 shl 48) or (v4 shl 40) or (v1 shl 32) or
                     (v8 shl 24) or (v5 shl 16) or (v2 shl 8) or (v9)
-                /*
-                 * build the remaining circulant tables C[t][x] = C[0][x] rotr t
-                 */
                 for (t in 1..7) {
                     CIRCULANT_TABLE[t][x] = (CIRCULANT_TABLE[t - 1][x] ushr 8) or ((CIRCULANT_TABLE[t - 1][x] shl 56))
                 }
             }
 
-            /*
-             * build the round constants:
-             */
-            ROUND_CONSTANTS[0] = 0L /* not used (assignment kept only to properly initialize all variables) */
+            ROUND_CONSTANTS[0] = 0L
             for (r in 1..ROUNDS) {
                 val i = 8 * (r - 1)
                 ROUND_CONSTANTS[r] =

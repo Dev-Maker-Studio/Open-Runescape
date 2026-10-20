@@ -6,9 +6,6 @@ import com.jagex.game.runetek5.graphics.loginscreen.LoginScreenComponent
 import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * Represents a stage in the game loading process with progress tracking.
- */
 class LoadingStage(
     @JvmField val number: Int,
     @JvmField val primaryTextDisplay: LocalizedText,
@@ -102,8 +99,6 @@ class LoadingStage(
         @JvmStatic
         fun initialize() {
             LOADING_STAGE?.let { stage ->
-                // Defensive: never overwrite a still-running thread reference — an
-                // overwritten reference can never be joined and leaks the thread.
                 loginScreenRendererThread?.let { previous ->
                     if (previous.isAlive && previous !== Thread.currentThread()) {
                         plainLoginScreenRenderer?.stop()
@@ -141,6 +136,7 @@ class LoadingStage(
 
             val loadingStage = LOADING_STAGE
             val loadingPercent = ClientStartup.initialize()
+            LoadTimer.stage(LOADING_STAGE!!.number)
 
             if (loadingStage === LOADING_STAGE) {
                 LOADING_TEXT = bannerFor(LOADING_STAGE!!)
@@ -151,13 +147,6 @@ class LoadingStage(
                     LOADING_TEXT = "$LOADING_TEXT$displayedLoadingPercentage%"
                 }
             } else if (LOADING_STAGE === PREPARE_PLAYER) {
-                // Stop the renderer BEFORE dropping the reference. Nulling it while the
-                // thread was still running (it is re-spawned every login-screen frame by
-                // Client.redraw → LoadingStage.initialize when the field is null) leaked
-                // an unstoppable orphan thread: the next killLoginscreenThread() — called
-                // by EVERY loadAssets/toolkit switch (Client.kt:2534) — skipped stop()
-                // (null ref) and then joined the still-running thread forever, hanging
-                // the client at "Please wait - changing renderer".
                 plainLoginScreenRenderer?.stop()
                 plainLoginScreenRenderer = null
                 bannerOverride = null
@@ -207,18 +196,10 @@ class LoadingStage(
             plainLoginScreenRenderer?.stop()
 
             loginScreenRendererThread?.let { thread ->
-                // Self-join is a guaranteed deadlock (a component running ON the login
-                // thread triggering loadAssets); skip and let the thread wind down via
-                // the stop() flag.
                 if (thread === Thread.currentThread()) {
                     println("[LoadingStage] WARNING: killLoginscreenThread called from the login-screen thread itself; skipping self-join")
                     return
                 }
-                // If the renderer reference was lost while the thread kept running
-                // (historical orphan leak), stop() above was a no-op and an unbounded
-                // join would hang the client forever at "Please wait". Join bounded;
-                // if the thread refuses to die, log loudly and move on — under the
-                // modern toolkit its draws are gate-rejected and harmless.
                 val unstoppable = plainLoginScreenRenderer == null
                 var waited = 0L
                 while (thread.isAlive) {

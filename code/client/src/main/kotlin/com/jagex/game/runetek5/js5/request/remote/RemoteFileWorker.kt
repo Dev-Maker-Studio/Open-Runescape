@@ -64,11 +64,6 @@ class RemoteFileWorker(
         }
     }
 
-    // pendingRequests/prefetchEntries are mutated both by the game thread's pulse
-    // (processPrefetch/processGeneralRequests, cleanup pass) and by the async map loader
-    // thread's cache misses (request/requestArchive via Js5ResourceProvider.getFile), so
-    // all structural access is guarded by this worker's monitor. Lock order is always
-    // worker -> net queue; the requester's pulse never calls back into a worker.
     @Synchronized
     override fun getProgress(fileId: Int): Int {
         val fileRequest = pendingRequests[fileId.toLong()]
@@ -91,7 +86,6 @@ class RemoteFileWorker(
         }
         val referenceTablePayload = masterIndexRequest!!.getPayload()
         if (masterIndexRequest is LocalRequest) {
-            /** ReferenceTable from disk **/
             val local = referenceTablePayload?.let { decodeLocalMasterIndex(it) }
             if (local == null) {
                 masterIndexRequest = null
@@ -103,7 +97,6 @@ class RemoteFileWorker(
             }
             masterIndex = local
         } else {
-            /** ReferenceTable from update server **/
             try {
                 if (referenceTablePayload == null) {
                     throw RuntimeException()
@@ -193,15 +186,15 @@ class RemoteFileWorker(
         }
     }
 
-    fun getTotalArchives(): Int {
+    override fun getTotalArchives(): Int {
         return if (masterIndex == null) 0 else masterIndex!!.validArchiveCount
     }
 
-    fun filesReceived(): Int {
+    override fun filesReceived(): Int {
         return filesSuccessfulyReceived
     }
 
-    fun getReferenceTableCompletion(): Int {
+    override fun getReferenceTableCompletion(): Int {
         return if (getMasterIndex() == null) {
             if (masterIndexRequest == null) 0 else masterIndexRequest!!.getCompletion()
         } else {
@@ -219,14 +212,6 @@ class RemoteFileWorker(
         }
     }
 
-    /**
-     *
-     * @param actionType
-     * [0 = local / standart requester priority req]
-     * [1 = local requester normal request]
-     * [2 = standart requester regular request]
-     *
-     */
     @Synchronized
     fun request(fileId: Int, actionType: Int): Js5WorkerRequestMessage? {
         var fileRequest: Js5WorkerRequestMessage? = pendingRequests[fileId.toLong()]
@@ -442,7 +427,6 @@ class RemoteFileWorker(
             }
         }
 
-        /** Cleanup high priority requests **/
         if (initialized && Utils.time() >= cleanupCycle) {
             var request: Js5WorkerRequestMessage? = pendingRequests.first()
             while (request != null) {
@@ -462,7 +446,7 @@ class RemoteFileWorker(
         }
     }
 
-    fun currentRequestId(): Int {
+    override fun currentRequestId(): Int {
         if (masterIndex == null) {
             return 0
         }

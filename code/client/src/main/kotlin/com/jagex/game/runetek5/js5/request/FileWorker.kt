@@ -10,4 +10,14 @@ abstract class FileWorker {
     abstract fun prefetch(fileId: Int)
 
     abstract fun getProgress(fileId: Int): Int
+
+    open val isLocal: Boolean get() = false
+
+    open fun getTotalArchives(): Int = 0
+
+    open fun filesReceived(): Int = 0
+
+    open fun currentRequestId(): Int = 0
+
+    open fun getReferenceTableCompletion(): Int = 100
 }

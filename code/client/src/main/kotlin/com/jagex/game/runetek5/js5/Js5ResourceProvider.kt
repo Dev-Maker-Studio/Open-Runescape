@@ -2,15 +2,10 @@ package com.jagex.game.runetek5.js5
 
 import com.jagex.game.runetek5.buffer.DataBuffer
 import com.jagex.game.runetek5.js5.request.FileWorker
+import com.jagex.game.runetek5.js5.request.local.LocalFileWorker
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * [J]
- *
- * @author Steven - 11/10/2023
- *
- */
 class Js5ResourceProvider(
     @JvmField var fileWorker: FileWorker,
     @JvmField var directMemoryMode: Boolean,
@@ -31,7 +26,7 @@ class Js5ResourceProvider(
         if (!ensureMasterIndexLoaded()) {
             throw IllegalStateException("")
         }
-        return masterIndex!!.headerCrc
+        return (fileWorker as? LocalFileWorker)?.loginCrc() ?: masterIndex!!.headerCrc
     }
 
     @Synchronized
@@ -99,6 +94,9 @@ class Js5ResourceProvider(
     fun fullyLoaded(): Boolean {
         if (!ensureMasterIndexLoaded()) {
             return false
+        }
+        if (fileWorker.isLocal) {
+            return true
         }
         var loaded = true
         for (archiveIndex in masterIndex!!.validArchiveIds.indices) {

@@ -15,12 +15,12 @@ class RemoteFileRequester : Js5NetQueue() {
     private fun dropWaitingRequests() {
         var request: Js5NetQueueRequest?
         while (super.waitingPriorityRequests.getNext().also { request = it as Js5NetQueueRequest? } != null) {
-            request!!.unlinkSub() // Remove from queue
-            request!!.unlink()     // Remove from RemoteFileWorker.pendingRequests
+            request!!.unlinkSub()
+            request!!.unlink()
         }
         while (super.waitingRegularRequests.getNext().also { request = it as Js5NetQueueRequest? } != null) {
-            request!!.unlinkSub() // Remove from queue
-            request!!.unlink()     // Remove from RemoteFileWorker.pendingRequests
+            request!!.unlinkSub()
+            request!!.unlink()
         }
         lastRemoteRequest = null
     }
@@ -31,7 +31,6 @@ class RemoteFileRequester : Js5NetQueue() {
             try {
                 this.updateServerConnection!!.close()
             } catch (ignored: Exception) {
-                // NOOP
             }
             this.updateServerConnection = null
         }
@@ -59,7 +58,6 @@ class RemoteFileRequester : Js5NetQueue() {
                                 try {
                                     this.updateServerConnection!!.close()
                                 } catch (exception: Exception) {
-                                    // NOOP
                                 }
                                 this.updateServerConnection = null
                                 failedRequests++
@@ -88,7 +86,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 try {
                     updateServerConnection!!.close()
                 } catch (exception: Exception) {
-                    // NOOP
                 }
                 updateServerConnection = null
                 failedRequests++
@@ -108,7 +105,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 try {
                     updateServerConnection!!.close()
                 } catch (exception: Exception) {
-                    // NOOP
                 }
                 updateServerConnection = null
                 failedRequests++
@@ -134,7 +130,6 @@ class RemoteFileRequester : Js5NetQueue() {
         try {
             updateServerConnection?.close()
         } catch (ignored: Exception) {
-            // NOOP
         }
         updateServerConnection = null
         dropWaitingRequests()
@@ -145,16 +140,11 @@ class RemoteFileRequester : Js5NetQueue() {
         incoming.currentPosition = 0
     }
 
-    /**
-     * Sends a request to the update server to start
-     * a new file update session with this client
-     */
     @Synchronized
     override fun rejectPayload() {
         try {
             updateServerConnection?.close()
         } catch (ignored: Exception) {
-            // NOOP
         }
         updateServerConnection = null
         failedRequests++
@@ -173,7 +163,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 try {
                     updateServerConnection!!.close()
                 } catch (ignored: Exception) {
-                    // NOOP
                 }
                 updateServerConnection = null
                 failedRequests++
@@ -182,15 +171,6 @@ class RemoteFileRequester : Js5NetQueue() {
         }
     }
 
-    /**
-     * Performs a cycle communicating with the update server
-     * @return All requests processed
-     *
-     * Holds the queue monitor for the whole cycle: the drain loops interleave queue
-     * unlinks with socket writes, and the async map loader inserts requests (via
-     * [Js5NetQueue.request]) concurrently. Reads are bounded by the socket's available
-     * capacity, so the monitor is never held across a blocking read.
-     */
     @Synchronized
     override fun pulse(): Boolean {
         if (updateServerConnection != null) {
@@ -206,7 +186,6 @@ class RemoteFileRequester : Js5NetQueue() {
                 try {
                     updateServerConnection!!.close()
                 } catch (ignored: Exception) {
-                    // NOOP
                 }
                 updateServerConnection = null
             }
@@ -350,7 +329,6 @@ class RemoteFileRequester : Js5NetQueue() {
             try {
                 updateServerConnection!!.close()
             } catch (exception: Exception) {
-                // NOOP
             }
             updateServerConnection = null
             failedRequests++

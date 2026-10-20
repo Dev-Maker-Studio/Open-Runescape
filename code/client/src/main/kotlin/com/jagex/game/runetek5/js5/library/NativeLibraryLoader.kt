@@ -83,7 +83,6 @@ class NativeLibraryLoader(@JvmField val nativeDllResource: Js5ResourceProvider) 
         if (!nativeDllResource.isCached(fullLibraryPath)) {
             return nativeDllResource.getArchiveLoadingPercent(fullLibraryPath)
         }
-        /** Check if the file inside the cache is the same as the old unpacked one, if not replace **/
         val nativeFileData = nativeDllResource.getNamedFile(fullLibraryPath, "")
         val outputFile = FileOperations.loadFromCacheDir(nativeLocation)
         if (nativeFileData != null) {

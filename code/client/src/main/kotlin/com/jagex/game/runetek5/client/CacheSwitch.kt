@@ -6,6 +6,7 @@ import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.rsinterface.Interface
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.js5.Js5Endpoint
+import com.jagex.game.runetek5.js5.request.local.PackedCache
 import com.jagex.game.runetek5.network.Connection
 import com.jagex.game.runetek5.network.ConnectionInfo
 import com.jagex.game.runetek5.rendering.Renderers
@@ -40,7 +41,7 @@ object CacheSwitch {
 
     @JvmStatic
     fun intercept(state: GameState): Boolean {
-        if (inProgress || resuming) return false
+        if (inProgress || resuming || PackedCache.present) return false
         val target = endpointFor(state) ?: return false
         if (Js5Endpoint.current().equals(target)) return false
         begin(target, state)
@@ -117,7 +118,6 @@ object CacheSwitch {
         try {
             Client.clientSocket?.close()
         } catch (ignored: Exception) {
-            // NOOP
         }
         Client.clientSocket = null
         Connection.updateConnection = null

@@ -9,6 +9,9 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.js5.library.NativeLibraryLoader
 import com.jagex.game.runetek5.js5.request.Js5NetQueue
 import com.jagex.game.runetek5.js5.request.local.LocalRequester
+import com.jagex.game.runetek5.js5.request.FileWorker
+import com.jagex.game.runetek5.js5.request.local.LocalFileWorker
+import com.jagex.game.runetek5.js5.request.local.PackedCache
 import com.jagex.game.runetek5.js5.request.remote.RemoteFileWorker
 import com.jagex.game.runetek5.scene.AsyncMapLoader
 import com.jagex.game.runetek5.scene.MapRegion
@@ -175,7 +178,7 @@ object Resource {
     var mapRegion: MapRegion? = null
 
     @JvmField
-    var remoteFileWorkersByIndex: Array<RemoteFileWorker?>? = null
+    var remoteFileWorkersByIndex: Array<FileWorker?>? = null
 
     @JvmField
     var remoteFileRequesterJs5: Js5NetQueue? = null
@@ -190,11 +193,16 @@ object Resource {
         }
         var cacheFile: Decompressor? = null
         val indexId = reference.getIndex()
+        if (PackedCache.present) {
+            val worker = LocalFileWorker.of(indexId)
+            remoteFileWorkersByIndex!![indexId] = worker
+            return Js5ResourceProvider(worker, directMemoryMode, loadType)
+        }
         if (GameShell.cacheFileData != null) {
             cacheFile = Decompressor(indexId, GameShell.cacheFileData!!, FileOnDisk.cacheFileIndices!![indexId]!!)
         }
         remoteFileWorkersByIndex!![indexId] = Client.requestManager!!.getWorker(indexId, cacheFile, referenceTableDecompressor)
-        remoteFileWorkersByIndex!![indexId]!!.reset()
+        (remoteFileWorkersByIndex!![indexId] as RemoteFileWorker).reset()
         return Js5ResourceProvider(remoteFileWorkersByIndex!![indexId]!!, directMemoryMode, loadType)
     }
 

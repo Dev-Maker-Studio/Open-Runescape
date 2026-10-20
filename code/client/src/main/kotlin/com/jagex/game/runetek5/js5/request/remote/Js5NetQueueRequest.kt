@@ -3,23 +3,12 @@ package com.jagex.game.runetek5.js5.request.remote
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.js5.request.Js5WorkerRequestMessage
 
-/**
- * A request to fetch a file from the update server
- * @author Brainpower - 21/05/2020
- *
- */
 class Js5NetQueueRequest : Js5WorkerRequestMessage() {
 
     @JvmField var padding: Byte = 0
 
-    /**
-     * The request processing status
-     */
     @JvmField var blockBytesRead: Int = 0
 
-    /**
-     * The stream holding the data of the request
-     */
     @JvmField var stream: Packet? = null
 
     override fun getPayload(): ByteArray {

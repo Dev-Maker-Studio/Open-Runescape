@@ -3,12 +3,6 @@ package com.jagex.game.runetek5.js5
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.tools.Hashing
 
-/**
- * [J] Generally known as ReferenceTable
- *
- * @author Steven - 11/10/2023
- *
- */
 class Js5MasterIndex(tablePayload: ByteArray, expectedCrc: Int, expectedWhirlpool: ByteArray?) {
 
     @JvmField var revision: Int = 0

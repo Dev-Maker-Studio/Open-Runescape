@@ -4,33 +4,15 @@ import com.jagex.game.runetek5.cache.Decompressor
 import com.jagex.game.runetek5.cache.node.Queue
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 
-/**
- * Handles local file fetching and storage with multi-threaded request processing.
- *
- * Fully refactored
- * @author Brainpower - 21/05/2020
- */
 class LocalRequester : Runnable {
 
-    /**
-     * The queue holding all multi-threaded cache requests
-     */
     val queue: Queue<LocalRequest> = Queue()
 
-    /**
-     * The request executing thread
-     */
     var executingThread: Thread? = Thread(this)
 
-    /**
-     * The amount of requests in our [queue]
-     */
     @JvmField
     var requestCount: Int = 0
 
-    /**
-     * Has shutdown been requested
-     */
     @Volatile
     var shutdown: Boolean = false
 
@@ -40,9 +22,6 @@ class LocalRequester : Runnable {
         executingThread?.priority = Thread.MIN_PRIORITY
     }
 
-    /**
-     * The main threaded cycle which stores / fetches files
-     */
     override fun run() {
         while (!shutdown) {
             val requestNode: LocalRequest
@@ -51,7 +30,6 @@ class LocalRequester : Runnable {
                     try {
                         (queue as Object).wait()
                     } catch (e: InterruptedException) {
-                        // NOOP
                     }
                     continue
                 }
@@ -79,10 +57,6 @@ class LocalRequester : Runnable {
         }
     }
 
-    /**
-     * (Blocking call)
-     * Requests a directly needed file to be loaded into memory
-     */
     fun createPriorityRequest(indexReference: Int, cacheFile: Decompressor): LocalRequest {
         val node = LocalRequest()
         node.type = 1
@@ -108,10 +82,6 @@ class LocalRequester : Runnable {
         return node
     }
 
-    /**
-     * (Non blocking call)
-     * Requests the payload from an already received file to be stored in our cache
-     */
     fun createStoreRequest(key: Int, payload: ByteArray, cacheFile: Decompressor): LocalRequest {
         val request = LocalRequest()
         request.type = 2
@@ -123,10 +93,6 @@ class LocalRequester : Runnable {
         return request
     }
 
-    /**
-     * (Non blocking call)
-     * Requests an indirectly needed file to be loaded into memory
-     */
     fun createNormalRequest(fileId: Int, cacheFile: Decompressor): LocalRequest {
         val request = LocalRequest()
         request.type = 3
@@ -137,9 +103,6 @@ class LocalRequester : Runnable {
         return request
     }
 
-    /**
-     * Requests a file to be fetched from our cache on a separate thread
-     */
     fun addRequest(request: LocalRequest) {
         synchronized(queue) {
             queue.insert(request)
@@ -148,9 +111,6 @@ class LocalRequester : Runnable {
         }
     }
 
-    /**
-     * Cleans up the queue and kills the executing thread
-     */
     fun shutdown() {
         shutdown = true
         synchronized(queue) {
@@ -159,7 +119,6 @@ class LocalRequester : Runnable {
         try {
             executingThread?.join()
         } catch (e: InterruptedException) {
-            // NOOP
         }
         executingThread = null
     }
