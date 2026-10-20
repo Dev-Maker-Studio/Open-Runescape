@@ -13,3 +13,4 @@ fleet = { path = "../fleet" }
 fresh = { path = "../fresh" }
 doctor = { path = "../doctor" }
 verify = { path = "../verify" }
+web = { path = "../web" }

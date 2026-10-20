@@ -63,6 +63,10 @@ pub fn display_name() -> Res<String> {
     private().map(|s| s.display)
 }
 
+pub fn sink() -> Option<String> {
+    audio::null_sink().ok()
+}
+
 pub fn xserver_pid() -> Option<u32> {
     state::read("xserver").and_then(|s| s.split(' ').nth(1).and_then(|p| p.parse().ok())).filter(|p| state::alive(*p))
 }

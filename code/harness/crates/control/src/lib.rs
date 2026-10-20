@@ -1,8 +1,8 @@
 mod cli;
 mod conn;
 mod look;
-mod script;
-mod trail;
+pub mod script;
+pub mod trail;
 mod up;
 
 pub use cli::run;

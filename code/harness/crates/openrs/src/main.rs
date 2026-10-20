@@ -2,7 +2,7 @@ type Run = fn(&[String]) -> i32;
 
 const COMMANDS: &[(&str, &str, Run)] = &[
     ("up", "[shared] [--no-build] [-D.. -X.. client args]  one client in the world, rebuilding a stale jar and cache first", up),
-    ("down", "[all]  stop the client, with all also the display, audio sink and local server", |a| done("down", control::down(a))),
+    ("down", "[all]  stop the client, with all also the web client, display, audio sink and local server", down),
     ("do", "<cmd> [args] [; cmd ...] | - | @file  control commands and batches for the client", control::run),
     ("look", "[path]  screenshot of the client frame and the world description", control::look),
     ("trail", "[N | since T | path]  footprints of commands and observed changes", control::trail),
@@ -16,8 +16,9 @@ const COMMANDS: &[(&str, &str, Run)] = &[
     ("player", "<command>  player files, interfaces, accounts and the local lobby and world", playerstore::run),
     ("fleet", "up [N] [--no-build] | down | status | place | do | look | trail | compare  up to nine clients", fleet),
     ("resume", "restart what a crash left behind: the fleet slots and the single client, with their local servers", resume),
-    ("capture", "setup | verify | client | web | exec | analyze | summary | diff | selftest  RenderDoc captures", renderdoc::run),
-    ("equiv", "<scene> | --live | history | scenes | test | down  client and renderer equivalence", renderdoc::equiv),
+    ("web", "up | down | do | look | trail | run | show | hide | toggle  the web client in chromium on the private display", web::run),
+    ("capture", "setup | verify | client | web | browser | exec | analyze | summary | diff | selftest  RenderDoc captures", renderdoc::run),
+    ("equiv", "<scene> | --live [--target native|browser] | history | scenes | test | down  client and renderer equivalence", renderdoc::equiv),
     ("doctor", "check everything the harness needs, PASS WARN FAIL with fixes", doctor::run),
     ("verify", "live end to end pass of the whole harness, JSON summary in code/harness/target/verify", verify::run),
     ("help", "this list", help),
@@ -25,6 +26,11 @@ const COMMANDS: &[(&str, &str, Run)] = &[
 
 fn done(name: &str, r: Result<(), String>) -> i32 {
     r.map_or_else(|e| { eprintln!("{name}: {e}"); 1 }, |()| 0)
+}
+
+fn down(args: &[String]) -> i32 {
+    let all = args.first().is_some_and(|a| a == "all");
+    done("down", if all { web::down() } else { Ok(()) }.and_then(|()| control::down(args)))
 }
 
 fn build() -> Result<(), String> {
@@ -74,6 +80,11 @@ fn resume(_: &[String]) -> i32 {
     if dead(&runtime("openrs").join("client")) {
         println!("resuming the single client");
         code |= up(&[]);
+        did = true;
+    }
+    if web::crashed() {
+        println!("resuming the web client");
+        code |= web::run(&["up".into()]);
         did = true;
     }
     if !did {
