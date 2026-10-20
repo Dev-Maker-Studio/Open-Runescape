@@ -203,7 +203,7 @@ impl Resources {
             if self.water.get(&key).is_some_and(|w| w.vp == vp && w.viewport == viewport) {
                 continue;
             }
-            let (v, i) = water::tessellate(vertices, indices, bytemuck::from_bytes(&vp), viewport);
+            let (v, i) = water::tessellate(vertices, indices, &bytemuck::pod_read_unaligned(&vp), viewport);
             self.water.insert(key, WaterMesh { mesh: mesh(device, bytemuck::cast_slice(&v), &i), vp, viewport });
         }
     }

@@ -11,9 +11,12 @@ use std::{borrow::Cow, collections::HashMap};
 use wgpu::*;
 
 pub const SHADOW_MAP_SIZE: u32 = 2048;
+pub const FRAME_GROUP: &str = "openrs";
+pub const CAPTURE_MARKERS: [&str; 2] = ["capture-marker,begin_capture", "capture-marker,end_capture"];
 
 pub struct Renderer {
     pub gpu: Gpu,
+    pub capture: bool,
     pipelines: Pipelines,
     resources: Resources,
     targets: Targets,
@@ -49,7 +52,7 @@ impl Renderer {
     pub fn new(gpu: Gpu, format: TextureFormat) -> Self {
         let pipelines = Pipelines::new(&gpu.device, format);
         let resources = Resources::new(&gpu.device, &gpu.queue);
-        Renderer { gpu, pipelines, resources, targets: Targets::new(format) }
+        Renderer { gpu, capture: false, pipelines, resources, targets: Targets::new(format) }
     }
 
     fn draw(&self, pass: &mut RenderPass, d: &Draw, width: u32, height: u32, mirrored: bool) {
@@ -121,6 +124,12 @@ impl Renderer {
         }
         let [r, g, b, a] = frame.clear.map(f64::from);
         let mut encoder = device.create_command_encoder(&Default::default());
+        if self.capture {
+            encoder.insert_debug_marker(CAPTURE_MARKERS[0]);
+        }
+        if cfg!(target_arch = "wasm32") {
+            encoder.push_debug_group(FRAME_GROUP);
+        }
         if shadows {
             let size = shadow_size.unwrap_or(1);
             let mut pass = begin(&mut encoder, None, self.targets.shadow(), true);
@@ -149,6 +158,12 @@ impl Renderer {
             self.draw(&mut pass, d, width, height, false);
         }
         drop(pass);
+        if cfg!(target_arch = "wasm32") {
+            encoder.pop_debug_group();
+        }
+        if std::mem::take(&mut self.capture) {
+            encoder.insert_debug_marker(CAPTURE_MARKERS[1]);
+        }
         self.gpu.queue.submit([encoder.finish()]);
     }
 }

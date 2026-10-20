@@ -48,7 +48,7 @@ fn module(device: &Device, name: &str) -> ShaderModule {
 fn blend(mode: u32) -> Option<BlendState> {
     let one = |src, dst| BlendComponent { src_factor: src, dst_factor: dst, operation: BlendOperation::Add };
     match mode {
-        1 => Some(BlendState::ALPHA_BLENDING),
+        1 => Some(BlendState { color: one(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha), alpha: one(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha) }),
         2 => Some(BlendState { color: one(BlendFactor::SrcAlpha, BlendFactor::One), alpha: one(BlendFactor::One, BlendFactor::One) }),
         3 => Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
         _ => None,
