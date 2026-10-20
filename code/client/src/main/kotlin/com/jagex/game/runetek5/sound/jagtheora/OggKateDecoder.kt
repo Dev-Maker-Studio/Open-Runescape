@@ -59,7 +59,6 @@ class OggKateDecoder(oggstreamstate1: OggStreamState) : OggStreamDecoder(oggstre
                 }
 
                 if ((packetType or 0x80) != 0) {
-                    // NOOP
                 }
             }
         }

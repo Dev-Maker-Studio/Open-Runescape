@@ -49,7 +49,6 @@ class QuickChatCategoryType : CacheableNode() {
                 }
             }
             4 -> {
-                // NOOP
             }
         }
     }

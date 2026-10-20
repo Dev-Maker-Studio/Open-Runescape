@@ -12,16 +12,16 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     VARP_LARGE(8, 6),
     LOGOUT_LOBBY(9, 0),
     MESSAGE_PRIVATE(10, -2),
-    STOP_VORBIS_STREAM(11, 2), //vorbis preload sound related with sending packet 37 as response
+    STOP_VORBIS_STREAM(11, 2),
     CLIENT_SETVARC_LARGE(12, 6),
     IF_MOVESUB(13, 8),
     PLAYER_WEIGHT(14, 2),
     UPDATE_ZONE_FULL_FOLLOWS(15, 3),
     OPEN_URL(16, -2),
-    VORBIS_PRELOAD_SOUND(17, 3), //vorbis preload sound probably
+    VORBIS_PRELOAD_SOUND(17, 3),
     VORBIS_SOUND(18, 8),
     UPDATE_FRIENDCHAT_CHANNEL_SINGLEUSER(19, -1),
-    OUTDATED_SET_THEORA_STRING_SOMETHING(20, 6), //OUTDATED gets a string from some linkedlist populated from index 36 theora?
+    OUTDATED_SET_THEORA_STRING_SOMETHING(20, 6),
     SHOW_FACE_HERE(21, 1),
     MESSAGE_QUICKCHAT_PRIVATE_ECHO(22, -1),
     IF_OPENSUB_ACTIVE_OBJECT(23, 32),
@@ -41,19 +41,19 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     IF_OPENTOP(37, 19),
     IF_OPENSUB(38, 23),
     CAM_MOVETO(39, 6),
-    SET_CAMERA_TARGET(40, 4), //map region x and y static variables?
+    SET_CAMERA_TARGET(40, 4),
     UPDATE_ZONE_PARTIAL_FOLLOWS(41, 3),
     UPDATE_INV_STOP_TRANSMIT(42, 3),
     PLAYER_UPDATE(43, -2),
     IF_SETANGLE(44, 10),
     VARCLAN_ENABLE(45, 0),
-    CLANSETTINGS_DELTA(46, -2), //X
+    CLANSETTINGS_DELTA(46, -2),
     NPC_UPDATE_LARGE(47, -2),
     IF_SETPOSITION(48, 8),
-    CLANCHANNEL_FULL(49, -2), // X
+    CLANCHANNEL_FULL(49, -2),
     SET_CLAN_STRING(50, -1),
     DYNAMIC_MAP_REGION(51, -2),
-    DEPRECATED_52_CLIENTPACKET_97(52, 1), //boolean also set on login?
+    DEPRECATED_52_CLIENTPACKET_97(52, 1),
     IF_SETPLAYERMODEL_OTHER(53, 10),
     CLIENT_SETVARCSTR_SMALL(54, -1),
     IF_SETSCROLLPOS(55, 6),
@@ -87,14 +87,14 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     MESSAGE_QUICKCHAT_PLAYER_GROUP(83, -1),
     CUSTOMIZE_OBJECT(84, -1),
     REGION(85, -2),
-    OPEN_SOCIAL_NETWORK_URL(86, -2), //"opensn" maybe social network login?
+    OPEN_SOCIAL_NETWORK_URL(86, -2),
     CREATE_ACCOUNT_REPLY(87, 1),
     OBJECT_PREFETCH(88, 5),
     CAM_RESET(89, 0),
     UPDATE_UID192(90, 28),
     UPDATE_SITESETTINGS_COOKIE(91, -1),
     MESSAGE_PRIVATE_ECHO(92, -2),
-    PLAY_SONG_AT_POSITION(93, 11), //play sound song but with specific volume or something?
+    PLAY_SONG_AT_POSITION(93, 11),
     VARCLAN_DISABLE(94, 0),
     MAP_PROJANIM_HALFSQ(95, 17),
     OUTDATED_INTERFACE_PULSE_EVENT(96, 8),
@@ -102,12 +102,12 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     REFLECTION_CHECK(98, -2),
     RUN_CS2_SCRIPT(99, -2),
     CLEAR_VARPS(100, 0),
-    FRIENDLIST_LOADED(101, 0), //something with setting a number to 1 and refreshing interfaces? ignore list related? FRIENDLIST_LOADED?
+    FRIENDLIST_LOADED(101, 0),
     UPDATE_REBOOT_TIMER(102, 2),
     WORLD_LIST(103, -2),
     VORBIS_SPEECH_SOUND(104, 6),
     IF_SETCOLOR(105, 6),
-    SET_VORBIS_SOUND(106, 2), //vorbis related?
+    SET_VORBIS_SOUND(106, 2),
     GROUND_ITEM_REVEAL(107, 7),
     VARBIT_LARGE(108, 6),
     IF_SETNPCHEAD(109, 8),
@@ -135,7 +135,7 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     MESSAGE_QUICKCHAT_CLANCHANNEL(131, -1),
     IF_SETRETEX(132, 9),
     MESSAGE_PLAYER_GROUP(133, -1),
-    SET_SONG_VOLUME(134, 2), //SOUND_MIXBUSS_SETLEVEL? Changes array of 16 values having to do with sound (volumes?)
+    SET_SONG_VOLUME(134, 2),
     IF_SETMODEL(135, 8),
     SOUND_SYNTH(136, 8),
     CLANSETTINGS_FULL(137, -2),
@@ -147,7 +147,7 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     MAP_PROJANIM(143, 16),
     IF_SETRECOL(144, 9),
     ANIMATE_NPC(145, 19),
-    TRIGGER_ONDIALOGABORT(146, 0), //load last interface? no idea maybe IF_SETEVENTS as it adds hook events to them somehow?
+    TRIGGER_ONDIALOGABORT(146, 0),
     IDENTIFY_HOST_NAME(147, 4),
     IF_RESETTARGETPARAM(148, 10),
     HINT_TRAIL(149, -2),
@@ -157,7 +157,7 @@ enum class ServerProt(val opcode: Int, val size: Int) {
     SET_CURSOR(153, -1),
     BLOCK_MINIMAP_STATE(154, 1),
     IF_OPENSUB_ACTIVE_GROUNDITEM(155, 29),
-    WINDOW_CALL_WITH_ARGS(156, -2), //calls a javascript method?..
+    WINDOW_CALL_WITH_ARGS(156, -2),
     UPDATE_DOB(157, 4),
     IF_SETPLAYERHEAD_OTHER(158, 10),
     REQUEST_FPS(159, 8),

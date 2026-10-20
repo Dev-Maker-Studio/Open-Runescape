@@ -7,11 +7,6 @@ import jagtheora.ogg.OggPacket
 import jagtheora.ogg.OggStreamState
 import jagtheora.theora.*
 
-/**
- * Theora video decoder node for handling video frame decoding.
- *
- * @author Brainpower - 12/01/2022
- */
 class JagTheoraTheoraNode(streamState: OggStreamState) : OggStreamDecoder(streamState) {
 
     var unusedBooleanV2: Boolean = false

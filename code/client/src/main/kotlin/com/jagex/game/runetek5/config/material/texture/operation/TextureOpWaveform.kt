@@ -6,12 +6,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.PI
 import kotlin.math.sqrt
 
-/**
- * Texture operation for waveform generation.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpWaveform : TextureOperation(0, true) {
 
     @JvmField var waveType: Int = 0

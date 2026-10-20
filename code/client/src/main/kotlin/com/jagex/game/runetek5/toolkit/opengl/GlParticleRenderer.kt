@@ -162,7 +162,6 @@ class GlParticleRenderer {
                 draw(toolkit, depthRange)
             }
         } catch (ignored: Exception) {
-            // NOOP
         }
 
         enableLights(toolkit)
@@ -170,12 +169,6 @@ class GlParticleRenderer {
     }
 
     fun draw(toolkit: OpenGlToolkit, depthRange: Int) {
-        // The GL modelview matrix here is exactly the toolkit's tracked view matrix:
-        // setupMatrixRendering()/updateModelViewAndLights() load it, and model rendering
-        // push/pops its per-model transforms. drawParticles() already relies on this
-        // invariant by computing particle depths from viewMatrix44, so build the
-        // billboard basis from the tracked matrix instead of a glGetFloatv(
-        // GL_MODELVIEW_MATRIX) driver readback, which can stall the pipeline.
         val modelview = toolkit.viewMatrix44.elements
         val vertexXA = modelview[0]
         val vertexXB = modelview[4]
@@ -419,16 +412,11 @@ class GlParticleRenderer {
     fun disableLights(toolkit: OpenGlToolkit) {
         sunBrightness = toolkit.sunBrightness
         toolkit.setupMatrixRendering()
-        OpenGL.glDisable(GL_LIGHT0)
-        OpenGL.glDisable(GL_LIGHT1)
         toolkit.setDepthMask(false)
-        OpenGL.glNormal3f(0.0F, -1.0f, 0.0F)
     }
 
     fun enableLights(toolkit: OpenGlToolkit) {
         toolkit.setDepthMask(true)
-        OpenGL.glEnable(GL_LIGHT0)
-        OpenGL.glEnable(GL_LIGHT1)
         if (toolkit.sunBrightness != sunBrightness) {
             toolkit.updateSun(sunBrightness)
         }

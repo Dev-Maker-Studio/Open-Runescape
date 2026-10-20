@@ -3,12 +3,6 @@ package com.jagex.game.runetek5.config.midi.instrument
 import com.jagex.game.runetek5.utils.BufferUtils
 import kotlin.math.min
 
-/**
- *
- * @author Brainpower 23/03/2023
- * https://www.cs.cmu.edu/afs/club/usr/cort/code/img2ktx/third_party/stb/stb_vorbis.c
- *
- */
 class MusicSampleFloor {
 
     var partitionClassList: IntArray

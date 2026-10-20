@@ -16,7 +16,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.jar.Manifest
 
-/** Version and commit the build stamped into the jar manifest. */
 object ClientBuild {
     val version: String
     val commit: String
@@ -29,16 +28,9 @@ object ClientBuild {
         commit = attributes?.getValue("Git-Commit") ?: "unknown"
     }
 
-    /** `2.1.0 (f33cbf08)`, or `development` when run from an IDE. */
     fun describe(): String = if (version == "development") version else "$version ($commit)"
 }
 
-/**
- * A crash report in two sizes: [discordText] fits in one Discord message, and
- * [fullText] is the file on disk with the whole stack trace and console tail.
- * The file starts with the Discord text so the launcher can show the same
- * summary without understanding the rest of the format.
- */
 class CrashReport private constructor(
     val fileName: String,
     val discordText: String,
@@ -50,7 +42,6 @@ class CrashReport private constructor(
     }.getOrNull()
 
     companion object {
-        /** Discord rejects messages over 2000 characters; leave room for the user's own sentence. */
         private const val DISCORD_BUDGET = 1800
         const val FULL_DETAILS_MARKER = "==== Full details below (the part above is enough for Discord) ===="
 
@@ -165,11 +156,6 @@ class CrashReport private constructor(
             return writer.toString().trimEnd()
         }
 
-        /**
-         * The exception chain with only the frames that matter: the first few of the
-         * top-level exception, fewer for each cause, and the long engine package
-         * names shortened. `rt5.` is `com.jagex.game.runetek5.`, `darkan.` is `com.darkan.`.
-         */
         fun compactTrace(throwable: Throwable, topFrames: Int = 10, causeFrames: Int = 4): String {
             val out = StringBuilder()
             var current: Throwable? = throwable
@@ -191,7 +177,6 @@ class CrashReport private constructor(
         private fun shortenFrame(frame: String): String =
             frame.replace("com.jagex.game.runetek5.", "rt5.").replace("com.darkan.", "darkan.")
 
-        /** The newest console lines that fit in [budget] characters, oldest first. */
         private fun fitConsoleTail(lines: List<String>, budget: Int): List<String> {
             if (budget < 80) return emptyList()
             var remaining = budget - 24
@@ -206,7 +191,6 @@ class CrashReport private constructor(
             return picked.asReversed()
         }
 
-        /** Keeps account names and passwords out of anything a player is asked to paste publicly. */
         private fun scrub(text: String): String {
             val secrets = listOf(Bot.password, Bot.username, PlayerUpdate.MY_PLAYER_USERNAME)
                 .filterNotNull()

@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.min
 
-/**
- * Texture operation that clamps pixel values to a range.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpClamp : TextureOperation(1, false) {
 
     @JvmField var minValue: Int = 0

@@ -52,14 +52,12 @@ class SpriteDrawQueue {
         if (maxCapacity < 1) {
             throw IllegalStateException()
         }
-        /** Ensure if the node already exist we delete it before adding a new one to replace it **/
         discard(renderer)
         currentCapacity -= 1
         while (currentCapacity < 0) {
             val renderNode = spriteDrawQueue.getFirst() as SpriteRenderNode
             discardNode(renderNode)
         }
-        /** Insert the new node **/
         val directRenderNode = DirectSpriteRenderNode(renderer, nativeSprite, 1)
         spriteRenderNodes.put(directRenderNode, renderer.getUid())
         spriteDrawQueue.insert(directRenderNode)
@@ -77,14 +75,12 @@ class SpriteDrawQueue {
         while (spriteRenderNode != null) {
             val nativeSprite = spriteRenderNode.createNativeSprite()
             if (spriteRenderNode.hasSoftReference()) {
-                /** The native sprite is soft referenced, if it's not reachable we should unlink **/
                 if (nativeSprite == null) {
                     spriteRenderNode.unlink()
                     spriteRenderNode.unlinkSub()
                     currentCapacity += spriteRenderNode.size
                 }
             } else if (++spriteRenderNode.indexReference > 5 && nativeSprite != null) {
-                /** We reached the cycles to unlink, lets change that direct reference into a soft reference to save memory **/
                 val referencedRenderNode = ReferencedSpriteRenderNode(spriteRenderNode.itemRenderer, nativeSprite, spriteRenderNode.size)
                 spriteRenderNodes.put(referencedRenderNode, spriteRenderNode.pointer)
                 CacheableNode.rebuild(referencedRenderNode, spriteRenderNode)

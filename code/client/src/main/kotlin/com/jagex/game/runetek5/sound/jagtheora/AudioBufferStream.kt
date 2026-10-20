@@ -1101,7 +1101,6 @@ open class AudioBufferStream(
                             super.playbackPosition = startPos + startPos - 1 - super.playbackPosition
                             super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
                             if (--super.loopsRemaining == 0) {
-                                // continue to next section
                             } else {
                                 do {
                                     currentOffset = mixSamplesForward(mixBuffer, currentOffset, endPos, endOffset, (buffer as AudioBuffer).getSamples()[super.end - 1].toFloat())

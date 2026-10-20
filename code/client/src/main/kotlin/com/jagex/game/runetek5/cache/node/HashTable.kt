@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.cache.node
 
-/**
- * Hashtable implementation using chained buckets.
- */
 class HashTable(
     @JvmField val size: Int
 ) {
@@ -20,12 +17,6 @@ class HashTable(
         }
     }
 
-    /**
-     * Gets a node by key.
-     *
-     * @param key The key to search for
-     * @return The node with this key, or null if not found
-     */
     @Suppress("UNCHECKED_CAST")
     fun get(key: Long): Node<*>? {
         retrievalKey = key
@@ -43,12 +34,6 @@ class HashTable(
         return null
     }
 
-    /**
-     * Gets all values into an array.
-     *
-     * @param values The output array
-     * @return The number of values retrieved
-     */
     @Suppress("UNCHECKED_CAST")
     fun values(values: Array<Node<*>?>): Int {
         var count = 0
@@ -63,12 +48,6 @@ class HashTable(
         return count
     }
 
-    /**
-     * Puts a node with the given key.
-     *
-     * @param value The node to put
-     * @param key The key to associate
-     */
     @Suppress("UNCHECKED_CAST")
     fun put(value: Node<*>, key: Long) {
         if (value.previous != null) {
@@ -82,11 +61,6 @@ class HashTable(
         value.pointer = key
     }
 
-    /**
-     * Counts the number of nodes in the table.
-     *
-     * @return The node count
-     */
     @Suppress("UNCHECKED_CAST")
     fun nodeCount(): Int {
         var count = 0
@@ -101,11 +75,6 @@ class HashTable(
         return count
     }
 
-    /**
-     * Gets the next node in the current bucket with the same key.
-     *
-     * @return The next node, or null if none
-     */
     @Suppress("UNCHECKED_CAST")
     fun nextInBucket(): Node<*>? {
         if (retrievableNode != null) {

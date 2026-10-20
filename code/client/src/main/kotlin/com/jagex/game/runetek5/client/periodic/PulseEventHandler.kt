@@ -37,27 +37,12 @@ import com.jagex.game.runetek5.client.periodic.PulseEventType.IF_SETMONOSPACED
 import com.jagex.game.runetek5.client.periodic.PulseEventType.IF_SETCLICKMASK
 import com.jagex.game.runetek5.client.periodic.PulseEventType.IF_SETTEXTANTIMACRO
 
-/**
- *
- * @author Brainpower - 22/01/2023
- *
- */
 object PulseEventHandler {
 
-    /**
-     * Cached with the different type of pulse events to
-     * prevent them being constantly recreated
-     */
     @JvmField val PULSE_EVENT_CACHE: IterableNodeMap<PulseEvent> = IterableNodeMap<PulseEvent>(16)
 
-    /**
-     * Pulse events that should be executed asap
-     */
     @JvmField val HIGH_PRIORITY: Queue<PulseEvent> = Queue<PulseEvent>()
 
-    /**
-     * Pulse events with a delay
-     */
     @JvmField val LOW_PRIORITY: Queue<PulseEvent> = Queue<PulseEvent>()
 
     @JvmStatic

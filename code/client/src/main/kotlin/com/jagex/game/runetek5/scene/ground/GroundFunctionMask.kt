@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.scene.ground
 
-// usage: import static com.jagex.game.runetek5.scene.ground.GroundFunctionMask.*;
-
 class GroundFunctionMask {
     companion object {
         const val HD_SHADOWS: Int = 0x10

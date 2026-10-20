@@ -9,10 +9,6 @@ import java.util.Random
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpIrregularBricks : TextureOperation(0, true) {
 
     var randomSeed: Int = 0

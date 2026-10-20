@@ -28,20 +28,6 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.MathUtils
 import com.jagex.game.runetek5.vardomain.VarDomain
 
-/**
- * [J]
- * @author Steven - 11/10/2023
- *
- * [NXT]
-	[X]jag::game::NPCType::DecodeType(jag::Packet &,uint)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .text  0000000000469B30 000010DD 00000048 00000000 R . . . . T .
-	[~]jag::game::NPCType::GetBodyModels(jag::graphics::RT7Core *,jag::game::AssetBuilder &,jag::game::BuildRequest<jag::graphics::Model,jag::game::BuildModelMain> &,jag::shared_ptr<jag::graphics::EffectState> const&,jag::game::NPCTypeCustomisation const*,jag::game::PlayerVarDomain const*,jag::game::ConfigProvider *) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       .text  000000000051D630 0000022C 000000A8 00000010 R . . . . . .
-	[~]jag::game::NPCType::GetHeadModels(jag::graphics::RT7Core *,jag::game::AssetBuilder &,jag::game::BuildRequest<jag::graphics::Model,jag::game::BuildModelMain> &,jag::shared_ptr<jag::graphics::EffectState> const&,jag::game::NPCTypeCustomisation const*,jag::game::PlayerVarDomain const*,jag::game::ConfigProvider *) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       .text  000000000051DA30 0000021C 000000A8 00000010 R . . . . . .
-	[~]jag::game::NPCType::GetModel(jag::game::NPCType::ModelType,jag::graphics::RT7Core *,jag::game::AssetBuilder &,jag::game::BuildRequest<jag::graphics::Model,jag::game::BuildModelMain> &,jag::Array<int> const&,jag::game::NPCTypeCustomisation const*) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .text  000000000051CBF0 00000A20 000000E8 00000081 R . . . . . .
-	[X]jag::game::NPCType::GetMultiNPC(bool &,jag::game::PlayerVarDomain const&,jag::game::ConfigProvider &)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 .text  0000000000117380 00000208 00000038 00000000 R . . . . . .
-	[-]jag::game::NPCType::NPCType(jag::game::ConfigTypeListPreloadPackedContainer<jag::game::NPCType> *,int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .text  0000000000420F70 000003DF 00000018 00000000 R . . . . . .
-	[X]jag::game::NPCType::PostDecode(void)
- *
- */
 open class NPCType {
 
     @JvmField
@@ -261,11 +247,6 @@ open class NPCType {
         npcCustomisation: NPCTypeCustomisation?,
         basId: Int,
         ignoreOverrideBas: Boolean,
-        /**
-         * Return a model the caller may keep across frames. copy(4) hands back the
-         * toolkit's SHARED per-type slot object (legacy draws immediately, so the next
-         * NPC overwriting it is fine); a memoised pose must own its object.
-         */
         privatePool: PoseCopyPair? = null
     ): Model? {
         if (this.alternativeIds != null) {
@@ -640,9 +621,6 @@ open class NPCType {
         return objectnode?.value as? String ?: defaultValue
     }
 
-    /**
-     * [J]
-     */
     fun getMultiNpc(vars: VarDomain): NPCType? {
         var index = -1
         if (this.varpbit != -1) {

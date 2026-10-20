@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 
-/**
- *
- * @author Steven - 17/09/2023
- *
- */
 class SkyboxPreference : Preference {
 
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)

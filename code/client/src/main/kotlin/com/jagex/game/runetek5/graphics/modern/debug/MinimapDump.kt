@@ -13,14 +13,6 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-/**
- * Reads the generated minimap background texture straight off the GPU and writes it
- * to a PNG, so the composited-to-screen minimap can be compared against the texture
- * it was built from. That separates a generation bug (wrong pixels in the texture)
- * from a compositing bug (right texture, wrong rotate/scale/sample).
- *
- * Enabled with -Dminimap.dump=<path-prefix>. Dumps once per process.
- */
 object MinimapDump {
 
     private var done = false
@@ -35,8 +27,6 @@ object MinimapDump {
         done = true
 
         try {
-            // jaggl entry points: valid on both toolkits (the legacy toolkit never
-            // creates LWJGL capabilities, so GL33.* would abort there).
             OpenGL.glBindTexture(GL_TEXTURE_2D, handle)
             val w = OpenGL.glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH)
             val h = OpenGL.glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT)

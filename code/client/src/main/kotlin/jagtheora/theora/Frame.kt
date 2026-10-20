@@ -1,6 +1,3 @@
-/* Frame - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jagtheora.theora
 
 import jagtheora.misc.SimplePeer

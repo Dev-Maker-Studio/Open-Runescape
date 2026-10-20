@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.entity.grounditem.GroundItem
 import com.jagex.game.runetek5.scene.GroundItemFetcher
 import com.jagex.game.runetek5.trigger.ClientTriggerType
 
-/**
- *
- * @author Steven - 06/10/2023
- *
- */
 class IFSubActiveGroundItem(
     interfaceId: Int,
     overlay: Int,

@@ -42,9 +42,6 @@ class IdkType {
         return mesh
     }
 
-    /**
-     * Decodes the variables of a single opcode
-     */
     fun decode(buffer: Packet, opcode: Int) {
         when (opcode) {
             1 -> buffer.readUByte()
@@ -139,9 +136,6 @@ class IdkType {
         }
     }
 
-    /**
-     * Loads all identity kit variables from the stream
-     */
     internal fun decode(stream: Packet) {
         while (true) {
             val opcode = stream.readUByte()

@@ -34,9 +34,6 @@ class ShapedTile {
     @JvmField
     var light: ShortArray? = null
 
-    /**
-     * Unused
-     */
     @JvmField
     var secondaryMaterialIds: ShortArray? = null
 

@@ -166,7 +166,6 @@ object PulseEventQueue {
         pulseEvent.primary = scrollPos
     }
 
-    // Outdated?
     @JvmStatic
     fun priorityT13Update(componentHash: Int, value: Int) {
         val pulseEvent = PulseEventHandler.createPulseEvent(PulseEventType.T13, componentHash.toLong())
@@ -220,7 +219,6 @@ object PulseEventQueue {
         pulseEvent.queueLowPriority()
     }
 
-    // Outdated
     @JvmStatic
     fun priorityT17Update(componentHash: Int, value: Int) {
         val pulseEvent = PulseEventHandler.createPulseEvent(PulseEventType.T17, componentHash.toLong())

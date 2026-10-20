@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.utils.Utils
 import java.io.Serializable
 import java.util.*
 
-/**
- * @author Brainpower - 25/03/2023
- */
 class EnumType {
 
     @JvmField

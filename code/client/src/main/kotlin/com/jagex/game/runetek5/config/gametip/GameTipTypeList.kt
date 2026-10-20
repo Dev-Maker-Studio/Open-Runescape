@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 
-/**
- *
- * @author Brainpower - 28/03/2022
- *
- */
 class GameTipTypeList(resourceProvider: Js5ResourceProvider) {
 
     @JvmField val tipsResource: Js5ResourceProvider

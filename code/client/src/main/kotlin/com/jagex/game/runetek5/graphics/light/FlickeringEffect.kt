@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.ColorUtil
 import com.jagex.game.runetek5.utils.MathUtils
 
-/**
- * Flickering light effect for dynamic lighting.
- *
- * @author Brainpower
- */
 class FlickeringEffect(
     toolkit: AbstractToolkit,
     sizeShift: Int,

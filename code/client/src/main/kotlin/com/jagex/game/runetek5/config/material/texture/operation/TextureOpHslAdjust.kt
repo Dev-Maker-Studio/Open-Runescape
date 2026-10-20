@@ -6,12 +6,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * Texture operation that adjusts HSL (Hue, Saturation, Lightness) values.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpHslAdjust : TextureOperation(1, false) {
 
     @JvmField var hue: Int = 0

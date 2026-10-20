@@ -4,12 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpTile : TextureOperation(1, false) {
 
     @JvmField var tileCountX: Int = 4

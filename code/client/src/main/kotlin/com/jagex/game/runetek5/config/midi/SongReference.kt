@@ -7,9 +7,6 @@ import com.jagex.game.runetek5.sound.jagtheora.MusicTrack
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 
-/**
- * Reference to a music track with sound bank caching.
- */
 class SongReference(
     @JvmField val musicResource: Js5ResourceProvider,
     @JvmField val musicId: Int
@@ -36,11 +33,6 @@ class SongReference(
         return loadingStage == 2
     }
 
-    /**
-     * Initializes the song by loading the music track and sound bank.
-     *
-     * @return True if initialization is complete or progressed
-     */
     fun initialize(): Boolean {
         reset()
         if (loadingStage == 0) {

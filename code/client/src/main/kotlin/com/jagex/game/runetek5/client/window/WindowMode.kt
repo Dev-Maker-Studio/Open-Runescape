@@ -9,11 +9,6 @@ import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.tools.Browser
 import com.jagex.game.runetek5.utils.ArrayUtils
 
-/**
- * [J]
- * @author Steven
- *
- */
 class WindowMode @Throws(Exception::class) constructor() {
 
     var displayMode: DisplayMode? = null
@@ -216,7 +211,6 @@ class WindowMode @Throws(Exception::class) constructor() {
                     }
                 }
                 activeDisplayModeDetails = Array<DisplayModeDetails>(detailCount) { allDetailsRebuilt[it]!! }
-                // System.arraycopy(allDetailsRebuilt, 0, activeDisplayModeDetails, 0, detailCount)
                 val detailsArray = activeDisplayModeDetails!!
                 val displayDimensions = IntArray(detailsArray.size)
                 for (index in detailsArray.indices) {
@@ -228,12 +222,6 @@ class WindowMode @Throws(Exception::class) constructor() {
             return activeDisplayModeDetails!!
         }
 
-        /**
-         * requested_window_mode
-         * 1 = fixed
-         * 2 = resizable
-         * 3 = fullscreen
-         */
         @JvmStatic
         fun requestWindowMode(activeCurrentMode: Int, requestedWindowMode: Int, width: Int, height: Int, isFixed: Boolean) {
             if (fullScreenSupported && fullScreenFrame != null && (requestedWindowMode != 3 || width != fullScreenWidth || height != fullScreenHeight)) {
@@ -368,7 +356,7 @@ class WindowMode @Throws(Exception::class) constructor() {
                 Renderers.activeToolkit!!.ensureImageproducerCreated(GameShell.gameCanvas!!, canvasDimension.width, canvasDimension.height)
                 Renderers.activeToolkit!!.setActiveCanvas(GameShell.gameCanvas!!)
             } else {
-                Client.loadAssets(PreferenceManager.preferences!!.activeToolkit!!.value, false)
+                Client.loadAssets(false)
             }
             GameShell.setComponentsOnTop()
         }
@@ -405,7 +393,6 @@ class WindowMode @Throws(Exception::class) constructor() {
                             activeGraphics.fillRect(x, y + resizableScreenHeight - deltaY, resizableScreenWidth, deltaY)
                         }
                     } catch (exception: Exception) {
-                        // NOOP
                     }
                 }
             }

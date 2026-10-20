@@ -104,12 +104,6 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     @JvmField
     var hasPendingPositionUpdate: Boolean = false
 
-    /**
-     * Instead of a dot a 'P' is drawn
-     * on the minimap
-     * (presumably for player moderators
-     * although I'm not 100% sure)
-     */
     @JvmField
     var pMapdot: Boolean = false
 
@@ -298,14 +292,12 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     private var poseMemoKey = 0L
     private var poseMemoMinY = 0
     private val poseKey = PoseKey()
-    /** Key of the pose handed out THIS draw (0 when it was not memoisable); drives the shadow memo. */
     private var currentPoseKey = 0L
     private val shadowMemo = ShadowMemo()
     private val shadowKey = PoseKey()
     private val poseCopies = PoseCopyPair()
     private val shadowCopies = PoseCopyPair()
 
-    /** @param forDraw the render path: the only caller that memoises the posed model. */
     fun getAnimatedBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int, forDraw: Boolean = false): Boolean {
         var functionMask = initialFunctionMask
         val bastype = getBastype()
@@ -324,14 +316,11 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
 
         val appearance = playerAppearance!!
-        // Hill tilt first: position-only, feeds both the memo key and the transforms.
         if (x == 0 && z == 0) {
             hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
         } else {
             hillChange(rotation, x, z, getBastype().hillRotateX, getBastype().hillRotateZ)
         }
-        // See NpcEntity: the memo model already carries the in-place transforms, so
-        // their inputs are keyed; only tints (which compound) are excluded.
         val memoEligible = PoseMemo.enabledFor(toolkit) && !tintModel && forDraw
         var key = 0L
         if (memoEligible) {
@@ -781,7 +770,6 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         @JvmField
         var sceneUploaded: Boolean = false
 
-        /** -Drender.playerydiag: prints the local player's vertical draw inputs whenever they change. */
         private val PLAYER_Y_DIAG = System.getProperty("render.playerydiag") != null
         private var playerYDiagLast = ""
 

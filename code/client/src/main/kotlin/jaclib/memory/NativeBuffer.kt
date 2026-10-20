@@ -1,11 +1,5 @@
-/* NativeBuffer - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaclib.memory
 
-/**
- * Native buffer implementation with JNI methods for direct memory access.
- */
 open class NativeBuffer protected constructor() : Buffer, Source {
 
     private val size: Int = -1991552397

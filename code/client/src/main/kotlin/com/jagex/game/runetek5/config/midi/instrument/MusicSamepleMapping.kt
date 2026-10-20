@@ -1,11 +1,5 @@
 package com.jagex.game.runetek5.config.midi.instrument
 
-/**
- *
- * @author Brainpower 05/02/2023
- * https://www.cs.cmu.edu/afs/club/usr/cort/code/img2ktx/third_party/stb/stb_vorbis.c
- *
- */
 class MusicSamepleMapping {
 
     @JvmField val submaps: Int

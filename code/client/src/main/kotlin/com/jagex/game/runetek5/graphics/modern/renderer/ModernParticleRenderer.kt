@@ -13,64 +13,29 @@ import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 import java.nio.ShortBuffer
 
-/**
- * Modern OpenGL 3.3 particle renderer.
- *
- * Replaces the legacy GlParticleRenderer which used:
- * - glGetFloatv(GL_MODELVIEW_MATRIX) to extract billboard vectors
- * - glDisable(GL_LIGHT0) / glDisable(GL_LIGHT1) for unlit rendering
- * - glNormal3f(0, -1, 0) for fixed normal
- * - OpenGlArrayDrawBuffer for vertex data upload
- *
- * This modern renderer:
- * - Computes billboard corners on the CPU using the view matrix columns
- *   (identical math to legacy, but sourced from the toolkit's view matrix
- *   rather than glGetFloatv)
- * - Renders all particles as camera-facing quads via VBO + VAO + IBO
- * - Depth-sorts particles back-to-front using radix-sort bucketing
- *   (matching legacy depth sorting exactly)
- * - Batches particles by material (texture) to minimize draw calls
- * - Uses ONLY GLWrapper (LWJGL3 GL33) -- zero jaggl imports
- *
- * Vertex format (24 bytes per vertex):
- *   - position: vec3 (12 bytes) at offset 0  -- world-space billboard corner
- *   - texcoord: vec2 (8 bytes) at offset 12  -- UV coordinates
- *   - color: vec4 ubyte (4 bytes) at offset 20 -- RGBA particle color
- *
- * Each particle is a quad (4 vertices, 6 indices).
- */
 class ModernParticleRenderer {
 
     companion object {
-        /** Bytes per vertex in the particle vertex format. */
         const val BYTES_PER_VERTEX = 24
 
-        /** Maximum particles per draw call batch. */
         private const val MAX_PARTICLES = 8191
 
-        /** Maximum depth buckets for radix-sort (matches legacy). */
         private const val MAX_DEPTH_BUCKETS = 1600
 
-        /** Maximum particles per depth bucket (matches legacy). */
         private const val MAX_PER_BUCKET = 64
 
-        /** Maximum overflow buckets (matches legacy). */
         private const val MAX_OVERFLOW_BUCKETS = 64
     }
 
-    // GPU resources
     private var vao: VertexArray? = null
     private var vbo: VertexBuffer? = null
     private var ibo: IndexBuffer? = null
     private var shader: ShaderProgram? = null
 
-    // CPU staging buffer for vertex data
     private var vertexData: ByteBuffer? = null
 
-    // Pre-built static index buffer for quads
     private var staticIndices: ShortBuffer? = null
 
-    // Uniform locations (cached)
     private var uViewProjectionLocation = -1
     private var uTextureLocation = -1
     private var uTextureEnabledLocation = -1
@@ -82,10 +47,8 @@ class ModernParticleRenderer {
     private var uTextureScrollLocation = -1
     private var uAmbientLocation = -1
 
-    // State
     private var isInitialized = false
 
-    // Statistics
     private var drawCallsThisFrame = 0
     private var particlesThisFrame = 0
     private val vpScratch = FloatArray(16)
@@ -95,7 +58,6 @@ class ModernParticleRenderer {
         particlesThisFrame = 0
     }
 
-    // Depth sorting arrays (matches legacy GlParticleRenderer structure exactly)
     private val particleDepths = IntArray(MAX_PARTICLES)
     private val bucketCounts = IntArray(MAX_DEPTH_BUCKETS)
     private val overflowCounts = IntArray(MAX_OVERFLOW_BUCKETS)
@@ -104,49 +66,37 @@ class ModernParticleRenderer {
     private var overflowBucketIndex = 0
     private val depthShift: Int = BufferUtils.ilog(MAX_DEPTH_BUCKETS)
 
-    /**
-     * Initializes the renderer. Must be called on the GL thread before rendering.
-     */
     private val PARTICLE_POS_DIAG = System.getProperty("render.particlediag") != null
     private var posDiagTick = 0
 
     fun initialize() {
         if (isInitialized) return
 
-        // Create shader from resources
         shader = ShaderProgram.createFromResources("/shaders/particle.vert", "/shaders/particle.frag")
 
-        // Create GPU resources
         vao = VertexArray()
         vbo = VertexBuffer(VertexBuffer.BufferUsage.STREAM)
         ibo = IndexBuffer(IndexBuffer.BufferUsage.STATIC, IndexBuffer.IndexType.UNSIGNED_SHORT)
 
-        // Setup VAO with particle vertex format (24 bytes per vertex)
         vao!!.bind()
         vbo!!.bind()
 
-        // position: vec3 at offset 0
         vao!!.setAttribute(
             VertexArray.Companion.Attributes.POSITION, 3,
             GLWrapper.Constants.FLOAT, false,
             BYTES_PER_VERTEX, 0
         )
-        // texcoord: vec2 at offset 12
         vao!!.setAttribute(
             VertexArray.Companion.Attributes.TEXCOORD, 2,
             GLWrapper.Constants.FLOAT, false,
             BYTES_PER_VERTEX, 12
         )
-        // color: vec4 ubyte normalized at offset 20
         vao!!.setAttribute(
             VertexArray.Companion.Attributes.COLOR, 4,
             GLWrapper.Constants.UNSIGNED_BYTE, true,
             BYTES_PER_VERTEX, 20
         )
 
-        // Build static index buffer for MAX_PARTICLES quads
-        // Each quad uses indices: [i*4+0, i*4+1, i*4+2, i*4+2, i*4+3, i*4+0]
-        // This matches the legacy winding order from GlParticleRenderer/NativeParticleRenderer
         val indexData = MemoryUtil.memAllocShort(MAX_PARTICLES * 6)
         for (i in 0 until MAX_PARTICLES) {
             val base = i * 4
@@ -160,15 +110,12 @@ class ModernParticleRenderer {
         indexData.flip()
         ibo!!.upload(indexData)
         staticIndices = indexData
-        // Note: indexData is kept alive since ibo.upload copies it
 
         ibo!!.bind()
         vao!!.unbind()
 
-        // Allocate CPU staging buffer for vertex data
         vertexData = MemoryUtil.memAlloc(MAX_PARTICLES * 4 * BYTES_PER_VERTEX)
 
-        // Cache uniform locations
         cacheUniformLocations()
 
         isInitialized = true
@@ -190,34 +137,8 @@ class ModernParticleRenderer {
         s.unbind()
     }
 
-    /**
-     * Checks if the renderer is initialized and ready.
-     */
     fun isReady(): Boolean = isInitialized
 
-    /**
-     * Renders all particles from the given ParticleWrapper.
-     *
-     * This method replicates the exact rendering logic from the legacy
-     * GlParticleRenderer.drawParticles(), including:
-     * - Depth sorting with radix-sort bucketing
-     * - Back-to-front rendering order
-     * - Material (texture) batching
-     * - Billboard quad computation from view matrix columns
-     *
-     * @param particleWrapper The particle container
-     * @param viewMatrixFloats The 4x4 view (modelview) matrix as a 16-element float array.
-     *                         This replaces the legacy glGetFloatv(GL_MODELVIEW_MATRIX) call.
-     *                         The view matrix is sourced from the toolkit's particleMatrix field.
-     * @param projectionMatrixFloats The projection matrix for depth sorting
-     * @param lookupTextureHandle Function to resolve material ID to GL texture handle
-     * @param fogEnabled Whether fog is active
-     * @param fogStart Fog start distance
-     * @param fogEnd Fog end distance
-     * @param fogR Fog color red (0-1)
-     * @param fogG Fog color green (0-1)
-     * @param fogB Fog color blue (0-1)
-     */
     fun renderParticles(
         particleWrapper: ParticleWrapper,
         viewMatrixFloats: FloatArray,
@@ -229,7 +150,6 @@ class ModernParticleRenderer {
         fogR: Float,
         fogG: Float,
         fogB: Float,
-        /** The scene's tracked view-projection (row-major, RS clip space); when given it replaces proj x view. */
         vpOverride: FloatArray? = null,
         lookupCombineMode: (Int) -> Int = { 0 },
         lookupScroll: (Int) -> Int = { 0 },
@@ -241,12 +161,6 @@ class ModernParticleRenderer {
     ) {
         if (!isInitialized) return
 
-
-        // Extract billboard vectors from the view matrix columns.
-        // This is exactly what the legacy code does with glGetFloatv(GL_MODELVIEW_MATRIX).
-        //
-        // Column 0 (right vector): [0], [4], [8]
-        // Column 1 (up vector):    [1], [5], [9]
         val rightX = viewMatrixFloats[0]
         val rightY = viewMatrixFloats[4]
         val rightZ = viewMatrixFloats[8]
@@ -254,10 +168,6 @@ class ModernParticleRenderer {
         val upY = viewMatrixFloats[5]
         val upZ = viewMatrixFloats[9]
 
-        // Diagonal offsets for quad corners (matches legacy exactly):
-        // offDiag1 = right + up    (top-right / bottom-left diagonal)
-        // offDiag2 = right - up    (top-left / bottom-right diagonal)
-        // offAnti  = up - right    (opposite of offDiag2)
         val offDiag1X = rightX + upX
         val offDiag1Y = rightY + upY
         val offDiag1Z = rightZ + upZ
@@ -270,19 +180,11 @@ class ModernParticleRenderer {
         val offAntiY = upY - rightY
         val offAntiZ = upZ - rightZ
 
-        // Depth-sort key: legacy parity — GlParticleRenderer computes per-particle
-        // depth from the VIEW matrix's z row (toolkit.viewMatrix44.elements[2,6,10,14],
-        // GlParticleRenderer.kt:48-51), i.e. view-space Z, not clip Z.
         val zNearA = viewMatrixFloats[2]
         val zNearB = viewMatrixFloats[6]
         val zNearC = viewMatrixFloats[10]
         val zNearD = viewMatrixFloats[14]
 
-        // Build the combined VP matrix for the shader.
-        // Both inputs are RS row-major/row-vector matrices; indexing them as
-        // column-major here yields (V·P)^T in column-major form, so GLSL's M*v
-        // reproduces the legacy row-vector clip result (the same "straight upload"
-        // trick used by the ground/model batchers).
         val vpMatrix = vpScratch
         if (vpOverride != null) {
             System.arraycopy(vpOverride, 0, vpMatrix, 0, 16)
@@ -297,21 +199,17 @@ class ModernParticleRenderer {
                 vpMatrix[row + col * 4] = sum
             }
         }
-        // RS clip space is Y-down; OpenGL is Y-up. Negate the clip-Y output row
-        // (column-major indices 1,5,9,13), matching the ground/model batchers.
         vpMatrix[1] = -vpMatrix[1]
         vpMatrix[5] = -vpMatrix[5]
         vpMatrix[9] = -vpMatrix[9]
         vpMatrix[13] = -vpMatrix[13]
         }
 
-        // Setup GL state for particle rendering
         GLWrapper.enable(GLWrapper.Constants.BLEND)
         GLWrapper.blendFunc(GLWrapper.Constants.SRC_ALPHA, GLWrapper.Constants.ONE_MINUS_SRC_ALPHA)
-        GLWrapper.depthMask(false)  // Disable depth writes (particles are translucent)
+        GLWrapper.depthMask(false)
         GLWrapper.enable(GLWrapper.Constants.DEPTH_TEST)
 
-        // Bind shader and set per-frame uniforms
         val s = shader!!
         s.bind()
         GLWrapper.uniformMatrix4fv(uViewProjectionLocation, false, vpMatrix)
@@ -323,7 +221,6 @@ class ModernParticleRenderer {
             s.setUniform(uFogColorLocation, fogR, fogG, fogB, 1.0f)
         }
 
-        // Phase 1: Compute depth for each particle
         val tree = particleWrapper.particleBinaryTree.current
         var totalParticles = 0
         var minDepth = Int.MAX_VALUE
@@ -354,7 +251,6 @@ class ModernParticleRenderer {
             System.err.println(sb)
         }
 
-        // Phase 2: Compute bucket parameters
         var depthRange = maxDepth - minDepth
         val bucketShift: Int
         if (depthRange + 2 > MAX_DEPTH_BUCKETS) {
@@ -365,7 +261,6 @@ class ModernParticleRenderer {
             depthRange += 2
         }
 
-        // Phase 3: Iterate particles, group by material, sort into depth buckets, render
         var particleNode = tree.child
         var particlePtr = 0
         var currentMaterialId = -2
@@ -375,7 +270,6 @@ class ModernParticleRenderer {
         while (particleNode != null && particleNode !== tree) {
             overflowBucketIndex = 0
 
-            // Clear bucket counts
             for (i in 0 until depthRange) {
                 bucketCounts[i] = 0
             }
@@ -383,7 +277,6 @@ class ModernParticleRenderer {
                 overflowCounts[i] = 0
             }
 
-            // Fill buckets for current material batch
             while (particleNode != null && particleNode !== tree) {
                 val pe = particleNode as PointEntity
                 if (needUpdate) {
@@ -420,7 +313,6 @@ class ModernParticleRenderer {
                 particleNode = particleNode.child
             }
 
-            // Bind material texture
             val textureHandle = if (currentMaterialId >= 0) lookupTextureHandle(currentMaterialId) else 0
             if (textureHandle > 0) {
                 GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
@@ -441,7 +333,6 @@ class ModernParticleRenderer {
             val ambient = if (currentLightAdjust) sunBrightness else 1f
             s.setUniform(uAmbientLocation, ambient * sunR, ambient * sunG, ambient * sunB)
 
-            // Generate billboard quads for this material batch, back-to-front
             val vb = vertexData!!
             vb.clear()
             var quadCount = 0
@@ -449,7 +340,6 @@ class ModernParticleRenderer {
             for (bucketIdx in depthRange - 1 downTo 0) {
                 val primaryCount = Math.min(MAX_PER_BUCKET, bucketCounts[bucketIdx])
                 if (primaryCount > 0) {
-                    // Primary bucket particles
                     for (pIdx in primaryCount - 1 downTo 0) {
                         val pe = primaryBuckets[bucketIdx][pIdx]!!
                         writeParticleQuad(
@@ -461,7 +351,6 @@ class ModernParticleRenderer {
                         quadCount++
                     }
 
-                    // Overflow bucket particles
                     if (bucketCounts[bucketIdx] > MAX_PER_BUCKET) {
                         val overflowIdx = bucketCounts[bucketIdx] - MAX_PER_BUCKET - 1
                         for (oIdx in overflowCounts[overflowIdx] - 1 downTo 0) {
@@ -478,7 +367,6 @@ class ModernParticleRenderer {
                 }
             }
 
-            // Upload and draw if we have quads
             if (quadCount > 0) {
                 vb.flip()
                 vbo!!.upload(vb)
@@ -497,26 +385,16 @@ class ModernParticleRenderer {
             }
         }
 
-        // Restore GL state
         s.unbind()
         GLWrapper.depthMask(true)
     }
 
-    /**
-     * Writes a single particle's billboard quad (4 vertices) into the staging buffer.
-     *
-     * The quad corners are computed identically to the legacy GlParticleRenderer:
-     *   corner0 = center + diag1 * (-size)    UV(0,0)
-     *   corner1 = center + anti  * size        UV(0,1)
-     *   corner2 = center + diag1 * size        UV(1,1)
-     *   corner3 = center + diag2 * size        UV(1,0)
-     */
     private fun writeParticleQuad(
         buffer: ByteBuffer,
         particle: PointEntity,
-        d1x: Float, d1y: Float, d1z: Float,  // diag1 = right + up
-        d2x: Float, d2y: Float, d2z: Float,  // diag2 = right - up
-        ax: Float, ay: Float, az: Float       // anti  = up - right
+        d1x: Float, d1y: Float, d1z: Float,
+        d2x: Float, d2y: Float, d2z: Float,
+        ax: Float, ay: Float, az: Float
     ) {
         val color = particle.colorArgb
         val red = ((color shr 16) and 0xFF).toByte()
@@ -529,49 +407,39 @@ class ModernParticleRenderer {
         val z = (particle.z shr 12).toFloat()
         val size = (particle.size shr 12).toFloat()
 
-        // Corner 0: center + diag1 * (-size), UV(0, 0)
         buffer.putFloat(x + d1x * (-size))
         buffer.putFloat(y + d1y * (-size))
         buffer.putFloat(z + d1z * (-size))
-        buffer.putFloat(0.0f)  // u
-        buffer.putFloat(0.0f)  // v
+        buffer.putFloat(0.0f)
+        buffer.putFloat(0.0f)
         buffer.put(red).put(green).put(blue).put(alpha)
 
-        // Corner 1: center + anti * size, UV(0, 1)
         buffer.putFloat(x + ax * size)
         buffer.putFloat(y + ay * size)
         buffer.putFloat(z + az * size)
-        buffer.putFloat(0.0f)  // u
-        buffer.putFloat(1.0f)  // v
+        buffer.putFloat(0.0f)
+        buffer.putFloat(1.0f)
         buffer.put(red).put(green).put(blue).put(alpha)
 
-        // Corner 2: center + diag1 * size, UV(1, 1)
         buffer.putFloat(x + d1x * size)
         buffer.putFloat(y + d1y * size)
         buffer.putFloat(z + d1z * size)
-        buffer.putFloat(1.0f)  // u
-        buffer.putFloat(1.0f)  // v
+        buffer.putFloat(1.0f)
+        buffer.putFloat(1.0f)
         buffer.put(red).put(green).put(blue).put(alpha)
 
-        // Corner 3: center + diag2 * size, UV(1, 0)
         buffer.putFloat(x + d2x * size)
         buffer.putFloat(y + d2y * size)
         buffer.putFloat(z + d2z * size)
-        buffer.putFloat(1.0f)  // u
-        buffer.putFloat(0.0f)  // v
+        buffer.putFloat(1.0f)
+        buffer.putFloat(0.0f)
         buffer.put(red).put(green).put(blue).put(alpha)
     }
 
-    /**
-     * Gets rendering statistics for the current frame.
-     */
     fun getFrameStats(): FrameStats {
         return FrameStats(drawCallsThisFrame, particlesThisFrame)
     }
 
-    /**
-     * Releases all GPU and CPU resources.
-     */
     fun destroy() {
         shader?.destroy()
         vao?.destroy()

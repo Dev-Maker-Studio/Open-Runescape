@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.preference
 
-/**
- * @author Steven - 17/09/2023
- */
 abstract class Preference {
     @JvmField var value: Int
     @JvmField protected val gamePreferences: GamePreferences

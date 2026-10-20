@@ -46,10 +46,6 @@ import com.jagex.game.runetek5.vardomain.VarDomain
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.RECOLOR
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.RETEXTURE
 
-/**
- * @author Steven
- *
- */
 class Component {
 
     enum class StackMode {

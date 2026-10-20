@@ -12,26 +12,9 @@ import org.lwjgl.opengl.GL33.glGetQueryObjectui64
 import org.lwjgl.opengl.GL33.GL_TIMESTAMP
 import org.lwjgl.opengl.GL33.glQueryCounter
 
-/**
- * Per-pass GPU timing via `GL_TIME_ELAPSED` queries.
- *
- * Wall-clock CPU timers cannot see GPU cost: the driver returns from a draw call long
- * before the work runs, so a frame can be entirely GPU-bound while every CPU timer
- * reads near zero. This measures the GPU side directly, per named pass.
- *
- * Results are read back [RING] frames late and only when the driver reports them as
- * available, so the timer itself never stalls the pipeline — polling a query the frame
- * it was issued would introduce exactly the sync it is meant to measure.
- *
- * Only one `GL_TIME_ELAPSED` query may be active at a time, so passes must not nest;
- * [begin] on an already-open pass is ignored rather than raising a GL error.
- *
- * Enabled with `-Drender.gputimers`; completely inert otherwise.
- */
 class GpuTimer(private val passNames: Array<String>) {
 
     companion object {
-        /** Frames of latency before a result is collected. 4 is comfortably past any driver pipelining. */
         private const val RING = 4
 
         @JvmStatic
@@ -40,11 +23,9 @@ class GpuTimer(private val passNames: Array<String>) {
 
     private val passCount = passNames.size
 
-    /** queries[pass][slot] */
     private val queries = Array(passCount) { IntArray(RING) }
     private val issued = Array(passCount) { BooleanArray(RING) }
 
-    /** Accumulated nanoseconds and sample count per pass since the last [reset]. */
     private val accumNs = LongArray(passCount)
     private val samples = IntArray(passCount)
 
@@ -52,17 +33,13 @@ class GpuTimer(private val passNames: Array<String>) {
     private var openPass = -1
     private var initialized = false
 
-    /** Most recently collected per-pass result (ms), for stall diagnostics. */
     val lastPassMs = DoubleArray(passCount)
 
-    // Whole-GPU-frame timing from GL_TIMESTAMP pairs (present to present); a
-    // TIME_ELAPSED query cannot enclose the pass queries, timestamps can.
     private val stampStart = IntArray(RING)
     private val stampEnd = IntArray(RING)
     private val stampIssued = BooleanArray(RING)
     private var stampSlot = 0
     private var stampOpen = false
-    /** Last 6 collected GPU frame durations (ms), newest last. */
     val frameHistoryMs = DoubleArray(6)
     private var frameHistoryCount = 0L
 
@@ -75,11 +52,9 @@ class GpuTimer(private val passNames: Array<String>) {
         initialized = true
     }
 
-    /** Advances the ring and harvests whatever results are ready. Call once per presented frame. */
     fun nextFrame() {
         if (!initialized) return
         slot = (slot + 1) % RING
-        // The slot we are about to reuse holds the oldest outstanding query.
         for (p in 0 until passCount) {
             if (!issued[p][slot]) continue
             val q = queries[p][slot]
@@ -92,10 +67,8 @@ class GpuTimer(private val passNames: Array<String>) {
         }
     }
 
-    /** GPU frame start: call right after present. */
     fun frameStampStart() {
         if (!initialized || stampOpen) return
-        // Collect the oldest outstanding pair before reusing its slot.
         stampSlot = (stampSlot + 1) % RING
         if (stampIssued[stampSlot]) {
             val a = stampStart[stampSlot]; val b = stampEnd[stampSlot]
@@ -111,7 +84,6 @@ class GpuTimer(private val passNames: Array<String>) {
         stampOpen = true
     }
 
-    /** GPU frame end: call right before present. */
     fun frameStampEnd() {
         if (!initialized || !stampOpen) return
         glQueryCounter(stampEnd[stampSlot], GL_TIMESTAMP)
@@ -119,7 +91,6 @@ class GpuTimer(private val passNames: Array<String>) {
         stampOpen = false
     }
 
-    /** Compact diag string: last per-pass results and the recent GPU frame history. */
     fun lastFrameString(): String {
         if (!initialized) return "gpu=off"
         val sb = StringBuilder("gpuLast[")
@@ -144,7 +115,6 @@ class GpuTimer(private val passNames: Array<String>) {
         openPass = -1
     }
 
-    /** Mean milliseconds per frame for each pass since the last [reset], as a diag string. */
     fun summary(): String {
         if (!initialized) return "gpu[off]"
         val sb = StringBuilder("gpu[")

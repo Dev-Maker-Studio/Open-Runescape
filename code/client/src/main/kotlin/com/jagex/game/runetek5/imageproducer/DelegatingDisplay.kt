@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.imageproducer
 
-/**
- *
- * @author Brainpower - 22/04/2022
- *
- */
 abstract class DelegatingDisplay : AbstractDisplay() {
     abstract fun draw(): Int
 

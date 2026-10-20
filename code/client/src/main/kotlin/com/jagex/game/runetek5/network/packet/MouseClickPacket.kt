@@ -8,18 +8,10 @@ import com.jagex.game.runetek5.utils.Utils
 import java.util.LinkedList
 import java.util.Queue
 
-/**
- * Packet handler for mouse click events sent to the server.
- */
 class MouseClickPacket : AbstractMousePacket() {
 
     @JvmField val records: Queue<MouseActionServer> = LinkedList()
 
-    /**
-     * Adds a mouse action to the queue for sending to the server.
-     *
-     * @param record The mouse action to queue
-     */
     fun addToQueue(record: MouseActionServer) {
         records.add(record)
         if (records.size > 10) {
@@ -39,12 +31,6 @@ class MouseClickPacket : AbstractMousePacket() {
         }
     }
 
-    /**
-     * Writes the constant value for a mouse action to the packet.
-     *
-     * @param packet The packet to write to
-     * @param record The mouse action record
-     */
     fun writeConstant(packet: Packet, record: MouseActionServer) {
         packet.writeByte(record.getConstant())
     }

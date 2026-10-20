@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.client.input.mouse
 
-/**
- * Mouse action that will be processed client side with object pooling.
- *
- * @author Brainpower
- */
 class MouseActionClient : MouseRecord() {
 
     @JvmField var mouseY: Int = 0

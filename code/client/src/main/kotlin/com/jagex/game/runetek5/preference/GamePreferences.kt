@@ -10,32 +10,12 @@ import com.jagex.game.runetek5.systeminfo.SystemInfo
 import kotlin.math.max
 
 class GamePreferences : Node<GamePreferences> {
-    /**
-     * The preferred toolkit to render the game
-     * (may still get overridden on startup as the
-     * game profiles the performance of given toolkit)
-     *
-     * Options:
-     * - Safe mode
-     * - Enhanced software mode
-     * - OpenGL
-     * - OpenGL with shaders
-     */
     @JvmField
     var activeToolkit: ToolkitPreference? = null
 
-    /**
-     * The actual AA preference that persists
-     * over ingame / multiple game sessions
-     */
     @JvmField
     var antiAliasing: AntiAliasingPreference? = null
 
-    /**
-     * When switching AA setting this preference
-     * setting is used until the user presses
-     * confirm
-     */
     @JvmField
     var antiAliasingPreview: AntiAliasingPreference? = null
 
@@ -483,75 +463,40 @@ class GamePreferences : Node<GamePreferences> {
 
     fun encode(): Packet {
         val stream = Packet(40)
-        /*0*/
         stream.writeByte(28)
-        /*1*/
         stream.writeByte(antiAliasing!!.getValue())
-        /*2*/
         stream.writeByte(bloom!!.getValue())
-        /*3*/
         stream.writeByte(brightness!!.getValue())
-        /*4*/
         stream.writeByte(mapSize!!.getValue())
-        /*5*/
         stream.writeByte(buildArea!!.getValue())
-        /*6*/
         stream.writeByte(flickeringEffects!!.getValue())
-        /*7*/
         stream.writeByte(fog!!.getValue())
-        /*8*/
         stream.writeByte(goundBlending!!.getValue())
-        /*9*/
         stream.writeByte(groundDecoration!!.getValue())
-        /*10*/
         stream.writeByte(idleAnimations!!.getValue())
-        /*11*/
         stream.writeByte(lightDetail!!.getValue())
-        /*12*/
         stream.writeByte(sceneryShadows!!.getValue())
-        /*13*/
         stream.writeByte(defaultToolkit!!.getValue())
-        /*14*/
         stream.writeByte(particles!!.getValue())
-        /*15*/
         stream.writeByte(removeRoofs!!.getValue())
-        /*16*/
         stream.writeByte(maxScreenSize!!.getValue())
-        /*17*/
         stream.writeByte(skyboxes!!.getValue())
-        /*18*/
         stream.writeByte(characterShadows!!.getValue())
-        /*19*/
         stream.writeByte(textures!!.getValue())
-        /*20*/
         stream.writeByte(toolkit!!.getValue())
-        /*21*/
         stream.writeByte(0)
-        /*22*/
         stream.writeByte(water!!.getValue())
-        /*23*/
         stream.writeByte(fixedScreen!!.getValue())
-        /*24*/
         stream.writeByte(customCursor!!.getValue())
-        /*25*/
         stream.writeByte(graphics!!.getValue())
-        /*26*/
         stream.writeByte(cpu!!.getValue())
-        /*27*/
         stream.writeByte(gametipStartStagePreference!!.getValue())
-        /*28*/
         stream.writeByte(safeMode!!.getValue())
-        /*29*/
         stream.writeByte(soundEffectVolume!!.getValue())
-        /*30*/
         stream.writeByte(ambientSoundVolume!!.getValue())
-        /*31*/
         stream.writeByte(voiceOverVolume!!.getValue())
-        /*32*/
         stream.writeByte(musicVolume!!.getValue())
-        /*33*/
         stream.writeByte(soundLevel!!.getValue())
-        /*34*/
         stream.writeByte(monoStereo!!.getValue())
         return stream
     }

@@ -12,9 +12,6 @@ import com.jagex.game.runetek5.sound.player.area.AmbientSound
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Node for managing Vorbis audio files in the game.
- */
 class VorbisNode(
     @JvmField val fileId: Int,
     @JvmField val vfReference: VorbisFileReference,

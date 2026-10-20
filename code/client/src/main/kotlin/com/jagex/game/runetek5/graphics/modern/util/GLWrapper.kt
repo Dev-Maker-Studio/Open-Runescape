@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.graphics.modern.util
 
+import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
 import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
@@ -8,18 +9,7 @@ import java.nio.FloatBuffer
 import java.nio.IntBuffer
 import java.nio.ShortBuffer
 
-/**
- * OpenGL wrapper providing a clean interface over LWJGL3 GL33 functions.
- * This abstraction allows for easier testing and potential WebGL porting.
- *
- * All methods use the OpenGL 3.3 Core Profile, which is:
- * - Compatible with OpenGL ES 3.0 (basis for WebGL 2.0)
- * - Cross-platform (Windows, Linux, macOS)
- * - Modern programmable pipeline only (no fixed-function)
- */
 object GLWrapper {
-
-    // ===== Shader Functions =====
 
     fun createShader(type: Int): Int = glCreateShader(type)
 
@@ -65,14 +55,8 @@ object GLWrapper {
 
     fun getAttribLocation(program: Int, name: String): Int = glGetAttribLocation(program, name)
 
-    // ===== Uniform Functions =====
-
     fun uniform1i(location: Int, value: Int) = glUniform1i(location, value)
 
-    /** Sets consecutive elements of an int/sampler ARRAY uniform from a single base
-     *  location. Needed because some drivers return -1 for individual sampler-array
-     *  element locations (uTextures[5]); writing the whole array from uTextures[0]
-     *  with count=N sets every element regardless. */
     fun uniform1iv(location: Int, values: IntArray) = glUniform1iv(location, values)
 
     fun uniform1f(location: Int, value: Float) = glUniform1f(location, value)
@@ -104,8 +88,6 @@ object GLWrapper {
     fun uniformMatrix3fv(location: Int, transpose: Boolean, values: FloatArray) = glUniformMatrix3fv(location, transpose, values)
 
     fun uniformMatrix4fv(location: Int, transpose: Boolean, values: FloatArray) = glUniformMatrix4fv(location, transpose, values)
-
-    // ===== Buffer Functions =====
 
     fun genBuffers(): Int = glGenBuffers()
 
@@ -148,8 +130,6 @@ object GLWrapper {
         }
     }
 
-    // ===== Vertex Array Functions =====
-
     fun genVertexArrays(): Int = glGenVertexArrays()
 
     fun bindVertexArray(array: Int) = glBindVertexArray(array)
@@ -176,8 +156,6 @@ object GLWrapper {
         stride: Int,
         offset: Long
     ) = glVertexAttribIPointer(index, size, type, stride, offset)
-
-    // ===== Texture Functions =====
 
     fun genTextures(): Int = glGenTextures()
 
@@ -214,8 +192,6 @@ object GLWrapper {
     ) = glTexSubImage2D(target, level, xOffset, yOffset, width, height, format, type, data)
 
     fun generateMipmap(target: Int) = glGenerateMipmap(target)
-
-    // ===== Framebuffer Functions =====
 
     fun genFramebuffers(): Int = glGenFramebuffers()
 
@@ -256,18 +232,14 @@ object GLWrapper {
         }
     }
 
-    // ===== Draw Functions =====
+    fun drawArrays(mode: Int, first: Int, count: Int) = FrameDump.arrays(mode, first, count)
 
-    fun drawArrays(mode: Int, first: Int, count: Int) = glDrawArrays(mode, first, count)
-
-    fun drawElements(mode: Int, count: Int, type: Int, offset: Long) = glDrawElements(mode, count, type, offset)
+    fun drawElements(mode: Int, count: Int, type: Int, offset: Long) = FrameDump.elements(mode, count, type, offset)
 
     fun drawElementsInstanced(mode: Int, count: Int, type: Int, offset: Long, instanceCount: Int) =
-        glDrawElementsInstanced(mode, count, type, offset, instanceCount)
+        FrameDump.instanced(mode, count, type, offset, instanceCount)
 
     fun vertexAttribDivisor(index: Int, divisor: Int) = glVertexAttribDivisor(index, divisor)
-
-    // ===== State Functions =====
 
     fun enable(cap: Int) = glEnable(cap)
 
@@ -306,8 +278,6 @@ object GLWrapper {
 
     fun pointSize(size: Float) = glPointSize(size)
 
-    // ===== Query Functions =====
-
     fun getError(): Int = glGetError()
 
     fun getString(name: Int): String? = glGetString(name)
@@ -328,27 +298,21 @@ object GLWrapper {
         }
     }
 
-    // ===== Constants =====
     object Constants {
-        // Shader types
         const val VERTEX_SHADER = GL_VERTEX_SHADER
         const val FRAGMENT_SHADER = GL_FRAGMENT_SHADER
 
-        // Shader status
         const val COMPILE_STATUS = GL_COMPILE_STATUS
         const val LINK_STATUS = GL_LINK_STATUS
 
-        // Buffer targets
         const val ARRAY_BUFFER = GL_ARRAY_BUFFER
         const val ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER
         const val UNIFORM_BUFFER = GL_UNIFORM_BUFFER
 
-        // Buffer usage
         const val STATIC_DRAW = GL_STATIC_DRAW
         const val DYNAMIC_DRAW = GL_DYNAMIC_DRAW
         const val STREAM_DRAW = GL_STREAM_DRAW
 
-        // Data types
         const val FLOAT = GL_FLOAT
         const val INT = GL_INT
         const val UNSIGNED_INT = GL_UNSIGNED_INT
@@ -357,7 +321,6 @@ object GLWrapper {
         const val BYTE = GL_BYTE
         const val SHORT = GL_SHORT
 
-        // Primitive types
         const val POINTS = GL_POINTS
         const val LINES = GL_LINES
         const val LINE_STRIP = GL_LINE_STRIP
@@ -366,12 +329,10 @@ object GLWrapper {
         const val TRIANGLE_STRIP = GL_TRIANGLE_STRIP
         const val TRIANGLE_FAN = GL_TRIANGLE_FAN
 
-        // Texture targets
         const val TEXTURE_2D = GL_TEXTURE_2D
         const val TEXTURE_3D = GL_TEXTURE_3D
         const val TEXTURE_CUBE_MAP = GL_TEXTURE_CUBE_MAP
 
-        // Texture parameters
         const val TEXTURE_MIN_FILTER = GL_TEXTURE_MIN_FILTER
         const val TEXTURE_MAG_FILTER = GL_TEXTURE_MAG_FILTER
         const val TEXTURE_WRAP_S = GL_TEXTURE_WRAP_S
@@ -382,16 +343,13 @@ object GLWrapper {
         const val CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE
         const val REPEAT = GL_REPEAT
 
-        // Texture formats
         const val RGBA = GL_RGBA
         const val RGB = GL_RGB
         const val RGBA8 = GL_RGBA8
         const val RGB8 = GL_RGB8
 
-        // Texture units
         const val TEXTURE0 = GL_TEXTURE0
 
-        // Framebuffer
         const val FRAMEBUFFER = GL_FRAMEBUFFER
         const val READ_FRAMEBUFFER = GL_READ_FRAMEBUFFER
         const val DRAW_FRAMEBUFFER = GL_DRAW_FRAMEBUFFER
@@ -404,46 +362,38 @@ object GLWrapper {
         const val DEPTH_COMPONENT = GL_DEPTH_COMPONENT
         const val DEPTH_COMPONENT24 = GL_DEPTH_COMPONENT24
 
-        // Capabilities
         const val DEPTH_TEST = GL_DEPTH_TEST
         const val BLEND = GL_BLEND
         const val CULL_FACE = GL_CULL_FACE
         const val SCISSOR_TEST = GL_SCISSOR_TEST
         const val MULTISAMPLE = GL_MULTISAMPLE
 
-        // Blend factors
         const val SRC_ALPHA = GL_SRC_ALPHA
         const val ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA
         const val ONE = GL_ONE
         const val ZERO = GL_ZERO
         const val DST_COLOR = GL_DST_COLOR
 
-        // Depth functions
         const val LESS = GL_LESS
         const val LEQUAL = GL_LEQUAL
         const val GREATER = GL_GREATER
         const val ALWAYS = GL_ALWAYS
 
-        // Cull face
         const val BACK = GL_BACK
         const val FRONT = GL_FRONT
         const val FRONT_AND_BACK = GL_FRONT_AND_BACK
 
-        // Front face
         const val CCW = GL_CCW
         const val CW = GL_CW
 
-        // Clear bits
         const val COLOR_BUFFER_BIT = GL_COLOR_BUFFER_BIT
         const val DEPTH_BUFFER_BIT = GL_DEPTH_BUFFER_BIT
         const val STENCIL_BUFFER_BIT = GL_STENCIL_BUFFER_BIT
 
-        // Polygon mode
         const val FILL = GL_FILL
         const val LINE = GL_LINE
         const val POINT = GL_POINT
 
-        // Query
         const val VENDOR = GL_VENDOR
         const val RENDERER = GL_RENDERER
         const val VERSION = GL_VERSION

@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.MaterialType
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import kotlin.math.pow
 
-/**
- *
- * @author Brainpower - 28/01/2023
- * Reference: https://www.rune-server.ee/runescape-development/rs2-client/tools/589900-rs2-hsb-color-picker.html
- *
- */
 object ColorUtil {
 
     @JvmStatic

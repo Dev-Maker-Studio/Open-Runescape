@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.entity.EntityNode
 open class ParticleNode : EntityNode() {
 
     @JvmField var child: ParticleNode? = null
-    @JvmField var treeNext: ParticleNode? = null   // was "next" in Java
+    @JvmField var treeNext: ParticleNode? = null
 
     fun unlinkTree() {
         val n = treeNext ?: return

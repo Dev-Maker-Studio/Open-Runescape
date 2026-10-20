@@ -1,6 +1,3 @@
-/* QueryPerformanceCounter - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaclib.nanotime
 
 class QueryPerformanceCounter private constructor() {

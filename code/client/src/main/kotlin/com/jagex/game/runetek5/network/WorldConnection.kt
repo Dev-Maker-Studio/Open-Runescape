@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.world.WorldDescriptor
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Manages world connections and world list.
- */
 object WorldConnection {
 
     @JvmField var GAME_CONNECTION: ConnectionInfo? = null
@@ -23,12 +20,6 @@ object WorldConnection {
     @JvmField var gameConnection: Connection? = null
     @JvmField var WORLD_PING_REQUESTS: MutableMap<Int, PingRequest> = ConcurrentHashMap()
 
-    /**
-     * Sets the lobby connection host and port.
-     *
-     * @param host The lobby server host
-     * @param port The lobby server port
-     */
     @JvmStatic
     fun setLobbyConnection(host: String, port: Int) {
         if (LOBBY_CONNECTION_INFO == null) {
@@ -40,9 +31,6 @@ object WorldConnection {
         LOBBY_CONNECTION_INFO!!.devWorld2 = LOBBY_CONNECTION_INFO!!.worldId
     }
 
-    /**
-     * Drops the current client connection.
-     */
     @JvmStatic
     fun dropClient() {
         if (!GameState.inLobby(Client.gameState) && !GameState.isLoggedOut(Client.gameState)) {
@@ -54,16 +42,6 @@ object WorldConnection {
         }
     }
 
-    /**
-     * Sorts world descriptors using quicksort.
-     *
-     * @param srcPos The starting position
-     * @param size The ending position
-     * @param sortMode The sort mode
-     * @param ascending Whether to sort ascending
-     * @param filterMode The filter mode
-     * @param filterEnabled Whether filtering is enabled
-     */
     @JvmStatic
     fun quicksort(srcPos: Int, size: Int, sortMode: Int, ascending: Boolean, filterMode: Int, filterEnabled: Boolean) {
         if (srcPos < size) {
@@ -88,25 +66,12 @@ object WorldConnection {
         }
     }
 
-    /**
-     * Sorts and clears ping requests.
-     *
-     * @param sortMode The sort mode
-     * @param ascending Whether to sort ascending
-     * @param filterMode The filter mode
-     * @param filterEnabled Whether filtering is enabled
-     */
     @JvmStatic
     fun sortAndClearPings(sortMode: Int, ascending: Boolean, filterMode: Int, filterEnabled: Boolean) {
         quicksort(0, WORLD_DESCRIPTORS_BYID.size - 1, sortMode, ascending, filterMode, filterEnabled)
         WORLD_PING_REQUESTS.clear()
     }
 
-    /**
-     * Gets the next world descriptor.
-     *
-     * @return The next world descriptor, or null if at the end
-     */
     @JvmStatic
     fun getNextWorldDescriptor(): WorldDescriptor? {
         return if (CURRENT_WORLD < WORLD_DESCRIPTORS_BYID.size) WORLD_DESCRIPTORS_BYID[CURRENT_WORLD++] else null

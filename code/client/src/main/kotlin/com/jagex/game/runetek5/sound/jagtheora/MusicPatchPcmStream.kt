@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.sound.jagtheora
 import com.jagex.game.runetek5.cache.node.NodeCollection
 import com.jagex.game.runetek5.sound.player.PcmPlayerManager
 
-/**
- * PCM stream processor for music patches with sustain and looping support.
- */
 class MusicPatchPcmStream(@JvmField val midiPcmStream: MidiPcmStream) : PcmStream() {
 
     @JvmField val queue: NodeCollection = NodeCollection()

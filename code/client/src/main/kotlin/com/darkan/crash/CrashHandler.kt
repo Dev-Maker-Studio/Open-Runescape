@@ -6,22 +6,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.SwingUtilities
 import kotlin.system.exitProcess
 
-/**
- * Turns a fatal error into something a player can act on: the report is
- * written to `~/.darkanrs/logs/crash-<time>.txt`, printed to the console (so
- * the launcher's log has it too) and shown in [CrashDialog], which walks
- * them through pasting it into Discord. The launcher looks for those files
- * on its next start, so a crash is never lost even if the dialog could not
- * be shown.
- *
- * Non-fatal errors reported through [noteError] are kept in memory and land
- * in the next report's "recent errors" section.
- */
 object CrashHandler {
     const val DISCORD_INVITE = "https://discordapp.com/invite/Z32ggEB"
     const val DISCORD_CHANNEL = "#bug-reports"
 
-    /** Name given to the engine thread so crash reports and thread dumps can tell it apart. */
     const val GAME_THREAD_NAME = "darkan-game"
 
     private const val RECENT_ERRORS_KEPT = 8
@@ -30,14 +18,12 @@ object CrashHandler {
     private val crashed = AtomicBoolean(false)
     private val recentErrors = ArrayDeque<String>()
 
-    /** Where reports go: `$DARKAN_HOME/logs`, or `~/.darkanrs/logs`. The launcher reads the same folder. */
     fun logsDir(): File {
         val override = System.getenv("DARKAN_HOME")?.takeIf { it.isNotBlank() }
         val root = override?.let(::File) ?: File(System.getProperty("user.home"), ".darkanrs")
         return File(root, "logs")
     }
 
-    /** Call first thing in `main`, before anything can print or throw. */
     fun install() {
         ConsoleRecorder.install()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
@@ -53,10 +39,6 @@ object CrashHandler {
         }
     }
 
-    /**
-     * Records an error the client recovered from. Printed with its stack trace so
-     * the console tail shows it, and remembered for the next crash report.
-     */
     @JvmStatic
     fun noteError(context: String?, throwable: Throwable?) {
         val label = context?.takeIf { it.isNotBlank() } ?: "error"
@@ -72,11 +54,6 @@ object CrashHandler {
         }
     }
 
-    /**
-     * The game cannot continue. Writes the report, shows the dialog and exits
-     * with status 1 once the player closes it. Only the first crash is
-     * reported; later ones (often consequences of the first) are just printed.
-     */
     @JvmStatic
     fun fatal(throwable: Throwable, context: String) {
         if (!crashed.compareAndSet(false, true)) {
@@ -109,8 +86,6 @@ object CrashHandler {
                 exitProcess(1)
             }
         }
-        // If the UI thread is wedged the dialog never appears; don't leave a dead
-        // window on screen forever. The launcher will pick the file up next time.
         Thread({
             Thread.sleep(DIALOG_TIMEOUT_MS)
             if (!shown.get()) {
@@ -120,7 +95,6 @@ object CrashHandler {
         }, "darkan-crash-watchdog").apply { isDaemon = true }.start()
     }
 
-    /** A report the player asked for (nothing crashed), for "Report a bug" buttons. */
     fun userReport(context: String = "requested by the player"): CrashReport =
         CrashReport.build(null, context, snapshotErrors(), fatal = false)
 

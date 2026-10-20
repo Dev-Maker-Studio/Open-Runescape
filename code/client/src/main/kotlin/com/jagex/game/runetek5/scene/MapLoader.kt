@@ -187,13 +187,6 @@ open class MapLoader(
         }
     }
 
-    /**
-     * Applies HD point lights and uploads the ground geometry to the GPU. Creates GL
-     * resources ([LightGL]/VBOs via [Ground.resetLight]), so this must run on the render
-     * thread — async region builds defer it to [MapRegion.finalizeAsyncRegionSwap].
-     * addHdLight must precede resetLight: light construction reads ground arrays that
-     * resetLight consumes and nulls.
-     */
     fun finalizeUnderlayGl() {
         if (!overlayHidden && hdLight) {
             scene.addHdLight()
@@ -552,9 +545,6 @@ open class MapLoader(
         }
     }
 
-    /**
-     * Used every display mode above min
-     */
     fun addBlendedTiles(toolkit: AbstractToolkit, ground: Ground, z: Int, paletteIndices: Array<IntArray>, heightsCurrentLvl: Ground?, heightsNextLvl: Ground?) {
         val localPathShape = overlayPathShapes[z]
         val localOverlayRotation = overlayRotations[z]

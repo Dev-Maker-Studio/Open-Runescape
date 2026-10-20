@@ -32,13 +32,6 @@ class MaxScreenSizePreference : Preference {
     }
 
     override fun getDefaultValue(): Int {
-        return if (super.gamePreferences.activeToolkit!!.verifySettings() && nonHardwareMode(super.gamePreferences.activeToolkit!!.getValue())) 1 else 0
-    }
-
-    companion object {
-        @JvmStatic
-        fun nonHardwareMode(mode: Int): Boolean {
-            return mode == ToolkitPreference.SAFE_MODE
-        }
+        return 0
     }
 }

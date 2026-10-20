@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.config.sequence
 import com.jagex.game.runetek5.config.sequence.frameset.FrameSet
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 
-/**
- * Sequence mask for calculating animation function masks.
- */
 class SequenceMask {
 
     @JvmField var currentFrame: Int = 0
@@ -15,16 +12,6 @@ class SequenceMask {
     @JvmField var nextFrameset: FrameSet? = null
     @JvmField var functionmaskCalculated: Boolean = false
 
-    /**
-     * Calculates the function mask for the current sequence state.
-     *
-     * @param seqtypelist The sequence type list
-     * @param seqtype The sequence type
-     * @param currentFrameId The current frame ID
-     * @param nextFrameId The next frame ID for tweening
-     * @param frames The frame array
-     * @return True if calculation succeeded
-     */
     fun isCalculated(
         seqtypelist: SeqTypeList,
         seqtype: SeqType,
@@ -81,9 +68,6 @@ class SequenceMask {
         return true
     }
 
-    /**
-     * Resets the sequence mask to initial state.
-     */
     fun reset() {
         functionmaskCalculated = false
         functionMask = 0

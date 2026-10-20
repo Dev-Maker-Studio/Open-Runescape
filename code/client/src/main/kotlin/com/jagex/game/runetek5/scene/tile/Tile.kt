@@ -10,9 +10,6 @@ class Tile(plane: Int) {
     @JvmField var groundDecoration: AbstractGroundDecoration? = null
     @JvmField var secondaryWallDecoration: AbstractWallDecoration? = null
 
-    /**
-     * Always null
-     */
     @JvmField var secondaryWall: AbstractWall? = null
 
     @JvmField var primaryWallDecoration: AbstractWallDecoration? = null
@@ -22,7 +19,7 @@ class Tile(plane: Int) {
     @JvmField var plane: Byte = plane.toByte()
     @JvmField var cullX: Short = 0
     @JvmField var groundItem: AbstractGroundItem? = null
-    @JvmField var cullY: Short = 0 //FIXME:name
-    @JvmField var interactiveSideViewHeightOffset: Short = 0 //FIXME:name
-    @JvmField var cullZ: Short = 0 //FIXME:name
+    @JvmField var cullY: Short = 0
+    @JvmField var interactiveSideViewHeightOffset: Short = 0
+    @JvmField var cullZ: Short = 0
 }

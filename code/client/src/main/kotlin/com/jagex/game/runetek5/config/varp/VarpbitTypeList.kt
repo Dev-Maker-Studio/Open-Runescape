@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages variable bit (varpbit) types with LRU caching.
- */
 class VarpbitTypeList(
     @JvmField val varbitResource: Js5ResourceProvider?
 ) {
@@ -22,12 +19,6 @@ class VarpbitTypeList(
         }
     }
 
-    /**
-     * Retrieves a varpbit type by ID, loading it if not cached.
-     *
-     * @param id The varpbit ID
-     * @return The varpbit type
-     */
     fun list(id: Int): VarpbitType {
         var varbit: VarpbitType?
         synchronized(cache) {
@@ -53,38 +44,24 @@ class VarpbitTypeList(
         }
     }
 
-    /**
-     * Processes the cache cycle, cleaning up old entries.
-     */
     fun processCycle() {
         synchronized(cache) {
             cache.clean(5)
         }
     }
 
-    /**
-     * Clears the cache queue by resizing.
-     */
     fun clearQueue() {
         synchronized(cache) {
             cache.resize()
         }
     }
 
-    /**
-     * Resets the cache, clearing all entries.
-     */
     fun resetCache() {
         synchronized(cache) {
             cache.reset()
         }
     }
 
-    /**
-     * Resets the cache and recreates it with a new capacity.
-     *
-     * @param capacity The new cache capacity
-     */
     fun resetCache(capacity: Int) {
         synchronized(cache) {
             cache.reset()

@@ -11,11 +11,6 @@ import com.jagex.game.runetek5.graphics.sprite.meta.AnchorY
 import com.jagex.game.runetek5.scene.FrameRenderException
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * MessageBox || TopLeftBlackBox
- * @author Brainpower
- *
- */
 object MessageBox {
 
     @JvmField var paddingTop = 0
@@ -25,15 +20,15 @@ object MessageBox {
     @JvmField var boxId = 0
     @JvmField var anchorX: AnchorX? = null
     @JvmField var anchorY: AnchorY? = null
-    @JvmField var outlineCornerSprite: SpriteType? = null // diagonal corner outline sprite, used 4x once for each corner `,
-    @JvmField var outlineStraightSideSprite: SpriteType? = null // straight sides (left/right/bottom/top) outline
+    @JvmField var outlineCornerSprite: SpriteType? = null
+    @JvmField var outlineStraightSideSprite: SpriteType? = null
     @JvmField var boxTextCharacterSprites: Array<SpriteType>? = null
     @JvmField var filledBackgroundSpriteId = 0
     @JvmField var boxFontMetrics: FontMetrics? = null
     @JvmField var textColor = 0
     @JvmField var outlineCornerSpriteId = 0
     @JvmField var outlineStraightSideSpriteId = 0
-    @JvmField var boxFilledBackground: SpriteType? = null // box background sprite without outlines
+    @JvmField var boxFilledBackground: SpriteType? = null
     @JvmField var minimalTextHeight = 0
 
     @JvmStatic
@@ -97,7 +92,6 @@ object MessageBox {
         return fullyCached
     }
 
-    // draw_top_left_box
     @JvmStatic
     fun draw(text: String?, renderFrame: Boolean, toolkit: AbstractToolkit?, fontRenderer: AbstractFontRenderer?, fontMetrics: FontMetrics?) {
         if (text == null || toolkit == null || fontRenderer == null || fontMetrics == null) {
@@ -158,7 +152,6 @@ object MessageBox {
                 try {
                     toolkit.renderFrame()
                 } catch (exception: FrameRenderException) {
-                    // NOOP
                 }
             }
         }

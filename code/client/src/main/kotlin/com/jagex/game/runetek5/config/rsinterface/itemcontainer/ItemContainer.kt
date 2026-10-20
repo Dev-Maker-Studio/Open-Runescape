@@ -17,9 +17,6 @@ import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.RECOLOR
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.Hashing
 
-/**
- * @author Brainpower - 06/05/2022
- */
 class ItemContainer : Node<ItemContainer>() {
 
     @JvmField

@@ -68,7 +68,6 @@ class AsyncOutputStream(outputstream: OutputStream, capacity: Int) : Runnable {
                     try {
                         (this as Object).wait()
                     } catch (exception: InterruptedException) {
-                        // NOOP
                     }
                 }
             }
@@ -134,7 +133,6 @@ class AsyncOutputStream(outputstream: OutputStream, capacity: Int) : Runnable {
         try {
             executingThread.join()
         } catch (exception: InterruptedException) {
-            // NOOP
         }
     }
 }

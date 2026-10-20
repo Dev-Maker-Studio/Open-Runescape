@@ -28,33 +28,11 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.MathUtils
 import com.jagex.game.runetek5.vardomain.VarDomain
 
-/**
- * [J]
- * @author Steven
- *
- * [NXT]
-	[-]jag::game::LocType::DataSerialiseWrite<jag::Packet>(jag::DataSerialise<jag::Packet> &) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .text  000000000015C7C0 00000C44 00000148 00000000 R . . . . . .
-	[X] jag::game::LocType::DecodeType(jag::Packet &,uint)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .text  00000000004688E0 00001245 00000058 00000000 R . . . . T .
-	[-]jag::game::LocType::GetHillData(jag::Array<jag::Array<int>> &,jag::Array<jag::Array<int>> &,jag::game::LocType const&,jag::game::HeightMap const&,int,uint,uint,jag::Rotation90,bool)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 .text  00000000003E79D0 000003DD 000000B8 00000019 R . . . . . .
-	[-]jag::game::LocType::GetLocationHeight(jag::game::LocType const&,jag::game::HeightMap const&,int,uint,uint,jag::Rotation90,bool)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       .text  0000000000161A60 000002FA 00000098 0000000C R . . . . . .
-	[-]jag::game::LocType::GetLocationOnFlatGround(jag::game::LocType const&,int,jag::game::HeightMap const&,int,uint,uint,jag::Rotation90,bool)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             .text  0000000000161D60 00000123 00000060 00000011 R . . . . . .
-	[-]jag::game::LocType::GetMaxRemoveRoofLevel(jag::game::LinkMap const&,int,uint,uint,jag::Rotation90)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .text  00000000000C1880 000000E4 00000038 00000000 R . . . . . .
-	[~]jag::game::LocType::GetModels(jag::graphics::RT7Core *,jag::game::AssetBuilder &,jag::game::BuildRequest<jag::graphics::Model,jag::game::BuildModelMain> &,jag::game::LocShape,jag::Rotation90,bool,jag::game::LocTypeCustomisation const*) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   .text  0000000000515BE0 00000991 00000118 000000B0 R . . . . . .
-	[X] jag::game::LocType::GetMultiLoc(jag::shared_ptr<jag::game::LocType> &,jag::game::PlayerVarDomain const*,jag::game::ConfigProvider *)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  .text  00000000001112F0 000002AA 00000028 00000000 R . . . . . .
-	[-]jag::game::LocType::LocType(jag::game::ConfigTypeListPreloadPackedContainer<jag::game::LocType> *,int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .text  0000000000420040 0000038F 00000018 00000000 R . . . . . .
-	[-]jag::game::LocType::MakeLocationSoundData(void) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .text  00000000000441C8 0000021F 00000038 00000001 R . . . . . .
-	[X] jag::game::LocType::PostDecode(void)
- *
- */
 open class ObjectType {
 
 	@JvmField
 	var id: Int = 0
 
-	/**
-	 * The right click / mini menu actions
-	 * to interact with this object
-	 */
 	@JvmField
 	var actions: Array<String?>? = null
 
@@ -63,47 +41,21 @@ open class ObjectType {
 	@JvmField
 	var objectModelIds: Array<IntArray>? = null
 
-	/**
-	 * Hover / minimenu name
-	 * No actions if 'null'
-	 */
 	@JvmField
 	var name: String = "null"
 
-	/**
-	 * Tiles in width taken up by the model
-	 */
 	@JvmField
 	var sizeX: Int = 1
 
-	/**
-	 * Tiles in length taken up by the model
-	 */
 	@JvmField
 	var sizeY: Int = 1
 
-	/**
-	 * Is an entity blocked from passing through
-	 * 0 = no
-	 * 1 = yes (explicit)
-	 * 2 = yes (default)
-	 */
 	@JvmField
 	var blocksMovement: Int = 2
 
-	/**
-	 * Does an entity have to path around the object
-	 * when using projectiles (I.E. range/mage)
-	 */
 	@JvmField
 	var blocksProjectiles: Boolean = true
 
-	/**
-	 * Does the object have menu interactions
-	 * -1 = no (default)
-	 * 0 = no (explicit)
-	 * 1 = yes
-	 */
 	@JvmField
 	var hasActions: Int = -1
 
@@ -115,11 +67,6 @@ open class ObjectType {
 	var decorDisplacement: Int = 64
 	@JvmField
 	var inverted: Boolean = false
-	/**
-	 * Draw low detail (any mode) shadows under objects
-	 * (shadow only applies on tile below)
-	 * Shadow is static - always placed the same way
-	 */
 	@JvmField
 	var staticShadow: Boolean = true
 	@JvmField
@@ -140,26 +87,14 @@ open class ObjectType {
 	var soundGroupIds: IntArray? = null
 	@JvmField
 	var alternativeIds: IntArray? = null
-	/**
-	 * Only rendered if textures are enabled
-	 */
 	@JvmField
 	var requiresTextures: Boolean = false
-	/**
-	 * Draw high detail (gpu mode) shadows under objects
-	 * (shadow only applies on tile below)
-	 * Shadow is dynamic - based of the position of sun
-	 */
 	@JvmField
 	var dynamicShadow: Boolean = true
 
 	@JvmField
 	var replaySequence: Boolean = true
 
-	/**
-	 * Does a player have to be a member to interact
-	 * with this object
-	 */
 	@JvmField
 	var members: Boolean = false
 
@@ -204,39 +139,18 @@ open class ObjectType {
 	@JvmField
 	var transforms: Boolean = false
 
-	/**
-	 * Not sure if this is correct
-	 */
 	@JvmField
 	var ambientSoundMaxHearDistance: Int = 0
 
-	/**
-	 * Tints the object based on the tint
-	 * set for the current scene
-	 */
 	@JvmField
 	var dynamicTint: Boolean = false
 
-	/**
-	 * The TypeList used for loading LocTypes,
-	 * used for fetching if player is member
-	 * and usage of caches stored there
-	 */
 	@JvmField
 	var locTypeList: ObjectTypeList? = null
 
-	/**
-	 * The type of ground adjustment that has to
-	 * be performed on the model to display as intended
-	 */
 	@JvmField
 	var groundContourType: Byte = 0
 
-	/**
-	 * The animations the object performs by default.
-	 * One in the case of static animating,
-	 * multiple in the case of randomized animation display
-	 */
 	@JvmField
 	var animations: IntArray? = null
 
@@ -245,59 +159,27 @@ open class ObjectType {
 	@JvmField
 	var contrast: Int = 0
 
-	/**
-	 * Model face colors to find and replace
-	 * with the same index within [.recolorDst]
-	 */
 	@JvmField
 	var recolorSrc: ShortArray? = null
 
-	/**
-	 * Model face colors that are replacements for colors
-	 * with the same index within [.recolorSrc]
-	 */
 	@JvmField
 	var recolorDst: ShortArray? = null
 
-	/**
-	 * Model face materials to find and replace
-	 * with the same index within [.retextureDst]
-	 */
 	@JvmField
 	var retextureSrc: ShortArray? = null
 
-	/**
-	 * Model face materials that are replacements for materials
-	 * with the same index within [.retextureSrc]
-	 */
 	@JvmField
 	var retextureDst: ShortArray? = null
-
 
 	@JvmField
 	var recolorDPalette: ByteArray? = null
 
-	/**
-	 * Scaling factor for vertices x applied to [.objectModelIds]
-	 * Only scales when value != 128. Default usage of 128 to make minor
-	 * scaling easy (Example 129 --> (129 >> 7) * 100 --> 0.78125% scaled
-	 */
 	@JvmField
 	var resizeX: Int = 128
 
-	/**
-	 * Scaling factor for vertices y applied to [.objectModelIds]
-	 * Only scales when value != 128. Default usage of 128 to make minor
-	 * scaling easy (Example 129 --> (129 >> 7) * 100 --> 0.78125% scaled
-	 */
 	@JvmField
 	var resizeY: Int = 128
 
-	/**
-	 * Scaling factor for vertices z applied to [.objectModelIds]
-	 * Only scales when value != 128. Default usage of 128 to make minor
-	 * scaling easy (Example 129 --> (129 >> 7) * 100 --> 0.78125% scaled
-	 */
 	@JvmField
 	var resizeZ: Int = 128
 	@JvmField
@@ -331,9 +213,6 @@ open class ObjectType {
 	@JvmField
 	var parameters: IterableNodeMap<Node<*>>? = null
 
-	/**
-	 * [J]
-	 */
 	internal fun decodeType(buffer: Packet) {
 		while (true) {
 			val opcode = buffer.readUByte()
@@ -526,7 +405,7 @@ open class ObjectType {
 			opcode == 165 -> this.shadowOffsetY = buffer.readShort().toInt()
 			opcode == 166 -> this.shadowOffsetZ = buffer.readShort().toInt()
 			opcode == 167 -> this.groundDecorationHeight = buffer.readUShort()
-			opcode == 168 -> this.instrumentSoundEffect = true // ambient sound
+			opcode == 168 -> this.instrumentSoundEffect = true
 			opcode == 169 -> this.instrumentAmbientSound = true
 			opcode == 170 -> this.cullY = buffer.readUSmart()
 			opcode == 171 -> this.cullXZ = buffer.readUSmart()
@@ -558,9 +437,6 @@ open class ObjectType {
 		}
 	}
 
-	/**
-	 * [J]
-	 */
 	internal fun postDecode() {
 		if (this.hasActions == -1) {
 			this.hasActions = 0
@@ -880,13 +756,6 @@ open class ObjectType {
 		}
 		var applyShading = false
 		if (sequence != null) {
-			// Cacheable animation frames are built into a dedicated copy (copy type 0) so
-			// the result — including its GL buffers — survives across render frames and is
-			// shared by identical locs on the same frame. Uncacheable ones keep using the
-			// shared toolkit copy slot, which the next animated entity overwrites and which
-			// therefore has to be rebuilt every render frame.
-			// privatePose: the caller keeps the returned pose across frames (see
-			// AnimatedGameObject's pose memo), so it must not live in the shared slot.
 			val privatePose = privatePool != null && baseModel is ModelGL
 			model = if (privatePose) {
 				privatePool!!.copy(baseModel as ModelGL, functionMaskVar)
@@ -894,10 +763,6 @@ open class ObjectType {
 				val copyType: Byte = if (animatedCacheKey != null) 0 else 1
 				baseModel.copy(copyType, functionMaskVar, true)
 			}
-			// A private pose copy must own its normals: copyModelData shares the base's
-			// arrays unless the mask alters light, and neighbour normal merging
-			// (castShadow) on a copy that shares them drifts the BASE model's lighting —
-			// and every wall merged with it.
 			if (privatePose && model is ModelGL && baseModel is ModelGL) model.detachSharedNormals(baseModel)
 			applyShading = true
 			sequence.animateRotatedModel(model!!, rotation and 0x3)
@@ -932,40 +797,23 @@ open class ObjectType {
 		return model
 	}
 
-	/**
-	 * Decides whether the animated model produced by [getAnimatedModel] for [sequence]'s
-	 * current state is a pure function of the returned key, and can therefore be cached
-	 * and reused across render frames (and across identical locs, e.g. rows of torches).
-	 * Returns null when the result depends on state the key cannot capture; those calls
-	 * fall back to the per-frame shared-copy-slot rebuild.
-	 */
 	private fun createAnimatedModelCacheKey(uid: Long, functionMask: Int, sequence: Sequence): AnimatedModelCacheKey? {
 		if (this.groundContourType.toInt() != 0) {
-			// Ground-contoured geometry depends on the surrounding heightmap, which is not
-			// captured by the key and changes whenever the scene is rebuilt.
 			return null
 		}
 		val seqType = sequence.type ?: return null
 		if (seqType.frames == null || seqType.tweened) {
-			// Tweened sequences interpolate towards the next frame by elapsed time, so the
-			// output changes every client cycle; caching per-cycle results would only churn
-			// GL buffers instead of saving work.
 			return null
 		}
 		if (sequence.tweening && seqType.interfaceFrames != null) {
 			return null
 		}
 		if (!sequence.isMaskCalculated()) {
-			// Framesets are not loaded yet: animateRotatedModel would be a no-op, and caching
-			// the unanimated result would keep this frame frozen after they load.
 			return null
 		}
 		return AnimatedModelCacheKey(uid, functionMask, seqType.id, sequence.currentFrameId)
 	}
 
-	/**
-	 * [J]
-	 */
 	fun getMultiLoc(vars: VarDomain): ObjectType? {
 		var index = -1
 		if (this.varpbitId != -1) {
@@ -1085,12 +933,6 @@ open class ObjectType {
 		return this.animations
 	}
 
-	/**
-	 * Identifies one cacheable animated-loc build: [uid] already encodes loc id, shape,
-	 * rotation, customisation and renderer; the sequence id and frame index pin the pose.
-	 * Only non-tweened sequences are cached (see [createAnimatedModelCacheKey]), so the
-	 * frame index fully determines the vertex data.
-	 */
 	private data class AnimatedModelCacheKey(
 		val uid: Long,
 		val functionMask: Int,
@@ -1098,34 +940,15 @@ open class ObjectType {
 		val frameId: Int
 	)
 
-	/**
-	 * A cached animated build together with the stationary model it was derived from.
-	 * The base reference doubles as the validity check: when the stationary-model cache
-	 * is reset or the entry is rebuilt (mask merge, toolkit change, customisation), the
-	 * base instance changes and everything derived from the old instance is stale.
-	 */
 	private class CachedAnimatedModel(val base: Model, val model: Model)
 
 	companion object {
-		/** -Drender.locdiag=1,2,3 logs the mesh and model bounds built for those loc ids. */
 		private val LOC_DIAG: Set<Int> = System.getProperty("render.locdiag")?.split(',')?.mapNotNull { it.trim().toIntOrNull() }?.toSet() ?: emptySet()
 		@JvmField
 		var locRecolorPalette: ShortArray = ShortArray(256)
 
-		// Sized for extended render distance: entries ~ (distinct animated loc
-		// uids visible) x (frames of their sequences held hot). A 3x-distance map
-		// shows ~9x the area of the legacy 104 map; too-small capacity thrashes
-		// and degrades to a full rebuild per render frame, worse than no cache.
 		private const val ANIMATED_MODEL_CACHE_CAPACITY = 2048
 
-		/**
-		 * LRU cache of fully built animated-loc models. Animated locs (torches, fires,
-		 * fountains, ...) previously re-ran copy + skeletal transform + shading and
-		 * re-uploaded their geometry on every render frame even though the animation
-		 * only advances a few times per second; entries here are rebuilt once per
-		 * animation frame and drawn from their own retained GL buffers in between.
-		 * Access is guarded by synchronizing on the map itself.
-		 */
 		private val animatedModelCache =
 			object : LinkedHashMap<AnimatedModelCacheKey, CachedAnimatedModel>(64, 0.75f, true) {
 				override fun removeEldestEntry(eldest: MutableMap.MutableEntry<AnimatedModelCacheKey, CachedAnimatedModel>): Boolean {

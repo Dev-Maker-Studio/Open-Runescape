@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.preference.impl
 import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 
-/**
- *
- * @author Steven - 17/09/2023
- *
- */
 class SceneryShadowPreference : Preference {
 
     constructor(value: Int, gamePreferences: GamePreferences) : super(value, gamePreferences)

@@ -13,14 +13,8 @@ class MapSpriteTypeList(
     @JvmField val mapspriteResource: Js5ResourceProvider
 ) {
 
-    /**
-     * Definitions about map sprites
-     */
     @JvmField var mapspriteTypeCache: LRUCache = LRUCache(64)
 
-    /**
-     * The drawable map sprite data
-     */
     @JvmField var mapspriteCache: LRUCache = LRUCache(64)
 
     init {

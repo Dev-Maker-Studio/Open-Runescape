@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.config.midi
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * MIDI envelope for audio synthesis.
- */
 internal class Envelope {
     @JvmField var form: Int = 0
     @JvmField var start: Int = 0

@@ -7,11 +7,6 @@ import com.jagex.game.runetek5.config.`object`.ObjectShapes
 import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.scene.LocAction
 
-/**
- * Represents an object in a cutscene with its location, shape, and positioning.
- *
- * @author Brainpower - 01/02/2023
- */
 class CutsceneObject(buffer: Packet) {
 
     @JvmField val locId: Int
@@ -26,11 +21,6 @@ class CutsceneObject(buffer: Packet) {
         locShape = Identifiable.identify(ObjectShapes.values(), buffer.readUByte()) as ObjectShapes
     }
 
-    /**
-     * Checks if this cutscene object and all its animations are fully cached.
-     *
-     * @return true if the object type and all associated animations are cached
-     */
     fun isFullyCached(): Boolean {
         if (locId < 0) {
             return true
@@ -46,21 +36,10 @@ class CutsceneObject(buffer: Packet) {
         return cached
     }
 
-    /**
-     * Destroys this cutscene object from the scene.
-     */
     fun destroy() {
         LocAction.destroyObject(plane, x, y, locShape.group, -1, locShape.shape, rotation)
     }
 
-    /**
-     * Replaces this cutscene object at a new position with new rotation.
-     *
-     * @param plane The plane level
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @param rotation The rotation angle
-     */
     fun replace(plane: Int, x: Int, y: Int, rotation: Int) {
         LocAction.destroyObject(plane, x, y, locShape.group, locId, locShape.shape, rotation)
         this.plane = plane

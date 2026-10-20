@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * < Mostly refactored >
- * @author Brainpower - 30/05/2020
- *
- * Manages LightType configurations
- */
 class LightTypeList(
     @JvmField val lightResource: Js5ResourceProvider
 ) {
@@ -21,12 +15,6 @@ class LightTypeList(
         lightResource.getArchiveFileCount(SharedConfigsType.LIGHT_INTENSITIES.id)
     }
 
-    /**
-     * Retrieves a light type by ID, loading from cache or resource provider.
-     *
-     * @param lightId The light ID
-     * @return The light type configuration
-     */
     fun list(lightId: Int): LightType {
         var lightType: LightType?
         synchronized(lightCache) {
@@ -49,27 +37,18 @@ class LightTypeList(
         }
     }
 
-    /**
-     * Resets the light cache, clearing all cached light types.
-     */
     fun cacheReset() {
         synchronized(lightCache) {
             lightCache.reset()
         }
     }
 
-    /**
-     * Cleans the cache, removing least recently used entries.
-     */
     fun cacheClean() {
         synchronized(lightCache) {
             lightCache.clean(5)
         }
     }
 
-    /**
-     * Resizes the cache queue.
-     */
     fun cacheResize() {
         synchronized(lightCache) {
             lightCache.resize()

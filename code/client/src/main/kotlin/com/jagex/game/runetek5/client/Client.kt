@@ -84,6 +84,7 @@ import com.jagex.game.runetek5.interaction.chat.friendschat.FriendsChat
 import com.jagex.game.runetek5.js5.Js5Endpoint
 import com.jagex.game.runetek5.js5.dependency.CacheableDependencies
 import com.jagex.game.runetek5.js5.request.RequestManager
+import com.jagex.game.runetek5.js5.request.local.PackedCache
 import com.jagex.game.runetek5.js5.request.local.LocalRequester
 import com.jagex.game.runetek5.js5.request.remote.RemoteFileRequester
 import com.jagex.game.runetek5.math.Matrix43
@@ -122,7 +123,6 @@ import com.jagex.game.runetek5.sound.player.area.SoundEffectPlayer
 import com.jagex.game.runetek5.sound.player.song.SongPlayer
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.systeminfo.SystemInfo
-import com.jagex.game.runetek5.toolkit.AbstractNativeToolkit
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.Browser
 import com.jagex.game.runetek5.tools.Language
@@ -273,7 +273,6 @@ class Client : GameShell() {
     fun pulse() {
         logicPulses++
         if (gameState != GameState.UNK_16) {
-            //System.out.println("[Client]GameState: "+client.gameState);
             val mapRegionLoader = Resource.mapRegionLoaderTask
             if (mapRegionLoader != null && mapRegionLoader.state == AsyncMapLoader.State.READY) {
                 synchronized(mapRegionLoader.stateLock) {
@@ -369,7 +368,6 @@ class Client : GameShell() {
             } else if (GameState.isLoadingRegion(gameState)) {
                 Resource.mapRegion!!.loadRegion()
             }
-
 
             if (GameState.isLoggedOut(gameState) && !GameState.isLoadingRegion(gameState)) {
                 processLobbyTick()
@@ -515,18 +513,12 @@ class Client : GameShell() {
                     Renderers.activeToolkit!!.renderFrame()
                 } catch (sceneRenderException: FrameRenderException) {
                     PacketEncoder.sendErrorToServer(sceneRenderException.message + " " + getDebugString(), sceneRenderException)
-                    loadAssets(0, false)
+                    loadAssets(false)
                 }
             }
 
             VorbisNode.cleanupStaleStreams()
-            // The legacy per-frame CPU-preference sleep (15/10/5/2ms) capped the
-            // frame rate on top of the 50Hz cycle. Frame pacing is now owned by
-            // FrameLimiter in the main loop; lower the fps target to reduce CPU.
 
-            // Cache sweeps once per 50 Hz logic pulse, not per rendered frame: the
-            // legacy client never drew faster than its logic, so this restores its
-            // sweep cadence (and retention window) at any frame rate.
             if (typelistCycleUpdate && logicPulses != lastTypelistCleanPulse) {
                 lastTypelistCleanPulse = logicPulses
                 TypeLists.clean()
@@ -597,26 +589,23 @@ class Client : GameShell() {
                                     setAccessibleMethod.invoke(handleField, java.lang.Boolean.FALSE)
                                 }
                             } catch (throwable: Throwable) {
-                                // NOOP
                             }
 
                             setAccessibleMethod.invoke(nameField, java.lang.Boolean.FALSE)
                         } catch (throwable: Throwable) {
-                            // NOOP
                         }
                     }
                 }
             } catch (throwable: Throwable) {
-                // NOOP
             }
         } catch (throwable: Throwable) {
-            // NOOP
         }
 
         return debug
     }
 
     fun pulseFileRequester() {
+        if (PackedCache.present) return
         val connected = Resource.remoteFileRequesterJs5!!.pulse()
         if (!connected) {
             setupJs5Connection()
@@ -790,7 +779,6 @@ class Client : GameShell() {
         try {
             Ping.quit()
         } catch (ignored: Throwable) {
-            // NOOP
         }
 
         shutdownIcmpservice()
@@ -798,7 +786,6 @@ class Client : GameShell() {
         try {
             Console.shutdown()
         } catch (ignored: Exception) {
-            // NOOP
         }
 
         if (raiseBrowserErrorscreen) {
@@ -856,7 +843,6 @@ class Client : GameShell() {
         try {
             Console.clipboard = WindowMode.getActiveContainer().getToolkit().getSystemClipboard()
         } catch (exception: Exception) {
-            // NOOP
         }
 
         KeyRecorder.keyRecorder = CanvasKeyRecorder.create(gameCanvas!!)
@@ -1072,12 +1058,9 @@ class Client : GameShell() {
     }
 
     companion object {
-        /** Scene-draw wall time: traversal + model submission, excluding the toolkit render. */
         @JvmStatic var sceneDrawNs = 0L
-        /** 50 Hz logic pulses so far; frame-rate-independent work (particle stepping) keys off it. */
         @JvmField var logicPulses = 0L
         private var lastTypelistCleanPulse = -1L
-        /** Whole mainRedraw() (scene + interfaces) and the once-a-second AWT canvas refresh (diag). */
         @JvmStatic var redrawNs = 0L
         @JvmStatic var canvasRefreshNs = 0L
         @JvmStatic var sceneDrawSamples = 0
@@ -1329,11 +1312,6 @@ class Client : GameShell() {
         var awaitingPriorityRequests: Boolean = true
         var DRAW_DEBUG: Boolean = false
 
-        /**
-         * When true (default), pathing entities lerp between logic pulses at
-         * render time so movement stays smooth above 50fps. Toggled with the
-         * "smoothentities" console command.
-         */
         @JvmField
         var smoothEntityMovement: Boolean = true
         var DEBUG_MODE: Boolean = false
@@ -1788,7 +1766,6 @@ class Client : GameShell() {
                 try {
                     context.flush()
                 } catch (ignored: IOException) {
-                    // NOOP
                 }
                 context.closeConnection()
             }
@@ -1802,7 +1779,7 @@ class Client : GameShell() {
             SoundEffectPlayer.soundJinglePlaying = false
             SongPlayer.resetChannelVolumes()
             AmbientSound.unlinkSounds(true)
-            AbstractNativeToolkit.drawLoadingPleaseWaitHardware()
+            drawLoadingPleaseWaitHardware()
             Resource.mapRegionLoaderTask?.discard()
             clearWorldMapCaches()
             resetGameState()
@@ -1810,6 +1787,14 @@ class Client : GameShell() {
                 setGameState(GameState.UNK_12)
             } else {
                 setGameState(GameState.UNK_5)
+            }
+        }
+
+        fun drawLoadingPleaseWaitHardware() {
+            GraphicsCache.resetWorldmapCaches(false)
+            if (AbstractToolkit.activeRenderMode > 0) {
+                loadAssets(false)
+                AbstractToolkit.activeRenderMode = -1
             }
         }
 
@@ -1831,7 +1816,7 @@ class Client : GameShell() {
         @JvmStatic
         fun setLoadingWorldMap() {
             setGameState(GameState.LOADING_PLEASE_WAIT)
-            AbstractNativeToolkit.drawLoadingPleaseWaitHardware()
+            drawLoadingPleaseWaitHardware()
             System.gc()
         }
 
@@ -1894,7 +1879,6 @@ class Client : GameShell() {
                 if (!MiniMenu.isOpen) {
                     MiniMenu.resetEntries()
                 }
-                // Nothing may be decoded past a REGION packet until the async loader's deferred local-list reset has run.
                 if (Resource.mapRegionLoaderTask?.takeBuildFailure() == true) {
                     WorldConnection.dropClient()
                 } else if (Resource.mapRegionLoaderTask?.isLoadingRegion() != true) {
@@ -2048,9 +2032,6 @@ class Client : GameShell() {
                                                                     processDrag()
                                                                 }
                                                                 MenuInteraction.processMenuInput()
-                                                                /**
-                                                                 * Shift & Control pressed --> Scroll mouse = change plane
-                                                                 */
                                                                 if (PLAYER_RIGHTS > 0 && KeyRecorder.keyRecorder!!.held(82) && KeyRecorder.keyRecorder!!.held(81) && mouseWheelDelta != 0) {
                                                                     var plane: Int = PlayerUpdate.MY_PLAYER!!.plane - mouseWheelDelta
                                                                     if (plane < 0) {
@@ -2342,9 +2323,6 @@ class Client : GameShell() {
                     )
                     sceneDrawNs += System.nanoTime() - sceneT0
                     sceneDrawSamples++
-                    // Advance at pulse rate, not frame rate: animatingStep holds the
-                    // number of 50Hz pulses since the last rendered frame, so the
-                    // idle-detection gate in processGameTick keeps its 200ms timing.
                     drawsSinceLastPacket += animatingStep
                     SoundEffectPlayer.updatePlayers()
                     if (gameState == GameState.LOGGED_INGAME) {
@@ -2551,11 +2529,11 @@ class Client : GameShell() {
             }
         }
 
-        fun loadAssets(toolkitId: Int, leftTopScreenboxText: String?, verifySettingsPreUpdate: Boolean) {
+        fun loadAssets(verifySettingsPreUpdate: Boolean) {
             LoadingStage.killLoginscreenThread()
             resetGraphicsState()
             buildCanvasComponents()
-            Renderers.prepareForRendering(toolkitId, leftTopScreenboxText, verifySettingsPreUpdate)
+            Renderers.prepareForRendering(false, verifySettingsPreUpdate)
             reloadToolkitAssets()
             if (gameState == GameState.UNK_5) {
                 setGameState(GameState.UNK_11)
@@ -2585,11 +2563,6 @@ class Client : GameShell() {
             StaticMedia.initializeChatIcons(StaticMedia.nameIconSprites!!)
             setComponentsOnTop()
             GraphicsCache.resetGraphicCaches()
-        }
-
-        @JvmStatic
-        fun loadAssets(toolkitId: Int, verifySettingsPreUpdate: Boolean) {
-            loadAssets(toolkitId, LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), verifySettingsPreUpdate)
         }
 
         fun drawGameFrame(elapsedMillis: Long) {

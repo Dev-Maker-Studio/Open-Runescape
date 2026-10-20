@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.config.rsinterface.itemcontainer
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 
-/**
- *
- * @author Brainpower - 06/05/2022
- *
- */
 class ItemContainerType : CacheableNode() {
 
     @JvmField var defaultItemSize: Int = 0

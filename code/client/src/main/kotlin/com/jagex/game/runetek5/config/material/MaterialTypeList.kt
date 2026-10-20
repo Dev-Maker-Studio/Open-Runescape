@@ -140,7 +140,6 @@ class MaterialTypeList(
     }
 
     override fun cycle() {
-        // Empty implementation
     }
 
     override fun getPixelsArgb(materialId: Int, width: Int, height: Int): IntArray {

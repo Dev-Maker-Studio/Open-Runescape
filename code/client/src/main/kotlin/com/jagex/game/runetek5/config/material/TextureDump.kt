@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-/** -Drender.texdump=<dir> writes every generated material texture as <dir>/mat-<id>.png (ARGB). */
 object TextureDump {
     private val dir: File? = System.getProperty("render.texdump")?.let { File(it) }
 

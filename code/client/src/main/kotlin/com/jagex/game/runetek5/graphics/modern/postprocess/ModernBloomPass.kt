@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.graphics.modern.postprocess
 
+import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
 import com.jagex.game.runetek5.graphics.modern.core.ShaderProgram
 import com.jagex.game.runetek5.graphics.modern.core.VertexArray
 import com.jagex.game.runetek5.graphics.modern.framebuffer.FilterType
@@ -26,21 +27,6 @@ import org.lwjgl.opengl.GL30.GL_READ_FRAMEBUFFER
 import org.lwjgl.opengl.GL30.glBindFramebuffer
 import org.lwjgl.opengl.GL30.glBlitFramebuffer
 
-/**
- * Native bloom for the modern renderer, replicating the legacy RectangularTextureGL
- * post-process without touching the fixed-function FramebufferCompositor:
- *
- *  1. capture: the game window is redirected into a window-sized colour+depth FBO
- *     (the multisampled scene target resolves into it like into any bound target);
- *  2. downsample: the capture is halved (bilinear) through power-of-two levels until
- *     both sides are <= 256 — the same chain the legacy mipmapped path draws;
- *  3. bright pass: `col * step(whitePoint, luminance)` into a 256x256 buffer;
- *  4. separable 17-tap Gaussian blur, horizontal then vertical, 1/256 steps;
- *  5. composite over the window: `scene * (postLum/preLum) + bloom * brightpass`,
- *     the exact legacy tone curve.
- *
- * All draws are fullscreen triangles from `gl_VertexID` on an empty VAO.
- */
 class ModernBloomPass {
     private var sceneFbo: Framebuffer? = null
     private val levels = ArrayList<Framebuffer>()
@@ -56,11 +42,9 @@ class ModernBloomPass {
     var height = 0
         private set
 
-    /** True between a successful [begin] and the matching [composite]/[abort]. */
     var active = false
         private set
 
-    /** Set once a GL resource could not be created; the pass then refuses to run. */
     var failed = false
         private set
 
@@ -98,8 +82,6 @@ class ModernBloomPass {
         width = w
         height = h
         sceneFbo = colorTarget(w, h, depth = true) ?: run { failed = true; return false }
-        // Legacy chain: start at the largest power of two <= each side and halve
-        // while either side exceeds 256; the bright pass then samples the last level.
         var cw = MathUtils.furtestBitValue(w)
         var ch = MathUtils.furtestBitValue(h)
         while (cw > 256 || ch > 256) {
@@ -126,10 +108,6 @@ class ModernBloomPass {
         height = 0
     }
 
-    /**
-     * Redirects rendering into the capture target. Returns false (and binds nothing)
-     * when the pass is unavailable, so the caller can keep drawing to the window.
-     */
     fun begin(w: Int, h: Int): Boolean {
         if (failed || w <= 0 || h <= 0) return false
         if (!ensureShaders() || !ensureTargets(w, h)) return false
@@ -138,7 +116,6 @@ class ModernBloomPass {
         return true
     }
 
-    /** Re-binds the capture target after something else took the framebuffer binding. */
     fun rebind() {
         val fb = sceneFbo ?: return
         glBindFramebuffer(GL_FRAMEBUFFER, fb.getId())
@@ -146,7 +123,7 @@ class ModernBloomPass {
     }
 
     private fun drawFullscreen() {
-        glDrawArrays(GL_TRIANGLES, 0, 3)
+        FrameDump.arrays(GL_TRIANGLES, 0, 3)
     }
 
     private fun blit(src: Framebuffer, dst: Framebuffer) {
@@ -155,11 +132,6 @@ class ModernBloomPass {
         glBlitFramebuffer(0, 0, src.width, src.height, 0, 0, dst.width, dst.height, GL_COLOR_BUFFER_BIT, GL_LINEAR)
     }
 
-    /**
-     * Runs the post-process and writes the result over [targetFbo] (0 = window) with
-     * viewport [targetW]x[targetH]. Leaves the target bound, texture unit 0 active,
-     * no program and no VAO bound; depth test, blending, scissor and culling disabled.
-     */
     fun composite(targetFbo: Int, targetW: Int, targetH: Int, whitePoint: Float, bloom: Float, brightpass: Float) {
         val scene = sceneFbo
         val a = bloomA
@@ -178,7 +150,6 @@ class ModernBloomPass {
         glDisable(GL_SCISSOR_TEST)
         glDisable(GL_CULL_FACE)
 
-        // Downsample chain (pure blits: bilinear minification == legacy textured quads).
         var src: Framebuffer = scene
         for (level in levels) {
             blit(src, level)
@@ -188,7 +159,6 @@ class ModernBloomPass {
         quad.bind()
         glActiveTexture(GL_TEXTURE0)
 
-        // Bright pass -> A.
         a.bind()
         bright.bind()
         bright.setUniform("uSceneTex", 0)
@@ -196,7 +166,6 @@ class ModernBloomPass {
         glBindTexture(GL_TEXTURE_2D, src.getColorTexture(0))
         drawFullscreen()
 
-        // Blur horizontal A -> B, vertical B -> A.
         blur.bind()
         blur.setUniform("uBaseTex", 0)
         b.bind()
@@ -208,7 +177,6 @@ class ModernBloomPass {
         glBindTexture(GL_TEXTURE_2D, b.getColorTexture(0))
         drawFullscreen()
 
-        // Composite over the target.
         glBindFramebuffer(GL_FRAMEBUFFER, targetFbo)
         glViewport(0, 0, targetW, targetH)
         comp.bind()
@@ -230,7 +198,6 @@ class ModernBloomPass {
         composites++
     }
 
-    /** Drops the post-process and copies the captured colour straight to the target. */
     fun abort(targetFbo: Int, targetW: Int, targetH: Int) {
         val scene = sceneFbo
         val wasActive = active

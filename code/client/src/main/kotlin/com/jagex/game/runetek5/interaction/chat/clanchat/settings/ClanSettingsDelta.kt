@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.interaction.chat.clanchat.settings
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.NodeCollection
 
-/**
- * Represents a delta update for clan settings, containing a queue of pending updates.
- */
 class ClanSettingsDelta(buffer: Packet) {
 
     @JvmField var deltaVersion: Long = 0
@@ -16,11 +13,6 @@ class ClanSettingsDelta(buffer: Packet) {
         decode(buffer)
     }
 
-    /**
-     * Decodes clan settings delta from the packet buffer.
-     *
-     * @param buffer The packet buffer to decode from
-     */
     fun decode(buffer: Packet) {
         deltaVersion = buffer.readLong()
         updateCount = buffer.readInt()
@@ -48,12 +40,6 @@ class ClanSettingsDelta(buffer: Packet) {
         }
     }
 
-    /**
-     * Queues and applies all pending updates to the clan settings.
-     *
-     * @param clanSettings The clan settings to update
-     * @throws RuntimeException if the delta version doesn't match the clan settings
-     */
     fun queueUpdates(clanSettings: ClanSettings) {
         if (clanSettings.deltaVersion == deltaVersion && updateCount == clanSettings.updateCount) {
             var update = pendingUpdates.getFirst() as AbstractClanSettingUpdate?

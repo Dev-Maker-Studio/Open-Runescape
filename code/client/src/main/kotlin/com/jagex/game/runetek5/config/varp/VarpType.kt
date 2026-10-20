@@ -3,12 +3,6 @@ package com.jagex.game.runetek5.config.varp
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * @author Brainpower - 25/03/2023
- *
- * (Old varp format)
- * VARP = VarPlayer
- */
 class VarpType {
     @JvmField var typeChar: Char = 0.toChar()
     @JvmField var clientCode: Int = 0

@@ -92,17 +92,11 @@ class EnvironmentManager(
         } else {
             chunkEnvironmentUpdate(Camera.cameraPositionAbsoluteX shr 12, Camera.cameraPositionAbsoluteY shr 12, ENVIRONMENT_UPDATE_DURATION)
         }
-        // Only perform GL-affecting operations on the render thread.
         if (!mapregion.asyncMaploading) {
             finalizeDeferredAtmosphere()
         }
     }
 
-    /**
-     * Applies the GL-affecting environment transitions that [updateAtmosphere] skips
-     * during an async region build. Must run on the render thread after the region swap
-     * (applySun reads the live Resource.mapRegion).
-     */
     fun finalizeDeferredAtmosphere() {
         transitionSceneEnvironment()
         applySun()

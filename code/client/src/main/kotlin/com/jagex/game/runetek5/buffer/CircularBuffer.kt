@@ -1,14 +1,7 @@
 package com.jagex.game.runetek5.buffer
 
-/**
- * Circular buffer pool for reusing byte arrays to reduce allocations.
- */
 object CircularBuffer {
 
-    /**
-     * 0 = not in use
-     * 1 = in use
-     */
     @JvmField var SLOT_IN_USE: IntArray? = null
     @JvmField var STASH_FOR_BUFFER_SIZE: IntArray? = null
     @JvmField var UNUSED_1_CURSOR_POS: Int = 0

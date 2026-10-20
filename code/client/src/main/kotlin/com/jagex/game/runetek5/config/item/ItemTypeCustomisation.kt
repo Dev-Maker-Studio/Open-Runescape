@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.config.item
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * Item appearance customization for player equipment.
- *
- * @author Steven - 22/11/2023
- */
 class ItemTypeCustomisation(objType: ItemType) {
 
     @JvmField val maleBody: IntArray = IntArray(3)

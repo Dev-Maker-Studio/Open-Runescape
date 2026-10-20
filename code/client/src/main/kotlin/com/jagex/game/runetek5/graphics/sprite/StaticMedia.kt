@@ -11,9 +11,6 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 object StaticMedia {
 
-    /**
-     * Sprite archive ids
-     */
     @JvmField var headiconPkGroupid: Int = 0
     @JvmField var headiconsPrayerGroupid: Int = 0
     @JvmField var hintHeadiconsGroupid: Int = 0
@@ -27,9 +24,6 @@ object StaticMedia {
     @JvmField var otherLevelGroupid: Int = 0
     @JvmField var hintMapedgeGroupid: Int = 0
 
-    /**
-     * Loaded sprites
-     */
     @JvmField var headiconPkSprites: Array<NativeSprite>? = null
     @JvmField var headiconPrayerSprites: Array<NativeSprite>? = null
     @JvmField var hintHeadiconSprites: Array<NativeSprite>? = null

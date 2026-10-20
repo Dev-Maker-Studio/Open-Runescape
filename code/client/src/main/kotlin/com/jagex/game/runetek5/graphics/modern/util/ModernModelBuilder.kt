@@ -14,90 +14,14 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/**
- * Builds modern-renderer geometry directly from a CLEAN decoded [Mesh], where
- * facesA/B/C are DIRECT vertex indices.
- *
- * This replaces the legacy-capture approach (reading ModelGL's post-connectNormal,
- * normal-slot-indexed arrays and reverse-mapping slots back to vertices), which
- * dropped whole submeshes on multi-model locs and produced wrong UVs on textured
- * faces. Working from the pre-connectNormal mesh sidesteps both problems: every
- * face references real vertices, and UVs are recomputed here with the same RS
- * texture-triangle projection the legacy ModelGL constructor uses.
- *
- * Conventions (all chosen to be drop-in for the existing modern pipeline):
- * - Positions are RAW model-local RS coordinates (ints as floats, no Y/Z flip).
- *   The modern pipeline keeps models in legacy space: the per-model Matrix43 and
- *   the Y-negated view-projection matrix perform the RS->GL mapping, exactly as
- *   in ModernGLToolkit.buildModelCache today.
- * - Normals are unit vectors in the same RS model space (no flips), matching the
- *   raw legacy normals the current cache path emits.
- * - UVs use the LEGACY orientation (NO 1-V flip). The reference engine flips V
- *   because it also flips texture rows at upload; darkan-bot samples the
- *   legacy-uploaded (unflipped) textures, so legacy-orientation UVs are correct.
- *   The projection math itself is identical (see Model.mapCylindericalUv etc.).
- * - Texture parameter arrays (texturesScaleX/Rotation/Direction/Speed/U-Vtrans)
- *   are indexed by the ABSOLUTE texture-triangle index, matching the legacy
- *   ModelGL constructor and Model.generateTextureMatrix. (The reference engine's
- *   ModelDefinition uses sparse complex/cube sub-indices instead - do not port
- *   that convention here.)
- * - Vertex layout is the 40-byte [ModelCache] format so the result plugs
- *   straight into OptimizedFrameBatcher.addCachedModel / InstancedModelBatcher:
- *   position vec3 (12) + normal vec3 (12) + uv vec2 (8) + rgba u8x4 (4) +
- *   modelIndex float placeholder (4).
- *
- * Face filtering — a port of the legacy ModelGL constructor's count-time filter
- * plus its render-type handling. Verified by GeometryDiff over the whole cache:
- * 157,236 mesh-built models, zero divergence from legacy in face count, vertex
- * position (all four rotations, yaw applied) and per-face RGBA.
- * - faceRenderType 0: smooth-shaded; contributes to per-vertex normals.
- * - faceRenderType 1: flat-shaded; uses the face normal for all three vertices.
- * - any other render type: hidden, skipped entirely.
- * - material.skipTriangles: face dropped.
- * - detailsOnly material under [stripDetailLayers]: face kept and demoted to
- *   untextured (flat face colour, no UVs), never dropped.
- * - facesAlpha is NOT a filter. RS alpha 255 means GL alpha 0, but legacy draws
- *   opaque scenery with GL_BLEND disabled, which ignores vertex alpha outright, so
- *   those faces rasterize solid. Skipping them deleted Canifis wall and door faces.
- *
- * Preconditions: ColorUtil.hslToRgb must be initialized (it always is once the
- * client has started); returns null otherwise rather than throwing.
- *
- * Wired in at model-creation time: ModernGLToolkit.createModel builds this from
- * the final combined Mesh and stores it on the ModelGL (modernBuilt). Legacy
- * post-create yaw baking is tracked (ModelGL.modernYaw) and re-applied via the
- * per-instance model matrix; any other post-create mutation nulls modernBuilt
- * and the renderer falls back to legacy-capture (buildModelCache).
- */
 object ModernModelBuilder {
 
-    /**
-     * Geometry for one mesh, split into per-material batches.
-     *
-     * [vertexData] holds all vertices (3 per accepted face, in face order) in the
-     * 40-byte [ModelCache] layout; each [TextureBatch] indexes into it. Storage is
-     * a heap array (GC-managed, safe to keep on a ModelGL for its lifetime);
-     * [toCachedModel] copies into a fresh native buffer each call, so LRU eviction
-     * of the resulting [ModelCache.CachedModel] can free it and a later call can
-     * rebuild it cheaply.
-     *
-     * [id] is a stable content hash of the geometry: identical meshes built at
-     * different times (e.g. after the loc model cache evicted and recreated a
-     * model) map to the same id, so the persistent instanced-geometry store and
-     * the model cache dedupe them.
-     */
     class BuiltModel(
         val id: Long,
         val faceCount: Int,
         val vertexCount: Int,
         val vertexData: ByteArray,
         val batches: List<TextureBatch>,
-        /**
-         * Why faces from the source mesh were not emitted, by rule. Populated for
-         * diagnostics only (GeometryDiff): when this builder's face set diverges
-         * from legacy's, this names the responsible rejection rule instead of
-         * leaving it to be inferred.
-         */
         val skipBillboardHidden: Int = 0,
         val skipRenderType: Int = 0,
         val skipInvalidVertex: Int = 0,
@@ -107,37 +31,13 @@ object ModernModelBuilder {
         val billboardsWithUid: Int = 0,
         val billboardsOutOfRange: Int = 0,
         val skipMaterialFiltered: Int = 0,
-        /**
-         * Source-mesh face index for each emitted triangle, in emission order.
-         * Lets colour be recomputed WITHOUT rebuilding geometry: colour lives at a
-         * fixed offset inside each 40-byte vertex, so a tint/recolour only has to
-         * rewrite 4 bytes per vertex while positions, normals and UVs stay valid.
-         */
         val acceptedFaces: IntArray = IntArray(0),
-        /**
-         * RESOLVED material per emitted triangle, in emission order — the value the
-         * face filter settled on, which is not always facesMaterial[face]. Colour
-         * depends on it (material brightness/alpha feed faceColorRgba), so a recolour
-         * must reuse it rather than re-read the raw array.
-         */
         val acceptedMaterialIds: IntArray = IntArray(0)
     ) {
-        /**
-         * One draw batch: all faces sharing a material.
-         *
-         * @param materialId material/texture id, -1 for untextured
-         * @param indices vertex indices into [vertexData] (multiple of 3)
-         */
         class TextureBatch(val materialId: Int, val indices: IntArray)
 
-        /**
-         * Adapts this model to the structure the existing batchers consume.
-         * Allocates a native copy of the vertex data; the returned CachedModel
-         * owns it (its free() releases it, as the ModelCache LRU expects).
-         */
         fun toCachedModel(): ModelCache.CachedModel = toCachedModel(vertexData)
 
-        /** As [toCachedModel], but with colour bytes supplied by [recolour]. */
         fun toCachedModel(data: ByteArray): ModelCache.CachedModel {
             val buffer = MemoryUtil.memAlloc(data.size)
             buffer.put(data)
@@ -157,19 +57,8 @@ object ModernModelBuilder {
         }
     }
 
-    /** Byte offset of the RGBA colour within a 40-byte vertex (pos12+normal12+uv8). */
     const val COLOR_OFFSET = 32
 
-    /**
-     * Returns a copy of [built]'s vertex data with ONLY the colour bytes recomputed
-     * from the model's current face colours.
-     *
-     * Colour-only mutations (tint, recolor, setAmbient, environment alpha) change no
-     * geometry, yet they used to discard the mesh-built model entirely and drop it onto
-     * the legacy-capture path — where it is content-hashed over every vertex, every
-     * frame, forever. Measured over one scene those four accounted for 13,383 of 19,684
-     * invalidations. Rewriting 4 bytes per vertex keeps the geometry.
-     */
     @JvmStatic
     fun recolour(
         built: BuiltModel,
@@ -179,13 +68,10 @@ object ModernModelBuilder {
         ambient: Int,
         colorTable: IntArray,
         materialProvider: MaterialProvider?,
-        /** ModelGL.meshFaceIndices: model-face -> mesh-face, needed to invert. */
         meshFaceIndices: IntArray?
     ): ByteArray {
         val out = built.vertexData.copyOf()
         if (facesColor == null || meshFaceIndices == null) return out
-        // Invert to mesh-face -> model-face: the builder is mesh-indexed, the model's
-        // colour arrays are indexed over its own filtered/sorted face list.
         var maxMesh = 0
         for (v in meshFaceIndices) if (v > maxMesh) maxMesh = v
         val meshToModel = IntArray(maxMesh + 1) { -1 }
@@ -197,10 +83,6 @@ object ModernModelBuilder {
             if (meshFace >= meshToModel.size) continue
             val face = meshToModel[meshFace]
             if (face < 0 || face >= facesColor.size) continue
-            // The RESOLVED material, exactly as emission used it. Re-reading
-            // facesMaterial[face] here instead applied a different material's
-            // brightness through faceColorRgba, which saturates to white — that is
-            // what turned recoloured bushes white while everything else looked fine.
             val materialId = if (i < built.acceptedMaterialIds.size) built.acceptedMaterialIds[i] else -1
             val alpha = facesAlpha?.getOrNull(face)?.toInt()?.and(0xff) ?: 0
             val rgba = faceColorRgba(
@@ -221,7 +103,6 @@ object ModernModelBuilder {
 
     @JvmField val MB_TINT = System.getProperty("render.mbtint")?.equals("true", true) == true
 
-    /** Aggregate skip accounting across every build this session. */
     @JvmField var aggSource = 0L
     @JvmField var aggBillboard = 0L
     @JvmField var aggRenderType = 0L
@@ -234,24 +115,12 @@ object ModernModelBuilder {
         "mbSkip[src=$aggSource bb=$aggBillboard rt=$aggRenderType " +
         "badVert=$aggInvalidVertex alpha=$aggTransparent mat=$aggMaterial]"
 
-    /**
-     * Builds renderable geometry from a clean decoded mesh.
-     *
-     * @param mesh the combined, decoded mesh (direct vertex indices)
-     * @param ambient model ambient lightness (legacy createModel ambient, e.g. 64)
-     * @param materialProvider used for material alpha/brightness color modulation
-     *   and detailsOnly filtering; when null those steps are skipped
-     * @param stripDetailLayers when true, faces whose material is detailsOnly are
-     *   rendered untextured (legacy preferenceFlags bit 0x40 behavior)
-     * @return built geometry, or null if the mesh has no drawable faces
-     */
     @JvmStatic
     fun build(
         mesh: Mesh,
         ambient: Int,
         materialProvider: MaterialProvider? = null,
         stripDetailLayers: Boolean = false,
-        /** The model's lighting contrast (ModelGL.contrast); normals carry 768/contrast, as legacy's do. */
         contrast: Int = 768
     ): BuiltModel? {
         val numFaces = mesh.numFaces
@@ -274,13 +143,6 @@ object ModernModelBuilder {
         fun vertexC(face: Int) = facesC[face].toInt() and 0xffff
         fun isValidVertex(index: Int) = index < numVertices
 
-        // ---- Pass 1: smooth vertex normals (render type 0 faces only) --------
-        // Normals follow the ModelGL constructor exactly: an integer cross product
-        // shifted into +-8192, scaled to length 256 with integer division, summed per
-        // vertex for smooth (render type 0) faces with the face count as magnitude.
-        // Lighting then uses the PLAIN AVERAGE (sum / (count*256)) scaled by 768/contrast
-        // — never renormalised, so a crease lights darker — and a flat face normal at
-        // 256 * 2/contrast, two thirds of the smooth strength. See ModelGL.upload.
         val smoothX = IntArray(numVertices)
         val smoothY = IntArray(numVertices)
         val smoothZ = IntArray(numVertices)
@@ -332,10 +194,6 @@ object ModernModelBuilder {
             smoothX[c] += fx; smoothY[c] += fy; smoothZ[c] += fz; smoothCount[c]++
         }
 
-        // Faces hidden by billboards: legacy removes a face from rasterization
-        // when ANY attached billboard's type has hasUid set (the billboard quad
-        // replaces the anchor face). Drawing them anyway is the "green quad"
-        // bug - anchor faces carry the billboard tint as their face color.
         var billboardHiddenFaces: HashSet<Int>? = null
         var billboardsSeen = 0
         var billboardsWithUid = 0
@@ -355,7 +213,6 @@ object ModernModelBuilder {
             }
         }
 
-        // ---- Pass 2: select drawable faces and resolve materials -------------
         val acceptedFaces = IntArray(numFaces)
         val acceptedMaterials = IntArray(numFaces)
         var acceptedCount = 0
@@ -370,10 +227,6 @@ object ModernModelBuilder {
             if (billboardHiddenFaces?.contains(face) == true) { skipBillboardHidden++; continue }
 
             val renderType = faceRenderType?.get(face)?.toInt() ?: 0
-            // Legacy skips render type 2 and NOTHING ELSE — the ModelGL constructor's
-            // filter is `faceRenderType[i] != 2` (ModelGL.kt:403). Restricting to types
-            // 0 and 1 additionally dropped every face of any other type, which removed
-            // whole wall surfaces from buildings while leaving their frames and roofs.
             if (renderType == 2) { skipRenderType++; continue }
 
             val a = vertexA(face)
@@ -381,20 +234,6 @@ object ModernModelBuilder {
             val c = vertexC(face)
             if (!isValidVertex(a) || !isValidVertex(b) || !isValidVertex(c)) { skipInvalidVertex++; continue }
 
-            // DO NOT skip RS alpha == 255 faces. The obvious reading is "fully
-            // transparent, nothing to draw", but legacy draws opaque scenery with
-            // GL_BLEND DISABLED (OpenGlToolkit.setBlendMode(0)), and with blending
-            // off the vertex alpha is ignored entirely — the face rasterizes solid.
-            // Legacy's renderedFaceCount confirms it: for Canifis walls it equals
-            // the full source face count, so legacy discards none of them.
-            //
-            // Dropping them here deleted whole wall/door faces that legacy renders,
-            // which is exactly the missing-Canifis-walls symptom (GeometryDiff:
-            // every wall/door divergence was skips[transparent=N], nothing else).
-            // The alpha still travels in the vertex colour; whether it is honoured
-            // is the blend state's decision at draw time, not the builder's.
-
-            // SIGNED read: -1 = untextured, 0..N = valid material (including 0).
             var materialId = facesMaterial?.get(face)?.toInt() ?: -1
             if (materialId != -1 && materialProvider != null) {
                 val material = materialProvider.getMaterial(materialId and 0xffff)
@@ -412,12 +251,6 @@ object ModernModelBuilder {
         }
         if (acceptedCount == 0) return null
 
-        // ---- Order faces the way legacy does (Model.addBillboard) -------------
-        // Legacy sorts a model's faces so opaque faces precede alpha faces, grouped
-        // by material within each class, and draws them as material RUNS in that
-        // order. Emitting in that order gives the batchers legacy's run structure
-        // (few runs, and alpha faces last — which is what the ordered translucent
-        // pass relies on). Stable sort: ties keep mesh order.
         run {
             val order = IntArray(acceptedCount) { it }
             val keys = IntArray(acceptedCount)
@@ -441,24 +274,14 @@ object ModernModelBuilder {
             System.arraycopy(materials, 0, acceptedMaterials, 0, acceptedCount)
         }
 
-        // ---- Texture transform data (centers + matrices per texture) --------
         val transforms = if (mesh.facesTexture != null && mesh.numTextures > 0) {
             computeTextureTransforms(mesh)
         } else {
             null
         }
 
-        // ---- Pass 3: emit 40-byte vertices in face order ---------------------
         val vertexCount = acceptedCount * 3
         val vertexArray = ByteArray(vertexCount * ModelCache.BYTES_PER_VERTEX)
-        // NATIVE byte order. ByteBuffer.wrap defaults to BIG_ENDIAN, but
-        // toCachedModel copies these bytes verbatim into a MemoryUtil.memAlloc buffer
-        // (native = little-endian on x86) that is uploaded straight to the GPU, so
-        // big-endian floats were read byte-swapped: every position became garbage and
-        // no mesh-built geometry ever appeared on screen. The legacy-capture path
-        // writes native order (ModernGLToolkit.buildModelCache), which is why only
-        // this path was affected — and why the build-time scan passed, since both the
-        // data and the oracle read it as big-endian and never exercised the GPU view.
         val vertexData = ByteBuffer.wrap(vertexArray).order(java.nio.ByteOrder.nativeOrder())
         val uv = FloatArray(6)
 
@@ -475,7 +298,7 @@ object ModernModelBuilder {
             vertexData.put(((rgba ushr 16) and 0xff).toByte())
             vertexData.put(((rgba ushr 8) and 0xff).toByte())
             vertexData.put((rgba and 0xff).toByte())
-            vertexData.putFloat(0f)  // modelIndex placeholder, filled at render time
+            vertexData.putFloat(0f)
         }
 
         for (i in 0 until acceptedCount) {
@@ -500,15 +323,12 @@ object ModernModelBuilder {
                 writeVertex(b, smoothX[b] * kb, smoothY[b] * kb, smoothZ[b] * kb, uv[2], uv[3], rgba)
                 writeVertex(c, smoothX[c] * kc, smoothY[c] * kc, smoothZ[c] * kc, uv[4], uv[5], rgba)
             } else {
-                // Flat shading: the face normal (length 256, magnitude 0 in legacy) on
-                // all three vertices at legacy's 2/contrast.
                 computeFaceNormal(face)
                 writeVertex(a, faceNormal[0] * flatNormalScale, faceNormal[1] * flatNormalScale, faceNormal[2] * flatNormalScale, uv[0], uv[1], rgba)
                 writeVertex(b, faceNormal[0] * flatNormalScale, faceNormal[1] * flatNormalScale, faceNormal[2] * flatNormalScale, uv[2], uv[3], rgba)
                 writeVertex(c, faceNormal[0] * flatNormalScale, faceNormal[1] * flatNormalScale, faceNormal[2] * flatNormalScale, uv[4], uv[5], rgba)
             }
         }
-        // ---- Material runs in emission order (see the sort above) ------------
         val batches = ArrayList<BuiltModel.TextureBatch>()
         run {
             var runStart = 0
@@ -559,13 +379,8 @@ object ModernModelBuilder {
         )
     }
 
-    /**
-     * Stable 64-bit FNV-1a hash over the emitted vertex bytes plus batch material
-     * ids. Identical geometry always maps to the same id, so re-created models
-     * (loc model cache churn) reuse existing cache/instanced-store entries.
-     */
     private fun contentHash(vertexData: ByteArray, batches: List<BuiltModel.TextureBatch>): Long {
-        var hash = -0x340d631b7bdddcdbL  // FNV-1a 64-bit offset basis
+        var hash = -0x340d631b7bdddcdbL
         for (byte in vertexData) {
             hash = hash xor (byte.toLong() and 0xff)
             hash *= 0x100000001b3L
@@ -577,7 +392,6 @@ object ModernModelBuilder {
         return hash
     }
 
-    /** Averaged, renormalized smooth vertex normal component; +Y up fallback. */
     private fun smoothNormalX(
         sx: FloatArray, sy: FloatArray, sz: FloatArray, count: IntArray,
         vertex: Int, component: Int
@@ -595,15 +409,6 @@ object ModernModelBuilder {
         }
     }
 
-    // ------------------------------------------------------------------------
-    // Color
-    // ------------------------------------------------------------------------
-
-    /**
-     * Pure port of ModelGL.hslToRgb: ambient-adjusted HSL lookup plus optional
-     * material ambient-alpha blend and brightness boost. Returns packed 0xRRGGBBAA
-     * with GL alpha = 255 - RS alpha.
-     */
     private fun faceColorRgba(
         colorTable: IntArray,
         colorHsl: Int,
@@ -612,8 +417,6 @@ object ModernModelBuilder {
         alpha: Int,
         materialProvider: MaterialProvider?
     ): Int {
-        // -Drender.mbtint=true paints every mesh-built face magenta, so a single
-        // capture shows exactly which geometry takes this path.
         if (MB_TINT) return 0xFF00FFFF.toInt()
         var rgb = colorTable[ModelGL.adjustLuminance(colorHsl, ambient)]
         if (materialId != -1 && materialProvider != null) {
@@ -644,10 +447,6 @@ object ModernModelBuilder {
         return (rgb shl 8) or (255 - alpha)
     }
 
-    // ------------------------------------------------------------------------
-    // Texture transforms (port of Model.generateTextureMatrix, mesh-only)
-    // ------------------------------------------------------------------------
-
     private class TextureTransforms(
         val centerX: IntArray,
         val centerY: IntArray,
@@ -655,11 +454,6 @@ object ModernModelBuilder {
         val matrix: Array<FloatArray>
     )
 
-    /**
-     * Computes per-texture-triangle bounding-box centers and 3x3 projection
-     * matrices for complex mappings (types 1-3). All arrays are indexed by the
-     * ABSOLUTE texture-triangle index, matching legacy ModelGL.
-     */
     private fun computeTextureTransforms(mesh: Mesh): TextureTransforms {
         val numTextures = mesh.numTextures
         val facesTexture = mesh.facesTexture!!
@@ -742,7 +536,6 @@ object ModernModelBuilder {
         return TextureTransforms(centerX, centerY, centerZ, matrix)
     }
 
-    /** Bounds-guarded read of the (occasionally short-allocated) texture params. */
     private fun scaleParam(array: IntArray?, index: Int, fallback: Int): Int {
         if (array == null || index >= array.size) return fallback
         return array[index]
@@ -750,11 +543,6 @@ object ModernModelBuilder {
 
     private fun nonZero(value: Int): Int = if (value == 0) 1 else value
 
-    /**
-     * Port of Model.createTextureMatrix: Y-axis rotation combined with the
-     * axis-angle rotation derived from the texture triangle "vertices"
-     * (which encode an orientation for complex mappings), then scaled.
-     */
     private fun createTextureMatrix(
         n: Int, m: Int, p: Int, rotation: Int,
         scaleX: Float, scaleY: Float, scaleZ: Float
@@ -817,22 +605,12 @@ object ModernModelBuilder {
         return result
     }
 
-    // ------------------------------------------------------------------------
-    // UV computation (ports of the legacy ModelGL constructor's UV block)
-    // ------------------------------------------------------------------------
-
-    /**
-     * Computes the six UV components (aU, aV, bU, bV, cU, cV) for a face into [uv].
-     * Untextured faces get zeros; textured faces without a texture pointer get the
-     * legacy fixed fallback (0,1)-(1,1)-(0,0).
-     */
     private fun computeUVs(mesh: Mesh, transforms: TextureTransforms?, face: Int, materialId: Int, uv: FloatArray) {
         uv.fill(0f)
         if (materialId == -1) return
 
         val texturePointer = mesh.facesTexture?.get(face)?.toInt() ?: -1
         if (texturePointer == -1) {
-            // Legacy fixed UVs for material-without-texture-triangle faces.
             uv[0] = 0.0f; uv[1] = 1.0f
             uv[2] = 1.0f; uv[3] = 1.0f
             uv[4] = 0.0f; uv[5] = 0.0f
@@ -854,11 +632,6 @@ object ModernModelBuilder {
         }
     }
 
-    /**
-     * Type 0: planar projection onto the texture triangle's plane. Direct port of
-     * the legacy ModelGL constructor's simple-mapping block, with a zero-
-     * determinant guard for degenerate texture triangles.
-     */
     private fun computePlanarUVs(mesh: Mesh, texture: Int, face: Int, uv: FloatArray) {
         val verticesX = mesh.verticesX!!
         val verticesY = mesh.verticesY!!
@@ -920,7 +693,6 @@ object ModernModelBuilder {
         uv[5] = (basisX * cOffX + basisY * cOffY + basisZ * cOffZ) * scale
     }
 
-    /** Type 1: cylindrical projection with U (or V) seam correction. */
     private fun computeCylindricalUVs(mesh: Mesh, transforms: TextureTransforms?, texture: Int, face: Int, uv: FloatArray) {
         if (transforms == null || transforms.matrix[texture].isEmpty()) return
         val matrix = transforms.matrix[texture]
@@ -959,10 +731,6 @@ object ModernModelBuilder {
         }
     }
 
-    /**
-     * Type 2: cube/rectangular projection. The face normal (transformed by the
-     * texture matrix and un-scaled) selects which cube face to project onto.
-     */
     private fun computeCubeUVs(mesh: Mesh, transforms: TextureTransforms?, texture: Int, face: Int, uv: FloatArray) {
         if (transforms == null || transforms.matrix[texture].isEmpty()) return
         val matrix = transforms.matrix[texture]
@@ -980,9 +748,6 @@ object ModernModelBuilder {
         val verticesY = mesh.verticesY!!
         val verticesZ = mesh.verticesZ!!
 
-        // Face normal via cross product, transformed by the (scaled) texture
-        // matrix then divided by the scale so cube-face selection is based on
-        // the un-scaled orientation - exactly as the legacy constructor does.
         val edge1X = verticesX[b] - verticesX[a]
         val edge1Y = verticesY[b] - verticesY[a]
         val edge1Z = verticesZ[b] - verticesZ[a]
@@ -1009,7 +774,6 @@ object ModernModelBuilder {
         uv[4] = scratch[0]; uv[5] = scratch[1]
     }
 
-    /** Type 3: spherical projection with U (or V) seam correction. */
     private fun computeSphericalUVs(mesh: Mesh, transforms: TextureTransforms?, texture: Int, face: Int, uv: FloatArray) {
         if (transforms == null || transforms.matrix[texture].isEmpty()) return
         val matrix = transforms.matrix[texture]
@@ -1045,12 +809,6 @@ object ModernModelBuilder {
             else if (uv[1] - uv[5] > 0.5f) uv[5] += 1.0f
         }
     }
-
-    // ------------------------------------------------------------------------
-    // Per-vertex UV mapping primitives (ports of Model.mapCylindericalUv,
-    // Model.mapSphericalUv, Model.mapRectangularUv, Model.getCubeFace -
-    // legacy orientation, no V flip)
-    // ------------------------------------------------------------------------
 
     private fun mapCylindricalUv(
         vertexX: Int, vertexY: Int, vertexZ: Int,
@@ -1116,7 +874,6 @@ object ModernModelBuilder {
         applyDirection(direction, u, v, uv)
     }
 
-    /** Dominant-axis cube face selection (Y > Z > X tie-break, legacy order). */
     private fun getCubeFace(nx: Float, ny: Float, nz: Float): Int {
         val ax = if (nx < 0.0f) -nx else nx
         val ay = if (ny < 0.0f) -ny else ny
@@ -1130,10 +887,6 @@ object ModernModelBuilder {
         }
     }
 
-    /**
-     * 90-degree-step UV rotation (texture direction 0-3). Legacy orientation:
-     * no V flip - darkan-bot samples legacy-uploaded textures directly.
-     */
     private fun applyDirection(direction: Int, u: Float, v: Float, uv: FloatArray) {
         when (direction) {
             1 -> { uv[0] = -v; uv[1] = u }

@@ -1,6 +1,3 @@
-/* NativeHeapBuffer - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaclib.memory.heap
 
 import jaclib.memory.Buffer

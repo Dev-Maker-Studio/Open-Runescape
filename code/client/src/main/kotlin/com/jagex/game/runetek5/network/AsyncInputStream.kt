@@ -4,12 +4,6 @@ import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
 
-/**
- * < Fully refactored >
- * @author Brainpower - 30/05/2020
- *
- * Manages an inputstream on a separate thread
- */
 class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
 
     var readError: IOException? = null
@@ -26,9 +20,6 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
         executingThread.start()
     }
 
-    /**
-     * Reads the inputstream and manages the offset
-     */
     override fun run() {
         while (true) {
             var length: Int
@@ -48,7 +39,6 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
                     try {
                         (this as Object).wait()
                     } catch (interruptedException: InterruptedException) {
-                        // NOOP
                     }
                 }
             }
@@ -70,9 +60,6 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
         }
     }
 
-    /**
-     * Reads a part of the inputstream's buffer into given buffer
-     */
     fun read(destinationBuffer: ByteArray, destinationPosition: Int, copyLength: Int): Int {
         var actualCopyLength = copyLength
         if (actualCopyLength >= 0 && destinationPosition >= 0 && actualCopyLength + destinationPosition <= destinationBuffer.size) {
@@ -110,9 +97,6 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
         }
     }
 
-    /**
-     * Checks if the inputstream has enough capacity to fit a certain amount of bytes
-     */
     fun available(capacityRequired: Int): Boolean {
         if (capacityRequired > 0 && capacityRequired < capacity) {
             synchronized(this) {
@@ -134,9 +118,6 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
         throw IOException("requested $capacityRequired bytes, buffer holds ${capacity - 1}")
     }
 
-    /**
-     * Checks how many bytes are left to be read
-     */
     fun capacityLeft(): Int {
         synchronized(this) {
             val length = if (readPosition <= readOffset) {
@@ -152,16 +133,10 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
         }
     }
 
-    /**
-     * Drops the inputstream to be shutdown automatically in 30 seconds
-     */
     fun drop() {
         inputStream = DroppedInputStream()
     }
 
-    /**
-     * Wakes up all the threads and joins them
-     */
     fun shutdown() {
         synchronized(this) {
             if (readError == null) {
@@ -172,7 +147,6 @@ class AsyncInputStream(inputstream: InputStream, size: Int) : Runnable {
         try {
             executingThread.join()
         } catch (interruptedException: InterruptedException) {
-            // NOOP
         }
     }
 }

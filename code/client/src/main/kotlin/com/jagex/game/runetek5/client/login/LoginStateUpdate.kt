@@ -11,10 +11,6 @@ class LoginStateUpdate(
     @JvmField
     val time: Int = (Utils.time() / 1000L).toInt()
 
-    /**
-     * logout =  0
-     * login = > 0
-     */
     @JvmField
     val actionType: Short = actionType.toShort()
 }

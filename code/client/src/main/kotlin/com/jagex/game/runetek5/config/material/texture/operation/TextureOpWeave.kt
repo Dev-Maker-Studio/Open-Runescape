@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.abs
 
-/**
- * Texture operation that generates weave/fabric patterns.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpWeave : TextureOperation(0, true) {
 
     @JvmField var threadWidth: Int = 585

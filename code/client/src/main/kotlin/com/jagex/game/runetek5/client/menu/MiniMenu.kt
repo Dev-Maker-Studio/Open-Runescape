@@ -618,11 +618,11 @@ object MiniMenu {
     fun getMinimenuCursor(): Int {
         if (Client.draggingComponent == null) {
             if (!isOpen) {
-                if (TypeLists.INTERACTION_DEFAULTS!!.minimenuCursor) { // own cursor?
+                if (TypeLists.INTERACTION_DEFAULTS!!.minimenuCursor) {
                     if (secondaryEntry != null) {
                         return secondaryEntry!!.cursor
                     }
-                } else if (activeEntry != null) { // default cursor?
+                } else if (activeEntry != null) {
                     return activeEntry!!.cursor
                 }
             } else {

@@ -13,13 +13,6 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 
-/**
- *
- * @author Brainpower - 19/04/2022
- * @autor lequietriot - 13/08/2021
- * Reference: https://github.com/lequietriot/RuneScape-MIDI-Player-Suite/blob/master/src/main/MusicSample.java
- *
- */
 class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Node<MusicSample>() {
 
     @JvmField var sampleRate: Int = 0
@@ -236,9 +229,6 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
             return musicSample
         }
 
-        /**
-         * https://www.cs.cmu.edu/afs/club/usr/cort/code/img2ktx/third_party/stb/stb_vorbis.c
-         */
         @JvmStatic
         fun float32Unpack(input: Int): Float {
             var mantissa = input and 0x1fffff

@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.TextUtils
 
-/**
- *
- * @author Steven - 18/09/2023
- *
- */
 object IgnoreList {
 
     @JvmField val IGNORED = arrayOfNulls<Ignore>(100)

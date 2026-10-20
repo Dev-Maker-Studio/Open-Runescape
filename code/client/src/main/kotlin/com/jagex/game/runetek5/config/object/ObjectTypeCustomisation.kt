@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.config.`object`
 
-/**
- * [J]
- * @author Steven - 22/11/2023
- *
- */
 class ObjectTypeCustomisation(
     @JvmField val id: Long,
     @JvmField val objectModelIds: IntArray?,

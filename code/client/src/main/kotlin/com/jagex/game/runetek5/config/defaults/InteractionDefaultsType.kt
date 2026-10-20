@@ -6,12 +6,6 @@ import com.jagex.game.runetek5.config.inputsubscriber.InputSubscriber
 import com.jagex.game.runetek5.config.inputsubscriber.KeyHoldInputSubscriber
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Interaction defaults configuration, including key bindings and tooltip colors.
- *
- * @author Brainpower - 19/04/2022
- * before: Defaults7Loader
- */
 class InteractionDefaultsType(resource: Js5ResourceProvider) {
 
     @JvmField var primaryClickSubscriber: InputSubscriber? = null
@@ -30,11 +24,6 @@ class InteractionDefaultsType(resource: Js5ResourceProvider) {
         decode(Packet(data!!))
     }
 
-    /**
-     * Decodes interaction defaults from the packet buffer.
-     *
-     * @param buffer The packet buffer to decode from
-     */
     fun decode(buffer: Packet) {
         while (true) {
             val opcode = buffer.readUByte()
@@ -42,16 +31,16 @@ class InteractionDefaultsType(resource: Js5ResourceProvider) {
                 return
             }
             when (opcode) {
-                1 -> primaryClickSubscriber = InputSubscriber.decode(buffer) // minimenu
-                2 -> secondaryClickSubscriber = InputSubscriber.decode(buffer) // minimenu
-                3 -> contextMenuSubscriber = InputSubscriber.decode(buffer) // minimenu
+                1 -> primaryClickSubscriber = InputSubscriber.decode(buffer)
+                2 -> secondaryClickSubscriber = InputSubscriber.decode(buffer)
+                3 -> contextMenuSubscriber = InputSubscriber.decode(buffer)
                 4 -> openMinimenuInputSubscriber = InputSubscriber.decode(buffer)
-                5 -> minimenuKey = KeyHoldInputSubscriber.decode(buffer) // minimenu
+                5 -> minimenuKey = KeyHoldInputSubscriber.decode(buffer)
                 6 -> toggleRunKey = KeyHoldInputSubscriber.decode(buffer)
                 7 -> teleportKey = KeyHoldInputSubscriber.decode(buffer)
-                8 -> InputSubscriber.decode(buffer) // decoded but not stored
-                9 -> InputSubscriber.decode(buffer) // decoded but not stored
-                10 -> InputSubscriber.decode(buffer) // decoded but not stored
+                8 -> InputSubscriber.decode(buffer)
+                9 -> InputSubscriber.decode(buffer)
+                10 -> InputSubscriber.decode(buffer)
                 11 -> minimenuCursor = true
                 12 -> tooltipColorP2p = buffer.readInt()
                 13 -> tooltipColorF2p = buffer.readInt()

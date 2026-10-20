@@ -6,10 +6,6 @@ import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 import com.jagex.game.runetek5.toolkit.ComponentDimensionSM
 import kotlin.math.min
 
-/**
- * The default font renderer for safe mode, doesn't support alpha
- * @author Brainpower
- */
 class FontRendererSM(
     override val toolkit: SafeModeToolkit,
     fontMetrics: FontMetrics,

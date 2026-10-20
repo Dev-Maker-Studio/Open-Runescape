@@ -4,12 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- * Texture operation that inverts RGB color values.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpInvert : TextureOperation(1, false) {
 
     override fun getColorOutput(y: Int): Array<IntArray> {

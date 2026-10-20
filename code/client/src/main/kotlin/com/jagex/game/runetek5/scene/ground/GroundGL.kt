@@ -50,7 +50,6 @@ open class GroundGL(
 
         @JvmStatic var shadowProbeTick = 0
         private val SUN_PROBE = System.getProperty("render.sunprobe") != null
-        /** -Drender.groundshadow=false skips the legacy shadow overlay (A/B aid). */
         private val GROUND_SHADOW_OVERLAY = System.getProperty("render.groundshadow")?.equals("false", true) != true
         private var sunProbeTick = 0
         @JvmField val GROUND_MATRIX = FloatArray(16)
@@ -71,28 +70,16 @@ open class GroundGL(
     @JvmField var lightingX: Array<FloatArray>? = null
     @JvmField var goundMaterialNodes: Array<Node<*>?>? = null
     @JvmField var dataArrayBuffer: ArrayBufferGL? = null
-    // Modern rendering: raw vertex data stored for LWJGL-only rendering (no legacy VBO dependency)
     @JvmField var modernVertexData: java.nio.ByteBuffer? = null
     private var modernVertexRelease: Cleaner.Cleanable? = null
     @JvmField var modernVertexStride: Int = 0
     @JvmField var modernVertexCount: Int = 0
 
-    /**
-     * Bumped whenever [modernVertexData] is rebuilt.
-     *
-     * The terrain mesh for a ground is static between rebuilds, but the modern path
-     * used to re-upload the WHOLE snapshot with glBufferData on every material draw
-     * — ~35 times a frame, tens of megabytes of PCIe traffic per frame for data that
-     * had not changed. The renderer now uploads only when this revision moves.
-     */
     @JvmField var modernVertexRevision: Int = 0
-    /** Hash of the visible tile set of the frame being drawn (see renderShadows). */
     @JvmField var modernVisibleStamp: Long = 0L
 
-    /** GL name of the resident copy of [modernVertexData], 0 until first upload. */
     @JvmField var modernVboId: Int = 0
 
-    /** [modernVertexRevision] the resident copy was uploaded from; -1 = never. */
     @JvmField var modernVboRevision: Int = -1
     @JvmField var vertexBuffer: OpenGlArrayDrawBuffer? = null
     @JvmField var colorBuffer: OpenGlArrayDrawBuffer? = null
@@ -292,9 +279,6 @@ open class GroundGL(
             activeToolkit.setupMatrixRendering()
             activeToolkit.setLightingEnabled((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0)
 
-            // -Drender.sunprobe: the exact lighting inputs this ground pass sees, so the
-            // two toolkits can be compared on the same scene (a brightness gap between
-            // them is either these numbers or the shader, never both).
             if (SUN_PROBE && sunProbeTick++ % 300 == 100) {
                 val tk = activeToolkit
                 val sd = tk.sunDirection
@@ -307,8 +291,6 @@ open class GroundGL(
                         "materials=${goundMaterialNodes?.size} visibleTiles=$visibleTileCount"
                 )
                 if (tk !is ModernGLToolkit) {
-                    // Fixed-function state as GL holds it right now, not as the toolkit
-                    // fields claim. Queried through LWJGL against the current context.
                     try {
                         org.lwjgl.opengl.GL.createCapabilities()
                         val f = FloatArray(4)
@@ -339,9 +321,6 @@ open class GroundGL(
                 }
             }
 
-            // Native ground shadows for the modern pipeline: select THIS ground's shadow
-            // map BEFORE its materials draw; the ground shader samples it per fragment.
-            // No fixed function.
             val sm = shadowMapper
             if (activeToolkit is ModernGLToolkit) {
                 val texelSize = if (sm != null) (width * tileUnits).toFloat() / (sm.width - 2).toFloat() else 0f
@@ -349,9 +328,6 @@ open class GroundGL(
                     ?.setShadowMapper(sm, texelSize)
             }
 
-            // Stamp of this frame's visible tile set. The modern ground path keys its
-            // per-material index lists and resident index buffers on it, so a frame
-            // whose camera did not move rebuilds and re-uploads nothing.
             if (activeToolkit is ModernGLToolkit) {
                 var h = 1469598103934665603L xor visibleTileCount.toLong()
                 for (i in 0 until visibleTileCount) {
@@ -364,9 +340,6 @@ open class GroundGL(
                 (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
             }
 
-            // FIXED-FUNCTION, LEGACY TOOLKIT ONLY. The modern pipeline must never run
-            // fixed-function work: it lights the ground in its own shaders instead
-            // (ModernGroundRenderer point lights). No crossover between pipelines.
             if (!activeLights.isEmpty() && activeToolkit !is ModernGLToolkit) {
                 val fogColor = activeToolkit.fogColor
                 val fogDensity = activeToolkit.fogDensity
@@ -404,13 +377,9 @@ open class GroundGL(
                     "groundTiles=${width}x${length} tileUnits=$tileUnits tileScale=$tileScale " +
                     "worldUnits=${width * tileUnits}x${length * tileUnits}")
             }
-            // FIXED-FUNCTION, LEGACY TOOLKIT ONLY (see above).
             if (shadowMapper != null && activeToolkit !is ModernGLToolkit && GROUND_SHADOW_OVERLAY) {
-                OpenGL.glPushMatrix()
-                OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
                 shadowMapper!!.renderShadowOverlay(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
-                OpenGL.glPopMatrix()
             }
         }
     }
@@ -421,11 +390,11 @@ open class GroundGL(
             for (x in 1 until width) {
                 for (y in 1 until length) {
                     intensity[x][y] = (
-                        (shadowing!![x][y - 1].toInt() shr 2) +    // south of center
-                            (shadowing!![x][y].toInt() shr 1) +    // center
-                            (shadowing!![x - 1][y].toInt() shr 2) + // west of center
-                            (shadowing!![x][y + 1].toInt() shr 3) + // north of center
-                            (shadowing!![x + 1][y].toInt() shr 3)   // east of center
+                        (shadowing!![x][y - 1].toInt() shr 2) +
+                            (shadowing!![x][y].toInt() shr 1) +
+                            (shadowing!![x - 1][y].toInt() shr 2) +
+                            (shadowing!![x][y + 1].toInt() shr 3) +
+                            (shadowing!![x + 1][y].toInt() shr 3)
                         ).toByte()
                 }
             }
@@ -731,13 +700,6 @@ open class GroundGL(
             }
             nativeStream.flush()
 
-            // For modern rendering: copy vertex data to a ByteBuffer we own (no legacy VBO
-            // dependency). This is a pure CPU-side capture — it must run whenever the
-            // active toolkit is ModernGLToolkit, regardless of whether the modern
-            // renderer has lazily initialized yet (init happens after the first render;
-            // the map can be built before that). Without this snapshot the modern ground
-            // path cannot draw AT ALL (no legacy fallback exists under toolkit 3), so
-            // failures here must be loud.
             val dataSize = nativeStream.written()
             if (activeToolkit is ModernGLToolkit) {
                 try {
@@ -826,9 +788,6 @@ open class GroundGL(
     ) {
         val activeDisplay = activeToolkit.getDisplay()
         if (currentColorCount > 0 && activeToolkit is ModernGLToolkit) {
-            // Modern toolkit: never the fixed-function path below. If the modern
-            // renderer cannot draw yet, the slice is skipped (and the miss is loud in
-            // the diag), never rendered through legacy GL.
             if (!activeToolkit.renderMinimapFloorModern(this, centerOffsetX, centerOffsetY, startX, startY, endX, endY, materialized)) {
                 activeToolkit.countLegacySkip("GroundGL.renderMinimapFloor")
             }
@@ -859,8 +818,6 @@ open class GroundGL(
             GROUND_MATRIX[13] = 1.0f - ((centerOffsetY * 2) + (1024 * endY) / 128.0f) / activeDisplay.getHeight()
             GROUND_MATRIX[14] = 0.0f
             GROUND_MATRIX[15] = 1.0f
-            OpenGL.glMatrixMode(5889)
-            OpenGL.glLoadMatrixf(GROUND_MATRIX, 0)
             GROUND_MATRIX[0] = 1.0f
             GROUND_MATRIX[1] = 0.0f
             GROUND_MATRIX[2] = 0.0f
@@ -877,8 +834,6 @@ open class GroundGL(
             GROUND_MATRIX[13] = 0.0f
             GROUND_MATRIX[14] = 0.0f
             GROUND_MATRIX[15] = 1.0f
-            OpenGL.glMatrixMode(5888)
-            OpenGL.glLoadMatrixf(GROUND_MATRIX, 0)
             if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
                 activeToolkit.setLightingEnabled(true)
                 activeToolkit.setLightingSourceParams()
@@ -991,10 +946,8 @@ open class GroundGL(
         tileColors!![tileX][tileY] = mainColors
         tileBlendColors!![tileX][tileY] = blendColors
         if (lightGroundOffsetsB != null && lightOffsetsB == null) {
-            // Already handled above
         }
         if (lightGroundOffsetsA != null && lightOffsetsA == null) {
-            // Already handled below
         }
         if (lightOffsetsB != null) {
             lightOffsetsB!![tileX][tileY] = lightGroundOffsetsB
@@ -1044,14 +997,10 @@ open class GroundGL(
         renderShadows(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
     }
 
-    /** [renderShadows] is a no-op without material nodes, so the plane draws nothing. */
     override fun hasRenderableFloor(): Boolean = goundMaterialNodes != null
 
     override fun createShadowAt(tileX: Int, tileY: Int, shadow: Shadow?): Shadow? {
         if ((shadowFunctionMasks[tileX][tileY].toInt() and GroundFunctionMask.CONTAINS_SHADOW) == 0) {
-            // Tiles without shadow-casting floor geometry produce no shadow. Returning the
-            // caller's scratch shadow here re-stamped the previous tile's shadow onto every
-            // later tile of the plane.
             return null
         }
         val dimension = tileUnits shr activeToolkit.shadowScale

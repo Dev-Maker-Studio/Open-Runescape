@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.math
 
-/**
- *
- * @author Steven - 16/08/2023
- *
- */
 object Vector3Pool {
 
     @JvmField var pool: Array<Vector3?> = arrayOfNulls(0)

@@ -56,7 +56,6 @@ class PingRequester : Runnable {
             try {
                 executingThread!!.join()
             } catch (ie: InterruptedException) {
-                // NOOP
             }
             executingThread = null
             pingThreadPool.shutdown()
@@ -73,7 +72,6 @@ class PingRequester : Runnable {
                     try {
                         (requestQueue as Object).wait()
                     } catch (ie: InterruptedException) {
-                        // NOOP
                     }
                     waitingRequest = requestQueue.poll()
                 }
@@ -94,17 +92,13 @@ class PingRequester : Runnable {
             } else {
                 queueRequest(waitingRequest!!)
                 try {
-                    Thread.sleep(50) // Small delay to prevent CPU spinning
+                    Thread.sleep(50)
                 } catch (e: InterruptedException) {
-                    // NOOP
                 }
             }
         }
     }
 
-    /**
-     * Processes an individual ping request in a worker thread
-     */
     private fun processPingRequest(request: PingRequest) {
         val ping: Int
         try {

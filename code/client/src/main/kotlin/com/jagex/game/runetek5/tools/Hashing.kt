@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.tools
 
-/**
- *
- * @author Brainpower - 31/05/2020
- *
- */
 object Hashing {
 
     @JvmField val CRC64_TABLE: LongArray = LongArray(256)

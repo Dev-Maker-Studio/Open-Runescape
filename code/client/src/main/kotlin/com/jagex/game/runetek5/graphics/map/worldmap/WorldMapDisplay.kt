@@ -59,16 +59,6 @@ object WorldMapDisplay {
     @JvmField
     var useTargetPosition = false
 
-    /**
-     * (White) text above worldmap areas
-     *
-     * Toll<br>
-     * gate
-     *
-     * Mage<br>
-     * Training<br>
-     * Arena
-     */
     @JvmField
     val RENDERED_WORLDMAP_AREA_NAMELINES = arrayOfNulls<String>(5)
 
@@ -97,7 +87,7 @@ object WorldMapDisplay {
     fun reset(mapElementId: Int, scrollX: Int, scrollY: Int, useTarget: Boolean) {
         if (PreferenceManager.preferences?.activeToolkit?.getValue() != 0) {
             AbstractToolkit.activeRenderMode = PreferenceManager.preferences?.activeToolkit?.getValue() ?: 0
-            Client.loadAssets(0, true)
+            Client.loadAssets(true)
         } else {
             GraphicsCache.resetWorldmapCaches(false)
         }

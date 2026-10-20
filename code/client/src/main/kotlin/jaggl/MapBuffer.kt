@@ -1,6 +1,3 @@
-/* MapBuffer - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaggl
 
 import jaclib.memory.NativeBuffer

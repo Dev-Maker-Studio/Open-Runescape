@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.config.rsinterface
 
-/**
- *
- * @author Steven - 15/10/2023
- *
- */
 class InteractiveComponentSprite(
     @JvmField val width: Int,
     @JvmField val height: Int,

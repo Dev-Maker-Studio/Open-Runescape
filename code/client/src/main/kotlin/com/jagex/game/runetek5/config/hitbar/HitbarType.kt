@@ -13,33 +13,14 @@ class HitbarType {
     @JvmField var fadeOutDuration = 70
     @JvmField val animationStepSize = 1
 
-    /**
-     * HitbarTypeList reference
-     */
     @JvmField var hitbarTypeList: HitbarTypeList? = null
 
-    /**
-     * The green part of a hitbar
-     */
     @JvmField var greenBarSpriteId = -1
 
-    /**
-     * The red part of a hitbar
-     */
     @JvmField var redBarSpriteId = -1
 
-    /**
-     * The green part of a hitbar,
-     * for players with a P mapdot
-     * [identical sprite to regular]
-     */
     @JvmField var pGreenBarSpriteId = -1
 
-    /**
-     * The red part of a hitbar,
-     * for players with a P mapdot
-     * [identical sprite to regular]
-     */
     @JvmField var pRedBarSpriteId = -1
 
     fun decode(stream: Packet, opcode: Int) {

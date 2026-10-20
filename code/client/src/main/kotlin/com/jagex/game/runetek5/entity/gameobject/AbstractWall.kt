@@ -6,9 +6,6 @@ import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Abstract wall entity in the scene graph.
- */
 abstract class AbstractWall(
     scene: Scene,
     x: Int,

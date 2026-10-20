@@ -13,9 +13,6 @@ class WeakReferenceMappingCache {
 
     @JvmField val referenceQueue = ReferenceQueue<Any>()
 
-    /**
-     * Remove
-     */
     fun discardUnreferenced() {
         while (true) {
             val currentElement = referenceQueue.poll() as WeakReferenceMapping? ?: return

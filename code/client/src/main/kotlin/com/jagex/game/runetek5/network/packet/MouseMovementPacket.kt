@@ -5,16 +5,8 @@ import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * Network packet for transmitting mouse movement and click data to the server.
- * Batches mouse events and sends them periodically.
- */
 class MouseMovementPacket : AbstractMousePacket() {
 
-    /**
-     * Gets the next mouse record to send
-     * @return The first mouse record in the queue, or null if empty
-     */
     fun getRecord(): MouseRecord? {
         return Client.MOUSE_MOVEMENTS.getFirst() as? MouseRecord
     }
@@ -28,7 +20,6 @@ class MouseMovementPacket : AbstractMousePacket() {
     }
 
     override fun writeConstantValue(packet: Packet, record: MouseRecord) {
-        // No constant values to write
     }
 
     override fun additionalPayloadLength(): Int = 0
@@ -38,7 +29,6 @@ class MouseMovementPacket : AbstractMousePacket() {
 
         val timeDelta = getServerSubmissionDelta(record, 32767)
 
-        // Clamp Y position to valid range
         var positionY = record.getY()
         if (positionY < 0) {
             positionY = 0
@@ -46,7 +36,6 @@ class MouseMovementPacket : AbstractMousePacket() {
             positionY = 65535
         }
 
-        // Clamp X position to valid range
         var positionX = record.getX()
         if (positionX < 0) {
             positionX = 0
@@ -54,10 +43,8 @@ class MouseMovementPacket : AbstractMousePacket() {
             positionX = 65535
         }
 
-        // Encode click type (0 = move, 1 = click)
         val clickType: Byte = if (record.getClickType() == 2) 1 else 0
 
-        // Create and send packet
         val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeIntLittle(positionX or (positionY shl 16))
         packet.buffer.writeShort(timeDelta or (clickType.toInt() shl 15))

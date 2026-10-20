@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.entity.pathingentity
 
 import com.jagex.game.runetek5.entity.EntityNode
 
-/**
- *
- * @author Brainpower - 01/05/2022
- *
- */
 class EntityOverhead : EntityNode() {
     @JvmField
     var pathingEntity: PathingEntity? = null

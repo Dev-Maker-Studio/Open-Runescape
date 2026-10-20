@@ -6,15 +6,6 @@ import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- *
- * @author Brainpower - 28/03/2022
- * Naming from OpenOSRS
- * Reference: https://www.rune-server.ee/runescape-development/rs-503-client-server/help/650307-742-music-midi-decoding.html
- * Reference: https://www.rune-server.ee/runescape-development/rs-503-client-server/snippets/311669-rs-music-file-structure-conversion.html
- * Reference: https://github.com/open-osrs/runelite
- *
- */
 class MusicTrack(inputPacket: Packet) : Node<MusicTrack>() {
 
     @JvmField
@@ -200,10 +191,6 @@ class MusicTrack(inputPacket: Packet) : Node<MusicTrack>() {
         var keyPressureAccum = 0
         var controllerValues = IntArray(128)
         controllerNumber = 0
-        // Opcode/status bytes live at the start of the buffer (read from offset 0 in the first
-        // pass); the conversion pass must re-read them from 0. This previously reused
-        // controllerIndex, left at controllerChangeCount, which corrupted the event stream and
-        // overran the output buffer.
         var opcodeIndex = 0
 
         var currentTrack = 0

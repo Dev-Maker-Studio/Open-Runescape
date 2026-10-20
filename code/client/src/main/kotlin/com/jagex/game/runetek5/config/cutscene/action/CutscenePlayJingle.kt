@@ -4,9 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.sound.player.area.SoundEffectPlayer
 
-/**
- * @author Steven - 23/09/2023
- */
 class CutscenePlayJingle(buffer: Packet) : CutsceneAction(buffer) {
 
     @JvmField

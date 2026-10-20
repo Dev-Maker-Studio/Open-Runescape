@@ -896,7 +896,6 @@ object WorldMap {
                         if (mapSpriteType.requiresUpscaling) {
                             var sizeX = locType.sizeX
                             var sizeY = locType.sizeY
-                            /** Rotate the sprite **/
                             if (locShapesAndRotations!![index].toInt() shr 6 and 0x1 == 1) {
                                 val tmpSizeX = sizeX
                                 sizeX = sizeY
@@ -972,7 +971,6 @@ object WorldMap {
         while (true) {
             while (buffer.currentPosition < buffer.buffer.size) {
                 if (buffer.readUByte() == 0) {
-                    // By tiles in map square
                     val mapSquareX = buffer.readUByte()
                     val mapSquareY = buffer.readUByte()
 
@@ -984,7 +982,6 @@ object WorldMap {
                         }
                     }
                 } else {
-                    // By chunks in map square
                     val mapSquareX = buffer.readUByte()
                     val mapSquareY = buffer.readUByte()
                     val chunkX = buffer.readUByte()

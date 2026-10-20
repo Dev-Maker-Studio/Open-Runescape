@@ -17,9 +17,6 @@ import com.jagex.game.runetek5.scene.RenderedEntityCache
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Represents an animated spot graphics effect in the game world.
- */
 class SpotAnimation(
     scene: Scene,
     @JvmField val gfxId: Int,

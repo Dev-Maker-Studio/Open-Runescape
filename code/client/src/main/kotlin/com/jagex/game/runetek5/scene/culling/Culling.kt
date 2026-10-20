@@ -6,40 +6,20 @@ import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.scene.tile.Tile
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Rename to Culling / SceneCulling?
- * @author Brainpower
- *
- */
 open class Culling(
     @JvmField val scene: Scene
 ) {
     companion object {
-        /** Set while a ModernGLToolkit is the active renderer; forces the software occluder off. */
         @JvmStatic var disabledForModern = false
 
         @JvmField
         var activeToolkit: AbstractToolkit? = null
 
-        /**
-         * Runtime switch for wall occlusion culling, flipped by `render wallcull`.
-         * See [hideWall] — isolating this answers whether the missing Canifis walls
-         * are being culled rather than mis-built, which byte-exact geometry parity
-         * with legacy has already ruled out as a construction problem.
-         */
         @JvmField
         var wallCullingEnabled: Boolean =
             System.getProperty("render.wallcull")?.equals("false", true) != true
     }
 
-    /**
-     * `-Drender.occlusion=false` disables the software occlusion system wholesale.
-     *
-     * Wider than wallCullingEnabled on purpose: the same depth buffer also gates
-     * isTileHidden/hideTile, which hide ordinary game objects. Walls AND bushes
-     * disappearing together in modern points at the shared occluder buffer rather
-     * than at anything wall-specific.
-     */
     private var statTick = 0
 
     @JvmField
@@ -68,10 +48,10 @@ open class Culling(
     var frusumCullingCursorPos: Int = 0
 
     @JvmField
-    var oneThirdViewportWidth: Int = -1 //FIXME: naming
+    var oneThirdViewportWidth: Int = -1
 
     @JvmField
-    var oneThirdViewportHeight: Int = -1 //FIXME: naming
+    var oneThirdViewportHeight: Int = -1
 
     @JvmField
     var depthBuffer: IntArray? = null
@@ -94,9 +74,6 @@ open class Culling(
     @JvmField
     val benchmarkCulling: Boolean = true
 
-    /**
-     * Always 512 (128 << upscaling)
-     */
     @JvmField
     val fullTileDimensionX: Int
 
@@ -141,15 +118,6 @@ open class Culling(
             }
         }
         cullingClustersCleared = false
-        // NOTE: this used to unconditionally re-enable culling, silently overriding
-        // -Drender.occlusion=false set at field init — which is why an earlier
-        // "occlusion disabled" experiment showed no change. Respect the property.
-        // The software occluder (wall-based occlusion buffer) is a legacy-renderer
-        // device: its tests are coarse enough to drop a whole loc that another loc
-        // barely overlaps, and the modern path resolves visibility on the GPU depth
-        // buffer anyway. It stays OFF whenever the modern toolkit is active
-        // (Culling.disabledForModern, set by ModernGLToolkit), unless
-        // -Drender.occlusion=true asks for it explicitly for a comparison.
         cullingEnabled = System.getProperty("render.occlusion")?.equals("false", true) != true &&
             !(disabledForModern && System.getProperty("render.occlusion")?.equals("true", true) != true)
         if (cullingEnabled) {
@@ -157,15 +125,6 @@ open class Culling(
         }
     }
 
-    /**
-     *
-     * @param displacement
-     * @param z
-     * @param x
-     * @param y
-     * @param cullY - 960 default (240 << scaling)
-     * @param cullXZ
-     */
     fun addWallCulling(displacement: Int, z: Int, x: Int, y: Int, cullY: Int, cullXZ: Int) {
         if (displacement != 8 && displacement != 16) {
             var tile = scene.tiles[z][x][y]
@@ -174,11 +133,9 @@ open class Culling(
                 scene.tiles[z][x][y] = tile
             }
             if (displacement == 1) {
-                // rotation % 1 == 0
                 tile.cullY = cullY.toShort()
                 tile.cullX = cullXZ.toShort()
             } else if (displacement == 2) {
-                // rotation % 1 == 1
                 tile.interactiveSideViewHeightOffset = cullY.toShort()
                 tile.cullZ = cullXZ.toShort()
             }
@@ -187,8 +144,6 @@ open class Culling(
                 removeInteractiveCullingClusters()
             }
         } else if (displacement == 8) {
-            // Wall placement on tiles	[   ][ / ]
-            //						  	[ / ][   ]
             val startX = x shl scene.tileUnits
             val endX = startX + scene.fullTileDimension
             val startY = y shl scene.tileUnits
@@ -201,8 +156,6 @@ open class Culling(
                 startY, endY, endY, startY
             )
         } else {
-            // Wall placement on tiles	[ \ ][   ]
-            //						  	[   ][ \ ]
             val startX = scene.fullTileDimension + (x shl scene.tileUnits)
             val endX = startX - scene.fullTileDimension
             val startY = y shl scene.tileUnits
@@ -223,8 +176,6 @@ open class Culling(
 
     fun processCulling(toolkit: AbstractToolkit, nextPlane: Int) {
         activeToolkit = toolkit
-        // A scene built before the toolkit switched (or with the property unset) must
-        // still honour the modern override.
         if (cullingEnabled && disabledForModern && System.getProperty("render.occlusion")?.equals("true", true) != true) {
             cullingEnabled = false
         }
@@ -278,10 +229,6 @@ open class Culling(
                 }
                 frustumCulling!!.state = 2
             }
-            // Occluder-buffer health. isTileHidden/hideWall/hideTile all bail out to
-            // "don't hide" when depthWriteCount < 102, so an underfilled buffer makes
-            // the scene render tiles legacy hides (roof/interior tiles showing while
-            // indoors). Compare this figure between toolkits.
             if (System.getProperty("render.cullstats") != null && (statTick++ % 120) == 0) {
                 System.err.println(
                     "[CullStat] depthWrites=${frustumCulling!!.depthWriteCount} " +
@@ -332,9 +279,6 @@ open class Culling(
         return true
     }
 
-    /**
-     * Checks if a tile is hidden (underlay & overlay not rendered)
-     */
     fun isTileHidden(plane: Int, x: Int, y: Int): Boolean {
         if (cullingEnabled && drawingScene) {
             if (frustumCulling!!.depthWriteCount < 102) {
@@ -420,11 +364,6 @@ open class Culling(
     }
 
     fun hideWall(wall: AbstractWall, z: Int, x: Int, y: Int): Boolean {
-        // `render wallcull` forces this off. hideWall is the only culling consumer
-        // that can hide every wall while leaving roofs, floors and stairs drawn —
-        // exactly the Canifis symptom — and it depends on the software occlusion
-        // buffer, which is fed through activeToolkit.calculateProjection and so can
-        // differ between the legacy and modern toolkits.
         if (!wallCullingEnabled) return false
         if (cullingEnabled && drawingScene) {
             if (frustumCulling!!.depthWriteCount < 102) {
@@ -470,16 +409,6 @@ open class Culling(
         return false
     }
 
-    /**
-     *
-     * @param minX - the lowest width coordinate
-     * @param minY - the lowest height coordinate
-     * @param minZ - the lowest length coordinate
-     * @param sizeX - the width
-     * @param sizeY - the height
-     * @param sizeZ - the length
-     * @return - culled
-     */
     fun boundaryCulled(minX: Int, minY: Int, minZ: Int, sizeX: Int, sizeY: Int, sizeZ: Int): Boolean {
         val maxX = sizeX + minX
         val maxY = sizeY + minY
@@ -521,7 +450,6 @@ open class Culling(
         }
     }
 
-    //max_x, min_y, max_z, max_x, min_y, min_z, max_x, max_y, min_z
     fun isCulled(xA: Int, yA: Int, zA: Int, xB: Int, yB: Int, zB: Int, xC: Int, yC: Int, zC: Int): Boolean {
         if (!projectedPositionHidden(xA, yA, zA)) {
             return false
@@ -547,9 +475,6 @@ open class Culling(
     fun processCullingCluster(toolkit: AbstractToolkit, cullingCluster: CullingCluster, plane: Int) {
         activeToolkit = toolkit
 
-        /**
-         * Check if rendering the tile should be forced
-         */
         if (visibleBelowDrawheight != null && cullingCluster.plane >= plane) {
             for (index in visibleBelowDrawheight!!.indices) {
                 if (visibleBelowDrawheight!![index] != -1000000 &&
@@ -574,7 +499,7 @@ open class Culling(
                             || cullingCluster.tileCullingsZ[2] >= visibleAboveY!![index]
                             || cullingCluster.tileCullingsZ[3] >= visibleAboveY!![index])
                 ) {
-                    return // Ensure tile is rendered
+                    return
                 }
             }
         }
@@ -728,7 +653,7 @@ open class Culling(
     }
 
     fun removeCullingCluster(displacement: Int, z: Int, x: Int, y: Int) {
-        if (displacement != 8 && displacement != 16) { // interactive
+        if (displacement != 8 && displacement != 16) {
             val tile = scene.tiles[z][x][y]
             if (tile != null) {
                 if (displacement == 1) {
@@ -738,7 +663,7 @@ open class Culling(
                 }
             }
             removeInteractiveCullingClusters()
-        } else { // non interactive
+        } else {
             for (clusterIndex in 0 until wallCullingCursorPosition) {
                 val wallCluster = diagonalWallCulling[clusterIndex]!!
                 if (wallCluster.type.toInt() == displacement && z == wallCluster.plane.toInt() && (x == wallCluster.startX.toInt() && y == wallCluster.startY.toInt() || x == wallCluster.endX.toInt() && y == wallCluster.endY.toInt())) {

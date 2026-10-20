@@ -37,7 +37,6 @@ abstract class AbstractInteractiveEntity(
     }
 
     open fun calculatePosition() {
-        // NOOP
     }
 
     override fun getActiveLights(cycledLightNodes: Array<PointLight?>): Int {
@@ -130,17 +129,10 @@ abstract class AbstractInteractiveEntity(
         return lightCount
     }
 
-
-    /**
-     * [J] Tile the entity is located on is hidden
-     */
     override fun isSoftHidden(toolkit: AbstractToolkit): Boolean {
         return scene!!.culling.hideTile(collisionPlane.toInt(), startX.toInt(), endX.toInt(), startZ.toInt(), endZ.toInt(), getAxisAlignedBoundingBox(toolkit))
     }
 
-    /**
-     * [J] Is the entity in view distance
-     */
     override fun canRender(): Boolean {
         for (x in startX.toInt()..endX.toInt()) {
             for (y in startZ.toInt()..endZ.toInt()) {

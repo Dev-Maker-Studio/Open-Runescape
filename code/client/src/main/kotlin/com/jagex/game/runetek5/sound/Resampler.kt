@@ -1,12 +1,5 @@
 package com.jagex.game.runetek5.sound
 
-/**
- * https://www.rune-server.ee/runescape-development/rs2-client/downloads/673441-167-osrs-sound-effects-dumped-wav-format-2.html
- * @author CrazyPanda
- *
- * @author Brainpower
- *
- */
 class Resampler(inputSampleRate: Int, outputSampleRate: Int) {
 
     @JvmField var inputSampleRate: Int = 0

@@ -6,8 +6,8 @@ class BoundingBoxPolygon : EntityNode() {
     @JvmField var left: Int = 0
     @JvmField var bottom: Int = 0
     @JvmField var right: Int = 0
-    @JvmField var size: Int = 0 // TODO: better name?
-    @JvmField var positionCalculated: Boolean = false //TODO: is this correct?
+    @JvmField var size: Int = 0
+    @JvmField var positionCalculated: Boolean = false
 
     fun hovered(mouseX: Int, mouseY: Int): Boolean {
         if (!this.positionCalculated) {

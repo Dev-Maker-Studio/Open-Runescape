@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.config.midi
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * Sound effect synthesizer.
- *
- * @author Brainpower - 05/02/2023
- */
 class SoundEffect(buffer: Packet) {
 
     @JvmField val instruments: Array<Instrument?> = arrayOfNulls(10)

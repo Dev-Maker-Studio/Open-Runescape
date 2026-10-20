@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.scene.culling
 
 import com.jagex.game.runetek5.scene.Scene
 
-/**
- * Represents a culling cluster for scene rendering optimization.
- */
 class CullingCluster(
     scene: Scene,
     type: Int,
@@ -25,9 +22,9 @@ class CullingCluster(
 
     @JvmField val type: Byte = type.toByte()
     @JvmField val plane: Byte = plane.toByte()
-    @JvmField val tileCullingsX: IntArray // world_x
+    @JvmField val tileCullingsX: IntArray
     @JvmField val drawHeights: IntArray
-    @JvmField val tileCullingsZ: IntArray // world_y
+    @JvmField val tileCullingsZ: IntArray
     @JvmField val startX: Short
     @JvmField val endX: Short
     @JvmField val startY: Short

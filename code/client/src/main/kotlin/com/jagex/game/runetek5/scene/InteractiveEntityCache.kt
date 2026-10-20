@@ -2,44 +2,16 @@ package com.jagex.game.runetek5.scene
 
 import com.jagex.game.runetek5.entity.RenderedEntity
 
-/**
- *
- * @author Steven - 20/09/2023
- *
- */
 class InteractiveEntityCache {
-    /**
-     * Entities drawn this frame that the mouse can interact with, far to near.
-     *
-     * The order matters (it is the order the mini-menu lists overlapping entities),
-     * but it is only READ once the frame's draws are done. It used to be maintained by
-     * inserting every entity into a sorted LinkedList — a linear scan per insertion,
-     * quadratic per frame, several milliseconds at a few thousand drawn entities.
-     * Now additions append and the list is sorted once, lazily, when first read.
-     */
     private val backing = ArrayList<RenderedEntity>(512)
     private var sorted = true
 
-    /**
-     * Always false
-     */
     @JvmField val removeDuplicates: Boolean = false
 
-    /**
-     * Always 0
-     */
     @JvmField var hoverOffsetX: Int = 0
 
-    /**
-     * Always 0
-     */
     @JvmField var hoverOffsetY: Int = 0
 
-    /**
-     * Far-to-near: floorDepth descending, and among equal depths the entity added LAST
-     * comes first — exactly what the old "insert before the first entry with a depth
-     * <= mine" produced.
-     */
     val entities: List<RenderedEntity>
         get() {
             if (!sorted) {

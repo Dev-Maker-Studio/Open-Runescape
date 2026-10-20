@@ -15,6 +15,5 @@ class SafeModeFrameBuffer(
     }
 
     override fun deallocate() {
-        // NOOP
     }
 }

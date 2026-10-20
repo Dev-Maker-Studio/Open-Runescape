@@ -3,15 +3,6 @@ package com.jagex.game.runetek5.cache.node.lru
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Queue
 
-/**
- * A cache that evicts the least recently used element when at capacity.
- *
- * [NXT]
- * jag::LRUCache<jag::audio::SoundResource>::~LRUCache() [clone]
- * jag::LRUCache<jag::game::AnimationWrapper>::~LRUCache() [clone]
- * jag::LRUCache<jag::game::ClientScript>::Put(jag::shared_ptr<jag::game::ClientScript> const&,uint,ulong) [clone]
- * ...
- */
 @Suppress("UNCHECKED_CAST")
 class LRUCache {
     @JvmField
@@ -39,16 +30,10 @@ class LRUCache {
 
     constructor(capacity: Int) : this(capacity, capacity)
 
-    /**
-     * [J]
-     */
     fun put(obj: Any?, uid: Long) {
         put(obj, uid, 1)
     }
 
-    /**
-     * [J]
-     */
     fun put(obj: Any?, uid: Long, capacityTaken: Int) {
         if (capacityTaken > capacity) {
             throw IllegalStateException()
@@ -67,9 +52,6 @@ class LRUCache {
         replacingNode.indexReference = 0L
     }
 
-    /**
-     * [J]
-     */
     fun clean(max: Int) {
         var node = queue.getNext() as? AbstractLRUNode
         while (node != null) {

@@ -511,12 +511,6 @@ class Interface(
             }
         }
 
-        /**
-         * Moves [targetComponent] to the END of its sibling array.
-         *
-         * Siblings are drawn in array order, so the last element is painted
-         * last and therefore appears in front of everything else.
-         */
         @JvmStatic
         fun moveComponentToFront(inter: Interface, targetComponent: Component?) {
             if (targetComponent != null) {
@@ -561,12 +555,6 @@ class Interface(
             }
         }
 
-        /**
-         * Moves [targetComponent] to index 0 of its sibling array.
-         *
-         * Siblings are drawn in array order, so index 0 is painted first and
-         * therefore appears behind everything else.
-         */
         @JvmStatic
         fun moveComponentToBack(inter: Interface, targetComponent: Component?) {
             if (targetComponent != null) {

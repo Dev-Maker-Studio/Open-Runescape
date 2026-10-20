@@ -113,11 +113,6 @@ class MapRegion(var asyncMaploading: Boolean) {
 
     @JvmField var environmentManager: EnvironmentManager? = null
 
-    /**
-     * Loc ambient sounds created during an async background build, buffered off-thread
-     * (see AmbientSound.DEFERRED_LOC_SOUNDS) and drained into the live sound list by
-     * finalizeAsyncRegionSwap on the game thread.
-     */
     @JvmField var pendingAmbientSounds: NodeCollection? = null
     var viewRangeStart: Int = 0
     var viewRangeEnd: Int = 0
@@ -128,10 +123,6 @@ class MapRegion(var asyncMaploading: Boolean) {
     var chunkBitpackedPosition: Array<Array<IntArray?>?> = arrayOfNulls(4)
     var drawPriority: Array<IntArray> = emptyArray()
 
-    /**
-     * Amount of entities on one tile
-     * sharing the highest draw priority
-     */
     var drawPrioritySharedby: Array<IntArray> = emptyArray()
     var tileSettingsBits: SettingsBits = SettingsBits(0, 0)
 
@@ -225,7 +216,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         performUpdate(mapBaseX, mapBaseY, newGamestate, false)
     }
-
 
     fun initializeRegion(instream: Bit?) {
         val stream = instream!!
@@ -586,7 +576,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         this.currentLoadingStage = RegionLoadingStage.PREPARE_DISPLAY
         if (!this.asyncMaploading) {
-            SoundEffectPlayer.updatePlayers() // instanced in 910
+            SoundEffectPlayer.updatePlayers()
         }
         if (!this.asyncMaploading) {
             for (index in 0..2047) {
@@ -605,14 +595,9 @@ class MapRegion(var asyncMaploading: Boolean) {
         if (!this.asyncMaploading) {
             TypeLists.resetCachedData(true)
         }
-        // Force loc-model caches to rebuild on every region build to work around stale
-        // cached loc models going empty after a scene teardown. Safe on both paths: the
-        // async build's ObjectTypeList is private to the loader until the finalize swap,
-        // so the render thread never reads it while this reset runs. Only the shared
-        // TypeLists/renderer caches stay deferred to finalizeAsyncRegionSwap.
         this.loctypeList!!.resetAll()
         if (!this.asyncMaploading) {
-            StaticMethods.resetAllVorbisStreams() // not in 910
+            StaticMethods.resetAllVorbisStreams()
         }
         var hasUnderwaterMap = false
         if (PreferenceManager.preferences!!.water!!.highDetail()) {
@@ -627,12 +612,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         if (Renderers.activeToolkit!!.extendBuildArea()) {
             buildAreaChunks++
         }
-        // The legacy visible-tile radius (65 with the original build area) was tuned to
-        // sit past the stock fog start (~34 tiles), so the terrain draw limit was never
-        // visible. With FOG_DISTANCE_MULTIPLIER pushing visibility to ~88 tiles the edge
-        // shows as a hard terrain cutoff with locs floating beyond it. Clamp the radius
-        // up to the full scene dimension so every loaded tile is inside the visibility
-        // window from any camera position; the far plane and fog bound the rest.
         val fullSceneRadius = maxOf(this.sceneSizeX, this.sceneSizeY)
         if (buildAreaChunks < fullSceneRadius) {
             buildAreaChunks = fullSceneRadius
@@ -697,9 +676,6 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             decodeLocMapsClient(this.surfaceSceneGraph!!, this.surfaceLocBuffer)
             if (this.npcSpawnBuffer != null) {
-                // NPC spawn data only exists on the animated-login-screen path, which
-                // always loads synchronously — decodeNpcSpawns mutates shared NPC state
-                // and must never run on the async loader thread.
                 check(!this.asyncMaploading || this.npcSpawnBuffer!!.all { it == null })
                 decodeNpcSpawns()
             }
@@ -743,9 +719,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         this.scene!!.resetSurfaceTiles()
         if (this.asyncMaploading) {
-            // CPU build complete. The game thread performs the GL uploads, cache resets,
-            // region swap and load completion in finalizeAsyncRegionSwap() once the
-            // loader thread parks in AsyncMapLoader.State.READY.
             return true
         }
         SoundEffectPlayer.updatePlayers()
@@ -755,12 +728,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         return true
     }
 
-    /**
-     * Finalizes an asynchronously built region on the game thread: uploads the ground
-     * geometry to the GPU, resets the caches backing the outgoing region, swaps this
-     * region in as the live one and completes the load. Runs while the loader thread is
-     * parked in AsyncMapLoader.State.READY, so this region is exclusively owned here.
-     */
     fun finalizeAsyncRegionSwap() {
         this.surfaceSceneGraph!!.finalizeUnderlayGl()
         if (this.underwaterMap != null) {
@@ -782,9 +749,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         TypeLists.resetCachedData(true)
         val outgoingRegion = Resource.mapRegion!!
-        // Reset the outgoing region's loc-model caches, not this region's: the new scene
-        // references models cached during the background build, while the outgoing list
-        // only backs the scene being torn down. It is handed back to the loader below.
         outgoingRegion.getLoctypeList().resetAll()
         if (this.environmentManager!!.activeToolkit !== Renderers.activeToolkit) {
             resetAtmosphere()
@@ -801,8 +765,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         outgoingRegion.setLoadingRegion()
         updateEntities(GameState.LOADING_PLEASE_WAIT)
         resetNonCutsceneEntities()
-        // updateEntities unlinked the outgoing region's loc ambient sounds; register the
-        // ones buffered during the background build now that it is safe on this thread.
         val pendingSounds = this.pendingAmbientSounds
         if (pendingSounds != null) {
             this.pendingAmbientSounds = null
@@ -818,11 +780,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         completeRegionLoad()
     }
 
-    /**
-     * Shared tail of a region load: clears stale ground items, re-adds hint trails,
-     * refreshes roof/loc state, prefetches neighbouring regions and confirms the load to
-     * the server. Runs on the game thread in both the synchronous and async paths.
-     */
     private fun completeRegionLoad() {
         for (plane in 0..3) {
             for (sceneX in 0..<this.sceneSizeX) {
@@ -931,8 +888,6 @@ class MapRegion(var asyncMaploading: Boolean) {
     val settingsBits: SettingsBits
         get() = this.tileSettingsBits!!
 
-
-
     fun setActiveSettingsBits(settingsBits: Array<Array<ByteArray>>?) {
         this.bits = settingsBits
     }
@@ -961,15 +916,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         this.environmentManager = EnvironmentManager(Renderers.activeToolkit!!, this.sceneSizeX shr 3, this.sceneSizeY shr 3)
     }
 
-    /**
-     * In 317 you'll see the view range is 50 - 3500
-     * this matches with what's calculated here, example: 104 * 34.46 = 3,583
-     * since high revisions don't downscale models but move the camera further away
-     * (proper model precision) upscale view range too to match this.
-     * start: 50 in 317 --> << 2 --> 200
-     * end: 3500 in 317 --> << 2 --> 14000
-     * 
-     */
     fun calculateViewRange() {
         this.viewRangeStart = 200
         this.viewRangeEnd = (34.46 * this.sceneSizeX).toInt()
@@ -1374,7 +1320,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         return if (this.surfaceSceneGraph != null && this.surfaceSceneGraph!!.lighting != null && this.surfaceSceneGraph!!.lighting!![z] != null) this.surfaceSceneGraph!!.lighting!![z] else null
     }
 
-
     fun getStaticElements(): StaticElements {
         return this.staticElements ?: NO_STATIC_ELEMENTS
     }
@@ -1400,7 +1345,6 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.viewRangeEnd = mapRegion.viewRangeEnd
             this.worldMapType = mapRegion.worldMapType
             this.staticElements = mapRegion.staticElements
-            // Read-only build inputs — safe to share with the live region.
             this.regionIds = mapRegion.regionIds
             this.surfaceMapArchives = mapRegion.surfaceMapArchives
             this.surfaceLocArchives = mapRegion.surfaceLocArchives
@@ -1418,11 +1362,6 @@ class MapRegion(var asyncMaploading: Boolean) {
                     mapRegion.chunkBitpackedPosition[plane]!![x]!!.clone()
                 }
             }
-            // Region-owned mutable structures must NOT be shared by reference: the
-            // outgoing region is clear()ed at the next finalize swap, which would wipe
-            // the live region's collision maps and tile flags through the alias, and
-            // every later build would mutate them mid-gameplay. Allocate fresh ones
-            // (mirrors setMapSize); the rebuild repopulates them.
             for (heightLevel in 0..3) {
                 this.collisionMaps[heightLevel] = CollisionMap.createClipMap(this.sceneSizeX, this.sceneSizeY)
             }
@@ -1456,17 +1395,11 @@ class MapRegion(var asyncMaploading: Boolean) {
     companion object {
         private val NO_STATIC_ELEMENTS = StaticElements(0)
 
-        /**
-         * The color behind the scene / the default background pixel color
-         */
         val BACKGROUND_COLOR: Int = 0xffffff.inv()
 
         var requiresClippingReset: Boolean = false
         var requiresDisplayResize: Boolean = false
 
-        /**
-         * Draws clipped tiles as pink on the minimap
-         */
         var visualizeClippedTilesOnMinimap: Boolean = false
         @JvmField
         val staticElementsAwaitingDrawing: NodeCollection = NodeCollection()
@@ -1833,8 +1766,6 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
             }
         }
-
-        // Something with roofs? - TODO: fix the horrible naming in this
 
         fun calculateVisibilityAdjustments(regionTiles: Array<Array<Array<Tile>?>?>?, viewIndex: Int, baseX: Int, baseY: Int, hideRoofs: Boolean): Boolean {
             val settingBits = Resource.mapRegion!!.bits

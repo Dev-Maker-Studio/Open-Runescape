@@ -5,23 +5,12 @@ import com.jagex.game.runetek5.config.hitbar.HitbarType
 import com.jagex.game.runetek5.entity.EntityNode
 import com.jagex.game.runetek5.entity.EntityNodeList
 
-/**
- * Manages hitbar display for entities with timed updates.
- *
- * @author Brainpower - 01/05/2022
- */
 class EntityHitbar(
     @JvmField val hitbarType: HitbarType
 ) : EntityNode() {
 
     @JvmField val entityList = EntityNodeList<EntityHitbarDisplayDetails>()
 
-    /**
-     * Retrieves the current hitbar display details for the given client cycle.
-     *
-     * @param clientCycle The current client cycle
-     * @return The hitbar display details, or null if none are active
-     */
     fun getActiveDisplay(clientCycle: Int): EntityHitbarDisplayDetails? {
         var details = entityList.getFirst()
         if (details != null && details.discardAtCycle <= clientCycle) {
@@ -41,14 +30,6 @@ class EntityHitbar(
         return null
     }
 
-    /**
-     * Updates or adds a hitbar display at the specified cycle.
-     *
-     * @param discardCycle The cycle at which this hitbar update occurs
-     * @param fromPercentage The starting percentage
-     * @param toPercentage The ending percentage
-     * @param lifetimeCycles The number of cycles this hitbar lasts
-     */
     fun updateHitbar(discardCycle: Int, fromPercentage: Int, toPercentage: Int, lifetimeCycles: Int) {
         var adjustedHitbar: EntityHitbarDisplayDetails? = null
         var hitbarCount = 0
@@ -79,11 +60,6 @@ class EntityHitbar(
         }
     }
 
-    /**
-     * Checks if the hitbar list is empty.
-     *
-     * @return True if there are no active hitbars
-     */
     fun isEmpty(): Boolean {
         return entityList.isEmpty()
     }

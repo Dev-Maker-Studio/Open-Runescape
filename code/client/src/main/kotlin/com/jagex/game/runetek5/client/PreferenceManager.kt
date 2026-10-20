@@ -48,7 +48,6 @@ object PreferenceManager {
         try {
             fileSystem?.close()
         } catch (exception: Exception) {
-            // NOOP
         }
 
         return prefs
@@ -99,12 +98,11 @@ object PreferenceManager {
         try {
             preferenceFile?.close()
         } catch (exception: Exception) {
-            // NOOP
         }
     }
 
     @JvmStatic
-    fun setHardwarePerformance(renderMode: Int, profilingPerformance: Int): Int {
+    fun setHardwarePerformance(profilingPerformance: Int): Int {
         val mode = when {
             profilingPerformance > 20077 -> {
                 loadHighDetailPreferences()
@@ -124,12 +122,7 @@ object PreferenceManager {
             }
         }
 
-        if (preferences!!.activeToolkit!!.getValue() != renderMode) {
-            preferences!!.setValue(preferences!!.toolkit!!, renderMode)
-            Client.loadAssets(renderMode, false)
-        } else {
-            preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
-        }
+        preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
 
         savePreferences()
         return mode
@@ -161,12 +154,7 @@ object PreferenceManager {
             loadMinDetailPreferences()
             1
         }
-        if (preferences!!.activeToolkit!!.getValue() != 0) {
-            preferences!!.setValue(preferences!!.toolkit!!, 0)
-            Client.loadAssets(0, false)
-        } else {
-            preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
-        }
+        preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
         savePreferences()
         return graphicsSettings
     }

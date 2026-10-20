@@ -197,7 +197,6 @@ class StationaryWall(
     }
 
     override fun particleCycle(toolkit: AbstractToolkit) {
-        // NOOP
     }
 
     override fun hasTileShadow(): Boolean {

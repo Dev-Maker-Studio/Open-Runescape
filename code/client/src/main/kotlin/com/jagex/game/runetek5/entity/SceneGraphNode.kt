@@ -6,17 +6,6 @@ import com.jagex.game.runetek5.math.Quaternion
 import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.movement.CoordinateSpace
 
-/**
- * Scene graph node for hierarchical position/rotation management.
- *
- * Based on native jag::graphics::GraphNode class.
- *
- * @see jag::graphics::GraphNode::AddChild
- * @see jag::graphics::GraphNode::CalculateBounds
- * @see jag::graphics::GraphNode::Detach
- * @see jag::graphics::GraphNode::GetWorldTransformationMatrixAligned
- * @see jag::graphics::GraphNode::GetWorldTranslation
- */
 open class SceneGraphNode {
 
     @JvmField var calculateAbsolutePosition: Boolean = true
@@ -27,10 +16,6 @@ open class SceneGraphNode {
     @JvmField var nextSibling: SceneGraphNode? = null
     @JvmField val basePosition: CoordinateSpace = CoordinateSpace()
 
-    /**
-     * Absolute position (upscaled by << 2)
-     * Private backing field - use getAbsolutePosition() for public access
-     */
     private val _absolutePosition: CoordinateSpace = CoordinateSpace()
     private val _negatedPosition: CoordinateSpace = CoordinateSpace()
     private val _projectionMatrix: Matrix43
@@ -49,9 +34,6 @@ open class SceneGraphNode {
         return basePosition
     }
 
-    /**
-     * Gets the absolute position (upscaled by << 2)
-     */
     open fun getAbsolutePosition(): CoordinateSpace {
         if (calculateAbsolutePosition) {
             calculateAbsolutePosition = false

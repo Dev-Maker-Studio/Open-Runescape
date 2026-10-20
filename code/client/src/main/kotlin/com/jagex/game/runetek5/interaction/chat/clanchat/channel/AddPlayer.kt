@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.interaction.chat.clanchat.channel
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- *
- * @author Brainpower - 14/01/2023
- *
- */
 class AddPlayer(
     @JvmField val clanChannelDelta: ClanChannelDelta
 ) : AbstractClanChannelUpdate() {

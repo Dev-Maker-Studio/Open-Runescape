@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.network.packet.TcpPacket
 import com.jagex.game.runetek5.tools.Isaac
 import java.io.IOException
 
-/**
- *
- * @author Brainpower - 02/02/2023
- *
- */
 class BufferedConnectionContext {
 
     @JvmField var isaac: Isaac? = null

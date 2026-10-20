@@ -102,9 +102,6 @@ abstract class NativeSprite : Sprite {
 
     abstract fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int)
 
-    /**
-     * Draws a black opaque circle
-     */
     open fun drawCircle(x: Int, y: Int, width: Int, height: Int) {
         drawColoredCircle(x, y, width, height, 1, 0, 1)
     }
@@ -216,7 +213,6 @@ abstract class NativeSprite : Sprite {
                     }
                     throw RuntimeException("")
                 } catch (ignored: InterruptedException) {
-                    // NOOP
                 }
             }
         }

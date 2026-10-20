@@ -1,12 +1,8 @@
 package com.jagex.game.runetek5.config.rsinterface.cs2
 
-/**
- * [J]
- */
 enum class ClientScriptOpCode(
     @JvmField val opcode: Int,
     @JvmField val hasIntConstant: Boolean = false,
-    /** Which ops object handles this opcode; see CS2Dispatch. */
     @JvmField val familyId: Int = 0,
 ) {
     PUSH_CONSTANT_INT(79, true, 0),
@@ -151,11 +147,11 @@ enum class ClientScriptOpCode(
     CC_SETOPKEY(895, familyId = 2),
     CC_SETOPTKEY(67, familyId = 2),
     CC_SETMOUSEOVERCURSOR(219, familyId = 2),
-    CC_SETONCLICK(813, familyId = 2),  // official name (CS2InstructionType.java:160); was CC_HOOK_MOUSE_PRESS
+    CC_SETONCLICK(813, familyId = 2),
     CC_SETONHOLD(158, familyId = 2),
     CC_SETONRELEASE(374, familyId = 2),
-    CC_SETONMOUSEOVER(1, familyId = 2),  // active-component form of IF_SETONMOUSEOVER
-    CC_SETONMOUSELEAVE(665, familyId = 2),  // active-component form of IF_SETONMOUSELEAVE
+    CC_SETONMOUSEOVER(1, familyId = 2),
+    CC_SETONMOUSELEAVE(665, familyId = 2),
     CC_SETONDRAG(705, familyId = 2),
     CC_SETONTARGETLEAVE(892, familyId = 2),
     CC_SETONVARTRANSMIT(697, familyId = 2),
@@ -355,7 +351,7 @@ enum class ClientScriptOpCode(
     IF_GETFONTMETRICS(543, familyId = 5),
     IF_GETINVOBJECT(808, familyId = 5),
     IF_GETINVCOUNT(373, familyId = 5),
-    IF_HASSUB(888, familyId = 5),  // any sub open in the slot; IF_HASSUBMODAL matches a specific sub id
+    IF_HASSUB(888, familyId = 5),
     IF_GETNEXTSUBID(1000, familyId = 5),
     IF_HASSUBMODAL(448, familyId = 5),
     IF_HASSUBOVERLAY(331, familyId = 5),
@@ -663,8 +659,8 @@ enum class ClientScriptOpCode(
     CHATCAT_FINDPHRASEBYSHORTCUT(188, familyId = 12),
     CHATPHRASE_GETDYNAMICCOMMANDCOUNT(795, familyId = 12),
     CHATPHRASE_GETDYNAMICCOMMAND(324, familyId = 12),
-    ACTIVECHATPHRASE_SETDYNAMICINT(109, familyId = 12), // set something in qc
-    ACTIVECHATPHRASE_SETDYNAMICOBJ(217, familyId = 12),  // same handler as ACTIVECHATPHRASE_SETDYNAMICINT
+    ACTIVECHATPHRASE_SETDYNAMICINT(109, familyId = 12),
+    ACTIVECHATPHRASE_SETDYNAMICOBJ(217, familyId = 12),
     CHATPHRASE_GETDYNAMICCOMMANDPARAM_ENUM(349, familyId = 12),
     CHATPHRASE_FIND(711, familyId = 12),
     CHATPHRASE_FINDNEXT(830, familyId = 12),
@@ -756,7 +752,7 @@ enum class ClientScriptOpCode(
     CAM_SETFOLLOWHEIGHT(155, familyId = 12),
     CAM_GETFOLLOWHEIGHT(931, familyId = 12),
     CAM_FOLLOWCOORD(722, familyId = 12),
-    CAM_SMOOTHRESET(396, familyId = 12), // reset cam shake?
+    CAM_SMOOTHRESET(396, familyId = 12),
     COORD_CLAMPTOSCENE_ORDEFAULT(365, familyId = 12),
     CAM2_ISENABLED(151, familyId = 13),
     LOGIN_REQUEST(831, familyId = 13),
@@ -885,7 +881,7 @@ enum class ClientScriptOpCode(
     IF_DEBUG_GETCOMCOUNT(136, familyId = 14),
     IF_DEBUG_GETCOMNAME(40, familyId = 14),
     IF_DEBUG_GETSERVERTRIGGERS(307, familyId = 14),
-    NOOP(429, familyId = 14),  // empty in the stock interpreter too
+    NOOP(429, familyId = 14),
     IF_DEBUG_BUTTON1(305, familyId = 14),
     IF_DEBUG_BUTTON2(653, familyId = 14),
     IF_DEBUG_BUTTON3(561, familyId = 14),

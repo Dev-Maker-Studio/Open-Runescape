@@ -653,7 +653,7 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun profileToolkit(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = DisplayModeDetails.getProfilingPerformance(PreferenceManager.preferences!!.activeToolkit!!.getValue(), 200)
+        executor.intStack[++executor.intStackPtr - 1] = DisplayModeDetails.getProfilingPerformance(200)
     }
 
     @JvmStatic
@@ -1037,7 +1037,7 @@ object CameraLoginPrefOps {
     @JvmStatic
     fun setAntiAliasingPreview(executor: CS2Executor) {
         PreferenceManager.preferences!!.antiAliasingPreview!!.setValue(executor.intStack[--executor.intStackPtr])
-        Client.loadAssets(PreferenceManager.preferences!!.activeToolkit!!.getValue(), false)
+        Client.loadAssets(false)
         PreferenceManager.savePreferences()
     }
 
@@ -1050,11 +1050,7 @@ object CameraLoginPrefOps {
 
     @JvmStatic
     fun detailToolkit(executor: CS2Executor) {
-        var toolkitId = executor.intStack[--executor.intStackPtr]
-        if (toolkitId !in ToolkitPreference.AVAILABLE) {
-            toolkitId = ToolkitPreference.SAFE_MODE
-        }
-        Client.loadAssets(toolkitId, false)
+        executor.intStackPtr--
     }
 
     @JvmStatic

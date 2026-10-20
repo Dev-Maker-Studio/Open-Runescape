@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.graphics.sprite.Sprite
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- *
- * @author Brainpower - 21/03/2023
- *
- */
 abstract class AbstractFontRenderer(
     open val toolkit: AbstractToolkit,
     open val fontMetrics: FontMetrics
@@ -158,7 +153,6 @@ abstract class AbstractFontRenderer(
                 calibrate(colorArgb, originalShadowColor)
             }
         } catch (exception: Exception) {
-            // NOOP
         }
     }
 
@@ -329,7 +323,6 @@ abstract class AbstractFontRenderer(
                                     currentX += sprites[spriteIndex].getSpriteWidth()
                                     prevChar = -1
                                 } catch (exception: Exception) {
-                                    // NOOP
                                 }
                             } else {
                                 updateTextEffects(effect)
@@ -504,7 +497,6 @@ abstract class AbstractFontRenderer(
         return extraWidth
     }
 
-    // Only vertical
     fun renderCenteredWave(text: String?, x: Int, y: Int, color: Int, waveSeed: Int) {
         if (text != null) {
             calibrate(color, 0xffffff.inv())
@@ -517,7 +509,6 @@ abstract class AbstractFontRenderer(
         }
     }
 
-    // Horizontal & vertical
     fun renderCenteredWave2(text: String?, x: Int, y: Int, color: Int, waveSeed: Int) {
         if (text != null) {
             calibrate(color, 0xffffff.inv())

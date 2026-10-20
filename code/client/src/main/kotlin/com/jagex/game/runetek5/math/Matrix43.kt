@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.movement.CoordinateSpace
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * [J]
- * @author Steven
- *
- */
 class Matrix43 {
 
     var xB: Float = 0.0f
@@ -176,7 +171,6 @@ class Matrix43 {
         }
     }
 
-    // rotate around axis
     fun rotateMatrix(x: Float, y: Float, z: Float, angle: Float) {
         val cos = cos(angle.toDouble()).toFloat()
         val sin = sin(angle.toDouble()).toFloat()
@@ -200,19 +194,10 @@ class Matrix43 {
         this.zD += offsetZ
     }
 
-    /**
-     * Rotates the matrix around the given axis by the given angle.
-     *
-     * @param axisX x-component of the axis vector
-     * @param axisY y-component of the axis vector
-     * @param axisZ z-component of the axis vector
-     * @param theta angle to rotate by
-     */
     fun rotate(axisX: Float, axisY: Float, axisZ: Float, theta: Float) {
         val cos = cos(theta.toDouble()).toFloat()
         val sin = sin(theta.toDouble()).toFloat()
 
-        // Calculate the rotation matrix elements
         val m00 = cos + axisX * axisX * (1.0f - cos)
         val m01 = axisZ * sin + axisY * axisX * (1.0f - cos)
         val m02 = -axisY * sin + axisZ * axisX * (1.0f - cos)
@@ -223,7 +208,6 @@ class Matrix43 {
         val m21 = -axisX * sin + axisY * axisZ * (1.0f - cos)
         val m22 = cos + axisZ * axisZ * (1.0f - cos)
 
-        // Apply the rotation matrix to the matrix
         val newXA = this.xA * m00 + this.yA * m10 + this.zA * m20
         val newYA = this.xA * m01 + this.yA * m11 + this.zA * m21
         val newZA = this.xA * m02 + this.yA * m12 + this.zA * m22

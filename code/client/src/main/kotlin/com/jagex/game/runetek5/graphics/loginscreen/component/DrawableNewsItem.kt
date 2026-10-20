@@ -8,9 +8,6 @@ import com.jagex.game.runetek5.graphics.loginscreen.DrawableItem
 import com.jagex.game.runetek5.network.newsitem.NewsItemFetcher
 import com.jagex.game.runetek5.rendering.Renderers
 
-/**
- * Drawable news item component for the login screen.
- */
 class DrawableNewsItem(
     @JvmField val newsItemFetcher: NewsItemFetcher,
     @JvmField val outlinedNewsItem: OutlinedNewsItem
@@ -49,15 +46,6 @@ class DrawableNewsItem(
         drawText(MiniMenu.minimenuHeader!!, newsitem.line3, x, y)
     }
 
-    /**
-     * Draws text using the specified renderer.
-     *
-     * @param renderer The font renderer
-     * @param text The text to draw
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @return The number of lines drawn
-     */
     fun drawText(renderer: AbstractFontRenderer, text: String, x: Int, y: Int): Int {
         return renderer.drawText(
             text,
@@ -72,6 +60,5 @@ class DrawableNewsItem(
     }
 
     override fun initialize() {
-        // NOOP
     }
 }

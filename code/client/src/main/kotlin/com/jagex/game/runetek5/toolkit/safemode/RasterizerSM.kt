@@ -3,10 +3,6 @@ package com.jagex.game.runetek5.toolkit.safemode
 import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 import com.jagex.game.runetek5.utils.ColorUtil
 
-/**
- * Only used for safemode
- * @author Brainpower
- */
 class RasterizerSM(
     @JvmField val safemodeToolkit: SafeModeToolkit,
     @JvmField val threadResource: ThreadResourceSM
@@ -18,7 +14,6 @@ class RasterizerSM(
     @JvmField var clipHeight: Int = 0
     @JvmField var offsetY: Float = 0f
 
-    /** Draws the lines around the characters, triangles - flawed code though */
     @JvmField var wireframeMode: Boolean = false
     @JvmField var fogColour: Int = 0
     @JvmField var texturePixelsA: IntArray? = null
@@ -36,7 +31,6 @@ class RasterizerSM(
     @JvmField var textureSizeC: Int = 0
     @JvmField var textureMaskC: Int = 0
 
-    /** Always false */
     @JvmField var blending: Boolean = false
 
     @JvmField var smoothEdges: Boolean = true
@@ -515,7 +509,6 @@ class RasterizerSM(
             }
         }
 
-        // Texture a
         if (materialA != textureA) {
             texturePixelsA = safemodeToolkit.getAnimatedMaterialArgb(materialA)
             if (texturePixelsA == null) {
@@ -532,7 +525,6 @@ class RasterizerSM(
         }
         textureScaleA = scaleA
 
-        // Texture b
         if (textureB != materialB) {
             texturePixelsB = safemodeToolkit.getAnimatedMaterialArgb(materialB)
             if (texturePixelsB == null) {
@@ -548,7 +540,6 @@ class RasterizerSM(
         }
         textureScaleB = scaleB
 
-        // Texture c
         if (materialC != textureC) {
             texturePixelsC = safemodeToolkit.getAnimatedMaterialArgb(materialC)
             if (texturePixelsC == null) {
@@ -3304,7 +3295,6 @@ class RasterizerSM(
                 var depthNear = 1.0f / zNearA
                 var depthFar = 1.0f / zFarA
                 if (depthNear < depthBuf[y]) {
-                    /** Calculate base material colors **/
                     var u = uA * depthFar
                     var v = vA * depthFar
                     var textureUA = (u * textureSizeA * textureScaleA).toInt() and textureMaskA
@@ -3316,14 +3306,12 @@ class RasterizerSM(
                     textureUA = (u * textureSizeC * textureScaleC).toInt() and textureMaskC
                     textureVA = (v * textureSizeC * textureScaleC).toInt() and textureMaskC
                     var texturePixelC = texturePixelsC[textureUA + textureVA * textureSizeC]
-                    /** Mix texture colors **/
                     var texturePercentC = 1.0f - (textureAPercentageA + textureBPercentageA)
                     texturePixelA = 0xff000000.toInt() or ((textureAPercentageA * (texturePixelA shr 16 and 0xff)).toInt() shl 16) or ((textureAPercentageA * (texturePixelA shr 8 and 0xff)).toInt() shl 8) or (textureAPercentageA * (texturePixelA and 0xff)).toInt()
                     texturePixelB = 0xff000000.toInt() or ((textureBPercentageA * (texturePixelB shr 16 and 0xff)).toInt() shl 16) or ((textureBPercentageA * (texturePixelB shr 8 and 0xff)).toInt() shl 8) or (textureBPercentageA * (texturePixelB and 0xff)).toInt()
                     texturePixelC = 0xff000000.toInt() or ((texturePercentC * (texturePixelC shr 16 and 0xff)).toInt() shl 16) or ((texturePercentC * (texturePixelC shr 8 and 0xff)).toInt() shl 8) or (texturePercentC * (texturePixelC and 0xff)).toInt()
                     var colorSum = texturePixelA + texturePixelB + texturePixelC
                     var blendColor = 0xff000000.toInt() or ((redA * (colorSum shr 16 and 0xff)).toInt() shl 8 and 0xff0000) or ((greenA * (colorSum shr 8 and 0xff)).toInt() and 0xff00) or ((blueA * (colorSum and 0xff)).toInt() shr 8)
-                    /** Blend fog into final color **/
                     if (fogDensityA != 0.0f) {
                         var fogTransparency = (255.0f - fogDensityA).toInt()
                         var fogBlendedColor = ((fogColour and 0xff00ff) * fogDensityA.toInt() and -16711936 or (fogDensityA.toInt() * (fogColour and 0xff00) and 0xff0000)) ushr 8
@@ -3917,7 +3905,6 @@ class RasterizerSM(
         bufferOffset += startX - 1
         color += slopeColor * startX
         depth += slopeDepth * startX
-        // Sub-pixel slivers sample the gradient outside the triangle, and an HSL index past the vertex range wraps through the table (grey -> red).
         val colorEnd = color + slopeColor * (endX - startX - 1)
         if (color < shadedColorMin || color > shadedColorMax || colorEnd < shadedColorMin || colorEnd > shadedColorMax) {
             val clampedStart = color.coerceIn(shadedColorMin, shadedColorMax)

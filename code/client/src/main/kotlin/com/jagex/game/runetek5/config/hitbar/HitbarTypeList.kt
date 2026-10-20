@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages hitbar types with LRU caching for both hitbars and sprites.
- */
 class HitbarTypeList(
     @JvmField val hitbarResource: Js5ResourceProvider,
     @JvmField val spriteResource: Js5ResourceProvider
@@ -20,12 +17,6 @@ class HitbarTypeList(
         hitbarResource.getArchiveFileCount(SharedConfigsType.HITBARS.id)
     }
 
-    /**
-     * Retrieves a hitbar type by ID, loading it if not cached.
-     *
-     * @param id The hitbar ID
-     * @return The hitbar type
-     */
     fun list(id: Int): HitbarType {
         var hitbarType: HitbarType?
         synchronized(hitbarCache) {
@@ -49,9 +40,6 @@ class HitbarTypeList(
         }
     }
 
-    /**
-     * Resets both the hitbar and sprite caches.
-     */
     fun resetCaches() {
         synchronized(hitbarCache) {
             hitbarCache.reset()
@@ -61,9 +49,6 @@ class HitbarTypeList(
         }
     }
 
-    /**
-     * Processes the cache cycle, cleaning up old entries.
-     */
     fun processCycle() {
         synchronized(hitbarCache) {
             hitbarCache.clean(5)
@@ -73,9 +58,6 @@ class HitbarTypeList(
         }
     }
 
-    /**
-     * Clears both cache queues by resizing.
-     */
     fun clearQueues() {
         synchronized(hitbarCache) {
             hitbarCache.resize()

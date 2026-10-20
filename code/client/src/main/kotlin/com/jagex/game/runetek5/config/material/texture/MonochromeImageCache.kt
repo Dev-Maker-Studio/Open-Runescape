@@ -2,12 +2,6 @@ package com.jagex.game.runetek5.config.material.texture
 
 import com.jagex.game.runetek5.cache.node.LinkedList
 
-/**
- * Cache for monochrome texture operation output.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class MonochromeImageCache(
     @JvmField val paletteSize: Int,
     @JvmField val maxCachedEntries: Int,
@@ -29,9 +23,6 @@ class MonochromeImageCache(
         nodes = arrayOfNulls(maxCachedEntries)
     }
 
-    /**
-     * Resets and releases the cache.
-     */
     fun reset() {
         for (i in 0 until paletteSize) {
             paletteData[i] = null
@@ -42,12 +33,6 @@ class MonochromeImageCache(
         nodelist = null
     }
 
-    /**
-     * Gets a palette row, managing the cache.
-     *
-     * @param index The row index
-     * @return The palette data for this row
-     */
     fun getPalette(index: Int): IntArray {
         if (maxCachedEntries == paletteSize) {
             dirty = nodes[index] == null
@@ -81,11 +66,6 @@ class MonochromeImageCache(
         return paletteData[0]!!
     }
 
-    /**
-     * Gets all palette data.
-     *
-     * @return All palette data
-     */
     fun getAllPaletteData(): Array<IntArray?> {
         if (paletteSize != maxCachedEntries) {
             throw RuntimeException()

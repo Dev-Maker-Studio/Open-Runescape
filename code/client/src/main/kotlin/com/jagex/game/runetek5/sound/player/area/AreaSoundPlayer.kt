@@ -190,9 +190,6 @@ object AreaSoundPlayer {
         SoundResourceManager.midiPcmStream!!.setVolumeMultiplier(volume shr 8)
     }
 
-    /**
-     * Plays vorbis sound with volume adjusted by distance from given position
-     */
     @JvmStatic
     fun playSoundVorbis(soundId: Int, timesRepeated: Int, delay: Int, volume: Int, bitpackedPosition: Int, voiceEffect: Boolean, sampleRate: Int): AreaSound? {
         if ((if (voiceEffect) PreferenceManager.preferences!!.voiceOverVolume!!.getValue()
@@ -204,9 +201,6 @@ object AreaSoundPlayer {
         return null
     }
 
-    /**
-     * Plays vorbis sound with a constant volume
-     */
     @JvmStatic
     fun playSoundVorbis(soundId: Int, timesRepeated: Int, delay: Int, volume: Int, voiceEffect: Boolean, sampleRate: Int): AreaSound? {
         if ((if (voiceEffect) PreferenceManager.preferences!!.voiceOverVolume!!.getValue()
@@ -218,9 +212,6 @@ object AreaSoundPlayer {
         return null
     }
 
-    /**
-     * Plays synth sound with volume adjusted by distance from given position
-     */
     @JvmStatic
     fun playSoundSynth(soundId: Int, timesRepeat: Int, delay: Int, volume: Int, bitpackedPosition: Int, sampleRate: Int): AreaSound? {
         if (PreferenceManager.preferences!!.soundEffectVolume!!.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
@@ -231,9 +222,6 @@ object AreaSoundPlayer {
         return null
     }
 
-    /**
-     * Plays synth sound with a constant volume
-     */
     @JvmStatic
     fun playSoundSynth(soundId: Int, timesRepeat: Int, delay: Int, volume: Int, sampleRate: Int): AreaSound? {
         if (PreferenceManager.preferences!!.soundEffectVolume!!.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {

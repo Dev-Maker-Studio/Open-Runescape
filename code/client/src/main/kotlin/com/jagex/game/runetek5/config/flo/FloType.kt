@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.config.flo
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.ColorUtil
 
-/**
- * Floor overlay type configuration.
- */
 class FloType {
 
     @JvmField var slot: Int = 8
@@ -25,11 +22,6 @@ class FloType {
     @JvmField var overlayId: Int = 0
     @JvmField var floTypeList: FloTypeList? = null
 
-    /**
-     * Decodes floor overlay data from a packet.
-     *
-     * @param stream The packet stream
-     */
     fun decode(stream: Packet) {
         while (true) {
             val opcode = stream.readUByte()
@@ -40,12 +32,6 @@ class FloType {
         }
     }
 
-    /**
-     * Decodes a single opcode from the packet.
-     *
-     * @param stream The packet stream
-     * @param opcode The opcode to decode
-     */
     fun decode(stream: Packet, opcode: Int) {
         when (opcode) {
             1 -> tileColorHsl = rgbToHsl(stream.readUMedium())
@@ -66,26 +52,17 @@ class FloType {
             13 -> waterColor = stream.readUMedium()
             14 -> waterFogDepth = stream.readUByte() shl 5
             16 -> waterIntensity = stream.readUByte()
-            20 -> opcode20 = stream.readUShort() // water scale?
+            20 -> opcode20 = stream.readUShort()
             21 -> unusedOpcode21 = stream.readUByte()
             22 -> unusedOpcode22 = stream.readUShort()
         }
     }
 
-    /**
-     * Post-processing after decoding is complete.
-     */
     fun postDecode() {
         slot = slot shl 8 or overlayId
     }
 
     companion object {
-        /**
-         * Converts RGB to HSL color format.
-         *
-         * @param hsl The RGB color value
-         * @return The HSL color value, or -1 if the special magenta value
-         */
         @JvmStatic
         fun rgbToHsl(hsl: Int): Int {
             return if (hsl == 16711935) -1 else ColorUtil.rgbToHsl24(hsl)

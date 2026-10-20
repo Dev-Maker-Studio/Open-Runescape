@@ -2,33 +2,14 @@ package com.jagex.game.runetek5.graphics.model.billboard
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * Configuration type for billboards (2D sprites attached to 3D models).
- */
 class BillboardType {
 
-    /**
-     * The material/texture ID to use for this billboard.
-     */
     @JvmField var materialId = -1
 
-    /**
-     * The horizontal size / ingame width.
-     */
     @JvmField var size2d = 64
 
-    /**
-     * The vertical size / ingame height.
-     */
     @JvmField var size3d = 64
 
-    /**
-     * FIXME: incorrectly named? should be something related to color blending?
-     *   0 = rectangle
-     *   1 = circle
-     *   2 = brightened rectangle
-     *   > 2 = invalid, hides model billboard is attached to
-     */
     @JvmField var shape = 2
 
     @JvmField var blendType = 1
@@ -37,11 +18,6 @@ class BillboardType {
 
     @JvmField var hasUid = false
 
-    /**
-     * Decodes this billboard type from a packet buffer.
-     *
-     * @param buffer The packet to decode from
-     */
     fun decode(buffer: Packet) {
         while (true) {
             val opcode = buffer.readUByte()
@@ -52,12 +28,6 @@ class BillboardType {
         }
     }
 
-    /**
-     * Decodes a single opcode from the packet buffer.
-     *
-     * @param buffer The packet to decode from
-     * @param opcode The opcode to process
-     */
     fun decode(buffer: Packet, opcode: Int) {
         when (opcode) {
             1 -> {

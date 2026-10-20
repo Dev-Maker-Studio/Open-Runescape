@@ -94,7 +94,6 @@ class SystemInfo : Node<SystemInfo>() {
                 ++versionPos
             }
         } catch (exception: Exception) {
-            // NOOP
         }
         javaBuild = versionPart
         versionPos = javaVersion.indexOf('.', 2) + 1
@@ -109,7 +108,6 @@ class SystemInfo : Node<SystemInfo>() {
                 ++versionPos
             }
         } catch (exception: Exception) {
-            // NOOP
         }
         javaSubBuild = versionPart
         versionPos = javaVersion.indexOf('_', 4) + 1
@@ -124,7 +122,6 @@ class SystemInfo : Node<SystemInfo>() {
                 ++versionPos
             }
         } catch (exception: Exception) {
-            // NOOP
         }
         javaUpdate = versionPart
         idk = false
@@ -201,7 +198,6 @@ class SystemInfo : Node<SystemInfo>() {
                             dxDriverMonth = driverDate.substring(0, firstSlash).toInt()
                             dxDriverYear = driverDate.substring(secondSlash + 1, driverDate.indexOf(' ', secondSlash)).toInt()
                         } catch (exception: Exception) {
-                            // NOOP
                         }
                     }
                     i += 2

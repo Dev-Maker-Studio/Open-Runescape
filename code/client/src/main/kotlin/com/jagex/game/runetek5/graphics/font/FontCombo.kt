@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.TypeResult
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- *
- * @author Brainpower - 13/09/2021
- *
- */
 class FontCombo(
     @JvmField val loadingFontResource: Js5ResourceProvider,
     @JvmField val fontmetricsResource: Js5ResourceProvider,

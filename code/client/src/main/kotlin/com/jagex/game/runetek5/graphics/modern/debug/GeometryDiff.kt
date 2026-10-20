@@ -10,55 +10,22 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.ColorUtil
 import com.jagex.game.runetek5.utils.MathUtils
 
-/**
- * Differential check between the modern renderer's two geometry paths.
- *
- * Both representations of a loc model live on the SAME [ModelGL]: the mesh-built
- * geometry in `modernBuilt` (produced by ModernModelBuilder at createModel time)
- * and the legacy post-connectNormal face arrays that `buildModelCache` reads. One
- * model build therefore yields both, and no second toolkit or GL context is needed.
- *
- * Why this exists: `render meshbuilt OFF` (legacy-capture only) makes Canifis
- * house walls appear, so the mesh-built path is losing them. A screenshot can only
- * say "walls are gone"; this says which loc, which shape, which rotation, and how
- * many faces diverged. Crucially it runs at the LOGIN SCREEN — JS5 assets and the
- * type lists load during startup, well before an account is involved — so the
- * whole check is self-verifying with no credentials and no game session.
- *
- * Enable with `-Dgeodiff=<locId>[,<locId>...]`. Runs once, prints to stderr.
- */
 object GeometryDiff {
 
     private var hasRun = false
 
-    /** Max MISMATCH lines printed before summarising, so a bad build can't flood. */
     private const val MAX_REPORTS = 60
 
-    /**
-     * Function mask that keeps every CPU array the comparison reads.
-     *
-     * ModelGL frees these aggressively once uploaded, and defaulting a freed array
-     * to 0/-1 silently fabricates a "legacy colour" that never existed — which is
-     * exactly how this harness twice produced confident-looking but meaningless
-     * numbers. PROJECTION retains facesA/B/C, ALTERS_COLOR retains facesColor,
-     * ALTERS_ALPHA retains facesAlpha, HAS_TEXTURE_COORDS retains facesMaterial.
-     */
     private const val RETAIN_MASK =
         ModelFunctionMask.PROJECTION or
             ModelFunctionMask.ALTERS_COLOR or
             ModelFunctionMask.ALTERS_ALPHA or
             ModelFunctionMask.HAS_TEXTURE_COORDS
 
-    /** The mask StationaryWall itself builds with (2048 = HAS_TEXTURE_COORDS). */
     private const val WALL_MASK = ModelFunctionMask.HAS_TEXTURE_COORDS
 
-    /** Raw `-Dgeodiff` value: a comma list of loc ids, or "scan" for every loc. */
     private val setting: String? by lazy { System.getProperty("geodiff")?.trim() }
 
-    /**
-     * Total loc ids in the cache. Mirrors how ObjectTypeList sizes itself: all
-     * archives are full except the last, which holds the remainder.
-     */
     private fun locCount(locList: ObjectTypeList): Int {
         val config = locList.configResource ?: return 0
         val lastArchive = config.getArchiveCount() - 1
@@ -67,10 +34,6 @@ object GeometryDiff {
         return lastArchive * capacity + config.getArchiveFileCount(lastArchive)
     }
 
-    /**
-     * Runs the diff once, as soon as a toolkit and the loc type list are both
-     * available. Safe to call every frame; it self-disarms.
-     */
     fun runOnce(toolkit: AbstractToolkit) {
         if (hasRun) return
         val mode = setting ?: return
@@ -121,27 +84,11 @@ object GeometryDiff {
         }
     }
 
-    /**
-     * Live check: does `modernBuilt` still describe this model's CURRENT vertices?
-     *
-     * The offline scan can only build models with null ground levels, so it never
-     * sees per-placement vertex state. This runs inside the real render loop on the
-     * real scene, which is the only place a stale modernBuilt can actually be
-     * observed. Budgeted so it cannot affect the frame it is measuring.
-     */
     @JvmStatic
     fun verifyLive(model: ModelGL, built: com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder.BuiltModel) {
         if (liveBudget <= 0) return
 
-        // FACE COUNT FIRST — it needs no CPU face arrays. The deeper checks below
-        // bail out when facesA/B/C have been freed, and walls build with mask 2048
-        // (HAS_TEXTURE_COORDS), which does NOT retain them. So every "verified"
-        // model in the previous run was a model that happened to keep its arrays;
-        // the walls were systematically excluded from their own verification.
         liveCountChecked++
-        // Legacy scales the sun term by 768/model.contrast (ModelGL:1933). The
-        // shader omits it entirely, so record the distribution to see whether it is
-        // effectively constant or genuinely per-model.
         contrastHist[model.contrast.toInt()] = (contrastHist[model.contrast.toInt()] ?: 0) + 1
         if (built.faceCount != model.renderedFaceCount) {
             liveCountMismatch++
@@ -157,11 +104,6 @@ object GeometryDiff {
             }
         }
 
-        // UV COMPARISON — the last unverified dimension, and the only one that can
-        // make geometrically perfect, correctly coloured, correctly textured faces
-        // render invisibly: sampling the wrong texels. The mesh path recomputes UVs
-        // from the RS texture-triangle projection; legacy reads model.textureU/V,
-        // which are indexed by NORMAL SLOT (facesA/B/C), not by vertex.
         run {
             val tu = model.textureU
             val tv = model.textureV
@@ -205,10 +147,6 @@ object GeometryDiff {
         val extra = subtractMultiset(mesh, legacy)
         liveChecked++
 
-        // MATERIAL ASSIGNMENT. Positions and colours matching says nothing about
-        // WHICH material batch each face lands in, and a wall drawn with the wrong
-        // material renders geometrically perfect and invisible. Compare the
-        // per-material face-count histograms of the two paths.
         val legacyMats = HashMap<Int, Int>()
         model.facesMaterial?.let { mats ->
             for (f in 0 until model.renderedFaceCount) {
@@ -305,11 +243,6 @@ object GeometryDiff {
         for (shape in shapes) {
             for (rotation in 0..3) {
                 val model = try {
-                    // PROJECTION keeps facesA/B/C alive: ModelGL frees the CPU face
-                    // arrays unless retainsFaceIndices() holds, and with mask 0 every
-                    // model came back with facesA == null — which silently no-op'd
-                    // the whole position oracle while it still reported a confident
-                    // posMISMATCH=0.
                     type.getStationaryModel(toolkit, RETAIN_MASK, shape.toInt(), rotation, null)
                 } catch (e: Throwable) {
                     stat.buildErrors++
@@ -318,13 +251,6 @@ object GeometryDiff {
 
                 report(locId, shape.toInt(), rotation, model, type.name)
 
-                // WALL PATH. StationaryWall does not use getStationaryModel — it
-                // calls getPair(), which takes ground levels and ORs in DISPLACE_*
-                // for contoured locs. Everything verified above therefore says
-                // nothing about walls, which is why byte-exact parity on the
-                // getStationaryModel path left the missing Canifis/Lumbridge walls
-                // completely untouched. Null grounds keep uncontoured locs on the
-                // mesh-built path, which is the case that renders wrong.
                 val pairModel = try {
                     type.getPair(
                         toolkit, WALL_MASK, shape.toInt(), rotation,
@@ -346,15 +272,10 @@ object GeometryDiff {
         stat.models++
         if (viaPair) stat.pairModels++
         val built = model.modernBuilt
-        // renderedFaceCount is legacy's true drawn-face set (billboard anchor faces
-        // are sorted past it and never rasterized), so it is the count the
-        // mesh-built path has to match.
         val legacyDrawn = model.renderedFaceCount
         val tag = "loc=$locId shape=$shape rot=$rotation"
 
         if (built == null) {
-            // Not a defect by itself: contourToGround/recolor/translate legitimately
-            // null modernBuilt and hand the model to legacy-capture.
             stat.legacyCapture++
             return
         }
@@ -362,24 +283,9 @@ object GeometryDiff {
 
         val delta = built.faceCount - legacyDrawn
 
-        // POSITION ORACLE. Face-count equality is necessary but nowhere near
-        // sufficient — a wall can carry exactly the right number of faces and still
-        // be built in the wrong place, which is invisible to a count diff and is the
-        // leading explanation for walls vanishing while counts look fine. Compare
-        // the two face sets as MULTISETS of canonicalised vertex-position triples.
-        //
-        // Only at rotation 0: mesh-built geometry is unrotated by construction while
-        // the legacy arrays have had rotateWithNormals baked in, so any other
-        // rotation would diff the transform rather than the builder.
         var posVerdict = ""
         run {
             val legacyFaces = legacyFaceKeys(model, legacyDrawn)
-            // For rotated locs, apply modernYaw to the (unrotated) mesh-built
-            // positions with EXACTLY the integer math rotateWithNormals uses, then
-            // compare. This tests the yaw re-application end to end: if the compose
-            // is right the rotated mesh geometry must land on legacy's baked
-            // vertices, and if it is wrong the walls are being drawn somewhere other
-            // than where legacy puts them — which looks identical to "missing".
             val meshFaces = meshFaceKeys(built, model.modernYaw and 0x3fff)
             if (legacyFaces == null) {
                 stat.posSkipped++
@@ -392,11 +298,6 @@ object GeometryDiff {
                     posVerdict = " POS missingFromMesh=$onlyLegacy extraInMesh=$onlyMesh"
                 }
 
-                // COLOUR ORACLE. Positions matching proves the builder places
-                // geometry correctly but says nothing about what colour it paints.
-                // Invisible walls and stray green quads are both colour-shaped, so
-                // fold the per-face RGBA into the key and re-diff: any divergence
-                // here is purely colour, since the positions already agree.
                 val legacyCols = legacyColourKeys(model, legacyDrawn)
                 val meshCols = meshColourKeys(built, model.modernYaw and 0x3fff)
                 if (legacyCols == null) {
@@ -420,8 +321,6 @@ object GeometryDiff {
             stat.mismatches++
             stat.mismatchLocs.add(locId)
         }
-        // Names make the 898 suspect locs legible at a glance — "wall"/"door" in
-        // here is the direct link from this scan to the Canifis symptom.
         stat.mismatchNames.add("$locId:$locName")
         if (stat.reported++ >= MAX_REPORTS) return
 
@@ -434,17 +333,7 @@ object GeometryDiff {
         )
     }
 
-    /**
-     * Canonical position keys for the faces the legacy path would draw.
-     *
-     * ModelGL.facesA/B/C hold NORMAL-SLOT indices after connectNormal, so each is
-     * mapped back to its owning vertex through the `triangles` CSR ranges — the same
-     * reverse mapping buildModelCache performs. Returns null when the model has been
-     * stripped of the arrays needed (post-VBO-upload models free them).
-     */
     private fun legacyFaceKeys(model: ModelGL, faceCount: Int, includeColour: Boolean = false): LongArray? {
-        // Report WHICH array is absent once. A silent null here made the whole
-        // position oracle no-op while still printing a confident posMISMATCH=0.
         val missing = when {
             model.facesA == null -> "facesA"
             model.facesB == null -> "facesB"
@@ -490,8 +379,6 @@ object GeometryDiff {
             return if (slot < numNormals) normalToVertex!![slot] else -1
         }
 
-        // No defaulting: a freed array means the comparison is not valid for this
-        // model, and saying so is the whole point.
         if (includeColour) {
             val missingColour = when {
                 model.facesColor == null -> "facesColor"
@@ -531,11 +418,6 @@ object GeometryDiff {
         return keys.toLongArray().also { it.sort() }
     }
 
-    /**
-     * Canonical position keys for the faces the mesh-built path emits, optionally
-     * rotated by [yaw] using the same fixed-point math as ModelGL.rotateWithNormals
-     * so the result is directly comparable to legacy's baked vertices.
-     */
     private fun meshFaceKeys(
         built: com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder.BuiltModel,
         yaw: Int,
@@ -565,8 +447,6 @@ object GeometryDiff {
             }
             var key = faceKey(rx[0], ry[0], rz[0], rx[1], ry[1], rz[1], rx[2], ry[2], rz[2])
             if (includeColour) {
-                // RGBA sits at offset 32 of the 40-byte vertex, written R,G,B,A —
-                // repack into legacy's 0xRRGGBBAA layout for comparison.
                 val o = base + 32
                 val packed = ((built.vertexData[o].toInt() and 0xFF) shl 24) or
                     ((built.vertexData[o + 1].toInt() and 0xFF) shl 16) or
@@ -580,12 +460,6 @@ object GeometryDiff {
         return keys
     }
 
-    /**
-     * Order-independent hash of a triangle's three vertex positions. The two paths
-     * emit faces in different orders (legacy sorts by billboard uid, mesh-built by
-     * accepted-face order) and may wind them differently, so the key must not depend
-     * on either.
-     */
     private fun faceKey(
         ax: Int, ay: Int, az: Int,
         bx: Int, by: Int, bz: Int,
@@ -598,30 +472,19 @@ object GeometryDiff {
             h = h * 31 + z
             return h
         }
-        // Sum is commutative, so vertex order within the face cannot change the key.
         return v(ax, ay, az) + v(bx, by, bz) + v(cx, cy, cz)
     }
 
-    /**
-     * Position+colour keys for legacy's drawn faces, using the SAME colour
-     * derivation buildModelCache performs (ModelGL.hslToRgb, then RS-inverted alpha).
-     */
     private fun legacyColourKeys(model: ModelGL, faceCount: Int): LongArray? {
         val positions = legacyFaceKeys(model, faceCount, includeColour = true) ?: return null
         return positions
     }
 
-    /** Position+colour keys for the mesh-built faces. */
     private fun meshColourKeys(
         built: com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder.BuiltModel,
         yaw: Int
     ): LongArray = meshFaceKeys(built, yaw, includeColour = true)
 
-    /**
-     * For the first few colour-mismatching models, pair faces BY POSITION (they
-     * agree) and print legacy vs mesh packed RGBA plus legacy's inputs, so the
-     * discrepancy can be read off directly instead of inferred.
-     */
     private fun dumpColourDetail(
         locId: Int, shape: Int, rotation: Int,
         model: ModelGL,
@@ -650,7 +513,6 @@ object GeometryDiff {
         }
         fun vertexOf(slot: Int) = if (direct) slot else if (slot < numNormals) normalToVertex!![slot] else -1
 
-        // posKey -> legacy packed colour (+ the inputs that produced it)
         val byPos = HashMap<Long, IntArray>()
         for (f in 0 until legacyDrawn) {
             val a = vertexOf(facesA[f].toInt() and 0xFFFF)
@@ -690,14 +552,6 @@ object GeometryDiff {
                 ((built.vertexData[o + 2].toInt() and 0xFF) shl 8) or
                 (built.vertexData[o + 3].toInt() and 0xFF)
             if (meshPacked == legacy[0]) continue
-            // Decide between the two possible causes without guessing:
-            //  - mesh RGB found in the CURRENT table  -> the two paths read
-            //    different HSL indices (different facesColor source)
-            //  - mesh RGB absent from the current table -> modernBuilt holds colours
-            //    baked from a DIFFERENT table instance. ColorUtil rebuilds
-            //    hslToRgb with a randomised gamma after resetTables() drops it to
-            //    zero users, and ModernModelBuilder bakes colours once at
-            //    createModel time and never revisits them.
             val table = ColorUtil.hslToRgb
             val legacyIdx = ModelGL.adjustLuminance(legacy[1], model.ambient.toInt())
             val tableAtLegacyIdx = table?.getOrNull(legacyIdx) ?: -1
@@ -722,7 +576,6 @@ object GeometryDiff {
         }
     }
 
-    /** Count of entries in [a] (sorted) that have no partner in [b] (sorted). */
     private fun subtractMultiset(a: LongArray, b: LongArray): Int {
         var i = 0
         var j = 0

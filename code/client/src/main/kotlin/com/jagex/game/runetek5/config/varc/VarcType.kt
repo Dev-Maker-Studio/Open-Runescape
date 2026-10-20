@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.config.varc
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * @author Brainpower
- *
- * VARC = VarClient
- */
 class VarcType {
 
     @JvmField

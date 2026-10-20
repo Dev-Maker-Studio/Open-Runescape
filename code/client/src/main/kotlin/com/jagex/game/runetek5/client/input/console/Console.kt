@@ -19,10 +19,6 @@ import java.io.IOException
 import java.util.Calendar
 import java.util.Date
 
-/**
- * [J]
- * @author Steven
- */
 object Console {
 
     @JvmField
@@ -161,7 +157,6 @@ object Console {
                     try {
                         pauseSeconds = scriptArguments!![argIndex].substring(6).toInt()
                     } catch (ignored: Exception) {
-                        // NOOP
                     }
                     writeLine("Pausing for $pauseSeconds seconds...")
                     pausedAtCommandIndex = argIndex + 1
@@ -213,7 +208,6 @@ object Console {
                             runscript(script)
                         }
                     } catch (ignored: Exception) {
-                        // NOOP
                     }
                 }
             } else if (code == 85 && commandLength > 0) {
@@ -261,7 +255,6 @@ object Console {
                     try {
                         waitDuration = arguments[index].substring(6).toInt()
                     } catch (exception: Exception) {
-                        // NOOP
                     }
                     writeLine("Pausing for $waitDuration seconds...")
                     scriptArguments = arguments
@@ -328,7 +321,6 @@ object Console {
             try {
                 outputStream!!.close()
             } catch (ignored: IOException) {
-                // NOOP
             }
         }
         outputStream = null

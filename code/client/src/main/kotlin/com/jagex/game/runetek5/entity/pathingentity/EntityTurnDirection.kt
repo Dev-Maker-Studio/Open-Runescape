@@ -1,21 +1,10 @@
 package com.jagex.game.runetek5.entity.pathingentity
 
-/**
- * Manages entity rotation with acceleration and deceleration.
- */
 class EntityTurnDirection {
 
     @JvmField var rotation: Int = 0
     @JvmField var velocity: Int = 0
 
-    /**
-     * Calculates rotation towards a target with acceleration.
-     *
-     * @param targetRotation The target rotation angle
-     * @param acceleration The acceleration rate
-     * @param maxVelocity The maximum velocity
-     * @return True if actively accelerating towards target
-     */
     fun calculateRotation(targetRotation: Int, acceleration: Int, maxVelocity: Int): Boolean {
         val previousVelocity = velocity
 
@@ -87,28 +76,15 @@ class EntityTurnDirection {
         return shouldAccelerate
     }
 
-    /**
-     * Sets the rotation directly.
-     *
-     * @param rotation The new rotation angle
-     */
     fun setRotation(rotation: Int) {
         this.rotation = rotation
         velocity = 0
     }
 
-    /**
-     * Gets the clamped rotation.
-     *
-     * @return The rotation clamped to 14 bits
-     */
     fun getRotation(): Int {
         return rotation and 0x3fff
     }
 
-    /**
-     * Clamps the rotation to 14 bits.
-     */
     fun clamp() {
         rotation = rotation and 0x3fff
     }

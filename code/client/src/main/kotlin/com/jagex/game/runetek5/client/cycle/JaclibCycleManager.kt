@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.client.cycle
 
 import jaclib.nanotime.QueryPerformanceCounter
 
-/**
- * Cycle manager implementation using Jaclib's high-performance timer.
- */
 class JaclibCycleManager : AbstractCycleManager() {
 
     @JvmField var lastNanotime: Long = 0L
@@ -31,11 +28,6 @@ class JaclibCycleManager : AbstractCycleManager() {
         return currentCycleAt
     }
 
-    /**
-     * Calculates the average execution time based on the time cache.
-     *
-     * @return The average execution time in nanoseconds
-     */
     fun averageExecutionTime(): Long {
         val currentNanotime = QueryPerformanceCounter.nanoTime()
         val timedelta = currentNanotime - lastNanotime

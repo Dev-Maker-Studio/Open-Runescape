@@ -5,12 +5,6 @@ import java.io.PrintStream
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-/**
- * Keeps the last few hundred lines written to stdout/stderr so a crash report
- * can show what the client was doing right before it died. Installed once at
- * startup; every later redirect (the bot sidebar's log tee) wraps these
- * streams, so nothing printed anywhere is lost.
- */
 object ConsoleRecorder {
     private const val CAPACITY = 400
     private const val MAX_LINE_LENGTH = 300
@@ -31,7 +25,6 @@ object ConsoleRecorder {
     fun record(text: String, isError: Boolean) {
         val trimmed = text.trimEnd('\n', '\r')
         if (trimmed.isEmpty()) return
-        // The bot sidebar already stamps its lines with a full date; don't stamp twice.
         val alreadyStamped = trimmed.length > 10 && trimmed[4] == '-' && trimmed[7] == '-' && trimmed[10] == ' '
         val prefix = if (alreadyStamped) "" else stamp.format(LocalTime.now()) + " "
         val marker = if (isError) "! " else "  "

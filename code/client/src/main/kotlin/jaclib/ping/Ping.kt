@@ -1,14 +1,8 @@
-/* Ping - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaclib.ping
 
 import java.io.IOException
 import java.net.InetAddress
 
-/**
- * Ping utility with native implementation fallback to pure Java.
- */
 class Ping {
     init {
         throw Error()
@@ -21,7 +15,6 @@ class Ping {
         @JvmStatic
         @Throws(Throwable::class)
         fun ping(rawIp0: Byte, rawIp1: Byte, rawIp2: Byte, rawIp3: Byte, timeout: Long): Int {
-            // Original native implementation disabled in favor of Java fallback
             val ipAddress = byteArrayOf(rawIp0, rawIp1, rawIp2, rawIp3)
             val address = InetAddress.getByAddress(ipAddress)
             try {

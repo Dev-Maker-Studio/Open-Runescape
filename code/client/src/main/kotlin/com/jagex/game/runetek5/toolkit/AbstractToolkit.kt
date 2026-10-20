@@ -71,9 +71,6 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     @Throws(FrameRenderException::class)
     open fun renderFrame() {
-        // Toolkit-agnostic on purpose: the whole point is A/B'ing legacy (2) against
-        // modern (6) on the same in-game scene, so the driver cannot live on
-        // ModernGLToolkit. No-ops unless -Dautologin is set.
         AutoLogin.tick()
         render()
     }
@@ -248,14 +245,8 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun getRenderingMatrix(): Matrix43
 
-    /**
-     * Creates a model and applies the function mask to set the correct attributes
-     */
     abstract fun createModel(mesh: Mesh, functionMask: Int, preferenceMask: Int, ambient: Int, contrast: Int): Model
 
-    /**
-     * Checks if function_mask_a has all the functions of function_mask_b if so returns 0 otherwise returns 1
-     */
     abstract fun mismatchingFunctionMask(functionMaskA: Int, functionMaskB: Int): Int
 
     abstract fun copyModelMatrix(): Matrix44
@@ -280,10 +271,6 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         return delegatingDisplay
     }
 
-    /**
-     * Sets the general rendering brightness
-     * @param brightness 0.0 - 1.0
-     */
     abstract fun updateSun(brightness: Float)
 
     abstract fun applyLighting(color: Int, intensity: Float, antiIntensity: Float, positionX: Float, positionY: Float, positionZ: Float)
@@ -322,38 +309,11 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun calculateProjection(width: Float, height: Float, length: Float, matrix: FloatArray)
 
-    /**
-     * [isOnScreen] for a vertical column at ([x], [z]) spanning [yLow]..[yHigh].
-     *
-     * The scene's tile-visibility grid tests this shape thousands of times a frame;
-     * toolkits that can share the X/Z terms between the two corners override it.
-     */
-    /**
-     * Whether this toolkit's scene pass reads the fixed-function GL light state.
-     *
-     * The scene walk selects up to four lights per entity and pushes them through
-     * [copyLights] on every drawn entity, every frame. A shader-based toolkit that
-     * does its own per-model light selection never reads that state, so both the
-     * selection and the GL_LIGHT calls behind it are pure waste for it.
-     */
     open fun usesFixedFunctionLights(): Boolean = true
 
     open fun isColumnOnScreen(x: Int, z: Int, yLow: Int, yHigh: Int): Int =
         isOnScreen(x, yLow, z, x, yHigh, z)
 
-    /**
-     * [isColumnOnScreen] for a whole run of columns sharing an X, writing the clip
-     * flags into [out].
-     *
-     * The scene tests one of these per tile of the visibility grid — around eleven
-     * thousand a frame. As individual calls that is eleven thousand dispatches
-     * through a method with several toolkit implementations, which is more work than
-     * the arithmetic inside. One call per column of the sweep makes the dispatch
-     * negligible and lets the implementation hoist the matrix out of the loop.
-     *
-     * @param zs scene Z for each entry, already upscaled to world units
-     * @param count number of entries to test
-     */
     open fun isColumnRunOnScreen(
         x: Int, zs: IntArray, yLow: IntArray, yHigh: IntArray, out: IntArray, count: Int
     ) {
@@ -435,10 +395,6 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, mipmapped: Boolean): NativeSprite
 
-    /**
-     * Benchmarks the performance of given toolkit in order
-     * to determine which display mode is optimal for your pc
-     */
     abstract fun benchmark()
 
     fun drawOpaqueHorizontalLine(x: Int, y: Int, width: Int, colorArgb: Int) {
@@ -447,9 +403,6 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun forceFixedScreenmode(): Boolean
 
-    /**
-     * Give this a better name (?), currently only used for worldmap tiles
-     */
     abstract fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixels: ByteArray, pixelOffset: Int, blendMode: Int)
 
     abstract fun createNativeSprite(width: Int, height: Int, textureWidth: Int, textureHeight: Int, hasAlpha: Boolean): NativeSprite
@@ -463,16 +416,11 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         @JvmField
         var activeRenderMode = -1
 
+        const val BOOTSTRAP_MODE = 0
+
         @JvmField
         var nativeLibraryLoader: INativeLibraryLoader? = null
 
-        /**
-         * @param renderMode Identifier for the display mode we're using
-         * @param canvasToDrawOn EG: game canvas / inventory item canvas
-         * @param materialProvider The wrapper around material management
-         * @param shaderResource The resource containing all shaders
-         * @param multiSamples Multi samples preference
-         */
         @JvmStatic
         fun create(renderMode: Int, canvasToDrawOn: Canvas?, materialProvider: MaterialProvider?, shaderResource: Js5ResourceProvider?, multiSamples: Int): AbstractToolkit {
             var screenWidth = 0
@@ -488,20 +436,10 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         @JvmStatic
         @Synchronized
         fun toolkitForType(renderMode: Int, gameCanvas: Canvas?, materialProvider: MaterialProvider?, shaderIndex: Js5ResourceProvider?, multiSamples: Int, screenWidth: Int, screenHeight: Int): AbstractToolkit {
-            val mode = when (renderMode) {
-                0 -> "SM"
-                1, 5 -> "GL"
-                3 -> "Modern GL"
-                else -> "UNKNOWN"
+            if (renderMode == BOOTSTRAP_MODE) {
+                return SafeModeToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
             }
-            println("[AbstractToolkit] Entering render mode: $renderMode = $mode")
-            return when (renderMode) {
-                0 -> SafeModeToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
-                1 -> OpenGlToolkit.createToolkitLd(gameCanvas, materialProvider, multiSamples)
-                3 -> ModernGLToolkit.createToolkit(gameCanvas, materialProvider, multiSamples)
-                5 -> OpenGlToolkit.createToolkitHd(gameCanvas, materialProvider, shaderIndex, multiSamples)
-                else -> throw IllegalArgumentException("Invalid toolkit option: $renderMode")
-            }
+            return ModernGLToolkit.createToolkit(gameCanvas, materialProvider, multiSamples)
         }
 
         @JvmStatic
@@ -539,7 +477,6 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
                 val setIgnoreRepaint = clazz.getMethod("setIgnoreRepaint", java.lang.Boolean.TYPE)
                 setIgnoreRepaint.invoke(gameCanvas, java.lang.Boolean.TRUE)
             } catch (e: Exception) {
-                // NOOP
             }
         }
 

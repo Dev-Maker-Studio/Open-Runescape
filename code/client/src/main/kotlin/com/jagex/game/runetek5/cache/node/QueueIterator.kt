@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.cache.node
 
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 
-/**
- * Iterator for traversing cacheable nodes in a Queue.
- */
 class QueueIterator(queue: Queue<*>) : MutableIterator<CacheableNode?> {
 
     @JvmField var lastReturned: CacheableNode? = null
@@ -15,11 +12,6 @@ class QueueIterator(queue: Queue<*>) : MutableIterator<CacheableNode?> {
         lastReturned = null
     }
 
-    /**
-     * Resets the iterator and returns the next node.
-     *
-     * @return The next node after reset
-     */
     fun nextAndReset(): CacheableNode? {
         reset()
         return next() as CacheableNode?
@@ -47,9 +39,6 @@ class QueueIterator(queue: Queue<*>) : MutableIterator<CacheableNode?> {
         lastReturned = null
     }
 
-    /**
-     * Resets the iterator to the beginning of the queue.
-     */
     fun reset() {
         current = queue.current.nextCache
         lastReturned = null

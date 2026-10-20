@@ -12,9 +12,6 @@ import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * Display mode details and profiling utilities.
- */
 class DisplayModeDetails {
 
     @JvmField var width: Int = 0
@@ -38,15 +35,9 @@ class DisplayModeDetails {
         }
 
         @JvmStatic
-        fun getProfilingPerformance(toolkitId: Int, profilingTime: Int): Int {
+        fun getProfilingPerformance(profilingTime: Int): Int {
             if (Client.ENTITY_DEFAULTS!!.profilingMesh == -1) {
                 return 1
-            }
-            if (toolkitId != PreferenceManager.preferences!!.activeToolkit!!.getValue()) {
-                Client.loadAssets(toolkitId, LocalizedText.PROFILING.translate(Client.CURRENT_LANGUAGE!!), true)
-                if (PreferenceManager.preferences!!.activeToolkit!!.getValue() != toolkitId) {
-                    return -1
-                }
             }
             try {
                 val dimension = GameShell.gameCanvas!!.size

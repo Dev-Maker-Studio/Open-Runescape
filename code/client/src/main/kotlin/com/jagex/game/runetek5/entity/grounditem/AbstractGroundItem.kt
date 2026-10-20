@@ -7,9 +7,6 @@ import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Abstract base class for ground items rendered in the scene.
- */
 abstract class AbstractGroundItem(
     scene: Scene,
     x: Int,

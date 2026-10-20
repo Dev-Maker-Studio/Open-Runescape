@@ -4,12 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpBrightness : TextureOperation(1, false) {
 
     @JvmField var blueBrightness: Int = 4096

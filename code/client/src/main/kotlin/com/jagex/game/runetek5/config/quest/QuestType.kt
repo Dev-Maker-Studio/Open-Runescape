@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.utils.MathUtils
 import com.jagex.game.runetek5.vardomain.VarDomain
 
-/**
- *
- * @author Brainpower - 01/05/2022
- *
- */
 class QuestType {
 
     @JvmField

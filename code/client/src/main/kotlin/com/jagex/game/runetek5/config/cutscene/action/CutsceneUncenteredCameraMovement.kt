@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 
-/**
- *
- * @author Brainpower - 06/04/2022
- *
- */
 class CutsceneUncenteredCameraMovement(buffer: Packet) : CutsceneAction(buffer) {
 
     @JvmField val localX: Int = buffer.readUShort()

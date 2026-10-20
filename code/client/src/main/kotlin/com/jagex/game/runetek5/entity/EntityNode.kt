@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.entity
 
-/**
- *
- * @author Brainpower - 01/05/2022
- *
- */
 open class EntityNode {
 
     @JvmField var next: EntityNode? = null

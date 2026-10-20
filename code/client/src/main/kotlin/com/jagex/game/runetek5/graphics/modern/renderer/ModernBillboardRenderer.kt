@@ -9,23 +9,6 @@ import com.jagex.game.runetek5.math.MatrixRotations
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 
-/**
- * Model billboards (the glow sprites anchored to model faces — lamps, fires) on the
- * modern path: the twin of ModelGL.drawBillboards.
- *
- * Legacy draws each one as a camera-facing textured quad in EYE space: the anchor
- * face's centroid is transformed by model x view, pulled toward the camera by the
- * billboard's distance along the eye ray, offset by the surface's (offsetX, offsetY),
- * scaled to (scaleX*sizeX>>7, scaleY*sizeY>>7) half-extents, rotated in the screen
- * plane and drawn as GL_QUADS with the anchor face's colour, the material's texture,
- * the shape as blend mode (0 none, 1 alpha, 2 additive) and depth writes off when
- * the model has alpha transitions. The quad corners and UVs are the toolkit's
- * screen quad: (-1,-1) uv(0,0), (-1,1) uv(0,1), (1,1) uv(1,1), (1,-1) uv(1,0).
- *
- * Positions are already in eye space, so the shader (the particle shader) gets the
- * projection alone as its view-projection, built exactly the way the particle
- * renderer composes it (row-vector legacy convention, Y negated for GL).
- */
 class ModernBillboardRenderer {
     private var shader: ShaderProgram? = null
     private var vao: VertexArray? = null
@@ -44,7 +27,6 @@ class ModernBillboardRenderer {
 
     private val vp = FloatArray(16)
 
-    /** Draws this frame (diag). */
     @JvmField var drawsThisFrame = 0
 
     fun initialize() {
@@ -59,7 +41,6 @@ class ModernBillboardRenderer {
         vao!!.setAttribute(VertexArray.Companion.Attributes.TEXCOORD, 2, GLWrapper.Constants.FLOAT, false, BYTES_PER_VERTEX, 12)
         vao!!.setAttribute(VertexArray.Companion.Attributes.COLOR, 4, GLWrapper.Constants.UNSIGNED_BYTE, true, BYTES_PER_VERTEX, 20)
         val indexData = MemoryUtil.memAllocShort(6)
-        // Two triangles over the quad in the legacy corner order.
         indexData.put(0).put(1).put(2).put(2).put(3).put(0)
         indexData.flip()
         ibo!!.upload(indexData)
@@ -80,10 +61,7 @@ class ModernBillboardRenderer {
         isInitialized = true
     }
 
-    /** Per-frame projection (legacy row-vector projection matrix elements) and fog. */
     fun setFrame(projectionFloats: FloatArray, fogEnabled: Boolean, fogStart: Float, fogEnd: Float, fogR: Float, fogG: Float, fogB: Float) {
-        // View is the identity (positions are eye space): vp = projection, indexed the
-        // way ModernParticleRenderer builds its (V·P)^T, then clip-Y negated for GL.
         for (i in 0 until 16) vp[i] = projectionFloats[i]
         vp[1] = -vp[1]; vp[5] = -vp[5]; vp[9] = -vp[9]; vp[13] = -vp[13]
         this.fogEnabled = fogEnabled
@@ -99,15 +77,6 @@ class ModernBillboardRenderer {
     private var fogG = 0f
     private var fogB = 0f
 
-    /**
-     * Draws one billboard immediately (other translucent passes may run between
-     * calls, so every call binds its own state).
-     *
-     * @param ex eye-space centre (after the distance pull and surface offsets)
-     * @param halfW half extents in world units, [rotation] in RS angle units (0..16383)
-     * @param argb anchor face colour with alpha in the top byte
-     * @param blendMode legacy setBlendMode argument (the billboard shape)
-     */
     fun drawOne(
         ex: Float, ey: Float, ez: Float,
         halfW: Int, halfH: Int, rotation: Int,
@@ -129,9 +98,6 @@ class ModernBillboardRenderer {
         val g = ((argb shr 8) and 0xff).toByte()
         val b = (argb and 0xff).toByte()
         val a = ((argb ushr 24) and 0xff).toByte()
-        // Matrix44.setRotatedTranslation as a row-vector transform of the unit quad:
-        // x' = cx*cos*w - cy*sin*h ; y' = cx*sin*w + cy*cos*h (see OpenGlToolkit's
-        // screen quad for the corner/uv pairs).
         fun corner(cx: Float, cy: Float, u: Float, v: Float) {
             val x = cx * cos * halfW - cy * sin * halfH
             val y = cx * sin * halfW + cy * cos * halfH
@@ -161,7 +127,6 @@ class ModernBillboardRenderer {
         } else {
             s.setUniform(uTextureEnabledLocation, 0)
         }
-        // Legacy setBlendMode: 1 alpha, 2 additive, 128 multiply, else no blending.
         when (blendMode) {
             1 -> { GLWrapper.enable(GLWrapper.Constants.BLEND); GLWrapper.blendFunc(GLWrapper.Constants.SRC_ALPHA, GLWrapper.Constants.ONE_MINUS_SRC_ALPHA) }
             2 -> { GLWrapper.enable(GLWrapper.Constants.BLEND); GLWrapper.blendFunc(GLWrapper.Constants.ONE, GLWrapper.Constants.ONE) }

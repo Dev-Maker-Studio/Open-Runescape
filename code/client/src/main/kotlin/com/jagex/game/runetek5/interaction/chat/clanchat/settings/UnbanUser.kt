@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.interaction.chat.clanchat.settings
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * @author Brainpower - 11/01/2022
- */
 class UnbanUser(
     @JvmField val clanSettingsDelta: ClanSettingsDelta
 ) : AbstractClanSettingUpdate() {

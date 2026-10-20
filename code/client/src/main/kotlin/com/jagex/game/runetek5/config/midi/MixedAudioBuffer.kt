@@ -5,13 +5,6 @@ import com.jagex.game.runetek5.sound.jagtheora.MixedAudioStream
 import com.jagex.game.runetek5.sound.Resampler
 import com.jagex.game.runetek5.sound.jagtheora.AbstractAudioFile
 
-/**
- *
- * @author Brainpower - 19/04/2022
- * @author lequietriot - 07/05/2020
- * Reference: https://github.com/lequietriot/RuneScape-MIDI-Player-Suite/blob/master/src/main/AudioBuffer.java
- *
- */
 class MixedAudioBuffer(
     @JvmField val samples: ByteArray,
     start: Int,

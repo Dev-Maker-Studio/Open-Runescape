@@ -81,9 +81,6 @@ class CollisionMap {
         }
     }
 
-    /**
-     * was called addwall
-     */
     fun flagBoundary(x: Int, y: Int, type: Int, rotation: Int, blocks: Boolean, alt: Boolean) {
         val adjustedX = x - offsetX
         val adjustedY = y - offsetY

@@ -1216,7 +1216,6 @@ open class ModelSM : Model {
     }
 
     override fun uploadToGpu() {
-        // NOOP
     }
 
     override fun yaxisRotateWithoutNormals(rotation: Int) {
@@ -2436,7 +2435,6 @@ open class ModelSM : Model {
                         try {
                             (this as Object).wait()
                         } catch (ie: InterruptedException) {
-                            // NOOP
                         }
                     }
                     this.renderLock = true
@@ -2581,7 +2579,6 @@ open class ModelSM : Model {
             try {
                 draw(this.toolkit.colourBuffer != null, this.toolkit.depthBuffer != null, (rasterizerFlags and ModelFunctionMaskGL.TRANSPARENT) != 0, offscreen, this.threadResource!!.fogEnabled && fogDepth > this.threadResource!!.fogStartDistance || this.threadResource!!.hasWaterUpdate)
             } catch (ex: Exception) {
-                // NOOP
             }
             if (this.billboardEffects != null) {
                 for (faceIndex in 0 until this.numFaces) {
@@ -2960,7 +2957,6 @@ open class ModelSM : Model {
                     try {
                         (this as Object).wait()
                     } catch (ie: InterruptedException) {
-                        // NOOP
                     }
                 }
                 super.isLocked = true

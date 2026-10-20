@@ -4,12 +4,6 @@ import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
 import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 
-/**
- * Preference controlling particle system detail level.
- * Determines how many particles are rendered (0=off, 1=low, 2=high).
- *
- * @author Steven - 17/09/2023
- */
 class ParticlePreference : Preference {
 
     constructor(value: Int, gamePreferences: GamePreferences) : super(value, gamePreferences) {
@@ -21,12 +15,10 @@ class ParticlePreference : Preference {
     }
 
     fun ensureValid() {
-        // Force particles off if memory is too low
         if (gamePreferences.getProcessorSpecs().getMaxMemory() < 245) {
             value = 0
         }
 
-        // Ensure value is in valid range (0-2)
         if (value < 0 || value > 2) {
             value = getDefaultValue()
         }
@@ -40,9 +32,9 @@ class ParticlePreference : Preference {
 
     override fun canModify(value: Int): Int {
         return if (gamePreferences.getProcessorSpecs().getMaxMemory() < 245) {
-            3 // Cannot modify - insufficient memory
+            3
         } else {
-            1 // Can modify
+            1
         }
     }
 
@@ -51,8 +43,5 @@ class ParticlePreference : Preference {
         ParticleSystemManager.setDetail(this.value)
     }
 
-    /**
-     * Returns whether particles are supported (sufficient memory available)
-     */
     fun supported(): Boolean = gamePreferences.getProcessorSpecs().getMaxMemory() >= 245
 }

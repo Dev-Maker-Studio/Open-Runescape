@@ -42,13 +42,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     var jaclibLoaded = false
 
     companion object {
-        /**
-         * Nanoseconds inside onPulse, and pulses run, since the last diagnostic reset.
-         *
-         * Game logic runs at a fixed 50Hz while rendering is uncapped, so this is a
-         * per-SECOND load amortised over however many frames fit between pulses — and
-         * a spike on the frames that carry one.
-         */
         @JvmStatic var pulseNs = 0L
         @JvmStatic var pulseCount = 0L
 
@@ -89,9 +82,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         @JvmField
         var cacheFileData: FileOnDisk? = null
 
-        /**
-         * Time in nanoseconds, comes down to 0.02s, 1 / 0.02 = 50 fps
-         */
         @JvmField
         val PREFERED_CYCLE_DURATION: Long = 20000000L
 
@@ -104,11 +94,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         @JvmField
         var nextCanvasRefreshAt: Long = 0L
 
-        /**
-         * Interpolation alpha for the current render frame: how far we are
-         * through the 20ms logic window, in [0, 1]. Entities lerp between their
-         * previous and current pulse positions by this amount.
-         */
         @JvmField
         var renderPulseAlpha: Float = 1.0f
 
@@ -153,9 +138,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         var modernOpenglTried: Boolean = false
 
         @JvmField
-        var legacyOpenglTried: Boolean = false
-
-        @JvmField
         var mainRedrawCachePos: Int = 0
 
         @JvmField
@@ -163,34 +145,16 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
 
         @JvmStatic
         fun calculateGraphics(): Int {
-            val profileModern = !modernOpenglTried
-            val profileLegacy = !legacyOpenglTried
-            if (!profileModern && !profileLegacy) {
+            if (modernOpenglTried) {
                 return PreferenceManager.calculateDisplayMode()
             }
-            var performanceModern = -1
-            var performanceLegacy = -1
-            if (profileModern) {
-                try {
-                    performanceModern = DisplayModeDetails.getProfilingPerformance(ToolkitPreference.MODERN_OPENGL, 1000)
-                } catch (exception: Exception) {
-                    exception.printStackTrace()
-                }
+            val performance = try {
+                DisplayModeDetails.getProfilingPerformance(1000)
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+                -1
             }
-            if (profileLegacy) {
-                try {
-                    performanceLegacy = DisplayModeDetails.getProfilingPerformance(ToolkitPreference.LEGACY_OPENGL, 1000)
-                } catch (exception: Exception) {
-                    exception.printStackTrace()
-                }
-            }
-            if (performanceModern == -1 && performanceLegacy == -1) {
-                return PreferenceManager.calculateDisplayMode()
-            }
-            return if (performanceModern >= performanceLegacy)
-                PreferenceManager.setHardwarePerformance(ToolkitPreference.MODERN_OPENGL, performanceModern)
-            else
-                PreferenceManager.setHardwarePerformance(ToolkitPreference.LEGACY_OPENGL, performanceLegacy)
+            return if (performance == -1) PreferenceManager.calculateDisplayMode() else PreferenceManager.setHardwarePerformance(performance)
         }
 
         @JvmStatic
@@ -247,7 +211,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                     playerRandomDat?.setPosition(0L)
                     playerRandomDat?.write(data.buffer, startPosition, 24)
                 } catch (exception: Exception) {
-                    // NOOP
                 }
             }
         }
@@ -266,7 +229,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                         eventQueue.postEvent(ActionEvent(canvas, 1001, "dummy"))
                     }
                 } catch (ignored: Exception) {
-                    // NOOP
                 }
             }
         }
@@ -300,7 +262,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             screenCanvasWidth = windowSettings.width
             WindowMode.resizableScreenWidth = screenCanvasWidth
             var windowHeight = windowSettings.height
-            // -Dwindow.size=WxH overrides the configured window size (see setFrameTitle).
             System.getProperty("window.size")?.let { spec ->
                 val parts = spec.split('x').mapNotNull { it.trim().toIntOrNull() }
                 if (parts.size == 2 && parts[0] > 0 && parts[1] > 0) {
@@ -337,7 +298,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             SystemInfo.javaVendor = System.getProperty("java.vendor")
             SystemInfo.javaVersion = System.getProperty("java.version")
         } catch (exception: Exception) {
-            // NOOP
         }
         try {
             SystemInfo.operatingSystem = System.getProperty("os.name")
@@ -361,7 +321,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 PreferenceManager.preferencesParentFile += "/"
             }
         } catch (exception: Exception) {
-            // NOOP
         }
         try {
             if (SystemInfo.operatingSystemLowercase.startsWith("win")) {
@@ -375,7 +334,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 PreferenceManager.preferencesParentFile += "/"
             }
         } catch (exception: Exception) {
-            // NOOP
         }
         if (PreferenceManager.preferencesParentFile == null) {
             PreferenceManager.preferencesParentFile = "~/"
@@ -383,7 +341,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         try {
             SystemInfo.systemEventQueue = Toolkit.getDefaultToolkit().systemEventQueue
         } catch (throwable: Throwable) {
-            // NOOP
         }
         val prefParentFile = PreferenceManager.preferencesParentFile ?: ""
         val cacheBaseDirs = arrayOf("c:/rscache/", "/rscache/", "c:/windows/", "c:/winnt/", "c:/", prefParentFile, "/tmp/", "")
@@ -588,16 +545,11 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         engineFrame!!.background = Color.black
         engineFrame!!.isVisible = true
         engineFrame!!.toFront()
-        // -Dwindow.size=WxH: create the frame at that canvas size (captures no longer
-        // depend on a window-manager resize the client may miss while loading).
         System.getProperty("window.size")?.let { spec ->
             val parts = spec.split('x').mapNotNull { it.trim().toIntOrNull() }
             if (parts.size == 2 && parts[0] > 0 && parts[1] > 0) {
                 WindowMode.resizableScreenWidth = parts[0]
                 WindowMode.resizableScreenHeight = parts[1]
-                // The canvas fields too, or the client keeps laying out at the old size
-                // until a resize event it may never receive. screenCanvasHeight is stored
-                // pre-multiplied by the inverse of -969250379.
                 screenCanvasWidth = parts[0]
                 screenCanvasHeight = parts[1] * -1929118563
             }
@@ -664,10 +616,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         synchronized(this) {
             appletHasFocus = WindowMode.hasFocus
         }
-        // Timed separately from the render frame: game logic runs at a fixed 50Hz
-        // while rendering is uncapped, so its cost is a per-SECOND load that gets
-        // amortised over however many frames fit between pulses — and a spike on the
-        // frames that carry one.
         val pulseStartNs = System.nanoTime()
         onPulse()
         pulseNs += System.nanoTime() - pulseStartNs
@@ -685,8 +633,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             val timeDelta = (currentTime - lastTime).toInt()
             FPS = ((timeDelta shr 1) + 32000) / timeDelta
         }
-        // Legacy code refreshed the canvas every 50 redraws (~1/sec at 50fps).
-        // Now that the render rate is decoupled, key this off wall time instead.
         if (currentTime >= nextCanvasRefreshAt) {
             val refreshT0 = System.nanoTime()
             nextCanvasRefreshAt = currentTime + 1000L
@@ -707,8 +653,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         frameHistogram(redrawT0)
     }
 
-    // Toolkit-independent frame pacing histogram (-Dframe.hist): wall time between
-    // consecutive redraw entries, so legacy and modern runs can be compared for stalls.
     private var fhLast = 0L
     private var fhCount = 0
     private var fhOver15 = 0
@@ -766,7 +710,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     }
 
     override fun windowActivated(windowEvent: WindowEvent) {
-        // NOOP
     }
 
     override fun windowClosing(windowEvent: WindowEvent) {
@@ -775,7 +718,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     }
 
     override fun windowDeactivated(windowEvent: WindowEvent) {
-        // NOOP
     }
 
     fun prepareExit() {
@@ -788,7 +730,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         try {
             shutdown()
         } catch (ignored: Exception) {
-            // NOOP
         }
         try {
             cacheFileData?.close()
@@ -798,16 +739,13 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             cacheFileReferenceTable?.close()
             playerRandomDat?.close()
         } catch (ignored: Exception) {
-            // NOOP
         }
         if (jaclibLoaded) {
             try {
                 QueryPerformanceCounter.quit()
             } catch (ignored: Throwable) {
-                // NOOP
             }
         }
-        // SW3D removed - no longer need FinalizeCacheSw3d.shutdown()
         if (AbstractToolkit.nativeLibraryLoaded()) {
             AbstractToolkit.getNativeLibraryLoader().shutdown()
         }
@@ -816,7 +754,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 gameCanvas!!.removeFocusListener(this)
                 gameCanvas!!.parent.remove(gameCanvas)
             } catch (ignored: Exception) {
-                // NOOP
             }
         }
         if (engineFrame != null) {
@@ -827,7 +764,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     }
 
     override fun windowOpened(windowEvent: WindowEvent) {
-        // NOOP
     }
 
     abstract override fun init()
@@ -851,7 +787,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             try {
                 QueryPerformanceCounter.init()
             } catch (throwable: Throwable) {
-                // NOOP
             }
         }
         return jaclibLoaded
@@ -871,7 +806,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     }
 
     override fun windowDeiconified(windowEvent: WindowEvent) {
-        // NOOP
     }
 
     override fun start() {
@@ -952,9 +886,6 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             }
             renderPulseAlpha = cycleManager!!.pulseFraction(PREFERED_CYCLE_DURATION)
             mainRedrawWrapper()
-            // The dummy event keeps the AWT queue pumping, but posting it every
-            // render frame floods the EDT at high frame rates (and can block in
-            // its peekEvent/sleep loop), so keep it at the legacy 50Hz cadence.
             val now = Utils.time()
             if (now >= nextDummyEventAt) {
                 performDummyActionevent(gameCanvas!!)

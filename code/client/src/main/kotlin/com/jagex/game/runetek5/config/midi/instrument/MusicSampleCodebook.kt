@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.utils.BufferUtils
 import com.jagex.game.runetek5.utils.MathUtils
 import kotlin.math.pow
 
-/**
- * https://www.cs.cmu.edu/afs/club/usr/cort/code/img2ktx/third_party/stb/stb_vorbis.c
- * @author Brainpower
- *
- */
 class MusicSampleCodebook {
 
     @JvmField val dimensions: Int
@@ -105,7 +100,6 @@ class MusicSampleCodebook {
         return multiplicands!![decode()]
     }
 
-    //buildhuffmantree
     fun computeAcceleratedHuffman() {
         val codewords = IntArray(entries)
         val sortedCodes = IntArray(33)

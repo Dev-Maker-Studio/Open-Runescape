@@ -17,21 +17,6 @@ import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 
-/**
- * Modern OpenGL renderer for ground/terrain.
- *
- * Handles terrain rendering with:
- * - Material-based batching
- * - Per-vertex lighting (baked into vertex colors)
- * - Shadow mapping support
- * - Fog
- *
- * Vertex format (28 bytes per vertex):
- * - Position: vec3 (12 bytes) at offset 0
- * - Normal: vec3 (12 bytes) at offset 12
- * - Color: RGBA (4 bytes) at offset 24
- */
-/** -Drender.groundcolor=raw: ground vertex colour with no lighting at all (debug). */
 private val RAW_COLOR_DEBUG = System.getProperty("render.groundcolor")?.equals("raw", true) == true
 
 class GroundWater(
@@ -72,18 +57,15 @@ class ModernGroundRenderer {
         private const val DEFAULT_INDEX_CAPACITY = 131072
     }
 
-    // GPU resources for self-managed rendering
     private var vao: VertexArray? = null
     private var vbo: VertexBuffer? = null
     private var ibo: IndexBuffer? = null
     private var shader: ShaderProgram? = null
 
-    // Textured ground shader (for rendering with external legacy VBOs)
     private var texturedShader: ShaderProgram? = null
     private var externalVao: VertexArray? = null
     private var externalIbo: IndexBuffer? = null
 
-    // Uniform locations for textured shader
     private var uTexViewProjectionLocation = -1
     private var uTexTextureScaleLocation = -1
     private var uTexTextureScrollLocation = -1
@@ -128,8 +110,6 @@ class ModernGroundRenderer {
     private val WATER_TEXTURE_UNIT = 5
     private val SCENE_DEPTH_TEXTURE_UNIT = 6
 
-    // Legacy sun parameters for HD_LIGHT grounds (raw, unnormalized values from
-    // OpenGlToolkit.sunDirection / sunBrightness / sunColorIntensity / antiSunColorIntensity)
     private var legacySunDirX = 0f
     private var legacySunDirY = -1f
     private var legacySunDirZ = 0f
@@ -137,29 +117,16 @@ class ModernGroundRenderer {
     private var legacyContrastPos = 0f
     private var legacyContrastNeg = 0f
 
-    /**
-     * Sets the raw legacy sun parameters used by the HD_LIGHT ground lighting formula
-     * (GroundGL.kt:458-459). Values must be passed UNNORMALIZED, matching legacy.
-     */
-    // ===== Ground shadows (native) =====
-    // Legacy composites dynamic scenery/entity shadows with a fixed-function overlay
-    // (ShadowMapperGL.renderShadowOverlay). That must never run in this pipeline, so
-    // the same source data -- ShadowMapperGL.shadowMapperData, one intensity byte per
-    // shadow texel over the whole ground -- is uploaded as an R8 texture and sampled
-    // in the ground shaders instead.
-    /** One resident overlay texture per shadow mapper (each ground plane owns a mapper). */
     private class ShadowTexEntry(val mapper: ShadowMapperGL) {
         var tex = 0
         val w = mapper.width
         val h = mapper.length
-        /** Legacy overlay texels (68 in shadow, 17 per shadowed 4-neighbour outside), full map. */
         val derived = ByteArray(w * h)
         var uploadedVersion = -1
         var lastUsedFrame = 0L
     }
     private val shadowEntries = LinkedHashMap<ShadowMapperGL, ShadowTexEntry>()
     private var currentShadowMapper: ShadowMapperGL? = null
-    /** Mapper whose texture the bound program currently samples; null = uniforms stale. */
     private var boundShadowMapper: ShadowMapperGL? = null
     private var shadowTexelSize = 32f
     private val SHADOW_TEXTURE_UNIT = 4
@@ -168,25 +135,9 @@ class ModernGroundRenderer {
     private var shadowDiagCount = 0
     private val GROUND_POINT_LIGHTS =
         System.getProperty("render.groundlights")?.equals("false", true) != true
-    /** -Drender.groundshadows=false disables the native ground shadow overlay. */
     private val GROUND_SHADOWS =
         System.getProperty("render.groundshadows")?.equals("false", true) != true
 
-    /**
-     * Native replacement for legacy's fixed-function ground shadow overlay
-     * (ShadowMapperGL.renderShadowOverlay): a ground's whole intensity map lives in
-     * one R8 texture, sampled per fragment by the ground shader and applied as
-     * `colour *= 1 - texel`, which is exactly what legacy's REPLACE + alpha-blended
-     * overlay quad does. Texel values are derived the way ShadowTileGL.regenerateTexture
-     * derives them (68 where the map is non-zero, neighbourCount * 17 on the fringe),
-     * and only the texels the mapper reports dirty are re-derived and re-uploaded.
-     *
-     * This is not a small effect: at the spawn hub the map is non-zero over ~94% of
-     * the ground, so without it the entire terrain renders ~27% brighter than legacy.
-     *
-     * Called by GroundGL BEFORE it draws that ground's materials, so the draws that
-     * follow sample the right plane's map. [texelSize] = world units per shadow texel.
-     */
     fun setShadowMapper(sm: ShadowMapperGL?, texelSize: Float) {
         if (!GROUND_SHADOWS) return
         currentShadowMapper = sm
@@ -244,14 +195,11 @@ class ModernGroundRenderer {
         sm.dirtyRectCount = 0
     }
 
-    /** Re-derives one texel rectangle (max exclusive) plus a one-texel halo and uploads it. */
     private fun syncShadowRect(e: ShadowTexEntry, rx0: Int, ry0: Int, rx1: Int, ry1: Int) {
         val sm = e.mapper
         val derived = e.derived
         val w = e.w
         val h = e.h
-        // Fringe texels just outside the changed rectangle read their neighbour count
-        // from inside it, so re-derive one texel further out.
         val x0 = maxOf(0, rx0 - 1)
         val y0 = maxOf(0, ry0 - 1)
         val x1 = minOf(w, rx1 + 1)
@@ -298,7 +246,6 @@ class ModernGroundRenderer {
         }
     }
 
-    /** Binds the current mapper's overlay texture and uniforms on the bound program [s]. */
     private fun uploadShadowUniforms(s: ShaderProgram) {
         val sm = currentShadowMapper
         boundShadowMapper = sm
@@ -309,7 +256,6 @@ class ModernGroundRenderer {
         if (en < 0) return
         if (sm == null) { GLWrapper.uniform1i(en, 0); return }
         val e = shadowEntryFor(sm)
-        // The upload binds on the active unit; unit 0 must keep the material texture the pass cached.
         GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + SHADOW_TEXTURE_UNIT)
         syncShadowTexture(e)
         glBindTexture(GL_TEXTURE_2D, e.tex)
@@ -321,7 +267,6 @@ class ModernGroundRenderer {
         if (tx >= 0) GLWrapper.uniform1i(tx, SHADOW_TEXTURE_UNIT)
     }
 
-    /** Point lights for this frame, evaluated in the ground shaders (no FFP). */
     private var plCount = 0
     private var plPos = FloatArray(0)
     private var plColor = FloatArray(0)
@@ -395,40 +340,33 @@ class ModernGroundRenderer {
         legacyContrastNeg = contrastNeg
     }
 
-    // CPU staging buffer
     private var vertexData: ByteBuffer? = null
     private var indexData: java.nio.ShortBuffer? = null
 
-    // Matrices
     private val viewMatrix = Matrix4f()
     private val projectionMatrix = Matrix4f()
     private val modelViewMatrix = Matrix4f()
     private val modelViewProjectionMatrix = Matrix4f()
     private val normalMatrix = Matrix3f()
 
-    // Shadow matrix for shadow mapping
     private val shadowMatrix = Matrix4f()
 
-    // Lighting
     private val sunDirection = Vector3f(0f, 1f, 0f)
     private val sunColor = Vector3f(1f, 1f, 1f)
     private var ambient = 0.3f
     private var contrast = 0.7f
 
-    // Fog
     private var fogEnabled = false
     private var fogStart = 100f
     private var fogEnd = 500f
     private val fogColor = floatArrayOf(0.7f, 0.8f, 0.9f, 1f)
 
-    // Shadow mapping
     private var shadowEnabled = false
     private var shadowMapTextureId = 0
     private var shadowBias = 0.005f
     private var shadowIntensity = 0.5f
-    private var shadowMapSize = 2048f  // Shadow map dimensions for PCF texel size calculation
+    private var shadowMapSize = 2048f
 
-    // Uniform locations
     private var uMVPLocation = -1
     private var uMVLocation = -1
     private var uNormalMatrixLocation = -1
@@ -449,17 +387,12 @@ class ModernGroundRenderer {
 
     private var isInitialized = false
 
-    // Statistics
     private var drawCallsThisFrame = 0
     private var trianglesThisFrame = 0
 
-    /**
-     * Initializes the renderer.
-     */
     fun initialize() {
         if (isInitialized) return
 
-        // Initialize the standard ground shader (for self-managed vertex data)
         shader = ShaderProgram.createFromResources("/shaders/ground.vert", "/shaders/ground.frag")
 
         vao = VertexArray()
@@ -477,7 +410,6 @@ class ModernGroundRenderer {
 
         cacheUniformLocations()
 
-        // Initialize textured ground shader (for external legacy VBOs)
         texturedShader = ShaderProgram.createFromResources("/shaders/groundTextured.vert", "/shaders/groundTextured.frag")
         externalVao = VertexArray()
         externalIbo = IndexBuffer(IndexBuffer.BufferUsage.DYNAMIC, IndexBuffer.IndexType.UNSIGNED_SHORT)
@@ -547,7 +479,6 @@ class ModernGroundRenderer {
         uTexLapAmbientLocation = s.getUniformLocation("uLapAmbient")
         uTexWaterTimeLocation = s.getUniformLocation("uWaterTime")
         uTexRippleFogLocation = s.getUniformLocation("uRippleFog")
-        // A sampler2D and the sampler3D left on the same unit make every draw GL_INVALID_OPERATION.
         if (uTexTextureLocation >= 0) GLWrapper.uniform1i(uTexTextureLocation, 0)
         if (uTexWaterNoiseLocation >= 0) GLWrapper.uniform1i(uTexWaterNoiseLocation, WATER_TEXTURE_UNIT)
         val shadowTex = s.getUniformLocation("uGroundShadowTex")
@@ -557,23 +488,14 @@ class ModernGroundRenderer {
         s.unbind()
     }
 
-    /**
-     * Sets the projection matrix.
-     */
     fun setProjection(matrix: Matrix4f) {
         projectionMatrix.set(matrix)
     }
 
-    /**
-     * Sets the view matrix.
-     */
     fun setView(matrix: Matrix4f) {
         viewMatrix.set(matrix)
     }
 
-    /**
-     * Configures lighting.
-     */
     fun setLighting(direction: Vector3f, color: Vector3f, ambientIntensity: Float, contrastIntensity: Float) {
         sunDirection.set(direction).normalize()
         sunColor.set(color)
@@ -581,9 +503,6 @@ class ModernGroundRenderer {
         contrast = contrastIntensity
     }
 
-    /**
-     * Configures fog.
-     */
     fun setFog(enabled: Boolean, start: Float, end: Float, r: Float, g: Float, b: Float) {
         fogEnabled = enabled
         fogStart = start
@@ -593,9 +512,6 @@ class ModernGroundRenderer {
         fogColor[2] = b
     }
 
-    /**
-     * Configures shadow mapping.
-     */
     fun setShadowMapping(enabled: Boolean, shadowMap: Int, matrix: Matrix4f, bias: Float = 0.005f, intensity: Float = 0.5f, mapSize: Int = 2048) {
         shadowEnabled = enabled
         shadowMapTextureId = shadowMap
@@ -605,9 +521,6 @@ class ModernGroundRenderer {
         shadowMapSize = mapSize.toFloat()
     }
 
-    /**
-     * Begins a render frame.
-     */
     fun invalidateBoundTexture() {
         boundTexture = -1
     }
@@ -628,21 +541,11 @@ class ModernGroundRenderer {
         setShadowUniforms()
     }
 
-    /**
-     * Ends a render frame.
-     */
     fun endFrame() {
         closeGroundBatch()
         shader?.unbind()
     }
 
-    /**
-     * Releases the pipeline after a run of ground draws.
-     *
-     * Must be called before anything else issues GL, because the pass leaves the
-     * ground shader bound, the ground VAO bound and its attribute arrays enabled.
-     * Idempotent.
-     */
     fun closeGroundBatch() {
         if (!groundBatchOpen) return
         groundBatchOpen = false
@@ -662,8 +565,6 @@ class ModernGroundRenderer {
         boundWaterMode = -1
         boundWaterNoise = -1
         glBindBuffer(GL_ARRAY_BUFFER, 0)
-        // Unbind the program: legacy fixed-function draws interleave with this path
-        // (lights, UI, fallbacks), and a bound program hijacks their vertex processing.
         texturedShader?.unbind()
         boundVertexVbo = 0
         boundTexture = -1
@@ -677,7 +578,6 @@ class ModernGroundRenderer {
         boundTexCoordSize = -1
     }
 
-    /** Open-pass state, so consecutive ground draws only re-issue what actually changed. */
     private val releaseAction = Runnable { closeGroundBatch() }
     private var groundBatchOpen = false
     private var boundVertexVbo = 0
@@ -727,17 +627,9 @@ class ModernGroundRenderer {
         }
     }
 
-    /**
-     * Draws terrain with the provided vertex and index data.
-     *
-     * @param vertices ByteBuffer with interleaved vertex data (28 bytes per vertex)
-     * @param indices ShortBuffer with indices
-     * @param indexCount Number of indices
-     */
     fun drawIndexed(vertices: ByteBuffer, indices: java.nio.ShortBuffer, indexCount: Int) {
         if (indexCount == 0) return
 
-        // Use identity model matrix for terrain (world space)
         projectionMatrix.mul(viewMatrix, modelViewProjectionMatrix)
         viewMatrix.normal(normalMatrix)
 
@@ -756,16 +648,6 @@ class ModernGroundRenderer {
         trianglesThisFrame += indexCount / 3
     }
 
-    /**
-     * Draws a terrain tile with separate attribute arrays.
-     *
-     * @param positions Vertex positions [x,y,z, ...]
-     * @param normals Vertex normals [nx,ny,nz, ...]
-     * @param colors Vertex colors [r,g,b,a, ...]
-     * @param indices Triangle indices
-     * @param vertexCount Number of vertices
-     * @param indexCount Number of indices
-     */
     fun drawTile(
         positions: FloatArray,
         normals: FloatArray,
@@ -785,19 +667,15 @@ class ModernGroundRenderer {
         vb.clear()
         ib.clear()
 
-        // Interleave vertex data
         for (i in 0 until vertexCount) {
-            // Position (12 bytes)
             vb.putFloat(positions[i * 3])
             vb.putFloat(positions[i * 3 + 1])
             vb.putFloat(positions[i * 3 + 2])
 
-            // Normal (12 bytes)
             vb.putFloat(normals[i * 3])
             vb.putFloat(normals[i * 3 + 1])
             vb.putFloat(normals[i * 3 + 2])
 
-            // Color (4 bytes)
             vb.put(colors[i * 4])
             vb.put(colors[i * 4 + 1])
             vb.put(colors[i * 4 + 2])
@@ -812,45 +690,10 @@ class ModernGroundRenderer {
         drawIndexed(vb, ib, indexCount)
     }
 
-    /**
-     * Gets frame statistics.
-     */
     fun getFrameStats(): FrameStats {
         return FrameStats(drawCallsThisFrame, trianglesThisFrame)
     }
 
-    /**
-     * Renders ground geometry using external legacy VBOs.
-     *
-     * This method binds to pre-existing VBOs created by the legacy GroundGL system
-     * and renders them through the modern shader pipeline. The legacy VBO has
-     * the following interleaved layout (from GroundGL.resetLight):
-     *
-     * Standard (24 bytes per vertex):
-     * - Position: vec3 (12 bytes) at offset 0
-     * - Color: RGBA (4 bytes) at offset 12
-     * - TexCoord: vec2 (8 bytes) at offset 16
-     *
-     * With 3D texcoords (28 bytes per vertex):
-     * - Position: vec3 (12 bytes) at offset 0
-     * - Color: RGBA (4 bytes) at offset 12
-     * - TexCoord: vec3 (12 bytes) at offset 16
-     *
-     * With HD_LIGHT normals (add 12 bytes):
-     * - Normal: vec3 (12 bytes) at offset 24 or 28
-     *
-     * @param interleavedVboId GL buffer ID containing all vertex data (position, color, texcoord, normal)
-     * @param stride Stride between vertices in the interleaved buffer
-     * @param texCoordSize Size of texture coordinates (2 for vec2, 3 for vec3)
-     * @param indexData Raw index data as byte array
-     * @param indexByteCount Number of bytes in indexData that contain valid index data
-     * @param indexCount Number of indices to draw
-     * @param textureHandle GL texture handle (0 for no texture)
-     * @param textureScale Scale factor for texture coordinates
-     * @param hasNormals Whether HD lighting normals are available
-     * @param viewProjection The combined view-projection matrix (Matrix44 from legacy)
-     * @param isBigEndian Whether the index data is big-endian
-     */
     fun renderWithExternalVBOs(
         interleavedVboId: Int,
         stride: Int,
@@ -870,11 +713,8 @@ class ModernGroundRenderer {
         val vao = externalVao ?: return
         val ibo = externalIbo ?: return
 
-        // Bind shader
         s.bind()
 
-        // Set view-projection matrix: RS elements is row-major, upload straight through
-        // for GLSL column-vector trick. Negate Y row for OpenGL Y-up convention.
         val vp = viewProjection.elements ?: return
         val colMajor = FloatArray(16)
         for (i in 0..15) colMajor[i] = vp[i]
@@ -884,11 +724,9 @@ class ModernGroundRenderer {
         colMajor[13] = -colMajor[13]
         glUniformMatrix4fv(uTexViewProjectionLocation, false, colMajor)
 
-        // Set texture scaling
         s.setUniform(uTexTextureScaleLocation, textureScale)
         s.setUniform(uTexTextureScrollLocation, 0f, 0f)
 
-        // Set lighting parameters
         s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
         s.setUniform(uTexSunDirectionLocation, sunDirection.x, sunDirection.y, sunDirection.z)
         s.setUniform("uSunColor", sunColor)
@@ -897,47 +735,36 @@ class ModernGroundRenderer {
         s.setUniform(uTexAmbientLocation, ambient)
         s.setUniform(uTexContrastLocation, contrast)
 
-        // Set fog parameters
         s.setUniform(uTexFogEnabledLocation, if (fogEnabled) 1 else 0)
         s.setUniform(uTexFogStartLocation, fogStart)
         s.setUniform(uTexFogEndLocation, fogEnd)
         s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
 
-        // Set texture parameters
         val hasTexture = textureHandle > 0
         s.setUniform(uTexHasTextureLocation, if (hasTexture) 1 else 0)
         if (hasTexture) {
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
             GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
-            // Ensure texture tiles properly with world-space texture coordinates
             GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_S, GLWrapper.Constants.REPEAT)
             GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_T, GLWrapper.Constants.REPEAT)
             s.setUniform(uTexTextureLocation, 0)
         }
 
-
-        // Setup VAO with external VBO
         vao.bind()
 
-        // Bind the single interleaved VBO
         GLWrapper.bindBuffer(GLWrapper.Constants.ARRAY_BUFFER, interleavedVboId)
 
-        // Position: vec3 at offset 0
         glEnableVertexAttribArray(0)
         glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
 
-        // Color: vec4 ubyte at offset 12
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, stride, 12L)
 
-        // TexCoord: vec2 or vec3 at offset 16
         glEnableVertexAttribArray(2)
         glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
 
-        // Calculate texture coordinate byte size (for normal offset calculation)
-        val texCoordBytes = texCoordSize * 4  // 8 for vec2, 12 for vec3
+        val texCoordBytes = texCoordSize * 4
 
-        // Normal: vec3 at offset 16 + texCoordBytes (if HD_LIGHT)
         if (hasNormals) {
             val normalOffset = 16L + texCoordBytes
             glEnableVertexAttribArray(3)
@@ -946,17 +773,14 @@ class ModernGroundRenderer {
             glDisableVertexAttribArray(3)
         }
 
-        // Upload index data - convert byte array to short buffer with correct endianness
         ensureIndexCapacity(indexCount)
         val shortBuffer = this.indexData!!
         shortBuffer.clear()
         for (i in 0 until indexCount) {
             val byteOffset = i * 2
             val idx = if (isBigEndian) {
-                // Big-endian: MSB first
                 ((indexData[byteOffset].toInt() and 0xFF) shl 8) or (indexData[byteOffset + 1].toInt() and 0xFF)
             } else {
-                // Little-endian: LSB first
                 (indexData[byteOffset].toInt() and 0xFF) or ((indexData[byteOffset + 1].toInt() and 0xFF) shl 8)
             }
             shortBuffer.put(idx.toShort())
@@ -964,10 +788,8 @@ class ModernGroundRenderer {
         shortBuffer.flip()
         ibo.upload(shortBuffer)
 
-        // Draw
         GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
 
-        // Cleanup
         glDisableVertexAttribArray(0)
         glDisableVertexAttribArray(1)
         glDisableVertexAttribArray(2)
@@ -982,31 +804,12 @@ class ModernGroundRenderer {
         trianglesThisFrame += indexCount / 3
     }
 
-    // VBO for modern-only rendering (no legacy dependency)
     private var modernVbo: Int = 0
 
-    // Scratch VBO for per-material color data when the legacy color buffer is not a VBO
     private var modernColorVbo: Int = 0
 
-    // Reused matrix upload scratch (avoid per-draw allocation)
     private val vpScratch = FloatArray(16)
 
-    /**
-     * Renders ground using a ByteBuffer directly (no legacy VBO involvement).
-     * This is the pure LWJGL path with zero legacy dependency.
-     *
-     * Color source parity with legacy: GroundMaterialGL.drawMaterialTriangles draws with
-     * toggleDrawingClientstates(ground.vertexBuffer, ground.normalsBuffer,
-     * material.arrayBufferPointer, ground.textureBuffer) (GroundMaterialGL.kt:189/199) —
-     * i.e. vertex COLORS come from the PER-MATERIAL color VBO (baked light/shadow written
-     * by writeVertexColor, alpha mask via appendToNativeStream), NOT from the interleaved
-     * ground buffer (whose color at offset 12 is black for textured vertices).
-     *
-     * @param colorVboId GL buffer id of the per-material color VBO (4 ubytes RGBA per
-     *        vertex, same vertex indexing as the interleaved buffer), or 0 when unavailable
-     * @param colorData client-memory copy of the per-material colors when colorVboId == 0
-     * @param combineMode legacy MaterialType.combineMode (see groundTextured.frag)
-     */
     fun renderWithModernData(
         vertexData: java.nio.ByteBuffer,
         stride: Int,
@@ -1022,17 +825,8 @@ class ModernGroundRenderer {
         colorVboId: Int = 0,
         colorData: java.nio.ByteBuffer? = null,
         combineMode: Int = 0,
-        /** Take fragment alpha from the vertex colour instead of the texture (see groundTextured.frag). */
         alphaFromVertex: Boolean = false,
-        /**
-         * Resident VBO already holding [vertexData], or 0 to upload into this
-         * renderer's own scratch VBO. Terrain geometry is static between ground
-         * rebuilds, so the caller keeps a resident copy per ground and re-uploads
-         * only when it actually changes — this used to re-send the whole snapshot
-         * on every material draw.
-         */
         residentVertexVbo: Int = 0,
-        /** Element buffer already holding [indexCount] indices, or 0 to upload [indexShorts]. */
         residentIndexIbo: Int = 0,
         water: GroundWater = GroundWater.NONE
     ) {
@@ -1053,22 +847,9 @@ class ModernGroundRenderer {
             glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW)
         }
 
-        // ---- Per-PASS state ----
-        //
-        // The terrain draws once per material — about 35 times a frame — and all of
-        // this is identical across those draws. It used to be re-issued for every one
-        // of them, including a 3.5KB re-upload of the point-light arrays and three
-        // string-keyed uniform-location lookups, which put the ground pass among the
-        // most expensive things in the frame despite drawing almost nothing.
-        //
-        // The pass stays open across consecutive ground draws and is closed by
-        // [closeGroundBatch] the moment anything else takes the pipeline.
         if (!groundBatchOpen) {
             s.bind()
 
-            // View-projection: RS elements is row-major, upload straight through for
-            // the GLSL column-vector trick (row-major + M*v = row-vector result).
-            // Negate the Y row (1,5,9,13) for OpenGL Y-up (RS VP is Y-down).
             val vp = viewProjection.elements ?: return
             val colMajor = vpScratch
             for (i in 0..15) colMajor[i] = vp[i]
@@ -1087,9 +868,6 @@ class ModernGroundRenderer {
                 glUniform2f(uTexFramebufferSizeLocation, depthFogWidth.toFloat(), depthFogHeight.toFloat())
             }
 
-            // Lighting. HD_LIGHT grounds bake sunDotProduct = 1.0 into the vertex
-            // colors and expect runtime sun lighting (GroundGL.kt:457-460), so pass
-            // the RAW legacy sun parameters for the shader's legacy-formula lighting.
             s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
             s.setUniform("uSunColor", sunColor)
             uploadPointLights(s)
@@ -1108,11 +886,6 @@ class ModernGroundRenderer {
             s.setUniform(uTexFogEndLocation, fogEnd)
             s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
 
-            // Blend must be on: the per-material color VBO carries a per-vertex alpha
-            // MASK (0 for vertices not owned by this material, 255 for owned — written
-            // by GroundMaterialGL.appendToNativeStream), and legacy draws ground with
-            // setBlendMode(1) via setupMatrixRendering. Without blending the
-            // cross-material tile edges lose their legacy feathering.
             glEnable(GL_DEPTH_TEST)
             glDepthFunc(GL_LEQUAL)
             glDepthMask(true)
@@ -1127,7 +900,6 @@ class ModernGroundRenderer {
             glEnableVertexAttribArray(2)
 
             groundBatchOpen = true
-            // Any other program binding now releases the pass — see ShaderProgram.bind.
             ShaderProgram.groundPassProgramId = s.programId
             ShaderProgram.releaseGroundPass = releaseAction
             boundVertexVbo = 0
@@ -1142,21 +914,16 @@ class ModernGroundRenderer {
             boundWaterNoise = -1
         }
 
-        // ---- Per-GROUND state: the interleaved attribute layout ----
-        // Each ground plane has its own shadow map; GroundGL selects it before its draws.
         if (currentShadowMapper !== boundShadowMapper) uploadShadowUniforms(s)
 
         val texCoordBytes = texCoordSize * 4
         if (vertexVbo != boundVertexVbo || stride != boundStride || texCoordSize != boundTexCoordSize) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexVbo)
-            // Position: vec3 at offset 0
             glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
-            // TexCoord: vec2 or vec3 at offset 16
             glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
             boundVertexVbo = vertexVbo
             boundStride = stride
             boundTexCoordSize = texCoordSize
-            // The normal pointer is relative to the same layout, so it has to follow.
             boundHasNormals = -1
         }
         val hasNormalsFlag = if (hasNormals) 1 else 0
@@ -1172,7 +939,6 @@ class ModernGroundRenderer {
             boundHasNormals = hasNormalsFlag
         }
 
-        // ---- Per-MATERIAL state ----
         if (textureScale != boundTextureScale) {
             s.setUniform(uTexTextureScaleLocation, textureScale)
             boundTextureScale = textureScale
@@ -1188,10 +954,6 @@ class ModernGroundRenderer {
             if (hasTexture) {
                 GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
                 GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
-                // No wrap override here: the texture keeps the wrap its material
-                // declares (OpenGLTextureCache -> setRepeat(material.repeatS/T)), which
-                // is what legacy samples with. Forcing REPEAT also fails once the model
-                // batcher holds a bindless handle on the same texture (immutable).
             }
             boundTexture = textureHandle
         }
@@ -1206,9 +968,6 @@ class ModernGroundRenderer {
 
         applyWater(water)
 
-        // Color: from the per-material color VBO (legacy parity — see kdoc above).
-        // Attribute pointers latch the ARRAY_BUFFER binding at specification time,
-        // so this must come after the interleaved attributes are specified.
         when {
             colorVboId != 0 -> {
                 glBindBuffer(GL_ARRAY_BUFFER, colorVboId)
@@ -1222,13 +981,10 @@ class ModernGroundRenderer {
                 glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, 4, 0L)
             }
             else -> {
-                // Fallback: interleaved color at offset 12 (black for textured vertices)
                 glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, stride, 12L)
             }
         }
 
-        // Index data: a material that already holds this frame's list in its own
-        // element buffer just binds it; otherwise upload the caller's shorts.
         if (residentIndexIbo != 0) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, residentIndexIbo)
         } else {
@@ -1241,21 +997,12 @@ class ModernGroundRenderer {
             ibo.bind()
         }
 
-        // Draw. Teardown is deferred to closeGroundBatch — every state this draw set
-        // is either identical for the next material or re-checked above.
         GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
 
         drawCallsThisFrame++
         trianglesThisFrame += indexCount / 3
     }
 
-    /**
-     * Draws a top-down slice of a ground into the CURRENT framebuffer for the minimap:
-     * the modern twin of GroundGL.renderMinimapFloor. [vpColMajor] is the finished
-     * GL clip transform (ortho over world X/Z, no Y flip needed). Untextured, unfogged,
-     * no depth, no blend; lit by the sun formula when HD normals are present, exactly
-     * the fixed-function state legacy used (lighting on for HD_LIGHT, off otherwise).
-     */
     fun renderMinimapFloor(
         vertexVbo: Int,
         stride: Int,
@@ -1332,9 +1079,6 @@ class ModernGroundRenderer {
         boundShadowMapper = null
     }
 
-    /**
-     * Releases resources.
-     */
     fun destroy() {
         if (modernVbo != 0) {
             glDeleteBuffers(modernVbo)
@@ -1398,12 +1142,11 @@ class ModernGroundRenderer {
         s.setUniform(uShadowEnabledLocation, if (shadowEnabled) 1 else 0)
         if (shadowEnabled) {
             s.setUniform("uShadowMatrix", shadowMatrix)
-            s.setUniform(uShadowMapLocation, 1) // Texture unit 1
+            s.setUniform(uShadowMapLocation, 1)
             s.setUniform(uShadowBiasLocation, shadowBias)
             s.setUniform(uShadowIntensityLocation, shadowIntensity)
             GLWrapper.uniform2f(uShadowMapSizeLocation, shadowMapSize, shadowMapSize)
 
-            // Bind shadow map to texture unit 1
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + 1)
             GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, shadowMapTextureId)
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)

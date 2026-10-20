@@ -5,11 +5,6 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 
-/**
- * Jagex File System wrapper for RandomAccessFile with max capacity enforcement.
- *
- * @author Brainpower
- */
 class JFS32 @Throws(IOException::class) constructor(
     outputFile: File,
     maxCapacity: Long
@@ -46,15 +41,6 @@ class JFS32 @Throws(IOException::class) constructor(
         }
     }
 
-    /**
-     * Writes data to the file, throwing EOFException if capacity exceeded.
-     *
-     * @param data The data to write
-     * @param writeOffset The offset in the data array
-     * @param seekOffset The number of bytes to write
-     * @throws IOException if an I/O error occurs
-     * @throws EOFException if writing would exceed max capacity
-     */
     @Throws(IOException::class)
     fun write(data: ByteArray, writeOffset: Int, seekOffset: Int) {
         if (seekPosition + seekOffset > maxCapacity) {
@@ -67,26 +53,11 @@ class JFS32 @Throws(IOException::class) constructor(
         }
     }
 
-    /**
-     * Returns the length of the underlying file.
-     *
-     * @return The file length in bytes
-     * @throws IOException if an I/O error occurs
-     */
     @Throws(IOException::class)
     fun length(): Long {
         return rwFile!!.length()
     }
 
-    /**
-     * Reads data from the file and updates the seek position.
-     *
-     * @param data The buffer to read into
-     * @param offset The offset in the buffer
-     * @param length The maximum number of bytes to read
-     * @return The number of bytes actually read
-     * @throws IOException if an I/O error occurs
-     */
     @Throws(IOException::class)
     fun getSeekOffset(data: ByteArray, offset: Int, length: Int): Int {
         val seekOffset = rwFile!!.read(data, offset, length)
@@ -96,12 +67,6 @@ class JFS32 @Throws(IOException::class) constructor(
         return seekOffset
     }
 
-    /**
-     * Seeks to a specific position in the file.
-     *
-     * @param seekTo The position to seek to
-     * @throws IOException if an I/O error occurs
-     */
     @Throws(IOException::class)
     fun seek(seekTo: Long) {
         rwFile!!.seek(seekTo)

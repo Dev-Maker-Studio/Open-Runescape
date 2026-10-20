@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.config.light
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * < Mostly refactored >
- * @author Brainpower - 30/05/2020
- *
- */
 class LightType {
 
     @JvmField var effect: Int = 0

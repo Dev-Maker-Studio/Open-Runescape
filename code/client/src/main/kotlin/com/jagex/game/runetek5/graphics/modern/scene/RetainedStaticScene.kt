@@ -18,43 +18,12 @@ import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 
-/**
- * Retained submission of the scene's STATIC entities for the modern toolkit.
- *
- * The legacy scene walk costs ~1 µs per visible entity per frame — visibility,
- * projection, sort, then a draw that re-derives the same matrix and re-submits the
- * same geometry — and at a dense hub that is most of the frame. Static locs, walls
- * and decorations never change between frames, so their draws are captured ONCE per
- * 8x8-tile chunk (by running each entity's own draw() with the toolkit in capture
- * mode, so the captured geometry and matrix are exactly what the walk would have
- * produced) and resubmitted per frame from here:
- *
- *  - chunks are culled against the frustum and the walk's visible window;
- *  - each instance applies the walk's plane/roof rule (Scene.isHidden) at the first
- *    footprint tile inside the window, exactly as the walk does;
- *  - translucent instances carry the walk's sort key (floorDepth), and the batchers
- *    order the whole translucent pass by that key, so they land where the walk's
- *    depth sort would have put them;
- *  - interactive instances get their picking box and RenderedEntity registered as
- *    the walk would (InteractiveEntityCache).
- *
- * Deliberately NOT reproduced: the software occlusion culling (hideTile/hideWall)
- * and the per-tile frustum grid — both only ever REMOVE geometry that is not
- * visible, so skipping them changes nothing on screen, only what the GPU discards.
- *
- * Scene mutations invalidate the affected chunk (RetainedSceneHook), and its
- * entities fall back to the walk until the chunk is recaptured on its next visit.
- * `-Drender.retained=false` disables the whole mechanism.
- */
 class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneHook {
 
-    /** One model submission recorded while an entity's draw() ran in capture mode. */
     class Capture(
         val cached: ModelCache.CachedModel,
         val key: Long,
-        /** Matrix the batcher draws with (yaw-composed for mesh-built geometry). */
         val matrix: Matrix43,
-        /** The legacy model matrix, which the model's own bounds are expressed against. */
         val legacyMatrix: Matrix43,
         val model: ModelGL
     )
@@ -67,7 +36,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         val legacyMatrix: Matrix43,
         val model: ModelGL,
         val translucent: Boolean,
-        /** Last record of its entity: registers the picking entry after the box is computed. */
         val pickable: Boolean,
         val absX: Float,
         val absY: Float,
@@ -77,42 +45,29 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         val tx1: Int,
         val tz0: Int,
         val tz1: Int,
-        /** World-space AABB of the model under its legacy matrix (per-instance frustum cull). */
         val bMinX: Float, val bMinY: Float, val bMinZ: Float,
         val bMaxX: Float, val bMaxY: Float, val bMaxZ: Float
     ) {
-        /** Point-light selection memo (indices into the toolkit's frame light set). */
         val lightIdx = FloatArray(4)
         var lightEpoch = -1
-        /** -1 unknown, else 0/1: cached so the hot loop never touches the ModelGL object. */
         var billboards = -1
-        /** Translucent or billboard-bearing: never part of a chunk block. */
         var extra = false
-        /** Cached legacy depth anchor (absY + minY/2). */
         var depthY = 0f
         var depthYSet = false
     }
 
-    /** One resident mesh's packed instances inside a chunk block. */
     private class BlockGroup(val entry: InstancedModelBatcher.MeshEntry, val key: Long, val offset: Int, val count: Int)
 
     private class Chunk {
         val records = ArrayList<Record>(32)
         var valid = false
-        // Per-chunk instance block: every opaque, billboard-free record visible under
-        // the current roof/window key, packed once as INSTANCE_FLOATS per instance and
-        // grouped by resident mesh, so a visible chunk costs one arraycopy per mesh
-        // instead of a lookup/refit/light pass per instance.
         var blockFloats = FloatArray(0)
         val blockGroups = ArrayList<BlockGroup>(16)
         val blockRecords = ArrayList<Record>(32)
         var blockValid = false
         var blockKey = 0L
         var blockLightEpoch = -1
-        /** Prebuilt opaque multi-draw for the block (bindless batcher only). */
         var blockDraw: InstancedModelBatcher.BlockDraw? = null
-        // Translucent (non-billboard) records: packed instance floats, command
-        // templates and material words prebuilt; only the depth key is per frame.
         val transRecords = ArrayList<Record>(16)
         var transEntries = arrayOfNulls<InstancedModelBatcher.MeshEntry>(0)
         var transFloats = FloatArray(0)
@@ -127,7 +82,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         var transEntryLayout = IntArray(0)
         var transValid = false
         var transLightEpoch = -1
-        /** Visibility per record (chunk.records order) the block was packed for. */
         var blockMask = BooleanArray(0)
         var minX = 0f; var minY = 0f; var minZ = 0f
         var maxX = 0f; var maxY = 0f; var maxZ = 0f
@@ -170,16 +124,10 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
     }
 
     override fun active(scene: Scene): Boolean {
-        // Only while THIS toolkit is the one drawing: after a runtime toolkit switch the
-        // modern instance stays initialized, and taking the statics away from the walk
-        // would leave the legacy renderer with nothing to draw for them.
         if (!ENABLED || Renderers.activeToolkit !== toolkit) return false
         if (!toolkit.isModernRenderingActive() || !toolkit.canSubmitRetained()) return false
         val ok = ensureScene(scene)
         if (ok && OCCLUSION_OFF && scene.culling.cullingEnabled) {
-            // The software occluder pass (Culling.processCulling + per-entity hideTile)
-            // only ever removes geometry that is already invisible; with statics
-            // resubmitted from here it costs more per frame than the overdraw it saves.
             scene.culling.cullingEnabled = false
         }
         return ok
@@ -232,9 +180,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         column[cy] = chunk
                     }
                     if (!chunk.valid) {
-                        // Capturing every chunk of a fresh region in one frame is a
-                        // ~250 ms stall. Spread it: an uncaptured chunk's entities are
-                        // simply not retained yet, so the walk draws them this frame.
                         if (capturesThisFrame >= CAPTURE_BUDGET) continue
                         capturesThisFrame++
                         captureChunk(scene, chunk, plane, cx, cy)
@@ -252,10 +197,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         continue
                     }
                     for (k in records.indices) records[k].cached.lastUsedFrame = cacheFrame
-                    // A chunk wholly inside the frustum needs no per-instance tests.
                     val chunkInside = toolkit.isWorldAabbFullyInside(chunk.minX, chunk.minY, chunk.minZ, chunk.maxX, chunk.maxY, chunk.maxZ)
-                    // Picking data (bounding box + entity ref) only matters for entities the
-                    // cursor can be over; a chunk whose screen bounds exclude the cursor skips it.
                     val pickHere = chunkNearMouse(chunk)
                     var usedBlock = false
                     if (BLOCKS && batcher != null) {
@@ -311,9 +253,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         val inTrans = usedTrans && r.translucent && r.billboards == 0
                         if (inTrans && !pickThis) continue
                         if (SKIP_TRANS_TEST && r.translucent && !pickThis) continue
-                        // The walk decides visibility at the first footprint tile inside
-                        // the window (Scene.isHidden): draw iff the plane/roof rule holds
-                        // there. No tile in the window means hidden.
                         var visible = false
                         var decided = false
                         var fx = r.tx0
@@ -333,8 +272,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                             fx++
                         }
                         if (!visible) continue
-                        // Per-instance frustum test, the same conservative AABB test the
-                        // walk's model submission applies (isModelVisible).
                         if (!chunkInside && !toolkit.isWorldAabbVisible(r.bMinX, r.bMinY, r.bMinZ, r.bMaxX, r.bMaxY, r.bMaxZ)) {
                             toolkit.retainedInstancesCulled++
                             continue
@@ -354,15 +291,11 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                         val depth = if (needsDepth) {
                             toolkit.retainedDepth(r.absX, r.absY + (r.entity.getMinY() shr 1), r.absZ)
                         } else 0
-                        // Light selection memoised on the record: touching the ModelGL memo
-                        // for every instance was a cache-miss per record (13% of the spin frame).
                         if (!inBlock) {
                             if (r.lightEpoch != lightEpoch) {
                                 toolkit.selectLightsInto(r.matrix.xD, r.matrix.yD, r.matrix.zD, r.lightIdx)
                                 r.lightEpoch = lightEpoch
                             }
-                            // Translucent records whose mesh is resident skip the per-instance
-                            // lookup/refit path: just the ordered append with this frame's key.
                             val te = if (r.translucent && batcher != null) r.cached.instanceEntry as? InstancedModelBatcher.MeshEntry else null
                             if (te != null && batcher != null && te.resident && te.modelId == r.key &&
                                 batcher.appendTranslucentEntry(te, r.matrix, r.lightIdx, true, toolkit.nextTranslucentSeq(), depth)
@@ -391,7 +324,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
     }
 
     private val mouseProj = FloatArray(3)
-    /** Conservative: true unless the chunk's projected AABB lies clearly away from the cursor. */
     private fun chunkNearMouse(chunk: Chunk): Boolean {
         if (!PICK_GATE) return true
         val recorder = MouseRecord.recorder ?: return true
@@ -411,7 +343,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         return mx >= minX - m && mx <= maxX + m && my >= minY - m && my <= maxY + m
     }
 
-    /** Roof/window visibility of a record, exactly the per-record rule of the fallback loop. */
     private fun recordVisible(r: Record, winX0: Int, winX1: Int, winY0: Int, winY1: Int,
                               settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte): Boolean {
         var fx = r.tx0
@@ -431,10 +362,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         return false
     }
 
-    /**
-     * Packs the chunk's block for [visKey]. Leaves [Chunk.blockValid] false when some
-     * record has no resident mesh yet (the fallback loop resolves it this frame).
-     */
     private fun buildBlock(chunk: Chunk, visKey: Long, winX0: Int, winX1: Int, winY0: Int, winY1: Int,
                            settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte, lightEpoch: Int) {
         chunk.blockValid = false
@@ -487,7 +414,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         chunk.blockLightEpoch = lightEpoch
         chunk.blockValid = true
         chunk.blockDraw = null
-        // Translucent records: pack once (matrix + lights); templates come later.
         val tn = transList.size
         if (chunk.transFloats.size < tn * stride) chunk.transFloats = FloatArray(tn * stride)
         val tf = chunk.transFloats
@@ -509,7 +435,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         toolkit.retainedBlockBuilds++
     }
 
-    /** Command templates for the chunk's translucent records; false if some mesh is not resident yet. */
     private fun buildTransTemplates(chunk: Chunk, batcher: InstancedModelBatcher): Boolean {
         chunk.transValid = false
         val list = chunk.transRecords
@@ -572,7 +497,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         chunk.transLightEpoch = lightEpoch
     }
 
-    /** Builds (or rebuilds) the chunk's command template from its groups' current arena layout. */
     private fun buildBlockDraw(chunk: Chunk, batcher: InstancedModelBatcher): InstancedModelBatcher.BlockDraw {
         val b = chunk.blockDraw ?: InstancedModelBatcher.BlockDraw().also { chunk.blockDraw = it }
         val groups = chunk.blockGroups
@@ -603,7 +527,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         return b
     }
 
-    /** True when every block-eligible record's roof visibility still matches the packed mask. */
     private fun blockMaskUnchanged(chunk: Chunk, winX0: Int, winX1: Int, winY0: Int, winY1: Int,
                                    settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte): Boolean {
         val records = chunk.records
@@ -634,7 +557,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         chunk.blockLightEpoch = lightEpoch
     }
 
-    /** Appends the whole block; validates every group first so a failure never leaves a partial submission. */
     private fun submitBlock(chunk: Chunk, batcher: InstancedModelBatcher): Boolean {
         val groups = chunk.blockGroups
         for (i in groups.indices) {
@@ -689,7 +611,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
                 var container = tile.interactives
                 while (container != null) {
                     val interactive = container.interactiveObject
-                    // Multi-tile locs sit in every tile they cover; capture at their origin only.
                     if (interactive is StationaryInteractiveObject &&
                         interactive.startX.toInt() == x && interactive.startZ.toInt() == y
                     ) {
@@ -708,7 +629,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
     private fun captureEntity(scene: Scene, chunk: Chunk, entity: SceneGraphEntity, tileX: Int, tileY: Int) {
         if (entity.modernRetained) scene.walkRevision++
         entity.modernRetained = false
-        // Animated textures scroll their UVs per frame through the live path; leave those to the walk.
         if (!entity.disregardTextureMovement()) return
         val captures = toolkit.beginCapture()
         val ref = entity.draw(toolkit)
@@ -752,7 +672,6 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
     private val boundsScratch = FloatArray(6)
     private var capturesThisFrame = 0
 
-    /** World AABB of the model's bounds under its legacy matrix, into [boundsScratch] (min xyz, max xyz). */
     private fun worldBounds(model: ModelGL, m: Matrix43) {
         val minX = model.getMinX().toFloat(); val maxX = model.getMaxX().toFloat()
         val minY = model.getMinY().toFloat(); val maxY = model.getMaxY().toFloat()
@@ -781,16 +700,10 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
     private var diagLines = 0
 
     companion object {
-        /** Chunk captures allowed per frame (-Drender.capturebudget=N). */
-        /** -Drender.retainedblocks=false restores per-record submission. */
         private val BLOCKS = System.getProperty("render.retainedblocks")?.equals("false", true) != true
-        /** -Drender.blockdraw=false submits blocks per mesh instead of as command templates. */
         private val BLOCK_DRAW = System.getProperty("render.blockdraw")?.equals("false", true) != true
-        /** -Drender.transtpl=false: translucent retained records through the per-record path. */
         private val TRANS_TPL = System.getProperty("render.transtpl")?.equals("false", true) != true
-        /** TEST ONLY (-Drender.skiptrans): drops translucent retained records to measure their cost. */
         private val SKIP_TRANS_TEST = System.getProperty("render.skiptrans") != null
-        /** -Drender.pickgate=false computes picking data for every visible pickable record. */
         private val PICK_GATE = System.getProperty("render.pickgate")?.equals("false", true) != true
         private val PICK_MARGIN = (System.getProperty("render.pickmargin")?.toIntOrNull() ?: 48).toFloat()
         private val CAPTURE_BUDGET = System.getProperty("render.capturebudget")?.toIntOrNull() ?: 6
@@ -798,9 +711,7 @@ class RetainedStaticScene(private val toolkit: ModernGLToolkit) : RetainedSceneH
         const val CHUNK_SHIFT = 3
         const val CHUNK_SIZE = 1 shl CHUNK_SHIFT
 
-        /** -Drender.retained=false hands every entity back to the legacy walk. */
         @JvmStatic val ENABLED = System.getProperty("render.retained")?.equals("false", true) != true
-        /** -Drender.occlusion=true keeps the legacy software occluder pass running. */
         @JvmStatic val OCCLUSION_OFF = System.getProperty("render.occlusion")?.equals("true", true) != true
     }
 }

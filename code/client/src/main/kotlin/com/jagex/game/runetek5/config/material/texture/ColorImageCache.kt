@@ -2,12 +2,6 @@ package com.jagex.game.runetek5.config.material.texture
 
 import com.jagex.game.runetek5.cache.node.LinkedList
 
-/**
- * Cache for color texture operation output with RGB channels.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class ColorImageCache(
     @JvmField val maxCachedRows: Int,
     @JvmField val totalRows: Int,
@@ -28,9 +22,6 @@ class ColorImageCache(
         cacheEntries = arrayOfNulls(totalRows)
     }
 
-    /**
-     * Clears and releases the cache.
-     */
     fun clear() {
         cacheEntries = emptyArray()
         rgbData = emptyArray()
@@ -38,12 +29,6 @@ class ColorImageCache(
         lruList = null
     }
 
-    /**
-     * Gets a palette row, managing the cache.
-     *
-     * @param index The row index
-     * @return The RGB palette data for this row
-     */
     fun getPalette(index: Int): Array<IntArray> {
         if (totalRows == maxCachedRows) {
             dirty = cacheEntries[index] == null
@@ -76,11 +61,6 @@ class ColorImageCache(
         return rgbData[entry.index]
     }
 
-    /**
-     * Gets all palette data.
-     *
-     * @return All RGB palette data
-     */
     fun getAllPalettes(): Array<Array<IntArray>> {
         if (maxCachedRows != totalRows) {
             throw RuntimeException()

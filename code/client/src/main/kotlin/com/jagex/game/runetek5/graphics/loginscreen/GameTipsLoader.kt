@@ -25,9 +25,6 @@ import com.jagex.game.runetek5.graphics.loginscreen.component.RotatedNewsSprite
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.network.newsitem.NewsItemFetcher
 
-/**
- * Loads game tips and creates drawable items from tip details.
- */
 class GameTipsLoader(
     @JvmField val spriteResource: Js5ResourceProvider,
     @JvmField val fontResource: Js5ResourceProvider

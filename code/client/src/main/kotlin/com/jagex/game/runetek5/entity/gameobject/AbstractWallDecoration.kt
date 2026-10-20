@@ -6,10 +6,6 @@ import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Base class for wall decorations (paintings, torches, etc.).
- * Wall decorations are attached to walls and rendered at specific positions.
- */
 abstract class AbstractWallDecoration protected constructor(
     scene: Scene,
     x: Int,
@@ -21,10 +17,8 @@ abstract class AbstractWallDecoration protected constructor(
     positionY: Int
 ) : SceneGraphEntity(scene) {
 
-    /** X position offset on the wall */
     @JvmField var positionX: Short = positionX.toShort()
 
-    /** Y position offset on the wall */
     @JvmField var positionY: Short = positionY.toShort()
 
     init {

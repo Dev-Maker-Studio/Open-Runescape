@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.entity.pathingentity
 
 import com.jagex.game.runetek5.entity.EntityNode
 
-/**
- *
- * @author Brainpower - 14/01/2022
- *
- */
 class EntityHitbarDisplayDetails(
     discardAtCycle: Int,
     fromPercentage: Int,

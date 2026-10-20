@@ -9,11 +9,6 @@ import java.awt.event.KeyListener
 import com.jagex.game.runetek5.cache.node.NodeCollection
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- *
- * @author Brainpower - 19/04/2022
- *
- */
 class CanvasKeyRecorder(component: Component) : KeyRecorder(), KeyListener, FocusListener {
 
     @JvmField val keysAwaitingProcessing: NodeCollection = NodeCollection()

@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.math
 
-/**
- * 4D vector for homogeneous coordinates.
- *
- * @author Brainpower - 04/03/2023
- */
 class Vector4 {
 
     @JvmField var x: Float = 0f
@@ -20,14 +15,6 @@ class Vector4 {
         reset()
     }
 
-    /**
-     * Sets the vector components.
-     *
-     * @param x The x component
-     * @param y The y component
-     * @param z The z component
-     * @param w The w component
-     */
     fun set(x: Float, y: Float, z: Float, w: Float) {
         this.x = x
         this.y = y
@@ -35,20 +22,10 @@ class Vector4 {
         this.w = w
     }
 
-    /**
-     * Copies values from another vector.
-     *
-     * @param vector4 The source vector
-     */
     fun copy(vector4: Vector4) {
         set(vector4.x, vector4.y, vector4.z, vector4.w)
     }
 
-    /**
-     * Unpacks a bitpacked RGBA value into normalized float components.
-     *
-     * @param bitpacked The bitpacked color value (ARGB format)
-     */
     fun unpack(bitpacked: Int) {
         set(
             ((bitpacked shr 16) and 0xff) * 0.003921569f,
@@ -58,9 +35,6 @@ class Vector4 {
         )
     }
 
-    /**
-     * Negates all components of the vector.
-     */
     fun negate() {
         x = -x
         y = -y
@@ -68,9 +42,6 @@ class Vector4 {
         w = -w
     }
 
-    /**
-     * Resets all components to zero.
-     */
     fun reset() {
         w = 0.0f
         z = 0.0f
@@ -82,11 +53,6 @@ class Vector4 {
         return "$x,$y,$z,$w"
     }
 
-    /**
-     * Transforms this vector by a 4x4 matrix.
-     *
-     * @param matrix The transformation matrix
-     */
     fun concat(matrix: Matrix44) {
         val origX = x
         val origY = y
@@ -98,11 +64,6 @@ class Vector4 {
         w = matrix.elements[3] * origX + matrix.elements[7] * origY + matrix.elements[11] * origZ + matrix.elements[15] * origW
     }
 
-    /**
-     * Scales all components by a multiplier.
-     *
-     * @param multiplier The scale factor
-     */
     fun scale(multiplier: Float) {
         x *= multiplier
         y *= multiplier

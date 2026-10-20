@@ -9,10 +9,6 @@ import com.jagex.game.runetek5.network.packet.MouseClickPacket
 import com.jagex.game.runetek5.network.packet.MouseMovementPacket
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * Mouse action that will be processed server side
- * @author Brainpower
- */
 open class MouseActionServer : MouseRecord() {
 
     @JvmField var clickMeta: Int = 0

@@ -39,9 +39,6 @@ object GroundItemUpdating {
         groundItemWrapper.groundItems.addFirst(addedGroundItem)
     }
 
-    /**
-     * Could use cleanup including naming
-     */
     @JvmStatic
     fun removeGroundItem(plane: Int, x: Int, y: Int) {
         val base = Resource.mapRegion!!.getBaseCoordinates()

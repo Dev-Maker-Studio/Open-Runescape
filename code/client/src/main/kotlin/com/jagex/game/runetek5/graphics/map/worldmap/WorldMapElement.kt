@@ -191,7 +191,6 @@ class WorldMapElement(
                 val lineText = WorldMapDisplay.RENDERED_WORLDMAP_AREA_NAMELINES[line]
                 if (lineText != null) {
                     val areaNameLine = if (line < lineCount - 1) {
-                        // If not the last line of the area name strip the <br> tag
                         lineText.substring(0, lineText.length - 4)
                     } else {
                         lineText

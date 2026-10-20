@@ -2,10 +2,6 @@ package com.jagex.game.runetek5.entity
 
 import java.util.NoSuchElementException
 
-/**
- * Needs better naming...
- *
- */
 class EntityNodeList<N : EntityNode> : Iterable<N> {
 
     @JvmField

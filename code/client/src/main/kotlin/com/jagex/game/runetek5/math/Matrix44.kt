@@ -2,41 +2,8 @@ package com.jagex.game.runetek5.math
 
 import kotlin.math.sqrt
 
-/**
- * [J]
- * @author Brainpower
- *
- **/
 class Matrix44 {
 
-    /**
-     * Structure:
-     *
-     * A
-     * [0]	vertex_x_a
-     * [1]	vertex_y_a
-     * [2]	vertex_z_near_a
-     * [3]	vertex_z_far_a
-     *
-     * B
-     * [4]	vertex_x_b
-     * [5]	vertex_y_b
-     * [6]	vertex_z_near_b
-     * [7]	vertex_z_far_b
-     *
-     * C
-     * [8]	vertex_x_c
-     * [9]	vertex_y_c
-     * [10]	vertex_z_near_c
-     * [11]	vertex_z_far_c
-     *
-     * D
-     * [12]	vertex_x_d
-     * [13]	vertex_y_d
-     * [14]	vertex_z_near_d
-     * [15]	vertex_z_far_d
-     *
-     */
     val elements = FloatArray(16)
 
     constructor(source: Matrix44) {
@@ -352,39 +319,38 @@ class Matrix44 {
     }
 
     fun copy3x3NearMatrixInto(matrix: FloatArray): FloatArray {
-        matrix[0] = this.elements[0]        // x_a
-        matrix[1] = this.elements[1]        // y_a
-        matrix[2] = this.elements[2]        // z_near_a
-        matrix[3] = this.elements[4]        // x_b
-        matrix[4] = this.elements[5]        // y_b
-        matrix[5] = this.elements[6]        // z_near_b
-        matrix[6] = this.elements[8]        // x_c
-        matrix[7] = this.elements[9]        // y_c
-        matrix[8] = this.elements[10]        // z_near_c
+        matrix[0] = this.elements[0]
+        matrix[1] = this.elements[1]
+        matrix[2] = this.elements[2]
+        matrix[3] = this.elements[4]
+        matrix[4] = this.elements[5]
+        matrix[5] = this.elements[6]
+        matrix[6] = this.elements[8]
+        matrix[7] = this.elements[9]
+        matrix[8] = this.elements[10]
         return matrix
     }
 
     fun copyFullyInto(matrix: FloatArray): FloatArray {
-        matrix[0] = this.elements[0]        // x_a
-        matrix[1] = this.elements[4]        // x_b
-        matrix[2] = this.elements[8]        // x_c
-        matrix[3] = this.elements[12]        // x_d
-        matrix[4] = this.elements[1]        // y_a
-        matrix[5] = this.elements[5]        // y_b
-        matrix[6] = this.elements[9]        // y_c
-        matrix[7] = this.elements[13]        // y_d
-        matrix[8] = this.elements[2]        // z_near_a
-        matrix[9] = this.elements[6]        // z_near_b
-        matrix[10] = this.elements[10]        // z_near_c
-        matrix[11] = this.elements[14]        // z_near_d
-        matrix[12] = this.elements[3]        // z_far_a
-        matrix[13] = this.elements[7]        // z_far_b
-        matrix[14] = this.elements[11]        // z_far_c
-        matrix[15] = this.elements[15]        // z_far_d
+        matrix[0] = this.elements[0]
+        matrix[1] = this.elements[4]
+        matrix[2] = this.elements[8]
+        matrix[3] = this.elements[12]
+        matrix[4] = this.elements[1]
+        matrix[5] = this.elements[5]
+        matrix[6] = this.elements[9]
+        matrix[7] = this.elements[13]
+        matrix[8] = this.elements[2]
+        matrix[9] = this.elements[6]
+        matrix[10] = this.elements[10]
+        matrix[11] = this.elements[14]
+        matrix[12] = this.elements[3]
+        matrix[13] = this.elements[7]
+        matrix[14] = this.elements[11]
+        matrix[15] = this.elements[15]
         return matrix
     }
 
-    // Should be given better name
     fun partialCopyInto(copyInto: FloatArray): FloatArray {
         copyInto[0] = this.elements[0]
         copyInto[1] = this.elements[1]
@@ -542,14 +508,14 @@ class Matrix44 {
     }
 
     fun copyXYInto(matrix: FloatArray): FloatArray {
-        matrix[0] = this.elements[0] // x_a
-        matrix[1] = this.elements[4] // x_b
-        matrix[2] = this.elements[8] // x_c
-        matrix[3] = this.elements[12]// x_d
-        matrix[4] = this.elements[1] // y_a
-        matrix[5] = this.elements[5] // y_b
-        matrix[6] = this.elements[9] // y_c
-        matrix[7] = this.elements[13]// y_d
+        matrix[0] = this.elements[0]
+        matrix[1] = this.elements[4]
+        matrix[2] = this.elements[8]
+        matrix[3] = this.elements[12]
+        matrix[4] = this.elements[1]
+        matrix[5] = this.elements[5]
+        matrix[6] = this.elements[9]
+        matrix[7] = this.elements[13]
         return matrix
     }
 

@@ -427,9 +427,6 @@ object Utils {
         return res
     }
 
-    /**
-     * @deprecated Use [isWrongJava] instead
-     */
     @JvmStatic
     fun isValidIntegerDeprecated(text: CharSequence): Boolean {
         return isWrongJava(text)

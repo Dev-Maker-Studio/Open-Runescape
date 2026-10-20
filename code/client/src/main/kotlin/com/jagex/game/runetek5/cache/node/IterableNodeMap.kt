@@ -1,13 +1,5 @@
 package com.jagex.game.runetek5.cache.node
 
-/**
- * @author Major
- * @author Brainpower - 29/05/2020
- *
- * Ported from revision 839
- *
- * @param V value type
- */
 class IterableNodeMap<V : Node<*>>(capacity: Int) : Iterable<V> {
 
     @JvmField var nodes: Array<Node<Any?>>

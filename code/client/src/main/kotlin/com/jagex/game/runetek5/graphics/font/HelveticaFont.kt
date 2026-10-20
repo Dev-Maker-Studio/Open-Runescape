@@ -92,7 +92,6 @@ class HelveticaFont(toolkit: AbstractToolkit, fontSize: Int, component: Componen
                     ++width
                 }
             } catch (ignored: Exception) {
-                // NOOP
             }
         }
 
@@ -116,7 +115,6 @@ class HelveticaFont(toolkit: AbstractToolkit, fontSize: Int, component: Componen
         try {
             pixelGrabber.grabPixels()
         } catch (ignored: Exception) {
-            // NOOP
         }
 
         image.flush()

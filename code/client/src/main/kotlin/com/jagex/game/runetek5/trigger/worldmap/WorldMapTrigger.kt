@@ -12,11 +12,6 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.trigger.ClientTriggerType
 import com.jagex.game.runetek5.utils.BufferUtils
 
-/**
- *
- * @author Steven - 06/10/2023
- *
- */
 object WorldMapTrigger {
 
     @JvmStatic

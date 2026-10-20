@@ -9,30 +9,16 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URL
 
-/**
- * Fetches news items from the game server in a background thread.
- */
 class NewsItemFetcher : Runnable {
 
     @JvmField var thread: Thread? = null
     @Volatile @JvmField var fetched = false
     @JvmField var newsItems: Array<NewsItem>? = null
 
-    /**
-     * Retrieves a news item by ID.
-     *
-     * @param id The news item ID
-     * @return The news item, or null if not found or not yet fetched
-     */
     fun get(id: Int): NewsItem? {
         return if (newsItems != null && id >= 0 && id < newsItems!!.size) newsItems!![id] else null
     }
 
-    /**
-     * Initiates the fetch operation if not already started.
-     *
-     * @return true if the fetch is complete, false if still in progress
-     */
     fun fetch(): Boolean {
         if (fetched) {
             return true
@@ -74,7 +60,6 @@ class NewsItemFetcher : Runnable {
                 NewsItem(lineArray[baseIndex], lineArray[baseIndex + 1], lineArray[baseIndex + 2])
             }
         } catch (ioexception: IOException) {
-            // NOOP
         }
         fetched = true
     }

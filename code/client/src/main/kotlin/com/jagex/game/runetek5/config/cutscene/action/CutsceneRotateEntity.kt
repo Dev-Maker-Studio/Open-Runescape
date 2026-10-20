@@ -4,9 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 
-/**
- * @author Brainpower - 06/04/2022
- */
 class CutsceneRotateEntity(buffer: Packet) : CutsceneAction(buffer) {
 
     @JvmField

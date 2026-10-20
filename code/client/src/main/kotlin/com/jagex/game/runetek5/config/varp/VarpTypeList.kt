@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages the loading and caching of Varp (player variable) configuration types.
- */
 class VarpTypeList(
     @JvmField val resourceProvider: Js5ResourceProvider?
 ) {
@@ -23,12 +20,6 @@ class VarpTypeList(
         }
     }
 
-    /**
-     * Retrieves a Varp type by ID, loading from cache or resource provider.
-     *
-     * @param id The Varp ID
-     * @return The Varp type configuration
-     */
     fun list(id: Int): VarpType {
         var varType: VarpType?
         synchronized(vardefinitionCache) {
@@ -51,27 +42,18 @@ class VarpTypeList(
         }
     }
 
-    /**
-     * Sweeps the cache, removing least recently used entries.
-     */
     fun sweepCache() {
         synchronized(vardefinitionCache) {
             vardefinitionCache.clean(5)
         }
     }
 
-    /**
-     * Resets the cache, clearing all cached Varp types.
-     */
     fun resetCache() {
         synchronized(vardefinitionCache) {
             vardefinitionCache.reset()
         }
     }
 
-    /**
-     * Clears the cache queue of pending removals.
-     */
     fun clearCacheQueue() {
         synchronized(vardefinitionCache) {
             vardefinitionCache.resize()

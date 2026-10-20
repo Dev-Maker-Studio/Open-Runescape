@@ -1,15 +1,5 @@
 package com.jagex.game.runetek5.entity
 
-/**
- * Pooled linked-list node wrapping an interactive entity in a tile's interactives chain.
- *
- * The free list is shared between the game thread (players/NPCs added and released every
- * frame) and the async map loader thread (one node per loc during a background build), so
- * pool operations are guarded by [POOL_LOCK]. An unsynchronized pop can hand the same node
- * to both threads, and a concurrent release rewires [child] — which doubles as the tile
- * chain link — silently truncating a freshly built scene's interactives (missing roofs
- * and scenery).
- */
 class InteractiveEntityContainer {
     @JvmField var interactiveObject: AbstractInteractiveEntity? = null
     @JvmField var child: InteractiveEntityContainer? = null

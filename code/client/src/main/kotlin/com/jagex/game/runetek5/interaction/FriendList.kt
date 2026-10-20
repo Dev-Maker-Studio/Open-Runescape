@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.TextUtils
 
-/**
- *
- * @author Steven - 18/09/2023
- *
- */
 object FriendList {
 
     @JvmField val FRIENDS = arrayOfNulls<Friend>(200)
@@ -130,7 +125,6 @@ object FriendList {
 
     @JvmStatic
     fun sort() {
-        // Sort friends list by display name
         java.util.Arrays.sort(FRIENDS, 0, FRIEND_COUNT) { f1, f2 ->
             if (f1 == null || f1.displayName == null) return@sort 1
             if (f2 == null || f2.displayName == null) return@sort -1

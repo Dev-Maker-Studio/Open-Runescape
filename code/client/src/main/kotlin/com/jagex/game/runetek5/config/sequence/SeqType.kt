@@ -22,17 +22,6 @@ class SeqType {
     @JvmField var moveType: Int = -1
     @JvmField var loopType: Int = 2
     @JvmField var interfaceFrames: IntArray? = null
-    /**
-     * << Contains >>
-     * Bitpacked information
-     * > int sound_id = (frame_sounds[frame][0] >> 8)
-     * > int times_repeat = (frame_sounds[frame][0] >> 5 & 0x7)
-     *
-     * << Non bitpacked information >>
-     * If a frame has more than 1 sound option
-     * an index past 0 is a non bitpacked sound id
-     * > int sound_id = frame_sounds[frame][1]
-     */
     @JvmField var frameSounds: Array<IntArray?>? = null
     @JvmField var lights: Boolean = false
     @JvmField var tweened: Boolean = false
@@ -105,11 +94,8 @@ class SeqType {
                 val soundCount = stream.readUByte()
                 if (soundCount > 0) {
                     frameSounds!![frame] = IntArray(soundCount)
-                    // >> 8 = sound_id
-                    // >> 5 & 0x7 = times_repeated
                     frameSounds!![frame]!![0] = stream.readUMedium()
                     for (alternativeSound in 1 until soundCount) {
-                        // randomly picked non bitpacked frame sound id
                         frameSounds!![frame]!![alternativeSound] = stream.readUShort()
                     }
                 }

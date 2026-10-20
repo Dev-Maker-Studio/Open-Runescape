@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 import com.jagex.game.runetek5.scene.SceneGraph
 
-/**
- *
- * @author Steven - 24/09/2023
- *
- */
 class CutsceneAnimateObject(buffer: Packet) : CutsceneAction(buffer) {
 
     @JvmField val objectIndex: Int = buffer.readUShort()

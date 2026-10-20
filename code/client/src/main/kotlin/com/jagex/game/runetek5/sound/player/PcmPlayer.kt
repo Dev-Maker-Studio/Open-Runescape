@@ -297,25 +297,20 @@ open class PcmPlayer {
     }
 
     open fun writeToBuffer() {
-        // NOOP
     }
 
     open fun close() {
-        // NOOP
     }
 
     @Throws(Exception::class)
     open fun open() {
-        // NOOP
     }
 
     @Throws(Exception::class)
     open fun play(bufferSize: Int) {
-        // NOOP
     }
 
     open fun initialize() {
-        // NOOP
     }
 
     fun skipAudioSamples() {

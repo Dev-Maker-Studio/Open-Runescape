@@ -10,16 +10,6 @@ import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.ColorUtil
 
-/**
- *
- * @author Brainpower - 30/03/2022
- * @author Praesul team - 22/08/2023
- *
- * Replaced some of the naming with the naming from the Praesul team as it was clearer
- * Reference: https://rune-server.org/runescape-development/rs2-client/show-off/695325-praesul-private-map-editor.html
- *
- *
- */
 class Environment {
 
     @JvmField var sunColour: Int = 0
@@ -194,7 +184,6 @@ class Environment {
             }
         }
     }
-
 
     fun isEqual(other: Environment): Boolean {
         return this.sunColour == other.sunColour && other.sunAmbient == this.sunAmbient

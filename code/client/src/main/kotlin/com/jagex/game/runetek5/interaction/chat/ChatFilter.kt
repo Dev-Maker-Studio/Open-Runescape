@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.interaction.chat
 
-/**
- *
- * @author Brainpower - 18/09/2023
- *
- */
 enum class ChatFilter(
     @JvmField val id: Int
 ) {

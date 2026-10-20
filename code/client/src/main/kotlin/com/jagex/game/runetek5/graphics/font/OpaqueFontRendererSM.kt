@@ -189,9 +189,6 @@ class OpaqueFontRendererSM(
         }
     }
 
-    /**
-     * Applies an alpha-blended color transformation to a rectangular region
-     */
     fun blendImage(glyphData: ByteArray, pixels: IntArray, color: Int, glyphOffset: Int, pixelOffset: Int, width: Int, height: Int, dstRowPadding: Int, srcRowPadding: Int) {
         var glyphPos = glyphOffset
         var pixelPos = pixelOffset

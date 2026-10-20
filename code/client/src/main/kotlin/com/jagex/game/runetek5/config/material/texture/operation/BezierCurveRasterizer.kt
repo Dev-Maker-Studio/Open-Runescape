@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.config.material.texture.operation
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.ArrayUtils
 
-/**
- * Texture operation bezier curve rendering class.
- */
 class BezierCurveRasterizer(
     @JvmField val controlX0: Int,
     @JvmField val controlY0: Int,

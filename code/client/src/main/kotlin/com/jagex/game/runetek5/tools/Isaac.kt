@@ -1,11 +1,5 @@
 package com.jagex.game.runetek5.tools
 
-/**
- * ISAAC (Indirection, Shift, Accumulate, Add, and Count) random number generator
- *
- * @author Steven - 29/07/2023
- * Reference: https://gist.github.com/bl00dshooter/995695
- */
 class Isaac(seed: IntArray) {
 
     @JvmField

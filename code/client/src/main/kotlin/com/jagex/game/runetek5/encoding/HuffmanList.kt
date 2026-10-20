@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.encoding
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- *
- * @author Brainpower - 19/04/2022
- *
- */
 object HuffmanList {
 
     @JvmField var HUFFMAN: Huffman? = null

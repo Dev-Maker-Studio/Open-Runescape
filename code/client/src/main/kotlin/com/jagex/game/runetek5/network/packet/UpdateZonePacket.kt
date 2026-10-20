@@ -334,7 +334,7 @@ enum class UpdateZonePacket(val size: Int) {
     }
 
     private fun decodeTileMessage(buffer: Packet) {
-        buffer.readUByte() // Unused
+        buffer.readUByte()
         val coords = buffer.readUByte()
         val x = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = (coords and 0x7) + UPDATE_ZONE_Y
@@ -475,7 +475,6 @@ enum class UpdateZonePacket(val size: Int) {
         val UPDATE_ZONE_Y: Int
             get() = zoneAbsY - Resource.mapRegion!!.getBaseCoordinates().y
 
-        // The server addresses zones from the scene it last sent, which an async build has not swapped in yet.
         fun setZone(sceneX: Int, sceneY: Int, plane: Int) {
             val serverBase = Resource.mapRegionLoaderTask?.requestedFrame?.base ?: Resource.mapRegion!!.getBaseCoordinates()
             zoneAbsX = serverBase.x + sceneX

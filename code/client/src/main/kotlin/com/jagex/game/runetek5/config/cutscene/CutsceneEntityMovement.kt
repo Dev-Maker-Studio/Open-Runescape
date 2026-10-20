@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.sequence.MovementType
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 
-/**
- *
- * @author Brainpower - 06/04/2022
- *
- */
 class CutsceneEntityMovement(buffer: Packet) {
 
     @JvmField val movementTypes: IntArray

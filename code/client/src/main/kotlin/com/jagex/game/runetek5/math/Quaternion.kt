@@ -1,23 +1,11 @@
 package com.jagex.game.runetek5.math
 
-/**
- * [J]
- * @author Steven - 16/08/2023
- *
- * A quaternion is basically an axis in 3D space with a angle of rotation around the axis.
- * Four values make up a quaternion, namely x, y, z and w.
- * Three of the values are used to represent the axis in vector format, and the forth value would be the angle of rotation around the axis.
- *
- */
 class Quaternion {
 
     @JvmField var x: Float = 0f
     @JvmField var y: Float = 0f
     @JvmField var z: Float = 0f
 
-    /**
-     * The angle of rotation around the axis
-     */
     @JvmField var w: Float = 1f
 
     constructor() {

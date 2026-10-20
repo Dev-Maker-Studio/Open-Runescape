@@ -17,6 +17,5 @@ class SafeModeRenderBuffer(
     }
 
     override fun deallocate() {
-        // NOOP
     }
 }

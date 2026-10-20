@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 
-/**
- * JagName = RenderContext?
- * Render dependencies for safe mode
- * @author Brainpower
- *
- */
 class ThreadResourceSM(
     @JvmField val toolkit: SafeModeToolkit
 ) {
@@ -27,13 +21,10 @@ class ThreadResourceSM(
     @JvmField var fogColor: Int = 0
     @JvmField var lastWaterColor: Int = 0
 
-    /**
-     * FIXME: incorrect
-     */
     @JvmField var hasWaterUpdate: Boolean = false
 
     @JvmField var waterAverageHeight: Int = 0
-    @JvmField var waterScale: Int = 0 // water depth?
+    @JvmField var waterScale: Int = 0
     @JvmField var zbuffering: Boolean = false
     @JvmField val scratchMatrix44: Matrix44
     @JvmField val renderingMatrix43: Matrix43

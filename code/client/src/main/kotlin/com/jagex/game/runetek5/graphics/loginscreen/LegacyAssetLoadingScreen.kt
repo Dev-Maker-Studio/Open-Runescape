@@ -7,12 +7,6 @@ import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.utils.Utils
 import java.awt.*
 
-/**
- * Draws the vertically centered loading bar in the first seconds of the client starting
- * as to give an indication the client is loading while the login screen assets are
- * yet to display
- * @author Steven - 01/10/2023
- */
 class LegacyAssetLoadingScreen : LoginScreenComponent {
     var resourcesUnavailable = false
     var drawInCenterX = false
@@ -231,9 +225,6 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
         }
     }
 
-    /**
-     * Draws the loading bar when the login screen image resources are unavailable
-     */
     fun drawPlainLoadingBar() {
         drawPlainLoadingBar(
             LoadingStage.plainLoginScreenRenderer!!.getLoadingPercentage(),
@@ -259,9 +250,6 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
             FontManager.helvetaBold13Font = null
         }
 
-        /**
-         * Draws the loading bar when the login screen image resources are unavailable
-         */
         @JvmStatic
         fun drawPlainLoadingBar(loadingPercentage: Int, rectText: String, innerRectColor: Color?, rectBackgroundColor: Color?, textColor: Color?) {
             try {

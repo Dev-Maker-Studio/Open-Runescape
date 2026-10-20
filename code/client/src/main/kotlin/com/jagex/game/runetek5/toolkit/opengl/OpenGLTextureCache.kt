@@ -7,9 +7,6 @@ import com.jagex.game.runetek5.config.material.TextureDump
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.*
-/**
- * Cache for OpenGL 2D textures with material support.
- */
 class OpenGLTextureCache(
     @JvmField val toolkit: OpenGlToolkit,
     @JvmField val materialProvider: MaterialProvider
@@ -17,12 +14,6 @@ class OpenGLTextureCache(
 
     @JvmField val textureCache = LRUCache(toolkit.textureCacheCapacity())
 
-    /**
-     * Retrieves a texture for the specified material ID.
-     *
-     * @param textureId The texture/material ID
-     * @return The OpenGL texture, or null if not cached
-     */
     fun getTexture(textureId: Int): OpenGl2DTexture? {
         var textureSize = -1
         val cachedTexture = textureCache.get(textureId.toLong())
@@ -61,26 +52,14 @@ class OpenGLTextureCache(
         return texture
     }
 
-    /**
-     * Alias for getTexture().
-     *
-     * @param textureId The texture ID
-     * @return The OpenGL texture
-     */
     fun get(textureId: Int): OpenGl2DTexture? {
         return getTexture(textureId)
     }
 
-    /**
-     * Cycles the bloom cache, cleaning up old entries.
-     */
     fun cycleBloomCache() {
         textureCache.clean(toolkit.textureRetainCycles())
     }
 
-    /**
-     * Resets the bloom cache, clearing all cached textures.
-     */
     fun resetBloomCache() {
         textureCache.reset()
     }

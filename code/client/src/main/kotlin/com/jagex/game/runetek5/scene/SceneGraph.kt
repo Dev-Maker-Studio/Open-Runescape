@@ -40,7 +40,6 @@ open class SceneGraph(
 ) : MapLoader(scene, dimensionZ, dimensionX, dimensionY, hideOverlay, TypeLists.FLO!!, TypeLists.FLU!!, regionMap) {
 
     companion object {
-        /** -Drender.hidelocs=1,2,3 keeps those loc ids out of the scene (A/B isolation of a rendering artifact). */
         private val HIDDEN_LOCS: Set<Int> = System.getProperty("render.hidelocs")?.split(',')?.mapNotNull { it.trim().toIntOrNull() }?.toSet() ?: emptySet()
         @JvmStatic
         var soundsOnly = false
@@ -522,9 +521,6 @@ open class SceneGraph(
         }
     }
 
-    /**
-     * Contains logic for shading and culling
-     */
     fun calculateVisibility(underwater: Boolean) {
         scene.applyShading()
         if (!underwater) {

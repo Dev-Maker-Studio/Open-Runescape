@@ -9,9 +9,6 @@ import com.jagex.game.runetek5.toolkit.opengl.GL_FRAMEBUFFER
 import com.jagex.game.runetek5.toolkit.opengl.GL_RENDERBUFFER
 import jaggl.OpenGL
 
-/**
- * OpenGL render buffer implementation.
- */
 class OpenGlRenderBuffer : CacheableNode, NativeRenderBuffer {
 
     @JvmField var handle: Int

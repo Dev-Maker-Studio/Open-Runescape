@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.cache.node
 
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 
-/**
- * Circular doubly-linked queue implementation.
- */
 class Queue<T> : Iterable<T> {
 
     @JvmField val current = CacheableNode()
@@ -15,20 +12,12 @@ class Queue<T> : Iterable<T> {
         current.current = current
     }
 
-    /**
-     * Removes all nodes from the queue.
-     */
     fun reset() {
         while (current.nextCache != current) {
             current.nextCache!!.unlinkSub()
         }
     }
 
-    /**
-     * Inserts a node at the end of the queue.
-     *
-     * @param next The node to insert
-     */
     fun insert(next: CacheableNode) {
         if (next.current != null) {
             next.unlinkSub()
@@ -39,11 +28,6 @@ class Queue<T> : Iterable<T> {
         next.nextCache!!.current = next
     }
 
-    /**
-     * Removes and returns the first node.
-     *
-     * @return The first node, or null if empty
-     */
     fun getFirst(): CacheableNode? {
         val node = current.nextCache
         return if (node == current) {
@@ -54,11 +38,6 @@ class Queue<T> : Iterable<T> {
         }
     }
 
-    /**
-     * Gets the size of the queue.
-     *
-     * @return The number of nodes
-     */
     fun size(): Int {
         var size = 0
         var node = current.nextCache
@@ -69,20 +48,10 @@ class Queue<T> : Iterable<T> {
         return size
     }
 
-    /**
-     * Gets the next node (wrapper for getCurrentNext).
-     *
-     * @return The next node
-     */
     fun getNext(): CacheableNode? {
         return getCurrentNext()
     }
 
-    /**
-     * Gets the first node without removing it.
-     *
-     * @return The first node, or null if empty
-     */
     fun getCurrentNext(): CacheableNode? {
         val node = current.nextCache
         return if (node == current) {
@@ -94,11 +63,6 @@ class Queue<T> : Iterable<T> {
         }
     }
 
-    /**
-     * Gets the next node after the current iterator position.
-     *
-     * @return The next node, or null if at the end
-     */
     fun getDirectNext(): CacheableNode? {
         val node = next
         return if (node == current) {

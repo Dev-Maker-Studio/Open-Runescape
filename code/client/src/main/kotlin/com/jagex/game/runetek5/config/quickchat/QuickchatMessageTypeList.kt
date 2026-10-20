@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages quick chat message types with LRU caching.
- *
- * @author Brainpower - 22/04/2022
- */
 class QuickchatMessageTypeList(
     @JvmField val messageResource: Js5ResourceProvider?,
     @JvmField val menuResource: Js5ResourceProvider?,
@@ -29,14 +24,6 @@ class QuickchatMessageTypeList(
         }
     }
 
-    /**
-     * Gets the display string for a quick chat value.
-     *
-     * @param value The value type
-     * @param configs The config values
-     * @param data The data value
-     * @return The display string
-     */
     fun getValueDisplay(value: QuickChatValueType, configs: IntArray, data: Long): String {
         if (quickchatFillerlist != null) {
             val displayName = quickchatFillerlist.getValueDisplay(value, configs, data)
@@ -47,12 +34,6 @@ class QuickchatMessageTypeList(
         return data.toString()
     }
 
-    /**
-     * Lists a quick chat message type by ID.
-     *
-     * @param id The message ID
-     * @return The message type
-     */
     fun listMessage(id: Int): QuickchatMessageType {
         var messageType = messageTypeCache.get(id.toLong()) as QuickchatMessageType?
         if (messageType == null) {
@@ -78,12 +59,6 @@ class QuickchatMessageTypeList(
     }
 
     companion object {
-        /**
-         * Decodes a quick chat message from a packet buffer.
-         *
-         * @param buffer The packet buffer
-         * @return The decoded quick chat message
-         */
         @JvmStatic
         fun decodeQuickchatMessage(buffer: Packet): QuickChatMessage {
             val message = QuickChatMessage()

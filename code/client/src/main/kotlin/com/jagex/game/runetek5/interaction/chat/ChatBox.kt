@@ -15,20 +15,13 @@ import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.rendering.Renderers
 
-/**
- *
- * @author Brainpower - 18/09/2023
- *
- */
 object ChatBox {
 
-    // Chat
     @JvmField val CHAT_LINES = arrayOfNulls<ChatLine>(100)
     @JvmField val CHAT_ICONS = LRUCache(8)
     @JvmField var NUM_CHAT_LINES = 0
     @JvmField var CHATLINE_IDENTIFIER = 0
 
-    // Chat filter
     @JvmField var PUBLIC_FILTER = 0
     @JvmField var PRIVATE_FILTER: ChatFilter? = null
     @JvmField var TRADE_FILTER = 0

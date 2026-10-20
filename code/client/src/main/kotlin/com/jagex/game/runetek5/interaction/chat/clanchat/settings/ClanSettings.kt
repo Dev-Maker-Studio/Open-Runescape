@@ -51,7 +51,6 @@ class ClanSettings(buffer: Packet) {
         return -1
     }
 
-    // varbit
     fun getClanFlagBitfield(i1: Int, i2: Int, shift: Int): Int {
         val mask = if (shift == 31) -1 else (1 shl (shift + 1)) - 1
         return (clanFlags!![i1] and mask) ushr i2

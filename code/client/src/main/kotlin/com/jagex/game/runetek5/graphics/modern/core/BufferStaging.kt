@@ -12,21 +12,6 @@ import org.lwjgl.opengl.GL15.glGenBuffers
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
 
-/**
- * Sub-range updates of large resident buffers (the instanced geometry store) without
- * a CPU/GPU sync.
- *
- * `glBufferSubData` into a buffer the GPU is still reading (the previous frame's
- * draws) makes the driver either wait for those draws or copy the whole store —
- * with a ~30 MB vertex store that showed up as 20–95 ms `swap` stalls on exactly the
- * frames where many animated locs rebuilt their geometry. Writing the bytes into a
- * freshly orphaned streaming buffer never syncs, and `glCopyBufferSubData` from it
- * into the store is queued on the GPU behind the draws that still use the old
- * contents, so it is both stall-free and ordered.
- *
- * Uploads larger than [MAX_STAGED] (the initial bulk fill) go straight through
- * `glBufferSubData` — a store that has never been drawn from cannot be busy.
- */
 object BufferStaging {
     private const val MAX_STAGED = 64L shl 20
     private var stagingId = 0
@@ -34,7 +19,6 @@ object BufferStaging {
     private var cursor = 0L
     private var allocated = 0L
 
-    /** Copies staged through [BufferStaging] (diag). */
     @JvmStatic var stagedCopies = 0L
     @JvmStatic var directUploads = 0L
 
@@ -45,14 +29,12 @@ object BufferStaging {
         glBindBuffer(GL_COPY_READ_BUFFER, stagingId)
         if (capacity < bytes) capacity = maxOf(bytes * 2, 4L shl 20)
         if (allocated != capacity || cursor + bytes > capacity) {
-            // Orphan: fresh storage, no dependency on copies queued from the old one.
             glBufferData(GL_COPY_READ_BUFFER, capacity, GL_STREAM_DRAW)
             allocated = capacity
             cursor = 0
         }
     }
 
-    /** Writes [data] (position..limit) into buffer [targetId] at [targetOffset]; position is preserved. */
     @JvmStatic
     fun upload(targetId: Int, targetTarget: Int, targetOffset: Long, data: ByteBuffer) {
         val bytes = data.remaining().toLong()

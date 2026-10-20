@@ -7,12 +7,6 @@ import com.jagex.game.runetek5.graphics.texture.water.WaterTextureGenerator
 import com.jagex.game.runetek5.utils.ArrayUtils
 import kotlin.math.pow
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpPerlinNoise : TextureOperation(0, true) {
 
     @JvmField

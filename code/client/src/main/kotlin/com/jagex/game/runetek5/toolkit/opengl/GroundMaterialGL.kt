@@ -36,19 +36,14 @@ class GroundMaterialGL(
     @JvmField val groundFunctionMask: IntArray
     @JvmField val texture2d: GlElementsArrayBuffer
 
-    /** Modern path: visible-set stamp the cached index list below was built for. */
     @JvmField var modernIndexStamp: Long = 0L
     @JvmField var modernIndexCount: Int = -1
-    /** Modern path: resident GL element buffer holding the cached index list. */
     @JvmField var modernIboId: Int = 0
     @JvmField var modernWaterPlaneY: Float = Float.NaN
     @JvmField var modernIboCapacity: Int = 0
-    /** Tile indices where this material owns at least one triangle (static per material). */
     @JvmField var modernTiles: IntArray? = null
     @JvmField var modernTilesMaskSize: Int = -1
-    /** Per 8x8 chunk index lists of this material's triangles (see ModernGLToolkit ground draw). */
     @JvmField var modernChunkIdx: Array<ShortArray?>? = null
-    /** Per chunk: the tile index of each slice of [modernChunkIdx], and the slice's end offset. */
     @JvmField var modernChunkTiles: Array<IntArray?>? = null
     @JvmField var modernChunkTileEnd: Array<IntArray?>? = null
     @JvmField var modernChunkRevision: Int = -1
@@ -149,16 +144,11 @@ class GroundMaterialGL(
     }
 
     fun drawMaterialTriangles(tileIndices: IntArray, tileCount: Int) {
-        // Under the modern toolkit the modern path is the ONLY path — no legacy
-        // fixed-function fallback. If the modern pipeline cannot draw (renderer not
-        // initialized, no vertex snapshot), the material draws NOTHING and the miss
-        // is counted in the [ModernDiag] gate counters (ground=drawn/noPipe/noSnap).
         if (toolkit is ModernGLToolkit) {
             renderGroundMaterialModern(tileIndices, tileCount)
             return
         }
 
-        // Legacy rendering path (non-modern toolkits only)
         var addedTextures = 0
         val textureBuffer = toolkit.textureBuffer
         textureBuffer.currentPosition = 0
@@ -241,7 +231,6 @@ class GroundMaterialGL(
                         }
                         org.lwjgl.opengl.GL11.glBindTexture(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, prev)
                     }
-                    // Texture-environment state per unit: what the combiner actually multiplies.
                     val ip = IntArray(1)
                     val fp = FloatArray(4)
                     org.lwjgl.opengl.GL11.glGetIntegerv(org.lwjgl.opengl.GL13.GL_ACTIVE_TEXTURE, ip)
@@ -317,37 +306,21 @@ class GroundMaterialGL(
             texture2d.putElements(textureBuffer.buffer, textureBuffer.currentPosition)
             toolkit.toggleDrawingClientstates(ground.vertexBuffer, ground.normalsBuffer, arrayBufferPointer, ground.textureBuffer)
             toolkit.renderTexture(materialId, (ground.waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0, (ground.waterFunctionMask and 0x8) != 0)
-            // -Drender.groundcolor=true: draw the lit primary colour alone (no texture),
-            // the legacy twin of the modern ground shader's colour-only debug mode.
             if (GROUND_COLOR_DEBUG) {
                 toolkit.renderTexture(-1, (ground.waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0, (ground.waterFunctionMask and 0x8) != 0)
                 if (RAW_COLOR_DEBUG) toolkit.setLightingEnabled(false)
             }
-            // -Drender.groundcombine=<mode>: force one combine mode (A/B aid; twin of the modern flag).
             if (GROUND_COMBINE_OVERRIDE >= 0) toolkit.loadTextureCombineMode(GROUND_COMBINE_OVERRIDE)
             if (toolkit.stillWaterToggled) {
                 toolkit.addWaterTile(Int.MAX_VALUE, waterTile)
             }
 
-            OpenGL.glMatrixMode(GL_TEXTURE)
-            OpenGL.glPushMatrix()
-            OpenGL.glScalef(1.0f / textureScale, 1.0f / textureScale, 1.0f)
-            OpenGL.glMatrixMode(GL_MODELVIEW)
             toolkit.toggleDrawingClientstates(ground.vertexBuffer, ground.normalsBuffer, arrayBufferPointer, ground.textureBuffer)
             toolkit.drawElements(texture2d, 0, addedTextures)
-            OpenGL.glMatrixMode(GL_TEXTURE)
-            OpenGL.glPopMatrix()
-            OpenGL.glMatrixMode(GL_MODELVIEW)
         }
 
     }
 
-    /**
-     * Modern rendering path for ground materials using ModernGLToolkit.
-     *
-     * @return true when the modern pipeline handled the draw; false when the caller
-     *         must fall back to the legacy fixed-function path.
-     */
     private fun renderGroundMaterialModern(tileIndices: IntArray, tileCount: Int): Boolean {
         val modernToolkit = toolkit as ModernGLToolkit
         return modernToolkit.renderGroundMaterialModern(

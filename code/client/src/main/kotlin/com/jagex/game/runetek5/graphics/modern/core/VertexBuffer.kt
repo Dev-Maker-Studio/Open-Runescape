@@ -10,12 +10,6 @@ import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
-/**
- * GPU vertex buffer wrapper for modern OpenGL rendering.
- *
- * Supports both static and dynamic buffer usage patterns.
- * Handles memory management for buffer data uploads.
- */
 class VertexBuffer(
     private val usage: BufferUsage = BufferUsage.STATIC
 ) {
@@ -24,31 +18,19 @@ class VertexBuffer(
     private var currentSize: Long = 0
 
     enum class BufferUsage(val glUsage: Int) {
-        STATIC(STATIC_DRAW),    // Data set once, used many times
-        DYNAMIC(DYNAMIC_DRAW),  // Data modified occasionally
-        STREAM(STREAM_DRAW)     // Data modified every frame
+        STATIC(STATIC_DRAW),
+        DYNAMIC(DYNAMIC_DRAW),
+        STREAM(STREAM_DRAW)
     }
 
-    /**
-     * Binds this buffer to GL_ARRAY_BUFFER.
-     */
     fun bind() {
         GLWrapper.bindBuffer(ARRAY_BUFFER, id)
     }
 
-    /**
-     * Unbinds any buffer from GL_ARRAY_BUFFER.
-     */
     fun unbind() {
         GLWrapper.bindBuffer(ARRAY_BUFFER, 0)
     }
 
-    /**
-     * Uploads float data to the buffer.
-     * Reallocates if necessary.
-     *
-     * @param data Float array to upload
-     */
     fun upload(data: FloatArray) {
         bind()
         val buffer = MemoryUtil.memAllocFloat(data.size)
@@ -60,16 +42,10 @@ class VertexBuffer(
         }
     }
 
-    /**
-     * Uploads float buffer data to the GPU.
-     *
-     * @param data FloatBuffer containing the data
-     */
     fun upload(data: FloatBuffer) {
         bind()
         val sizeBytes = data.remaining().toLong() * 4
         if (sizeBytes > capacity) {
-            // Reallocate buffer
             GLWrapper.bufferData(ARRAY_BUFFER, data, usage.glUsage)
             capacity = sizeBytes
         } else if (usage == BufferUsage.STREAM) {
@@ -78,7 +54,6 @@ class VertexBuffer(
             GLWrapper.bufferSubData(ARRAY_BUFFER, 0, data)
             data.reset()
         } else {
-            // Update existing buffer
             data.mark()
             GLWrapper.bufferSubData(ARRAY_BUFFER, 0, data)
             data.reset()
@@ -86,18 +61,10 @@ class VertexBuffer(
         currentSize = sizeBytes
     }
 
-    /**
-     * Uploads byte data to the buffer.
-     *
-     * @param data ByteBuffer containing the data
-     */
     fun upload(data: ByteBuffer) {
         bind()
         val sizeBytes = data.remaining().toLong()
         if (sizeBytes > capacity || usage == BufferUsage.STREAM) {
-            // STREAM buffers are rewritten every frame while the previous frame's
-            // draws may still read them: glBufferData orphans the old storage instead
-            // of making glBufferSubData wait for (or copy around) those draws.
             GLWrapper.bufferData(ARRAY_BUFFER, data, usage.glUsage)
             if (sizeBytes > capacity) capacity = sizeBytes
         } else {
@@ -108,14 +75,6 @@ class VertexBuffer(
         currentSize = sizeBytes
     }
 
-    /**
-     * Uploads [data] at [byteOffset], leaving the rest of the buffer untouched.
-     *
-     * For append-only stores where only a tail range changes each frame, this
-     * replaces a whole-buffer [upload] (which always writes from offset 0).
-     * The caller must have reserved the range via [allocate] first — this never
-     * grows the buffer.
-     */
     fun uploadSubRange(byteOffset: Long, data: ByteBuffer) {
         if (!data.hasRemaining()) return
         bind()
@@ -126,11 +85,6 @@ class VertexBuffer(
         if (end > currentSize) currentSize = end
     }
 
-    /**
-     * Pre-allocates buffer storage without uploading data.
-     *
-     * @param sizeBytes Size in bytes to allocate
-     */
     fun allocate(sizeBytes: Long) {
         bind()
         GLWrapper.bufferData(ARRAY_BUFFER, sizeBytes, usage.glUsage)
@@ -138,31 +92,15 @@ class VertexBuffer(
         currentSize = 0
     }
 
-    /**
-     * Updates a portion of the buffer.
-     *
-     * @param offset Offset in bytes from start of buffer
-     * @param data Data to upload
-     */
     fun update(offset: Long, data: FloatBuffer) {
         bind()
         GLWrapper.bufferSubData(ARRAY_BUFFER, offset, data)
     }
 
-    /**
-     * Gets current buffer size in bytes.
-     */
     fun getSize(): Long = currentSize
 
-    /**
-     * Gets buffer capacity in bytes.
-     */
     fun getCapacity(): Long = capacity
 
-    /**
-     * Releases GPU resources.
-     * Safe to call from any thread - will silently skip if no GL context is available.
-     */
     fun destroy() {
         val hasContext = try {
             GL.getCapabilities() != null
@@ -175,19 +113,10 @@ class VertexBuffer(
     }
 }
 
-/**
- * Builder for interleaved vertex data.
- *
- * Helps construct vertex buffers with multiple attributes
- * (position, normal, texcoord, color) interleaved.
- */
 class InterleavedVertexBuilder(initialCapacity: Int = 1024) {
     private var buffer = MemoryUtil.memAllocFloat(initialCapacity)
     private var position = 0
 
-    /**
-     * Ensures capacity for additional floats.
-     */
     private fun ensureCapacity(additionalFloats: Int) {
         if (position + additionalFloats > buffer.capacity()) {
             val newCapacity = (buffer.capacity() * 2).coerceAtLeast(position + additionalFloats)
@@ -229,10 +158,6 @@ class InterleavedVertexBuilder(initialCapacity: Int = 1024) {
         return this
     }
 
-    /**
-     * Packs RGBA color (0-255 each) into a single float.
-     * Suitable for GL_UNSIGNED_BYTE vertex attributes.
-     */
     fun putColorRGBA(r: Int, g: Int, b: Int, a: Int): InterleavedVertexBuilder {
         ensureCapacity(1)
         val packed = (a and 0xFF shl 24) or (b and 0xFF shl 16) or (g and 0xFF shl 8) or (r and 0xFF)
@@ -240,30 +165,18 @@ class InterleavedVertexBuilder(initialCapacity: Int = 1024) {
         return this
     }
 
-    /**
-     * Gets the buffer ready for upload.
-     */
     fun build(): FloatBuffer {
         buffer.position(0)
         buffer.limit(position)
         return buffer
     }
 
-    /**
-     * Returns current vertex count (assuming stride is known).
-     */
     fun getFloatCount(): Int = position
 
-    /**
-     * Resets builder for reuse.
-     */
     fun clear() {
         position = 0
     }
 
-    /**
-     * Frees native memory.
-     */
     fun destroy() {
         MemoryUtil.memFree(buffer)
     }

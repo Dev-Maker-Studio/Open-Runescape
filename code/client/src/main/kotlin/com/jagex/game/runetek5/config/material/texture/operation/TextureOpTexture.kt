@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import com.jagex.game.runetek5.config.material.texture.TextureTypeList
 
-/**
- * Texture operation that samples from a material texture.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpTexture : TextureOperation(0, false) {
 
     @JvmField var texturePixels: IntArray? = null

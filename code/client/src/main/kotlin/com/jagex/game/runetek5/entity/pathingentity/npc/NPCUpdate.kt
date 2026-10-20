@@ -12,10 +12,6 @@ import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.sound.player.area.AmbientSound
 
-/**
- * Handles NPC update packets from the server.
- * Manages NPC entity lifecycle, movement, animations, and state updates.
- */
 object NPCUpdate {
 
     @JvmStatic
@@ -115,7 +111,6 @@ object NPCUpdate {
                 val moveSpeed = buffer.readBits(2)
                 when (moveSpeed) {
                     0 -> {
-                        // Standing still
                         Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = updateIndice
                         npc.lastUpdate = Client.npcUpdateCycle
                         Client.NPC_INDICES[++Client.npcListSize - 1] = updateIndice
@@ -131,7 +126,6 @@ object NPCUpdate {
                         }
                     }
                     2 -> {
-                        // General movement
                         Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = updateIndice
                         npc.lastUpdate = Client.npcUpdateCycle
                         if (buffer.readBits(1) == 1) {
@@ -149,7 +143,6 @@ object NPCUpdate {
                         }
                     }
                     3 -> {
-                        // Teleport
                         Client.LOCAL_NPC_INDICES[++Client.localNpcCount - 1] = updateIndice
                     }
                 }
@@ -266,7 +259,6 @@ object NPCUpdate {
                 updateFlag += buffer.readUByte() shl 24
             }
 
-            // Movement animations
             if ((updateFlag and 0x10) != 0) {
                 val movementAnimations = IntArray(MovementType.values().size)
                 for (index in movementAnimations.indices) {
@@ -276,7 +268,6 @@ object NPCUpdate {
                 PlayerUpdate.animate(npc, movementAnimations, speed, true)
             }
 
-            // Customize
             if ((updateFlag and UpdateFlag.CUSTOMIZE) != 0) {
                 val modelCount = npc.definitions?.modelIds?.size ?: 0
                 val colorAdjustments = npc.definitions?.recolorDst?.size ?: 0
@@ -315,7 +306,6 @@ object NPCUpdate {
                 }
             }
 
-            // Force move
             if ((updateFlag and UpdateFlag.FORCE_MOVE) != 0) {
                 npc.forceMovementT1XOff = buffer.readByteSubtract().toInt()
                 npc.forceMovementT1YOff = buffer.readByteAdd().toInt()
@@ -332,7 +322,6 @@ object NPCUpdate {
                 npc.previousMovementStepsLeft = 0
             }
 
-            // Set BAS
             if ((updateFlag and UpdateFlag.SET_BAS) != 0) {
                 npc.currRenderAnim = buffer.readUShort()
                 if (npc.currRenderAnim == 0xffff) {
@@ -340,7 +329,6 @@ object NPCUpdate {
                 }
             }
 
-            // Set VARN
             if ((updateFlag and UpdateFlag.SET_VARN) != 0) {
                 val count = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
                 for (index in 0 until count) {
@@ -350,7 +338,6 @@ object NPCUpdate {
                 }
             }
 
-            // Play GFX
             if ((updateFlag and UpdateFlag.PLAY_GFX) != 0) {
                 var spotAnimId = buffer.readUShortAdd()
                 val bitpackedSpeedHeight = buffer.readUIntInverseMiddle()
@@ -365,7 +352,6 @@ object NPCUpdate {
                 npc.playSpotAnimation(spotAnimId, bitpackedSpeedHeight, spotAnimRotation, slotId, adjustReplaymode, 3)
             }
 
-            // Face entity
             if ((updateFlag and UpdateFlag.FACE_ENTITY) != 0) {
                 npc.faceEntity = buffer.readUShortLittle()
                 if (npc.faceEntity == 65535) {
@@ -373,7 +359,6 @@ object NPCUpdate {
                 }
             }
 
-            // Animate
             if ((updateFlag and UpdateFlag.ANIMATE) != 0) {
                 val count = buffer.readUByteInverse()
                 val sequences = IntArray(count)
@@ -387,7 +372,6 @@ object NPCUpdate {
                 PlayerUpdate.animate(npc, sequences, speeds, slotMasks)
             }
 
-            // Spot anim (0x800)
             if ((updateFlag and 0x800) != 0) {
                 var gfxId = buffer.readUShortLittle()
                 val bitpackedSpeedHeight = buffer.readInt()
@@ -402,7 +386,6 @@ object NPCUpdate {
                 npc.playSpotAnimation(gfxId, bitpackedSpeedHeight, spotAnimRotation, slotId, adjustReplaymode, 1)
             }
 
-            // Add hitsplat
             if ((updateFlag and UpdateFlag.ADD_HITSPLAT) != 0) {
                 val hitCount = buffer.readUByteAdd()
                 if (hitCount > 0) {
@@ -415,23 +398,23 @@ object NPCUpdate {
                         var hitsplatId = buffer.readUSmart()
 
                         when (hitsplatId) {
-                            32767 -> { // Soaking
+                            32767 -> {
                                 hitsplatId = buffer.readUSmart()
                                 hitText = buffer.readUSmart()
                                 soakHitsplatId = buffer.readUSmart()
                                 soakText = buffer.readUSmart()
                             }
-                            32766 -> { // Missed
+                            32766 -> {
                                 hitsplatId = -1
                                 hitText = buffer.readUByte()
                             }
-                            32764 -> { // Custom with soaking
+                            32764 -> {
                                 hitsplatId = buffer.readUSmart()
                                 hitCustomText = buffer.readString()
                                 soakHitsplatId = buffer.readUSmart()
                                 soakCustomText = buffer.readString()
                             }
-                            32765 -> { // Custom without soaking
+                            32765 -> {
                                 hitsplatId = buffer.readUSmart()
                                 hitCustomText = buffer.readString()
                             }
@@ -460,7 +443,6 @@ object NPCUpdate {
                 }
             }
 
-            // Transform (0x8)
             if ((updateFlag and 0x8) != 0) {
                 if (npc.definitions?.hasSoundEffects() == true) {
                     AmbientSound.unlinkEntitySound(npc)
@@ -473,7 +455,6 @@ object NPCUpdate {
                 }
             }
 
-            // Spot anim (0x2000000)
             if ((updateFlag and 0x2000000) != 0) {
                 var spotanimId = buffer.readUShortLittle()
                 val flags = buffer.readUIntLittle()
@@ -488,7 +469,6 @@ object NPCUpdate {
                 npc.playSpotAnimation(spotanimId, flags, rotation, slotId, adjustReplaymode, 2)
             }
 
-            // Update stats
             if ((updateFlag and UpdateFlag.UPDATE_STATS) != 0) {
                 val configCount = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
                 for (index in 0 until configCount) {
@@ -499,7 +479,6 @@ object NPCUpdate {
                 }
             }
 
-            // Head customization (0x40000)
             if ((updateFlag and 0x40000) != 0) {
                 val headmodelCount = npc.definitions?.headModels?.size ?: 0
                 var adjustmentLength = npc.definitions?.recolorDst?.size ?: 0
@@ -529,12 +508,10 @@ object NPCUpdate {
                     }
 
                     val uid = npcIndice.toLong() or ((++npc.headMeshModifierCount - 1).toLong() shl 32)
-                    // Note: Creating object but not assigning - matches original Java code
                     NPCTypeCustomisation(uid, models, recolorDst, retextureDst)
                 }
             }
 
-            // Update combat level
             if ((updateFlag and UpdateFlag.UPDATE_CB_LVL) != 0) {
                 npc.modifiedCbLvl = buffer.readUShortAdd()
                 if (npc.modifiedCbLvl == 0xffff) {
@@ -542,7 +519,6 @@ object NPCUpdate {
                 }
             }
 
-            // Clear varns (0x400000)
             if ((updateFlag and 0x400000) != 0) {
                 npc.varns.clear()
                 val varnCount = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
@@ -553,13 +529,11 @@ object NPCUpdate {
                 }
             }
 
-            // Face coordinates
             if ((updateFlag and 0x4) != 0) {
                 npc.faceX = buffer.readUShortAddLittle()
                 npc.faceY = buffer.readUShortLittle()
             }
 
-            // Tint (0x20000)
             if ((updateFlag and 0x20000) != 0) {
                 npc.hue = buffer.readByteSubtract()
                 npc.saturation = buffer.readByte()
@@ -569,7 +543,6 @@ object NPCUpdate {
                 npc.tintEndCycle = Client.cycles + buffer.readUShort()
             }
 
-            // Modified name
             if ((updateFlag and 0x800000) != 0) {
                 npc.modifiedName = buffer.readString()
                 check(npc.modifiedName != null)
@@ -578,12 +551,10 @@ object NPCUpdate {
                 }
             }
 
-            // Say text (0x2)
             if ((updateFlag and 0x2) != 0) {
                 npc.setOverheadText(buffer.readString())
             }
 
-            // Unknown (0x4000)
             if ((updateFlag and 0x4000) != 0) {
                 val equipCount = buffer.readUByteSubtract()
                 val equipTargets = IntArray(equipCount)
@@ -601,7 +572,6 @@ object NPCUpdate {
                 npc.setEquipmentOverrides(equipTargets, equipSlotMasks)
             }
 
-            // Spot anim (0x20)
             if ((updateFlag and 0x20) != 0) {
                 var spotAnimId = buffer.readUShort()
                 val bitpackedSpeedHeight = buffer.readUIntInverseMiddle()

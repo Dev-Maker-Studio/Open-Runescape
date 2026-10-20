@@ -1,6 +1,3 @@
-/* SimplePeer - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jagtheora.misc
 
 abstract class SimplePeer {
@@ -42,7 +39,6 @@ abstract class SimplePeer {
                 resetPeer()
             }
         } finally {
-            // super.finalize() is deprecated and removed
         }
     }
 

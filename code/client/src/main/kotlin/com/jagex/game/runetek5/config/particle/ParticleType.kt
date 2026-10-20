@@ -6,9 +6,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.utils.MathUtils
 import kotlin.math.sqrt
 
-/**
- * Particle configuration type.
- */
 class ParticleType {
 
     @JvmField var partileFileId: Int = 0

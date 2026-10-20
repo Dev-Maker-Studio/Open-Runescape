@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.cache.compression
 
-/**
- * Data container for Bzip2 decompression blocks.
- */
 class Bzip2BlockEntry {
 
     @JvmField var runCount: Int = 0

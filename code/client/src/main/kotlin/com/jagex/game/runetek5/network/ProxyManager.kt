@@ -13,7 +13,6 @@ open class ProxyManager : SocketManager() {
 
     @JvmField val proxySelector: ProxySelector? = ProxySelector.getDefault()
 
-    // Unused
     @Throws(IOException::class)
     fun getProxySocket(proxy: Proxy): Socket? {
         if (proxy.type() == Type.DIRECT) {
@@ -46,7 +45,6 @@ open class ProxyManager : SocketManager() {
                     }
                 }
             } catch (ignored: Exception) {
-                // NOOP
             }
 
             return proxySocketConnect(inetSocketAddress.hostName, inetSocketAddress.port, proxyAuthHeader)
@@ -58,7 +56,6 @@ open class ProxyManager : SocketManager() {
         return null
     }
 
-    // Unused
     @Throws(IOException::class)
     fun proxySocketConnect(host: String, port: Int, customHeader: String?): Socket? {
         val socket = Socket(host, port)
@@ -101,7 +98,6 @@ open class ProxyManager : SocketManager() {
         return null
     }
 
-    // Unused
     @Throws(IOException::class)
     override fun getProxySocket(): Socket {
         val useSystemProxies = java.lang.Boolean.parseBoolean(System.getProperty("java.net.useSystemProxies"))
@@ -133,7 +129,6 @@ open class ProxyManager : SocketManager() {
             } catch (ex: ProxyIOException) {
                 proxyException = ex
             } catch (ignored: IOException) {
-                // NOOP
             }
         }
         if (proxyException != null) {

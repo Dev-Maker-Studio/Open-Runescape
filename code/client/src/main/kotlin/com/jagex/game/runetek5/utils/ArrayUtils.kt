@@ -10,29 +10,6 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods
 
 object ArrayUtils {
 
-	/**
-	 * ChatGPT 4:
-	 * public static void array_copy(int[] source, int srcPos, int[] destination, int destPos, int length) {
-    if (destination == source) {
-        if (destPos == srcPos) {
-            return;
-        }
-
-        if (destPos > srcPos && destPos < srcPos + length) {
-            destPos += length - 1;
-            srcPos += length - 1;
-            for (int i = length - 1; i >= 0; i--) {
-                destination[destPos--] = source[srcPos--];
-            }
-            return;
-        }
-    }
-
-    for (int i = 0; i < length; i++) {
-        destination[destPos++] = source[srcPos++];
-    }
-}
-	 */
 	@JvmStatic
 	fun arrayCopy(src: IntArray, srcPos: Int, dest: IntArray, destPos: Int, length: Int) {
 		var srcPos = srcPos
@@ -258,39 +235,6 @@ object ArrayUtils {
 
 	}
 
-	/**
-	 * ChatGPT 4:
-	 * public static void quickSort(long[] arr, Object[] objects, int startIndex, int endIndex) {
-    if (startIndex >= endIndex) {
-        return;
-    }
-    int midIndex = (startIndex + endIndex) / 2;
-    long pivotValue = arr[midIndex];
-    int leftIndex = startIndex;
-    int rightIndex = endIndex;
-    while (leftIndex <= rightIndex) {
-        while (arr[leftIndex] < pivotValue) {
-            leftIndex++;
-        }
-        while (arr[rightIndex] > pivotValue) {
-            rightIndex--;
-        }
-        if (leftIndex <= rightIndex) {
-            // Swap values and objects
-            long tempValue = arr[leftIndex];
-            arr[leftIndex] = arr[rightIndex];
-            arr[rightIndex] = tempValue;
-            Object tempObject = objects[leftIndex];
-            objects[leftIndex] = objects[rightIndex];
-            objects[rightIndex] = tempObject;
-            leftIndex++;
-            rightIndex--;
-        }
-    }
-    quickSort(arr, objects, startIndex, rightIndex);
-    quickSort(arr, objects, leftIndex, endIndex);
-}
-	 */
 	@JvmStatic
 	fun <T> quicksort(keys: LongArray, values: Array<T>, startIndex: Int, endIndex: Int) {
 		var partitionIndex = startIndex

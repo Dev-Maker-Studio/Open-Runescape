@@ -4,12 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- * Texture operation that generates Mandelbrot fractal patterns.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpMandelbrot : TextureOperation(0, true) {
 
     @JvmField var centerX: Int = 0

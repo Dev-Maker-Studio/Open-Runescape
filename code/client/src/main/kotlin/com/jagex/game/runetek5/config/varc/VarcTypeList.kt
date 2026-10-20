@@ -63,14 +63,12 @@ class VarcTypeList(
                 }
                 decodeVarcInt(Packet(data))
             } catch (exception: Exception) {
-                // NOOP
             }
             try {
                 if (jagexFilesystem != null) {
                     jagexFilesystem.close()
                 }
             } catch (exception: Exception) {
-                // NOOP
             }
         }
 

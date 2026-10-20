@@ -30,14 +30,6 @@ open class WorldDescriptor : WorldDescriptorFlags() {
                 null
         }
 
-        /**
-         *
-         * @param world1
-         * @param world2
-         * @param sortMode
-         * @param ascending
-         * @return
-         */
         @JvmStatic
         fun worldTypeChanged(world1: WorldDescriptor, world2: WorldDescriptor, sortMode: Int, ascending: Boolean): Int {
             if (sortMode == 1) {

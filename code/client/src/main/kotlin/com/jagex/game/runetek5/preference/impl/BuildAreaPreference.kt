@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 import com.jagex.game.runetek5.scene.BuildArea
 
-/**
- *
- * @author Steven - 17/09/2023
- *
- */
 class BuildAreaPreference : Preference {
 
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)

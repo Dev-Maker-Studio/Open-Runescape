@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages identity kit (IDK) types with LRU caching.
- *
- * @author Brainpower - 30/05/2020
- */
 class IdkTypeList(
     @JvmField val identityResource: Js5ResourceProvider,
     @JvmField val modelResource: Js5ResourceProvider
@@ -21,12 +16,6 @@ class IdkTypeList(
         identityResource.getArchiveFileCount(SharedConfigsType.IDENTITY_KIT.id)
     }
 
-    /**
-     * Retrieves an identity kit type by ID, loading it if not cached.
-     *
-     * @param identityId The identity kit ID
-     * @return The identity kit type
-     */
     fun list(identityId: Int): IdkType {
         var identityType: IdkType?
         synchronized(cache) {
@@ -50,27 +39,18 @@ class IdkTypeList(
         }
     }
 
-    /**
-     * Resets the cache, clearing all entries.
-     */
     fun reset() {
         synchronized(cache) {
             cache.reset()
         }
     }
 
-    /**
-     * Cycles the cache, cleaning up old entries.
-     */
     fun cycleCache() {
         synchronized(cache) {
             cache.clean(5)
         }
     }
 
-    /**
-     * Removes entries from the cache by resizing.
-     */
     fun remove() {
         synchronized(cache) {
             cache.resize()

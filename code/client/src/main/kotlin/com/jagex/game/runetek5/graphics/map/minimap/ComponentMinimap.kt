@@ -170,11 +170,6 @@ object ComponentMinimap {
         }
     }
 
-    /**
-     * Draws the inner part of the minimap that displays
-     * the world and entites in it.
-     * Does not include border
-     */
     @JvmStatic
     fun drawMinimap(toolkit: AbstractToolkit, component: Component, clipLeft: Int, clipTop: Int) {
         val sprite: InteractiveComponentSprite? = component.addInteractiveSprite(toolkit)
@@ -267,7 +262,6 @@ object ComponentMinimap {
         }
     }
 
-    // is it size_x/y or is it offset_x/y
     @JvmStatic
     fun drawEntity(component: Component, dimension: ComponentSurface, clipLeft: Int, clipTop: Int, sizeX: Int, sizeZ: Int, sprite: NativeSprite?) {
         if (sprite != null) {
@@ -543,9 +537,6 @@ object ComponentMinimap {
         }
     }
 
-    /**
-     * Renders the minimap
-     */
     @JvmStatic
     fun drawGame(toolkit: AbstractToolkit, fromPlane: Int): Boolean {
         Utils.time()
@@ -582,8 +573,8 @@ object ComponentMinimap {
                 minimapPixels[index] = MapRegion.BACKGROUND_COLOR
             }
             var directDisplay: DirectDisplay? = null
-            var centerOffsetX: Byte = 0 // + makes map move east
-            var centerOffsetY: Byte = 0 // + makes map move south
+            var centerOffsetX: Byte = 0
+            var centerOffsetY: Byte = 0
             if (MapRegion.requiresDisplayResize) {
                 minimapBackground = toolkit.generateEmptySprite(minimapDimension, minimapDimension, false, true)
                 directDisplay = toolkit.getImageProducer()
@@ -610,12 +601,12 @@ object ComponentMinimap {
                 while (length < regionDimensionY) {
                     var drawPositionX = centerOffsetX.toInt()
                     var drawPositionY = centerOffsetY.toInt()
-                    var tilesStartX = width // + makes map move west
+                    var tilesStartX = width
                     if (width > 0) {
                         tilesStartX = width - 1
                         drawPositionX = centerOffsetX + 4
                     }
-                    var tilesStartY = length // + makes map move north
+                    var tilesStartY = length
                     if (length > 0) {
                         tilesStartY = length - 1
                     }
@@ -641,7 +632,6 @@ object ComponentMinimap {
                                 visibleTiles[x][y] = settingsBits.isVisible(fromPlane, z, x + tilesStartX, y + tilesStartY)
                             }
                         }
-                        // FIXME: better names for the parameters
                         scene.surfaceHeightmap!![z]!!.renderMinimapFloor(centerOffsetX.toInt(), centerOffsetY.toInt(), tilesStartX, tilesStartY, tilesEndX, tilesEndY, visibleTiles)
                         if (!MapRegion.visualizeClippedTilesOnMinimap) {
                             for (offsetX in -4 until halfRegionDimension) {

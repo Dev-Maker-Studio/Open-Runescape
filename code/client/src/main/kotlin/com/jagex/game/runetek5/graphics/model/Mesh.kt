@@ -800,10 +800,6 @@ class Mesh {
         return (numTextures++).toByte()
     }
 
-    /**
-     * @author Tamatea
-     * https://github.com/tamateea/RuneBlend
-     */
     fun createVertexGroups(fromNumVertices: Boolean): Array<IntArray> {
         val vertexGroupCount = IntArray(256)
         var count = 0
@@ -831,10 +827,6 @@ class Mesh {
         return groupedVertices
     }
 
-    /**
-     * @author Tamatea
-     * https://github.com/tamateea/RuneBlend
-     */
     fun createFaceGroups(): Array<IntArray> {
         val faceGroupCount = IntArray(256)
         var count = 0

@@ -7,21 +7,8 @@ import java.nio.ByteBuffer
 import java.nio.ShortBuffer
 import kotlin.math.sqrt
 
-/**
- * Converts legacy Mesh data to modern renderer format.
- *
- * The modern renderer expects interleaved vertex data:
- * - Position: vec3 (12 bytes)
- * - Normal: vec3 (12 bytes)
- * - TexCoord: vec2 (8 bytes)
- * - Color: RGBA (4 bytes)
- * Total: 36 bytes per vertex
- */
 object MeshConverter {
 
-    /**
-     * Result of mesh conversion containing vertex and index data.
-     */
     data class ConvertedMesh(
         val vertexData: ByteBuffer,
         val indexData: ShortBuffer,
@@ -34,16 +21,6 @@ object MeshConverter {
         }
     }
 
-    /**
-     * Converts a Mesh to modern renderer format.
-     *
-     * Since Mesh has per-face colors but modern rendering needs per-vertex,
-     * we duplicate vertices for each face to allow proper per-face coloring.
-     *
-     * @param mesh The source mesh
-     * @param defaultColor Default RGBA color if face color is not available
-     * @return ConvertedMesh with vertex and index data, or null if conversion fails
-     */
     fun convert(mesh: Mesh, defaultColor: Int = 0xFFFFFFFF.toInt()): ConvertedMesh? {
         val numFaces = mesh.numFaces
         if (numFaces <= 0) return null
@@ -55,7 +32,6 @@ object MeshConverter {
         val verticesY = mesh.verticesY ?: return null
         val verticesZ = mesh.verticesZ ?: return null
 
-        // Each face has 3 vertices, each vertex is 36 bytes
         val vertexCount = numFaces * 3
         val indexCount = numFaces * 3
 
@@ -70,7 +46,6 @@ object MeshConverter {
                 val b = facesB[faceIdx].toInt() and 0xFFFF
                 val c = facesC[faceIdx].toInt() and 0xFFFF
 
-                // Get vertex positions
                 val ax = verticesX[a].toFloat()
                 val ay = verticesY[a].toFloat()
                 val az = verticesZ[a].toFloat()
@@ -83,7 +58,6 @@ object MeshConverter {
                 val cy = verticesY[c].toFloat()
                 val cz = verticesZ[c].toFloat()
 
-                // Calculate face normal
                 val e1x = bx - ax
                 val e1y = by - ay
                 val e1z = bz - az
@@ -106,7 +80,6 @@ object MeshConverter {
                     nz = 0f
                 }
 
-                // Get face color (convert from HSL to RGBA)
                 val rgba = if (mesh.facesColor != null && faceIdx < mesh.facesColor!!.size) {
                     hslToRgba(mesh.facesColor!![faceIdx].toInt() and 0xFFFF)
                 } else {
@@ -118,16 +91,12 @@ object MeshConverter {
                 val blue = rgba and 0xFF
                 val alpha = (rgba shr 24) and 0xFF
 
-                // Write vertex A
                 writeVertex(vertexData, ax, ay, az, nx, ny, nz, 0f, 0f, r, g, blue, alpha)
 
-                // Write vertex B
                 writeVertex(vertexData, bx, by, bz, nx, ny, nz, 0f, 0f, r, g, blue, alpha)
 
-                // Write vertex C
                 writeVertex(vertexData, cx, cy, cz, nx, ny, nz, 0f, 0f, r, g, blue, alpha)
 
-                // Write indices (sequential since we're duplicating vertices)
                 indexData.put(vertexIndex.toShort())
                 indexData.put((vertexIndex + 1).toShort())
                 indexData.put((vertexIndex + 2).toShort())
@@ -147,10 +116,6 @@ object MeshConverter {
         }
     }
 
-    /**
-     * Converts a Mesh using shared vertices (more efficient but per-vertex colors).
-     * Uses Gouraud-style vertex colors averaged from adjacent faces.
-     */
     fun convertShared(mesh: Mesh, defaultColor: Int = 0xFFFFFFFF.toInt()): ConvertedMesh? {
         val numVertices = mesh.numVertices
         val numFaces = mesh.numFaces
@@ -163,12 +128,10 @@ object MeshConverter {
         val verticesY = mesh.verticesY ?: return null
         val verticesZ = mesh.verticesZ ?: return null
 
-        // Compute per-vertex normals (averaged from adjacent faces)
         val normalsX = FloatArray(numVertices)
         val normalsY = FloatArray(numVertices)
         val normalsZ = FloatArray(numVertices)
 
-        // Accumulate face normals for each vertex
         for (faceIdx in 0 until numFaces) {
             val a = facesA[faceIdx].toInt() and 0xFFFF
             val b = facesB[faceIdx].toInt() and 0xFFFF
@@ -208,7 +171,6 @@ object MeshConverter {
             normalsZ[c] += nz
         }
 
-        // Normalize
         for (i in 0 until numVertices) {
             val len = sqrt(normalsX[i] * normalsX[i] + normalsY[i] * normalsY[i] + normalsZ[i] * normalsZ[i])
             if (len > 0.0001f) {
@@ -220,7 +182,6 @@ object MeshConverter {
             }
         }
 
-        // Compute per-vertex colors (average from adjacent faces)
         val colorR = IntArray(numVertices)
         val colorG = IntArray(numVertices)
         val colorB = IntArray(numVertices)
@@ -246,12 +207,10 @@ object MeshConverter {
             colorR[c] += r; colorG[c] += g; colorB[c] += blue; colorCount[c]++
         }
 
-        // Allocate buffers
         val vertexData = MemoryUtil.memAlloc(numVertices * 36)
         val indexData = MemoryUtil.memAllocShort(numFaces * 3)
 
         try {
-            // Write vertices
             for (i in 0 until numVertices) {
                 val px = verticesX[i].toFloat()
                 val py = verticesY[i].toFloat()
@@ -265,7 +224,6 @@ object MeshConverter {
                 writeVertex(vertexData, px, py, pz, normalsX[i], normalsY[i], normalsZ[i], 0f, 0f, r, g, b, 255)
             }
 
-            // Write indices
             for (faceIdx in 0 until numFaces) {
                 indexData.put(facesA[faceIdx])
                 indexData.put(facesB[faceIdx])
@@ -291,43 +249,30 @@ object MeshConverter {
         u: Float, v: Float,
         r: Int, g: Int, b: Int, a: Int
     ) {
-        // Position (12 bytes)
         buffer.putFloat(px)
         buffer.putFloat(py)
         buffer.putFloat(pz)
-        // Normal (12 bytes)
         buffer.putFloat(nx)
         buffer.putFloat(ny)
         buffer.putFloat(nz)
-        // TexCoord (8 bytes)
         buffer.putFloat(u)
         buffer.putFloat(v)
-        // Color RGBA (4 bytes)
         buffer.put(r.toByte())
         buffer.put(g.toByte())
         buffer.put(b.toByte())
         buffer.put(a.toByte())
     }
 
-    /**
-     * Converts RS HSL color (16-bit packed) to RGBA.
-     *
-     * RS HSL format: (hue6 << 10) | (sat3 << 7) | lightness7
-     * - hue: 0-63 (6 bits, maps to 0-360)
-     * - saturation: 0-7 (3 bits, maps to 0-255)
-     * - lightness: 0-127 (7 bits, maps to 0-255)
-     */
     private fun hslToRgba(packedHsl: Int): Int {
-        if (packedHsl == 0) return 0xFF808080.toInt()  // Default gray
+        if (packedHsl == 0) return 0xFF808080.toInt()
 
-        val hue6 = (packedHsl shr 10) and 0x3F      // 0-63
-        val sat3 = (packedHsl shr 7) and 0x7        // 0-7
-        val lum7 = packedHsl and 0x7F               // 0-127
+        val hue6 = (packedHsl shr 10) and 0x3F
+        val sat3 = (packedHsl shr 7) and 0x7
+        val lum7 = packedHsl and 0x7F
 
-        // Scale to standard ranges
-        val h = hue6 / 63f                          // 0-1
-        val s = sat3 / 7f                           // 0-1
-        val l = lum7 / 127f                         // 0-1
+        val h = hue6 / 63f
+        val s = sat3 / 7f
+        val l = lum7 / 127f
 
         return hslToRgb(h, s, l)
     }

@@ -46,10 +46,6 @@ object InterfaceRenderer {
 	@JvmField
 	var dragTickCount: Int = 0
 
-	/**
-	 * Draws an interface and it's component,
-	 * also processes interface interaction
-	 */
 	@JvmStatic
 	fun processInterfaceCycle(
 		parentInterface: Interface,
@@ -167,10 +163,7 @@ object InterfaceRenderer {
 										clickTriggered = true
 									}
 								} else {
-									// If you want: treat null as "whole area clickable" OR "not clickable".
-									// Match the behavior from your earlier logic:
 									clickTriggered = true
-									// or: continue / leave clickTriggered false
 								}
 							} else {
 								clickTriggered = true
@@ -804,9 +797,6 @@ object InterfaceRenderer {
 
 	@JvmStatic
 	fun resetPendingHooks() {
-		// NodeCollection.first() and getNext() walk the same direction; getFirst() starts
-		// the opposite walk, and pairing it with getNext() bounced between the first two
-		// hooks, so hooks queued by components behind a no-click-through one survived.
 		var hook = Client.PENDING_HOOK_REQUESTS.first() as HookRequest?
 		while (hook != null) {
 			if (hook.hasMousePosition) {

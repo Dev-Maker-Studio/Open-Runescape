@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Type list for spot animations (graphics effects).
- */
 class SpotAnimTypeList(
     @JvmField val gfxResource: Js5ResourceProvider,
     @JvmField val modelResource: Js5ResourceProvider

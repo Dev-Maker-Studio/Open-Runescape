@@ -21,11 +21,6 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-/**
- *
- * @author Brainpower - 06/04/2022
- *
- */
 object HintRenderer {
 
     @JvmStatic

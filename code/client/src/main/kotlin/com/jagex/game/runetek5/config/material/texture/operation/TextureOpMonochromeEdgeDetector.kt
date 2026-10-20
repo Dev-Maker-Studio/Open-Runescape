@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.sqrt
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpMonochromeEdgeDetector : TextureOperation(1, true) {
 
     @JvmField var strength: Int = 4096

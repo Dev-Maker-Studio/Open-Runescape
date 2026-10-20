@@ -27,11 +27,6 @@ import javax.swing.JTextArea
 import javax.swing.SwingConstants
 import javax.swing.WindowConstants
 
-/**
- * The window a player sees after a crash. Three numbered steps, big buttons,
- * no jargon: copy the report, open Discord, paste. Plain Swing only, so it
- * works even when the game window and the bot sidebar are broken.
- */
 object CrashDialog {
     enum class Mode { CRASH, REPORT }
 
@@ -40,7 +35,6 @@ object CrashDialog {
     private val small = Font(Font.SANS_SERIF, Font.PLAIN, 12)
     private val mono = Font(Font.MONOSPACED, Font.PLAIN, 12)
 
-    /** Must be called on the event dispatch thread. [onClose] runs once the window is gone. */
     fun show(report: CrashReport, file: File?, mode: Mode, onClose: () -> Unit = {}) {
         val title = if (mode == Mode.CRASH) "Darkan has crashed" else "Report a problem"
         val dialog = JDialog(null as Frame?, title, false)
@@ -55,8 +49,6 @@ object CrashDialog {
 
         val intro = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
-            // BoxLayout places children by alignmentX; labels and panels default to
-            // different values, which would stagger the rows.
             add(JLabel(if (mode == Mode.CRASH) "Sorry, Darkan ran into a problem and had to close." else "Something not working right? Tell us about it.").apply { font = heading; alignmentX = JComponent.LEFT_ALIGNMENT })
             add(Box.createVerticalStrut(6))
             add(JLabel("Help us fix it. It takes three clicks:").apply { font = body; alignmentX = JComponent.LEFT_ALIGNMENT })
@@ -163,7 +155,6 @@ object CrashDialog {
         }.onFailure { openWithSystemCommand(file.parentFile.absolutePath) }
     }
 
-    /** `Desktop` is unavailable on some Linux desktops; fall back to the platform opener. */
     private fun openWithSystemCommand(target: String): Boolean = runCatching {
         val os = System.getProperty("os.name").lowercase()
         val command = when {

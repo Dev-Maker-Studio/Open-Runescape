@@ -141,7 +141,6 @@ class ItemTypeList(
             nativeSprite = itemToolkit.createNativeSprite(sprites, 36, 36, 32)
         }
 
-        // this block gets hit on every display mode full & fixed screen
         if (!useMainToolkit) {
             val itemRenderer = SoftwareItemRender()
             itemRenderer.rendererId = itemToolkit.renderId

@@ -19,9 +19,6 @@ import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.scene.ground.Ground
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Stationary wall decoration game object.
- */
 class StationaryWallDecoration(
     scene: Scene,
     toolkit: AbstractToolkit,

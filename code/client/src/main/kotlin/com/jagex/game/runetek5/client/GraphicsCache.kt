@@ -15,14 +15,8 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapDisplay
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.scene.AsyncMapLoader
 
-/**
- * Manages graphics cache reset operations.
- */
 object GraphicsCache {
 
-    /**
-     * Resets all graphic caches based on preference settings.
-     */
     @JvmStatic
     fun resetGraphicCaches() {
         var preferenceMask = 0
@@ -40,8 +34,6 @@ object GraphicsCache {
         Resource.mapRegion!!.getLoctypeList().resetCaches(preferenceMask)
         val mapRegionLoader = Resource.mapRegionLoaderTask!!
         synchronized(mapRegionLoader.stateLock) {
-            // Only touch the loader's loc-model caches while no background build is
-            // using them; a busy loader's list is fully reset at the next region swap.
             if (mapRegionLoader.state == AsyncMapLoader.State.IDLE) {
                 mapRegionLoader.getMapRegion().getLoctypeList().resetCaches(preferenceMask)
             }
@@ -57,11 +49,6 @@ object GraphicsCache {
         Resource.mapRegion!!.reload()
     }
 
-    /**
-     * Resets world map caches.
-     *
-     * @param preserveStaticElement Whether to preserve the static element
-     */
     @JvmStatic
     fun resetWorldmapCaches(preserveStaticElement: Boolean) {
         if (preserveStaticElement && WorldMap.staticElement != null) {

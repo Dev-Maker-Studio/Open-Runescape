@@ -1,31 +1,21 @@
 #version 330 core
 
-// Inputs from vertex shader
 in vec2 vTexCoord;
 in vec4 vColor;
 flat in int vTexIndex;
 flat in vec4 vClip;
 
-// Texture samplers for multi-texture batching (up to 8 textures bound simultaneously)
 uniform sampler2D uTextures[8];
 
-// Output
 out vec4 fragColor;
 
 void main() {
-    // Per-quad scissor: a pixel (px,py) passes glScissor(x,y,w,h) iff x <= px < x+w
-    // and y <= py < y+h; gl_FragCoord is the pixel centre (px + 0.5), so the same
-    // half-open comparison on it is exactly that test.
     if (gl_FragCoord.x < vClip.x || gl_FragCoord.x >= vClip.z ||
         gl_FragCoord.y < vClip.y || gl_FragCoord.y >= vClip.w) {
         discard;
     }
     if (vTexIndex >= 0) {
         vec4 texColor;
-        // Select texture by index. Switch statement compiles to efficient branching
-        // on all modern GPU architectures. The flat interpolation qualifier ensures
-        // all fragments in a primitive use the same index, so there is zero divergence
-        // within a triangle.
         switch (vTexIndex) {
             case 0:  texColor = texture(uTextures[0], vTexCoord); break;
             case 1:  texColor = texture(uTextures[1], vTexCoord); break;
@@ -38,11 +28,9 @@ void main() {
         }
         fragColor = texColor * vColor;
     } else {
-        // Untextured (solid color)
         fragColor = vColor;
     }
 
-    // Discard fully transparent fragments
     if (fragColor.a < 0.004) {
         discard;
     }

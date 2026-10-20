@@ -21,23 +21,12 @@ import com.jagex.game.runetek5.vardomain.VarDomain
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 
-/**
- *
- * @author Brainpower - 20/05/2020
- *
- */
 class PlayerAppearance {
-	/**
-	 * Appearance hashes
-	 */
 	@JvmField
 	var playerAppearanceHash: Long = 0L
 	@JvmField
 	var bodyModelHash: Long = 0L
 
-	/**
-	 * Appearance data
-	 */
 	@JvmField
 	var meshModifiers: Array<ItemTypeCustomisation>? = null
 	@JvmField
@@ -51,9 +40,6 @@ class PlayerAppearance {
 	@JvmField
 	var appearance: IntArray? = null
 
-	/**
-	 * 839 [unused]
-	 */
 	@JvmField
 	var secondaryAppearanceHash: Long = 0L
 
@@ -96,9 +82,6 @@ class PlayerAppearance {
 		calculateAppearanceHash()
 	}
 
-	/**
-	 * 839 [unused]
-	 */
 	fun getBodyModelRev839(toolkit: AbstractToolkit, initialFunctionMask: Int, basTypeList: BasTypeList, idkTypeList: IdkTypeList, loader: NpcTypeList, objTypeList: ItemTypeList, varProvider: VarDomain, animatingSequence: Sequence?, idleSequence: Sequence?, objSequences: Array<Sequence?>?, rotations: IntArray?, rotationDelta: Int, equipmentDefaults: EquipmentDefaultsType): Model? {
 		if (this.morphism != -1) {
 			return loader.list(this.morphism).getAnimatedBodymodel(toolkit, initialFunctionMask, basTypeList, varProvider, animatingSequence, idleSequence, objSequences, rotations, rotationDelta, null)
@@ -355,7 +338,6 @@ class PlayerAppearance {
 		return copiedModel
 	}
 
-	// 727
 	fun getBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int, basTypeList: BasTypeList, idkTypeList: IdkTypeList, loader: NpcTypeList, objTypeList: ItemTypeList, varProvider: VarDomain, animatingSequence: Sequence?, idleSequence: Sequence?, objSequence: Array<Sequence?>?, rotations: IntArray?, rotationDelta: Int, equipmentDefaults: EquipmentDefaultsType, privatePool: PoseCopyPair? = null): Model? {
 		if (this.morphism != -1) {
 			return loader.list(this.morphism).getAnimatedBodymodel(toolkit, initialFunctionMask, basTypeList, varProvider, animatingSequence, idleSequence, objSequence, rotations, rotationDelta, null, privatePool = privatePool)
@@ -612,9 +594,6 @@ class PlayerAppearance {
 		return copiedModel
 	}
 
-	/**
-	 * Gets the head model of a player without any equipment displayed
-	 */
 	fun getPlainAnimatedHeadModel(toolkit: AbstractToolkit, initialFunctionMask: Int, identityTypeList: IdkTypeList, sequence: Sequence?, primaryHead: Int, secondaryHead: Int, tertiaryHead: Int): Model? {
 		val displacementFunctionMask = if (sequence != null) initialFunctionMask or sequence.getFunctionMask() else initialFunctionMask
 		val headUid = (tertiaryHead.toLong() shl 32) or ((secondaryHead.toLong() shl 16) or primaryHead.toLong())
@@ -667,9 +646,6 @@ class PlayerAppearance {
 		return model
 	}
 
-	/**
-	 * Gets the head model of a player with equipment displayed
-	 */
 	fun getAnimatedHeadModel(toolkit: AbstractToolkit, initialFunctionMask: Int, idkTypeList: IdkTypeList, npcTypeList: NpcTypeList, objTypeList: ItemTypeList, varProvider: VarDomain, sequence: Sequence?): Model? {
 		if (this.morphism != -1) {
 			return npcTypeList.list(this.morphism).getAnimatedHeadmodel(toolkit, initialFunctionMask, varProvider, sequence, null)
@@ -817,31 +793,19 @@ class PlayerAppearance {
 	}
 
 	companion object {
-		/**
-		 * Identity kit parts
-		 */
 		@JvmField
 		val IDK_PART_TABLE = intArrayOf(8, 11, 4, 6, 9, 7, 10, 0)
 
-		/**
-		 * Cached models
-		 */
 		@JvmField
 		val bodyModelCache = LRUCache(260)
 		@JvmField
 		val headModelCache = LRUCache(5)
 
-		/**
-		 * Colors to find / replacements
-		 */
 		@JvmField
 		var recolorPaletteSrc: Array<ShortArray>? = null
 		@JvmField
 		var recolorPaletteDst: Array<Array<ShortArray>>? = null
 
-		/**
-		 * Visual preferences (light / shadow)
-		 */
 		@JvmField
 		var preferenceFlags: Int = 0
 

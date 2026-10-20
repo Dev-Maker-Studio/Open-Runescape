@@ -405,11 +405,7 @@ object WorldMapUserDetailOps {
 
     @JvmStatic
     fun computeGraphicsMode() {
-        if (CS2Interpreter.lastEnteredGraphicsMode == ToolkitPreference.LEGACY_OPENGL) {
-            GameShell.legacyOpenglTried = true
-        } else if (CS2Interpreter.lastEnteredGraphicsMode == ToolkitPreference.MODERN_OPENGL) {
-            GameShell.modernOpenglTried = true
-        }
+        GameShell.modernOpenglTried = true
     }
 
     @JvmStatic

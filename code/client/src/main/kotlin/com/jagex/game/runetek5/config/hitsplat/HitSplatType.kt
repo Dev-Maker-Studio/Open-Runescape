@@ -7,10 +7,6 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.TextUtils
 
-// HIT
-// MISS (0)
-// CRITICAL
-// ...?
 class HitSplatType {
 
     @JvmField var fontId = -1

@@ -2,9 +2,6 @@ package com.jagex.game.runetek5.utils
 
 import kotlin.math.*
 
-/**
- * Math utility functions including precomputed sine/cosine tables.
- */
 object MathUtils {
 
     @JvmField val SINE = IntArray(16384)
@@ -18,26 +15,12 @@ object MathUtils {
         }
     }
 
-    /**
-     * Theta is used in math as a variable to represent a measured angle.
-     * https://wumbo.net/symbols/theta/#:~:text=The%20Greek%20letter%20%CE%B8%20(theta,tangent%20as%20the%20input%20variable.
-     *
-     * @param rotation The rotation value
-     * @return The angle in radians
-     */
     @JvmStatic
     fun getTheta(rotation: Int): Float {
         val maskedRotation = rotation and 0x3fff
         return (maskedRotation / 16384.0f) * 6.283185307179586f
     }
 
-    /**
-     * Calculates a random sample rate between min and max delays using logarithmic distribution.
-     *
-     * @param maxDelay The maximum delay
-     * @param minDelay The minimum delay
-     * @return A random sample rate
-     */
     @JvmStatic
     fun calculateSampleRate(maxDelay: Int, minDelay: Int): Int {
         val logMin = ln(minDelay.toDouble()) / ln(2.0)
@@ -46,12 +29,6 @@ object MathUtils {
         return (2.0.pow(randomLog) + 0.5).toInt()
     }
 
-    /**
-     * Finds the highest set bit value (furthest bit from LSB).
-     *
-     * @param value The input value
-     * @return The value with only the highest bit set
-     */
     @JvmStatic
     fun furtestBitValue(value: Int): Int {
         var result = value ushr 1
@@ -63,12 +40,6 @@ object MathUtils {
         return value and result.inv()
     }
 
-    /**
-     * Rounds up to the next power of two.
-     *
-     * @param value The input value
-     * @return The next power of two
-     */
     @JvmStatic
     fun nextPowerOfTwo(value: Int): Int {
         var result = value - 1
@@ -80,13 +51,6 @@ object MathUtils {
         return result + 1
     }
 
-    /**
-     * Calculates integer power using exponentiation by squaring.
-     *
-     * @param base The base value
-     * @param exponent The exponent
-     * @return base^exponent
-     */
     @JvmStatic
     fun power(base: Int, exponent: Int): Int {
         var currentBase = base

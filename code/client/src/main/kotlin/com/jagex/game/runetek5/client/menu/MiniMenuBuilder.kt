@@ -28,14 +28,6 @@ import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.TextUtils
 import com.jagex.game.runetek5.vardomain.VarProviders
 
-/**
- * Builds mini menu (right-click context menu) entries for game entities.
- *
- * @author Brainpower - 27/01/2023
- *
- * Value 2000 = lower the priority of the attack option (move it down if on top)
- */
-
 @JvmField
 var SHOW_FACE_HERE = false
 
@@ -230,7 +222,6 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
             y = (posY + (PlayerUpdate.MY_PLAYER!!.getSize() - 1 shl 8)) shr 9
             val plane = PlayerUpdate.MY_PLAYER!!.plane
             if (plane < 3 && ((Resource.mapRegion?.settingsBits?.tileFunctionMasks?.get(1)?.get(posX shr 9)?.get(posY shr 9)?.toInt() ?: 0) and 0x2) != 0) {
-                // Empty block
             }
         }
 

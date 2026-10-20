@@ -7,9 +7,6 @@ import java.awt.Frame
 import java.io.File
 import javax.swing.JFileChooser
 
-/**
- * Directory picker dialog using Swing file chooser.
- */
 class DirectoryPicker(
     @JvmField val diaglogTitle: String
 ) : Runnable {

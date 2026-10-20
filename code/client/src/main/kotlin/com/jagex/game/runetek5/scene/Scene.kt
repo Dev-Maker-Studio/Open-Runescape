@@ -90,26 +90,11 @@ class Scene(
     val alphaEntities: Array<SceneGraphEntity?>
     val dynamicRenderObjects: Array<SceneGraphEntity?>
 
-    /**
-     * Objects of which face_render_priorities
-     * can be disregarded
-     * (Could be wrong, could be: opaque_graph_node)
-     * graph_nodes_3d before
-     */
     var depthRenderedEntities: Array<SceneGraphEntity?>
 
-    /**
-     * Objects that need to have their face_render_priority
-     * taken into account for correct rendering
-     * (could be wrong, could be: transparent_graph_node)
-     */
     var priorityRenderedEntities: Array<SceneGraphEntity?>
     var interactiveObjects: Array<AbstractInteractiveEntity?>
 
-    /**
-     * 0 = onscreen
-     * 1 = offscreen
-     */
     val tileVisibility: IntArray
 
     init {
@@ -331,7 +316,6 @@ class Scene(
         }
     }
 
-
     fun addWall(plane: Int, baseX: Int, baseY: Int, primaryWall: AbstractWall?, secondaryWall: AbstractWall?) {
         retainedChunkChanged(plane, baseX, baseY)
         val tile = getTile(plane, baseX, baseY)
@@ -405,9 +389,6 @@ class Scene(
     }
 
     private fun notifyInteractiveChanged(interactive: AbstractInteractiveEntity) {
-        // Only stationary locs are ever retained. Players, NPCs and animated locs are
-        // re-added every frame (clearInteractives), and reporting those would
-        // invalidate the chunk under every moving entity each frame.
         if (interactive is HintTrailGraphNode) {
             walkRevision++
             return
@@ -433,11 +414,6 @@ class Scene(
         retainedHook?.sceneReset(this)
     }
 
-    /**
-     * Bumped on every change to the static walk lists (adds, removes, resets,
-     * interactive churn) and by the retained renderer whenever it flips an entity's
-     * [SceneGraphEntity.modernRetained]. The retained walk cache below is keyed on it.
-     */
     @JvmField var walkRevision: Int = 0
     private var walkCacheRevision = -1
     private var walkCacheLayer = -1
@@ -446,12 +422,6 @@ class Scene(
     private var walkCacheAlpha: Array<SceneGraphEntity?> = arrayOfNulls(256)
     private var walkCacheAlphaCount = 0
 
-    /**
-     * Under the retained path most static entities are skipped by the walk, but the
-     * walk still had to chase the whole singly-linked static lists (~10k nodes) to
-     * find the few it must draw. Cache the non-retained subset as flat arrays and
-     * rebuild only when the lists or the retained flags change.
-     */
     private fun rebuildWalkCache(layerIndex: Int) {
         walkCacheRebuildsAcc++
         walkCacheRevision = walkRevision
@@ -561,7 +531,6 @@ class Scene(
         if (tile != null) {
             val primaryWallDecoration = tile.primaryWallDecoration
             val secondaryWallDecoration = tile.secondaryWallDecoration
-            /** The upscaling happening below equals to 9 - 7 = 2, to match the model upscaling **/
             if (primaryWallDecoration != null) {
                 primaryWallDecoration.positionX = (displacement * primaryWallDecoration.positionX / (16 shl this.tileUnits - 7)).toShort()
                 primaryWallDecoration.positionY = (displacement * primaryWallDecoration.positionY / (16 shl this.tileUnits - 7)).toShort()
@@ -792,10 +761,6 @@ class Scene(
         }
     }
 
-    /**
-     * Adjusts the depth of the object (perspective_z)
-     * to prevent the floor rendering over an object
-     */
     fun separateFromFloor(entity: SceneGraphEntity) {
         walkNodes++
         val absolutePosition = entity.getAbsolutePosition().coords
@@ -817,10 +782,6 @@ class Scene(
         return null
     }
 
-    /**
-     * Determine if the game object on the tile is supposed to be culled or not
-     * If the object is culled that DOES NOT mean the tile is culled too, it just means the gameobject is hidden
-     */
     fun isHidden(entity: SceneGraphEntity, hideInteractives: Boolean, settingBits: Array<Array<ByteArray>>?, lowestRenderedPlane: Int, roofPreference: Byte): Boolean {
         if (!this.calculateTilesOnScreen) {
             return false
@@ -974,7 +935,6 @@ class Scene(
         }
     }
 
-    // bake light?
     fun addHdLight() {
         for (slotIndex in 0 until this.lightSlot) {
             if (!this.lightSlotAvailable!![slotIndex]) {
@@ -1119,19 +1079,6 @@ class Scene(
         this.layeredObjectCount = 0
         this.tileDrawCycle++
         val walkT0 = System.nanoTime()
-        // Visibility BEFORE projection.
-        //
-        // isHidden rejects a node whose tiles all fall outside the visible
-        // window, and does so without side effects — particleCycle only runs for
-        // nodes that ARE in range, exactly as before. Roughly three quarters of the
-        // scene graph is rejected that way on a typical frame, and every one of them
-        // used to pay a full projection first. The only thing that changes is that a
-        // rejected node's floorDepth is left at its previous value, which nothing
-        // reads: it is the depth sort key for accepted nodes, and the interaction
-        // cache only ever holds nodes that were drawn.
-        // Retained statics: a deferred renderer may hold the static entities' draws
-        // and resubmit them itself (RetainedSceneHook). Only on the surface pass — the
-        // underwater pass (hideInteractives) is rare and keeps the full walk.
         val hook = retainedHook
         val retained = hook != null && !hideInteractives && hook.active(this)
         var entity: SceneGraphEntity?
@@ -1218,9 +1165,6 @@ class Scene(
             phaseRetainedNs += System.nanoTime() - retainedT0
         }
 
-        /**
-         * Renders general scene objects, walls
-         */
         if (this.depthObjectCount > 0) {
             val sortT0 = System.nanoTime()
             quicksortBelow(this.depthRenderedEntities, 0, this.depthObjectCount - 1)
@@ -1236,10 +1180,6 @@ class Scene(
         }
         val floorT0 = System.nanoTime()
         for (plane in 0 until this.regionSizeZ) {
-            // A plane with no floor to draw does not need its per-tile visibility
-            // computed: the only consumer is the renderFloor call below, which would
-            // return immediately. tileOnScreen is fully rewritten by whichever plane
-            // runs next, so skipping leaves nothing stale behind.
             val planeGround = this.localHeightmap[plane]
             if (planeGround == null || !planeGround.hasRenderableFloor()) {
                 planesSkipped++
@@ -1247,12 +1187,6 @@ class Scene(
             }
             planesDrawn++
             if (plane >= lowestRenderedPlane && settingBits != null) {
-                // These bounds are array indices, and index -> scene tile is
-                // `tileX + visibleToXnegative - visibleToInvertedXnegative`, so the
-                // overflow test has to subtract the inverted offset too. Without it the
-                // window is clamped in scene space while used in index space, leaving the
-                // tiles the camera actually sees untouched -- they then keep the raw
-                // frustum visibility drawScene wrote and render with no roof test at all.
                 var visibleSizeX = this.tileInFrustum.size
                 if (this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
                     visibleSizeX -= this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
@@ -1264,10 +1198,6 @@ class Scene(
                 if (this.calculateTilesOnScreen) {
                     val yBase = this.visibleToYnegative - this.visibleToInvertedYnegative
                     val cullingLocal = this.culling
-                    // Which descending plane owns each tile of this floor is static per
-                    // scene: resolve it once (refreshed periodically in case tiles are
-                    // still streaming in) instead of chasing tiles[p][x][y] down the
-                    // planes for every tile of every floor every frame.
                     val owner = floorOwnerPlane(plane)
                     val dimY = this.sceneDimensionY
                     val cullingOff = !cullingLocal.cullingEnabled
@@ -1290,7 +1220,6 @@ class Scene(
                 }
                 this.localHeightmap[plane]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, false)
             } else {
-                // Same index-space clamp as the roof-tested branch above.
                 var visibleSizeX = this.tileInFrustum.size
                 if (this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
                     visibleSizeX -= this.tileInFrustum.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
@@ -1317,20 +1246,10 @@ class Scene(
         }
         phaseFloorNs += System.nanoTime() - floorT0
 
-        /**
-         * Renders ground decoration, light rays, objects with particles, roof / next level decoration
-         */
         if (DUMP_ALPHA && !hideInteractives) dumpAlphaTick++
         if (this.layeredObjectCount > 0) {
             val alphaT0 = System.nanoTime()
             quicksortAbove(this.priorityRenderedEntities, 0, this.layeredObjectCount - 1)
-            // The alpha bucket. Legacy relies on nothing but submission order here:
-            // these entities are drawn after every opaque entity and after the floor,
-            // back to front, so their blended faces land over whatever is behind
-            // them. A deferred/batched toolkit has no way to recover that ordering
-            // from the models themselves (hasAlpha() is per-entity, not per-model),
-            // so the walk announces the phase and the toolkit keeps these draws in
-            // an ordered pass of their own.
             alphaPassActive = true
             try {
                 for (index in 0 until this.layeredObjectCount) {
@@ -1343,8 +1262,6 @@ class Scene(
             walkAlpha += this.layeredObjectCount.toLong()
         }
     }
-    // Per floor plane: the descending plane whose tile carries that floor at each
-    // (x, y), or -1. See drawTiles.
     private var floorOwnerPlanes: Array<ByteArray?> = arrayOfNulls(0)
     private var floorOwnerCycle = IntArray(0)
     private fun floorOwnerPlane(plane: Int): ByteArray {
@@ -1376,10 +1293,8 @@ class Scene(
         return owner
     }
     private var lastParticlePulse = -1L
-    /** True on frames that advance particle simulation (one per logic pulse). */
     @JvmField var particleTickThisFrame = true
     private val PARTICLE_PER_TICK = System.getProperty("render.particletick")?.equals("false", true) != true
-
 
     fun drawScene(rotation: Int, cameraX: Int, cameraZ: Int, cameraY: Int, settingBits: Array<Array<ByteArray>>?,
                           visibleBelowDrawheight: IntArray?, visibleAboveX: IntArray?, visibleBelowX: IntArray?,
@@ -1416,10 +1331,6 @@ class Scene(
         }
         val unadjustedAdjacentTilesOnScreen = this.tileInFrustum
         val unadjustedTilesOnScreen = this.tileOnScreen
-        // Everything the tile-visibility grid needs, read once. This loop runs over
-        // (2*visibleTiles+2)^2 tiles — around eleven thousand — every frame, and each
-        // of the fields below was being re-read from `this` on every one of them,
-        // along with a fresh row lookup into each two-dimensional array.
         val gridSpan = this.visibleTiles + this.visibleTiles + 2
         val tileUnitsLocal = this.tileUnits
         val heightBias = 1000 shl (tileUnitsLocal - 7)
@@ -1440,16 +1351,11 @@ class Scene(
             val sceneX = tileX + originX
             val xInRange = sceneX >= 0 && sceneX < dimX
             val upscaledSceneX = sceneX shl tileUnitsLocal
-            // Row slices: the heightmaps and both grids are arrays of rows, so the
-            // outer index only has to be resolved once per column of the sweep.
             val topRow = if (xInRange) topSurface.tileHeights[sceneX] else null
             val lowRow = if (xInRange) lowSurface.tileHeights[sceneX] else null
             val onScreenRow = onScreenGrid[tileX]
             val adjacentRow = if (tileX > 0) adjacentGrid[tileX - 1] else null
 
-            // Clip flags for the whole column in one call. Testing them one at a time
-            // meant a virtual dispatch per tile — more expensive than the arithmetic
-            // it guarded, at eleven thousand tiles a frame.
             if (columnScratchZ.size < gridSpan) {
                 columnScratchZ = IntArray(gridSpan)
                 columnScratchLow = IntArray(gridSpan)
@@ -1478,9 +1384,6 @@ class Scene(
                     walkTiles += runCount.toLong()
                     toolkit.isColumnRunOnScreen(upscaledSceneX, zs, lows, highs, flags, runCount)
                     if (VERIFY_CULL) {
-                        // Oracle: the batched run must agree with the original
-                        // per-tile call for every tile, or the terrain and the
-                        // entity window disagree about what is on screen.
                         for (i in 0 until runCount) {
                             val expected = toolkit.isOnScreen(
                                 upscaledSceneX, lows[i], zs[i], upscaledSceneX, highs[i], zs[i]
@@ -1525,10 +1428,6 @@ class Scene(
         val cullT0 = System.nanoTime()
         this.culling.processCulling(this.activeToolkit, lowestRenderedPlane)
         phaseCullNs += System.nanoTime() - cullT0
-        // Particle systems and emitters step once per CALL. The legacy client drew at
-        // most 50 frames a second, so that was one step per logic tick; with the
-        // render loop decoupled a 150-300 fps frame rate ran the simulation 3-6x too
-        // fast and the cape sparkles fell far below the emitters. Step per logic pulse.
         particleTickThisFrame = !PARTICLE_PER_TICK || Client.logicPulses != lastParticlePulse
         lastParticlePulse = Client.logicPulses
         if (particleTickThisFrame) ParticleSystemManager.processParticleCycle(this, this.activeToolkit)
@@ -1641,17 +1540,6 @@ class Scene(
         return if (this.opcode21 != null) this.opcode21!![x][y].toInt() and 0xff else 0
     }
 
-    /**
-     * Disables lighting on objects if the light is off screen,
-     * disabling this fixes some glitches
-     * EG: object is half onscreen but the light is not
-     */
-    /**
-     * Extracts each entity's [SceneGraphEntity.floorDepth] into [sortKeys] so the sort
-     * compares ints in a packed array instead of dereferencing an entity per
-     * comparison. The depths do not change during the sort, so this is exact; it just
-     * turns ~26k pointer chases into one pass of [count] plus int compares.
-     */
     private fun extractSortKeys(entities: Array<SceneGraphEntity?>, count: Int): IntArray {
         var keys = sortKeys
         if (keys.size < count) {
@@ -1664,10 +1552,8 @@ class Scene(
 
     private var sortKeys = IntArray(0)
 
-    /** -Drender.verifycull: cross-check the batched tile-visibility run against the per-tile call. */
     private val VERIFY_CULL = System.getProperty("render.verifycull") != null
 
-    /** Per-column staging for the batched tile-visibility test in [drawScene]. */
     private var columnScratchZ = IntArray(0)
     private var columnScratchLow = IntArray(0)
     private var columnScratchHigh = IntArray(0)
@@ -1782,14 +1668,7 @@ class Scene(
         return tile?.interactives
     }
 
-    /**
-     * Places any object/entity into the scene
-     */
     fun placeSceneryObjects(entity: SceneGraphEntity, lights: Array<PointLight?>) {
-        // Per-entity light selection feeds the fixed-function GL_LIGHT state, which a
-        // shader toolkit doing its own per-model selection never reads — so under one
-        // this is a per-entity, per-frame walk of the tile's light uids plus four
-        // glLightfv/glLightf calls, all discarded.
         if (this.copyLights && this.activeToolkit.usesFixedFunctionLights()) {
             val lightCount = entity.getActiveLights(lights)
             this.activeToolkit.copyLights(lightCount, lights as Array<PointLight>)
@@ -1865,7 +1744,6 @@ class Scene(
         @JvmStatic var phaseTilesNs = 0L
         @JvmStatic var phaseSamples = 0
 
-        /** Scene-walk shape, per [ModernPerf] interval: nodes visited, tiles tested, entities drawn. */
         @JvmStatic var walkNodes = 0L
         @JvmStatic var walkTiles = 0L
         @JvmStatic var cullVerifyChecks = 0L
@@ -1876,21 +1754,13 @@ class Scene(
         @JvmStatic var walkAlpha = 0L
         @JvmStatic var walkCacheRebuildsAcc = 0
 
-        /** Rebuilds since the previous call (the perf print reads it once per interval). */
         @JvmStatic fun walkCacheRebuildsTotal(): Int { val v = walkCacheRebuildsAcc; walkCacheRebuildsAcc = 0; return v }
         @JvmStatic var phaseAlphaNs = 0L
         @JvmStatic var phaseRetainedNs = 0L
         private val DUMP_ALPHA = System.getProperty("render.dumpalpha") != null
         private var dumpAlphaTick = 0
-        /**
-         * True while [drawTiles] is submitting the alpha bucket (the entities whose
-         * hasAlpha() is set, drawn last and depth-sorted). Read by deferred toolkits
-         * to route those draws into an ordered translucent pass.
-         */
         @JvmStatic @Volatile var alphaPassActive = false
-        /** Deferred-renderer takeover of static entities; null = legacy walk draws everything. */
         @JvmStatic var retainedHook: RetainedSceneHook? = null
-        /** Entity whose draw() is executing (for renderers that need its floorDepth). */
         @JvmStatic var currentDrawEntity: SceneGraphEntity? = null
         @JvmStatic var phaseWalkNs = 0L
         @JvmStatic var phaseSortNs = 0L
@@ -1900,18 +1770,15 @@ class Scene(
         fun setRoofOverride() {
             val roofToggle = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()
             if (roofToggle == 0) {
-                // Reset
                 Resource.mapRegion!!.setActiveSettingsBits(null)
                 initializeRoofSettings(0)
             } else if (roofToggle == 1) {
-                // Always
                 resetSettingsBits(0.toByte())
                 initializeRoofSettings(512)
                 if (Resource.mapRegion!!.getScene() != null) {
                     updateTileVisibility()
                 }
             } else {
-                // Selectively
                 resetSettingsBits((Client.timesSceneRendered - 4 and 0xff).toByte())
                 initializeRoofSettings(2)
             }

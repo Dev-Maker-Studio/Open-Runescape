@@ -7,7 +7,6 @@ import com.jagex.game.runetek5.tools.LocalizedText
 
 object TextUtils {
 
-    // [ , , _, -, à, á, â, ä, ã, À, Á, Â, Ä, Ã, è, é, ê, ë, È, É, Ê, Ë, í, î, ï, Í, Î, Ï, ò, ó, ô, ö, õ, Ò, Ó, Ô, Ö, Õ, ù, ú, û, ü, Ù, Ú, Û, Ü, ç, Ç, ÿ, Ÿ, ñ, Ñ, ß]
     @JvmField
     val ALLOWED_SPECIAL_CHARS = charArrayOf(
         ' ', '\u00a0', '_', '-', '\u00e0', '\u00e1', '\u00e2', '\u00e4', '\u00e3', '\u00c0', '\u00c1', '\u00c2',
@@ -209,11 +208,6 @@ object TextUtils {
         }
     }
 
-    /**
-     * [/, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-     * A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y,
-     * a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y]
-     */
     @JvmStatic
     fun isAlphabeticalOrNumeric(character: Char): Boolean {
         return character in '0'..'9' || character in 'A'..'Z' || character in 'a'..'z'
@@ -224,9 +218,6 @@ object TextUtils {
         return format(charSequence)
     }
 
-    /**
-     * [ ,  , _, -]
-     */
     @JvmStatic
     fun isSpaceCharacter(character: Char): Boolean {
         return character == '\u00a0' || character == ' ' || character == '_' || character == '-'
@@ -304,12 +295,6 @@ object TextUtils {
         return value != 0 && (value < 128 || value >= 160 || Utils.UNICODE_TABLE[value - 128].code != 0)
     }
 
-    /**
-     * Decodes a URL-encoded string and returns the decoded string.
-     *
-     * @param encodedUrl the URL-encoded string to decode
-     * @return the decoded string
-     */
     @JvmStatic
     fun decodeUrl(encodedUrl: String): String {
         val sb = StringBuilder()

@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.network
 import java.io.IOException
 import java.net.Socket
 
-/**
- * Asynchronous network connection implementation with buffered I/O streams.
- */
 class AsyncConnection(
     @JvmField val socket: Socket,
     capacity: Int
@@ -51,7 +48,6 @@ class AsyncConnection(
         try {
             socket.close()
         } catch (ioexception: IOException) {
-            // NOOP
         }
         inputStream.shutdown()
     }

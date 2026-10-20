@@ -341,7 +341,6 @@ object EntityUpdating {
                     }
                 }
 
-                // Hitsplat rendering
                 for (hitsplatIndex in 0 until Client.ENTITY_DEFAULTS!!.maximumHits) {
                     val cycle = pathingEntity.hitsplatCycles[hitsplatIndex]
                     val hitplatId = pathingEntity.activeHitsplatIds[hitsplatIndex]
@@ -617,10 +616,8 @@ object EntityUpdating {
                                     val soakTextTopY = soakTextDrawY - soakFontMetrics!!.topPadding
                                     val soakTextBottomY = soakTextDrawY + soakFontMetrics!!.bottomPadding
                                     if (soakTextTopY < clipMinY) {
-                                        // clipMinY = soakTextTopY // Dead code in original
                                     }
                                     if (soakTextBottomY > clipMaxY) {
-                                        // clipMaxY = soakTextBottomY // Dead code in original
                                     }
                                 }
 
@@ -749,8 +746,6 @@ object EntityUpdating {
                 if (colorType < 6) {
                     color = Client.OVERHEAD_TEXT_COLORS[colorType]
                 }
-                // Flash phase keys off the 50Hz pulse counter, not the frame
-                // counter, so blink speed is independent of the frame rate.
                 if (colorType == 6) {
                     color = if (Client.cycles % 20 < 10) 16711680 else 16776960
                 }
@@ -795,25 +790,19 @@ object EntityUpdating {
                 val drawType = Client.HINT_DETAILS[hintIndex]!!.getDrawType()
 
                 if (drawType == 0) {
-                    // All regular text: no effects / plain color effects (red:) / cyan / flash1 / flash2 / flash3 / glow1 / glow2 / glow3
                     MiniMenu.minimenuHeader!!.renderCentered(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, 0xFF000000.toInt())
                 }
                 if (drawType == 1) {
-                    // Wave effect (wave:texthere) - phase driven by the 50Hz pulse
-                    // counter so animation speed is frame-rate independent
                     MiniMenu.minimenuHeader!!.renderCenteredWave(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.cycles)
                 }
                 if (drawType == 2) {
-                    // Wave2 effect (wave2:texthere)
                     MiniMenu.minimenuHeader!!.renderCenteredWave2(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.cycles)
                 }
                 if (drawType == 3) {
-                    // Shake effect (shake:texthere)
                     val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.cycles, effectProgress)
                 }
                 if (drawType == 4) {
-                    // Scroll effect (scroll:texthere)
                     val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     val scrollOffset = effectProgress * (FontMetrics.defaultFontMetrics!!.getWidthNoSprites(drawnText!!) + 100) / 150
                     Renderers.activeToolkit!!.expandClipping(clipLeft + hintX - 50, clipTop, clipLeft + hintX + 50, height + clipTop)
@@ -821,7 +810,6 @@ object EntityUpdating {
                     Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop)
                 }
                 if (drawType == 5) {
-                    // Slide effect (slide:texthere)
                     val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     var scrollOffset = 0
                     if (effectProgress < 25) {
@@ -1087,7 +1075,6 @@ object EntityUpdating {
                     positionDelta = positionDelta shr 1
                 }
 
-                // Is always -1
                 if (bas.unused != -1) {
                     positionDelta = positionDelta shl 9
                     if (entity.movementStepsLeft == 1) {

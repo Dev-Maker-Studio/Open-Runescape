@@ -178,13 +178,6 @@ class AmbientSound : Node<AmbientSound>() {
         @JvmField
         val LOC_AMBIENT_SOUNDS = NodeCollection()
 
-        /**
-         * When set on the current thread, loc ambient sounds are buffered here instead
-         * of being linked into [LOC_AMBIENT_SOUNDS], whose intrusive cursor the game
-         * thread iterates every tick. The async map loader sets this for the duration
-         * of a background build; MapRegion.finalizeAsyncRegionSwap drains the buffer on
-         * the game thread after the outgoing region's sounds are unlinked.
-         */
         @JvmField
         val DEFERRED_LOC_SOUNDS: ThreadLocal<NodeCollection?> = ThreadLocal()
 

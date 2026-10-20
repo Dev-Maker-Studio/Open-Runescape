@@ -39,35 +39,8 @@ import kotlin.math.sqrt
 
 class ModelGL : Model {
 
-    /**
-     * Drops the mesh-built geometry because a mutation changed this model beyond what
-     * the per-instance matrix can express, and records WHY. The reason histogram
-     * (-Dmodel.invalidatediag) shows which mutations force the legacy-capture path, and
-     * therefore which ones are worth expressing as a matrix instead of a vertex bake.
-     */
     private fun invalidateModernBuilt(reason: Int) {
         if (INVALIDATE_DIAG) invalidateCounts[reason]++
-        // Colour-only mutations keep the geometry: a tint/recolour changes no position,
-        // normal or UV, so only the 4 colour bytes per vertex are rebuilt
-        // (ModernModelBuilder.recolour) and the cache re-keys on the colour state.
-        //
-        // This needs meshFaceIndices to bridge index spaces -- the builder is indexed
-        // by MESH face, while ModelGL rebuilds facesColour over its own filtered,
-        // sorted face list. Reading the raw array with a mesh index picked up the
-        // wrong material's brightness and saturated recoloured models to white.
-        // -Drender.verifyrecolour asserts recolour reproduces the emission bytes
-        // exactly; it reports 0 mismatches.
-        // DISABLED. Colour-only mutations look like they could keep the geometry and
-        // rebuild just the colour bytes, but the recolour path is not proven for the
-        // case that matters: -Drender.verifyrecolour only compares models with
-        // modernColorRevision == 0, i.e. models that never took a colour mutation --
-        // exactly the ones this branch would NOT affect. It reported 0 mismatches while
-        // recoloured bushes still rendered white. Re-enable only once the check covers
-        // MUTATED models.
-        // Colour-only reasons still invalidate (rendering unchanged), but record the
-        // revision and keep the built geometry aside so the recolour path can be
-        // verified against the currently-correct output on MUTATED models -- the case
-        // the previous check never covered.
         if (reason == 4 || reason == 6 || reason == 7 || reason == 8) {
             this.modernColorRevision++
             if (VERIFY_RECOLOUR_CAPTURE && this.modernBuiltShadow == null) {
@@ -83,14 +56,10 @@ class ModelGL : Model {
         @JvmStatic val INVALIDATE_REASONS = arrayOf("yaxisRotate", "translate", "mirror", "scale", "recolor", "rematerial", "tint", "setAmbient", "envAlpha", "offsetSubmesh", "xaxisRotate", "zaxisRotate", "contourToGround", "hillChange", "normalMerge")
         @JvmStatic val invalidateCounts = LongArray(16)
 
-        /** How often [calculateBounds] actually recomputes, and over how many vertices. */
 @JvmStatic var boundsCalls = 0L
         @JvmStatic var boundsVertices = 0L
         @JvmStatic fun invalidateSummary(): String =
             INVALIDATE_REASONS.indices.joinToString(" ") { "${INVALIDATE_REASONS[it]}=${invalidateCounts[it]}" }
-        // Picking scratch (calculateProjection) — game thread only. Construction-time
-        // scratch must NOT live here: models are built concurrently by the game thread
-        // (NPC/player/item models) and the async map loader (loc models).
         @JvmField
         val matrixX = IntArray(8)
 
@@ -112,15 +81,8 @@ class ModelGL : Model {
         @JvmField
         var withinOrigin: Boolean = false
 
-        /** Source of unique face-content stamps; see [facesRevision]. */
         private val FACES_REVISION_COUNTER = AtomicLong(1L)
 
-        /**
-         * XORed into [facesRevision] by [mirror]. Mirroring swaps facesB/facesC, which is
-         * its own inverse, and XOR mirrors that: applying the salt twice restores the
-         * original stamp. The high bits guarantee a mirrored stamp can never collide with
-         * an unmirrored counter value.
-         */
         private const val MIRRORED_FACES_REVISION_SALT = 0x517cc1b727220a95L
 
         @JvmStatic
@@ -157,11 +119,6 @@ class ModelGL : Model {
         }
     }
 
-    /**
-     * Normal-dedup scratch used only while constructing from a Mesh; nulled when
-     * construction completes. Instance-level (not static) because model construction
-     * runs concurrently on the game thread and the async map loader thread.
-     */
     private var normalsUid: LongArray? = null
 
     @JvmField
@@ -197,108 +154,36 @@ class ModelGL : Model {
     @JvmField
     var functionMask: Int = 0
 
-    /**
-     * True when this model is a per-frame ANIMATED POSE snapshot (produced by
-     * copyModelData with a vertex-altering mask, i.e. a sequence-augmented mask).
-     *
-     * Captured at COPY time and never cleared by applyShading, because the animated
-     * pose paths (NPCType.getAnimatedBodymodel/head, SpotAnimType, ItemType) call
-     * applyShading(<base caller mask>) AFTER animating — that overwrites functionMask
-     * (dropping ALTERS_VERTICES) and nulls vertexGroups (releaseUploadedData), which
-     * destroys BOTH signals the modern renderer's cache gate relied on. Every such
-     * pose has different vertices, so if wrongly admitted to the content cache /
-     * persistent instanced store each pose becomes a unique mesh — flooding the store,
-     * forcing capacity-overflow rebuilds, and serving substituted geometry (the
-     * green-quad impling/signpost bug). The modern gate reads this flag so these
-     * snapshots always stream fresh and are never content-cached.
-     */
     @JvmField
     var animatedPoseSnapshot: Boolean = false
 
-    /**
-     * Modern-renderer geometry built from the CLEAN decoded mesh at createModel
-     * time (direct vertex indices, proper texture-projection UVs). Shared across
-     * copies (immutable). Nulled by any vertex/color mutation the modern path
-     * cannot represent in the per-instance model matrix (translate, mirror,
-     * scale, recolor, rematerial, tint, ambient change, non-yaw rotation,
-     * ground contouring) — the modern renderer then falls back to capturing the
-     * legacy arrays. Yaw rotations are representable: they accumulate in
-     * [modernYaw] and are applied via the model matrix instead of re-baking.
-     */
     @JvmField
     var modernBuilt: ModernModelBuilder.BuiltModel? = null
 
-    /**
-     * Accumulated Y-axis rotation (0..16383, legacy angle units) baked into this
-     * model's LEGACY vertices by rotateWithNormals. The modern path's base
-     * geometry ([modernBuilt]) is unrotated, so the modern renderer pre-multiplies
-     * this yaw into the per-instance model matrix.
-     */
     @JvmField
     var modernYaw: Int = 0
 
-    /** model-face index -> source mesh face index, after filtering and sorting. */
     @JvmField
     var meshFaceIndices: IntArray? = null
 
-    /** Built geometry kept past a colour mutation, for verification only. */
     @JvmField
     var modernBuiltShadow: ModernModelBuilder.BuiltModel? = null
 
-    /** Bumped by colour-only mutations; geometry stays valid (see invalidateModernBuilt). */
     @JvmField
     var modernColorRevision: Int = 0
 
-    /**
-     * Memoised modern-renderer content hash, and the geometry the modern path
-     * built from THESE vertices.
-     *
-     * Both are keyed by [modernContentValid], which every method that writes to a
-     * geometry array clears (see invalidateModernContent and its call sites — the
-     * set was derived mechanically from every assignment into verticesX/Y/Z,
-     * faces*, normals*, texture*, triangles, vertexNormalIndices and the counts).
-     *
-     * Rationale: the modern renderer used to recompute an O(vertices + faces)
-     * rolling hash for EVERY model EVERY frame (~12% of a logged-in frame at 1400
-     * fallback-path models), and re-run the whole per-face build for every animated
-     * model every frame (~22%). Neither input changes between render frames — game
-     * logic mutates models at 50Hz while the render loop is uncapped — so both are
-     * pure repeated work. Memoising them makes a render frame that follows another
-     * render frame with no intervening logic tick nearly free on the CPU.
-     *
-     * `-Drender.verifyhash` recomputes the hash every frame and reports any
-     * disagreement with the memoised value, which is the direct test that the
-     * invalidation set above is complete.
-     */
     @JvmField
     var modernContentValid: Boolean = false
 
-    /** Valid only while [modernContentValid]. */
     @JvmField
     var modernContentHash: Long = 0
 
-    /**
-     * Per-instance geometry built from the CURRENT (post-animation) vertices,
-     * owned by this model. Valid only while [modernContentValid]. Typed as [Any]
-     * to keep ModelGL free of a dependency on the modern batch package; the modern
-     * renderer is the only reader and casts it back.
-     */
     @JvmField
     var modernStreamGeometry: Any? = null
 
-    /** Valid only while true; cleared alongside [modernContentValid]. */
     @JvmField
     var modernStreamValid: Boolean = false
 
-    /**
-     * The shared-cache entry this model resolved to last time, and the key it was
-     * resolved under. Lets the modern renderer skip the cache's hash-map lookup
-     * (an access-ordered LinkedHashMap keyed by a boxed Long, which restructures
-     * on every get) for a model whose geometry has not changed.
-     *
-     * The entry can still be evicted and freed underneath us, so the fast path also
-     * checks the entry's own eviction flag; a miss there just falls back to the map.
-     */
     @JvmField
     var modernSharedGeometry: Any? = null
 
@@ -308,41 +193,14 @@ class ModelGL : Model {
     @JvmField
     var modernSharedValid: Boolean = false
 
-    /**
-     * Stable identity for this model's per-pose geometry in the instanced store,
-     * assigned once and never reused.
-     *
-     * Animated models cannot be keyed by content — every pose differs — but they can
-     * be keyed by INSTANCE, which is what lets their geometry live in the persistent
-     * store and be rewritten in place when the pose changes, instead of being copied
-     * into a streaming buffer on every render frame.
-     */
     @JvmField
     var modernStreamKey: Long = 0
-    /** Entity whose pose memo should receive the geometry the toolkit builds next (see PoseMemoOwner). */
     @JvmField var modernPoseMemoOwner: Any? = null
 
-    /**
-     * Set on copies owned by a PoseCopyPair: nobody but the owner writes this object
-     * between the scene walk and the frame flush, so its geometry may be built off
-     * the render thread. Shared toolkit copy slots are overwritten by the next entity.
-     */
     @JvmField var privatePoseCopy: Boolean = false
-    /** Deferred-build bookkeeping (ModernGLToolkit.enqueueDeferredBuild). */
     @JvmField var modernDeferredStamp: Int = -1
     @JvmField var modernDeferredIndex: Int = 0
 
-
-    /**
-     * Last point-light selection made for this model, and the world origin and light
-     * epoch it was made at.
-     *
-     * Selecting the four strongest lights for a model is a scan over every light
-     * whose influence reaches its cell. A static loc sits at the same place frame
-     * after frame with the same lights around it, so the answer is the same every
-     * time — this makes the repeat a four-float comparison. The epoch invalidates
-     * every memo at once when the frame's light set is rebuilt.
-     */
     @JvmField
     var modernLightEpoch: Int = -1
 
@@ -355,18 +213,9 @@ class ModelGL : Model {
     @JvmField
     var modernLightZ: Float = 0f
 
-    /** Four light indices as floats, matching the per-instance attribute layout. */
     @JvmField
     val modernLightIdx: FloatArray = FloatArray(4)
 
-    /**
-     * Clears everything memoised from this model's geometry arrays. Called at the
-     * head of every mutating method; idempotent and cheap enough to be free on the
-     * paths that call it thousands of times per tick.
-     *
-     * The stream geometry BUFFER is deliberately kept (only its validity is
-     * dropped) so the next rebuild can write into it instead of allocating.
-     */
     fun invalidateModernContent() {
         modernContentValid = false
         modernStreamValid = false
@@ -517,39 +366,17 @@ class ModelGL : Model {
     @JvmField
     var dynamicArrayBuffer: ArrayBufferGL? = null
 
-    /**
-     * Content stamp for facesA/facesB/facesC. Every freshly built model gets a unique
-     * stamp; copies inherit the source's stamp (identical index content) and [mirror]
-     * XORs a salt (mirroring twice restores both the windings and the stamp). Used to
-     * skip rebuilding and re-uploading [dynamicElementsBuffer] when it already holds
-     * exactly this model's indices — animation only moves vertices, so the index data
-     * of an animated model is identical from frame to frame.
-     */
     private var facesRevision: Long = FACES_REVISION_COUNTER.getAndIncrement()
 
-    /** Faces stamp and face count [dynamicElementsBuffer] was last built from. */
     private var dynamicElementsRevision: Long = -1L
     private var dynamicElementsFaceCount: Int = -1
 
-    /** Toolkit context generation the buffer's upload belongs to. */
     private var dynamicElementsGeneration: Int = -1
 
-    /**
-     * Reusable 3x3 fixed-point matrix scratch for [animateTransform]. Skeletal animation
-     * previously allocated these per bone group per entity per render frame. Instance
-     * fields (not companion scratch) because models are built and animated concurrently
-     * on the game thread and the async map loader thread; per-instance reuse is exactly
-     * as thread-safe as the vertex arrays the same code writes.
-     */
     private var animScratchMatrixA: IntArray? = null
     private var animScratchMatrixB: IntArray? = null
     private var animScratchMatrixC: IntArray? = null
 
-    /**
-     * A copy slot must always own the draw-buffer objects the preallocated copy path
-     * writes into; an earlier copy with a different mask can have pointed a slot's
-     * field at the base's (possibly null) buffer. Restores the constructor's set.
-     */
     fun ensureSlotBuffers() {
         if (this.vertexBuffer == null) this.vertexBuffer = OpenGlArrayDrawBuffer(null, GL_FLOAT, 3, 0)
         if (this.textureCoordinatesBuffer == null) this.textureCoordinatesBuffer = OpenGlArrayDrawBuffer(null, GL_FLOAT, 2, 0)
@@ -695,10 +522,6 @@ class ModelGL : Model {
         }
 
         Model.addBillboard(billboardUids, faces)
-        // Retain model-face -> MESH-face after the sort. ModelGL rebuilds facesColor /
-        // facesAlpha / facesMaterial over this filtered, sorted list, so anything that
-        // starts from a mesh face index (ModernModelBuilder) needs this to reach the
-        // model's per-face arrays. Without it the two index spaces silently disagree.
         this.meshFaceIndices = faces.copyOf(this.numFaces)
         this.numVertices = mesh.numVertices
         this.maxDepth = mesh.maxDepth
@@ -789,7 +612,6 @@ class ModelGL : Model {
         this.triangles!![mesh.maxDepth] = normalSlotOffset
         val transformMatrix = generateTextureMatrix(mesh, faces, this.numFaces)
         val faceNormals = arrayOfNulls<FaceNormalGL>(mesh.numFaces)
-        // UV scratch is local: constructions run concurrently across threads.
         val uv = FloatArray(2)
 
         for (faceTriangleIndex in 0 until mesh.numFaces) {
@@ -1275,12 +1097,6 @@ class ModelGL : Model {
         return copyModelData(dst, src, functionMask, usesPreallocated)
     }
 
-    /**
-     * Gives this copy its own normal arrays wherever [copyModelData] left it sharing
-     * [base]'s. A copy that outlives the frame (a private pose kept across ticks) can be
-     * merged with its neighbours (applyShading(model, ...)), and through shared arrays
-     * that mutates the base every other instance and neighbour derives its lighting from.
-     */
     fun detachSharedNormals(base: ModelGL) {
         if (this.normalsX != null && this.normalsX === base.normalsX) this.normalsX = this.normalsX!!.copyOf()
         if (this.normalsY != null && this.normalsY === base.normalsY) this.normalsY = this.normalsY!!.copyOf()
@@ -1301,24 +1117,14 @@ class ModelGL : Model {
         dst.invalidateModernContent()
         dst.renderState = 0
         dst.functionMask = flags
-        // Capture animation intent NOW, from the copy mask, before any later
-        // applyShading(<base mask>) overwrites functionMask / nulls vertexGroups.
-        // A vertex-altering copy mask means this is (or will be animated into) a
-        // per-frame pose snapshot the modern content cache must never key on.
-        // Set unconditionally (SET, not OR) so reused preallocated copy slots never
-        // carry a stale true into a later non-animated copy.
         dst.animatedPoseSnapshot = ModelFunctionMaskGL.altersVertices(flags) ||
             (this.vertexGroups != null && ModelFunctionMaskGL.altersAnyVerticeType(flags))
-        // Modern base geometry is immutable and shared with copies; each copy
-        // tracks its own accumulated yaw. SET (not OR) so reused preallocated
-        // copy slots never carry stale values from an earlier copy.
         dst.modernBuilt = this.modernBuilt
         dst.modernYaw = this.modernYaw
         dst.preferenceFlags = this.preferenceFlags
         dst.ambient = this.ambient
         dst.contrast = this.contrast
         dst.numVertices = this.numVertices
-        // Clamp maxDepth to numVertices to prevent ArrayIndexOutOfBoundsException
         dst.maxDepth = minOf(this.maxDepth, this.numVertices)
         dst.numNormals = this.numNormals
         dst.numFaces = this.numFaces
@@ -1563,9 +1369,6 @@ class ModelGL : Model {
             dst.facesC = this.facesC
         }
 
-        // Whether shared or copied, the destination's face indices now match the source.
-        // Note: dst.dynamicElementsRevision is deliberately untouched — it describes the
-        // contents of dst's persistent dynamic element buffer, not dst's face arrays.
         dst.facesRevision = this.facesRevision
 
         if (ModelFunctionMaskGL.copyElementsBuffer(flags)) {
@@ -1794,8 +1597,6 @@ class ModelGL : Model {
 
     override fun yaxisRotateWithoutNormals(rotation: Int) {
         invalidateModernContent()
-        // Rotates vertices but deliberately NOT normals — the modern matrix path
-        // would rotate both, changing lighting. Not representable; invalidate.
         invalidateModernBuilt(0)
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
@@ -1815,8 +1616,6 @@ class ModelGL : Model {
 
     override fun rotateWithNormals(rotation: Int) {
         invalidateModernContent()
-        // Yaw is representable in the modern per-instance model matrix; track it
-        // instead of invalidating the modern base geometry.
         this.modernYaw = (this.modernYaw + rotation) and 0x3fff
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
@@ -1919,7 +1718,6 @@ class ModelGL : Model {
                     matrix.setRotatedTranslation(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, eyeX + surface.offsetX - eyeX * distanceScale, eyeY + surface.offsetY - eyeY * distanceScale, eyeZ - eyeZ * distanceScale)
                     this.toolkit.loadMatrix(matrix)
                     val diffuseColor = surface.diffuseColor
-                    OpenGL.glColor4ub((diffuseColor shr 16).toByte(), (diffuseColor shr 8).toByte(), diffuseColor.toByte(), (diffuseColor shr 24).toByte())
                     this.toolkit.renderTexture(effect.materialId.toInt())
                     this.toolkit.setBlendMode(effect.shape.toInt())
                     this.toolkit.drawArrays(4)
@@ -1942,10 +1740,6 @@ class ModelGL : Model {
         }
 
         if (reuseBuffer) {
-            // Animation only displaces vertices; the index data and material batching
-            // only change when the face composition itself changes. If the dynamic
-            // element buffer already holds exactly this model's indices (same face
-            // content stamp and count), skip the rebuild and the GL re-upload.
             val existingBuffer = this.dynamicElementsBuffer
             if (existingBuffer != null &&
                 this.dynamicElementsRevision == this.facesRevision &&
@@ -2418,7 +2212,6 @@ class ModelGL : Model {
 
     override fun awaitLock() {
         while (this.isLocked) {
-            // Wait for lock to be released
         }
     }
 
@@ -2567,23 +2360,14 @@ class ModelGL : Model {
     }
 
     override fun drawMatrixThreaded(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon?, rasterizerFunctionMask: Int) {
-        // Check if the ACTIVE renderer is modern (not model's cached toolkit reference)
-        // Models cache their toolkit at creation time, but we switch toolkits at runtime.
-        // Under the modern toolkit the modern batcher is the ONLY path — when its gate
-        // rejects (renderer not initialized, wrong thread, offscreen target), the model
-        // draws NOTHING; the miss is counted in [ModernDiag] modelGate=accepted/total.
         val activeToolkit = Renderers.activeToolkit
         if (activeToolkit is ModernGLToolkit) {
             if (activeToolkit.isModernRenderingActive()) {
-                // Render using modern pipeline
                 activeToolkit.renderModelGLModern(this, projectionMatrix)
-                // Still calculate bounding box for mouse interaction
                 if (boundingBox != null && this.numNormals != 0) {
                     calculateBoundingBoxForModern(projectionMatrix, boundingBox)
                 }
             } else {
-                // Gate rejected (wrong thread / renderer not initialized): the model is
-                // dropped — count it loudly so the diag exposes the gap.
                 activeToolkit.countLegacySkip("ModelGL.drawMatrixThreaded(gate-rejected)")
             }
             return
@@ -2700,15 +2484,11 @@ class ModelGL : Model {
             modelMatrix.multiplyBy(this.toolkit.viewMatrix44)
             drawBillboards(modelMatrix)
             if ((rasterizerFunctionMask and 0x2) != 0) {
-                OpenGL.glPolygonMode(1032, 6914)  // Reset GL_FRONT_AND_BACK to GL_FILL
+                OpenGL.glPolygonMode(1032, 6914)
             }
         }
     }
 
-    /**
-     * Calculates bounding box for mouse interaction when using modern renderer.
-     * This is a simplified version that doesn't require legacy GL matrix operations.
-     */
     internal fun calculateBoundingBoxForModern(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon) {
         if (!this.boundsCalculated) {
             calculateBounds()
@@ -2818,8 +2598,6 @@ class ModelGL : Model {
 
     override fun mirror() {
         invalidateModernContent()
-        // Mirroring flips winding; not representable in the modern matrix path
-        // without a per-draw cull flip. Invalidate.
         invalidateModernBuilt(2)
         for (i in 0 until this.maxDepth) {
             this.verticesZ!![i] = -this.verticesZ!![i]
@@ -2835,14 +2613,6 @@ class ModelGL : Model {
             }
         }
 
-        // Negating a single axis above flips the model's handedness, which
-        // reverses the on-screen winding of every triangle. Reverse the winding
-        // back by swapping two corners per face, so hardware backface culling
-        // still treats the visible side as front-facing. Each face corner is a
-        // single index into the expanded vertex/normal/UV/colour arrays, so
-        // swapping the indices moves position, normal, UV and colour together
-        // and keeps them correctly associated. Only per-corner data (facesB and
-        // facesC) is affected; per-face data (colour/alpha/material) is not.
         val facesBLocal = this.facesB
         val facesCLocal = this.facesC
         if (facesBLocal != null && facesCLocal != null) {
@@ -2852,14 +2622,8 @@ class ModelGL : Model {
                 facesCLocal[i] = swap
             }
 
-            // The GL element (index) buffer is built from facesA/B/C and may
-            // have been shared from the cached source model during copy(). Drop
-            // it so it is rebuilt with the corrected winding on the next draw.
             this.modelElementsBuffer?.openglElementsBuffer = null
 
-            // XOR (not a fresh counter value) so a double mirror restores the stamp,
-            // and so every copy of the same source mirrored the same way shares one
-            // stamp and can reuse an already-uploaded dynamic element buffer.
             this.facesRevision = this.facesRevision xor MIRRORED_FACES_REVISION_SALT
         }
 
@@ -2896,7 +2660,6 @@ class ModelGL : Model {
 
     override fun setContrast(contrast: Int) {
         invalidateModernContent()
-        // Mesh-built normals carry 768/contrast baked in (ModernModelBuilder).
         invalidateModernBuilt(7)
         this.contrast = contrast.toShort()
         if (this.colorsBuffer != null) {
@@ -3009,7 +2772,6 @@ class ModelGL : Model {
 
     override fun setAmbient(ambient: Int) {
         invalidateModernContent()
-        // Modern base colors are baked with the createModel-time ambient.
         invalidateModernBuilt(7)
         this.ambient = ambient.toShort()
         if (this.colorsBuffer != null) {
@@ -3089,8 +2851,6 @@ class ModelGL : Model {
             calculateBounds()
         }
 
-        // Project the model's AABB along the sun direction onto the ground plane
-        // (same projection as projectShadow applies per vertex) to size the sprite.
         val shadowOffsetX = this.toolkit.bakeShadowOffsetX()
         val shadowOffsetZ = this.toolkit.bakeShadowOffsetZ()
         val shadowScale = this.toolkit.shadowScale
@@ -3132,12 +2892,6 @@ class ModelGL : Model {
 
     override fun applyShading(model: Model, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         invalidateModernContent()
-        // Normal merging with an adjacent loc changes this model's LIGHTING (legacy
-        // uploads mergedNormals in place of normals), which the mesh-built geometry
-        // cannot express: it lit itself from the mesh's own normals at build time.
-        // Drop it so the legacy-capture path, which reads the merged normals, draws
-        // this model. Without this, building walls rendered visibly brighter than
-        // legacy along every shared edge.
         invalidateModernBuilt(14)
         val openglModel = model as ModelGL
         if (this.numFaces != 0 && openglModel.numFaces != 0) {
@@ -3255,11 +3009,6 @@ class ModelGL : Model {
                                                 otherMergedNormalsGL.magnitude = otherMagnitudes
                                             }
 
-                                            // Every normal slot of the shared vertex (one per colour/texture/alpha
-                                            // combination) receives the other model's ORIGINAL normal, and vice
-                                            // versa. Merging only the first slot left seams on multi-material
-                                            // vertices, and the scan continues so coincident duplicate vertices
-                                            // of the other model all contribute.
                                             val thisX = this.normalsX!![thisNormalIdx]
                                             val thisY = this.normalsY!![thisNormalIdx]
                                             val thisZ = this.normalsZ!![thisNormalIdx]
@@ -3493,7 +3242,6 @@ class ModelGL : Model {
         if (this.vertexGroups == null) {
             return false
         }
-        // Scale vertices up by 16 (shift left 4) for animation precision
         for (v in 0 until this.numVertices) {
             this.verticesX!![v] = this.verticesX!![v] shl 4
             this.verticesY!![v] = this.verticesY!![v] shl 4
@@ -3507,8 +3255,6 @@ class ModelGL : Model {
 
     override fun endAnimation() {
         invalidateModernContent()
-        // Scale vertices back down by 16 (shift right 4) after animation
-        // Adding 7 before shift provides proper rounding
         for (v in 0 until this.numVertices) {
             this.verticesX!![v] = this.verticesX!![v] + 7 shr 4
             this.verticesY!![v] = this.verticesY!![v] + 7 shr 4
@@ -3990,7 +3736,6 @@ class ModelGL : Model {
                     }
                 }
             } else {
-                // No verticesData - simple rotation
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < (this.vertexGroups?.size ?: 0)) {
@@ -4164,7 +3909,6 @@ class ModelGL : Model {
                     }
                 }
             } else {
-                // No verticesData - simple scale
                 for (labelIndex in 0 until labelCount) {
                     val label = labels[labelIndex]
                     if (label < (this.vertexGroups?.size ?: 0)) {
@@ -4187,9 +3931,7 @@ class ModelGL : Model {
                 }
             }
         } else {
-            // Transform types 5, 7, 8, 9, 10 - face/billboard transforms
             if (transformationType == 5) {
-                // Alpha transform
                 if (this.faceGroups != null) {
                     for (labelIndex in 0 until labelCount) {
                         val label = labels[labelIndex]
@@ -4219,7 +3961,6 @@ class ModelGL : Model {
                     }
                 }
             } else if (transformationType == 7) {
-                // Color transform
                 if (this.faceGroups != null) {
                     for (labelIndex in 0 until labelCount) {
                         val label = labels[labelIndex]
@@ -4258,7 +3999,6 @@ class ModelGL : Model {
                 }
             } else {
                 if (transformationType == 8) {
-                    // Billboard offset transform
                     if (this.billboardGroups != null) {
                         for (labelIndex in 0 until labelCount) {
                             val label = labels[labelIndex]
@@ -4273,7 +4013,6 @@ class ModelGL : Model {
                         }
                     }
                 } else if (transformationType == 10) {
-                    // Billboard scale transform
                     if (this.billboardGroups != null) {
                         for (labelIndex in 0 until labelCount) {
                             val label = labels[labelIndex]
@@ -4288,7 +4027,6 @@ class ModelGL : Model {
                         }
                     }
                 } else if (transformationType == 9 && this.billboardGroups != null) {
-                    // Billboard rotation transform
                     for (labelIndex in 0 until labelCount) {
                         val label = labels[labelIndex]
                         if (label < this.billboardGroups!!.size) {
@@ -4438,7 +4176,6 @@ class ModelGL : Model {
 
     override fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int) {
         invalidateModernContent()
-        // Ground contouring reshapes vertices per-tile; not matrix-representable.
         invalidateModernBuilt(12)
         if (!this.boundsCalculated) {
             calculateBounds()

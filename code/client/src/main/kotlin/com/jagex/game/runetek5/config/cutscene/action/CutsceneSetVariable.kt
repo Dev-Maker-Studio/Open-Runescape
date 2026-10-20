@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.cache.node.IntNode
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 
-/**
- *
- * @author Brainpower - 01/02/2023
- *
- */
 class CutsceneSetVariable(buffer: Packet, isVarbit: Boolean) : CutsceneAction(buffer) {
 
     @JvmField val key: Long

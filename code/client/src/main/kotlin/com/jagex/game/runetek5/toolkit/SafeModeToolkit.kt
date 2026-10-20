@@ -242,14 +242,8 @@ open class SafeModeToolkit : AbstractToolkit {
         viewportUpdate()
     }
 
-    /**************************************************************
-     *					(TODO: textures)
-     *************************************************************/
-
     override fun animateTextures(clientCycle: Int) {
-        val cycle = clientCycle - this.currentCycle // ~30 avg ish
-        //System.out.println("CYCLE: "+cycle);
-        //cycle = 30;
+        val cycle = clientCycle - this.currentCycle
         var materialNode = this.animatedModelMaterials!!.getFirst() as SafeModeTexture2D?
         while (materialNode != null) {
             if (materialNode.isAnimated) {
@@ -370,7 +364,6 @@ open class SafeModeToolkit : AbstractToolkit {
         }
     }
 
-
     override fun accumulateViewportDimensions(viewportDimensions: IntArray) {
         viewportDimensions[0] = this.viewportWidth
         viewportDimensions[1] = this.viewportHeight
@@ -428,7 +421,6 @@ open class SafeModeToolkit : AbstractToolkit {
         }
     }
 
-
     override fun addWaterTile(averageHeight: Int, waterTile: WaterTile) {
         val viewport = getThreadResource(Thread.currentThread())
         viewport!!.waterAverageHeight = averageHeight
@@ -454,10 +446,8 @@ open class SafeModeToolkit : AbstractToolkit {
     override fun awaitRenderCompletion() {
     }
 
-
     override fun setBloomFilter(whitePoint: Float, bloom: Float, brightpass: Float) {
     }
-
 
     fun renderParticles(hasColorBuffer: Boolean, hasDepthBuffer: Boolean, particleWrapper: ParticleWrapper) {
         val threadResource = getThreadResource(Thread.currentThread())
@@ -504,7 +494,7 @@ open class SafeModeToolkit : AbstractToolkit {
         return false
     }
 
-    override fun hasHardwareRendering(): Boolean { // unknown
+    override fun hasHardwareRendering(): Boolean {
         return false
     }
 
@@ -1663,7 +1653,6 @@ open class SafeModeToolkit : AbstractToolkit {
         return GroundSM(this, tileFunctionMask, sizeX, sizeY, tileUnits, heightsNext, heightsCurrent)
     }
 
-
     override fun getRenderingMatrix(): Matrix43 {
         val threadResource = getThreadResource(Thread.currentThread())
         return threadResource!!.renderingMatrix43!!
@@ -1693,7 +1682,6 @@ open class SafeModeToolkit : AbstractToolkit {
     override fun renderParticles(particles: ParticleWrapper) {
         renderParticles(this.colourBuffer != null, this.depthBuffer != null, particles)
     }
-
 
     fun renderMaterializedSprite(hasColorBuffer: Boolean, hasDepthBuffer: Boolean, pointEntity: PointEntity, screenX: Int, screenY: Int, depth: Float, halfSize: Int) {
         var halfSize = halfSize
@@ -2115,7 +2103,6 @@ open class SafeModeToolkit : AbstractToolkit {
     override fun beginBloomCapture(width: Int, height: Int) {
     }
 
-
     override fun benchmark() {
         val hasColor = this.colourBuffer != null
         val hasDepth = this.depthBuffer != null
@@ -2229,15 +2216,12 @@ open class SafeModeToolkit : AbstractToolkit {
         return this.forceSmallTexture || materialProvider!!.getMaterial(materialId).isSmall
     }
 
-
     override fun setSunCubeTexture(cubeTexture: AbstractCubeTextureGenerator?) {
     }
-
 
     override fun getImageProducer(): DirectDisplay {
         return SafeModeDirectDisplay(this)
     }
-
 
     override fun render() {
         delegatingDisplay!!.draw(0, 0)
@@ -2245,7 +2229,6 @@ open class SafeModeToolkit : AbstractToolkit {
             materialProvider!!.cycle()
         }
     }
-
 
     override fun addWater(waterTile: WaterTile) {
         for (threadIndex in this.renderingThreads!!.indices) {
@@ -2256,7 +2239,6 @@ open class SafeModeToolkit : AbstractToolkit {
             this.renderingThreads!![threadIndex].hasWaterUpdate = true
         }
     }
-
 
     override fun setModelMatrix(modelMatrix: Matrix44) {
         this.modelMatrix!!.copyFrom(modelMatrix)
@@ -2304,7 +2286,6 @@ open class SafeModeToolkit : AbstractToolkit {
         safeModeSprite.setSize(spriteType.minX, spriteType.minY, spriteType.borderX, spriteType.borderY)
         return safeModeSprite
     }
-
 
     override fun drawThickLine(startX: Int, startY: Int, x: Int, y: Int, color: Int, thickness: Int, blendType: Int) {
         if (this.colourBuffer != null) {
@@ -2365,14 +2346,12 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-
     override fun debugModeChanged() {
     }
 
     override fun getNativeMemory(size: Int): NativeMemoryNode? {
         return null
     }
-
 
     override fun getMaxLights(): Int {
         return 0
@@ -2419,7 +2398,6 @@ open class SafeModeToolkit : AbstractToolkit {
         }
     }
 
-
     override fun applyClearFlags(flags: Int, backgroundColor: Int) {
         if ((flags and 0x1) != 0) {
             drawFilledRectangle(0, 0, this.viewportWidth, this.viewportHeight, backgroundColor, 0)
@@ -2428,7 +2406,6 @@ open class SafeModeToolkit : AbstractToolkit {
             clearDepth()
         }
     }
-
 
     override fun drawTransparentVerticalLine(x: Int, y: Int, height: Int, color: Int, alpha: Int) {
         var y = y
@@ -2496,7 +2473,6 @@ open class SafeModeToolkit : AbstractToolkit {
         this.lightIntensity = (multiplier * 65535.0f).toInt()
     }
 
-
     override fun setClipping(left: Int, top: Int, right: Int, bottom: Int) {
         var left = left
         var top = top
@@ -2525,11 +2501,9 @@ open class SafeModeToolkit : AbstractToolkit {
         return null
     }
 
-
     fun hasBeenShutdown(): Boolean {
         return this.shutdown
     }
-
 
     override fun drawLine(x: Int, y: Int, width: Int, length: Int, color: Int, lineSpacing: Int, lineLength: Int, dashOffset: Int) {
         var x = x
@@ -2685,17 +2659,13 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-
-
     override fun createPointLight(x: Int, y: Int, z: Int, radius: Int, color: Int): PointLight? {
         return null
     }
 
-
     override fun bloomSupported(): Boolean {
         return false
     }
-
 
     override fun mismatchingFunctionMask(toFlag: Int, xor: Int): Int {
         var toFlag = toFlag
@@ -2703,11 +2673,9 @@ open class SafeModeToolkit : AbstractToolkit {
         return toFlag and xor xor xor
     }
 
-
     override fun getOffheap(): Int {
         return 0
     }
-
 
     fun mainThreadInitialize() {
         this.renderingThreads!![0].setRunnable(Thread.currentThread())

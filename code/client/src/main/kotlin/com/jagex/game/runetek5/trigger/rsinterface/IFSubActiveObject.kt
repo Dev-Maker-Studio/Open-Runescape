@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.entity.gameobject.GameObject
 import com.jagex.game.runetek5.trigger.ClientTriggerType
 
-/**
- *
- * @author Steven - 06/10/2023
- *
- */
 class IFSubActiveObject(
     subInterfaceId: Int,
     overlay: Int,

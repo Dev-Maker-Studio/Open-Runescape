@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 
-/**
- *
- * @author Steven - 17/08/2023
- *
- */
 class CutsceneExecuteScript(buffer: Packet) : CutsceneAction(buffer) {
     @JvmField val scriptStringParam: String = buffer.readString()
     @JvmField val scriptIntParam: Int = buffer.readUShort()

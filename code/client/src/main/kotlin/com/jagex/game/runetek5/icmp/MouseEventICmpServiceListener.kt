@@ -5,7 +5,6 @@ import com.jagex.game.runetek5.client.input.mouse.MouseActionServer
 class MouseEventICmpServiceListener : ICmpServiceListener {
 
     override fun onNotify(unused1: Boolean, unused2: Int) {
-        // NOOP
     }
 
     override fun onMouseEvent(bitpackedPosition: Int, meta: Int, constant: Int, unused: Int) {

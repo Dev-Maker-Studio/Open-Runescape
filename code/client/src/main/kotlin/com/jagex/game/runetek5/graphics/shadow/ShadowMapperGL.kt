@@ -13,29 +13,14 @@ class ShadowMapperGL(
     val width: Int
     val length: Int
     val shadowMapperData: ByteArray
-    /** Bumped whenever the intensity map changes, so the modern texture re-uploads. */
     @JvmField var shadowVersion: Int = 0
 
-    /**
-     * Texel rectangle of [shadowMapperData] changed since the modern ground renderer
-     * last uploaded it (min inclusive, max exclusive). Re-sending the whole 2.8MB map
-     * on every entity shadow add/remove is what made the native shadow path too
-     * expensive to enable; a moving NPC only touches a few hundred texels.
-     */
     @JvmField var dirtyMinX = 0
     @JvmField var dirtyMinY = 0
     @JvmField var dirtyMaxX = 0
     @JvmField var dirtyMaxY = 0
     @JvmField var dirty = false
 
-    /**
-     * Individual dirty rectangles (x0,y0,x1,y1 per entry, max exclusive), up to
-     * [MAX_DIRTY_RECTS]. Every moving player/NPC touches its own few-hundred-texel
-     * patch per tick; one union rectangle over all of them spanned most of the map
-     * and re-derived ~100k texels a frame. The bounding rect above is kept as the
-     * union for readers that want it; [dirtyRectCount] == 0 with [dirty] set means
-     * "use the union" (overflow, or markAllDirty).
-     */
     @JvmField val dirtyRects = IntArray(MAX_DIRTY_RECTS * 4)
     @JvmField var dirtyRectCount = 0
 
@@ -60,11 +45,10 @@ class ShadowMapperGL(
             if (y0 < dirtyMinY) dirtyMinY = y0
             if (x1 > dirtyMaxX) dirtyMaxX = x1
             if (y1 > dirtyMaxY) dirtyMaxY = y1
-            // Already in union mode (overflowed or markAllDirty): stay there.
             if (dirtyRectCount == 0) return
         }
         if (dirtyRectCount == MAX_DIRTY_RECTS) {
-            dirtyRectCount = 0 // overflow: fall back to the union
+            dirtyRectCount = 0
             return
         }
         val r = dirtyRectCount * 4
@@ -114,11 +98,6 @@ class ShadowMapperGL(
                         if (tileX - cameraGridX >= -visibleRange && tileX - cameraGridX <= visibleRange) {
                             for (tileY in chunkStartY until chunkEndY) {
                                 if (tileY - cameraGridY >= -visibleRange && tileY - cameraGridY <= visibleRange && tilesOnScreen[visibleRange + (tileX - cameraGridX)][tileY - cameraGridY + visibleRange]) {
-                                    OpenGL.glMatrixMode(5890)
-                                    OpenGL.glLoadIdentity()
-                                    OpenGL.glScalef(texCoordScale, texCoordScale, 1.0f)
-                                    OpenGL.glTranslatef((-chunkX) / texCoordScale, (-chunkY) / texCoordScale, 1.0f)
-                                    OpenGL.glMatrixMode(5888)
                                     shadowTiles!![chunkX][chunkY]!!.drawShadow()
                                     continue@label136
                                 }
@@ -174,11 +153,6 @@ class ShadowMapperGL(
                     }
 
                     if (indexCount > 0) {
-                        OpenGL.glMatrixMode(5890)
-                        OpenGL.glLoadIdentity()
-                        OpenGL.glScalef(texCoordScale, texCoordScale, 1.0f)
-                        OpenGL.glTranslatef((-chunkX) / texCoordScale, (-chunkY) / texCoordScale, 1.0f)
-                        OpenGL.glMatrixMode(5888)
                         shadowTiles!![chunkX][chunkY]!!.drawShadowWithIndices(textureBuffer.buffer, indexCount)
                     }
                 }
@@ -186,9 +160,6 @@ class ShadowMapperGL(
             }
         }
 
-        OpenGL.glMatrixMode(5890) //GL_TEXTURE
-        OpenGL.glLoadIdentity()
-        OpenGL.glMatrixMode(5888) //GL_MODELVIEW
     }
 
     fun applyShadow(shadow: Shadow, shadowX: Int, shadowY: Int): Boolean {

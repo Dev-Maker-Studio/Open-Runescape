@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.sound.jagtheora
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.NodeCollection
 
-/**
- * Audio stream queue manager that handles multiple PCM streams with timing/priority.
- */
 class PcmStreamMixer : PcmStream() {
 
     val subStreams: NodeCollection = NodeCollection()

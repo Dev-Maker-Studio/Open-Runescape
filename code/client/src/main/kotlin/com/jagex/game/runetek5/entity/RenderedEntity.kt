@@ -4,9 +4,6 @@ import com.jagex.game.runetek5.scene.InteractiveEntityCache
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 class RenderedEntity {
-    /**
-     * Only set for interactives
-     */
     @JvmField var entity: SceneGraphEntity? = null
     @JvmField var interactive: Boolean = false
     @JvmField var parent: InteractiveEntityCache? = null

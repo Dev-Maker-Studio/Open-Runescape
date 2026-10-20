@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.graphics.map.worldmap
 
-/**
- *
- * @author Brainpower - 28/01/2023
- *
- */
 class TileOnWorldMap(
     mapsquarePosX: Int,
     mapsquarePosY: Int,

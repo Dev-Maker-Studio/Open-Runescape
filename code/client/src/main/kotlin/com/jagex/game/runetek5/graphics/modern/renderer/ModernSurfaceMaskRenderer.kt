@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.graphics.modern.renderer
 
+import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
 import com.jagex.game.runetek5.graphics.modern.core.ShaderProgram
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import org.joml.Matrix4f
@@ -7,27 +8,6 @@ import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 
-/**
- * Immediate-mode renderer for SURFACE-MASKED sprite quads — the real modern
- * implementation of the legacy multi-texture surface overlay:
- *
- * Legacy reference (SpriteGL.drawWithSurface, SpriteGL.kt:271-313 and
- * drawAffineMasked, SpriteGL.kt:489-519):
- *   unit 0 = sprite texture, combine REPLACE           → rgb/alpha from sprite
- *   unit 1 = surface (alpha mask), REPLACE(rgb=GL_PREVIOUS)/MODULATE(alpha)
- *                                                      → rgb = sprite.rgb,
- *                                                        alpha = sprite.a * surface.a
- *   glColor3f(1,1,1), setBlendMode(1) (SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
- *
- * Used by the minimap (circular mask over the rotated map sprite and its icons —
- * ComponentMinimap.kt:292, NativeSprite.kt:89/119) and component-surface overlays.
- *
- * Draws one quad per call, immediately (no batching) — these are a handful of
- * quads per frame and must interleave exactly in submission order with the
- * sprite batch (the caller flushes the batch first).
- *
- * Vertex format (24 bytes): position vec2 | baseUV vec2 | maskUV vec2.
- */
 class ModernSurfaceMaskRenderer {
 
     private var shader: ShaderProgram? = null
@@ -111,12 +91,6 @@ class ModernSurfaceMaskRenderer {
 
     fun isReady(): Boolean = isInitialized
 
-    /**
-     * Draws one masked quad immediately. Corner order matches the legacy
-     * glBegin(GL_QUADS) submission (v0..v3); screen coordinates, top-left origin.
-     * The caller is responsible for flushing the sprite batch first (submission
-     * order) and for restoring legacy state caches afterwards.
-     */
     fun drawMaskedQuad(
         baseHandle: Int, maskHandle: Int,
         screenWidth: Int, screenHeight: Int,
@@ -129,9 +103,6 @@ class ModernSurfaceMaskRenderer {
         if (!isInitialized || baseHandle <= 0 || maskHandle <= 0) return
         val s = shader ?: return
 
-        // Match the sprite batch's presentation conventions: full-target ortho with
-        // top-left origin, full-target viewport (legacy 2D parity — see
-        // ModernSpriteRenderer.begin/flush).
         GLWrapper.viewport(0, 0, screenWidth, screenHeight)
         projection.identity().ortho(0f, screenWidth.toFloat(), screenHeight.toFloat(), 0f, -1f, 1f)
 
@@ -167,7 +138,7 @@ class ModernSurfaceMaskRenderer {
         glBindVertexArray(vao)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBufferSubData(GL_ARRAY_BUFFER, 0L, vb)
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0L)
+        FrameDump.elements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0L)
         glBindVertexArray(0)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
         s.unbind()

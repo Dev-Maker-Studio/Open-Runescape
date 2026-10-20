@@ -6,12 +6,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import com.jagex.game.runetek5.config.material.texture.TextureTypeList
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 
-/**
- * Texture operation that renders a sprite as a texture.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 open class TextureOpSprite : TextureOperation(0, false) {
 
     @JvmField var spritePixels: IntArray? = null

@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.sqrt
 
-/**
- * Texture operation for color-based edge detection.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpColorEdgeDetector : TextureOperation(1, false) {
 
     @JvmField var normalized: Boolean = true

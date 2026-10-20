@@ -46,7 +46,6 @@ object Browser {
                     Desktop.getDesktop().browse(URI(url))
                     return
                 } catch (exception: Exception) {
-                    // NOOP
                 }
             }
             if (SystemInfo.operatingSystemLowercase.startsWith("win") && !isApplet) {

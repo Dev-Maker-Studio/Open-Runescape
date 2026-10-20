@@ -112,7 +112,6 @@ class Skybox(
             applySunRotation(toolkit, rotationY, rotationX, rotationZ, alpha)
         }
 
-        // Render additional sun projections
         for (index in availableSunCount - 1 downTo 0) {
             availableSuns!![index]!!.calculateProjection(toolkit, width, height, positionX, positionY, positionZ, invertedAlpha)
         }
@@ -225,18 +224,15 @@ class Skybox(
             var primarySkybox: Skybox = this
             var secondarySkybox: Skybox = skybox!!
 
-            // Swap if necessary based on hashCode to ensure consistent rendering order
             if (hashCode() > secondarySkybox.hashCode()) {
                 primarySkybox = skybox!!
                 secondarySkybox = this
                 alpha = 255 - alpha
             }
 
-            // Render the primary and secondary skyboxes
             primarySkybox.renderSkybox(toolkit, angle, x, y, width, height, rotationX, rotationY, rotationZ, fogColor, true, alpha)
             secondarySkybox.renderSkybox(toolkit, angle, x, y, width, height, rotationX, rotationY, rotationZ, fogColor, false, 255 - alpha)
         } else {
-            // Render the single skybox if no secondary is present
             renderSkybox(toolkit, angle, x, y, width, height, rotationX, rotationY, rotationZ, fogColor, true, alpha)
         }
     }
@@ -292,9 +288,6 @@ class Skybox(
         return ready
     }
 
-    /**
-     * [J]
-     */
     fun setupModel(toolkit: AbstractToolkit) {
         try {
             val archiveLoaded = TextureTypeList.modelResource!!.loadArchive(skyboxArchiveId)
@@ -311,30 +304,23 @@ class Skybox(
                 }
             }
         } catch (exception: Exception) {
-            // NOOP
         }
     }
 
     fun applySunRotation(toolkit: AbstractToolkit, rotationY: Int, rotationX: Int, rotationZ: Int, alpha: Int) {
-        // Backup the current sun position
         val originalSunPosition = toolkit.copyViewMatrix()
-        // Create a new matrix for the sun position and apply the rotations
         val rotatedSunPosition = Matrix43()
         rotatedSunPosition.setViewPosition(0.0f, 0.0f, 0.0f)
         rotatedSunPosition.rotate(0.0f, -1.0f, 0.0f, MathUtils.getTheta(-rotationX and 0x3fff))
         rotatedSunPosition.rotate(-1.0f, 0.0f, 0.0f, MathUtils.getTheta(-rotationY and 0x3fff))
         rotatedSunPosition.rotate(0.0f, 0.0f, -1.0f, MathUtils.getTheta(-rotationZ and 0x3fff))
-        // Update the sun position in the toolkit
         toolkit.setViewMatrix(rotatedSunPosition)
-        // Update the sky model's alpha value if it has changed
         if (alpha != lastAlpha) {
             skyModel!!.applyEnvironmentAlpha(alpha.toByte(), faceAlpha!!)
             lastAlpha = alpha
         }
-        // Draw the sky model using the rotated matrix
         val drawnMatrix = Matrix43()
         skyModel!!.drawMatrixThreaded(drawnMatrix, null, ModelFunctionMaskGL.EMPTY)
-        // Restore the original sun position
         toolkit.setViewMatrix(originalSunPosition)
     }
 

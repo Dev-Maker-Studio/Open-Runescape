@@ -3,17 +3,8 @@ package com.jagex.game.runetek5.scene
 import com.jagex.game.runetek5.utils.MathUtils
 import kotlin.math.sqrt
 
-/**
- * Utilities for tile manipulation and terrain generation.
- */
 object TileUtils {
 
-    /**
-     * Gets the culling type from a bitpacked value.
-     *
-     * @param bitpacked The bitpacked value
-     * @return The culling type
-     */
     @JvmStatic
     fun getCullingType(bitpacked: Int): Int {
         val type = bitpacked and 0x3f
@@ -35,13 +26,6 @@ object TileUtils {
         }
     }
 
-    /**
-     * Calculates tile height using Perlin noise.
-     *
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @return The calculated height
-     */
     @JvmStatic
     fun calculateTileheight(x: Int, y: Int): Int {
         var height = perlinNoise(45365 + x, y + 91923, 4) - 128 +
@@ -55,14 +39,6 @@ object TileUtils {
         }
     }
 
-    /**
-     * Generates Perlin noise at the specified coordinates.
-     *
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @param frequencyReciprocal The frequency reciprocal
-     * @return The noise value
-     */
     @JvmStatic
     fun perlinNoise(x: Int, y: Int, frequencyReciprocal: Int): Int {
         val adjX = x / frequencyReciprocal
@@ -78,13 +54,6 @@ object TileUtils {
         return interpolate(interpolatedNoiseNorth, interpolatedNoiseSouth, angleY, frequencyReciprocal)
     }
 
-    /**
-     * Calculates weighted sum of random noise values.
-     *
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @return The weighted noise sum
-     */
     @JvmStatic
     fun randomNoiseWeighedSum(x: Int, y: Int): Int {
         val corners = randomNoise(x - 1, y - 1) + randomNoise(1 + x, y - 1) +
@@ -95,13 +64,6 @@ object TileUtils {
         return corners / 16 + sides / 8 + center / 4
     }
 
-    /**
-     * Generates random noise for the given coordinates.
-     *
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @return The random noise value
-     */
     @JvmStatic
     fun randomNoise(x: Int, y: Int): Int {
         var n = y * 57 + x
@@ -110,15 +72,6 @@ object TileUtils {
         return value shr 19 and 0xff
     }
 
-    /**
-     * Interpolates between two values using cosine interpolation.
-     *
-     * @param a The first value
-     * @param b The second value
-     * @param angle The interpolation angle
-     * @param frequencyReciprocal The frequency reciprocal
-     * @return The interpolated value
-     */
     @JvmStatic
     fun interpolate(a: Int, b: Int, angle: Int, frequencyReciprocal: Int): Int {
         val cosine = (65536 - MathUtils.COSINE[angle * 8192 / frequencyReciprocal]) shr 1

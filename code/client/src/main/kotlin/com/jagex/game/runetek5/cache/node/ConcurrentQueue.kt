@@ -11,9 +11,6 @@ class ConcurrentQueue(capacity: Int) : AbstractQueue<Any>() {
     val queuedObjectComparator: Comparator<Any>? = null
     var currentPosition = 0
 
-    /**
-     * Doubles the size of the cache
-     */
     fun expand() {
         val newSize = (queuedObjectNodes.size shl 1) + 1
         queuedObjectNodes = queuedObjectNodes.copyOf(newSize)

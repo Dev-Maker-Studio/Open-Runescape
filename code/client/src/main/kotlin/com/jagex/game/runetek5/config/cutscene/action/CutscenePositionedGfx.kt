@@ -7,11 +7,6 @@ import com.jagex.game.runetek5.config.sequence.PositionedGfx
 import com.jagex.game.runetek5.entity.spotanimation.SpotAnimation
 import com.jagex.game.runetek5.scene.MapRegion
 
-/**
- *
- * @author Brainpower - 01/02/2023
- *
- */
 class CutscenePositionedGfx(buffer: Packet) : AbstractCutsceneSpotAnimation(buffer) {
 
     @JvmField val x: Int

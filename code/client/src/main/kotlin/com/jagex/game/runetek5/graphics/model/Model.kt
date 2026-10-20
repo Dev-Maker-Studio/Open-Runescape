@@ -18,39 +18,15 @@ abstract class Model {
     @JvmField
     protected var isLocked: Boolean = false
 
-    /**
-     * *****************************************************************
-     * 					(TODO:): GPU handling
-     * *****************************************************************
-     */
-
     abstract fun uploadToGpu()
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Multi threading
-     * *****************************************************************
-     */
 
     abstract fun awaitLock()
 
     abstract fun unlock()
 
-    /**
-     * *****************************************************************
-     * 					(TODO:): Drawing
-     * *****************************************************************
-     */
-
     abstract fun calculateProjection(camX: Int, camY: Int, modelMatrix: Matrix43, notRendered: Boolean, sizeShift: Int): Boolean
 
     abstract fun drawMatrixThreaded(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon?, rasterizerFunctionMask: Int)
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Adjustment
-     * *****************************************************************
-     */
 
     abstract fun translate(x: Int, y: Int, z: Int)
 
@@ -60,18 +36,8 @@ abstract class Model {
 
     abstract fun setContrast(contrast: Int)
 
-    /**
-     * [J]
-     * @param src
-     * @param dst
-     */
     abstract fun recolor(src: Short, dst: Short)
 
-    /**
-     * [J]
-     * @param src
-     * @param dst
-     */
     abstract fun rematerial(src: Short, dst: Short)
 
     abstract fun tint(hue: Int, saturation: Int, lightness: Int, opacity: Int)
@@ -91,12 +57,6 @@ abstract class Model {
     abstract fun offsetSubmesh(matrix: Matrix43, functionMask: Int, updateIdentityMatrix: Boolean)
 
     abstract fun updateParticlePosition(projectionMatrix: Matrix43)
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Getters
-     * *****************************************************************
-     */
 
     abstract fun getSize2d(): Int
 
@@ -132,12 +92,6 @@ abstract class Model {
 
     abstract fun accountForLayers(): Boolean
 
-    /**
-     * *****************************************************************
-     * 					(TODO:) Rotate
-     * *****************************************************************
-     */
-
     abstract fun rotateWithNormals(rotation: Int)
 
     abstract fun zaxisRotateWithoutNormals(rotation: Int)
@@ -145,13 +99,6 @@ abstract class Model {
     abstract fun xaxisRotateWithoutNormals(rotation: Int)
 
     abstract fun yaxisRotateWithoutNormals(rotation: Int)
-
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Animate
-     * *****************************************************************
-     */
 
     abstract fun startAnimation(): Boolean
 
@@ -451,18 +398,8 @@ abstract class Model {
 
     abstract fun animateShadowtransform(transformType: Int, x: Int, y: Int, z: Int)
 
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Ground adjustment
-     * *****************************************************************
-     */
-
     abstract fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int)
 
-    /**
-     * [J]
-     */
     protected open fun hillChange(ground: Ground, offX: Int, y: Int, offY: Int, width: Int, length: Int, xan: Int, zan: Int) {
         val deltaXSw = -width / 2
         val deltaYSw = -length / 2
@@ -521,13 +458,6 @@ abstract class Model {
             translate(0, height, 0)
         }
     }
-
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Texture matrix
-     * *****************************************************************
-     */
 
     protected open fun generateTextureMatrix(mesh: Mesh, faces: IntArray?, numFaces: Int): TextureTransformationMatrix? {
         var centerX: IntArray? = null
@@ -686,13 +616,6 @@ abstract class Model {
         return result
     }
 
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) UV mapping
-     * *****************************************************************
-     */
-
     protected open fun mapCylindericalUv(verticeX: Int, verticeY: Int, verticeZ: Int, centerX: Int, centerY: Int, centerZ: Int, matrix: FloatArray?, offset: Float, direction: Int, speedOffset: Float, uv: FloatArray?) {
         var vX = verticeX - centerX
         var vY = verticeY - centerY
@@ -819,12 +742,6 @@ abstract class Model {
         val az = if (nz < 0.0f) -nz else nz
         return if (ay > ax && ay > az) (if (ny > 0.0f) 0 else 1) else (if (az > ax && az > ay) (if (nz > 0.0f) 2 else 3) else (if (nx > 0.0f) 4 else 5))
     }
-
-    /**
-     * *****************************************************************
-     * 					(TODO:) Misc / static
-     * *****************************************************************
-     */
 
     companion object {
         @JvmStatic

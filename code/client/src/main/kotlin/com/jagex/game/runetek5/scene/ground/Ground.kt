@@ -4,9 +4,6 @@ import com.jagex.game.runetek5.graphics.light.PointLight
 import com.jagex.game.runetek5.graphics.shadow.Shadow
 import com.jagex.game.runetek5.scene.tile.WaterTile
 
-/**
- * Abstract base class for ground rendering and height calculation.
- */
 abstract class Ground(
     @JvmField val width: Int,
     @JvmField val length: Int,
@@ -64,13 +61,6 @@ abstract class Ground(
 
     abstract fun resetLight()
 
-    /**
-     * Calculates the average height at the given coordinates using bilinear interpolation.
-     *
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @return The interpolated height
-     */
     fun getAverageHeight(x: Int, y: Int): Int {
         val scaledX = x shr tileScale
         val scaledY = y shr tileScale
@@ -104,24 +94,8 @@ abstract class Ground(
 
     abstract fun renderFloor(cameraGridX: Int, cameraGridY: Int, visibleTileRange: Int, tilesOnScreen: Array<BooleanArray>, belowLowestPlane: Boolean)
 
-    /**
-     * Whether [renderFloor] can draw anything at all for this plane.
-     *
-     * The scene walks every plane and computes per-tile visibility for each before
-     * calling renderFloor — tens of thousands of tile tests a frame, including the
-     * occlusion tests behind them. An outdoor region has ground on one plane and
-     * nothing on the rest, and for those the whole sweep feeds a renderFloor that
-     * returns immediately. Reporting emptiness here lets the scene skip both.
-     */
     open fun hasRenderableFloor(): Boolean = true
 
-    /**
-     * Gets the height at the specified tile coordinates.
-     *
-     * @param x The tile x coordinate
-     * @param y The tile y coordinate
-     * @return The height at that tile
-     */
     fun getHeight(x: Int, y: Int): Int {
         return tileHeights[x][y]
     }

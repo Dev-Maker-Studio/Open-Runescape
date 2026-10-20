@@ -1,6 +1,3 @@
-/* HardwareInfo - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jaclib.hardware_info
 
 class HardwareInfo private constructor() {

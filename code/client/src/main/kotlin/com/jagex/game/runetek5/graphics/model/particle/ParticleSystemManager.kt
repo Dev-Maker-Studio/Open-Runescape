@@ -8,9 +8,6 @@ import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import java.util.LinkedList
 
-/**
- * Manages active particle systems and particle pooling.
- */
 object ParticleSystemManager {
 
     @JvmField var activeParticleSystems: MutableList<ParticleSystem>? = null

@@ -2,12 +2,6 @@ package com.jagex.game.runetek5.config.material.texture.operation
 
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpTiledSprite : TextureOpSprite() {
 
     override fun getColorOutput(y: Int): Array<IntArray> {

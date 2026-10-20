@@ -35,14 +35,6 @@ class BasType {
     @JvmField
     var objVisibility: IntArray? = null
 
-    /**
-     * [0] translate x
-     * [1] translate y
-     * [2] translate z
-     * [3] rotate x
-     * [4] rotate y
-     * [5] rotate z
-     */
     @JvmField
     var objVerticeTransformations: Array<IntArray?>? = null
 

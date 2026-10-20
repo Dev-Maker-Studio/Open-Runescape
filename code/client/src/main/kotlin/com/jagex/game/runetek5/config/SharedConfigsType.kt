@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.config
 
-/**
- * Shared configuration types enum.
- *
- * @author Brainpower - 29/03/2022
- */
 enum class SharedConfigsType(
     @JvmField val id: Int,
     @JvmField val bit: Int = 0

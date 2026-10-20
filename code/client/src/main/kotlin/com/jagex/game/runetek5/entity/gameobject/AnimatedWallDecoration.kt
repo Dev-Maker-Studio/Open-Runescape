@@ -54,7 +54,6 @@ class AnimatedWallDecoration(
         setupBoundingBox(1)
     }
 
-
     override fun addShadow(toolkit: AbstractToolkit) {
         wallDecoration.getAnimatedShadowedModel(toolkit)
     }
@@ -63,11 +62,9 @@ class AnimatedWallDecoration(
         return hasTransparency
     }
 
-
     override fun getAxisAlignedBoundingBox(toolkit: AbstractToolkit): Silhouette? {
         return axisAlignedBoundingBox
     }
-
 
     override fun getIconHeight(): Int {
         return wallDecoration.getNegativeMinY()

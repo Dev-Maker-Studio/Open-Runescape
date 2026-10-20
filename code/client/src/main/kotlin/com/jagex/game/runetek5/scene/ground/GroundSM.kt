@@ -15,10 +15,6 @@ import com.jagex.game.runetek5.toolkit.safemode.RasterizerSM
 import com.jagex.game.runetek5.toolkit.safemode.ThreadResourceSM
 import com.jagex.game.runetek5.utils.ColorUtil
 
-/**
- * Software-mode ground renderer for safe mode rendering.
- * Handles tile rendering, shadows, and minimap floor rendering.
- */
 class GroundSM(
     @JvmField val toolkit: SafeModeToolkit,
     @JvmField val groundFunctionMask: Int,
@@ -29,22 +25,17 @@ class GroundSM(
     tileHeights: Array<IntArray>
 ) : Ground(regionSizeX, regionSizeY, tileUnits, otherTileHeights) {
 
-    /** Tiles that render as squares [MIN] */
     @JvmField var scenePlainTiles: Array<Array<PlainTile?>>? = null
     @JvmField var sceneShapedTiles: Array<Array<ShapedTile?>>? = null
 
-    /** Tiles that blend colors from overlay / underlay together [LOW / MED] */
     @JvmField var plainBlendedTiles: Array<Array<PlainTileBlended?>>? = null
     @JvmField var shapedBlendedTiles: Array<Array<ShapedTileBlended?>>? = null
 
-    /** Tiles that blend colors and textures from overlay / underlay together [HIGH] */
     @JvmField var blendedTexturedTiles: Array<Array<TextureBlendedTile?>>? = null
 
-    /** Color adjustment */
     @JvmField var directionalTileLight: Array<ByteArray>?
     @JvmField var tileShadowing: Array<ByteArray>?
 
-    /** Projection matrix */
     @JvmField var vertexXA: Float = 0f
     @JvmField var vertexYA: Float = 0f
     @JvmField var vertexZNearA: Float = 0f
@@ -965,7 +956,6 @@ class GroundSM(
                 val hasWaterEffect = tile.materialId != (-1).toShort() && flagMatch(toolkit.materialProvider!!.getMaterial(tile.materialId.toInt()).effectId.toInt())
                 val combinedFogBCD = fogAlphaB + fogAlphaC + fogAlphaD
 
-                // Triangle 1: C-D-B (NorthEast-NorthWest-SouthEast)
                 if ((xC - xD) * (yB - yD) - (yC - yD) * (xB - xD) > 0.0f) {
                     rasterizer.clipEdges = xC < 0.0f || xD < 0.0f || xB < 0.0f || xC > rasterizer.clipWidth || xD > rasterizer.clipWidth || xB > rasterizer.clipWidth
                     if (combinedFogBCD < 3.0f) {
@@ -994,7 +984,6 @@ class GroundSM(
                 }
 
                 val combinedFogABD = fogAlphaA + fogAlphaB + fogAlphaD
-                // Triangle 2: A-B-D (SouthWest-SouthEast-NorthWest)
                 if ((xA - xB) * (yD - yB) - (yA - yB) * (xD - xB) > 0.0f) {
                     rasterizer.clipEdges = xA < 0.0f || xB < 0.0f || xD < 0.0f || xA > rasterizer.clipWidth || xB > rasterizer.clipWidth || xD > rasterizer.clipWidth
                     if (combinedFogABD < 3.0f) {
@@ -1452,7 +1441,6 @@ class GroundSM(
     override fun createShadowAt(x: Int, y: Int, shadow: Shadow?): Shadow? = null
 
     override fun addShadow(shadow: Shadow?, scaledX: Int, averageHeight: Int, scaledY: Int) {
-        // NOOP
     }
 
     override fun hasRenderingShadows(shadow: Shadow?, x: Int, planesHeightDelta: Int, y: Int): Boolean = false
@@ -1482,7 +1470,6 @@ class GroundSM(
     }
 
     override fun removeShadow(shadow: Shadow?, x: Int, groundOffset: Int, y: Int) {
-        // NOOP
     }
 
     fun renderBlockTile(
@@ -1622,7 +1609,6 @@ class GroundSM(
                     zD = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZD / farZD
                 }
 
-                // Triangle 1: C-D-B (NorthEast-NorthWest-SouthEast)
                 if ((xC - xD) * (yB - yD) - (yC - yD) * (xB - xD) > 0.0f) {
                     rasterizer.clipEdges = xC < 0.0f || xD < 0.0f || xB < 0.0f || xC > rasterizer.clipWidth || xD > rasterizer.clipWidth || xB > rasterizer.clipWidth
                     if (plainTile.materialId >= 0) {
@@ -1632,7 +1618,6 @@ class GroundSM(
                     }
                 }
 
-                // Triangle 2: A-B-D (SouthWest-SouthEast-NorthWest)
                 if ((xA - xB) * (yD - yB) - (yA - yB) * (xD - xB) > 0.0f) {
                     rasterizer.clipEdges = xA < 0.0f || xB < 0.0f || xD < 0.0f || xA > rasterizer.clipWidth || xB > rasterizer.clipWidth || xD > rasterizer.clipWidth
                     if (plainTile.materialId >= 0) {
@@ -1731,6 +1716,5 @@ class GroundSM(
     }
 
     override fun addLight(light: PointLight, lightDisplacement: IntArray) {
-        // NOOP
     }
 }

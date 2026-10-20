@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.config.quickchat
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.quickchat.QuickChatValueType.*
 
-/**
- * @author Brainpower - 22/04/2022
- */
 class QuickchatFiller : QuickchatFillerList {
     override fun getValueDisplay(value: QuickChatValueType, configs: IntArray, data: Long): String {
         if (value == LIST_DIALOG) {

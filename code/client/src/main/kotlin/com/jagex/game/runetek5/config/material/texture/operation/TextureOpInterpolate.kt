@@ -4,12 +4,6 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- * Texture operation that interpolates between two textures based on a third texture as a blend factor.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpInterpolate : TextureOperation(3, false) {
 
     override fun getMonochromeOutput(y: Int): IntArray {

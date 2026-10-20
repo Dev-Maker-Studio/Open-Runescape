@@ -38,17 +38,6 @@ class AnimatedGameObject(
     var locCustomisation: ObjectTypeCustomisation? = null
     var pairModel: Model? = null
 
-    /**
-     * Pose memo for tweened sequences.
-     *
-     * Their frames are not in ObjectType's shared animated-model cache, so every render
-     * frame re-copied and re-animated the base model into the shared copy slot, and the
-     * deferred toolkit rebuilt its geometry from that — although the pose only changes
-     * when the sequence advances, once per client cycle. The key covers everything the
-     * pose depends on; while it holds, the same PRIVATE copy (ObjectType privatePose,
-     * which owns its normals) is returned, so both the animation and the toolkit's
-     * geometry rebuild are skipped.
-     */
     private val poseCopies = PoseCopyPair()
     private var poseMemoModel: Model? = null
     private var poseMemoKey: Long = 0L
@@ -56,7 +45,6 @@ class AnimatedGameObject(
     private var missDiagBudget = 6
 
     override fun storePoseGeometry(geometry: Any, streamKey: Long) {
-        // Not used by the private-copy memo; the geometry lives on the copy itself.
     }
     var castShadowAtPlane: BooleanArray? = null
     var shadow: Shadow? = null
@@ -238,11 +226,6 @@ class AnimatedGameObject(
             val memoEligible = POSE_MEMO && seqType != null
             var poseKey = 0L
             if (memoEligible) {
-                // The function mask is deliberately NOT part of the key: draw (2048),
-                // the particle cycle (262144) and picking (131072) ask for the same
-                // pose with different masks, and keying on the mask made every
-                // torch-style loc rebuild twice per frame. A memo model serves any
-                // caller whose mask it satisfies (the legacy caches' merged-mask rule).
                 poseKey = loctype.id.toLong()
                 poseKey = poseKey * 1000003L + type
                 poseKey = poseKey * 1000003L + rotation
@@ -265,12 +248,8 @@ class AnimatedGameObject(
             if (memoEligible && memo != null && poseKey == poseMemoKey &&
                 renderer.mismatchingFunctionMask(memo.getFunctionMask(), functionMask) == 0
             ) {
-                // Same pose as last time: the private copy (and the toolkit geometry
-                // attached to it) is still exact. No copy, no re-animation.
                 model = memo
             } else {
-                // Build a copy that satisfies every caller seen so far, so the next
-                // request from either path hits.
                 if (memoEligible && memo != null) functionMask = renderer.mergeFunctionMasks(functionMask, memo.getFunctionMask())
                 model = loctype.getAnimatedModel(
                     renderer,
@@ -290,8 +269,6 @@ class AnimatedGameObject(
                     val previous = poseMemoModel as? ModelGL
                     val fresh = model as? ModelGL
                     if (previous != null && fresh != null && previous !== fresh) {
-                        // Carry the toolkit's per-instance key and geometry buffer over so
-                        // the store refreshes one entry in place instead of appending.
                         if (previous.modernStreamKey != 0L) fresh.modernStreamKey = previous.modernStreamKey
                         if (fresh.modernStreamGeometry == null && previous.modernStreamGeometry != null) {
                             fresh.modernStreamGeometry = previous.modernStreamGeometry
@@ -396,7 +373,6 @@ class AnimatedGameObject(
     }
 
     companion object {
-        /** -Drender.posememo=false rebuilds tweened loc poses every render frame (legacy behaviour). */
         @JvmStatic val MISS_DIAG = System.getProperty("render.missdiag") != null
         @JvmStatic val POSE_MEMO = System.getProperty("render.posememo")?.equals("false", true) != true
     }

@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.interaction.chat.clanchat.settings
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- *
- * @author Steven - 18/09/2023
- *
- */
 class UpdateBitpackedVariable(
     @JvmField val clanSettingsDelta: ClanSettingsDelta
 ) : AbstractClanSettingUpdate() {

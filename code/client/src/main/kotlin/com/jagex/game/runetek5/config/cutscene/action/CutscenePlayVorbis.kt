@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.midi.AreaSound
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 
-/**
- *
- * @author Steven - 02/10/2023
- *
- */
 class CutscenePlayVorbis(buffer: Packet) : CutsceneAction(buffer) {
 
     @JvmField var vorbisSound: AreaSound? = null

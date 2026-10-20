@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.midi.SongReference
 import com.jagex.game.runetek5.sound.player.song.SongPlayer
 
-/**
- *
- * @author Brainpower - 09/04/2022
- *
- */
 class CutscenePlaySong(buffer: Packet) : CutsceneAction(buffer) {
 
     @JvmField val musicId: Int = buffer.readUShort()

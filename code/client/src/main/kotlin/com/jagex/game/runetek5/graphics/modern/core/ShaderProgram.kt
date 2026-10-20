@@ -12,12 +12,6 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.Vector4f
 
-/**
- * Wrapper for OpenGL shader programs.
- *
- * Handles compilation, linking, and uniform management for vertex and fragment shaders.
- * Supports caching uniform locations for efficient access.
- */
 class ShaderProgram private constructor(
     val programId: Int,
     private val vertexShaderId: Int,
@@ -26,30 +20,16 @@ class ShaderProgram private constructor(
     private val uniformLocations = mutableMapOf<String, Int>()
     private var isBound = false
 
-    // Temporary arrays for matrix uploads (avoid allocation per frame)
     private val matrix3Buffer = FloatArray(9)
     private val matrix4Buffer = FloatArray(16)
 
     companion object {
-        /**
-         * Set by [com.jagex.game.runetek5.graphics.modern.renderer.ModernGroundRenderer]
-         * while it is holding the pipeline across a run of terrain draws: the program
-         * it is holding, and the action that releases it.
-         */
         @JvmStatic
         var groundPassProgramId: Int = -1
 
         @JvmStatic
         var releaseGroundPass: Runnable? = null
 
-        /**
-         * Creates a shader program from vertex and fragment shader source code.
-         *
-         * @param vertexSource GLSL source code for vertex shader
-         * @param fragmentSource GLSL source code for fragment shader
-         * @return Compiled and linked ShaderProgram
-         * @throws ShaderCompilationException if compilation or linking fails
-         */
         fun create(vertexSource: String, fragmentSource: String): ShaderProgram {
             val vertexShaderId = compileShader(VERTEX_SHADER, vertexSource)
             val fragmentShaderId = try {
@@ -72,26 +52,15 @@ class ShaderProgram private constructor(
                 throw ShaderCompilationException("Failed to link shader program: $log")
             }
 
-            return ShaderProgram(programId, vertexShaderId, fragmentShaderId)
+            return ShaderProgram(programId, vertexShaderId, fragmentShaderId).also { com.jagex.game.runetek5.graphics.modern.dump.FrameDump.source(programId, vertexSource, fragmentSource) }
         }
 
-        /**
-         * Creates a shader program from resource files.
-         *
-         * @param vertexResourcePath Path to vertex shader resource (e.g., "/shaders/model.vert")
-         * @param fragmentResourcePath Path to fragment shader resource (e.g., "/shaders/model.frag")
-         * @return Compiled and linked ShaderProgram
-         */
         fun createFromResources(vertexResourcePath: String, fragmentResourcePath: String): ShaderProgram {
             val vertexSource = loadResource(vertexResourcePath)
             val fragmentSource = loadResource(fragmentResourcePath)
-            return create(vertexSource, fragmentSource)
+            return create(vertexSource, fragmentSource).also { com.jagex.game.runetek5.graphics.modern.dump.FrameDump.name(it.programId, vertexResourcePath.substringAfterLast('/').substringBeforeLast('.')) }
         }
 
-        /**
-         * Creates a shader program from source strings.
-         * Alias for create() for API consistency.
-         */
         fun createFromSource(vertexSource: String, fragmentSource: String): ShaderProgram {
             return create(vertexSource, fragmentSource)
         }
@@ -117,56 +86,21 @@ class ShaderProgram private constructor(
         }
     }
 
-    /**
-     * Gets the OpenGL program ID.
-     */
     fun getId(): Int = programId
 
-    /**
-     * Binds this shader program for use in rendering.
-     */
     fun bind() {
-        // ALWAYS issue the call. glUseProgram is a single piece of GL state, so the
-        // old per-object `isBound` flag went stale as soon as any other program
-        // bound: this object still believed it was current, bind() no-opped, and the
-        // following glUniform* calls landed on whatever program was really active —
-        // or on none, if something had called unbind(). That is the
-        // "GL_INVALID_OPERATION: No active program" out of ModernSpriteRenderer.flush.
-        //
-        // A global "currently bound" cache would not be safe either: the legacy
-        // toolkit calls jaggl OpenGL.glUseProgram directly (ShaderGL,
-        // RectangularTextureGL, BreakingWaterEffect...), including glUseProgram(0),
-        // with no way to notify us. A redundant bind is one cheap call per batch
-        // flush; a missed one silently corrupts a frame.
-        // A run of terrain draws leaves the ground shader, its VAO and its attribute
-        // arrays bound so consecutive materials do not each re-establish them; binding
-        // any other program is the signal that the run is over. This is the one place
-        // every modern draw path passes through, which is why the release lives here
-        // rather than being sprinkled across the call sites that could forget it.
         if (programId != groundPassProgramId) releaseGroundPass?.run()
 
         GLWrapper.useProgram(programId)
         isBound = true
     }
 
-    /**
-     * Unbinds this shader program.
-     */
     fun unbind() {
         if (programId != groundPassProgramId) releaseGroundPass?.run()
         GLWrapper.useProgram(0)
         isBound = false
     }
 
-
-    /**
-     * Gets the location of a uniform variable, caching the result.
-     */
-    /**
-     * Location of a uniform ARRAY. Some drivers (Mesa/llvmpipe) only resolve the
-     * element form "name[0]" and return -1 for the bare name; NVIDIA accepts both.
-     * Querying the bare name alone silently dropped every point-light position.
-     */
     fun getArrayUniformLocation(name: String): Int {
         val bare = getUniformLocation(name)
         return if (bare >= 0) bare else getUniformLocation("$name[0]")
@@ -178,14 +112,9 @@ class ShaderProgram private constructor(
         }
     }
 
-    /**
-     * Gets the location of an attribute variable.
-     */
     fun getAttribLocation(name: String): Int {
         return GLWrapper.getAttribLocation(programId, name)
     }
-
-    // ===== Uniform Setters =====
 
     fun setUniform(name: String, value: Int) {
         GLWrapper.uniform1i(getUniformLocation(name), value)
@@ -241,14 +170,6 @@ class ShaderProgram private constructor(
         }
     }
 
-    // ===== Direct Location Setters (for hot paths) =====
-
-    /**
-     * Last scalar value set per location, so repeated sets of the same value skip the
-     * GL call. Uniform state belongs to the program object and persists across binds,
-     * so this is exact for as long as every scalar set of these locations goes through
-     * here. The batchers set 3-4 scalars per material batch, hundreds of times a frame.
-     */
     private var intUniformCache = IntArray(0)
     private var intUniformValid = BooleanArray(0)
     private var floatUniformCache = FloatArray(0)
@@ -297,13 +218,7 @@ class ShaderProgram private constructor(
         GLWrapper.uniformMatrix4fv(location, false, matrix4Buffer)
     }
 
-    /**
-     * Releases GPU resources associated with this shader program.
-     * Safe to call from any thread - will silently skip if no GL context is available.
-     */
     fun destroy() {
-        // Check if GL context is available on this thread before making GL calls
-        // This prevents LWJGL from aborting the JVM with a native error
         val hasContext = try {
             GL.getCapabilities() != null
         } catch (e: IllegalStateException) {
@@ -318,13 +233,9 @@ class ShaderProgram private constructor(
             GLWrapper.deleteShader(fragmentShaderId)
             GLWrapper.deleteProgram(programId)
         }
-        // If no context, resources will be freed when the GL context is destroyed
 
         uniformLocations.clear()
     }
 }
 
-/**
- * Exception thrown when shader compilation or linking fails.
- */
 class ShaderCompilationException(message: String) : RuntimeException(message)

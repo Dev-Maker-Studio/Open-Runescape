@@ -1175,7 +1175,6 @@ object PacketDecoder {
             val fpsResponse = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac)
             fpsResponse.buffer.writeIntInverseMiddle(key)
             fpsResponse.buffer.writeIntMiddle(flags)
-            // Uncapped rendering can exceed a byte; clamp so the value doesn't wrap
             fpsResponse.buffer.writeByteSubtract(GameShell.FPS.coerceAtMost(255))
             context.queuePacket(fpsResponse)
             context.currentPacket = null
@@ -1406,7 +1405,7 @@ object PacketDecoder {
             VarProviders.PLAYER_VAR_PROVIDER.setVarBitValueFromServer(varbitId, variable)
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.STOP_VORBIS_STREAM) { //request packet 37?
+        } else if (context.currentPacket == ServerProt.STOP_VORBIS_STREAM) {
             val key = buffer.readUShortAddLittle()
             Client.requestVarVerifyid()
             StaticMethods.stopVorbisStream(key)
@@ -1974,7 +1973,7 @@ object PacketDecoder {
             if (clanChannel == null) {
                 ignore = true
             } else {
-                for (hashIndex in 0..99) { //TODO validate this logic
+                for (hashIndex in 0..99) {
                     if (Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex] == messageHash) {
                         ignore = true
                         break
@@ -2014,7 +2013,6 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_SITESETTINGS_COOKIE) {
-            //no applet deprecated
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.REDUCE_ATTACK_PRIORITY) {
@@ -2340,7 +2338,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_TARGET) {
-            Client.ENTITY_TARGET = buffer.readShortLittle() //reads same identifier as projectile (index+1 for npc and -index-1 for player)
+            Client.ENTITY_TARGET = buffer.readShortLittle()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_OBJECT) {

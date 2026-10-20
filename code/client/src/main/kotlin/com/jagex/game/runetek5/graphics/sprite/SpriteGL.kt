@@ -23,13 +23,6 @@ open class SpriteGL : NativeSprite {
     @JvmField val texture2d: OpenGl2DImageTexture
     @JvmField var channelMaskTexture: OpenGl2DImageTexture? = null
 
-    /**
-     * Legacy immediate-mode sprite drawing is forbidden under ModernGLToolkit
-     * (standalone modern renderer — no fixed-function detours). Plain SpriteGL
-     * instances only exist under the modern toolkit when they were created before
-     * the modern renderer's lazy init; their draws are dropped and counted in the
-     * [ModernDiag] legacySkips map. ModernSpriteGL overrides never reach these.
-     */
     protected fun blockedUnderModernToolkit(callsite: String): Boolean {
         val tk = toolkit
         if (tk is ModernGLToolkit) {
@@ -95,20 +88,8 @@ open class SpriteGL : NativeSprite {
     }
 
     override fun pixelTransfer() {
-        OpenGL.glPixelTransferf(GL_RED_SCALE, 0.5f)
-        OpenGL.glPixelTransferf(GL_RED_BIAS, 0.499f)
-        OpenGL.glPixelTransferf(GL_GREEN_SCALE, 0.5f)
-        OpenGL.glPixelTransferf(GL_GREEN_BIAS, 0.499f)
-        OpenGL.glPixelTransferf(GL_BLUE_SCALE, 0.5f)
-        OpenGL.glPixelTransferf(GL_BLUE_BIAS, 0.499f)
         channelMaskTexture = OpenGl2DImageTexture.createFromScreenCapture(toolkit, 0, 0, texture2d.singleWidth, texture2d.singleLength)
         channelMaskIndex = 3
-        OpenGL.glPixelTransferf(GL_RED_SCALE, 1.0f)
-        OpenGL.glPixelTransferf(GL_RED_BIAS, 0.0f)
-        OpenGL.glPixelTransferf(GL_GREEN_SCALE, 1.0f)
-        OpenGL.glPixelTransferf(GL_GREEN_BIAS, 0.0f)
-        OpenGL.glPixelTransferf(GL_BLUE_SCALE, 1.0f)
-        OpenGL.glPixelTransferf(GL_BLUE_BIAS, 0.0f)
     }
 
     fun updateTextureRegion(x: Int, y: Int, width: Int, height: Int, pixels: IntArray, rowLength: Int) {
@@ -124,29 +105,15 @@ open class SpriteGL : NativeSprite {
         toolkit.setActiveTexture(texture2d)
         toolkit.setBlendMode(blendMode)
         toolkit.loadTextureCombineMode(combineMode)
-        OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         if (texture2d.tiled && !stretched) {
             val t = texture2d.t * height / texture2d.singleLength
             val s = texture2d.s * width / texture2d.singleWidth
             toolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glTexCoord2f(0.0f, t)
-            OpenGL.glVertex2i(x, y)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(x, endY)
-            OpenGL.glTexCoord2f(s, 0.0f)
-            OpenGL.glVertex2i(endX, endY)
-            OpenGL.glTexCoord2f(s, t)
-            OpenGL.glVertex2i(endX, y)
-            OpenGL.glEnd()
         } else {
-            OpenGL.glPushMatrix()
-            OpenGL.glTranslatef(translateX.toFloat(), translateY.toFloat(), 0.0f)
             val spriteWidth = getSpriteWidth()
             val spriteHeight = getSpriteHeight()
             var tileEndY = texture2d.singleLength + y
             toolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
 
             var startY: Int
             var startX: Int
@@ -155,28 +122,12 @@ open class SpriteGL : NativeSprite {
                 var tileEndX = texture2d.singleWidth + x
                 startX = x
                 while (tileEndX <= endX) {
-                    OpenGL.glTexCoord2f(0.0f, texture2d.t)
-                    OpenGL.glVertex2i(startX, startY)
-                    OpenGL.glTexCoord2f(0.0f, 0.0f)
-                    OpenGL.glVertex2i(startX, tileEndY)
-                    OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-                    OpenGL.glVertex2i(tileEndX, tileEndY)
-                    OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-                    OpenGL.glVertex2i(tileEndX, startY)
                     tileEndX += spriteWidth
                     startX += spriteWidth
                 }
 
                 if (startX < endX) {
                     val partialS = texture2d.s * (endX - startX) / texture2d.singleWidth
-                    OpenGL.glTexCoord2f(0.0f, texture2d.t)
-                    OpenGL.glVertex2i(startX, startY)
-                    OpenGL.glTexCoord2f(0.0f, 0.0f)
-                    OpenGL.glVertex2i(startX, tileEndY)
-                    OpenGL.glTexCoord2f(partialS, 0.0f)
-                    OpenGL.glVertex2i(endX, tileEndY)
-                    OpenGL.glTexCoord2f(partialS, texture2d.t)
-                    OpenGL.glVertex2i(endX, startY)
                 }
 
                 startY += spriteHeight
@@ -189,33 +140,15 @@ open class SpriteGL : NativeSprite {
 
                 var tileX = x
                 while (startX <= endX) {
-                    OpenGL.glTexCoord2f(0.0f, texture2d.t)
-                    OpenGL.glVertex2i(tileX, startY)
-                    OpenGL.glTexCoord2f(0.0f, partialT)
-                    OpenGL.glVertex2i(tileX, endY)
-                    OpenGL.glTexCoord2f(texture2d.s, partialT)
-                    OpenGL.glVertex2i(startX, endY)
-                    OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-                    OpenGL.glVertex2i(startX, startY)
                     startX += spriteWidth
                     tileX += spriteWidth
                 }
 
                 if (tileX < endX) {
                     val partialS = texture2d.s * (endX - tileX) / texture2d.singleWidth
-                    OpenGL.glTexCoord2f(0.0f, texture2d.t)
-                    OpenGL.glVertex2i(tileX, startY)
-                    OpenGL.glTexCoord2f(0.0f, partialT)
-                    OpenGL.glVertex2i(tileX, endY)
-                    OpenGL.glTexCoord2f(partialS, partialT)
-                    OpenGL.glVertex2i(endX, endY)
-                    OpenGL.glTexCoord2f(partialS, texture2d.t)
-                    OpenGL.glVertex2i(endX, startY)
                 }
             }
 
-            OpenGL.glEnd()
-            OpenGL.glPopMatrix()
         }
     }
 
@@ -234,41 +167,16 @@ open class SpriteGL : NativeSprite {
         texture2d.setLinearTextureFilter(false)
         toolkit.setupSpriteRendering()
         toolkit.setBlendMode(blendMode)
-        OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         var drawX = x + translateX
         var drawY = y + translateY
         if (channelMaskTexture == null) {
             toolkit.setActiveTexture(texture2d)
             toolkit.loadTextureCombineMode(combineMode)
             toolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glTexCoord2f(0.0f, texture2d.t)
-            OpenGL.glVertex2i(drawX, drawY)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(drawX, texture2d.singleLength + drawY)
-            OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-            OpenGL.glVertex2i(texture2d.singleWidth + drawX, texture2d.singleLength + drawY)
-            OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-            OpenGL.glVertex2i(texture2d.singleWidth + drawX, drawY)
-            OpenGL.glEnd()
         } else {
             setupChannelMaskRendering(combineMode)
             channelMaskTexture!!.setLinearTextureFilter(false)
             toolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
-            OpenGL.glTexCoord2f(0.0f, texture2d.t)
-            OpenGL.glVertex2i(drawX, drawY)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(drawX, texture2d.singleLength + drawY)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, texture2d.s, 0.0f)
-            OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-            OpenGL.glVertex2i(texture2d.singleWidth + drawX, texture2d.singleLength + drawY)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, texture2d.s, texture2d.t)
-            OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-            OpenGL.glVertex2i(texture2d.singleWidth + drawX, drawY)
-            OpenGL.glEnd()
             resetChannelMaskState()
         }
     }
@@ -297,21 +205,6 @@ open class SpriteGL : NativeSprite {
         val t0 = surfaceTexture.t - (drawY - surfaceOffsetY) * tPerPixel
         val t1 = surfaceTexture.t - (endY - surfaceOffsetY) * tPerPixel
         toolkit.legacyDrawTrace()
-        OpenGL.glBegin(7)
-        OpenGL.glColor3f(1.0f, 1.0f, 1.0f)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texture2d.t)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, s0, t0)
-        OpenGL.glVertex2i(drawX, drawY)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, s0, t1)
-        OpenGL.glVertex2i(drawX, texture2d.singleLength + drawY)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, texture2d.s, 0.0f)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, s1, t1)
-        OpenGL.glVertex2i(texture2d.singleWidth + drawX, texture2d.singleLength + drawY)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, texture2d.s, texture2d.t)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, s1, t0)
-        OpenGL.glVertex2i(texture2d.singleWidth + drawX, drawY)
-        OpenGL.glEnd()
         toolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
         toolkit.loadTextureCombineMode(0)
         toolkit.setActiveTexture(null)
@@ -323,7 +216,6 @@ open class SpriteGL : NativeSprite {
         texture2d.setLinearTextureFilter(true)
         toolkit.setupSpriteRendering()
         toolkit.setBlendMode(blendMode)
-        OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         if (stretched) {
             val scaleX = width.toFloat() / getSpriteWidth()
             val scaleY = height.toFloat() / getSpriteHeight()
@@ -335,68 +227,20 @@ open class SpriteGL : NativeSprite {
                 toolkit.setActiveTexture(texture2d)
                 toolkit.loadTextureCombineMode(combineMode)
                 toolkit.legacyDrawTrace()
-                OpenGL.glBegin(GL_QUADS)
-                OpenGL.glTexCoord2f(0.0f, texture2d.t)
-                OpenGL.glVertex2f(x0, y0)
-                OpenGL.glTexCoord2f(0.0f, 0.0f)
-                OpenGL.glVertex2f(x0, y1)
-                OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-                OpenGL.glVertex2f(x1, y1)
-                OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-                OpenGL.glVertex2f(x1, y0)
-                OpenGL.glEnd()
             } else {
                 setupChannelMaskRendering(combineMode)
                 channelMaskTexture!!.setLinearTextureFilter(true)
                 toolkit.legacyDrawTrace()
-                OpenGL.glBegin(GL_QUADS)
-                OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
-                OpenGL.glTexCoord2f(0.0f, texture2d.t)
-                OpenGL.glVertex2f(x0, y0)
-                OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f)
-                OpenGL.glTexCoord2f(0.0f, 0.0f)
-                OpenGL.glVertex2f(x0, y1)
-                OpenGL.glMultiTexCoord2f(GL_TEXTURE1, texture2d.s, 0.0f)
-                OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-                OpenGL.glVertex2f(x1, y1)
-                OpenGL.glMultiTexCoord2f(GL_TEXTURE1, texture2d.s, texture2d.t)
-                OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-                OpenGL.glVertex2f(x1, y0)
-                OpenGL.glEnd()
                 resetChannelMaskState()
             }
         } else if (channelMaskTexture == null) {
             toolkit.setActiveTexture(texture2d)
             toolkit.loadTextureCombineMode(combineMode)
             toolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glTexCoord2f(0.0f, texture2d.t)
-            OpenGL.glVertex2i(x, y)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(x, y + height)
-            OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-            OpenGL.glVertex2i(width + x, y + height)
-            OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-            OpenGL.glVertex2i(width + x, y)
-            OpenGL.glEnd()
         } else {
             setupChannelMaskRendering(combineMode)
             channelMaskTexture!!.setLinearTextureFilter(true)
             toolkit.legacyDrawTrace()
-            OpenGL.glBegin(GL_QUADS)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
-            OpenGL.glTexCoord2f(0.0f, texture2d.t)
-            OpenGL.glVertex2i(x, y)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f)
-            OpenGL.glTexCoord2f(0.0f, 0.0f)
-            OpenGL.glVertex2i(x, y + height)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, texture2d.s, 0.0f)
-            OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-            OpenGL.glVertex2i(width + x, y + height)
-            OpenGL.glMultiTexCoord2f(GL_TEXTURE1, texture2d.s, texture2d.t)
-            OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-            OpenGL.glVertex2i(width + x, y)
-            OpenGL.glEnd()
             resetChannelMaskState()
         }
     }
@@ -441,18 +285,7 @@ open class SpriteGL : NativeSprite {
         toolkit.setActiveTexture(texture2d)
         toolkit.setBlendMode(blendMode)
         toolkit.loadTextureCombineMode(combineMode)
-        OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         toolkit.legacyDrawTrace()
-        OpenGL.glBegin(7)
-        OpenGL.glTexCoord2f(0.0f, texture2d.t)
-        OpenGL.glVertex2f(x1, y1)
-        OpenGL.glTexCoord2f(0.0f, 0.0f)
-        OpenGL.glVertex2f(x3, y3)
-        OpenGL.glTexCoord2f(texture2d.s, 0.0f)
-        OpenGL.glVertex2f(x4, y4)
-        OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
-        OpenGL.glVertex2f(x2, y2)
-        OpenGL.glEnd()
     }
 
     override fun getSpriteWidth(): Int {
@@ -509,21 +342,6 @@ open class SpriteGL : NativeSprite {
         uX = surfaceTexture.s / surfaceTexture.singleWidth
         uY = surfaceTexture.t / surfaceTexture.singleLength
         toolkit.legacyDrawTrace()
-        OpenGL.glBegin(7)
-        OpenGL.glColor3f(1.0f, 1.0f, 1.0f)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texture2d.t)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, uX * (x1 - surfaceOffsetX), surfaceTexture.t - uY * (y1 - surfaceOffsetY))
-        OpenGL.glVertex2f(x1, y1)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, uX * (x3 - surfaceOffsetX), surfaceTexture.t - uY * (y3 - surfaceOffsetY))
-        OpenGL.glVertex2f(x3, y3)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, texture2d.s, 0.0f)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, uX * (x4 - surfaceOffsetX), surfaceTexture.t - uY * (y4 - surfaceOffsetY))
-        OpenGL.glVertex2f(x4, y4)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE0, texture2d.s, texture2d.t)
-        OpenGL.glMultiTexCoord2f(GL_TEXTURE1, uX * (x2 - surfaceOffsetX), surfaceTexture.t - uY * (y2 - surfaceOffsetY))
-        OpenGL.glVertex2f(x2, y2)
-        OpenGL.glEnd()
         toolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
         toolkit.loadTextureCombineMode(0)
         toolkit.setActiveTexture(null)

@@ -7,12 +7,6 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.utils.ArrayUtils
 import java.util.Random
 
-/**
- * Texture operation that generates brick patterns.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpBricks : TextureOperation(0, true) {
 
     @JvmField var columnsPerRow: Int = 4

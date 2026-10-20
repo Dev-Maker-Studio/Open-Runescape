@@ -5,12 +5,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import com.jagex.game.runetek5.utils.ArrayUtils
 
-/**
- * Texture operation for horizontal and vertical flipping.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpFlip : TextureOperation(1, false) {
 
     @JvmField var mirrorHorizontally: Boolean = true

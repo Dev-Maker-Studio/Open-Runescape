@@ -659,27 +659,17 @@ object InterfaceComponentRenderer {
     fun renderItems(toolkit: AbstractToolkit?) {
         if (toolkit == null) return
         if (!Component.ITEMS.isEmpty()) {
-            if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == 0) {
-                var item = Component.ITEMS.getFirst() as Item?
-                while (item != null) {
-                    TypeLists.OBJ!!.getSprite(toolkit, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.stackMode, Renderers.FONT_RENDERER!!, if (item.hasPlayerAppearance) PlayerUpdate.MY_PLAYER!!.playerAppearance else null)
-                    item.unlink()
-                    item = Component.ITEMS.next() as Item?
-                }
-                GameShell.setComponentsOnTop()
-            } else {
-                if (Renderers.GPU_ITEM_RENDERER == null) {
-                    val itemCanvas = Canvas()
-                    itemCanvas.setSize(36, 32)
-                    Renderers.GPU_ITEM_RENDERER = AbstractToolkit.create(0, itemCanvas, TypeLists.MATERIALS, Resource.SHADER, 0)
-                    Renderers.GPU_ITEM_FONT_RENDERER = Renderers.GPU_ITEM_RENDERER!!.createFontRenderer(FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p11FullIndex), SpriteType.decodeGroup(Resource.SPRITES, FontManager.p11FullIndex), true)
-                }
-                var item = Component.ITEMS.getFirst() as Item?
-                while (item != null) {
-                    TypeLists.OBJ!!.getSprite(Renderers.GPU_ITEM_RENDERER!!, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.stackMode, Renderers.GPU_ITEM_FONT_RENDERER!!, if (item.hasPlayerAppearance) PlayerUpdate.MY_PLAYER!!.playerAppearance else null)
-                    item.unlink()
-                    item = Component.ITEMS.next() as Item?
-                }
+            if (Renderers.GPU_ITEM_RENDERER == null) {
+                val itemCanvas = Canvas()
+                itemCanvas.setSize(36, 32)
+                Renderers.GPU_ITEM_RENDERER = AbstractToolkit.create(AbstractToolkit.BOOTSTRAP_MODE, itemCanvas, TypeLists.MATERIALS, Resource.SHADER, 0)
+                Renderers.GPU_ITEM_FONT_RENDERER = Renderers.GPU_ITEM_RENDERER!!.createFontRenderer(FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p11FullIndex), SpriteType.decodeGroup(Resource.SPRITES, FontManager.p11FullIndex), true)
+            }
+            var item = Component.ITEMS.getFirst() as Item?
+            while (item != null) {
+                TypeLists.OBJ!!.getSprite(Renderers.GPU_ITEM_RENDERER!!, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.stackMode, Renderers.GPU_ITEM_FONT_RENDERER!!, if (item.hasPlayerAppearance) PlayerUpdate.MY_PLAYER!!.playerAppearance else null)
+                item.unlink()
+                item = Component.ITEMS.next() as Item?
             }
         }
     }

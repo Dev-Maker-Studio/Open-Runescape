@@ -1,10 +1,5 @@
 package com.jagex.game.runetek5.scene.culling
 
-/**
- * https://www.youtube.com/watch?v=-ymmkfjMIeI&ab_channel=OGLDEV
- * @author Steven
- *
- */
 open class FrustumCulling(
     @JvmField val culling: Culling
 ) {
@@ -15,7 +10,6 @@ open class FrustumCulling(
     @JvmField
     var depthWriteCount: Int = 0
 
-    // Could be named inside_view_frustum other than that it also calcs
     fun cull(yA: Int, yB: Int, yC: Int, xA: Int, xB: Int, xC: Int, zA: Int, zB: Int, zC: Int): Boolean {
         var yA = yA
         var yB = yB

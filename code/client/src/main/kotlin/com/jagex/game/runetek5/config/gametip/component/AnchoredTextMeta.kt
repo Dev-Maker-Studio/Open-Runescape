@@ -17,9 +17,6 @@ class AnchoredTextMeta(
     @JvmField val lineSpacing: Int,
     @JvmField val width: Int,
     @JvmField val height: Int,
-    /**
-     * The sprite & font id
-     */
     @JvmField val fileId: Int,
     @JvmField val textColor: Int,
     @JvmField val textShadowColor: Int

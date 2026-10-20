@@ -3,14 +3,6 @@ package com.jagex.game.runetek5.preference.impl
 import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 
-/**
- *
- * @author Brainpower - 07/02/2023
- * Options:
- * 0 = Reset
- * 1 = Always
- * 2 = Selectively
- */
 class RoofPreference : Preference {
 
     constructor(value: Int, gamePreferences: GamePreferences) : super(value, gamePreferences)

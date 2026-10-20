@@ -1,6 +1,3 @@
-/* DSPState - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package jagtheora.vorbis
 
 import jagtheora.misc.SimplePeer

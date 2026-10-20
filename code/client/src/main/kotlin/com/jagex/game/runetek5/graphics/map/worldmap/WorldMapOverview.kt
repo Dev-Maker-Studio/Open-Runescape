@@ -10,22 +10,8 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.DebugDisplay
 
-/**
- * Handles rendering the world map overview window.
- */
 object WorldMapOverview {
 
-    /**
-     * Draws a small map containing the entire world,
-     * used to allow user to reposition position
-     * on worldmap
-     *
-     * @param toolkit The rendering toolkit
-     * @param x The x position
-     * @param y The y position
-     * @param width The width
-     * @param height The height
-     */
     @JvmStatic
     fun drawWorldmapOverview(toolkit: AbstractToolkit, x: Int, y: Int, width: Int, height: Int) {
         var adjustedX = x

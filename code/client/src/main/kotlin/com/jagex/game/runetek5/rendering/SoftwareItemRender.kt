@@ -4,10 +4,6 @@ import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.graphics.sprite.IItemRenderer
 import com.jagex.game.runetek5.tools.Hashing
 
-/**
- * Software-based item renderer implementation with CRC64 unique ID generation.
- * Note: Despite the name, this is used for general item rendering, not SW3D-specific
- */
 class SoftwareItemRender : IItemRenderer {
 
     @JvmField var outlineSize: Int = 0

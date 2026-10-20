@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.trigger.ClientTriggerType
 
-/**
- *
- * @author Steven - 06/10/2023
- *
- */
 class IFSubActivePlayer(
     subInterfaceId: Int,
     overlay: Int,

@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.config
 
-/**
- * Enumeration of cache index references (0-36).
- */
 enum class IndexReference(val indexId: Int) {
     INDEX_0(0),
     INDEX_1(1),
@@ -49,11 +46,6 @@ enum class IndexReference(val indexId: Int) {
     companion object {
         @JvmField var maxIndexReference = -1
 
-        /**
-         * Calculates and returns the maximum index reference value.
-         *
-         * @return The maximum index ID plus one
-         */
         @JvmStatic
         fun getMaxIndexReference(): Int {
             if (maxIndexReference == -1) {

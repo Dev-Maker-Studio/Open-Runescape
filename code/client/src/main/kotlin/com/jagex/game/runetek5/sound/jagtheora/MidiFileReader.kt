@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.sound.jagtheora
 
 import com.jagex.game.runetek5.buffer.Packet
 
-/**
- * @author Brainpower - 28/03/2022
- * Naming from OpenOSRS
- *
- */
 class MidiFileReader {
 
     @JvmField

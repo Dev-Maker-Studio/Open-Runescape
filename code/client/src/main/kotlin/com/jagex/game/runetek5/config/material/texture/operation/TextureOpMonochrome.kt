@@ -3,12 +3,6 @@ package com.jagex.game.runetek5.config.material.texture.operation
 import com.jagex.game.runetek5.config.material.texture.TextureOperation
 import com.jagex.game.runetek5.config.material.texture.TextureRaster
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpMonochrome : TextureOperation(1, true) {
 
     override fun getMonochromeOutput(y: Int): IntArray {

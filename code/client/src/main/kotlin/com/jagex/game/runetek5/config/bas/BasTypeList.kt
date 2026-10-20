@@ -6,10 +6,6 @@ import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.config.defaults.EquipmentDefaultsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages the loading and caching of BAS (Base Animation Set) configuration types.
- * BAS types define animation sets for equipped items and character rendering.
- */
 class BasTypeList(
     @JvmField val basResource: Js5ResourceProvider,
     @JvmField val equipmentDefaults: EquipmentDefaultsType
@@ -21,12 +17,6 @@ class BasTypeList(
         basResource.getArchiveFileCount(SharedConfigsType.RENDER_ANIMS.id)
     }
 
-    /**
-     * Retrieves a BAS type by ID, loading from cache or resource provider.
-     *
-     * @param basFileId The BAS file ID
-     * @return The BAS type configuration
-     */
     fun list(basFileId: Int): BasType {
         var bastype: BasType?
         synchronized(basCache) {
@@ -50,27 +40,18 @@ class BasTypeList(
         }
     }
 
-    /**
-     * Cleans the cache, removing least recently used entries.
-     */
     fun cleanCache() {
         synchronized(basCache) {
             basCache.clean(5)
         }
     }
 
-    /**
-     * Resets the cache, clearing all cached BAS types.
-     */
     fun resetCache() {
         synchronized(basCache) {
             basCache.reset()
         }
     }
 
-    /**
-     * Resizes the cache queue.
-     */
     fun resizeCache() {
         synchronized(basCache) {
             basCache.resize()

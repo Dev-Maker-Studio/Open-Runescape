@@ -10,29 +10,15 @@ import com.jagex.game.runetek5.sound.player.area.AmbientSound
 import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 import java.util.LinkedList
 
-/**
- * Asynchronous map region loader.
- *
- * Builds new map regions on a dedicated background thread while the game thread keeps
- * rendering the current region. The background build is CPU-only (JS5 fetch + decode);
- * all GL uploads and shared-state mutation happen in [MapRegion.finalizeAsyncRegionSwap],
- * which the game thread runs at the top of its pulse once the loader parks in [State.READY].
- *
- * @author Brainpower - 11/03/2023
- */
 class AsyncMapLoader : Runnable {
 
     enum class State {
-        /** No build in progress. */
         IDLE,
 
-        /** Loader thread is fetching/decoding a region. */
         BUILDING,
 
-        /** Build complete; loader is parked waiting for the game thread to finalize. */
         READY,
 
-        /** Game thread is running [MapRegion.finalizeAsyncRegionSwap]. */
         FINALIZING
     }
 
@@ -41,16 +27,13 @@ class AsyncMapLoader : Runnable {
     @Volatile
     @JvmField var state: State = State.IDLE
 
-    /** Guards [state]/[pendingRegion] transitions between READY and IDLE. */
     @JvmField val stateLock = Object()
 
-    /** The fully built region awaiting finalization, non-null only in READY/FINALIZING. */
     @Volatile
     @JvmField var pendingRegion: MapRegion? = null
 
     @JvmField val regionLoadRequests: LinkedList<RegionLoadRequest> = LinkedList()
 
-    /** Game thread only. The scene the server's zone packets are relative to while it is still being built. */
     @JvmField var requestedFrame: RegionLoadRequest.SceneFrame? = null
 
     @Volatile
@@ -75,7 +58,6 @@ class AsyncMapLoader : Runnable {
 
     private fun requestMapUpdate(regionLoadRequest: RegionLoadRequest) {
         regionLoadRequest.peekSceneFrame()?.let { requestedFrame = it }
-        // Claimed here, not on the loader thread: the game thread must never observe IDLE with a request queued.
         synchronized(stateLock) {
             if (state == State.IDLE) {
                 state = State.BUILDING
@@ -137,15 +119,12 @@ class AsyncMapLoader : Runnable {
                     try {
                         (regionLoadRequests as Object).wait()
                     } catch (ie: InterruptedException) {
-                        // NOOP
                     }
                 }
                 requestGeneration = generation
                 regionLoadRequests.pollFirst()!!
             }
             try {
-                // Under stateLock so the game thread can atomically check IDLE before
-                // touching this loader's region (e.g. GraphicsCache.resetGraphicCaches).
                 synchronized(stateLock) {
                     state = State.BUILDING
                 }
@@ -182,9 +161,6 @@ class AsyncMapLoader : Runnable {
         val requestStart = request.buffer?.currentPosition ?: 0
         var attempt = 1
         while (true) {
-            // Buffer loc ambient sounds created during the build; the game thread
-            // iterates the live sound lists every tick, so they are drained into
-            // place by finalizeAsyncRegionSwap instead.
             region.pendingAmbientSounds = NodeCollection()
             AmbientSound.DEFERRED_LOC_SOUNDS.set(region.pendingAmbientSounds)
             try {
@@ -196,8 +172,6 @@ class AsyncMapLoader : Runnable {
                 var outstanding = Int.MAX_VALUE
                 var lastProgress = System.currentTimeMillis()
                 while (!region.loadRegion()) {
-                    // Re-entrant: false means JS5 data is still downloading; the game
-                    // thread's file requester pumps it, so pace the retries.
                     if (generation != requestGeneration) {
                         throw BuildCancelled()
                     }

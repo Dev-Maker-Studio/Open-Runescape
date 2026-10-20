@@ -7,12 +7,6 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/**
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- *
- */
 class TextureOpEmboss : TextureOperation(1, true) {
 
     @JvmField var embossDepth = 4096

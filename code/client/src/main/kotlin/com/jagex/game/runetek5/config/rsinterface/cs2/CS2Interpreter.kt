@@ -117,11 +117,6 @@ import com.jagex.game.runetek5.tools.LocalizedText
 import com.jagex.game.runetek5.utils.*
 import com.jagex.game.runetek5.vardomain.VarProviders
 
-/**
- * Interpreter state and entry point. The opcode handlers themselves live in
- * [com.jagex.game.runetek5.config.rsinterface.cs2.ops]; see CS2Dispatch for why
- * dispatch is split across per-family objects.
- */
 import com.jagex.game.runetek5.config.rsinterface.cs2.ops.CS2Dispatch
 
 object CS2Interpreter {

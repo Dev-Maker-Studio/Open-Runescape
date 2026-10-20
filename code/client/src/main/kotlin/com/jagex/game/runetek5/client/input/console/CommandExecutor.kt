@@ -36,7 +36,6 @@ import com.jagex.game.runetek5.utils.DirectoryPicker
 import com.jagex.game.runetek5.utils.Utils
 import com.jagex.game.runetek5.vardomain.VarProviders
 import javax.swing.SwingUtilities
-import com.jagex.game.runetek5.preference.impl.ToolkitPreference
 
 object CommandExecutor {
 
@@ -48,14 +47,12 @@ object CommandExecutor {
     @JvmStatic
     fun executeCommand(command: String, clientCommand: Boolean, save: Boolean) {
         try {
-            // Handle bot commands first
             try {
                 Bot.handleConsoleCommand(command.split(" ").toTypedArray())
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
 
-            // Basic commands available to everyone
             when {
                 command.equals("commands", ignoreCase = true) || command.equals("help", ignoreCase = true) -> {
                     Console.writeLine("commands - This command")
@@ -88,26 +85,8 @@ object CommandExecutor {
                     Console.writeLine("Driver Version: ${renderInfo.driverVersion}")
                     return
                 }
-                command.equals("toolkit", ignoreCase = true) || command.startsWith("toolkit ", ignoreCase = true) -> {
-                    val currentToolkitId = PreferenceManager.preferences!!.activeToolkit!!.getValue()
-                    val toolkitId = command.substringAfter(' ', "").trim().toIntOrNull()
-                    if (toolkitId == null || toolkitId !in ToolkitPreference.AVAILABLE) {
-                        Console.writeLine("Usage: toolkit <0|1|3> (current: $currentToolkitId; 0 safe mode, 1 legacy OpenGL, 3 modern OpenGL)")
-                        return
-                    }
-                    if (toolkitId == currentToolkitId) {
-                        Console.writeLine("Toolkit $toolkitId is already active")
-                        return
-                    }
-                    Console.writeLine("Switching to toolkit $toolkitId...")
-                    Client.loadAssets(toolkitId, "Please wait - changing renderer...", true)
-                    return
-                }
                 command.equals("render", ignoreCase = true) ||
                     command.startsWith("render ", ignoreCase = true) -> {
-                    // Toggle individual modern-renderer stages at runtime so a
-                    // missing-geometry question can be bisected in one session
-                    // instead of one rebuild per hypothesis.
                     when (command.substringAfter(' ', "").trim().lowercase()) {
                         "cull" -> {
                             ModernGLToolkit.frustumCullEnabled = !ModernGLToolkit.frustumCullEnabled
@@ -142,7 +121,6 @@ object CommandExecutor {
                     return
                 }
                 command.equals("crash", ignoreCase = true) -> {
-                    // Exercises the real crash path on the game thread: report file, dialog, exit.
                     throw IllegalStateException("Test crash requested from the console")
                 }
                 command.equals("bugreport", ignoreCase = true) -> {
@@ -153,11 +131,6 @@ object CommandExecutor {
                 }
                 command.equals("cs2trace", ignoreCase = true) ||
                     command.startsWith("cs2trace ", ignoreCase = true) -> {
-                    // The interpreter has always been able to log every opcode it
-                    // executes, but nothing exposed the flags, so the capability
-                    // was unreachable. An opcode trace is the only practical way
-                    // to confirm a CS2 refactor changed nothing at runtime:
-                    // capture one before and after and diff the sequences.
                     val filter = command.substringAfter(' ', "").trim()
                     if (filter.isEmpty()) {
                         CS2Executor.isDebugTracing = !CS2Executor.isDebugTracing
@@ -189,7 +162,6 @@ object CommandExecutor {
                 }
             }
 
-            // Privileged commands (dev environment or staff)
             if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE || Client.PLAYER_RIGHTS >= 2) {
                 when {
                     command.equals("wm1", ignoreCase = true) -> {
@@ -253,26 +225,6 @@ object CommandExecutor {
                         val host = "${args.substring(spaceIndex + 1).trim()}.runescape.com"
                         WorldConnection.setLobbyConnection(host, port)
                         Console.writeLine("Success")
-                        return
-                    }
-                    command.equals("tk0", ignoreCase = true) -> {
-                        handleToolkitSwitch(0)
-                        return
-                    }
-                    command.equals("tk1", ignoreCase = true) -> {
-                        handleToolkitSwitch(1)
-                        return
-                    }
-                    command.equals("tk2", ignoreCase = true) -> {
-                        handleToolkitSwitch(2)
-                        return
-                    }
-                    command.equals("tk3", ignoreCase = true) -> {
-                        handleToolkitSwitch(3)
-                        return
-                    }
-                    command.equals("tk5", ignoreCase = true) -> {
-                        handleToolkitSwitch(5)
                         return
                     }
                     command.equals("clientdrop", ignoreCase = true) -> {
@@ -405,7 +357,6 @@ object CommandExecutor {
                     }
                 }
 
-                // Send command to server if in-game
                 if (Client.gameState == GameState.LOGGED_INGAME) {
                     val clientPacket = PacketEncoder.createPacket(ClientProt.COMMAND, Client.GAME_CONNECTION_CONTEXT.isaac)
                     clientPacket.buffer.writeByte(command.length + 3)
@@ -417,25 +368,12 @@ object CommandExecutor {
                 }
             }
 
-            // Unknown command
             if (Client.gameState != GameState.LOGGED_INGAME) {
                 Console.writeLine("${LocalizedText.UNKNOWN_DEV_COMMAND.translate(Client.CURRENT_LANGUAGE!!)}$command")
             }
         } catch (exception: Exception) {
             Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(Client.CURRENT_LANGUAGE!!)!!)
             exception.printStackTrace()
-        }
-    }
-
-    private fun handleToolkitSwitch(toolkitId: Int) {
-        Client.loadAssets(toolkitId, false)
-        if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == toolkitId) {
-            Console.writeLine("Success")
-            PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, toolkitId)
-            PreferenceManager.savePreferences()
-            Client.preferencesSavedOnServer = false
-        } else {
-            Console.writeLine("Failure")
         }
     }
 

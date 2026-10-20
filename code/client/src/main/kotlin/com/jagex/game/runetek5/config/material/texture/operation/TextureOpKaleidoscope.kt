@@ -6,12 +6,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
 import kotlin.math.PI
 import kotlin.math.atan2
 
-/**
- * Texture operation that creates a kaleidoscope effect by mirroring input texture.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpKaleidoscope : TextureOperation(1, false) {
 
     override fun decodeOpcode(opcode: Int, buffer: Packet) {

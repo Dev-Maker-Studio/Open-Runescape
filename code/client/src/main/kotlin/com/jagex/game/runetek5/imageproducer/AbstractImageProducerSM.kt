@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.imageproducer
 import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 import java.awt.Canvas
 
-/**
- * Safe mode image producer with software rendering.
- *
- * @author Brainpower - 22/04/2022
- */
 abstract class AbstractImageProducerSM(
     @JvmField val toolkit: SafeModeToolkit,
     @JvmField val canvas: Canvas,

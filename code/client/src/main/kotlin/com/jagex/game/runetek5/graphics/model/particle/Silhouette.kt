@@ -2,10 +2,6 @@ package com.jagex.game.runetek5.graphics.model.particle
 
 import com.jagex.game.runetek5.graphics.model.Model
 
-/**
- * Axis-aligned bounding box (AABB)
- * @author Steven - 17/10/2023
- */
 class Silhouette(
     absX: Int,
     absY: Int,

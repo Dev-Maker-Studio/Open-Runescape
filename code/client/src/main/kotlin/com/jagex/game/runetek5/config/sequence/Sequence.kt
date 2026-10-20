@@ -41,7 +41,7 @@ open class Sequence protected constructor(tween: Boolean) {
     val nextMask: SequenceMask?
 
     init {
-        this.tweening = tween // could be incorrect
+        this.tweening = tween
         this.currentMask = SequenceMask()
         if (this.tweening) {
             this.nextMask = SequenceMask()
@@ -201,7 +201,6 @@ open class Sequence protected constructor(tween: Boolean) {
     }
 
     open fun playSound(seqtype: SeqType, frame: Int) {
-        // Implemented in override
     }
 
     fun resetMasks() {

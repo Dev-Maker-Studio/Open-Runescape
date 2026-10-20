@@ -6,11 +6,6 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.sound.jagtheora.AudioBuffer
 import com.jagex.game.runetek5.sound.player.area.SoundEffectPlayer
 
-/**
- *
- * @author Brainpower - 19/04/2022
- *
- */
 class SoundBankCache(
     val soundEffectProvider: Js5ResourceProvider,
     val musicSampleProvider: Js5ResourceProvider

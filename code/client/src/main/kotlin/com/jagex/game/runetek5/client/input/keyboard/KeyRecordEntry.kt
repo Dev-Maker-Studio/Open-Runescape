@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.client.input.keyboard
 
 import com.jagex.game.runetek5.cache.node.Node
 
-/**
- *
- * @author Brainpower - 18/04/2022
- *
- */
 class KeyRecordEntry : Node<KeyRecordEntry>(), KeyRecord {
 
     @JvmField var timeSubmitted: Long = 0

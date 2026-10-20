@@ -28,21 +28,6 @@ import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.HAS_TEXTURE_COOR
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.FULL_DISPLACEMENT
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISABLE_TEXTURES
 
-/**
- *
- * @author Steven
- *
- * [NXT]
-	[X] jag::game::ObjType::DecodeType(jag::Packet &,uint)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .text  0000000000458610 00001783 000001C8 00000000 R . . . . T .
-	jag::game::ObjType::GetAppearance(bool,jag::shared_ptr<jag::game::ObjTypeCustomisation> const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       .text  00000000000F1160 0000009A                   R . . . . . .
-	jag::game::ObjType::GetModel(jag::graphics::RT7Core *,jag::game::AssetBuilder &,jag::game::BuildRequest<jag::graphics::Model,jag::game::BuildModelMain> &,jag::shared_ptr<jag::game::PlayerModel> const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             .text  0000000000516590 000005B1 000000E8 00000080 R . . . . . .
-	[X]jag::game::ObjType::GetStackSizeAlt(int)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              .text  00000000000F1040 0000011A                   R . . . . T .
-	[-]jag::game::ObjType::ObjType(jag::game::ConfigTypeListPreloadPackedContainer<jag::game::ObjType> *,int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .text  00000000003953B0 00000523 00000038 00000000 R . . . . . .
-	[X]jag::game::ObjType::PostDecode(void)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  .text  00000000000A1DE0 00000002                   R . . . . T .
-	jag::game::ObjType::SetupDerivedObject(jag::game::DerivedObjType,jag::shared_ptr<jag::game::ObjType> const&,jag::shared_ptr<jag::game::ObjType> const&,char const*)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   .text  00000000003912A0 00000507 00000048 00000000 R . . . . . .
-
- *
- */
 open class ItemType {
 
     @JvmField
@@ -184,15 +169,6 @@ open class ItemType {
     @JvmField
     var bindId: Int = -1
 
-    /**
-     * ***********************************************************|
-     * 							Decode
-     * ***********************************************************|
-     */
-
-    /**
-     * [J]
-     */
     fun decodeType(stream: Packet) {
         while (true) {
             val opcode = stream.readUByte()
@@ -349,7 +325,6 @@ open class ItemType {
     }
 
     fun postDecode() {
-        // NOOP
     }
 
     fun getAnimatedModel(toolkit: AbstractToolkit, initialFunctionMask: Int, stackSize: Int, playerAppearance: PlayerAppearance?, animatingSequence: Sequence?, tintHue: Int, tintSaturation: Int, tintLightness: Int, tintOpacity: Int): Model? {
@@ -770,9 +745,6 @@ open class ItemType {
         return primaryHeadMesh
     }
 
-    /**
-     * [J]
-     */
     fun getStackSizeAlt(stackSize: Int): ItemType {
         if (this.stackIds != null && stackSize > 1) {
             var stackId = -1

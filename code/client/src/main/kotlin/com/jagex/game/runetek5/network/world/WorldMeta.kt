@@ -74,16 +74,13 @@ class WorldMeta {
 
                 if (request.ping != -1 || timedOut) {
                     if (timedOut && request.ping == -1) {
-                        //System.out.println("Ping timeout for world " + world.ipAddress);
                         world.ping = 1000
                     } else {
-                        //System.out.println("Ping: " + world.getWorld().activity + " (" + world.ipAddress + ") -> " + request.ping);
                         world.ping = request.ping
                     }
 
                     iterator.remove()
                 } else if (elapsedTime > 1000 && (elapsedTime % 1000) < 50) {
-                    //System.out.println("Waiting on " + worldIdx + " - " + world.ipAddress + " (" + elapsedTime/1000 + "s elapsed)");
                 }
             }
 
@@ -99,7 +96,6 @@ class WorldMeta {
                             request.startTime = System.currentTimeMillis()
 
                             WorldConnection.WORLD_PING_REQUESTS[worldIdx] = request
-                            //System.out.println("Started ping request for " + world.getWorld().activity + " (" + world.ipAddress + ")");
                             availableSlots--
                         }
                     }

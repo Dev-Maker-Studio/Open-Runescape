@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.config.varn
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * @author Brainpower - 25/03/2023
- *
- * VARN = VarNPC
- */
 class VarnType {
 
     @JvmField

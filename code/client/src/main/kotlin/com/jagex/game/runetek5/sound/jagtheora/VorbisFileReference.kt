@@ -3,9 +3,6 @@ package com.jagex.game.runetek5.sound.jagtheora
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Reference to a Vorbis audio file with streaming support.
- */
 class VorbisFileReference(
     @JvmField val resourceProvider: Js5ResourceProvider,
     @JvmField val fileId: Int

@@ -7,9 +7,6 @@ import com.jagex.game.runetek5.framebuffer.NativeRenderBuffer
 import com.jagex.game.runetek5.framebuffer.RenderBuffer
 import jaggl.OpenGL
 
-/**
- * @author Brainpower - 22/04/2022
- */
 class IntegratedGraphicsDisplayGL(
     @JvmField val toolkit: OpenGlToolkit
 ) : DirectDisplay(), AutoCloseable {

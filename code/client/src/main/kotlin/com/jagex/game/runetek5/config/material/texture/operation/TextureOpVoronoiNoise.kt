@@ -9,12 +9,6 @@ import java.util.Random
 import kotlin.math.max
 import kotlin.math.sqrt
 
-/**
- * Procedural Voronoi noise texture generator.
- *
- * @author Steven - 30/11/2023
- * @author OpenOSRS - naming
- */
 class TextureOpVoronoiNoise : TextureOperation(0, true) {
 
     @JvmField var permutationTable: ByteArray = ByteArray(512)

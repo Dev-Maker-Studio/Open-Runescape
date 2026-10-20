@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * Drawable game tip component for login screen.
- */
 class DrawableGameTip(
     @JvmField val tipsType: GameTipType,
     @JvmField val displayDurationMs: Int,

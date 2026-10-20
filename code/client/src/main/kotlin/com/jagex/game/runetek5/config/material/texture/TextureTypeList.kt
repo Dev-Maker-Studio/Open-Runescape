@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import kotlin.math.min
 import kotlin.math.pow
 
-/**
- * @author Brainpower - 02/06/2020
- * @author OpenOSRS - All operation names
- *
- */
 object TextureTypeList {
 
     @JvmField

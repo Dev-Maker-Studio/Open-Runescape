@@ -4,9 +4,6 @@ import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.Queue
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 
-/**
- * A mini menu entry container that groups entries by color tag.
- */
 class ColoredMiniMenuEntry(
     @JvmField val tagStart: String
 ) : CacheableNode() {
@@ -14,11 +11,6 @@ class ColoredMiniMenuEntry(
     @JvmField val nodeQueue = Queue<CacheableNode>()
     @JvmField var queueSize = 0
 
-    /**
-     * Gets the click type of the first entry in the queue.
-     *
-     * @return The click type, or -1 if the queue is empty
-     */
     fun getClickType(): Int {
         return if (nodeQueue.current.nextCache != nodeQueue.current) {
             (nodeQueue.current.nextCache as MiniMenuEntry).clickType
@@ -27,12 +19,6 @@ class ColoredMiniMenuEntry(
         }
     }
 
-    /**
-     * Adds a menu entry to the queue, maintaining priority order.
-     *
-     * @param baseEntry The entry to add
-     * @return true if this is the first entry added, false otherwise
-     */
     fun addEntry(baseEntry: MiniMenuEntry): Boolean {
         var isFirst = true
         baseEntry.unlinkSub()
@@ -53,12 +39,6 @@ class ColoredMiniMenuEntry(
         return isFirst
     }
 
-    /**
-     * Removes a menu entry from the queue.
-     *
-     * @param entry The entry to remove
-     * @return true if the click type changed after removal, false otherwise
-     */
     fun removeEntry(entry: MiniMenuEntry): Boolean {
         val clickType = getClickType()
         entry.unlinkSub()
@@ -75,12 +55,6 @@ class ColoredMiniMenuEntry(
     }
 
     companion object {
-        /**
-         * Inserts nodeA before nodeB in a linked list.
-         *
-         * @param nodeA The node to insert
-         * @param nodeB The node to insert before
-         */
         @JvmStatic
         fun push(nodeA: CacheableNode, nodeB: CacheableNode) {
             if (nodeA.current != null) {

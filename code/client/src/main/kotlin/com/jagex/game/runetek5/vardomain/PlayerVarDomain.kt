@@ -8,24 +8,10 @@ import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.varp.VarpbitType
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * [J]
- * @author Steven - 22/11/2023
- *
- * [NXT]
-[X]jag::game::PlayerVarDomain::GetVarBitValue(jag::shared_ptr<jag::game::VarBitType> const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             .text  00000000000A1B60 00000035 00000008 00000000 R . . . . . .
-[X]jag::game::PlayerVarDomain::GetVarValue(jag::shared_ptr<jag::game::VarType> const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   .text  0000000000094D50 00000055                   R . . . . . .
-[X]jag::game::PlayerVarDomain::Reset(void)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               .text  0000000000556080 000000FF 00000028 00000000 R . . . . T .
-[X]jag::game::PlayerVarDomain::Service(void)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             .text  000000000045C8B0 0000049F 000001A8 00000018 R . . . . T .
-[X]jag::game::PlayerVarDomain::SetVarBitValue(jag::shared_ptr<jag::game::VarBitType> const&,int,bool *)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  .text  00000000000AEFD0 00000153 00000098 00000000 R . . . . . .
-[X]jag::game::PlayerVarDomain::SetVarBitValueFromServer(jag::shared_ptr<jag::game::VarBitType> const&,int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       .text  000000000045D650 000001A6 000000A8 00000000 R . . . B . .
-[X]jag::game::PlayerVarDomain::SetVarValue(jag::shared_ptr<jag::game::VarType> const&,jag::game::VarValue const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        .text  000000000045CD50 00000302 00000088 00000000 R . . . . . .
-[X]jag::game::PlayerVarDomain::SetVarValueFromServer(jag::shared_ptr<jag::game::VarType> const&,jag::game::VarValue const&) [clone]
- */
 class PlayerVarDomain : VarDomain {
 
     @JvmField var activeVars: IntArray
-    @JvmField var updates: IterableNodeMap<LongNode> = IterableNodeMap(128) // TODO: better name?
+    @JvmField var updates: IterableNodeMap<LongNode> = IterableNodeMap(128)
     @JvmField var pendingVars: IntArray
 
     init {
@@ -33,9 +19,6 @@ class PlayerVarDomain : VarDomain {
         activeVars = IntArray(TypeLists.VAR!!.size)
     }
 
-    /**
-     * [J]
-     */
     fun service(startHead: Boolean): Int {
         val currentTime = Utils.time()
         var update: LongNode? = if (startHead) updates.first() else updates.next()
@@ -57,9 +40,6 @@ class PlayerVarDomain : VarDomain {
         return -1
     }
 
-    /**
-     * [J]
-     */
     override fun getVarBitValue(varbitId: Int): Int {
         val varbitType = TypeLists.VARPBIT!!.list(varbitId)
         val varId = varbitType.configIndex
@@ -69,16 +49,10 @@ class PlayerVarDomain : VarDomain {
         return activeVars[varId] shr start and mask
     }
 
-    /**
-     * [J]
-     */
     override fun getVarValue(varpId: Int): Int {
         return activeVars[varpId]
     }
 
-    /**
-     * [J]
-     */
     fun setVarBitValueFromServer(varbitId: Int, variable: Int) {
         val varbit = TypeLists.VARPBIT!!.list(varbitId)
         val configIndex = varbit.configIndex
@@ -93,9 +67,6 @@ class PlayerVarDomain : VarDomain {
         setVarValueFromServer(configIndex, pendingVars[configIndex] and bitmask.inv() or (adjustedVariable shl start and bitmask))
     }
 
-    /**
-     * [J]
-     */
     fun setVarValueFromServer(configIndex: Int, varValue: Int) {
         pendingVars[configIndex] = varValue
         val value = updates[configIndex.toLong()]
@@ -109,9 +80,6 @@ class PlayerVarDomain : VarDomain {
         }
     }
 
-    /**
-     * [J]
-     */
     fun setVarBitValue(varbitId: Int, variable: Int) {
         val varbitType = TypeLists.VARPBIT!!.list(varbitId)
         val configIndex = varbitType.configIndex
@@ -126,9 +94,6 @@ class PlayerVarDomain : VarDomain {
         setVarValue(configIndex, activeVars[configIndex] and bitmask.inv() or (adjustedVariable shl start and bitmask))
     }
 
-    /**
-     * [J]
-     */
     fun setVarValue(configIndex: Int, varValue: Int) {
         ScriptExecutor.pushEvent(Varp(configIndex, activeVars[configIndex], varValue))
         activeVars[configIndex] = varValue
@@ -141,9 +106,6 @@ class PlayerVarDomain : VarDomain {
         }
     }
 
-    /**
-     * [J]
-     */
     fun reset() {
         for (index in 0 until TypeLists.VAR!!.size) {
             pendingVars[index] = 0

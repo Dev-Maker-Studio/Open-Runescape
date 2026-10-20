@@ -11,9 +11,6 @@ import com.jagex.game.runetek5.scene.FrameRenderException
 import com.jagex.game.runetek5.tools.TimeTools
 import com.jagex.game.runetek5.utils.Utils
 
-/**
- * Loading screen renderer that runs on a background thread to display loading progress.
- */
 class AssetLoadingScreenRenderer : Runnable {
 
     @JvmField var clear: Boolean = false
@@ -116,7 +113,6 @@ class AssetLoadingScreenRenderer : Runnable {
                         }
 
                         try {
-                            // Legacy loading screen gets replaced by background + top screen load bar
                             if (Renderers.activeToolkit != null && frontComponent !is LegacyAssetLoadingScreen) {
                                 Renderers.activeToolkit!!.renderFrame()
                             }
@@ -125,7 +121,7 @@ class AssetLoadingScreenRenderer : Runnable {
                                 renderException.message + ClientStartup.activeClient!!.getDebugString(),
                                 renderException
                             )
-                            Client.loadAssets(0, true)
+                            Client.loadAssets(true)
                         }
                     }
                     clear = false

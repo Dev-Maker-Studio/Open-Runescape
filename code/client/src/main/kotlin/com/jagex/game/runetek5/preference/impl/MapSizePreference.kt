@@ -4,11 +4,6 @@ import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
 import com.jagex.game.runetek5.scene.MapSize
 
-/**
- * Preference for controlling the visible map size based on available memory.
- *
- * @author Steven - 17/09/2023
- */
 class MapSizePreference : Preference {
 
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)
@@ -23,11 +18,6 @@ class MapSizePreference : Preference {
         return MapSize.MAPSIZE_104_DEFAULT.id
     }
 
-    /**
-     * Checks if the user is allowed to modify map size based on memory.
-     *
-     * @return true if the user has enough memory (>= 245 MB)
-     */
     fun allowSelection(): Boolean {
         val maxMemory = gamePreferences.getProcessorSpecs().getMaxMemory()
         return maxMemory >= 245
@@ -48,10 +38,6 @@ class MapSizePreference : Preference {
         return value
     }
 
-    /**
-     * Ensures the map size value is valid based on available memory constraints.
-     * Downgrades the map size if insufficient memory is available.
-     */
     fun ensureValid() {
         val maxMemory = gamePreferences.getProcessorSpecs().getMaxMemory()
         if (maxMemory < 245) {

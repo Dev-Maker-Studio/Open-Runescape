@@ -5,14 +5,6 @@ import com.jagex.game.runetek5.graphics.model.particle.Silhouette
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
-jag::graphics::GraphEntity::LineIntersectionSupport(void) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     .text  00000000000ADFD0 00000003                   R . . . . . .
-jag::graphics::GraphEntity::LowerCurrentLOD(int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              .text  00000000000ADFB0 00000002                   R . . . . . .
-jag::graphics::GraphEntity::OccludesView(void) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .text  00000000000ADFE0 00000003                   R . . . . . .
-jag::graphics::GraphEntity::TestIntersection(jag::math::Vector3 const&,jag::math::Vector3 const&,int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         .text  00000000000ADFC0 00000003                   R . . . . . .
-jag::graphics::GraphEntity::~GraphEntity() [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .text  00000000000F7F50 0000000B                   R . . . . . .
-jag::graphics::GraphEntity::~GraphEntity() [clone]
- */
 @Suppress("EXPOSED_SUPER_CLASS")
 abstract class SceneGraphEntity(
     @JvmField var scene: Scene?
@@ -24,11 +16,6 @@ abstract class SceneGraphEntity(
     @JvmField var child: SceneGraphEntity? = null
     @JvmField var floorDepth: Int = 0
 
-    /**
-     * Set by a deferred toolkit that holds this static entity's draw in a retained
-     * store; while the retained store is active the scene walk skips the entity and
-     * the toolkit resubmits it itself (see RetainedSceneHook).
-     */
     @JvmField var modernRetained: Boolean = false
 
     abstract fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean
@@ -39,10 +26,6 @@ abstract class SceneGraphEntity(
 
     abstract fun disregardTextureMovement(): Boolean
 
-    // FIXME: find correct name
-    // has_alpha
-    // account_for_layers
-    // account_for_priorities
     abstract fun hasAlpha(): Boolean
 
     abstract fun draw(toolkit: AbstractToolkit): RenderedEntity?

@@ -5,9 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Manages hitsplat types with LRU caching for both hitsplats and sprites.
- */
 class HitSplatTypeList(
     @JvmField val hitsplatResource: Js5ResourceProvider,
     @JvmField val spriteResource: Js5ResourceProvider
@@ -20,12 +17,6 @@ class HitSplatTypeList(
         hitsplatResource.getArchiveFileCount(SharedConfigsType.HITSPLATS.id)
     }
 
-    /**
-     * Retrieves a hitsplat type by ID, loading it if not cached.
-     *
-     * @param typeId The hitsplat type ID
-     * @return The hitsplat type
-     */
     fun list(typeId: Int): HitSplatType {
         var hitsplattype: HitSplatType?
         synchronized(hitsplatTypeCache) {
@@ -49,9 +40,6 @@ class HitSplatTypeList(
         }
     }
 
-    /**
-     * Processes the cache cycle, cleaning up old entries.
-     */
     fun processCacheCycle() {
         synchronized(hitsplatTypeCache) {
             hitsplatTypeCache.clean(5)
@@ -61,9 +49,6 @@ class HitSplatTypeList(
         }
     }
 
-    /**
-     * Resets both the hitsplat and sprite caches.
-     */
     fun resetCaches() {
         synchronized(hitsplatTypeCache) {
             hitsplatTypeCache.reset()
@@ -73,9 +58,6 @@ class HitSplatTypeList(
         }
     }
 
-    /**
-     * Clears both cache queues by resizing.
-     */
     fun clearQueues() {
         synchronized(hitsplatTypeCache) {
             hitsplatTypeCache.resize()

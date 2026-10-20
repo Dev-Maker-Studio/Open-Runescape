@@ -5,11 +5,6 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
-/**
- * Type list for map areas.
- *
- * @author Brainpower
- */
 class MECTypeList(
     @JvmField val definitionResource: Js5ResourceProvider,
     @JvmField val spriteResource: Js5ResourceProvider

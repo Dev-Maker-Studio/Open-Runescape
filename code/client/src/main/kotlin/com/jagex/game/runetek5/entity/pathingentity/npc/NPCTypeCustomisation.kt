@@ -2,11 +2,6 @@ package com.jagex.game.runetek5.entity.pathingentity.npc
 
 import com.jagex.game.runetek5.config.npc.NPCType
 
-/**
- * [J]
- * @author Steven - 11/10/2023
- *
- */
 class NPCTypeCustomisation {
 
     @JvmField var uid: Long = 0

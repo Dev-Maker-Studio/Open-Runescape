@@ -8,11 +8,6 @@ import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.scene.ground.Ground
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * Fully refactored
- * @author Brainpower - 21/05/2020
- *
- */
 class SpotAnimType {
 
     @JvmField

@@ -4,10 +4,6 @@ import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.ColorUtil
 
-/**
- * Official name = PickerHelper?
- * @author Steven
- */
 object ColorPicker {
     @JvmStatic
     fun drawColorPicker(toolkit: AbstractToolkit, x: Int, y: Int, component: Component) {

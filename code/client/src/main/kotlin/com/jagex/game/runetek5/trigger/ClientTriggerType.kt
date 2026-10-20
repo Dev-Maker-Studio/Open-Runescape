@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.trigger
 
-/**
- * @author Steven - 06/10/2023
- */
 enum class ClientTriggerType(@JvmField val id: Int) {
     MINIMENU_CLICK_MEC_OPTION1(10),
     MINIMENU_CLICK_MEC_OPTION2(11),

@@ -2,16 +2,6 @@ package com.jagex.game.runetek5.icmp
 
 import jaclib.ping.IcmpService
 
-/**
- *
- * @author Brainpower - 28/01/2023
- *
- * Important note:
- * Several seemingly unused methods here are actually used,
- * be careful with removing code or you'll find your client
- * getting stuck loading
- *
- */
 open class IcmpServiceJaclib : IcmpService() {
     @JvmField var listeners: MutableList<ICmpServiceListener> = ArrayList()
 
@@ -107,7 +97,6 @@ open class IcmpServiceJaclib : IcmpService() {
                 try {
                     icmpService!!.quit()
                 } catch (ignored: Throwable) {
-                    // NOOP
                 }
                 icmpService = null
             }

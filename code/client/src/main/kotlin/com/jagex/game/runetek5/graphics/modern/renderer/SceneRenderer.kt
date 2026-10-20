@@ -13,83 +13,40 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import java.nio.ByteBuffer
 
-/**
- * Unified scene renderer that coordinates all modern rendering components.
- *
- * This coordinator manages the entire rendering pipeline, including:
- * - Render state management
- * - Shader and material binding
- * - Multi-pass rendering (opaque, transparent, overlay)
- * - Draw call batching and sorting
- * - Camera and lighting setup
- *
- * Usage:
- * ```kotlin
- * val renderer = SceneRenderer(materialProvider)
- * renderer.initialize()
- *
- * // Each frame:
- * renderer.beginFrame(projection, view)
- * renderer.setLighting(sunDir, sunColor, ambient)
- * renderer.setFog(fogParams)
- *
- * // Draw geometry
- * renderer.beginOpaque()
- * renderer.drawModel(model, transform)
- * renderer.drawGround(ground)
- * renderer.endOpaque()
- *
- * renderer.beginTransparent()
- * renderer.drawModel(transparentModel, transform)
- * renderer.endTransparent()
- *
- * renderer.endFrame()
- * ```
- */
 class SceneRenderer(
     private val materialProvider: MaterialProvider? = null
 ) {
-    // Core components
     private lateinit var renderState: RenderState
     private lateinit var textureManager: TextureManager
     private lateinit var materialAdapter: MaterialAdapter
     private lateinit var modelRenderer: ModernModelRenderer
     private lateinit var groundRenderer: ModernGroundRenderer
 
-    // Matrices
     private val projection = Matrix4f()
     private val view = Matrix4f()
     private val viewProjection = Matrix4f()
     private val shadowMatrix = Matrix4f()
 
-    // Lighting
     private val sunDirection = Vector3f(0.5f, 1f, 0.3f).normalize()
     private val sunColor = Vector3f(1f, 1f, 1f)
     private var ambientStrength = 0.3f
     private var lightingContrast = 0.7f
 
-    // Fog
     private var fogEnabled = false
     private var fogStart = 0f
     private var fogEnd = 1000f
     private val fogColor = Vector3f(0.7f, 0.8f, 0.9f)
 
-    // Rendering state
     private var isInitialized = false
     private var currentPass = RenderPass.NONE
     private var frameStats = FrameStats()
 
-    // Deferred rendering queues
     private val opaqueQueue = mutableListOf<DrawCommand>()
     private val transparentQueue = mutableListOf<DrawCommand>()
 
-    // Shadow mapping (placeholder for now)
     private var shadowMapTexture = 0
     private var shadowMapEnabled = false
 
-    /**
-     * Initializes all rendering components.
-     */
     fun initialize() {
         if (isInitialized) return
 
@@ -106,9 +63,6 @@ class SceneRenderer(
         println("[SceneRenderer] Initialized")
     }
 
-    /**
-     * Begins a new frame with the given camera matrices.
-     */
     fun beginFrame(projection: Matrix4f, view: Matrix4f) {
         if (!isInitialized) return
 
@@ -116,20 +70,16 @@ class SceneRenderer(
         this.view.set(view)
         this.viewProjection.set(projection).mul(view)
 
-        // Reset frame stats
         frameStats = FrameStats()
 
-        // Clear render queues
         opaqueQueue.clear()
         transparentQueue.clear()
 
-        // Reset render state
         renderState.reset()
         renderState.setDepthTest(true)
         renderState.setDepthWrite(true)
         renderState.setCullFace(CullFace.BACK)
 
-        // Set up renderers
         modelRenderer.beginFrame()
         modelRenderer.setProjection(projection)
         modelRenderer.setView(view)
@@ -148,27 +98,18 @@ class SceneRenderer(
         currentPass = RenderPass.NONE
     }
 
-    /**
-     * Ends the current frame and flushes all pending draw calls.
-     */
     fun endFrame() {
         if (!isInitialized) return
 
         modelRenderer.endFrame()
         groundRenderer.endFrame()
 
-        // Accumulate stats
         frameStats.modelStats = modelRenderer.getFrameStats()
         frameStats.groundStats = groundRenderer.getFrameStats()
 
         currentPass = RenderPass.NONE
     }
 
-    // ===== Lighting Setup =====
-
-    /**
-     * Sets the sun/directional light parameters.
-     */
     fun setLighting(direction: Vector3f, color: Vector3f, ambient: Float, contrast: Float = 0.7f) {
         sunDirection.set(direction).normalize()
         sunColor.set(color)
@@ -181,9 +122,6 @@ class SceneRenderer(
         }
     }
 
-    /**
-     * Sets fog parameters.
-     */
     fun setFog(enabled: Boolean, start: Float, end: Float, r: Float, g: Float, b: Float) {
         fogEnabled = enabled
         fogStart = start
@@ -196,51 +134,24 @@ class SceneRenderer(
         }
     }
 
-    // ===== Opaque Pass =====
-
-    /**
-     * Begins the opaque rendering pass.
-     */
     fun beginOpaque() {
         currentPass = RenderPass.OPAQUE
         renderState.setOpaqueState()
     }
 
-    /**
-     * Ends the opaque rendering pass.
-     */
     fun endOpaque() {
         currentPass = RenderPass.NONE
     }
 
-    // ===== Transparent Pass =====
-
-    /**
-     * Begins the transparent rendering pass.
-     */
     fun beginTransparent() {
         currentPass = RenderPass.TRANSPARENT
         renderState.setTransparentState()
     }
 
-    /**
-     * Ends the transparent rendering pass.
-     */
     fun endTransparent() {
         currentPass = RenderPass.NONE
     }
 
-    // ===== Model Drawing =====
-
-    /**
-     * Draws a model with the given transform.
-     *
-     * @param vertices Interleaved vertex data (position, normal, texcoord, color)
-     * @param indices Index buffer for triangles
-     * @param indexCount Number of indices to draw
-     * @param modelMatrix Model transformation matrix
-     * @param materialId Material/texture ID for the model
-     */
     fun drawModel(
         vertices: ByteBuffer,
         indices: java.nio.ShortBuffer,
@@ -250,20 +161,16 @@ class SceneRenderer(
     ) {
         if (!isInitialized) return
 
-        // Bind material and get uniforms
         val uniforms = if (materialId >= 0) {
             materialAdapter.bindMaterial(materialId)
         } else {
             MaterialUniforms.DEFAULT
         }
 
-        // Skip if material says not to render
         if (!uniforms.shouldRender) return
 
-        // Set model matrix
         modelRenderer.setModelMatrix(modelMatrix)
 
-        // Bind texture if available
         if (uniforms.hasTexture) {
             val texHandle = textureManager.getTextureByName("material_$materialId")
             if (texHandle > 0) {
@@ -275,16 +182,12 @@ class SceneRenderer(
             modelRenderer.bindTexture(0)
         }
 
-        // Draw the model
         modelRenderer.drawIndexed(vertices, indices, indexCount)
 
         frameStats.modelDrawCalls++
         frameStats.triangles += indexCount / 3
     }
 
-    /**
-     * Draws a model using separate arrays (for legacy compatibility).
-     */
     fun drawModelArrays(
         positions: FloatArray,
         normals: FloatArray?,
@@ -322,15 +225,6 @@ class SceneRenderer(
         frameStats.triangles += indices.size / 3
     }
 
-    // ===== Ground Drawing =====
-
-    /**
-     * Draws ground geometry.
-     *
-     * @param vertices Interleaved vertex data (position, normal, color)
-     * @param indices Index buffer for triangles
-     * @param indexCount Number of indices to draw
-     */
     fun drawGround(
         vertices: ByteBuffer,
         indices: java.nio.ShortBuffer,
@@ -344,9 +238,6 @@ class SceneRenderer(
         frameStats.triangles += indexCount / 3
     }
 
-    /**
-     * Draws ground geometry using separate arrays.
-     */
     fun drawGroundArrays(
         positions: FloatArray,
         normals: FloatArray,
@@ -362,11 +253,6 @@ class SceneRenderer(
         frameStats.triangles += indices.size / 3
     }
 
-    // ===== Shadow Mapping =====
-
-    /**
-     * Enables shadow mapping with the given shadow matrix and texture.
-     */
     fun enableShadowMap(shadowMatrix: Matrix4f, shadowTexture: Int) {
         this.shadowMatrix.set(shadowMatrix)
         this.shadowMapTexture = shadowTexture
@@ -374,49 +260,22 @@ class SceneRenderer(
         groundRenderer.setShadowMapping(true, shadowTexture, shadowMatrix)
     }
 
-    /**
-     * Disables shadow mapping.
-     */
     fun disableShadowMap() {
         shadowMapEnabled = false
     }
 
-    // ===== Texture Management =====
-
-    /**
-     * Registers an external OpenGL texture for use with materials.
-     */
     fun registerTexture(materialId: Int, glTextureId: Int, width: Int, height: Int) {
         materialAdapter.registerExternalTexture(materialId, glTextureId, width, height)
     }
 
-    /**
-     * Gets the texture manager for direct texture operations.
-     */
     fun getTextureManager(): TextureManager = textureManager
 
-    // ===== State Access =====
-
-    /**
-     * Gets the render state manager for advanced state manipulation.
-     */
     fun getRenderState(): RenderState = renderState
 
-    /**
-     * Gets the current frame statistics.
-     */
     fun getFrameStats(): FrameStats = frameStats
 
-    /**
-     * Checks if the renderer is initialized.
-     */
     fun isInitialized(): Boolean = isInitialized
 
-    // ===== Cleanup =====
-
-    /**
-     * Releases all resources.
-     */
     fun destroy() {
         if (!isInitialized) return
 
@@ -430,9 +289,6 @@ class SceneRenderer(
     }
 }
 
-/**
- * Render pass types.
- */
 enum class RenderPass {
     NONE,
     SHADOW,
@@ -441,21 +297,15 @@ enum class RenderPass {
     OVERLAY
 }
 
-/**
- * Draw command for deferred rendering.
- */
 data class DrawCommand(
     val vertices: ByteBuffer,
     val indices: java.nio.ShortBuffer,
     val indexCount: Int,
     val modelMatrix: Matrix4f,
     val materialId: Int,
-    val depth: Float  // For sorting
+    val depth: Float
 )
 
-/**
- * Per-frame rendering statistics.
- */
 data class FrameStats(
     var modelDrawCalls: Int = 0,
     var groundDrawCalls: Int = 0,

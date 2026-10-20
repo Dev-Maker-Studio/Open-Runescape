@@ -5,11 +5,6 @@ import java.util.LinkedList
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
-/**
- * [J]
- * @author Steven
- *
- */
 class ParticleSystem(cycle: Int, hasOntick: Boolean) {
 
     @JvmField var isDisabled: Boolean = false
@@ -39,9 +34,6 @@ class ParticleSystem(cycle: Int, hasOntick: Boolean) {
         this.containsOntickCycle = hasOntick
     }
 
-    /**
-     * Called on rotation / movement
-     */
     fun onEntityUpdate() {
         this.changePosition = true
     }

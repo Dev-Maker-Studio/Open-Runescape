@@ -42,9 +42,9 @@ enum class ClientProt(
     ADD_IGNORE(34, -1),
     BUG_REPORT(35, -2),
     REFLECTION_CHECK(36, -1),
-    PLAY_VORBIS(37, 2), //index 36 and some hook/click type related
+    PLAY_VORBIS(37, 2),
     OBJECT_OP3(38, 9, true),
-    UNUSED_CLAN_OP(39, -1), //Packet is referenced by one CS2 instruction but that CS2 instruction is present in no scripts
+    UNUSED_CLAN_OP(39, -1),
     MOVE_MOUSE(40, -1),
     IF_ON_NPC(41, 11, true),
     MINI_WALK(42, 18, true),
@@ -68,7 +68,7 @@ enum class ClientProt(
     CLOSE_INTERFACE(60, 0),
     GROUND_ITEM_EXAMINE(61, 7),
     CLIENT_FOCUS(62, 1),
-    UNK_63(63, 4), //near where shift click teleporting so some kind of map click probably?
+    UNK_63(63, 4),
     QUICKCHAT_PUBLIC(64, -1),
     NPC_OP1(65, 3, true),
     PLAYER_OP1(66, 3, true),
@@ -87,7 +87,7 @@ enum class ClientProt(
     ACCOUNT_CREATION_STAGE(79, 1),
     RESUME_NAMEDIALOG(80, -1),
     IF_OP10(81, 8, true),
-    UNK_82(82, 4), //writes one identical int sometime during gamestate/region loading. Probably sends when something fails to load or error occurs
+    UNK_82(82, 4),
     MOVE_CAMERA(83, 4),
     SCREEN_SIZE(84, 6),
     COMMAND(85, -1),
@@ -102,7 +102,7 @@ enum class ClientProt(
     PLAYER_OP8(94, 3, true),
     NPC_OP5(95, 3, true),
     IF_OP1(96, 8, true),
-    DEPRECATED_97_SERVERPACKET_52(97, -1), //cs2 driven something during login stage?
+    DEPRECATED_97_SERVERPACKET_52(97, -1),
     IF_ON_OBJECT(98, 17, true),
     EMAIL_VALIDATION_CHANGE_ADDRESS(99, -2),
     REPORT_ABUSE(100, -1),

@@ -70,16 +70,6 @@ class Huffman(codeLengths: ByteArray) {
         }
     }
 
-    /**
-     * Decompresses Huffman-encoded data
-     *
-     * @param inputBytes the input byte array to be decompressed
-     * @param inputOffset the starting offset in the input byte array
-     * @param inputLength the number of bytes to be decompressed
-     * @param outputBytes the output byte array to hold the decompressed data
-     * @param outputOffset the starting offset in the output byte array
-     * @return the number of bytes written to the output byte array
-     */
     fun decompress(inputBytes: ByteArray, inputOffset: Int, inputLength: Int,
                    outputBytes: ByteArray, outputOffset: Int): Int {
         var bitBuffer = 0

@@ -16,9 +16,6 @@ class ObjectTypeList(
     @JvmField val configResource: Js5ResourceProvider?,
     @JvmField val meshResource: Js5ResourceProvider
 ) {
-    /**
-     * The preferences set for the player, EG: textures off
-     */
     @JvmField
     var preferenceMask: Int = 0
 

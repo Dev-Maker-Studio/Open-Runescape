@@ -3,11 +3,6 @@ package com.jagex.game.runetek5.interaction.chat
 import com.jagex.game.runetek5.client.ChatMessageType
 import com.jagex.game.runetek5.client.Client
 
-/**
- * [J]
- * @author Brainpower - 03/02/2023
- *
- */
 class ChatLine(
     type: ChatMessageType,
     effectFlags: Int,

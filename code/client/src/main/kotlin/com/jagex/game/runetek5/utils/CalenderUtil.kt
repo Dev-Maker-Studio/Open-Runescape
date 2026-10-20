@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.utils
 
-/**
- * Backward compatibility alias for CalendarUtil (fixes spelling)
- */
 object CalenderUtil {
     @JvmStatic
     fun getLocalYear(milliseconds: Long): Int = CalendarUtil.getLocalYear(milliseconds)

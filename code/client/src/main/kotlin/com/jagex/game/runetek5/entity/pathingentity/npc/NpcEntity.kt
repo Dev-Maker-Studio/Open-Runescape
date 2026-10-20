@@ -57,11 +57,6 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         return if (this.definitions == null) 0 else this.definitions!!.sizeShift
     }
 
-    /**
-     * Generates random tints for the entity's model
-     * presumably one of the purposes of this is to
-     * deal with color bots
-     */
     fun createDynamicTint() {
         this.tintHue = 32 + (Math.random() * 4.0).toInt()
         this.tintSaturation = 3 + (Math.random() * 2.0).toInt()
@@ -81,20 +76,13 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
     private var poseMemoKey = 0L
     private var poseMemoMinY = 0
     private val poseKey = PoseKey()
-    /** Key of the pose handed out THIS draw (0 when it was not memoisable); drives the shadow memo. */
     private var currentPoseKey = 0L
-    /** models[0] already carries the type tint (applied inside the memo); draw() skips it. */
     private var bodyTintInMemo = false
     private val shadowMemo = ShadowMemo()
     private val shadowKey = PoseKey()
     private val poseCopies = PoseCopyPair()
     private val shadowCopies = PoseCopyPair()
 
-    /**
-     * @param applyTypeTint apply the NPC type's tint to the body inside the memo (the
-     *   draw path; draw() then skips its own tint for models[0]). The particle-cycle
-     *   caller builds with function mask 0, whose model is not tint-capable.
-     */
     fun getAnimatedBodymodel(toolkit: AbstractToolkit, functionMask: Int, applyTypeTint: Boolean = false): Boolean {
         var functionMask = functionMask
         val initialFunctionMask = functionMask
@@ -114,23 +102,11 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
         val yawRotation = super.yaw.getRotation()
         val definitions = this.definitions!!
-        // Hill tilt first: it depends only on the entity's position, and both the memo
-        // key and the in-place model transforms below read its results.
         if (modelWidth == 0 && modelLength == 0) {
             hillChange(yawRotation, getSize() shl 9, getSize() shl 9, 0, 0)
         } else {
             hillChange(yawRotation, modelWidth, modelLength, bastype.hillRotateX, bastype.hillRotateZ)
         }
-        // The memo model already carries every in-place transform applied on a miss
-        // (roll/pitch rotate, wide-model hill tilt/translate), so those inputs are part
-        // of the key and are NOT re-applied on a hit. Tints (entity or type — the type
-        // tint is re-applied per draw) compound in place, so tinted models stay out.
-        // The TYPE tint (definitions.hasTint) is a fixed recolour: applied once on a
-        // miss, it is part of the memoised model and draw() must not apply it again
-        // (bodyTintInMemo). The entity hit-flash tint is temporary and stays out.
-        // Only the draw path memoises (applyTypeTint is its marker): picking
-        // (calculateProjection, mask 131072) and the particle-init pass (mask 0) keep
-        // legacy's shared-slot copies and never touch the memo.
         val memoEligible = PoseMemo.enabledFor(toolkit) && !hasTint && applyTypeTint
         if (!memoEligible) { if (hasTint) PoseMemo.inelEntityTint++; if (definitions.hasTint) PoseMemo.inelTypeTint++ }
         bodyTintInMemo = memoEligible && definitions.hasTint

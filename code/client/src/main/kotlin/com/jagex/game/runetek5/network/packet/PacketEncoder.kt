@@ -54,7 +54,6 @@ import com.jagex.game.runetek5.utils.Utils
 object PacketEncoder {
 
     @JvmStatic
-    /** Sends FC_JOIN with an empty name, which the server reads as "leave". */
     fun sendLeaveFriendsChatPacket() {
         val connectionContext = Client.connectionContext
         val tcpPacket = createPacket(ClientProt.FC_JOIN, connectionContext.isaac)
@@ -520,11 +519,6 @@ object PacketEncoder {
         }
     }
 
-    /**
-     * Records an error the client recovered from. Jagex's client posted these to
-     * `clienterror.ws`; there is no such endpoint here, so the report stays local:
-     * console, the CS2 error log and the next crash report's "recent errors".
-     */
     @JvmStatic
     fun sendErrorToServer(addition: String?, throwable: Throwable?) {
         try {

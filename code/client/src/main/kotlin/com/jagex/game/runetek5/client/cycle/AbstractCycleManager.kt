@@ -11,11 +11,6 @@ abstract class AbstractCycleManager {
         return loopsInCycle(preferedDuration)
     }
 
-    /**
-     * Fraction of the current logic window that has elapsed, in [0, 1]. Managers
-     * that pace the loop to exactly one pulse per iteration have no inter-pulse
-     * render frames, so the default is 1 (no interpolation).
-     */
     open fun pulseFraction(preferedDuration: Long): Float {
         return 1.0f
     }

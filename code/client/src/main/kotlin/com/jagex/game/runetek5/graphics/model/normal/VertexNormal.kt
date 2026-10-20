@@ -14,7 +14,6 @@ class VertexNormal {
     var magnitude: Int = 0
 
     constructor() {
-        // NOOP
     }
 
     constructor(other: VertexNormal) {

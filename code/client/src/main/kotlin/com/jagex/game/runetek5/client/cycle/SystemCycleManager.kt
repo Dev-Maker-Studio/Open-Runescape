@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.client.cycle
 
-/**
- * Cycle manager implementation using System.nanoTime().
- */
 class SystemCycleManager : AbstractCycleManager() {
 
     @JvmField var lastNanotime: Long = 0L
@@ -53,11 +50,6 @@ class SystemCycleManager : AbstractCycleManager() {
         }
     }
 
-    /**
-     * Calculates the average execution time based on the time cache.
-     *
-     * @return The average execution time in nanoseconds
-     */
     fun averageExecutionTime(): Long {
         val currentNanotime = System.nanoTime()
         val timedelta = currentNanotime - lastNanotime

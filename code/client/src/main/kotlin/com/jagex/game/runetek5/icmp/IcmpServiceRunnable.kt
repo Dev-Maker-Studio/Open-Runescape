@@ -5,7 +5,6 @@ class IcmpServiceRunnable : Runnable {
         try {
             IcmpServiceJaclib.icmpService!!.run()
         } catch (throwable: Throwable) {
-            // NOOP
         }
         IcmpServiceJaclib.icmpService = null
     }
