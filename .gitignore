@@ -91,3 +91,13 @@ target/
 
 # cloned separately: git clone https://gitlab.com/darkanrs/cache-unpacked.git assets/cache
 assets/cache/
+/code/harness/target/
+/code/web/target/
+assets/cache-packed/
+/code/harness/fleet.toml
+/code/renderer/target-s*/
+
+/assets/.cache-packed.stamp
+/code/client/.claude/
+/code/web/static/renderer.js
+/code/web/static/renderer_bg.wasm
