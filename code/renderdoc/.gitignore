@@ -1,0 +1,4 @@
+.env/
+apps/wgpu_scene/target/
+*.rdc
+__pycache__/
