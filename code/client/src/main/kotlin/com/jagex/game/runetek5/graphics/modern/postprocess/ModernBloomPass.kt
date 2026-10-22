@@ -25,7 +25,7 @@ import org.lwjgl.opengl.GL30.GL_DRAW_FRAMEBUFFER
 import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER
 import org.lwjgl.opengl.GL30.GL_READ_FRAMEBUFFER
 import org.lwjgl.opengl.GL30.glBindFramebuffer
-import org.lwjgl.opengl.GL30.glBlitFramebuffer
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 
 class ModernBloomPass {
     private var sceneFbo: Framebuffer? = null
@@ -129,7 +129,7 @@ class ModernBloomPass {
     private fun blit(src: Framebuffer, dst: Framebuffer) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, src.getId())
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.getId())
-        glBlitFramebuffer(0, 0, src.width, src.height, 0, 0, dst.width, dst.height, GL_COLOR_BUFFER_BIT, GL_LINEAR)
+        GLWrapper.blitFramebuffer(0, 0, src.width, src.height, 0, 0, dst.width, dst.height, GL_COLOR_BUFFER_BIT, GL_LINEAR)
     }
 
     fun composite(targetFbo: Int, targetW: Int, targetH: Int, whitePoint: Float, bloom: Float, brightpass: Float) {
@@ -145,6 +145,7 @@ class ModernBloomPass {
             return
         }
         active = false
+        FrameDump.bloom(whitePoint, bloom, brightpass)
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_BLEND)
         glDisable(GL_SCISSOR_TEST)
@@ -206,7 +207,7 @@ class ModernBloomPass {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, scene.getId())
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFbo)
             glDisable(GL_SCISSOR_TEST)
-            glBlitFramebuffer(0, 0, scene.width, scene.height, 0, 0, targetW, targetH, GL_COLOR_BUFFER_BIT, GL_LINEAR)
+            GLWrapper.blitFramebuffer(0, 0, scene.width, scene.height, 0, 0, targetW, targetH, GL_COLOR_BUFFER_BIT, GL_LINEAR)
         }
         glBindFramebuffer(GL_FRAMEBUFFER, targetFbo)
         glViewport(0, 0, targetW, targetH)

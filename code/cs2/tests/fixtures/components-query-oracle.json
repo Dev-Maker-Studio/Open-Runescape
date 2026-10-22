@@ -1,0 +1,102 @@
+{
+  "oracle": "CC_GETPARENTLAYER, IF_GETPARENTLAYER, IF_GET_GAMESCREEN and the IF_DEBUG_ opcodes GETOPENIFCOUNT, GETOPENIFID, GETNAME, GETCOMCOUNT, GETCOMNAME and GETSERVERTRIGGERS through the actual ComponentQueryOps, InterfaceQueryOps, DetailCapabilityOps and WorldMapUserDetailOps dispatch with real Component, Interface and SubInterface objects, a populated Client.OPEN_INTERFACES IterableNodeMap, Client.BASE_WINDOW_ID and Client.GAME_SCREEN_INTERFACE, all run headless from an isolated COPY of the pre-existing pinned shaded client JAR. No operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentQueryOps.kt": "11a490fba441cae41d34532ac10f0aee1e47d475f68fb70249a5fbad5ed3e194",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/DetailCapabilityOps.kt": "583c443e446d9a3d9811d4834e36edf922eaeb8457cca72f5e796aa16f34b4a8",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/WorldMapUserDetailOps.kt": "201edf6fa737e6bd5693441b351ff874d4b1c7a2048656e42a387052b732d858",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/SubInterface.kt": "1ba673fd7559461ec83e03d7da9bea7dd1c60f0669fafaab438c67436e900dd5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/IterableNodeMap.kt": "e5c334f2569dc991df140e3490b6f8b4111a4d6dfc93b77a1bbde1739f928b18",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/ComponentLayerFixtures.java": "2c2fb81374e676db7047834e7cebebcc380d92c9bbc4bad9de2c3f4bc1846108",
+    "code/cs2/tests/native/ComponentQueryFixtures.java": "d53942b32ac9d4de461e2396942f702477479d77a51815d8c74ff7f04f596709"
+  },
+  "generator_sha256": "0f5525529f682e16b4550e0f583e9b728f7a458c9563e934cf0ebf12790625ab",
+  "fixture_sha256": {
+    "components-query.native.tsv": "bedcd6361cbab3b06e87ebdac9044373f9fe3e3bd1dca8b7931b4761f8c65b4d",
+    "components-query.stats.tsv": "976e6d0d08e15f4af5e9460aa60b46e54e97173af52090607d839388136a58d0"
+  },
+  "random_seeds": [
+    "0x727c5227 (java.util.Random)"
+  ],
+  "tsv_encoding": "components-query: W, I, C, N as in components-layer; B base window id; Q interface component name (null or hex:UTF-8) serverTriggers; G game screen interface component; O hash sub-interface-id overlay in insertion order; K initial hook secondary interface index; H hook change before the next T; T world opcode operand ints; R result int-stack string-stack - hook1 hook2; Z total.",
+  "query_cases": 14000,
+  "query_records": {
+    "W": 4,
+    "I": 16,
+    "C": 50,
+    "N": 10,
+    "B": 4,
+    "Q": 50,
+    "O": 29,
+    "K": 8,
+    "T": 14000,
+    "R": 14000,
+    "H": 409,
+    "G": 2,
+    "Z": 1
+  },
+  "query_per_opcode": {
+    "CC_GETPARENTLAYER": {
+      "ok": 1598,
+      "error": 0
+    },
+    "IF_DEBUG_GETCOMCOUNT": {
+      "ok": 739,
+      "error": 480
+    },
+    "IF_DEBUG_GETCOMNAME": {
+      "ok": 732,
+      "error": 1249
+    },
+    "IF_DEBUG_GETNAME": {
+      "ok": 754,
+      "error": 891
+    },
+    "IF_DEBUG_GETOPENIFCOUNT": {
+      "ok": 785,
+      "error": 0
+    },
+    "IF_DEBUG_GETOPENIFID": {
+      "ok": 1045,
+      "error": 486
+    },
+    "IF_DEBUG_GETSERVERTRIGGERS": {
+      "ok": 709,
+      "error": 1320
+    },
+    "IF_GETPARENTLAYER": {
+      "ok": 1910,
+      "error": 515
+    },
+    "IF_GET_GAMESCREEN": {
+      "ok": 787,
+      "error": 0
+    }
+  },
+  "query_error_classes": {
+    "error:ArrayIndexOutOfBoundsException": 3827,
+    "error:NullPointerException": 616,
+    "error:IllegalArgumentException": 95,
+    "error:StringIndexOutOfBoundsException": 133,
+    "error:ClassCastException": 270
+  }
+}

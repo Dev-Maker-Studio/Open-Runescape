@@ -1,0 +1,24 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch (MINIMENUOPEN through Interface.hasActiveMenuEntry) and PlayerWorldOps.dispatch (GET_ACTIVE_MINIMENU_INVSLOT) from an isolated copy of the pinned client JAR, with real Component, Interface, MiniMenuEntry (inserted into the real MiniMenu.entryList), ItemContainer (real CONTAINER_MAP) and mouseLeaveArrayParams; MiniMenu.isOpen and activeEntry are set directly",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "ComponentLayerFixtures.java": "2c2fb81374e676db7047834e7cebebcc380d92c9bbc4bad9de2c3f4bc1846108",
+    "MenuEntryFixtures.java": "717f6c99271a0871e02897ca9cce75e40e92629ace43ecee1d3c6038d216cb21"
+  },
+  "generator_sha256": "a9a8504fb5350996c270a3a6d829cfc9d33f5e83a63df905218160352ddd419e",
+  "fixture_sha256": {
+    "menu-entry.native.tsv": "1d7bb1f9bc972e487d25bf2e5c2c105d69d027f3d16e69c476165e29bfc87d31",
+    "menu-entry.stats.tsv": "e7e50d15c307a4a116a8d1b528df476089316e562cf03f38b99b6a01eb2b27dd"
+  },
+  "cases": 12000,
+  "opcodes": [
+    "GET_ACTIVE_MINIMENU_INVSLOT",
+    "MINIMENUOPEN"
+  ],
+  "random_seed": "0x3e9e171 (java.util.Random)",
+  "not_injected": "OPEN_INTERFACES is empty so getSub never finds a sub interface parent; entries are added to the list directly rather than through MiniMenu.addEntry",
+  "reproduction": "python3 code/cs2/tests/native/generate_menu_entry.py --check"
+}

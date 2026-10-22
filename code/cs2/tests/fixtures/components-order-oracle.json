@@ -1,0 +1,143 @@
+{
+  "oracle": "CC_/IF_ SENDTOFRONT and SENDTOBACK, IF_HASSUB, IF_HASSUBMODAL, IF_HASSUBOVERLAY through the actual ComponentLifecycleOps and InterfaceQueryOps dispatch with real Component, Interface and SubInterface objects and a populated Client.OPEN_INTERFACES, and GET_VARP_OLD and GET_VARPBIT_OLD through the actual CoreVmOps dispatch with a real PlayerEntity ConfigNodeMap, an NpcEntity and a null entity, all run headless from an isolated COPY of the pre-existing pinned shaded client JAR. No operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentLifecycleOps.kt": "d2c9cc40d736eb12ef57dae5e9db05f95c96e1080b4eb7f1991802cd5510f8cd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CoreVmOps.kt": "be05214d08ae26980d31470e542ece77d63fbfddbcd16a34a29617441a007b5a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/SubInterface.kt": "1ba673fd7559461ec83e03d7da9bea7dd1c60f0669fafaab438c67436e900dd5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/varp/VarpType.kt": "806d2b7a58e2284e240539be430d6cb4fd6e7c813c90e253b566c93bc0f4f7cc",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/varp/VarpTypeList.kt": "1a5c5d9f36b159709054caed7a267a5078d320b453cc69b513f956a9ca55ae01",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/varp/VarpbitType.kt": "44dbacf359f1defe0ba2a812c150893be3c39a5c433811720e0c8190d08bc0ef",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/varp/VarpbitTypeList.kt": "4b8e8680a13c6d652c1a3ae4ff57b114606db43706c4dea7ea7df31c1a216d08",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/entity/pathingentity/player/ConfigNodeMap.kt": "e836335b3ea199844176a2933fc90ede17e60098e9fe5dd764c975e11957195a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/cs2/tests/native/generate_components_hooks.py": "2421588fe5ccf2d4729b3bc4a4690cd35b36d2425093f21f4041f09e852d79e2",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/ComponentLayerFixtures.java": "2c2fb81374e676db7047834e7cebebcc380d92c9bbc4bad9de2c3f4bc1846108",
+    "code/cs2/tests/native/ComponentOrderFixtures.java": "6a60059a29eb2f183d5f518447596bad198462069e510a531b1eeffe3004840a",
+    "code/cs2/tests/native/EntityVarFixtures.java": "45cc514ac4634d729d0042d1b0ef2d3a282f4f75c7065cd6e4758e931ad8326f"
+  },
+  "generator_sha256": "8f063601a31766421a01061aafe2676655035e504d5209b20f1512e6c1ca96e6",
+  "fixture_sha256": {
+    "components-order.native.tsv": "850c5297bd5f2562fe15df1845885cf44c06b7707e4f08901644162ebf9224b7",
+    "components-order.stats.tsv": "041490a9bd3c022f79450a7a5cfbbd615d1990ce7f6b07407c54cba6d46e85bd",
+    "entity-vars.native.tsv": "4fbcb71ee2f63571408c506e425a4a9ed7d244b12baa6046cbca6fbc91b877f2",
+    "entity-vars.stats.tsv": "a805dd871165483ebdc999a276075f7aaa851feda794f8e1492daa938d646374"
+  },
+  "random_seeds": [
+    "0x727c5225 (java.util.Random)",
+    "0x727c5226 (java.util.Random)"
+  ],
+  "tsv_encoding": "components-order: W, I, C, N, K, T, R, D, Z as in components-layer plus O hash sub-interface-id overlay for each open sub-interface. D keys are iN.M (idHash:parentId:slotId|slotChildren|itemSlots), iN.M.sK for children and iN.sub for the interface subComponents; lists are comma separated idHash/slotId with underscore for a null slot and dash for a null array. entity-vars: V stored player varp, T varp type char code, B varbit definition (id varp start end), A default varbit definition, C opcode entity operand result final int stack (the stack pointer is already incremented when an error is thrown), Z total.",
+  "order_cases": 14000,
+  "order_records": {
+    "W": 2,
+    "I": 8,
+    "C": 25,
+    "N": 5,
+    "O": 11,
+    "K": 4,
+    "T": 14000,
+    "R": 14000,
+    "D": 3725,
+    "Z": 1
+  },
+  "order_per_opcode": {
+    "CC_CREATE": {
+      "ok": 258,
+      "error": 1349
+    },
+    "CC_DELETE": {
+      "ok": 85,
+      "error": 402
+    },
+    "CC_DELETEALL": {
+      "ok": 413,
+      "error": 112
+    },
+    "CC_FIND": {
+      "ok": 1384,
+      "error": 155
+    },
+    "CC_SENDTOBACK": {
+      "ok": 985,
+      "error": 1155
+    },
+    "CC_SENDTOFRONT": {
+      "ok": 997,
+      "error": 1080
+    },
+    "IF_FIND": {
+      "ok": 466,
+      "error": 71
+    },
+    "IF_HASSUB": {
+      "ok": 1015,
+      "error": 0
+    },
+    "IF_HASSUBMODAL": {
+      "ok": 1075,
+      "error": 0
+    },
+    "IF_HASSUBOVERLAY": {
+      "ok": 1026,
+      "error": 0
+    },
+    "IF_SENDTOBACK": {
+      "ok": 817,
+      "error": 193
+    },
+    "IF_SENDTOFRONT": {
+      "ok": 782,
+      "error": 180
+    }
+  },
+  "order_error_classes": {
+    "error:RuntimeException": 1093,
+    "error:NullPointerException": 2927,
+    "error:ArrayIndexOutOfBoundsException": 552,
+    "error:NegativeArraySizeException": 39,
+    "error:IllegalArgumentException": 86
+  },
+  "entity_cases": 756,
+  "entity_records": {
+    "T": 32,
+    "V": 16,
+    "B": 54,
+    "A": 6,
+    "C": 756,
+    "Z": 1
+  },
+  "entity_per_opcode": {
+    "GET_VARPBIT_OLD": {
+      "ok": 55,
+      "error": 323
+    },
+    "GET_VARP_OLD": {
+      "ok": 43,
+      "error": 335
+    }
+  },
+  "entity_error_classes": {
+    "error:NullPointerException": 406,
+    "error:ClassCastException": 252
+  }
+}

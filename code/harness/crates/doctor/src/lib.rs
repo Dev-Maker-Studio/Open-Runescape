@@ -1,4 +1,5 @@
 mod checks;
+mod web;
 
 use std::path::Path;
 use std::time::Instant;
@@ -54,9 +55,12 @@ pub fn collect(root: &Path) -> Vec<Check> {
     })
 }
 
-pub fn run(_: &[String]) -> i32 {
+pub fn run(args: &[String]) -> i32 {
     let t = Instant::now();
-    let checks = display::root().map_or_else(|e| vec![fail("root", e, "run inside the project or set OPENRS_ROOT")], |r| collect(&r));
+    let mut checks = display::root().map_or_else(|e| vec![fail("root", e, "run inside the project or set OPENRS_ROOT")], |r| collect(&r));
+    if args.iter().any(|a| a == "--deep") {
+        checks.extend(display::root().map_or_else(|_| vec![], |r| web::deep(&r)));
+    }
     checks.iter().for_each(|c| println!("{}", line(c)));
     let n = |l| checks.iter().filter(|c| c.level == l).count();
     println!("{} pass, {} warn, {} fail in {} ms", n(Level::Pass), n(Level::Warn), n(Level::Fail), t.elapsed().as_millis());

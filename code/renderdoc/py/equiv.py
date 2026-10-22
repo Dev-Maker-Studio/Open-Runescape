@@ -10,7 +10,12 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+import classify
+import convention
 import diff
+import orf
+
+FORMULA = 2
 
 BARS = "▁▂▃▄▅▆▇█"
 
@@ -52,7 +57,7 @@ def regions(cdir, wdir, c, w, count):
 
 def texture_sets(c, w):
     def hashes(s):
-        return {t["hash"] for d in s["draws"] for t in d.get("textures", [])}
+        return {t["hash"] for d in s["draws"] for t in d.get("textures", []) if not convention.placeholder(t)}
 
     hc, hw = hashes(c), hashes(w)
     return {"client_unique": len(hc), "web_unique": len(hw), "shared": len(hc & hw), "client_only": sorted(hc - hw)[:8], "web_only": sorted(hw - hc)[:8]}
@@ -68,6 +73,17 @@ def load_history(path):
     return [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.exists() else []
 
 
+def grouped(flat, kind, key, top):
+    g = defaultdict(lambda: {"draws": 0, "first": None, "example": ""})
+    for i, k, m in flat:
+        if k == kind:
+            e = g[key(m)]
+            e["draws"] += 1
+            e["first"] = i if e["first"] is None else e["first"]
+            e["example"] = e["example"] or m[:200]
+    return [{"what": k, **v} for k, v in sorted(g.items(), key=lambda kv: -kv[1]["draws"])[: top * 2]]
+
+
 def report(a):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -80,20 +96,32 @@ def report(a):
     bad = [p for p in rep["pairs"] if p["diffs"]]
     groups = defaultdict(lambda: {"draws": 0, "kinds": Counter(), "examples": []})
     for p in bad:
-        g = groups[pass_name(ci[p["client_eid"]], c)]
+        d = ci[p["client_eid"]]
+        fam = classify.family(d, c)
+        g = groups[pass_name(d, c) if fam == "unknown" else f"{fam} ({classify.owner(fam)})"]
         g["draws"] += 1
         for k, m in p["diffs"]:
             g["kinds"][k] += 1
             if len(g["examples"]) < a.examples:
                 g["examples"].append(f"draw {p['index']} (client eid {p['client_eid']}, web eid {p['web_eid']}) {k}: {m[:260]}")
-    unmatched = len(rep["only_client"]) + len(rep["only_web"])
-    only = {side: dict(Counter(pass_name(idx[e], summ) for e in rep["only_" + side]).most_common(a.top)) for side, idx, summ in (("client", ci, c), ("web", wi, w))}
+    frame_path = Path(a.orf) if a.orf else next((q for q in (out / "frame.orf", Path(a.web) / "frame.orf") if q.exists()), None)
+    rows = classify.classify(c, w, [ci[e] for e in rep["only_client"]], [wi[e] for e in rep["only_web"]], orf.counts(frame_path) if frame_path else None)
+    real = [r for r in rows if not r["known"]]
+    unmatched = len(real)
+    known = Counter(r["side"] for r in rows if r["known"])
+    only = defaultdict(lambda: {"eids": [], "known": False})
+    for r in rows:
+        o = only[(r["side"], r["family"], r["owner"], r["reason"].split(" (")[0])]
+        o["eids"].append(r["eid"])
+        o["known"] = r["known"]
+    conventions = Counter(k for p in rep["pairs"] for k, _ in p["notes"])
+    converted = sum(any(convention.is_clip_matrix(k, v) for k, v in d.get("uniforms", {}).items()) for d in c["draws"]) if c["meta"]["api"] == "OpenGL" else 0
     final = next((t for t in rep["targets"] if t["final"] and "pixels" in t), None)
     px = final["pixels"] if final else None
     ssim = max(0.0, px["ssim"]) if px else 0.0
     matched = rep["matched"]
-    total = max(len(c["draws"]), len(w["draws"]), 1)
-    score = round(100 * (0.5 * ssim + 0.25 * matched / total + 0.25 * (1 - len(bad) / max(matched, 1))), 1)
+    comparable = max(len(c["draws"]) - known["client"], len(w["draws"]) - known["web"], 1)
+    score = round(100 * (0.5 * ssim + 0.25 * min(matched / comparable, 1) + 0.25 * (1 - len(bad) / max(matched, 1))), 1)
     checks = [
         {"name": "final ssim", "need": f">= {a.min_ssim}", "got": px["ssim"] if px else None, "pass": bool(px) and px["ssim"] >= a.min_ssim},
         {"name": "unmatched draws", "need": "== 0", "got": unmatched, "pass": unmatched == 0},
@@ -110,13 +138,17 @@ def report(a):
         "verdict": verdict,
         "score": score,
         "previous_score": prev["score"] if prev else None,
+        "previous_formula": prev.get("formula", 1) if prev else None,
+        "formula": FORMULA,
         "checks": checks,
         "pixels": px,
         "sizes": sizes,
-        "draws": {"client": len(c["draws"]), "web": len(w["draws"]), "matched": matched, "mismatched": len(bad), "only_client": rep["only_client"][:20], "only_web": rep["only_web"][:20], "only_client_total": len(rep["only_client"]), "only_by_pass": only, "only_web_total": len(rep["only_web"])},
+        "draws": {"client": len(c["draws"]), "web": len(w["draws"]), "matched": matched, "mismatched": len(bad), "only_client": rep["only_client"][:20], "only_web": rep["only_web"][:20], "reordered": sum(p["reordered"] for p in rep["pairs"]), "only_client_total": len(rep["only_client"]), "only_web_total": len(rep["only_web"]), "real_unmatched": unmatched, "known_unmatched": sum(known.values()),
+                  "unmatched": [{"side": k[0], "family": k[1], "owner": k[2], "reason": k[3], "known": v["known"], "count": len(v["eids"]), "eids": v["eids"][:8]} for k, v in sorted(only.items(), key=lambda kv: (kv[1]["known"], -len(kv[1]["eids"])))]},
+        "conventions": {"clip matrix draws": converted, **conventions},
         "groups": {k: {"draws": g["draws"], "kinds": dict(g["kinds"]), "examples": g["examples"]} for k, g in sorted(groups.items(), key=lambda kv: -kv[1]["draws"])},
-        "uniform_diffs": [f"draw {i}: {m[:200]}" for i, k, m in flat if k == "uniform"][: a.top * 2],
-        "texture_diffs": [f"draw {i}: {m[:200]}" for i, k, m in flat if k == "texture"][: a.top * 2],
+        "uniform_diffs": grouped(flat, "uniform", lambda m: m.split(" | ")[-1] if " | " in m else m[:80], a.top),
+        "texture_diffs": grouped(flat, "texture", lambda m: m.split("=")[0] + (" flipped" if "flipped" in m else ""), a.top),
         "texture_sets": texture_sets(c, w),
         "regions": top,
         "files": {"client": str(a.client), "web": str(a.web), "diff_report": str(out / "diff" / "report.txt"), "diff_json": str(out / "diff" / "diff.json"), "diff_png": px["diff_png"] if px else None},
@@ -128,7 +160,7 @@ def report(a):
     (out / "report.txt").write_text(text + "\n")
     if not a.no_history:
         Path(a.history).parent.mkdir(parents=True, exist_ok=True)
-        row = {"time": res["time"], "scene": a.scene, "mode": a.mode, "verdict": verdict, "score": score, "ssim": px["ssim"] if px else None, "psnr": px["psnr_db"] if px else None, "mismatched": len(bad), "unmatched": unmatched, "draws": [len(c["draws"]), len(w["draws"])]}
+        row = {"time": res["time"], "scene": a.scene, "mode": a.mode, "verdict": verdict, "score": score, "ssim": px["ssim"] if px else None, "psnr": px["psnr_db"] if px else None, "mismatched": len(bad), "unmatched": unmatched, "known": len(rows) - unmatched, "formula": FORMULA, "draws": [len(c["draws"]), len(w["draws"])]}
         with open(a.history, "a") as f:
             f.write(json.dumps(row) + "\n")
     print(text)
@@ -138,7 +170,7 @@ def report(a):
 def render(r):
     px, d = r["pixels"], r["draws"]
     prev = r["previous_score"]
-    trend = "" if prev is None else f" (previous {prev}, {r['score'] - prev:+.1f})"
+    trend = "" if prev is None else f" (previous {prev}, {r['score'] - prev:+.1f}{', score formula changed' if r['formula'] != r['previous_formula'] else ''})"
     L = [f"EQUIV scene={r['scene']} mode={r['mode']} verdict={r['verdict']} score={r['score']}/100{trend}"]
     L.append("thresholds: " + " | ".join(f"{k['name']} {k['need']} got {k['got']} {'ok' if k['pass'] else 'FAIL'}" for k in r["checks"]))
     if px:
@@ -147,21 +179,23 @@ def render(r):
             L.append(f"sizes: client={r['sizes']['client']} web={r['sizes']['web']}")
     else:
         L.append("pixels: no paired final target")
-    L.append(f"draws: client={d['client']} web={d['web']} matched={d['matched']} mismatched={d['mismatched']} only_client={d['only_client_total']} only_web={d['only_web_total']}")
-    for side, g in d["only_by_pass"].items():
-        if g:
-            L.append(f"draws only on {side} by shader/pass: " + "; ".join(f"{k} x{n}" for k, n in g.items()))
+    L.append(f"draws: client={d['client']} web={d['web']} matched={d['matched']} (reordered {d['reordered']}) mismatched={d['mismatched']} unmatched real={d['real_unmatched']} known={d['known_unmatched']}")
+    L.append("conventions normalized: " + ", ".join(f"{k}={v}" for k, v in r["conventions"].items()))
+    if d["unmatched"]:
+        L.append("unmatched draws by pass (owner), reason:")
+        for u in d["unmatched"]:
+            L.append(f"  {'known' if u['known'] else 'REAL '} {u['side']} {u['family']} ({u['owner']}) x{u['count']} eids {u['eids']}: {u['reason']}")
     if r["groups"]:
         L.append("mismatches by shader/pass:")
         for k, g in r["groups"].items():
             L.append(f"  {k}: draws={g['draws']} " + " ".join(f"{a}={b}" for a, b in sorted(g["kinds"].items())))
             L += [f"    {e}" for e in g["examples"]]
     if r["texture_diffs"]:
-        L.append("texture hash differences:")
-        L += [f"  {t}" for t in r["texture_diffs"]]
+        L.append("texture content differences by hash (draws, first draw, example):")
+        L += [f"  {t['what']}: draws={t['draws']} first={t['first']} {t['example']}" for t in r["texture_diffs"]]
     if r["uniform_diffs"]:
-        L.append("uniform differences:")
-        L += [f"  {u}" for u in r["uniform_diffs"]]
+        L.append("uniform differences by client uniform (draws, first draw, example):")
+        L += [f"  {u['what']}: draws={u['draws']} first={u['first']} {u['example']}" for u in r["uniform_diffs"]]
     t = r["texture_sets"]
     L.append(f"textures: client unique={t['client_unique']} web unique={t['web_unique']} shared={t['shared']} client only={t['client_only']} web only={t['web_only']}")
     if r["regions"]:
@@ -207,6 +241,7 @@ def main():
     r.add_argument("--min-ssim", type=float, default=0.99)
     r.add_argument("--max-mismatch", type=int, default=0)
     r.add_argument("--timings", default="")
+    r.add_argument("--orf", default="")
     r.add_argument("--history", required=True)
     r.add_argument("--no-history", action="store_true")
     h = sub.add_parser("history")

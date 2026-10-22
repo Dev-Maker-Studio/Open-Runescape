@@ -1,0 +1,15 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch for FORMATMINIMENU through MiniMenu.close, StaticMedia.resetChatMedia and the 12 style statics from an isolated copy of the pinned client JAR; Resource.SPRITES and Resource.FONT_METRICS are an Unsafe-allocated Js5ResourceProvider whose master index is empty, so the isFileCached prefetch checks are no-ops and are not modelled; the sprite cache clears are render state and not compared; MiniMenu.activeSubmenu is null",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "FormatMiniMenuFixtures.java": "e7d8b1450b8c508f308c15ea90c424c367119baafa1ed69d8de71af36219242f"
+  },
+  "generator_sha256": "fa44e010d5f0b3cf365082633323f2c4a5d5451f17644ca2ebf9d8fd3292311b",
+  "fixture_sha256": {
+    "format-mini-menu.native.tsv": "4663a9d2b93a597f6295b57ee25cc9b67810f4c55941d7598655adfbb19b75d2"
+  },
+  "cases": 400,
+  "random_seed": "0x727c5229 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_mini_menu.py --check"
+}

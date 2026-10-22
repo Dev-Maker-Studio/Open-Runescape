@@ -1,0 +1,22 @@
+[package]
+name = "openrs-native-host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+renderer = { path = "../renderer", default-features = false }
+tungstenite = "0.29"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+bytemuck = "1"
+miniz_oxide = "0.9"
+signal-hook = "0.3"
+fs2 = "0.4"
+blake3 = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

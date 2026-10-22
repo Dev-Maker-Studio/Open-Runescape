@@ -1,0 +1,20 @@
+{
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "384fd7829e5f73dc9a194bbf53870c5e593295943f6746a2af310fa084dcf9d4",
+  "generator_sha256": "7791219ea6468b583af74adb315daab0381ae2ca4096285f36202d97f84bac0b",
+  "fixture_sha256": {
+    "message.native.tsv": "939db45aab47713965686f341162b57df01d5ec67f7bbb5d6077f9fa5ba70bd0",
+    "message.stats.tsv": "6814d751e03eef0efa4df426fa577312f4506bbef88e2fa13a2110b99fa56019"
+  },
+  "cases": 30635,
+  "opcodes": [
+    "COMPARE",
+    "COORD",
+    "MES",
+    "MES_TYPED"
+  ],
+  "random_seed": "0x3e55a9e1 (java.util.Random)",
+  "not_injected": "DEV_CONSOLE and DEV_CONSOLE_CLEAR typed messages (the console needs fonts and a calendar); surrogate code units",
+  "reproduction": "python3 code/cs2/tests/native/generate_message.py --check"
+}

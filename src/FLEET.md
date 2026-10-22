@@ -47,7 +47,7 @@ All fleet state lives in `$XDG_RUNTIME_DIR/openrs-fleet`, selected with `OPENRS_
 | Log and pid | Slot | `slot<N>.log` and `slot<N>` |
 | Display | Shared | One Xwayland with nine windows. Frames are read back with `glReadPixels`, so overlapping windows do not matter |
 | Audio | Shared | The existing `openrs_null` sink |
-| Packed cache | Shared | `assets/cache-packed`, mapped read only, the pages are shared by the page cache |
+| Packed cache | Shared | `assets/cache/.packed`, mapped read only, the pages are shared by the page cache |
 | Account and player file | Slot | `fleetN` in the local file store |
 | Local lobby and world | Three slots | Instance `(N - 1) / 3`, see Local Server Instances |
 

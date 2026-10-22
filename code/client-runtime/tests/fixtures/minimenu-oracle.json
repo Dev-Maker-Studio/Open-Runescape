@@ -1,0 +1,12 @@
+{
+  "oracle": "the real Kotlin MiniMenu, ColoredMiniMenuEntry and MenuInteraction.processMenuInput driven through reflection with a uniform 6 pixel font, replayed cumulatively in Rust",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "6c453384be0b7fca2ceaaf7d45b79c763264bb11c1999fd3a3aeb7457d45fe3c",
+  "generator_sha256": "7e700bf12cc5c3526b77d1bfa30c4eb91163eb2eeab7f276ec93a9ff8242547b",
+  "fixture_sha256": "5c59b6aad4b6dd4290c591231710dcbaa082b0bce1851f12c1d4e3337a59e448",
+  "cases": 1000,
+  "random_seed": 727,
+  "oracle_output": "cases=1000 full=811 structure=189 steps=8142 packets=1561",
+  "reproduction": "python3 code/client-runtime/tests/native/generate_minimenu.py --jar <jar> --work <scratch dir> --seed 727 --cases 1000 [--check]"
+}

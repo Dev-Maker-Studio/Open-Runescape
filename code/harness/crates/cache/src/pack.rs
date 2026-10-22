@@ -4,12 +4,16 @@ use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 
+pub fn resolve_packed(path: PathBuf) -> PathBuf {
+    if path.join("cache.json").is_file() || path.join(".packed").is_dir() { path.join(".packed") } else { path }
+}
+
 pub fn packed(root: &Path) -> PathBuf {
-    std::env::var_os("OPENRS_CACHE").map(PathBuf::from).unwrap_or_else(|| root.join("assets/cache-packed"))
+    resolve_packed(std::env::var_os("OPENRS_CACHE").map(PathBuf::from).unwrap_or_else(|| root.join("assets/cache/.packed")))
 }
 
 fn stamp_file(root: &Path) -> PathBuf {
-    root.join("assets/.cache-packed.stamp")
+    root.join("assets/cache/.packed.stamp")
 }
 
 fn mix(bytes: &[u8]) -> u64 {
@@ -45,7 +49,7 @@ pub fn manifest(tree: &Path) -> Result<String, String> {
                 }
                 for e in entries.into_iter().flatten().flatten() {
                     let path = e.path();
-                    if path.file_name().is_some_and(|n| n == ".git") {
+                    if path.file_name().is_some_and(|n| n == ".git" || n == ".packed" || n == ".packed.stamp") {
                         continue;
                     }
                     match e.metadata() {

@@ -1,0 +1,51 @@
+{
+  "oracle": "Actual MathStringOps.dispatch and CameraLoginPrefOps.dispatch on a real CS2Executor, run headless from an isolated COPY of the pre-existing pinned shaded client JAR, with a non-UTC default time zone and a Turkish default language to prove the operations do not depend on them. No operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-Duser.timezone=America/Los_Angeles",
+    "-Duser.language=tr",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/MathStringOps.kt": "1c2392af110d261cd30318f427471b2d90e30b2d28512b07d901a522c0aa32d1",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CameraLoginPrefOps.kt": "e676deed503cb869e34a7404eb967d99ecaef958cc8d52db69ae79ca195be72b",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/CalendarUtil.kt": "d81312f2e3a40314b070f6704d909f62c4d25cbe6338016fd24f35b124706c63",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/CalenderUtil.kt": "32059b87171eb4488fd39c584bc32da5acfd29247616f244b46f928535a06939",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/PureFixtures.java": "1bc224f6e57a9ff75667135ea65521d7c2b7851daf884605ffeac2bcd6d2ab0d",
+    "code/cs2/tests/native/generate_pure.py": "daa2fc605e9d5f8cf794f607762fa7e26efe0d9d3460efdcddfab926d6ae2646"
+  },
+  "generator_sha256": "daa2fc605e9d5f8cf794f607762fa7e26efe0d9d3460efdcddfab926d6ae2646",
+  "driver_sha256": "1bc224f6e57a9ff75667135ea65521d7c2b7851daf884605ffeac2bcd6d2ab0d",
+  "fixture_sha256": {
+    "lower-supplementary.bin": "5c6ace8df92dc135792c5155a3299062cfbd721d6ca140c91974702285521941",
+    "pure.native.tsv": "128c78204f1449f1cb480cad67704c9d5bddb2e0d89760c1bc55b64ee93bf84c",
+    "pure.stats.tsv": "6209f6355a24e8d54ec0bf17b760f37abcb88046369e9b5c1311edcaaa8d88d8"
+  },
+  "table": "src/vm/lower-supplementary.bin: big-endian u32 pairs (code point, lowercase code point) for every supplementary code point whose real LOWERCASE result differs",
+  "random_seed": "0x727c5220 (java.util.Random)",
+  "tsv_encoding": "Tab separated: case name, opcode, byte operand, input ints (comma separated or dash), input string (hex: UTF-8, null or dash), result (ok or error:exception class), final int stack pointer, final int stack, final string stack (hex:, null, dash for empty).",
+  "cases": 81519,
+  "cases_per_opcode": {
+    "LOWERCASE": 8754,
+    "DATE_ISLEAPYEAR": 15061,
+    "DATE_MINUTES_FROMRUNEDAY": 11498,
+    "DATE_RUNEDAY_FROMDATE": 46206
+  },
+  "error_classes": {
+    "LOWERCASE error:NullPointerException": 1,
+    "DATE_ISLEAPYEAR error:ArrayIndexOutOfBoundsException": 1,
+    "DATE_MINUTES_FROMRUNEDAY error:ArrayIndexOutOfBoundsException": 1,
+    "DATE_RUNEDAY_FROMDATE error:ArrayIndexOutOfBoundsException": 3
+  }
+}

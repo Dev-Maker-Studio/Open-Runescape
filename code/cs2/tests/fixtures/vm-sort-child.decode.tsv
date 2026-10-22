@@ -1,0 +1,7 @@
+name	null
+counts	3	0	0	3	0	0
+0	PUSH_INT_LOCAL	int	0
+1	PUSH_INT_LOCAL	int	1
+2	PUSH_INT_LOCAL	int	2
+3	ARRAY_SORT	int	255
+4	RETURN	int	0

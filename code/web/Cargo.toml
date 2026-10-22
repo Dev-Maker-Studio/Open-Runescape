@@ -6,6 +6,10 @@ edition = "2021"
 [dependencies]
 tiny_http = "0.12"
 ctrlc = { version = "3", features = ["termination"] }
+libc = "0.2"
+nix = { version = "0.31", features = ["user"] }
+serde_json = { version = "1", features = ["raw_value"] }
+zeroize = "1"
 
 [profile.release]
 opt-level = 3

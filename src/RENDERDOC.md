@@ -300,20 +300,41 @@ The two runs capture the client separately, and the world moves between them, so
 - `code/renderdoc/tests/test_equiv.py` runs `equiv.py` over the golden summaries in `code/renderdoc/golden/selftest` and checks the stored verdict and score, a failing strict threshold, a removed draw, injected texture and uniform differences and a painted image region.
 - `openrs equiv test` runs those tests, then `capture selftest`, then a report over the freshly captured selftest folders with `--min-ssim 0.995 --max-mismatch 1`.
 
+# Multi Frame Equivalence
+
+```bash
+export OPENRS_WEB_STATE=$XDG_RUNTIME_DIR/openrs-web-multi
+openrs equiv lumbridge --frames 2 --target browser --cold
+```
+
+- `--frames N` is optional and limited to 1 through 5. Without it, the existing single-capture path is unchanged.
+- The client is placed once, then N back-to-back RenderDoc capture and `.orf` dump pairs are collected. Each dump is replayed and captured in the chosen native or browser target, then analysed with the normal checks.
+- `frames/0000/` and the following numbered folders contain each client capture, target capture, frame dump and `equiv.json`. The root `equiv.json` and `report.txt` give every frame's score, the mean score and mean SSIM. All per-frame verdicts must pass for the sequence to pass.
+- This is substantially slower and more GPU-intensive than `twin --frames`: capture analysis replays full frames. Keep it for short deep investigations, not routine animation sweeps.
+- A world scene or `--live` is required. `login`, `--builtin` and `--reuse` are rejected with this flag. Capture and dump are armed together as in the existing path, so they can still differ by one neighbouring frame.
+
 # Comparison Conventions
 
-OpenGL and WebGPU describe the same draw differently, so the summary normalizes what is only a convention, and a reported mismatch is a real difference.
+The report preserves real rendering differences while normalizing API representation differences. A high image score does not prove that every pass was replayed.
 
-| Item | OpenGL capture | WebGPU capture | Normalization |
-| --- | --- | --- | --- |
-| Scissor origin | Bottom left | Top left | An OpenGL scissor is flipped to a top left y with `target height - y - height` |
-| Index values | Absolute into a shared buffer, up to 53931 | Rebased per draw, up to 54 | Indices are recorded relative to the smallest index of the draw, and the vertex data fetched through them is hashed as well |
-| Viewport height | Positive | Negative when flipped | Only width and height are compared, the origin is not |
+| Item | Normalization | Evidence |
+| --- | --- | --- |
+| Scissor and viewport | Convert OpenGL bottom-left coordinates to the target's top-left coordinates | Target height and tests of both origins |
+| Vertex clip rectangles | Flip y0 and y1 for `aClip`, preserving their order as rectangle bounds | Hash the normalized values and retain the original diagnostics |
+| Index offsets | Compare indices relative to the first used vertex, and compare the vertex values separately | Shared OpenGL arenas and per-draw WebGPU buffers address the same geometry differently |
+| Clip-space matrices | Convert the recognized forward projection or shadow matrix z row to `(z + w) / 2` before comparison | A sixteen-value matrix, recognized member name and tests using real captured values |
+| Inverse matrices | Do not convert automatically | The renderer preserves the original inverse view-projection in the relevant shaders |
+| Placeholder textures | Ignore bound 1 by 1 placeholders in content-hash inventory | They are the renderer's default unassigned resources; this heuristic is not proof of shader usage |
+| Texture order | Match texture content hashes instead of API binding-slot numbers | Different shader binding layouts can bind the same image |
+| Time-driven data | List detected capture-time drift separately | Adjacent captures can have different animation time; unexplained uniform differences stay failures |
 
-- A draw whose state, indices and vertex data agree is a match, even though the two APIs hold the data in different buffers.
-- The client capture and the frame dump are armed back to back, `fire` then `dump-frame`, so both cover the same frame or two neighbouring frames. Earlier they were a second apart and time driven values differed.
-- Relative paths given to `--out`, `--exe`, `--jar` and `--orf` are resolved against the directory `openrs` runs in. The client starts from the repository root, so a relative output path used to point RenderDoc at a folder that did not exist and the capture timed out.
-- Still not normalized: the view projection matrix. WebGPU's depth range is 0 to 1 and OpenGL's is minus 1 to 1, so the z row of the matrix differs by `(z + w) / 2` and every draw with that matrix reports a uniform difference.
+- Alpha blend factors remain real state differences, even when only the alpha source factor differs. Without downstream-use evidence, they cannot safely be dismissed as a convention.
+- A client texture missing from the web capture remains a real content difference. The diff does not assume it was unused.
+- `classify.py` assigns unmatched draws a shader family, owner and reason: offscreen replay skip, tessellation replacement, unported pass, detected frame drift or unexplained missing geometry. Known skips remain visible and are not proof of a complete port.
+- The report distinguishes known skips from unexplained unmatched draws. Pixel thresholds still apply to the final image, and unexplained differences fail the verdict.
+- Scores before and after normalization are not directly comparable: the original 73-point baseline counted representation differences. Use the history together with SSIM, skipped-pass counts and the detailed report.
+- Client capture and frame serialization are armed back to back, not guaranteed to be the same frame. `dump-frames` pairs the serialized records and screenshot within the same rendered frame for temporal tests.
+- Relative `--out`, `--exe`, `--jar` and `--orf` paths resolve against the caller's working directory before a child changes directories.
 
 # MCP Server
 
@@ -331,7 +352,7 @@ OpenGL and WebGPU describe the same draw differently, so the summary normalizes 
 - Two clients on the same account clash, a client that crashed keeps the session on the server for a while and the next login answers with response 5.
 - The browser capture needs `--enable-unsafe-webgpu` and Chromium's Vulkan feature. Without them WebGPU falls back to SwiftShader and the capture refuses to run.
 - A browser capture with `--url` fetches `--orf` from `/files/frame.orf` of that page, so the server must serve the capture folder there.
-- The browser page reads a frame file only through `replay_next`. The `window.openrs` page bridge of the `web` crate can replace it once it replays frames.
+- The page bridge supports frame replay now. Browser RenderDoc capture also uses a marked `replay_next` frame to exclude Chromium compositor work.
 
 # GPU Memory
 
@@ -340,3 +361,10 @@ OpenGL and WebGPU describe the same draw differently, so the summary normalizes 
 - Vulkan captures are analyzed in one process unless `OPENRS_JOBS` is set. If parallel workers fail, the analysis falls back to one process instead of failing.
 - A failed capture never signals process id 0 or 1, so a failed capture cannot stop the harness itself.
 
+
+# Final Integration Check
+
+- The complete harness verification ran both native and browser capture paths on the consolidated local cache. Browser rendering used NVIDIA WebGPU, not SwiftShader.
+- The latest browser-target score was 97.5 and native-target score 74.3. Both rendering verdicts were FAIL. These are separate captures and their scores are not a claim that one backend is more correct.
+- The normalization tests use recorded matrix values and synthetic origin, texture and classification cases. WebGPU raw-word uniform blocks still provide weaker diagnostics than named, reflected client uniforms; the detailed evidence and image differences remain necessary.
+- Alpha blend changes and missing client textures remain mismatches unless their irrelevance can actually be demonstrated. The golden selftest intentionally detects its differing alpha factor.

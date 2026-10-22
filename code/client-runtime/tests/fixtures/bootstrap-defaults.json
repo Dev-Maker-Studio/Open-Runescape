@@ -1,0 +1,112 @@
+{
+  "provenance": {
+    "source": "Existing native jar; fresh GamePreferences(Game.RUNESCAPE), no persisted preferences",
+    "jar": "darkan-client-shaded-2.0.0-all.jar",
+    "jarSha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+    "helperSha256": "c27c967fd130acd07b486c995d0f7fa37110ae05eb93a99667880112e0d4a3e9",
+    "generatorSha256": "b0f44d113c47939f9d5fc65b831dadf91296a279fb03008f67430d5a41aa64da",
+    "nativeCalls": [
+      "GamePreferences(Game.RUNESCAPE)",
+      "GamePreferences.encode()",
+      "GamePreferences(Packet, Game.RUNESCAPE)",
+      "Loader.loadParams()"
+    ],
+    "isolation": "bwrap --unshare-net; read-only host root; copied jar; empty temporary home; cleared environment",
+    "hardwareInputs": [
+      "GameShell.maxMemory",
+      "GameShell.availableProcessors",
+      "SystemInfo.OS_ARCH"
+    ],
+    "loaderParameterIds": {
+      "affiliateP": "33",
+      "clientKey": "13",
+      "JS5token": "17",
+      "sessionToken": "27",
+      "game": "8",
+      "language": "31"
+    },
+    "loaderScope": "Source-public Loader parameters only; offline.invalid is an unused synthetic host"
+  },
+  "loaderDefaults": {
+    "affiliateP": "wwGlrZHF5gKN6D3mDdihco3oPeYN2KFybL9hUUFqOvk",
+    "clientKey": "29EDD9FDC775629058FBBF106C5B0E0A3A8028FE0037D1737B8EC3EA2F4E8B8FD6F54EF2F4E65862",
+    "JS5token": "ev9+VAp5/tMKeNR/7MOuH6lKWS+rGkHK",
+    "sessionToken": 1451434218,
+    "game": 0,
+    "language": 0
+  },
+  "defaults": {
+    "input": {
+      "game": "RUNESCAPE",
+      "gameId": 0,
+      "maxMemory": 245,
+      "availableProcessors": 2,
+      "osArch": "amd64"
+    },
+    "processorSpecs": {
+      "maxMemory": 245,
+      "processorCount": 2,
+      "isArm": false
+    },
+    "length": 35,
+    "hex": "1c000003000001010101010102000202000101010300010201000400007f7f7f7f7f01",
+    "roundTripHex": "1c000003000001010101010102000202000101010300010201000400007f7f7f7f7f01",
+    "roundTripEqual": true
+  },
+  "variants": {
+    "memory244": {
+      "input": {
+        "game": "RUNESCAPE",
+        "gameId": 0,
+        "maxMemory": 244,
+        "availableProcessors": 2,
+        "osArch": "amd64"
+      },
+      "processorSpecs": {
+        "maxMemory": 244,
+        "processorCount": 2,
+        "isArm": false
+      },
+      "length": 35,
+      "hex": "1c000003000001010101010102000002000101010300010201000400007f7f7f7f7f01",
+      "roundTripHex": "1c000003000001010101010102000002000101010300010201000400007f7f7f7f7f01",
+      "roundTripEqual": true
+    },
+    "processors1": {
+      "input": {
+        "game": "RUNESCAPE",
+        "gameId": 0,
+        "maxMemory": 245,
+        "availableProcessors": 1,
+        "osArch": "amd64"
+      },
+      "processorSpecs": {
+        "maxMemory": 245,
+        "processorCount": 1,
+        "isArm": false
+      },
+      "length": 35,
+      "hex": "1c000003000001010101010102000202000101010300010201000200007f7f7f7f7f01",
+      "roundTripHex": "1c000003000001010101010102000202000101010300010201000200007f7f7f7f7f01",
+      "roundTripEqual": true
+    },
+    "arm": {
+      "input": {
+        "game": "RUNESCAPE",
+        "gameId": 0,
+        "maxMemory": 245,
+        "availableProcessors": 2,
+        "osArch": "arm"
+      },
+      "processorSpecs": {
+        "maxMemory": 245,
+        "processorCount": 2,
+        "isArm": true
+      },
+      "length": 35,
+      "hex": "1c000003000001010101010102000202000101010300010301000400007f7f7f7f7f01",
+      "roundTripHex": "1c000003000001010101010102000202000101010300010301000400007f7f7f7f7f01",
+      "roundTripEqual": true
+    }
+  }
+}

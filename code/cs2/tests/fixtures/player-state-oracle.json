@@ -1,0 +1,37 @@
+{
+  "oracle": "Actual PlayerWorldOps.dispatch, CoreVmOps.dispatch and DetailCapabilityOps.dispatch from an isolated copy of the pinned shaded client JAR; Client statics, PlayerUpdate, LoginManager and NpcEntity state set directly with Unsafe/reflection.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "f70ddb215a1f0fab05fcbfa4a4bfc93e7bb79a7615bdcd34f9a3f67e0b5a0364",
+  "generator_sha256": "ad6811c9a32081eb5da3d316843ae45298c44f07aeccd69e1688c65d6443e3f3",
+  "fixture_sha256": {
+    "player-state.native.tsv": "d20de6fe90524f10f8aff539e454858ae24455c6ff6a16eaebe087ea3334e5d9",
+    "player-state.stats.tsv": "c36bc037e4bb8543c78d19c4a8a042abb0b2438e5161a21e3b476dbb1b7e8ac2"
+  },
+  "cases": 6286,
+  "opcodes": [
+    "COMLEVEL_ACTIVE",
+    "GENDER",
+    "GET_NPC_STAT",
+    "GET_SELFYANGLE",
+    "GET_VARNBIT_OLD",
+    "GET_VARN_OLD",
+    "MAP_MEMBERS",
+    "MAP_WORLD",
+    "NPC_TYPE",
+    "PLAYERDEMO",
+    "PLAYERMEMBER",
+    "PLAYERMOD",
+    "PLAYERMODLEVEL",
+    "REBOOTTIMER",
+    "RUNENERGY_VISIBLE",
+    "RUNWEIGHT_VISIBLE",
+    "SELF_PLAYER_UID",
+    "STAFFMODLEVEL",
+    "STAT",
+    "STAT_BASE",
+    "STAT_VISIBLE_XP"
+  ],
+  "random_seed": "0x727c5227 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_player_state.py --check"
+}

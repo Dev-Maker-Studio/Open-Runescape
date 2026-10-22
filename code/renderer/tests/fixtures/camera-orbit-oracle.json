@@ -1,0 +1,17 @@
+{
+  "oracle": "Real Camera.updateFollowPlayerCamera, Camera.processCamera, Camera.setCameraPosition, MapRegion.tileheightForAbsolutePosition, Ground.getAverageHeight, Client.applyCameraYawRight and StaticMethods.applyCameraYawLeft/PitchUp/PitchDown from an isolated copy of the pinned shaded client JAR, run in a bwrap sandbox without network. Injected by the driver: the MapRegion, Scene, four GroundSM height grids, SettingsBits and lighting from hash functions, the player position, the per-cycle velocity halving, the jitter counter and step flips with scripted random bits, the Ctrl wheel zoom rule and the drawGameArea yaw, roll, base delta and scene clamp.",
+  "jar": "pinned.jar",
+  "jar_is_pinned": true,
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "4c2c7b2b222287fbafe20c4f28636a9b5d269a5ace05d7ebbc63001ea88515bd",
+  "generator_sha256": "7e927f13375b27fdd43530660383ab8ef2ae9dd9d70f02f84cae3c25a73e431a",
+  "fixture_sha256": {
+    "camera-orbit.native.tsv": "7269bfc3ef3b5ee9cb6c090d7a7fa6d491e40ddfc233d9f285f720f0e2af2e29"
+  },
+  "cases": 5496,
+  "kinds": [
+    "orbit"
+  ],
+  "random_seed": "0x0c4a3e72 (java.util.Random)",
+  "reproduction": "python3 code/renderer/tests/native/generate_camera_orbit.py --check"
+}

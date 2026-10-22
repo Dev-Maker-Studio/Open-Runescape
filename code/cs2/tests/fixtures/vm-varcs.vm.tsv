@@ -1,0 +1,35 @@
+instructions	66
+int	727
+int	-1
+int	-1
+int	0
+int	-2147483648
+int	0
+int	2147483647
+int	727
+string	hex:6c6f7765722d766172632d737472696e67
+string	hex:
+string	hex:
+string	hex:6368696c642d6669727374
+string	hex:
+string	hex:
+string	hex:
+string	hex:
+string	hex:
+string	hex:
+string	hex:726f6f742d74657874
+string	hex:63616c6c65722d766172632d6c6f63616c
+string	null
+long	727727727727
+long	9223372036854775080
+long	-9223372036854775808
+long	-9223372036854775081
+local-int	727
+local-string	hex:63616c6c65722d766172632d6c6f63616c
+local-string	null
+local-long	-9223372036854775081
+array	0	0
+array	1	0
+array	2	0
+array	3	0
+array	4	0

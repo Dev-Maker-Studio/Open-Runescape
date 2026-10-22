@@ -15,8 +15,9 @@ import renderdoc as rd
 
 import diff
 
-VERSION = 3
+VERSION = 6
 TINT = 23
+SCREEN_Y = {"aClip"}
 LIMIT = 4 << 20
 STAGES = {"vs": rd.ShaderStage.Vertex, "fs": rd.ShaderStage.Pixel, "cs": rd.ShaderStage.Compute}
 NULL = rd.ResourceId.Null()
@@ -101,6 +102,46 @@ def relative_indices(idx):
     return idx - idx.min() if len(idx) else idx
 
 
+def rgba8(f, a, t):
+    c = f.compCount
+    if f.type != rd.ResourceFormatType.Regular or c not in (1, 2, 3, 4) or not a.size:
+        return None
+    if f.compByteWidth == 1 and c == 4 and a.size % max(t.height, 1) == 0:
+        px = a.reshape(-1, 4)
+        return px[:, [2, 1, 0, 3]] if f.Name().startswith("B8G8R8A8") else px
+    if f.compByteWidth == 1 and a.size == t.width * t.height * c:
+        return expand_rgba(a.reshape(-1, c))
+    if f.compType == rd.CompType.Float and f.compByteWidth == 2 and a.size == t.width * t.height * c * 2:
+        return expand_rgba(np.rint(np.clip(a.view("<f2").astype(np.float32), 0, 1) * 255).astype(np.uint8).reshape(-1, c))
+    return None
+
+
+def value_range(f, a):
+    if f.compType != rd.CompType.Float or f.compByteWidth not in (2, 4) or a.size % f.compByteWidth:
+        return None
+    v = a.view("<f2" if f.compByteWidth == 2 else "<f4")
+    v = v[np.isfinite(v)]
+    return [round(float(v.min()), 3), round(float(v.max()), 3)] if len(v) else None
+
+
+def expand_rgba(px):
+    out = np.zeros((len(px), 4), np.uint8)
+    out[:, 3] = 255
+    out[:, : px.shape[1]] = px
+    return out
+
+
+def top_left_clip(d, target_height):
+    d = d.copy()
+    d[:, [1, 3]] = target_height - d[:, [3, 1]]
+    return d
+
+
+def trim_zero_components(d):
+    used = np.flatnonzero(d.any(0))
+    return d[:, : used[-1] + 1 if len(used) else 1]
+
+
 def decode(raw, off, stride, idx, f):
     dt = DTYPE.get((f.compType, f.compByteWidth))
     if f.type != rd.ResourceFormatType.Regular or dt is None:
@@ -140,15 +181,18 @@ class Replay:
         raw = self.ctl.GetTextureData(r, rd.Subresource(0, 0, 0))
         a = np.frombuffer(raw, np.uint8)
         f = t.format
-        if f.compByteWidth == 1 and f.compCount == 4 and f.type == rd.ResourceFormatType.Regular and a.size and a.size % max(t.height, 1) == 0:
-            px = a.reshape(-1, 4)[:, [2, 1, 0, 3]] if f.Name().startswith("B8G8R8A8") else a.reshape(-1, 4)
+        px = rgba8(f, a, t)
+        if px is not None:
             rows = np.ascontiguousarray(px).reshape(t.height, -1)
-            res = (h(rows.tobytes()), h(rows[::-1].tobytes()))
+            res = (h(rows.tobytes()), h(rows[::-1].tobytes()), value_range(f, a))
         else:
-            res = (h(raw), None)
+            res = (h(raw), None, value_range(f, a))
         if not t.creationFlags & (rd.TextureCategory.ColorTarget | rd.TextureCategory.DepthTarget):
             self.thash[key] = res
         return res
+
+    def height(self, p):
+        return next((self.tex[int(o.resource)].height for o in p.GetOutputTargets() if o.resource != NULL and int(o.resource) in self.tex), None)
 
     def state(self, p):
         gl = self.ctl.GetGLPipelineState() if p.IsCaptureGL() else None
@@ -165,10 +209,10 @@ class Replay:
         vx, vy, vw, vh = vp.x, vp.y + min(vp.height, 0), vp.width, abs(vp.height)
         full = not sc.enabled or (sc.x <= 0 and sc.y <= 0 and sc.width >= vw and sc.height >= vh)
         sy = sc.y
-        if gl:
-            target = next((self.tex[int(o.resource)] for o in p.GetOutputTargets() if o.resource != NULL and int(o.resource) in self.tex), None)
-            if target is not None:
-                sy = top_left_y(sc.y, sc.height, target.height)
+        th = self.height(p) if gl else None
+        if th is not None:
+            sy = top_left_y(sc.y, sc.height, th)
+            vy = top_left_y(vy, vh, th)
         blends = [
             {"src": nm(b.colorBlend.source), "dst": nm(b.colorBlend.destination), "op": nm(b.colorBlend.operation),
              "asrc": nm(b.alphaBlend.source), "adst": nm(b.alphaBlend.destination), "aop": nm(b.alphaBlend.operation), "mask": b.writeMask}
@@ -198,6 +242,7 @@ class Replay:
             index = {"format": f"u{stride_i * 8}", "hash": h(rel.tobytes()), "max": int(rel.max()) if len(rel) else 0}
         inst = np.arange(a.instanceOffset, a.instanceOffset + max(a.numInstances, 1))
         attrs, raws = [], {}
+        th = self.height(p) if p.IsCaptureGL() else None
         for s in refl.inputSignature if refl else []:
             at = next((a for a in ins if a.name and a.name == s.varName), ins[s.regIndex] if s.regIndex < len(ins) else None)
             if s.systemValue != rd.ShaderBuiltin.Undefined or at is None:
@@ -215,7 +260,9 @@ class Replay:
             d = decode(raws[key], at.byteOffset, vb.byteStride, sel - lo, at.format)
             rec = {"loc": s.regIndex, "name": s.varName, "format": at.format.Name(), "per_instance": bool(at.perInstance)}
             if d is not None:
-                d = np.round(d, 4)
+                if th is not None and s.varName in SCREEN_Y and d.shape[1] == 4:
+                    d = top_left_clip(d, th)
+                d = np.round(trim_zero_components(d), 4)
                 rec |= {"count": len(d), "hash": h(d.astype(np.float32).tobytes()), "head": d[:2].ravel().tolist()[:6]}
             attrs.append(rec)
         return attrs, index
@@ -261,7 +308,7 @@ class Replay:
                 if int(r) in self.tex:
                     t = self.tex[int(r)]
                     th = self.texture(r)
-                    rec["textures"].append({"stage": key, "slot": u.access.index, "rid": int(r), "size": [t.width, t.height, t.depth], "mips": t.mips, "format": t.format.Name(), "hash": th[0], "flip_hash": th[1]})
+                    rec["textures"].append({"stage": key, "slot": u.access.index, "rid": int(r), "size": [t.width, t.height, t.depth], "mips": t.mips, "format": t.format.Name(), "hash": th[0], "flip_hash": th[1], **({"range": th[2]} if th[2] else {})})
                 else:
                     rec["buffers"].append({"stage": key, "slot": u.access.index, "hash": h(bytes(self.buf(r)))})
         rec["state"] = self.state(a)

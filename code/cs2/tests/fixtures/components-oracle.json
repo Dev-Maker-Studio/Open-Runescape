@@ -1,0 +1,243 @@
+{
+  "oracle": "Actual ComponentLifecycleOps, ComponentQueryOps, ComponentSetterOps, InterfaceQueryOps and InterfaceSetterOps dispatch on real Component and Interface objects with a real CS2Executor, run headless from an isolated COPY of the pre-existing pinned shaded client JAR. Pulse events are read from the real PulseEventHandler.LOW_PRIORITY queue and redraws from Client.IS_COMPONENT_ON_TOP. No component operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentLifecycleOps.kt": "d2c9cc40d736eb12ef57dae5e9db05f95c96e1080b4eb7f1991802cd5510f8cd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentQueryOps.kt": "11a490fba441cae41d34532ac10f0aee1e47d475f68fb70249a5fbad5ed3e194",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentSetterOps.kt": "5f8f51aedc6abdd301c9c349db2d770094573cf80e6e812c0dadba06094184f6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceSetterOps.kt": "d456591367701349e609e5c508b9e5a66ca1dfc6ac32590e053510e2099a2b87",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CS2SharedOps.kt": "eb06364612eefa466cfcae26f16e796d7c679cd89676fec9e9253e59d380fd6a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventQueue.kt": "ed712458a2ed3aa36e158998304f23ae0f40c1d9bfeed3ee4b32dbe4698fe951",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentFixtures.java": "f2db801ef574ff5aa1e8adc841c1db9fcc439316b36bc158a52053af5240f72d",
+    "code/cs2/tests/native/generate_components.py": "2a8a7b8bbc1f4a5b0aaf0f7bd36a54097fd5e1ed86f04be1291ac6d1c5408b55"
+  },
+  "source_provenance": "Hashes identify the current relevant Kotlin sources and the shared Java helper, not a source rebuild; the pinned pre-existing JAR is the executable oracle.",
+  "generator_sha256": "2a8a7b8bbc1f4a5b0aaf0f7bd36a54097fd5e1ed86f04be1291ac6d1c5408b55",
+  "driver_sha256": "f2db801ef574ff5aa1e8adc841c1db9fcc439316b36bc158a52053af5240f72d",
+  "fixture_sha256": {
+    "components.native.tsv": "5bcac700b0d57b4cd95553b9929606ee5900a00e5245c9e30b9e19a07d06822c",
+    "components.stats.tsv": "f424acc0aa573c3179cbf24b66308229498f363d82e2cd505aade525ba4c37a6"
+  },
+  "random_seed": "0x727c5219 (java.util.Random)",
+  "tsv_encoding": "Tab separated records. W name capacity canvas-width canvas-height starts a world, I interface prevent-interaction count, C component columns (index type id-hash parent-id x y width height base-x base-y base-width base-height aspect-x/y/width/height types aspect-width aspect-height aspect-x aspect-y hidden scroll x/y/width/height sprite text-hex color transparency rendered cache-reference), N null slot, K initial hook. T world opcode operand int-stack string-stack starts a step, R result (ok or error:exception class) final int stack, final string stack, queued pulse events, secondary hooks 1 and 2 (interface:id-hash:slot or dash), D key then the changed component line (dash when the component is gone), Z total step count. Stacks are comma separated, dash is empty, strings are hex: prefixed or null.",
+  "cases": 7000,
+  "delta_records": 1519,
+  "records": {
+    "W": 2,
+    "I": 8,
+    "C": 25,
+    "N": 5,
+    "K": 3,
+    "T": 7000,
+    "R": 7000,
+    "D": 1519,
+    "Z": 1
+  },
+  "per_opcode": {
+    "CC_CREATE": {
+      "ok": 71,
+      "error": 333
+    },
+    "CC_DELETE": {
+      "ok": 21,
+      "error": 132
+    },
+    "CC_DELETEALL": {
+      "ok": 101,
+      "error": 33
+    },
+    "CC_FIND": {
+      "ok": 358,
+      "error": 36
+    },
+    "CC_GETCOLOUR": {
+      "ok": 88,
+      "error": 45
+    },
+    "CC_GETGRAPHIC": {
+      "ok": 84,
+      "error": 48
+    },
+    "CC_GETHEIGHT": {
+      "ok": 82,
+      "error": 48
+    },
+    "CC_GETHIDE": {
+      "ok": 82,
+      "error": 58
+    },
+    "CC_GETSCROLLHEIGHT": {
+      "ok": 90,
+      "error": 51
+    },
+    "CC_GETSCROLLWIDTH": {
+      "ok": 84,
+      "error": 52
+    },
+    "CC_GETSCROLLX": {
+      "ok": 89,
+      "error": 50
+    },
+    "CC_GETSCROLLY": {
+      "ok": 66,
+      "error": 54
+    },
+    "CC_GETTEXT": {
+      "ok": 83,
+      "error": 59
+    },
+    "CC_GETTRANS": {
+      "ok": 84,
+      "error": 63
+    },
+    "CC_GETWIDTH": {
+      "ok": 92,
+      "error": 59
+    },
+    "CC_GETX": {
+      "ok": 84,
+      "error": 48
+    },
+    "CC_GETY": {
+      "ok": 72,
+      "error": 61
+    },
+    "CC_SETCOLOUR": {
+      "ok": 92,
+      "error": 45
+    },
+    "CC_SETGRAPHIC": {
+      "ok": 82,
+      "error": 41
+    },
+    "CC_SETHIDE": {
+      "ok": 92,
+      "error": 54
+    },
+    "CC_SETPOSITION": {
+      "ok": 94,
+      "error": 46
+    },
+    "CC_SETSIZE": {
+      "ok": 82,
+      "error": 55
+    },
+    "CC_SETTEXT": {
+      "ok": 86,
+      "error": 51
+    },
+    "CC_SETTRANS": {
+      "ok": 96,
+      "error": 39
+    },
+    "IF_FIND": {
+      "ok": 348,
+      "error": 64
+    },
+    "IF_GETCOLOUR": {
+      "ok": 109,
+      "error": 31
+    },
+    "IF_GETGRAPHIC": {
+      "ok": 108,
+      "error": 36
+    },
+    "IF_GETHEIGHT": {
+      "ok": 100,
+      "error": 27
+    },
+    "IF_GETHIDE": {
+      "ok": 110,
+      "error": 17
+    },
+    "IF_GETSCROLLHEIGHT": {
+      "ok": 105,
+      "error": 36
+    },
+    "IF_GETSCROLLWIDTH": {
+      "ok": 101,
+      "error": 19
+    },
+    "IF_GETSCROLLX": {
+      "ok": 127,
+      "error": 28
+    },
+    "IF_GETSCROLLY": {
+      "ok": 96,
+      "error": 22
+    },
+    "IF_GETTEXT": {
+      "ok": 117,
+      "error": 25
+    },
+    "IF_GETTRANS": {
+      "ok": 102,
+      "error": 32
+    },
+    "IF_GETWIDTH": {
+      "ok": 120,
+      "error": 21
+    },
+    "IF_GETX": {
+      "ok": 115,
+      "error": 21
+    },
+    "IF_GETY": {
+      "ok": 108,
+      "error": 33
+    },
+    "IF_SETCOLOUR": {
+      "ok": 116,
+      "error": 37
+    },
+    "IF_SETGRAPHIC": {
+      "ok": 127,
+      "error": 28
+    },
+    "IF_SETHIDE": {
+      "ok": 118,
+      "error": 27
+    },
+    "IF_SETPOSITION": {
+      "ok": 118,
+      "error": 40
+    },
+    "IF_SETSIZE": {
+      "ok": 116,
+      "error": 24
+    },
+    "IF_SETTEXT": {
+      "ok": 101,
+      "error": 33
+    },
+    "IF_SETTRANS": {
+      "ok": 95,
+      "error": 26
+    }
+  },
+  "error_classes": {
+    "error:NullPointerException": 1540,
+    "error:ArrayIndexOutOfBoundsException": 304,
+    "error:IllegalArgumentException": 49,
+    "error:RuntimeException": 288,
+    "error:NegativeArraySizeException": 7
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "oracle": "Actual EnumEmailFriendOps.dispatch (reading EnumType through TypeLists.ENUM) for direct enum cases, CS2Script.decodeScript for decoded fixtures, and CS2Executor.executeScript via unchanged NativeFixtures.execution for root/parameterized child execution. All invoked from an isolated COPY of the pre-existing pinned shaded client JAR; no enum expression is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Script.kt": "649f42be8713d1c4c743dd8e81ee9d0a7726dc2856169ef0aeb7a0bde6b04476",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2CallFrame.kt": "a181a246d167c6e652529b43393f2ec881994cd1e8b54e2c2a054d8ba6ff72bf",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CS2Dispatch.kt": "f98f913ba7f5d48d0dd6e7dbe802149429d4b9390961886485501603082beeb7",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CoreVmOps.kt": "be05214d08ae26980d31470e542ece77d63fbfddbcd16a34a29617441a007b5a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/EnumEmailFriendOps.kt": "9271b1dc4dc234d74a2214df75311d1ade6311c9e118f629df3bce522b7bdc0a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/enumtype/EnumType.kt": "b67fc5656393446572082afc8f8832928354c30651a3781237bd3c2fed74c178",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/enumtype/EnumTypeList.kt": "1048457b7563fa8474cc712c2bbd40eb473f4d25852c2e9874f0f3af5919b722",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/buffer/Packet.kt": "496e0841cb82e2d6d8a49e6dcf72217bc0928824b37312e7786b2ac819736734",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/Utils.kt": "f426bd8e158b46718a651fa7113d2c15c168e4423649ea410871cbfa0dd518e8",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/EnumFixtures.java": "c54838ef332cd7bfd097fb8b402dbe7f99e1f8992abe11884568e99940512888",
+    "code/cs2/tests/native/generate_enums.py": "50e3e8d4d3695cf905ab0431e0df6b6b074b0081bc06875c4b47ef500139c7bc"
+  },
+  "source_provenance": "Hashes identify the current relevant Kotlin sources and unchanged shared Java helper, not a source rebuild; the pinned pre-existing JAR is the executable oracle.",
+  "generator_sha256": "50e3e8d4d3695cf905ab0431e0df6b6b074b0081bc06875c4b47ef500139c7bc",
+  "driver_sha256": "c54838ef332cd7bfd097fb8b402dbe7f99e1f8992abe11884568e99940512888",
+  "fixture_sha256": {
+    "enum-defs.tsv": "a9e2e46dd349c7b420191f29803f63fcc40d358fca139cd54a1640d688e11eca",
+    "enum.native.tsv": "08aa083f1a3fb689ea129ecb7bfb0de4496823c6ffc1be30cbd52c83c17bf63e",
+    "vm-enums-child.bin": "48136f511c4321080dad459344225e7748f9f124e61edacd281188033006c6ae",
+    "vm-enums-child.decode.tsv": "33c7381da6a541be2cdef70d4626c655a5777dab5cb07642b24c7ec3fca25783",
+    "vm-enums.bin": "bae2d19f42810a6b4dac4f070a8325745e4140f865bd79794d94461b3bbc3bcb",
+    "vm-enums.decode.tsv": "a027584e19de45b4a294f2304e4129da11e82a4f7443632ab8453916967bf3c8",
+    "vm-enums.vm.tsv": "0f402c0ea4b5e97982fc172c64a146576e905c92fa45ed8ebfe4e97eca890462"
+  },
+  "opcodes": {
+    "ENUM": {
+      "wire": 540,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_STRING": {
+      "wire": 820,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_HASOUTPUT": {
+      "wire": 60,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_HASOUTPUT_STRING": {
+      "wire": 840,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_GETOUTPUTCOUNT": {
+      "wire": 533,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_GETREVERSECOUNT": {
+      "wire": 149,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_GETREVERSECOUNT_STRING": {
+      "wire": 438,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_GETREVERSEINDEX": {
+      "wire": 904,
+      "family": 8,
+      "has_int_operand": false
+    },
+    "ENUM_GETREVERSEINDEX_STRING": {
+      "wire": 86,
+      "family": 8,
+      "has_int_operand": false
+    }
+  },
+  "native_cases": 23943,
+  "cases_per_operation": {
+    "ENUM": 4017,
+    "ENUM_STRING": 169,
+    "ENUM_HASOUTPUT": 505,
+    "ENUM_GETOUTPUTCOUNT": 15,
+    "ENUM_GETREVERSECOUNT": 421,
+    "ENUM_GETREVERSEINDEX": 12081,
+    "ENUM_HASOUTPUT_STRING": 183,
+    "ENUM_GETREVERSECOUNT_STRING": 183,
+    "ENUM_GETREVERSEINDEX_STRING": 6369
+  },
+  "error_cases_per_operation": {
+    "ENUM": 3666,
+    "ENUM_HASOUTPUT": 360,
+    "ENUM_GETREVERSECOUNT": 300,
+    "ENUM_GETREVERSEINDEX": 12060,
+    "ENUM_HASOUTPUT_STRING": 134,
+    "ENUM_GETREVERSECOUNT_STRING": 134,
+    "ENUM_GETREVERSEINDEX_STRING": 6346
+  },
+  "definitions": 12,
+  "decoded_scripts": {
+    "vm-enums": {
+      "instructions": 177,
+      "enum_instructions": {
+        "ENUM": 9,
+        "ENUM_STRING": 4,
+        "ENUM_HASOUTPUT": 4,
+        "ENUM_HASOUTPUT_STRING": 3,
+        "ENUM_GETOUTPUTCOUNT": 3,
+        "ENUM_GETREVERSECOUNT": 4,
+        "ENUM_GETREVERSECOUNT_STRING": 3,
+        "ENUM_GETREVERSEINDEX": 5,
+        "ENUM_GETREVERSEINDEX_STRING": 3
+      }
+    },
+    "vm-enums-child": {
+      "instructions": 11,
+      "enum_instructions": {
+        "ENUM": 1,
+        "ENUM_STRING": 1
+      }
+    }
+  },
+  "native_vm_instructions": 232,
+  "native_vm_records": {
+    "int": 36,
+    "string": 14,
+    "long": 1,
+    "local-int": 1,
+    "local-string": 1,
+    "local-long": 1,
+    "array": 5
+  },
+  "random_seed": "0x727c520e (java.util.Random)",
+  "native_tsv_encoding": "Seven columns without header: case name, opcode name, unsigned byte operand, initial int stack (comma-separated signed decimal), native result (ok or error:exception-simple-class:exact-message; dash for null message), native intStackPtr (signed decimal), final visible int stack. Dash encodes an empty initial/final stack, including all negative-pointer outcomes. Negative native pointers are captured before any array slicing.",
+  "decode_tsv_encoding": "Unchanged NativeFixtures.fixture output: name and six local/argument counts, then instruction index, opcode, operand kind, decoded value. .bin is native CS2 bytecode with unsigned byte operands for all four enum instructions.",
+  "vm_tsv_encoding": "Unchanged NativeFixtures.execution output for vm-enums: exact native instruction count, typed final int/string/long stack records, typed root locals, and five logical global-array records. Strings are UTF-8 hex prefixed hex:; null strings are null.",
+  "coverage": [
+    "All nine ENUM opcodes through the real EnumEmailFriendOps.dispatch with a real EnumTypeList (allocated without a JS5 provider, LRU cache pre-populated with real EnumType objects, absent ids hold the empty EnumType exactly as a missing cache file would).",
+    "Twelve definitions covering int and string values arrays, int and string parameter maps, Integer values under a string value type, string parameters under an int value type, size/values mismatch, size with neither table, size zero with a populated array, and non-int key types; plus the absent id 99 and id -1.",
+    "Grids over key type, value type, key, value, index and a text pool including null, empty, Latin-1 and non-Latin-1 strings; 2000 deterministic random iterations; full 1000-deep stacks per opcode.",
+    "Failure outcomes record exact exception class and message and the post-failure stacks, proving all operands are consumed before validation.",
+    "Decoded scripts run through the actual executor including a parameterized child (GOSUB_WITH_PARAMS) and compare instruction counts, stacks, locals and global arrays."
+  ],
+  "limitations": [
+    "Enum definitions come from an explicit host model, not from the JS5 cache; EnumType.decode is not exercised.",
+    "Underflow is not generated: the Kotlin executor fails with an ArrayIndexOutOfBoundsException and a negative stack pointer, which the Rust VM reports as a typed error with unchanged stacks; the Rust tests assert the typed error separately.",
+    "No game entry point, network, cache, accounts or display is used; only isolated javac/java fixture runs against a copied JAR."
+  ],
+  "reproduction": "python3 code/cs2/tests/native/generate_enums.py --check",
+  "generation": "python3 code/cs2/tests/native/generate_enums.py",
+  "work_directory": "Default code/cs2/target/native-enums; optional --work-dir must resolve inside code/cs2/target or code/harness/target/loop/iteration18-validation/cs2. Only the copied JAR/classes and regenerated outputs are written there; the work directory is not part of fixture identity."
+}

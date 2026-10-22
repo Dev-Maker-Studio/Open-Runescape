@@ -2,16 +2,30 @@ package com.jagex.game.runetek5.graphics.modern.dump
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import org.lwjgl.opengl.GL33.GL_TEXTURE_2D
+import org.lwjgl.opengl.GL33.GL_TEXTURE_3D
+import org.lwjgl.opengl.GL33.GL_TEXTURE_CUBE_MAP
+
+object SamplerTargets {
+    private val volumes = setOf("uWaveNoise", "uFoamNoise", "uWaterNoise", "uNormalSampler", "uOverlayTexture3D", "uTexture3D")
+    private val cubes = setOf("uEnvMap", "uEnvMapSampler", "uCubeMap")
+
+    fun of(sampler: String): Int = when (sampler) {
+        in volumes -> GL_TEXTURE_3D
+        in cubes -> GL_TEXTURE_CUBE_MAP
+        else -> GL_TEXTURE_2D
+    }
+}
 
 class Slot(val offset: Int, val int: Boolean = false, val comps: Int = 0, val stride: Int = 16)
 
 class Attr(val location: Int, val offset: Int, val bytes: Int)
 
-class Pass(val id: Int, val stride: Int, val block: Int, val attrs: List<Attr>, val slots: Map<String, Slot>, val samplers: List<String>) {
+class Pass(val id: Int, val stride: Int, val block: Int, val attrs: List<Attr>, val slots: Map<String, Slot>, val samplers: List<String>, val captureSlots: Map<String, Slot> = emptyMap()) {
     fun pack(values: Map<String, FloatArray>, extra: Map<String, FloatArray> = emptyMap()): ByteArray {
         val out = ByteBuffer.allocate(block).order(ByteOrder.LITTLE_ENDIAN)
         for ((name, v) in values + extra) {
-            val s = slots[name] ?: continue
+            val s = slots[name] ?: captureSlots[name] ?: continue
             if (s.comps == 0) {
                 for (i in v.indices) if (s.offset + i * 4 + 4 <= block) if (s.int) out.putInt(s.offset + i * 4, v[i].toInt()) else out.putFloat(s.offset + i * 4, v[i])
             } else {
@@ -58,7 +72,7 @@ object Passes {
         "uWaterTime" to f(5372), "uRippleFog" to f(5376), "uHasWaterNoise" to i(5384), "uWaterColour" to f(5392), "uDepthFog" to i(5404),
         "uInvViewProjection" to f(5408), "uViewport" to f(5472), "uFramebufferSize" to f(5488), "uGroundShadowEnabled" to i(5496),
         "uGroundShadowScale" to f(5500), "uHasTexture" to i(5504), "uFogColor" to f(5520), "uCombineMode" to i(5536), "uAlphaFromVertex" to i(5540)
-    ), listOf("uTexture", "uGroundShadowTex"))
+    ), listOf("uTexture", "uGroundShadowTex", "uWaterNoise"))
 
     val instanced = Pass(4, 36, 4320, model36, m(
         "uViewProjection" to f(0), "uClipPlane" to f(64), "uViewMatrix" to f(80), "uSunDirection" to f(144), "uSunBrightness" to f(156),
@@ -84,7 +98,7 @@ object Passes {
         "uRefraction" to f(292), "uWaveStrength" to f(296), "uSlowTime" to f(300), "uShadowScale" to f(304), "uReflectionSteps" to i(308),
         "uFogEnabled" to i(312), "uFogStart" to f(316), "uFogEnd" to f(320), "uPointLightCount" to i(324), "uPointLightPos" to a(336, 4),
         "uPointLightColor" to a(2384, 3)
-    ), listOf("uWaveNoise", "uFoamNoise", "uEnvMap", "uShadowTex", "uReflection"))
+    ), listOf("uWaveNoise", "uFoamNoise", "uEnvMap", "uShadowTex", "uReflection"), m("uTessPixels" to f(116)))
 
     val material = Pass(8, 36, 272, model36, m(
         "uModelViewProjection" to f(0), "uModelView" to f(64), "uNormalMatrix" to a(128, 3), "uSunDirection" to f(176), "uSunColor" to f(192),

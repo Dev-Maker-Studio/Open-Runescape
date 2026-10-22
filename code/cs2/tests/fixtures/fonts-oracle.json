@@ -1,0 +1,12 @@
+{
+  "oracle": "Actual MathStringOps.dispatch for STRINGWIDTH, PARAWIDTH, PARAHEIGHT and PARAHEIGHT_EXTRA through the real FontMetrics, InlineSprites and Utils classes, with the 27 real cache fonts (raw bytes rebuilt from the read-only cache), three synthetic fonts (two variable-width with kerning), fake name icon sprites and synthetic inline sprite groups, from an isolated COPY of the pinned shaded client JAR.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "fixture_sha256": {
+    "fonts.native.tsv": "6255492024caf31c94c713d10ca62db42709fa31dece39b26670b4a85f0e0126",
+    "fonts.table.tsv": "c182a41a8f67ca03d054ef9e554573609d7d2c5238648479bb5e8c806270da78"
+  },
+  "generator_sha256": "fe486847d0177ba9c6b54cf8dab3f43b7ee0c0056db934eb74c2db6102e7601e",
+  "driver_sha256": "9f90e720006a6ae1254b8b45238e0d322f39ce944f5dd8b673ce6745082258a2",
+  "reproduction": "python3 code/cs2/tests/native/generate_fonts.py --check"
+}

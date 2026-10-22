@@ -1,0 +1,22 @@
+{
+  "oracle": "Actual DialogOps.dispatch from an isolated copy of the pinned shaded client JAR; the real Client.GAME_CONNECTION_CONTEXT (isaac null) queue read back for packet bytes.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "7b21f6ad7eef9d394b798061a89d1e1640a2d0454a807b2297ebdc53426cb702",
+  "generator_sha256": "573afc5bfff6c22d2c01b6bdc7ebd851d6aaf6fb13a4f50286e438abf71f0d9a",
+  "fixture_sha256": {
+    "dialog.native.tsv": "48bfd51684c76ca128a038594d42b691b9b3f3b2a0d8c143068332ba54454242",
+    "dialog.stats.tsv": "d480474d878db085476d8a9235e0b2696f9936477cf528b41bd9ef33194715b9"
+  },
+  "cases": 182,
+  "opcodes": [
+    "RESUME_CLANFORUMQFCDIALOG",
+    "RESUME_COUNTDIALOG",
+    "RESUME_HSLDIALOG",
+    "RESUME_NAMEDIALOG",
+    "RESUME_OBJDIALOG",
+    "RESUME_STRINGDIALOG"
+  ],
+  "random_seed": "0x50c1a15 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_dialog.py --check"
+}

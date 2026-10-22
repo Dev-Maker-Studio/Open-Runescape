@@ -1,0 +1,52 @@
+{
+  "jarSha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "libraryJaclibSha256": "92f32235d2a67e7debedd89fbccd2ac0e937302eaa7e0732fe0ba93072a08a74",
+  "javaSourceSha256": "fa172d20b22b67b1691c7237b6bbc4b804fdc456daf8b0a1d9eeafeaf854203f",
+  "scenes": [
+    "a",
+    "b",
+    "c"
+  ],
+  "regionsWithTerrain": [
+    10034,
+    10035,
+    10288,
+    10289,
+    10290,
+    10291,
+    10544,
+    10545,
+    13621,
+    13622,
+    13877,
+    13878
+  ],
+  "regionsWithLocs": [
+    10034,
+    10035,
+    10288,
+    10289,
+    10290,
+    10291,
+    10544,
+    10545,
+    13621,
+    13622,
+    13877,
+    13878
+  ],
+  "modelsRequested": 1473,
+  "modelsUndecodable": [],
+  "idsRun": "PLACE_ORACLE ok ids a placements=10954 b placements=11225 c placements=8376",
+  "fullRun": "PLACE_ORACLE ok full a placements=10954 entities=11022 ok=10738 null=0 errors=0 b placements=11225 entities=11299 ok=11025 null=0 errors=0 c placements=8376 entities=8382 ok=8238 null=0 errors=0",
+  "fullStderr": "WARNING: A restricted method in java.lang.System has been called\nWARNING: java.lang.System::load has been called by PlaceOracle in an unnamed module (file:/tmp/loc-oracle-work/w2/)\nWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module\nWARNING: Restricted methods will be blocked in a future release unless native access is enabled\n\nWARNING: A terminally deprecated method in sun.misc.Unsafe has been called\nWARNING: sun.misc.Unsafe::objectFieldOffset has been called by PlaceOracle (file:/tmp/loc-oracle-work/w2/)\nWARNING: Please consider reporting this to the maintainers of class PlaceOracle\nWARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release",
+  "injected": [
+    "function mask 2048 for every getPair call",
+    "hasShadow false",
+    "ObjectTypeList and OpenGlToolkit built through Unsafe",
+    "GroundGL built through Unsafe over MapLoader.tileHeights",
+    "preferenceMask 0",
+    "SceneGraph.addObject glue transcribed, not executed"
+  ],
+  "originalJarUnchanged": true
+}

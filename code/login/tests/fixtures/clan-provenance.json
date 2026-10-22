@@ -1,0 +1,72 @@
+{
+  "cases": 7396,
+  "generator": {
+    "path": "code/login/tests/reference/clan-generate.py",
+    "sha256": "59b1e06e16aa6c2f10a6fb5c4cfcae35cbae52d1e902ed49312646fe82bbb6b1"
+  },
+  "helper": {
+    "path": "code/login/tests/reference/clan-oracle.java",
+    "sha256": "670cc7dd650cbbc2a97cda07e29f6934e3ec58d315b75ad3073d1a7ba2ec2629"
+  },
+  "invocation": "PacketDecoder.decode(BufferedConnectionContext) with preset currentPacket/currentPacketSize, fake Connection, zero-filled receive buffer, Client clan statics reset per session, Unsafe-allocated ClanVarTypeList; snapshots read the real ClanChannel/ClanSettings fields and helpers",
+  "jar": {
+    "mode": "private-copy",
+    "path": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+    "sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048"
+  },
+  "native_output_sha256": {
+    "clan-cases.tsv": "958c309e24fcebb257c32336b283cb2d7956ac73567ce9af733c5a38876e69e6"
+  },
+  "pinned_jar_class_sha256": {
+    "com/darkan/bot/Bot.class": "c86aae28dba0f743219dfa59c08ec21fb5458983e5d0e0d4e1382d031c486a02",
+    "com/jagex/game/runetek5/cache/node/IntNode.class": "bac4a9c613b86d6330e5b55ce2a3a7471b5683e78cc38536bcefe3169d45e0dd",
+    "com/jagex/game/runetek5/cache/node/IterableNodeMap.class": "b53d46c3479c96010f8012f24fbb017eab706c6e706fad12e162a8ba9ce2cc45",
+    "com/jagex/game/runetek5/cache/node/Node.class": "f25f9ca1a753752b95396275f3540fe8302f3c1fe1fcd598f4277d8f0721df8e",
+    "com/jagex/game/runetek5/cache/node/impl/LongNode.class": "623ff33110030c830b4152acad12c0e2b9011ebd0127d9493b29c0636ca7e7fe",
+    "com/jagex/game/runetek5/cache/node/impl/ObjectNode.class": "8940234681cdc1cbfa5b5a4b4f85f0ce14fc7616f2b6d787544f368dd3d79b12",
+    "com/jagex/game/runetek5/client/Client$Companion.class": "26f4d06d861179d8eb463d9ba44f7a2227dce97c4e211a7cb83da564268fb47f",
+    "com/jagex/game/runetek5/client/Client.class": "ad30bd5f92a8e2bf9944364291bc55bb75b9ca94957096027b2d138181fc4ed9",
+    "com/jagex/game/runetek5/config/TypeLists.class": "705833e4856d8df0ace08687b24f47c172a49d61e3a11525c1dbc974a5098160",
+    "com/jagex/game/runetek5/config/clanvar/ClanVarTypeList.class": "e1460b2944db2cf0a3583f4333073355b179249a91752be21c0f89bc395af9d1",
+    "com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannel.class": "545fb0b578b6d8d4da210607d9dca965ef575e05e7ecadaf4dd439dc8a3ef74e",
+    "com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannelDelta.class": "76f450291616a50c11bfaef8c2fba4e741317fc2d9da5c3d98d858202ec730c6",
+    "com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannelPlayer.class": "eaf0b220d9cfeb9ddbe4cdb59c9cd8783a4bca96adc8db2bc2e7d20e3dedb7b1",
+    "com/jagex/game/runetek5/interaction/chat/clanchat/settings/ClanSettings.class": "16f61ae15e30abeed1bc04612c67b6c4bdda59e5a2317c6bcacc7572798ce986",
+    "com/jagex/game/runetek5/interaction/chat/clanchat/settings/ClanSettingsDelta.class": "32d60a137093d2c891429becd8bf3998b363ce13a79523671a5fef90aa439fc9",
+    "com/jagex/game/runetek5/network/BufferedConnectionContext.class": "77e832e2542e96568e8b2d0c70dcaa0974d3d0bb9666e122080dc1925a6ca5f8",
+    "com/jagex/game/runetek5/network/Connection.class": "08aaad4aa28f26abd335d694fa055aeb71c1de351f08cfa44227b851898f12cc",
+    "com/jagex/game/runetek5/network/packet/PacketDecoder.class": "fcc4ff96f79d50a6e04e9933300619ffceacc586e4730f6cb173c78932c2a12e",
+    "com/jagex/game/runetek5/network/packet/ServerProt.class": "c402ba869dfaf40e1a1f66c3d6294646fdd1e997e27edb1e58c6a8cebf289c0d"
+  },
+  "sandbox": {
+    "java": "bwrap --unshare-net --ro-bind / /",
+    "javac": "bwrap --unshare-net --ro-bind / /",
+    "writable": "unique oracle evidence directory, tmpfs /tmp, proc /proc, dev /dev"
+  },
+  "schema": "clan-native-oracle-v1",
+  "snapshot": {
+    "format": "see ClanOracle.snapshot",
+    "strings": "null=~, else quote plus text with non-safe UTF-16 units as percent plus 4 hex digits"
+  },
+  "working_tree_source_sha256": {
+    "code/client/src/main/kotlin/com/darkan/bot/Bot.kt": "2eeab94185cfba6f22ba12899fc3ca21f7c90de589373a3e8f4f21c306c926f3",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/buffer/Packet.kt": "496e0841cb82e2d6d8a49e6dcf72217bc0928824b37312e7786b2ac819736734",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/IntNode.kt": "2ccc8f18e320b432aa468e7e6fe7d89b03ba3f13883d796abf6fc1085b4999fd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/IterableNodeMap.kt": "e5c334f2569dc991df140e3490b6f8b4111a4d6dfc93b77a1bbde1739f928b18",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/Node.kt": "0c8647385c7c821c3c76a52c69d4d4d8a2b11adad977901b08a3c0278135ed8d",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/impl/LongNode.kt": "0c7dbe642555759696f57f352aec09b6e179151402cfe0c0e904bab210539594",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/impl/ObjectNode.kt": "97b2b1dff3193d13c08c98c7cc3180d22003e5c4ba5813c35f236e9968477654",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/TypeLists.kt": "df44aec6c8206f0f88dc6c726e27109e7c972346a76b58eb9c84955377b4abba",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/clanvar/ClanVarTypeList.kt": "1c11c352940def9c82bd7e3552f55065aa186aefb3322e9d40fa082681ec9682",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannel.kt": "1ebcf9a2e6ecc705a1681e67afeae1c280025cc6e7bc7ff292b44ee1dbbab81b",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannelDelta.kt": "7bcc9e7880fc83f45db9da34e98319d85daf188eeb9ebc5353f674ed8da406c4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannelPlayer.kt": "7d66fb352291207333ddfbbabc9f294c7f731afc593f6e28f6e9ac079c620a5a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/clanchat/settings/ClanSettings.kt": "4850636dc253581b362cf2f146d81624f292608400a39e463316a0c795a8746f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/clanchat/settings/ClanSettingsDelta.kt": "3923858935fb05d095506fc7a97cd9aa52aea0422e0d19e05fcb636f3d0a34f4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/BufferedConnectionContext.kt": "275fe0e0c6fbd61d3b30e957e7053cfe34172333410f3738b49c1efab21c4fb2",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/Connection.kt": "27a8364846fe2dba0cc194e18557f686c4c5ac306fbcfa6605ae45f6a86c1e15",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/PacketDecoder.kt": "cf3339d5c70d9385a6b4361299e2e4eaf68100f16de6037df58637a7e7cbd590",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/ServerProt.kt": "a2f60b90b372ab1c07a33ef8e09711be5d99b7395aa7bc7e0583ea4741ce6b0a"
+  }
+}

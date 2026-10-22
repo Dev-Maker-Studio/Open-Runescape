@@ -225,6 +225,7 @@ OpenRS-Web/
 │   ├── server/        # Darkan lobby and world
 │   ├── harness/       # Rust `openrs` harness
 │   ├── renderer/      # Rust WebGPU renderer (wgpu, WGSL via naga)
+│   ├── games/         # Rust game hosts for the WebSocket frame stream
 │   ├── renderdoc/     # RenderDoc capture and equivalence tooling
 │   └── web/           # Rust web server and page
 └── src/               # English markdowns, start with src/HARNESS.md

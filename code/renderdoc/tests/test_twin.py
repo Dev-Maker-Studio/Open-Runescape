@@ -21,6 +21,51 @@ def solid(path, colour, size=(64, 48)):
     return path
 
 
+class RegionSsim(unittest.TestCase):
+    def frame(self):
+        rng = np.random.default_rng(3)
+        return rng.integers(0, 255, (503, 765, 3), dtype=np.uint8)
+
+    def test_identical_frames_score_one_everywhere(self):
+        a = self.frame()
+        r = twin.region_ssim(a, a.copy())
+        self.assertEqual(list(r), ["terrain", "models", "minimap", "chat"])
+        for v in r.values():
+            self.assertEqual(v["ssim"], 1.0)
+        self.assertIsNone(r["models"]["box"])
+
+    def test_change_in_viewport_hits_models_not_minimap_or_chat(self):
+        a = self.frame()
+        b = a.copy()
+        b[100:140, 200:240] = 255 - b[100:140, 200:240]
+        r = twin.region_ssim(a, b)
+        self.assertLess(r["models"]["ssim"], 0.5)
+        self.assertEqual(r["terrain"]["ssim"], 1.0)
+        self.assertEqual(r["minimap"]["ssim"], 1.0)
+        self.assertEqual(r["chat"]["ssim"], 1.0)
+        x0, y0, x1, y1 = r["models"]["box"]
+        self.assertTrue(x0 <= 200 and y0 <= 100 and x1 >= 240 and y1 >= 140)
+
+    def test_minimap_and_chat_changes_are_isolated(self):
+        a = self.frame()
+        b = a.copy()
+        b[50:120, 600:700] = 0
+        b[400:440, 20:300] = 0
+        r = twin.region_ssim(a, b)
+        self.assertLess(r["minimap"]["ssim"], 0.9)
+        self.assertLess(r["chat"]["ssim"], 0.9)
+        self.assertEqual(r["terrain"]["ssim"], 1.0)
+        self.assertEqual(r["models"]["ssim"], 1.0)
+
+    def test_small_global_noise_lowers_terrain(self):
+        a = self.frame()
+        b = a.astype(np.int16)
+        b[:338, :516] += 10
+        r = twin.region_ssim(a, np.clip(b, 0, 255).astype(np.uint8))
+        self.assertLess(r["terrain"]["ssim"], 1.0)
+        self.assertEqual(r["models"]["ssim"], 1.0)
+
+
 class Serialized(unittest.TestCase):
     def test_identical_files(self):
         with tempfile.TemporaryDirectory() as d:

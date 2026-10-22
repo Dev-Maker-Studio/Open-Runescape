@@ -1,0 +1,15 @@
+{
+  "oracle": "Actual PlayerWorldOps, QuickChatDisplayOps and WorldMapUserDetailOps dispatch for MAP_LANG, GET_ACTIVE_MINIMENU_ENTRY, GET_SECOND_MINIMENU_ENTRY, GETWINDOWMODE, GETDEFAULTWINDOWMODE, GETHOSTNAME, GETCLIPBOARD, IS_GAMESCREEN_STATE, GETPREFERENCEFILE, GETDIRECTORYPICKERRESULT, MEC_TEXT, MEC_GRAPHIC, MEC_TEXTSIZE, MEC_CATEGORY, MEC_PARAM and the VIDEO_ADVERT ops, with the statics they read set through reflection and Unsafe, plus MiniMenu.getClickType. Quest chat icons are not compared (getQuestsFrom needs the obj and npc caches); the oracle uses entries with no quest lookup.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "PlatformFixtures.java": "ad97032d62ec1b9eaa9fa7604e68a8b64d6e47ac4be15d87ebe9006c6b13d26a"
+  },
+  "generator_sha256": "97d12c916963534a268bc46b9cc4ba19f31b646180c75b0881c51b17e500763b",
+  "fixture_sha256": {
+    "platform.native.tsv": "b163ac202d17bc8c5d43a7f57c92c7b6589ff068d3ef30062f493ae2f35ad927"
+  },
+  "cases": 3608,
+  "random_seed": "0x727c5228 ^ 0x7f1a7 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_platform.py --check"
+}

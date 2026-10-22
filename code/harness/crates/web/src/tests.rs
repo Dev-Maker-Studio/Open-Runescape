@@ -106,6 +106,7 @@ fn batch_parsing_for_web_commands() {
 
 #[test]
 fn names_ports_files_and_trail() {
+    let _guard = crate::tests_input::ENV.lock().unwrap_or_else(|e| e.into_inner());
     assert_eq!(cmd::safe_name("frame 1.orf"), "frame_1.orf");
     assert_eq!(cmd::safe_name("../..x"), "_..x");
     assert_eq!(cmd::safe_name(".hidden"), "hidden");

@@ -18,16 +18,21 @@ def digest(path):
     p = Path(path)
     if not p.is_file():
         return {"file": str(p), "bytes": None, "sha256": None}
-    data = p.read_bytes()
-    return {"file": str(p), "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+    with p.open("rb") as f:
+        digest = hashlib.file_digest(f, "sha256").hexdigest()
+    return {"file": str(p), "bytes": p.stat().st_size, "sha256": digest}
 
 
 def first_difference(a, b):
-    x, y = Path(a).read_bytes(), Path(b).read_bytes()
-    for i, (p, q) in enumerate(zip(x, y)):
-        if p != q:
-            return i
-    return None if len(x) == len(y) else min(len(x), len(y))
+    at = 0
+    with Path(a).open("rb") as x, Path(b).open("rb") as y:
+        while True:
+            p, q = x.read(65536), y.read(65536)
+            if p != q:
+                return at + next((i for i, (u, v) in enumerate(zip(p, q)) if u != v), min(len(p), len(q)))
+            if not p:
+                return None
+            at += len(p)
 
 
 def serialized(client, web):
@@ -50,6 +55,45 @@ def regions(a, b, count):
                 out.append({"box": [x, y, min(x + tile, w) - 1, min(y + tile, h) - 1], "mean_diff": round(float(t.mean()), 2), "differing_pct": round(100 * off, 1)})
     out.sort(key=lambda r: (-r["mean_diff"], -r["differing_pct"]))
     return out[:count]
+
+
+LAYOUT = {
+    "viewport": (0.0, 0.0, 516 / 765, 338 / 503),
+    "minimap": (570 / 765, 0.0, 1.0, 190 / 503),
+    "chat": (0.0, 345 / 503, 516 / 765, 475 / 503),
+}
+MODEL_DIFF = 24
+MODEL_PAD = 4
+
+
+def crop_box(shape, frac):
+    h, w = shape[:2]
+    x0, y0, x1, y1 = frac
+    return int(round(x0 * w)), int(round(y0 * h)), int(round(x1 * w)), int(round(y1 * h))
+
+
+def region_ssim(a, b):
+    a, b = np.asarray(a), np.asarray(b)
+    out = {}
+    boxes = {k: crop_box(a.shape, v) for k, v in LAYOUT.items()}
+    for name in ("minimap", "chat"):
+        x0, y0, x1, y1 = boxes[name]
+        out[name] = {"box": [x0, y0, x1, y1], "ssim": round(diff.ssim(a[y0:y1, x0:x1], b[y0:y1, x0:x1]), 4)}
+    x0, y0, x1, y1 = boxes["viewport"]
+    va, vb = a[y0:y1, x0:x1], b[y0:y1, x0:x1]
+    hot = np.abs(va.astype(np.int16) - vb.astype(np.int16)).max(2) > MODEL_DIFF
+    if hot.any():
+        ys, xs = np.where(hot)
+        mx0, my0 = max(int(xs.min()) - MODEL_PAD, 0), max(int(ys.min()) - MODEL_PAD, 0)
+        mx1, my1 = min(int(xs.max()) + 1 + MODEL_PAD, va.shape[1]), min(int(ys.max()) + 1 + MODEL_PAD, va.shape[0])
+        out["models"] = {"box": [x0 + mx0, y0 + my0, x0 + mx1, y0 + my1], "ssim": round(diff.ssim(va[my0:my1, mx0:mx1], vb[my0:my1, mx0:mx1]), 4), "differing_pixels": int(hot.sum())}
+        masked = vb.copy()
+        masked[my0:my1, mx0:mx1] = va[my0:my1, mx0:mx1]
+    else:
+        out["models"] = {"box": None, "ssim": 1.0, "differing_pixels": 0}
+        masked = vb
+    out["terrain"] = {"box": [x0, y0, x1, y1], "ssim": round(diff.ssim(va, masked), 4)}
+    return {k: out[k] for k in ("terrain", "models", "minimap", "chat")}
 
 
 def font(size):
@@ -115,6 +159,7 @@ def run(out, scene, renderdoc):
         "thresholds": {"ssim": PASS_SSIM, "serialized_frames_identical": True},
         "pixels": px,
         "regions": regions(a, b, 5),
+        "region_ssim": region_ssim(np.asarray(a), np.asarray(b)),
         "serialized": orf,
         "state": states,
         "describe": desc,
@@ -145,6 +190,8 @@ def text(r):
     if r["renderdoc"]:
         rd = r["renderdoc"]
         L.append(f"renderdoc equiv: verdict={rd['verdict']} score={rd['score']} previous={rd['previous_score']}")
+    if r.get("region_ssim"):
+        L.append("region ssim: " + "  ".join(f"{k}={v['ssim']}" for k, v in r["region_ssim"].items()))
     if r["regions"]:
         L.append("worst regions (x0,y0,x1,y1):")
         L += [f"  {g['box']} mean_diff={g['mean_diff']} differing={g['differing_pct']}%" for g in r["regions"]]
@@ -156,8 +203,8 @@ def text(r):
 def trend(path, r):
     p = Path(path)
     old = [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.is_file() else []
-    last = next((o for o in reversed(old) if o["scene"] == r["scene"]), None)
-    rec = {"time": int(time.time()), "scene": r["scene"], "verdict": r["verdict"], "ssim": r["pixels"]["ssim"], "psnr": r["pixels"]["psnr_db"], "identical": r["serialized"]["identical"]}
+    last = next((o for o in reversed(old) if o["scene"] == r["scene"] and o.get("frames", 1) == 1), None)
+    rec = {"time": int(time.time()), "scene": r["scene"], "frames": 1, "verdict": r["verdict"], "ssim": r["pixels"]["ssim"], "psnr": r["pixels"]["psnr_db"], "identical": r["serialized"]["identical"]}
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a") as f:
         f.write(json.dumps(rec) + "\n")
@@ -165,6 +212,10 @@ def trend(path, r):
 
 
 def main():
+    if "--frames" in sys.argv[1:]:
+        import twin_frames
+        twin_frames.main()
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
     ap.add_argument("--scene", default="live")

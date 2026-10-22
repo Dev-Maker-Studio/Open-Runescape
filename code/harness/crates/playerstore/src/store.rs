@@ -19,7 +19,7 @@ pub fn root() -> PathBuf {
 }
 
 pub fn key(name: &str) -> String {
-    name.to_lowercase().replace(' ', "_").replace('/', "_")
+    name.to_lowercase().replace([' ', '/'], "_")
 }
 
 fn players() -> PathBuf {

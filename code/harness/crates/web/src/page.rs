@@ -23,6 +23,14 @@ impl Page {
         Ok(Page { cdp: Cdp::attach(&b.ws)?, frames: -1 })
     }
 
+    pub fn at(ws: &str) -> Result<Page, String> {
+        Ok(Page { cdp: Cdp::attach(ws)?, frames: -1 })
+    }
+
+    pub fn call(&mut self, method: &str, params: Value) -> Result<Value, String> {
+        self.cdp.call(method, params)
+    }
+
     pub fn run(&mut self, cmd: &str, args: &[String]) -> Result<Value, String> {
         let v = self.cdp.eval(&expression(cmd, args))?;
         self.frames = v["frames"].as_i64().unwrap_or(-1);

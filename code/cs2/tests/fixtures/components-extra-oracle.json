@@ -1,0 +1,564 @@
+{
+  "oracle": "Actual ComponentLifecycleOps, ComponentQueryOps, ComponentSetterOps, InterfaceQueryOps and InterfaceSetterOps dispatch on real Component and Interface objects with a real CS2Executor, run headless from an isolated COPY of the pre-existing pinned shaded client JAR. Pulse events are read from the real PulseEventHandler.LOW_PRIORITY queue and redraws from Client.IS_COMPONENT_ON_TOP. No component operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentLifecycleOps.kt": "d2c9cc40d736eb12ef57dae5e9db05f95c96e1080b4eb7f1991802cd5510f8cd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentQueryOps.kt": "11a490fba441cae41d34532ac10f0aee1e47d475f68fb70249a5fbad5ed3e194",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentSetterOps.kt": "5f8f51aedc6abdd301c9c349db2d770094573cf80e6e812c0dadba06094184f6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceSetterOps.kt": "d456591367701349e609e5c508b9e5a66ca1dfc6ac32590e053510e2099a2b87",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CS2SharedOps.kt": "eb06364612eefa466cfcae26f16e796d7c679cd89676fec9e9253e59d380fd6a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventQueue.kt": "ed712458a2ed3aa36e158998304f23ae0f40c1d9bfeed3ee4b32dbe4698fe951",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/generate_components_extra.py": "fbf9fcd08f03ff7d24470a505c52ea128c9cfd7e683938c0adc3994742460aae"
+  },
+  "source_provenance": "Hashes identify the current relevant Kotlin sources and the shared Java helper, not a source rebuild; the pinned pre-existing JAR is the executable oracle.",
+  "generator_sha256": "fbf9fcd08f03ff7d24470a505c52ea128c9cfd7e683938c0adc3994742460aae",
+  "driver_sha256": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+  "fixture_sha256": {
+    "components-extra.native.tsv": "bc2c6edfcc6677e18f1f9e477cdb1d63c23f388da4a2c3acac605ed95b33fe0b",
+    "components-extra.stats.tsv": "b2676b73c59aa9e59832cd32434aeee91d571df8f734f6eed5f4f671ac690208"
+  },
+  "random_seed": "0x727c5219 (java.util.Random)",
+  "tsv_encoding": "Tab separated records. W name capacity canvas-width canvas-height starts a world, I interface prevent-interaction count, C component columns (index type id-hash parent-id x y width height base-x base-y base-width base-height aspect-x/y/width/height types aspect-width aspect-height aspect-x aspect-y hidden scroll x/y/width/height sprite text-hex color transparency rendered cache-reference), N null slot, K initial hook. T world opcode operand int-stack string-stack starts a step, R result (ok or error:exception class) final int stack, final string stack, queued pulse events, secondary hooks 1 and 2 (interface:id-hash:slot or dash), D key then the changed component line (dash when the component is gone), Z total step count. Stacks are comma separated, dash is empty, strings are hex: prefixed or null.",
+  "cases": 18000,
+  "delta_records": 5614,
+  "records": {
+    "W": 2,
+    "I": 8,
+    "C": 25,
+    "N": 5,
+    "K": 3,
+    "T": 18000,
+    "R": 18000,
+    "D": 5614,
+    "Z": 1
+  },
+  "per_opcode": {
+    "CC_CREATE": {
+      "ok": 52,
+      "error": 348
+    },
+    "CC_DELETE": {
+      "ok": 13,
+      "error": 127
+    },
+    "CC_DELETEALL": {
+      "ok": 123,
+      "error": 37
+    },
+    "CC_FIND": {
+      "ok": 377,
+      "error": 33
+    },
+    "CC_GETCOLOUR": {
+      "ok": 91,
+      "error": 41
+    },
+    "CC_GETGRAPHIC": {
+      "ok": 77,
+      "error": 56
+    },
+    "CC_GETHEIGHT": {
+      "ok": 76,
+      "error": 43
+    },
+    "CC_GETHIDE": {
+      "ok": 81,
+      "error": 45
+    },
+    "CC_GETMODEL": {
+      "ok": 91,
+      "error": 51
+    },
+    "CC_GETMODELANGLE_X": {
+      "ok": 74,
+      "error": 53
+    },
+    "CC_GETMODELANGLE_Y": {
+      "ok": 78,
+      "error": 62
+    },
+    "CC_GETMODELANGLE_Z": {
+      "ok": 85,
+      "error": 38
+    },
+    "CC_GETMODELXOF": {
+      "ok": 96,
+      "error": 55
+    },
+    "CC_GETMODELYOF": {
+      "ok": 93,
+      "error": 65
+    },
+    "CC_GETMODELZOOM": {
+      "ok": 70,
+      "error": 50
+    },
+    "CC_GETSCROLLHEIGHT": {
+      "ok": 89,
+      "error": 60
+    },
+    "CC_GETSCROLLWIDTH": {
+      "ok": 77,
+      "error": 66
+    },
+    "CC_GETSCROLLX": {
+      "ok": 75,
+      "error": 62
+    },
+    "CC_GETSCROLLY": {
+      "ok": 67,
+      "error": 55
+    },
+    "CC_GETTEXT": {
+      "ok": 81,
+      "error": 55
+    },
+    "CC_GETTRANS": {
+      "ok": 83,
+      "error": 63
+    },
+    "CC_GETWIDTH": {
+      "ok": 76,
+      "error": 63
+    },
+    "CC_GETX": {
+      "ok": 84,
+      "error": 70
+    },
+    "CC_GETY": {
+      "ok": 85,
+      "error": 62
+    },
+    "CC_SET2DANGLE": {
+      "ok": 94,
+      "error": 75
+    },
+    "CC_SETALPHA": {
+      "ok": 88,
+      "error": 43
+    },
+    "CC_SETASPECT": {
+      "ok": 80,
+      "error": 62
+    },
+    "CC_SETCLICKMASK": {
+      "ok": 92,
+      "error": 51
+    },
+    "CC_SETCOLOUR": {
+      "ok": 73,
+      "error": 48
+    },
+    "CC_SETDRAGDEADZONE": {
+      "ok": 85,
+      "error": 53
+    },
+    "CC_SETFILL": {
+      "ok": 91,
+      "error": 44
+    },
+    "CC_SETFONTMONO": {
+      "ok": 88,
+      "error": 55
+    },
+    "CC_SETGRAPHIC": {
+      "ok": 90,
+      "error": 49
+    },
+    "CC_SETGRAPHICSHADOW": {
+      "ok": 76,
+      "error": 63
+    },
+    "CC_SETHFLIP": {
+      "ok": 88,
+      "error": 58
+    },
+    "CC_SETHIDE": {
+      "ok": 69,
+      "error": 51
+    },
+    "CC_SETLINEDIRECTION": {
+      "ok": 81,
+      "error": 60
+    },
+    "CC_SETLINEWID": {
+      "ok": 94,
+      "error": 60
+    },
+    "CC_SETMAXLINES": {
+      "ok": 84,
+      "error": 57
+    },
+    "CC_SETMODEL": {
+      "ok": 81,
+      "error": 56
+    },
+    "CC_SETMODELANGLE": {
+      "ok": 99,
+      "error": 46
+    },
+    "CC_SETMODELLIGHTING": {
+      "ok": 80,
+      "error": 49
+    },
+    "CC_SETMODELLIGHTING_SUNROTATION": {
+      "ok": 92,
+      "error": 51
+    },
+    "CC_SETMODELORIGIN": {
+      "ok": 85,
+      "error": 55
+    },
+    "CC_SETMODELORTHOG": {
+      "ok": 81,
+      "error": 53
+    },
+    "CC_SETMODELTINT": {
+      "ok": 80,
+      "error": 58
+    },
+    "CC_SETMODELZOOM": {
+      "ok": 74,
+      "error": 57
+    },
+    "CC_SETMODEL_ITEMCONTAINER": {
+      "ok": 91,
+      "error": 65
+    },
+    "CC_SETNOCLICKTHROUGH": {
+      "ok": 93,
+      "error": 51
+    },
+    "CC_SETOUTLINE": {
+      "ok": 74,
+      "error": 68
+    },
+    "CC_SETPAUSETEXT": {
+      "ok": 83,
+      "error": 59
+    },
+    "CC_SETPOSITION": {
+      "ok": 77,
+      "error": 46
+    },
+    "CC_SETSCROLLPOS": {
+      "ok": 80,
+      "error": 58
+    },
+    "CC_SETSCROLLSIZE": {
+      "ok": 90,
+      "error": 58
+    },
+    "CC_SETSIZE": {
+      "ok": 81,
+      "error": 47
+    },
+    "CC_SETTARGETVERB": {
+      "ok": 90,
+      "error": 52
+    },
+    "CC_SETTEXT": {
+      "ok": 88,
+      "error": 49
+    },
+    "CC_SETTEXTALIGN": {
+      "ok": 77,
+      "error": 52
+    },
+    "CC_SETTEXTANTIMACRO": {
+      "ok": 67,
+      "error": 49
+    },
+    "CC_SETTEXTFONT": {
+      "ok": 73,
+      "error": 49
+    },
+    "CC_SETTEXTSHADOW": {
+      "ok": 83,
+      "error": 42
+    },
+    "CC_SETTILING": {
+      "ok": 96,
+      "error": 50
+    },
+    "CC_SETTRANS": {
+      "ok": 72,
+      "error": 51
+    },
+    "CC_SETVFLIP": {
+      "ok": 68,
+      "error": 47
+    },
+    "IF_FIND": {
+      "ok": 351,
+      "error": 56
+    },
+    "IF_GETCOLOUR": {
+      "ok": 110,
+      "error": 24
+    },
+    "IF_GETGRAPHIC": {
+      "ok": 91,
+      "error": 28
+    },
+    "IF_GETHEIGHT": {
+      "ok": 111,
+      "error": 34
+    },
+    "IF_GETHIDE": {
+      "ok": 116,
+      "error": 25
+    },
+    "IF_GETMODEL": {
+      "ok": 109,
+      "error": 27
+    },
+    "IF_GETMODELANGLE_X": {
+      "ok": 108,
+      "error": 22
+    },
+    "IF_GETMODELANGLE_Y": {
+      "ok": 102,
+      "error": 26
+    },
+    "IF_GETMODELANGLE_Z": {
+      "ok": 107,
+      "error": 33
+    },
+    "IF_GETMODELXOF": {
+      "ok": 106,
+      "error": 37
+    },
+    "IF_GETMODELYOF": {
+      "ok": 94,
+      "error": 34
+    },
+    "IF_GETMODELZOOM": {
+      "ok": 125,
+      "error": 22
+    },
+    "IF_GETSCROLLHEIGHT": {
+      "ok": 106,
+      "error": 29
+    },
+    "IF_GETSCROLLWIDTH": {
+      "ok": 93,
+      "error": 35
+    },
+    "IF_GETSCROLLX": {
+      "ok": 120,
+      "error": 21
+    },
+    "IF_GETSCROLLY": {
+      "ok": 98,
+      "error": 32
+    },
+    "IF_GETTEXT": {
+      "ok": 119,
+      "error": 35
+    },
+    "IF_GETTRANS": {
+      "ok": 105,
+      "error": 22
+    },
+    "IF_GETWIDTH": {
+      "ok": 120,
+      "error": 33
+    },
+    "IF_GETX": {
+      "ok": 121,
+      "error": 26
+    },
+    "IF_GETY": {
+      "ok": 113,
+      "error": 35
+    },
+    "IF_SET2DANGLE": {
+      "ok": 94,
+      "error": 38
+    },
+    "IF_SETALPHA": {
+      "ok": 114,
+      "error": 28
+    },
+    "IF_SETASPECT": {
+      "ok": 104,
+      "error": 28
+    },
+    "IF_SETCLICKMASK": {
+      "ok": 119,
+      "error": 28
+    },
+    "IF_SETCOLOUR": {
+      "ok": 114,
+      "error": 32
+    },
+    "IF_SETDRAGDEADZONE": {
+      "ok": 90,
+      "error": 30
+    },
+    "IF_SETFILL": {
+      "ok": 100,
+      "error": 21
+    },
+    "IF_SETFONTMONO": {
+      "ok": 102,
+      "error": 33
+    },
+    "IF_SETGRAPHIC": {
+      "ok": 113,
+      "error": 23
+    },
+    "IF_SETGRAPHICSHADOW": {
+      "ok": 107,
+      "error": 23
+    },
+    "IF_SETHFLIP": {
+      "ok": 108,
+      "error": 38
+    },
+    "IF_SETHIDE": {
+      "ok": 96,
+      "error": 34
+    },
+    "IF_SETLINEDIRECTION": {
+      "ok": 122,
+      "error": 31
+    },
+    "IF_SETLINEWID": {
+      "ok": 102,
+      "error": 30
+    },
+    "IF_SETMAXLINES": {
+      "ok": 107,
+      "error": 27
+    },
+    "IF_SETMODEL": {
+      "ok": 108,
+      "error": 45
+    },
+    "IF_SETMODELANGLE": {
+      "ok": 104,
+      "error": 35
+    },
+    "IF_SETMODELLIGHTING": {
+      "ok": 101,
+      "error": 27
+    },
+    "IF_SETMODELLIGHTING_SUNROTATION": {
+      "ok": 121,
+      "error": 35
+    },
+    "IF_SETMODELORIGIN": {
+      "ok": 107,
+      "error": 27
+    },
+    "IF_SETMODELORTHOG": {
+      "ok": 111,
+      "error": 19
+    },
+    "IF_SETMODELTINT": {
+      "ok": 103,
+      "error": 32
+    },
+    "IF_SETMODELZOOM": {
+      "ok": 119,
+      "error": 16
+    },
+    "IF_SETMODEL_ITEMCONTAINER": {
+      "ok": 123,
+      "error": 22
+    },
+    "IF_SETNOCLICKTHROUGH": {
+      "ok": 105,
+      "error": 31
+    },
+    "IF_SETOUTLINE": {
+      "ok": 104,
+      "error": 29
+    },
+    "IF_SETPAUSETEXT": {
+      "ok": 99,
+      "error": 42
+    },
+    "IF_SETPOSITION": {
+      "ok": 107,
+      "error": 37
+    },
+    "IF_SETSCROLLPOS": {
+      "ok": 96,
+      "error": 38
+    },
+    "IF_SETSCROLLSIZE": {
+      "ok": 110,
+      "error": 32
+    },
+    "IF_SETSIZE": {
+      "ok": 112,
+      "error": 36
+    },
+    "IF_SETTARGETVERB": {
+      "ok": 117,
+      "error": 28
+    },
+    "IF_SETTEXT": {
+      "ok": 104,
+      "error": 28
+    },
+    "IF_SETTEXTALIGN": {
+      "ok": 117,
+      "error": 40
+    },
+    "IF_SETTEXTANTIMACRO": {
+      "ok": 112,
+      "error": 34
+    },
+    "IF_SETTEXTFONT": {
+      "ok": 117,
+      "error": 24
+    },
+    "IF_SETTEXTSHADOW": {
+      "ok": 98,
+      "error": 24
+    },
+    "IF_SETTILING": {
+      "ok": 113,
+      "error": 32
+    },
+    "IF_SETTRANS": {
+      "ok": 102,
+      "error": 22
+    },
+    "IF_SETVFLIP": {
+      "ok": 104,
+      "error": 25
+    }
+  },
+  "error_classes": {
+    "error:NullPointerException": 4270,
+    "error:ArrayIndexOutOfBoundsException": 938,
+    "error:IllegalArgumentException": 124,
+    "error:RuntimeException": 297,
+    "error:NegativeArraySizeException": 8,
+    "error:ArithmeticException": 10
+  }
+}

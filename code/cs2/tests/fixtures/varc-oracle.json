@@ -1,0 +1,208 @@
+{
+  "oracle": "Actual CoreVmOps.dispatch for four VARC operations, CS2Script.decodeScript and CS2Executor.executeScript through unchanged NativeFixtures.Program/fixture/execution. Executed only against a private copy of the pre-existing pinned JAR; no VARC expressions or pulse scheduling are reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Script.kt": "649f42be8713d1c4c743dd8e81ee9d0a7726dc2856169ef0aeb7a0bde6b04476",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2CallFrame.kt": "a181a246d167c6e652529b43393f2ec881994cd1e8b54e2c2a054d8ba6ff72bf",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CS2Dispatch.kt": "f98f913ba7f5d48d0dd6e7dbe802149429d4b9390961886485501603082beeb7",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CoreVmOps.kt": "be05214d08ae26980d31470e542ece77d63fbfddbcd16a34a29617441a007b5a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/varc/VarcTypeList.kt": "0eb1b9e07d7cac269827d3bc891d471ba047ce5747ace0a0778ce209e7a7fb4f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEvent.kt": "34e721c7d343acb5fcf228618561ce52882766d66fe9f97f82f8d9ff51835787",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventQueue.kt": "ed712458a2ed3aa36e158998304f23ae0f40c1d9bfeed3ee4b32dbe4698fe951",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventHandler.kt": "fa1bd17b8abf45cb59cb60d212da677d5d7d5e355a8346e420f6f00e6696254a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventType.kt": "d23dd3ad2b39813f7ec53f9416d523c4449b5f67150fc18ae2a44c753bd288c7",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/IterableNodeMap.kt": "e5c334f2569dc991df140e3490b6f8b4111a4d6dfc93b77a1bbde1739f928b18",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/HashTableIterator.kt": "476e6bb2c9739787d4d049846fe93c5cc0ef969563b53827cf8b4722c249960f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/Queue.kt": "4862950e04b41e90b12d5584865650f0dc847528720a8c0a8507b877e0c4f43d",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/QueueIterator.kt": "8859faaed9561fe06bfadc179d05f25bd5c6be430f5e0af9852eb9c7da19b01a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/lru/CacheableNode.kt": "f132f8044365b257fda0db02b6ebe44761e549f28ff852731caae4854ff03c9f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/Utils.kt": "f426bd8e158b46718a651fa7113d2c15c168e4423649ea410871cbfa0dd518e8",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/VarcFixtures.java": "3cdd759850ca91621ef5313f443622b33f38bd64ed2d9c10b11a44193af87cc4",
+    "code/cs2/tests/native/generate_varcs.py": "31e9d8358bf293e55b1ba06782b2bfca24b4d434ab5f29ec9e2ea2a1158732e4"
+  },
+  "existing_metadata_sha256": {
+    "opcodes.tsv": "341d1bf3b6ff855fdb59937e5061a0dfef73ebcaf5e687261b4f019e79e16ebf",
+    "all-opcodes.bin": "385a47da97487b533cc6a6c324274a26f165a38c84b2dc4bf5852d12d6c8d84a",
+    "all-opcodes.decode.tsv": "c96b51765a650ca2ef03799843ceefbc88f47c74b5ea18701915f465a475bffe",
+    "native-oracle.json": "efd588df36776d246ef8ca92a88eeef827f55206d0e25b1ef4108ec59cba6614"
+  },
+  "source_provenance": "Current source hashes identify the relevant Kotlin sources and unchanged shared Java helper; the executable oracle is the pre-existing pinned JAR, not a source rebuild. Sources and all pre-existing fixture files are hashed before/after compilation and execution.",
+  "generator_sha256": "31e9d8358bf293e55b1ba06782b2bfca24b4d434ab5f29ec9e2ea2a1158732e4",
+  "driver_sha256": "3cdd759850ca91621ef5313f443622b33f38bd64ed2d9c10b11a44193af87cc4",
+  "fixture_sha256": {
+    "varc.native.tsv": "bdee12fc39d15fe1f19d8295a2af3806dae105bf9a19acd0a904aece485fb681",
+    "vm-varcs-child.bin": "fb73f084e558b43791ef58d9786df3e6718d736697ec63248b4f27bd50b4f7ed",
+    "vm-varcs-child.decode.tsv": "8967eddbdcbe9129b5aaa94ce85ef462c12d9d320e548a66fdd2318744bff7b8",
+    "vm-varcs.bin": "f95d2e7cb552f12a1c9234c39e364b75ff445a770653bb63ceaf707bdb571802",
+    "vm-varcs.decode.tsv": "085a024ea27a90ae25771f5bf09aaaaf8d7a532c91942f7bdf197f634becefd3",
+    "vm-varcs.state.tsv": "1512ba802a30cdce37c75b974bc440cc2fe7e4dee816424a016c30cc4e457d58",
+    "vm-varcs.vm.tsv": "cfc77944310644e909b5118f77738336ed8114c3edcc08b1f8b28f3f61ce787b"
+  },
+  "opcodes": {
+    "PUSH_VARC_INT": {
+      "ordinal": 26,
+      "wire": 311,
+      "family": 0,
+      "has_int_operand": true
+    },
+    "POP_VARC_INT": {
+      "ordinal": 27,
+      "wire": 510,
+      "family": 0,
+      "has_int_operand": true
+    },
+    "PUSH_VARC_STRING": {
+      "ordinal": 31,
+      "wire": 700,
+      "family": 0,
+      "has_int_operand": true
+    },
+    "POP_VARC_STRING": {
+      "ordinal": 32,
+      "wire": 21,
+      "family": 0,
+      "has_int_operand": true
+    }
+  },
+  "native_cases": 650,
+  "native_steps": 679,
+  "steps_per_operation": {
+    "PUSH_VARC_INT": 139,
+    "PUSH_VARC_STRING": 144,
+    "POP_VARC_INT": 193,
+    "POP_VARC_STRING": 203
+  },
+  "native_errors_per_operation": {
+    "PUSH_VARC_INT": 8,
+    "POP_VARC_INT": 12,
+    "PUSH_VARC_STRING": 7,
+    "POP_VARC_STRING": 9
+  },
+  "multi_step_cases": {
+    "short-flags-dirty-false": 3,
+    "coalesce-dirty-false": 18,
+    "wide-id-257": 8,
+    "independent-lengths": 4
+  },
+  "decoded_scripts": {
+    "vm-varcs": {
+      "instructions": 44,
+      "counts": [
+        1,
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      "varc_instructions": {
+        "PUSH_VARC_INT": 4,
+        "PUSH_VARC_STRING": 6,
+        "POP_VARC_INT": 3,
+        "POP_VARC_STRING": 3
+      },
+      "varc_ids": [
+        0,
+        1,
+        3,
+        257
+      ]
+    },
+    "vm-varcs-child": {
+      "instructions": 11,
+      "counts": [
+        1,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "varc_instructions": {
+        "POP_VARC_INT": 1,
+        "POP_VARC_STRING": 2,
+        "PUSH_VARC_INT": 1,
+        "PUSH_VARC_STRING": 2
+      },
+      "varc_ids": [
+        1,
+        3
+      ]
+    }
+  },
+  "native_vm_instructions": 66,
+  "native_vm_records": {
+    "int": 8,
+    "string": 13,
+    "long": 4,
+    "local-int": 1,
+    "local-string": 2,
+    "local-long": 1,
+    "array": 5
+  },
+  "random_seed": "0x727c5210 (java.util.Random); 64 cases per operation",
+  "native_tsv_columns": [
+    "case",
+    "step",
+    "opcode",
+    "id",
+    "before_int_stack",
+    "before_string_stack",
+    "before_long_stack",
+    "before_varc_ints",
+    "before_varc_strings",
+    "persistent_flags",
+    "before_dirty",
+    "before_cache",
+    "before_low_priority",
+    "native_result",
+    "native_int_pointer",
+    "after_int_stack",
+    "native_string_pointer",
+    "after_string_stack",
+    "native_long_pointer",
+    "after_long_stack",
+    "after_varc_ints",
+    "after_varc_strings",
+    "after_dirty",
+    "after_cache",
+    "after_low_priority"
+  ],
+  "native_tsv_encoding": "No header. Comma-separated arrays/stacks, dash for empty; signed decimal integers/longs; strings null or u followed by four lowercase hex digits per UTF-16 code unit (empty string u); flags/dirty 0 or 1. Each step resets input stacks but retains state and pulse identities within a case. Native result ok or error:exception-simple-class:exact-message (dash for null message). Stack snapshots clip native pointers to 0..1000 but retain exact signed error pointers in separate columns.",
+  "event_encoding": "Comma-separated identity:type:id:500, dash for empty. Identity is assigned from actual LOW_PRIORITY native iteration on first observation, stable per case, and shared by cache/queue records. Cache and LOW_PRIORITY preserve their actual native iterator order; HIGH_PRIORITY is asserted empty. Types 1/2 are CLIENT_SETVARC/CLIENT_SETVARCSTR. Event payload fields remain native zero/null. No wallclock timestamps are written.",
+  "deadline_assertion": "Each direct dispatch is bracketed by Utils.time(); a new/requeued store event must have executeAfter in [before+500,after+500]. Other existing event deadlines must remain exactly unchanged. Whole decoded root/child execution is bracketed similarly and every final event must lie in that 500ms scheduling interval. The normalized 500 is target delay at the most recent store, not remaining delay at snapshot time.",
+  "oracle_exit": "Client static initialization creates idle non-daemon connection pingers even in a headless test. The private Java oracle exits with status 0/1 on completion/failure; it never calls Client.shutdown, writes preferences or controls any other process.",
+  "decode_tsv_encoding": "Unchanged NativeFixtures.fixture output: name and six local/argument counts, then instruction index, opcode, operand kind and decoded value. .bin uses the native four-byte integer operand for all four VARC operations, including id 257.",
+  "vm_tsv_encoding": "Unchanged NativeFixtures.execution output: instruction count, typed final stacks/root locals and five global-array records. Strings here use UTF-8 hex: or null, unlike direct TSV UTF-16 strings.",
+  "vm_state_tsv_encoding": "Twelve records phase<TAB>key<TAB>value with phases before/after and keys ints, strings, persistent, dirty, cache, low-priority; values use the direct TSV encodings. Root/child script names vm-varcs and vm-varcs-child; child script pointer 900026. Arrays contain 258 entries; int persistent flags true at ids 1 and 257, all others false.",
+  "coverage": [
+    "All eight ordinary ids with integer -1 and nullable-string defaults; signed integer extrema and neighboring/zero values; null, empty, non-BMP, embedded NUL/tab/newline, markup and non-ASCII strings.",
+    "Reads, changed stores and same-value stores crossed with first/interior/last ids and both persistence flags; every case starts clean with empty queues, while mixed sequences verify sticky dirty state after persistent then nonpersistent stores. Includes 64 deterministic random cases per operation.",
+    "Mixed-type/mixed-id sequences capture native cache iteration, low-priority requeue order, stable node identity and same-value coalescing; int/string id collisions remain distinct events.",
+    "Negative/extreme/out-of-range ids, underflow and full 1000-stack overflow retain native exact exception messages and pointer mutations; independent int/string lengths and short persistence arrays capture partial native mutations.",
+    "Wide id 257 direct and decoded operations; integer/string/long sentinels and locals remain unchanged on unrelated stack paths. Root with parameterized child calls stores global state, returns typed values, and stores null from uninitialized string locals."
+  ],
+  "limitations": [
+    "Native error records are factual observations, not a demand that bounded Rust reproduce unsafe partial writes, negative/overflow pointers or late flag failures. Rust rejection should be transactional.",
+    "No pulse consumer, preference persistence, hook execution, game/server/lobby entry point, supplied cache, account, credentials, network or display is invoked. Deferred events describe scheduling intent, not synthetic future overwrites.",
+    "Only the four named family-0 operations are covered; existing opcode metadata, all-opcode fixtures, native helper and every pre-existing fixture remain unchanged.",
+    "The executable JAR and full Java exception messages are pinned. No Gradle, rebuild, JAR repin or live JAR modification occurs."
+  ],
+  "reproduction": "python3 code/cs2/tests/native/generate_varcs.py --check",
+  "generation": "python3 code/cs2/tests/native/generate_varcs.py",
+  "work_directory": "code/harness/target/loop/iteration16-validation/varcs/native"
+}

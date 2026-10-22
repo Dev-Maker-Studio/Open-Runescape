@@ -12,6 +12,7 @@
 | `code/web/static/index.html` | Full viewport canvas |
 | `code/web/static/boot.js` | WebGPU and WebGL2 check, renderer module slot |
 | `code/web/static/bridge.js` | Frame loop, `window.openrs` commands for the harness, console capture |
+| `code/web/static/stream.js` | WebSocket to a game host, input events with sequence numbers, frame acks, stream stats, see `FRAME-STREAM.md` |
 
 ## Run
 
@@ -57,3 +58,4 @@ flowchart LR
 - The `web` entry point is `code/web`, started by `openrs-web`.
 - `openrs web up` starts the server on the first free port from 8091 and opens the page in Chromium on the private display, see `WEB-HARNESS.md`.
 - `bridge.js` runs the frame loop and calls `App.frame()` once per animation frame, paced to 60 frames per second or `?fps=N`.
+- `?game=NAME&host=HOST:PORT` connects `stream.js` to a game host and the page renders the streamed frames instead of a scene, see `FRAME-STREAM.md` and `GAMES.md`.

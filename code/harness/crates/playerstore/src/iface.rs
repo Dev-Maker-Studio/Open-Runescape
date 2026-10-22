@@ -104,8 +104,14 @@ pub fn run(name: &str, a: &[String]) -> Result<(), String> {
     let rest = &a[1..];
     match cmd {
         "open" | "close" => open(&mut v, gameval::resolve("interface", arg(a, 1, "iface")?)?, a.get(2), cmd == "open")?,
-        "text" => component(&mut v, rest, |s| Ok(s["text"] = json!(arg(a, 3, "text")?)))?,
-        "hide" => component(&mut v, rest, |s| Ok(s["hidden"] = json!(arg(a, 3, "bool")? == "true")))?,
+        "text" => component(&mut v, rest, |s| {
+            s["text"] = json!(arg(a, 3, "text")?);
+            Ok(())
+        })?,
+        "hide" => component(&mut v, rest, |s| {
+            s["hidden"] = json!(arg(a, 3, "bool")? == "true");
+            Ok(())
+        })?,
         "set" => component(&mut v, rest, |s| {
             match arg(a, 3, "field")? {
                 "item" => s["item"] = json!({"id": gameval::resolve("obj", arg(a, 4, "obj")?)?, "amount": int(a, 5, "amount").unwrap_or(1)}),

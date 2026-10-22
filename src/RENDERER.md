@@ -20,6 +20,7 @@
 | `code/renderer/src/math.rs` | Matrix helpers |
 | `code/renderer/src/shaders.rs` | Embedded WGSL sources |
 | `code/renderer/src/capture.rs` | Headless device, offscreen render and readback |
+| `code/renderer/src/stats.rs` | Per frame phase timing, GPU timestamp probe and the bench report |
 | `code/renderer/src/main.rs`, `window.rs` | Native command line and window |
 | `code/renderer/src/web.rs` | Browser entry exported by wasm bindgen |
 | `code/renderer/src/bin/shaderc.rs` | GLSL to WGSL translation tool |
@@ -45,6 +46,7 @@ cargo build --release
 | `--replay file.orf` | Use a frame file instead of a scene |
 | `--dump file.orf` | Write the scene as a frame file and exit |
 | `--check-shaders` | Create every WGSL module on the device and print the validation result |
+| `--bench N` | Render the frame N times headless and print CPU, GPU and wall time per frame, see Performance |
 
 - The backend is Vulkan, `WGPU_BACKEND=vulkan` forces it.
 - A RenderDoc capture launches `renderer-app` with `--out` or the window mode.
@@ -70,6 +72,7 @@ Every pass is a `Pass` value in `pass.rs`, numbered as in the frame format, with
 | Ground | `ground` | Main | 2D ground shadow, shadow map | Depth test and write |
 | Terrain | `groundTextured` | Main | Noise volume, 2D, ground shadow, texture | Depth test and write |
 | Sprite | `sprite` | Main | 2D array | No depth, alpha blend |
+| SurfaceMask | `surfaceMask` | Main | Base texture, mask | No depth, alpha blend |
 | Shadow | `shadow` | Shadow map only, no color | 2D alpha texture | Depth test and write, front faces culled |
 | Particle | `particle` | Main | 2D | Depth test, no write, alpha blend |
 | HdWater | `hdWater` | Main after the scene copy | Wave volume, scene color, scene depth, foam volume, environment cube, shadow, reflection | Depth test and write, less or equal, alpha blend |
@@ -113,10 +116,97 @@ Equivalence: the evaluation shader is a function of the barycentric interpolatio
 
 The fragment shader is patched for WebGPU's top left origin: `gl_FragCoord.xy` is flipped to the GL convention, and every scene color, depth and reflection fetch flips its texture coordinate back, so the unprojection with `uViewport` and `uInvViewProjection` matches the client.
 
-### Not Ported
+The reflection ray marcher uses projected `ndc.z` directly when comparing against the copied scene depth. The replay loader already converts `uViewProjection` to WebGPU's 0–1 depth range; retaining the native shader's additional `z * 0.5 + 0.5` conversion moved the near plane to 0.5 and produced false reflection intersections. The inverse matrix remains in the native GL convention, so unprojection still converts sampled depth with `depth * 2.0 - 1.0`. `tests/water.rs` executes the generated shader's projection function on the GPU and checks near, middle and far depth values; the original conversion fails the near-plane check.
 
-- The planar reflection target: water samples the white texture when `uUsePlanar` is set.
-- Bloom and the surface mask, fullscreen and `optimized` programs of the client.
+A frozen replay of `code/harness/target/bench/scene-all.orf` at 765×503 changes 54 pixels after the projection correction, with a maximum channel change of 12. All 12 draws, including HD water, remain drawn and zero are skipped. The frozen `verify.orf` remains pixel identical with 1882 drawn and 1117 skipped, including one `hdWater@mode14`: the producer rejected that patch draw before recording its geometry, uniforms or textures. The consumer cannot recover those missing resources. Enabling native water capture requires recording three-index patches in their original order, the HD-water uniform block and layer-packed 3D wave/foam textures and cube faces; terrain water also needs its noise volume and scene-depth binding. These captured-game water paths are not yet verified for parity.
+
+### Capture And Parity Limits
+
+Surface-mask draws are supported. When HD water requests a missing planar reflection, the renderer reconstructs a half-resolution reflection from the captured instanced and textured-terrain draws. This is not a replay of every native offscreen operation, and explicitly skipped native geometry remains missing.
+
+Bloom, fullscreen and `optimized` programs, native multisample rendering and complete offscreen-target equivalence remain unsupported. Base-level RGB16F/RGBA16F 2D textures travel as ORF4 RGBA16Float records; typed mip chains and other typed texture families remain unsupported. See `TRANSPILATION-STATUS.md` for measured hosted-game parity and capture limitations.
+
+## Performance
+
+`renderer-app --replay f.orf --bench N` renders a frame N times headless and prints one line for the first frame and the 50th and 95th percentiles of the rest. The browser prints the same report through `openrs web do bench N`, see `WEB-HARNESS.md`.
+
+```text
+bench: 60 frames, gpu time from timestamp queries, 765x503 verify.orf
+frame 1: cpu 150.09 ms (sync 136.27, water 0.02, groups 9.28, encode 0.17, submit 4.35), gpu 0.22 ms, wall 158.80 ms, 1882 draws, 3642 calls, 171 uploads, 97.9 MB, 6 fps
+frames 2-60 p50: cpu 1.00 ms (sync 0.03, water 0.00, groups 0.33, encode 0.10, submit 0.52), gpu 0.21 ms, wall 1.38 ms, 1882 draws, 3642 calls, 0 uploads, 0 B, 723 fps
+```
+
+| Column | Meaning |
+| --- | --- |
+| `sync` | Resource sync: hashing the frame's records, packing new meshes into arenas, texture upload with CPU mip chains, uniform buffers |
+| `water` | CPU tessellation of HD water meshes whose view changed |
+| `groups` | Pipeline lookups and bind group creation for every live draw |
+| `encode` | Recording the passes, including the scene copies before water |
+| `submit` | `queue.submit` |
+| `gpu` | GPU time from timestamp queries on every pass, or wall time to the fence when the device has none |
+| `wall` | From the start of the frame to the fence, the number the frame rate is derived from |
+| `calls` | Render pass commands recorded, after redundant state is skipped |
+| `uploads` | GPU buffers and textures created this frame and their bytes |
+
+### Caching
+
+- Every record is identified by a 64 bit content hash of its bytes, kept per id in a pool. A record whose id already maps to the same content is not touched, a record whose content exists under another id is aliased, and nothing is uploaded twice. Uniform buffers are immutable, a changed block is a new buffer.
+- All meshes that arrive in one sync are packed into one vertex and one index buffer per vertex stride, and all instance records into one instance buffer. A draw is `draw_indexed` with a first index, a base vertex and a first instance, so a run of draws from one arena binds its buffers once.
+- Bind groups are keyed by pass and the content hashes of the bound textures, pipelines by pass and state, both kept across frames in lists that the draws index.
+- While encoding, a cursor keeps the viewport, scissor, pipeline, both bind groups, the arena and the instance buffer last set, and a draw records only what differs. Draw order is unchanged, so blending and depth results are identical.
+- Pools are swept every 256 frames: entries no id refers to are dropped, arenas and instance buffers no mesh refers to are freed, and the bind group list is rebuilt.
+- The replay source hands out the same frame by reference, with meshes, textures and instances only in the first frame.
+- A draw whose uniform block is shorter than the pass block is skipped instead of invalidating the command buffer.
+
+### Measured
+
+Native, Vulkan on a GTX 1660 SUPER, `--bench 60`, the frame's own size of 765x503, 50th percentile of frames 2 to 60. Before is the committed renderer timed over `--frames 61` minus `--frames 1`.
+
+| Frame | Draws | Before, ms per frame | After CPU, ms | After GPU, ms | After wall, ms | First frame, ms | First frame uploads |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `verify.orf` | 1882 of 2999 | 4.1 | 1.00 | 0.21 | 1.38 | 150 | 171, 97.9 MB |
+| `lumbridge.orf` | 1169 of 1713 | 5.4 | 0.55 | 0.13 | 0.80 | 113 | 142, 83.5 MB |
+| `varrock.orf` | 1371 | 5.4 | 0.81 | 0.16 | 1.11 | 128 | 158, 96.0 MB |
+| `scene-all.orf` | 12 | | 0.12 | 0.33 | 0.55 | 12 | 20, 116 KB |
+
+| Phase of a `verify.orf` frame | Before | After |
+| --- | --- | --- |
+| Sync and uploads | Every mesh, instance and texture re-created, every uniform written, the frame cloned | 0.03 ms, hashes compared, nothing uploaded |
+| Water tessellation | Cached per mesh and view | 0.00 ms, unchanged |
+| Pipeline lookups and bind groups | A `Vec` key per draw, two lookups per draw | 0.33 ms, one lookup per draw into indexed lists |
+| Pass encoding | 9 commands per draw | 0.10 ms, 3642 commands for 1882 draws |
+| Submit | | 0.52 ms |
+| GPU | | 0.21 ms |
+
+The first frame is texture upload: about 150 textures are expanded to RGBA with CPU mip chains, 98 MB in all, which is 120 to 140 ms of the 150 ms. Mesh hashing and arena packing take about 15 ms.
+
+Browser, Chromium WebGPU on the same card, `openrs web do bench 60`, see `WEB-HARNESS.md` for the page loop numbers.
+
+| Frame | Before CPU, ms | After CPU, ms | After GPU, ms | After wall, ms | Load before, ms | Load after, ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| `verify.orf` | 7.6 | 1.03 | 0.26 | 7.1 | 3665 | 580 |
+| `lumbridge.orf` | 4.9 | 0.66 | 0.14 | 5.8 | 4055 | 347 |
+| `varrock.orf` | 13.7 | 0.77 | 0.16 | 5.9 | 4389 | 409 |
+| `scene-all.orf` | 0.5 | 0.18 | 0.35 | 6.6 | 101 | 31 |
+
+- Before CPU is the page's smoothed `cpuMs`, load is `openrs web do replay` from fetch to the second frame.
+- The browser wall time is the fence round trip through Chromium's GPU process, 5 to 7 ms even for 12 draws, and the page loop does not wait for it.
+- The pixels are unchanged: `--replay --out` of every bench frame and every scene is byte identical before and after, and `tests/pixels.rs` guards the recorded hashes.
+
+### Final Independent Replay Check
+
+After integration, the 1882-draw `verify.orf` frame was benchmarked independently again.
+
+| Measurement | Native | Browser |
+| --- | --- | --- |
+| Median CPU | 1.22 ms | 0.92 ms |
+| Median including completion fence | 1.59 ms | 5.63 ms |
+| 95th percentile including fence | 3.99 ms | 6.90 ms |
+| Repeat uploads | 0 | 0 |
+
+- Normal browser playback rendered 180 frames in 2.92 seconds. The benchmark's reciprocal fence time is a throughput ceiling, not the page's display rate.
+- First-frame decode and upload remain separate costs. Dynamic streamed games can upload changed uniforms and resources every tick; static replay timings are not an end-to-end game-stream benchmark.
+- The normal `cargo test` profile passes the pixel regression suite. The fast `iter` application profile uses abort-on-panic and can collide with unwind-based test artifacts, so it is not the canonical test command.
 
 ## Shader Translation
 
@@ -168,6 +258,7 @@ Every file translates and passes both naga validation and the device shader modu
 | `tests/routing.rs` | No | Every client shader name routes to one pass and back, a frame with one draw per pass replays with every shader counted as drawn, the scenes cover the new passes, the water tessellator follows screen size |
 | `tests/replay.rs` | Round trip only | Frame file parse and write, the synthetic client fixture, skipped draw counting |
 | `tests/passes.rs` | Yes | Every scene renders two frames and paints something |
+| `tests/pixels.rs` | Yes | Every scene at 765x503 and every `.orf` under `code/harness/target/bench` hash to the pixels recorded in `tests/fixtures/pixel-hashes.txt`, recorded with `PIXELS_WRITE=1`, skipped on another adapter name |
 
 ```
 cd code/renderer

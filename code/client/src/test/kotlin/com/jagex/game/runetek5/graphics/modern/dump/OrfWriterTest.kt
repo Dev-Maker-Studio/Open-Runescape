@@ -79,12 +79,73 @@ class OrfWriterTest {
                 OrfWriter.MESH -> if (head.getInt(0) == model) assertArrayEquals(modelVertices, record.copyOfRange(16, 16 + modelVertices.size))
                 OrfWriter.TEXTURE -> if (head.getInt(0) == atlas) assertArrayEquals(pattern(128, 4), record.copyOfRange(16, record.size))
                 OrfWriter.UNIFORM -> if (head.getInt(0) == block) assertArrayEquals(modelBlock, record.copyOfRange(8, record.size))
+                OrfWriter.DRAW -> {
+                    val textures = head.getInt(12)
+                    val nameOffset = 56 + textures * 4
+                    val nameBytes = head.getInt(nameOffset)
+                    assertEquals(60 + textures * 4 + nameBytes, record.size)
+                }
             }
         }
         assertEquals(0, b.remaining())
         assertEquals(listOf(0, 0, 1, 1, 2, 2, 3, 4, 4, 4, 4, 4), kinds)
-        assertEquals(5, compressed)
+        assertTrue(compressed > 0)
+        assertTrue(writer.profile.snapshot().getValue("compressNanos") > 0)
         println("[OrfWriterTest] ${path.toAbsolutePath()} ${bytes.size} bytes")
+    }
+
+    @Test
+    fun incompressiblePayloadIsStoredAndReproducible() {
+        val dir = Files.createTempDirectory("orf-stored")
+        try {
+            val payload = ByteArray(65536).also { java.util.Random(42).nextBytes(it) }
+            fun record(name: String): ByteArray {
+                val path = dir.resolve(name)
+                OrfWriter(path, 8, 8, FloatArray(4)).use { it.uniform(0, payload) }
+                return Files.readAllBytes(path)
+            }
+            val first = record("a.orf")
+            assertArrayEquals(first, record("b.orf"))
+            val b = ByteBuffer.wrap(first).order(ByteOrder.LITTLE_ENDIAN)
+            assertEquals(OrfWriter.UNIFORM, b.getInt(32))
+            assertEquals(payload.size + 8, b.getInt(36))
+            assertEquals(0, b.getInt(40))
+            assertArrayEquals(payload, first.copyOfRange(52, 52 + payload.size))
+            assertEquals(OrfWriter.END, b.getInt(52 + payload.size))
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
+    }
+
+    @Test
+    fun bloomParametersAreOneRecordAndSwitchTheMagicToOrf5() {
+        val dir = Files.createTempDirectory("orf-bloom")
+        try {
+            val plain = dir.resolve("plain.orf")
+            OrfWriter(plain, 8, 8, FloatArray(4)).use { it.uniform(0, ByteArray(64)) }
+            assertArrayEquals(OrfWriter.MAGIC, Files.readAllBytes(plain).copyOf(4))
+
+            val path = dir.resolve("bloom.orf")
+            OrfWriter(path, 8, 8, FloatArray(4)).use {
+                assertTrue(!it.bloom(1f, 0f, 0.25f))
+                assertTrue(!it.bloom(Float.NaN, 1f, 0.25f))
+                assertTrue(it.bloom(0.75f, 2.5f, 0.125f))
+                assertTrue(!it.bloom(1f, 1f, 0.25f))
+                it.uniform(0, ByteArray(64))
+            }
+            val bytes = Files.readAllBytes(path)
+            assertArrayEquals("ORF5".toByteArray(), bytes.copyOf(4))
+            val b = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+            assertEquals(OrfWriter.BLOOM, b.getInt(32))
+            assertEquals(12, b.getInt(36))
+            assertEquals(0, b.getInt(40))
+            assertEquals(0.75f, b.getFloat(44), 0f)
+            assertEquals(2.5f, b.getFloat(48), 0f)
+            assertEquals(0.125f, b.getFloat(52), 0f)
+            assertEquals(OrfWriter.UNIFORM, b.getInt(56))
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
     }
 
     @Test

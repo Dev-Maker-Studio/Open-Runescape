@@ -2,7 +2,7 @@ mod crc;
 mod js5;
 mod pack;
 
-pub use pack::{build, fresh};
+pub use pack::{build, fresh, packed};
 
 use std::path::Path;
 
@@ -39,7 +39,7 @@ fn mismatch(local: &[i32], remote: &[i32]) -> Option<String> {
 
 pub fn check(root: &Path, shared: bool) -> Result<(), String> {
     if !pack::fresh(root)? {
-        return Err("cache mismatch: assets/cache-packed is stale or missing, run openrs cache build".into());
+        return Err("cache mismatch: assets/cache/.packed is stale or missing, run openrs cache build".into());
     }
     let addr = lobby(shared);
     match diff(root, &addr) {
@@ -64,7 +64,7 @@ pub fn run(args: &[String]) -> i32 {
     };
     let shared = args.iter().any(|a| a == "shared");
     let result = match args.first().map(String::as_str) {
-        Some("build") => pack::build(&root, args.iter().any(|a| a == "force")).map(|b| println!("{}", if b { "built assets/cache-packed" } else { "up to date" })),
+        Some("build") => pack::build(&root, args.iter().any(|a| a == "force")).map(|b| println!("{}", if b { "built assets/cache/.packed" } else { "up to date" })),
         Some("status") => pack::fresh(&root).and_then(|f| {
             let table = crc::table(&pack::packed(&root));
             println!("manifest {}", pack::manifest(&root.join("assets/cache"))?);
@@ -72,7 +72,10 @@ pub fn run(args: &[String]) -> i32 {
             println!("indices {}", table.as_ref().map_or(0, Vec::len));
             Ok(())
         }),
-        Some("verify") => diff(&root, &lobby(shared)).and_then(|d| d.map_or_else(|| Ok(println!("cache match with {}", lobby(shared))), Err)),
+        Some("verify") => diff(&root, &lobby(shared)).and_then(|d| d.map_or_else(|| {
+            println!("cache match with {}", lobby(shared));
+            Ok(())
+        }, Err)),
         _ => Err("usage: openrs cache build [force] | status | verify [shared]".into()),
     };
     result.map_or_else(|e| fail(&e), |_| 0)

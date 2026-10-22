@@ -88,6 +88,8 @@ dependencies = [
  "fleet",
  "fresh",
  "renderdoc",
+ "serde_json",
+ "web",
 ]
 
 [[package]]

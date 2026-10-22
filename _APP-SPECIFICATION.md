@@ -13,6 +13,7 @@ This app is deployed to the web through WebGPU. Development runs locally on Linu
 | Renderer | `code/renderer` | Rust, WebGPU through `wgpu`, WGSL translated by naga | The transpiled modern renderer, native on Vulkan and in the browser as wasm |
 | RenderDoc | `code/renderdoc` | Python, C, Rust | Capture, analysis and equivalence diff of the client and the renderer |
 | Web | `code/web` | Rust, HTML | Web server and page that host the renderer |
+| Test games | `code/games` | Rust | Deterministic game hosts using the same frame-stream protocol as the future Kotlin host adapter |
 
 Only the modern renderer is transpiled to Rust for the web. The cache, lobby and server stay as they are.
 
@@ -72,14 +73,14 @@ flowchart LR
 ## Local Loop
 
 - The default loop runs entirely on this machine: `openrs up` starts the local lobby and world if needed and logs a local account in.
-- The client, the local lobby and the local world all read one packed cache, `assets/cache-packed`, so the login CRC check always matches.
+- The client, the local lobby and the local world all read one packed cache, `assets/cache/.packed`, so the login CRC check always matches.
 - `openrs up shared` targets the shared lobby instead.
 - `openrs verify` runs every live check against this loop and writes a report to `code/harness/target/verify/`.
 - `openrs resume` restarts the fleet and the client after a crash.
 
 ## Fast Cache Load
 
-- The client memory maps `assets/cache-packed`, built once from `assets/cache` with `openrs cache build`.
+- The client memory maps `assets/cache/.packed`, built once from `assets/cache` with `openrs cache build`.
 - Archives are decoded on first use and the JS5 network fetch is skipped.
 - Every startup prints one `[load]` line per stage.
 - The login packet carries the target lobby's CRC table, read over JS5, so the shared lobby accepts the client although its cache build differs.
@@ -111,11 +112,12 @@ flowchart LR
 - `openrs web up` starts the web server and an isolated Chromium on the private display, with WebGPU on the real GPU and audio on the null sink, never the user's browser.
 - `openrs web do`, `look`, `trail`, `show`, `hide` and `toggle` mirror the native commands, driven over the DevTools protocol through a `window.openrs` page bridge.
 - `openrs capture browser` captures the browser's WebGPU with RenderDoc, and `openrs equiv --target browser` compares it with the OpenGL client on one frame.
-- The browser currently replays frames. Game state arrives with the frame stream described in `src/MODERN-RENDERER-WEB-TRANSFER.md`.
+- The browser replays captured frames or renders a live stream from the orbit, walker and buttons game hosts. The game runs outside the browser and input returns over WebSocket. The Kotlin client host adapter remains the next integration.
+- Web input, nine-browser fleets, hardware-adapter checks and independent web verification are part of the harness.
 
 ## Twin
 
-- `openrs twin` runs the OpenGL client and the browser on the same frame, serializes the frame on both sides, and writes a side by side image, a difference image and a JSON report.
+- `openrs twin` compares the client and browser through serialization and side-by-side images. `--frames N --every K` records sequences with same-frame screenshots, per-frame metrics, worst frames, a contact sheet and an animation.
 - The verdict needs the serialized frames to be identical, so a pixel difference is known to come from rendering and not from lost data. `--renderdoc` adds the RenderDoc comparison.
 - `src/TWIN.md` describes the output and how to read it.
 
@@ -153,7 +155,8 @@ flowchart LR
 - Equivalence with the client is measured with `openrs equiv` before a pass is considered transferred.
 - Native desktop builds and the web build share the cache, lobby and server unchanged.
 - The renderer has the model, ground, sprite, shadow, particle, water and material passes. Planar water reflections and bloom are not ported yet.
-- Next: a live frame stream from the client to the browser, with input sent back, described in `src/MODERN-RENDERER-WEB-TRANSFER.md`.
+- The frame stream and interactive test games are implemented in `code/games`, `code/renderer/src/stream.rs` and the browser bridge. Resource records are sent on change and acknowledgements bound the number of in-flight frames. See `src/FRAME-STREAM.md` and `src/GAMES.md`.
+- Integrating the original Kotlin client as a live game host is not completed by replaying a captured frame.
 
 # Rules For Agents
 

@@ -44,5 +44,5 @@ pub fn server() -> Option<(u32, u16)> {
 }
 
 pub fn crashed() -> bool {
-    read("browser").is_some() && browser().is_none()
+    read("browser").is_some() && browser().is_none() || crate::game::crashed() || crate::native::crashed()
 }

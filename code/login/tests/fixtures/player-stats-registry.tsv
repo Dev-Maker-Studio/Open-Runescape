@@ -1,0 +1,4 @@
+name	opcode	length
+UPDATE_STAT	140	6
+RUN_ENERGY	64	1
+PLAYER_WEIGHT	14	2

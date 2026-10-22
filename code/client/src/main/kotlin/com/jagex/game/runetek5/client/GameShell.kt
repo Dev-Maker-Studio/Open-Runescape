@@ -22,6 +22,9 @@ import java.io.RandomAccessFile
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.FileOnDisk
 import com.jagex.game.runetek5.cache.JFS32
+import com.jagex.game.runetek5.cache.CacheLimits
+import com.jagex.game.runetek5.cache.Decompressor
+import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.client.cycle.AbstractCycleManager
 import com.jagex.game.runetek5.client.cycle.DecoupledCycleManager
 import com.jagex.game.runetek5.client.cycle.FrameLimiter
@@ -373,11 +376,12 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         }
         FileOperations.setPreferenceFile(PreferenceManager.preferenceFile!!)
         loadRandomFile()
-        cacheFileData = FileOnDisk(JFS32(FileOperations.loadFromCacheDir("main_file_cache.dat2"), 524288000L), 5200)
+        cacheFileData = FileOnDisk(JFS32(FileOperations.loadFromCacheDir("main_file_cache.dat2"), CacheLimits.DATA_BYTES), 5200)
         cacheFileReferenceTable = FileOnDisk(JFS32(FileOperations.loadFromCacheDir("main_file_cache.idx255"), 1048576L), 6000)
+        Resource.referenceTableDecompressor = Decompressor(255, cacheFileData!!, cacheFileReferenceTable!!)
         FileOnDisk.cacheFileIndices = arrayOfNulls(SystemInfo.numIndices)
         for (i in 0 until SystemInfo.numIndices) {
-            FileOnDisk.cacheFileIndices!![i] = FileOnDisk(JFS32(FileOperations.loadFromCacheDir("main_file_cache.idx$i"), 1048576L), 6000)
+            FileOnDisk.cacheFileIndices!![i] = FileOnDisk(JFS32(FileOperations.loadFromCacheDir("main_file_cache.idx$i"), CacheLimits.INDEX_BYTES), 6000)
         }
         try {
             WindowMode.activeWindowMode = WindowMode()

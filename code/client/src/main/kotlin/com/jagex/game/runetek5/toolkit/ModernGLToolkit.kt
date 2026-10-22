@@ -9,6 +9,7 @@ import com.jagex.game.runetek5.graphics.light.PointLight
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.material.MaterialTypeList
+import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
 import com.jagex.game.runetek5.graphics.modern.debug.AutoLogin
 import com.jagex.game.runetek5.graphics.modern.debug.GeometryDiff
 import com.jagex.game.runetek5.graphics.modern.batch.FrameBatcher
@@ -990,6 +991,7 @@ class ModernGLToolkit(
             glBindTexture(GL_TEXTURE_2D, boundTexture)
         }
         sceneMsaaRestoreFbo = restoreFbo
+        FrameDump.aliasTarget(restoreFbo, fb.getId(), fb.width, fb.height)
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, sceneMsaaRestoreFbo)
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.getId())
         blitWholeTarget(w, h)
@@ -1001,7 +1003,7 @@ class ModernGLToolkit(
     private fun blitWholeTarget(w: Int, h: Int) {
         val scissored = glIsEnabled(GL_SCISSOR_TEST)
         if (scissored) glDisable(GL_SCISSOR_TEST)
-        GL30.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST)
+        GLWrapper.blitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST)
         if (scissored) glEnable(GL_SCISSOR_TEST)
     }
 

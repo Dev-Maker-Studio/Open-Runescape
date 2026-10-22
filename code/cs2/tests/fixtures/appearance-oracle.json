@@ -1,0 +1,20 @@
+{
+  "oracle": "Actual ComponentLifecycleOps.dispatch (SETOBJ, BASEIDKIT, BASECOLOUR, SETGENDER, through the real PlayerAppearance and its CRC64 hash) and DetailCapabilityOps.dispatch (GET_NPC_VISLEVEL) from an isolated copy of the pinned shaded client JAR; PlayerEntity, PlayerAppearance, Interface, Component and the identity kit and item caches set directly with Unsafe.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "29e9b77770df2f2e9c95b6279c166b5306c51c42b74e065c4ab2c6b347f0768e",
+  "generator_sha256": "cb13862627601bec0936a3609d0492e70b79aa0469cd6d412da980eeb6f88cdd",
+  "fixture_sha256": {
+    "appearance.native.tsv": "8f5ca395154bdcc959d9c14ed79b865bb6533c43c4adbe05cca0972b06cc35c8"
+  },
+  "cases": 2400,
+  "visibility_cases": 900,
+  "opcodes": [
+    "BASECOLOUR",
+    "BASEIDKIT",
+    "SETGENDER",
+    "SETOBJ"
+  ],
+  "random_seed": "0x727a9e4a (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_appearance.py --check"
+}

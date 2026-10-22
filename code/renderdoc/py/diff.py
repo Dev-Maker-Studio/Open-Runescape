@@ -1,5 +1,7 @@
 import json
+import re
 import sys
+from bisect import bisect_left
 from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -7,7 +9,11 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+import convention
+
 TOL = 1e-3
+TIME = re.compile(r"(?i)time|pointlightcolor")
+IGNORED = {"drift", "web extra"}
 GROUP = "openrs"
 
 
@@ -32,7 +38,7 @@ def renderer_only(s):
 
 
 def load(d):
-    return renderer_only(json.loads((Path(d) / "summary.json").read_text()))
+    return convention.to_web(renderer_only(json.loads((Path(d) / "summary.json").read_text())))
 
 
 def key(d):
@@ -50,7 +56,15 @@ def align(a, b):
             pairs += [(a[i1 + k], b[j1 + k]) for k in range(n)]
             only_a += a[i1 + n : i2]
             only_b += b[j1 + n : j2]
-    return pairs, only_a, only_b
+    moved = set()
+    for x in list(only_a):
+        y = next((y for y in only_b if key(y) == key(x)), None)
+        if y:
+            only_a.remove(x)
+            only_b.remove(y)
+            pairs.append((x, y))
+            moved.add(x["eid"])
+    return pairs, only_a, only_b, moved
 
 
 def close(x, y):
@@ -66,13 +80,54 @@ def split(u):
 
 
 def scalars(u):
-    return {x for v in u.values() for x in v if x != 0}
+    return sorted({x for v in u.values() for x in v if abs(x) > TOL})
 
 
-def uniform_diffs(cu, wu):
+def missing(a, b):
+    out = []
+    for x in a:
+        i = bisect_left(b, x)
+        if not any(0 <= j < len(b) and convention.same(x, b[j]) for j in (i - 1, i)):
+            out.append(x)
+    return out
+
+
+def names_of(u, values):
+    hit = {k.split(".")[-1].split("[")[0] for k, v in u.items() if any(not missing([x], values) for x in v if abs(x) > TOL)}
+    return ",".join(sorted(hit))
+
+
+def time_moved(cu, wu):
+    if not any(k.endswith("._words") for k in wu):
+        return False
+    return any(TIME.search(n) and "light" not in n.lower() for n in names_of(cu, missing(scalars(cu), scalars(wu))).split(","))
+
+
+def drifted(cu, x, y, moved=False):
+    owners = {}
+    for k, vals in cu.items():
+        for v in vals:
+            owners.setdefault(v, set()).add(k.split(".")[-1].split("[")[0])
+    if not (moved or any(n for v in x for n in owners.get(v, ()) if TIME.search(n) and "light" not in n.lower())):
+        return None
+    explained = [v for v in x if owners.get(v) and all(TIME.search(n) for n in owners[v])]
+    rest = [v for v in x if v not in explained]
+    return (rest, y) if rest or len(y) > len(explained) + 2 else ([], [])
+
+
+def uniform_diffs(cu, wu, moved=False):
     if any(k.endswith("._words") for k in (*cu, *wu)):
         a, b = scalars(cu), scalars(wu)
-        return [] if a == b else [("uniform", f"values only client={sorted(a - b)[:8]} web={sorted(b - a)[:8]}")]
+        x, y = missing(a, b), missing(b, a)
+        if not (x or y):
+            return []
+        if not x:
+            return [("web extra", f"web block holds {len(y)} values with no client counterpart {y[:8]}")]
+        d = drifted(cu, x, y, moved)
+        if d == ([], []):
+            return [("drift", f"time driven uniforms differ between the two frames, client values {x[:8]} | client uniforms {names_of(cu, x)}")]
+        x, y = d if d else (x, y)
+        return [("uniform", f"values only client={x[:8]} web={y[:8]} | client uniforms {names_of(cu, x)}")]
     (cn, ca), (wn, wa) = split(cu), split(wu)
     out = []
     for k in sorted(set(cn) & set(wn)):
@@ -94,15 +149,15 @@ def blend(s):
     return [f"{b['src']}*{b['dst']} {b['op']} / {b['asrc']}*{b['adst']} {b['aop']} mask {b['mask']}" for b in s.get("blend", [])]
 
 
-def draw_diffs(c, w):
-    out = []
+def draw_diffs(c, w, moved=False):
+    out, notes = [], []
     cs, ws = c.get("state", {}), w.get("state", {})
     for f in ("cull", "front_ccw", "depth", "stencil", "scissor"):
         if cs.get(f) != ws.get(f):
             out.append(("state", f"{f} client={cs.get(f)} web={ws.get(f)}"))
     if blend(cs) != blend(ws):
         out.append(("state", f"blend client={blend(cs)} web={blend(ws)}"))
-    if cs.get("viewport", [])[2:] != ws.get("viewport", [])[2:]:
+    if cs.get("viewport") != ws.get("viewport"):
         out.append(("state", f"viewport client={cs.get('viewport')} web={ws.get('viewport')}"))
     if c.get("index", {}) and w.get("index"):
         if c["index"]["hash"] != w["index"]["hash"]:
@@ -116,16 +171,12 @@ def draw_diffs(c, w):
             out.append(("vertex", f"loc {loc} only on {'client' if a else 'web'}"))
         elif a.get("hash") != b.get("hash"):
             out.append(("vertex", f"loc {loc} {a['name']}/{b['name']} hash client={a.get('hash')} web={b.get('hash')} head client={a.get('head')} web={b.get('head')}"))
-    out += uniform_diffs(c.get("uniforms", {}), w.get("uniforms", {}))
-    ct, wt = c.get("textures", []), w.get("textures", [])
-    if len(ct) != len(wt):
-        out.append(("texture", f"bound count client={len(ct)} web={len(wt)}"))
-    for i, (a, b) in enumerate(zip(ct, wt)):
-        if a["hash"] == b["hash"]:
-            continue
-        flipped = a["hash"] == b.get("flip_hash") or a.get("flip_hash") == b["hash"]
-        out.append(("texture", f"slot {i} {a['size']}/{b['size']} hash client={a['hash']} web={b['hash']}{' vertically flipped' if flipped else ''}"))
-    return out
+    for d in uniform_diffs(c.get("uniforms", {}), w.get("uniforms", {}), moved):
+        (notes if d[0] in IGNORED else out).append(d)
+    found, extra = convention.textures(c.get("textures", []), w.get("textures", []))
+    out += [("texture", m) for m in found]
+    notes += [("client extra textures", m) for m in extra]
+    return out, notes
 
 
 def box(x, k):
@@ -194,10 +245,12 @@ def verdict(report):
 def run(cd, wd, out, limit):
     out.mkdir(parents=True, exist_ok=True)
     c, w = load(cd), load(wd)
-    pairs, oc, ow = align(c["draws"], w["draws"])
+    pairs, oc, ow, reordered = align(c["draws"], w["draws"])
     rep = {"client": str(cd), "web": str(wd), "client_api": c["meta"]["api"], "web_api": w["meta"]["api"], "draws": [len(c["draws"]), len(w["draws"])], "matched": len(pairs), "only_client": [d["eid"] for d in oc], "only_web": [d["eid"] for d in ow], "pairs": [], "targets": []}
+    moved = any(time_moved(a["uniforms"], b["uniforms"]) for a, b in pairs[:: max(1, len(pairs) // 40)])
     for i, (a, b) in enumerate(pairs):
-        rep["pairs"].append({"index": i, "client_eid": a["eid"], "web_eid": b["eid"], "key": list(key(a)), "diffs": draw_diffs(a, b)})
+        diffs, notes = draw_diffs(a, b, moved)
+        rep["pairs"].append({"index": i, "client_eid": a["eid"], "web_eid": b["eid"], "key": list(key(a)), "reordered": a["eid"] in reordered, "diffs": diffs, "notes": notes})
     for a, b in pair_targets(c, w):
         t = {"client": a and a["id"], "web": b and b["id"], "final": bool((a and a["final"]) or (b and b["final"]))}
         if a and b and a["png"] and b["png"]:
@@ -205,9 +258,11 @@ def run(cd, wd, out, limit):
         rep["targets"].append(t)
     rep["verdict"] = verdict(rep)
     (out / "diff.json").write_text(json.dumps(rep, indent=1))
-    lines = [f"verdict: {rep['verdict']}", f"client {rep['client_api']} draws={len(c['draws'])} clears={len(c['clears'])} targets={len(c['targets'])} | web {rep['web_api']} draws={len(w['draws'])} clears={len(w['clears'])} targets={len(w['targets'])}", f"aligned draws: {len(pairs)}, only client: {len(oc)}, only web: {len(ow)}"]
+    lines = [f"verdict: {rep['verdict']}", f"client {rep['client_api']} draws={len(c['draws'])} clears={len(c['clears'])} targets={len(c['targets'])} | web {rep['web_api']} draws={len(w['draws'])} clears={len(w['clears'])} targets={len(w['targets'])}", f"aligned draws: {len(pairs)} ({len(reordered)} reordered), only client: {len(oc)}, only web: {len(ow)}"]
     kinds = Counter(k for p in rep["pairs"] for k, _ in p["diffs"])
     lines.append("mismatches by kind: " + (", ".join(f"{k}={n}" for k, n in sorted(kinds.items())) or "none"))
+    conv = Counter(k for p in rep["pairs"] for k, _ in p["notes"])
+    lines.append("conventions ignored: " + (", ".join(f"{k}={n}" for k, n in sorted(conv.items())) or "none"))
     shown = 0
     for p in rep["pairs"]:
         for k, msg in p["diffs"]:

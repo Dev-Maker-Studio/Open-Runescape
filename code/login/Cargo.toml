@@ -1,0 +1,23 @@
+[package]
+name = "openrs-login"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "openrs_login"
+
+[dependencies]
+num-bigint = "0.4.8"
+openrs-protocol = { path = "../protocol" }
+zeroize = "1.9"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "=0.3.79"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

@@ -15,12 +15,13 @@ const COMMANDS: &[(&str, &str, Run)] = &[
     ("cache", "build [force] | status | verify [shared]  packed cache and the lobby CRC check", cache::run),
     ("player", "<command>  player files, interfaces, accounts and the local lobby and world", playerstore::run),
     ("fleet", "up [N] [--no-build] | down | status | place | do | look | trail | compare  up to nine clients", fleet),
-    ("resume", "restart what a crash left behind: the fleet slots and the single client, with their local servers", resume),
-    ("web", "up | down | do | look | trail | run | show | hide | toggle  the web client in chromium on the private display", web::run),
+    ("resume", "[web]  restart what a crash left behind: the fleet slots, the single client and the web client and fleet, web limits it to the web side", resume),
+    ("web", "up | down | do | look | trail | run | show | hide | toggle | fleet  the web client and a fleet of up to nine browsers in chromium on the private display", web::run),
+    ("games", "list  the test games of the frame stream host, started by openrs web up --game NAME", web::games),
     ("capture", "setup | verify | client | web | browser | exec | analyze | summary | diff | selftest  RenderDoc captures", renderdoc::run),
-    ("equiv", "<scene> | --live [--target native|browser] | history | scenes | test | down  client and renderer equivalence", renderdoc::equiv),
-    ("twin", "[scene | --at X Y Z] [--renderdoc] [--keep] [--out DIR]  the OpenGL client and the browser on one frame, side by side", twin::run),
-    ("doctor", "check everything the harness needs, PASS WARN FAIL with fixes", doctor::run),
+    ("equiv", "<scene> | --live [--target native|browser] [--frames 1..5] | history | scenes | test | down  client and renderer equivalence", renderdoc::equiv),
+    ("twin", "[scene | --at X Y Z | --here] [--frames N [--every K]] [--renderdoc] [--keep] [--out DIR]  the OpenGL client and the browser on one frame or a sequence, side by side", twin::run),
+    ("doctor", "[--deep]  check everything the harness needs, PASS WARN FAIL with fixes, --deep also starts the web page once and checks the WebGPU adapter", doctor::run),
     ("verify", "live end to end pass of the whole harness, JSON summary in code/harness/target/verify", verify::run),
     ("help", "this list", help),
 ];
@@ -31,7 +32,7 @@ fn done(name: &str, r: Result<(), String>) -> i32 {
 
 fn down(args: &[String]) -> i32 {
     let all = args.first().is_some_and(|a| a == "all");
-    done("down", if all { web::down() } else { Ok(()) }.and_then(|()| control::down(args)))
+    done("down", if all { web::down().and_then(|()| web::fleet_down()) } else { Ok(()) }.and_then(|()| control::down(args)))
 }
 
 fn build() -> Result<(), String> {
@@ -68,9 +69,10 @@ fn dead(pid_file: &std::path::Path) -> bool {
     std::fs::read_to_string(pid_file).ok().and_then(|s| s.trim().parse::<u32>().ok()).is_some_and(|p| !std::fs::read(format!("/proc/{p}/cmdline")).is_ok_and(|c| String::from_utf8_lossy(&c).contains("darkan-client")))
 }
 
-fn resume(_: &[String]) -> i32 {
+fn resume(args: &[String]) -> i32 {
+    let web_only = args.first().is_some_and(|a| a == "web");
     let fleet_dir = runtime("openrs-fleet");
-    let slots: Vec<usize> = std::fs::read_dir(&fleet_dir).into_iter().flatten().flatten().filter_map(|e| e.file_name().to_str()?.strip_prefix("slot")?.parse().ok()).collect();
+    let slots: Vec<usize> = std::fs::read_dir(&fleet_dir).into_iter().flatten().flatten().filter(|_| !web_only).filter_map(|e| e.file_name().to_str()?.strip_prefix("slot")?.parse().ok()).collect();
     let mut code = 0;
     let mut did = false;
     if let Some(n) = slots.iter().copied().filter(|n| dead(&fleet_dir.join(format!("slot{n}")))).max().map(|_| *slots.iter().max().unwrap_or(&0)) {
@@ -78,14 +80,13 @@ fn resume(_: &[String]) -> i32 {
         code |= fleet(&["up".into(), n.to_string()]);
         did = true;
     }
-    if dead(&runtime("openrs").join("client")) {
+    if !web_only && dead(&runtime("openrs").join("client")) {
         println!("resuming the single client");
         code |= up(&[]);
         did = true;
     }
-    if web::crashed() {
-        println!("resuming the web client");
-        code |= web::run(&["up".into()]);
+    if let Some(c) = web::resume() {
+        code |= c;
         did = true;
     }
     if !did {

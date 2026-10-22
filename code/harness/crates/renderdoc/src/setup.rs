@@ -7,7 +7,7 @@ fn missing() -> Vec<&'static str> {
 }
 
 fn site() -> Res<String> {
-    env::out(&mut env::tool(env::python()).args(["-c", "import rdc,os;print(os.path.dirname(os.path.dirname(rdc.__file__)))"])).map(|s| s.trim().into())
+    env::out(env::tool(env::python()).args(["-c", "import rdc,os;print(os.path.dirname(os.path.dirname(rdc.__file__)))"])).map(|s| s.trim().into())
 }
 
 fn patched(site: &str, patch: &Path) -> bool {

@@ -1,0 +1,20 @@
+{
+  "oracle": "Actual DialogOps.dispatch (opplayer, opplayerT, ifClose) through PacketEncoder.sendPlayerOperation and closeInterface from an isolated copy of the pinned client JAR; PlayerUpdate players, OUT_PLAYER_INDICES, MY_PLAYER and CURRENT_LANGUAGE set directly, the real Client.GAME_CONNECTION_CONTEXT (isaac null) queue and ChatBox lines read back",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "e282a3a56ac87a77dc2d138487c468b25190a79230d8cb9f3d7a1f08c018c1ef",
+  "generator_sha256": "868926fd5d56b9a54c21d451303acaabd2d6841c6199fa7a24098cb29ba4f339",
+  "fixture_sha256": {
+    "player-op.native.tsv": "9473f0b55ca749195c363b00997bf28b0b9d8600b0397594ec89de587a201dc9",
+    "player-op.stats.tsv": "c25f179ee52a9b8724610a04710b5f3f81d88d23204081ca8a6efbb31c5acbbe"
+  },
+  "cases": 12084,
+  "opcodes": [
+    "IF_CLOSE",
+    "OPPLAYER",
+    "OPPLAYERT"
+  ],
+  "random_seed": "0x70a1e40 (java.util.Random)",
+  "not_injected": "Client.OPEN_INTERFACES contents and activeDialogueContinue (IF_CLOSE sub interface closing is not compared); OPPLAYERT runs with an empty Interface.INTERFACES so the selected component is never found (the hookParams hook path is not compared); the route request is compared by the RouteStrategies.PLAYER destination and size that RouteFinder.calculateRoute receives, the route search itself is short circuited with movementBase -1 and not compared",
+  "reproduction": "python3 code/cs2/tests/native/generate_player_op.py --check"
+}

@@ -1,0 +1,15 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch (JAVA_VERSION_SUPPORTED, NOTIFY_ACCOUNTCREATESTARTED), DialogOps.dispatch (SETUP_MESSAGEBOX through MessageBox.initialize) and ConfigTypeChatOps.dispatch (BAS_GETANIM_READY through BasTypeList.list) from an isolated copy of the pinned client JAR, with an Unsafe-allocated SystemInfo and BasTypeList whose cache holds real BasType objects. PROFILE_CPU is a wall-clock benchmark and is not compared; MessageBox sprite and font asset loading is a no-op without Resource.SPRITES",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "SmallOpFixtures.java": "2b044a6d08b220279d8126a9f1f6c89fc507a956b7c1e80f686f42a25c7a21e2"
+  },
+  "generator_sha256": "3a441bbeffa78dc906bf89e388014aa01547c1c8eb08f79247afa77ab4e9a372",
+  "fixture_sha256": {
+    "small-ops.native.tsv": "660218a68221898a6ea30acf6ba39ef5e45105a1bf8951aaa026bb991400251a"
+  },
+  "cases": 749,
+  "random_seed": "0x5a11095 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_mini_menu.py --check"
+}

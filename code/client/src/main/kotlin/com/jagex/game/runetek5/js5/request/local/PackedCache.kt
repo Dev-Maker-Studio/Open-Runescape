@@ -27,7 +27,7 @@ object PackedCache {
         val configured = System.getProperty("openrs.cache") ?: System.getenv("OPENRS_CACHE")
         if (configured == "off") return null
         val source = configured?.let(::File) ?: generateSequence(File("").absoluteFile) { it.parentFile }.map { File(it, "assets/cache") }.firstOrNull { it.isDirectory } ?: return null
-        return listOf(source, File(source.absoluteFile.parentFile, source.name + "-packed")).firstOrNull { File(it, "main_file_cache.dat2").isFile }
+        return listOf(source, File(source, ".packed")).firstOrNull { File(it, "main_file_cache.dat2").isFile }
     }
 
     private fun table(index: Int): MappedByteBuffer? = synchronized(tables) {

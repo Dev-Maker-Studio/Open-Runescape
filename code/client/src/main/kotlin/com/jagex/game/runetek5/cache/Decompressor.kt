@@ -9,11 +9,7 @@ class Decompressor(
     @JvmField val idxFile: FileOnDisk
 ) {
 
-    @JvmField var sizeCap: Int = 65000
-
-    init {
-        this.sizeCap = 1500000
-    }
+    @JvmField var sizeCap: Int = CacheLimits.ARCHIVE_BYTES
 
     fun put(file: Int, data: ByteArray, size: Int): Boolean {
         synchronized(this.dataFile) {

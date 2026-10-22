@@ -1,0 +1,24 @@
+{
+  "oracle": "Real Matrix43.setViewPosition/rotate, Matrix44.fromMatrix/multiplyBy/setPerspective/getNearClipDistance/getDepthPerspectiveCD, MathUtils.getTheta, OpenGlToolkit.updateViewProjectionMatrix and recalculateFogAndProjection on an Unsafe-allocated ModernGLToolkit, and MapRegion.calculateViewRange with Loader.FOG_DISTANCE_MULTIPLIER, from an isolated copy of the pinned shaded client JAR. Injected by the driver: the batcher Y flip (elements 1,5,9,13), the fog enabled flag (enabled && density >= 0), the batcher colour channels, the environment density formula and the clear colour formula. NaN is recorded as one canonical quiet NaN.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "93b4352a709eacd7e122587c6f7a172d3147b348865bbe4978bc72ab0fb12805",
+  "generator_sha256": "1762fb192f025b64db298a7a0f3be3b70c6aeec892d64d315a7322bdd77b2c74",
+  "fixture_sha256": {
+    "camera.native.tsv": "89ee3ce33b42cf9c67d5c34e73a0ac92ce0dec66820f24f9c72bcac158060caf",
+    "camera.stats.tsv": "8392bd671ca2ea6f187b95e4caf4fefdcdf56a596c9abf62290427673c58b45d"
+  },
+  "cases": 32000,
+  "kinds": [
+    "clear",
+    "density",
+    "fog",
+    "pose",
+    "proj",
+    "range",
+    "theta",
+    "vp"
+  ],
+  "random_seed": "0x727c5228 (java.util.Random)",
+  "reproduction": "python3 code/renderer/tests/native/generate_camera.py --check"
+}

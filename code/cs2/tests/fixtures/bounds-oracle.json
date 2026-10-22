@@ -1,0 +1,21 @@
+{
+  "oracle": "Actual DetailCapabilityOps.dispatch for GET_ENTITY_BOUNDING_BOX, GET_LOC_BOUNDING_BOX, GET_OBJ_BOUNDING_BOX and GET_LOC_OVERLAY_HEIGHT from an isolated copy of the pinned shaded client JAR; NpcEntity, StationaryWall, StationaryGroundDecoration, GroundItem and the stationary and animated loc classes built with allocateInstance, with boundingBoxPolygons, BoundingBoxPolygon fields, ModelSM vertex arrays, maxDepth, boundsUpdated, minY and AnimatedGameObject.modelMinY set directly with Unsafe.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "611eb706631f2bc4bff99c476517131ebd9b1c5b2e4ae27c79d62272e77438ec",
+  "scene_driver_sha256": "f4799f92e3c17db95069110c7af87655a09113eb60e40cdae03459ebded0080a",
+  "generator_sha256": "40d2d4cef376aff5964c22fc23d16220066e0806fe487658bb8f86c2f92c9478",
+  "fixture_sha256": {
+    "bounds.native.tsv": "d4f26ce14ac7b55a8df9b6b364d4c1305d9eabb92dce6344b5a6c684d207bec7",
+    "bounds.stats.tsv": "d8757264d350b48057f8cf1474f4d2b67270a4ccc2b551804bdddba518daabd9"
+  },
+  "cases": 10000,
+  "opcodes": [
+    "GET_ENTITY_BOUNDING_BOX",
+    "GET_LOC_BOUNDING_BOX",
+    "GET_LOC_OVERLAY_HEIGHT",
+    "GET_OBJ_BOUNDING_BOX"
+  ],
+  "random_seed": "0x727c5229 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_bounds.py --check"
+}

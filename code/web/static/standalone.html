@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenRS original-protocol diagnostic</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,sans-serif;background:#111720;color:#e6edf3}body{max-width:900px;margin:48px auto;padding:0 24px}h1{font-size:28px;line-height:1.2}p{color:#bdc7d5}button{padding:10px 16px;background:#25394f;border:1px solid #57738e;border-radius:6px;color:inherit;font:inherit;margin:4px 8px 8px 0}button:disabled{opacity:.5}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1018;border:1px solid #344357;border-radius:8px;padding:20px;font:13px/1.5 monospace}strong{color:#ffd58b}
+</style>
+</head>
+<body>
+<h1>Original-protocol client diagnostic</h1>
+<p>This page runs the independent Rust/wasm lobby login, world login, and initial player/map decoder. The private development bootstrap is delivered once from this loopback server.</p>
+<p><strong>This is not a playable or rendered world.</strong> Later game packets are framed but are not yet applied to a scene. The hosted native/WebGPU renderer is a separate path.</p>
+<button id="start" type="button">Start lobby and world check</button>
+<button id="close" type="button">Close diagnostic session</button>
+<pre id="status" aria-live="polite">Not connected. No private bootstrap has been requested.</pre>
+<script type="module" src="./standalone.js"></script>
+</body>
+</html>

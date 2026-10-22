@@ -103,6 +103,8 @@ class CS2Executor {
     @JvmField
     var instrPtr: Int = -1
 
+    internal val arrayDiagnostics = if (java.lang.Boolean.getBoolean("darkan.cs2.arrayDiagnostics")) CS2ArrayDiagnostics() else null
+
     companion object {
         @JvmField
         val CS2_CACHE: CacheableNodeQueue = CacheableNodeQueue(128)
@@ -169,6 +171,7 @@ class CS2Executor {
             executor.intOpValues = executor.current!!.intOpValues
             var currentOpcode: ClientScriptOpCode? = null
             executor.returnValuesPtr = 0
+            executor.arrayDiagnostics?.begin()
             try {
                 try {
                     instructionCount = 0
@@ -178,6 +181,7 @@ class CS2Executor {
                             throw RuntimeException("")
                         }
                         currentOpcode = executor.operations!![++executor.instrPtr]
+                        executor.arrayDiagnostics?.record(executor, currentOpcode)
                         if (isDebugTracing && (debugFilterScript == null || executor.current!!.scriptName != null && executor.current!!.scriptName!!.indexOf(debugFilterScript!!) != -1)) {
                             println(executor.current!!.scriptName + ": " + currentOpcode)
                         }
@@ -187,8 +191,14 @@ class CS2Executor {
                             break
                         }
                         CS2Interpreter.executeOperation(currentOpcode, executor)
+                        if (currentOpcode == ClientScriptOpCode.DEFINE_ARRAY) {
+                            executor.arrayDiagnostics?.defined(executor)
+                        }
                     }
                 } catch (scriptException: Exception) {
+                    if (currentOpcode == ClientScriptOpCode.DEFINE_ARRAY || currentOpcode == ClientScriptOpCode.PUSH_ARRAY_INT || currentOpcode == ClientScriptOpCode.POP_ARRAY_INT) {
+                        executor.arrayDiagnostics?.let { System.err.println(it.report(executor)) }
+                    }
                     val errorBuilder = StringBuilder(30)
                     errorBuilder.append(executor.current!!.pointer).append(" ")
                     for (returnIdx in executor.returnValuesPtr - 1 downTo 0) {
@@ -375,5 +385,51 @@ class CS2Executor {
             }
             return errorStringMod
         }
+    }
+}
+
+internal class CS2ArrayDiagnostics {
+    private val recent = ArrayDeque<String>(64)
+    private val definitions = arrayOfNulls<String>(5)
+
+    fun begin() {
+        recent.clear()
+    }
+
+    fun record(executor: CS2Executor, opcode: ClientScriptOpCode) {
+        val location = "script=${executor.current?.pointer} instruction=${executor.instrPtr} opcode=${opcode.opcode}"
+        val operand = executor.intOpValues?.getOrNull(executor.instrPtr)
+        val details = when (opcode) {
+            ClientScriptOpCode.DEFINE_ARRAY -> {
+                val arrayId = operand?.shr(16)
+                " array=$arrayId requestedLength=${executor.intStack.getOrNull(executor.intStackPtr - 1)} length=${arrayId?.let { executor.globalArrayLengths.getOrNull(it) }}"
+            }
+            ClientScriptOpCode.PUSH_ARRAY_INT, ClientScriptOpCode.POP_ARRAY_INT -> {
+                val offset = if (opcode == ClientScriptOpCode.POP_ARRAY_INT) 2 else 1
+                " array=$operand index=${executor.intStack.getOrNull(executor.intStackPtr - offset)} length=${operand?.let { executor.globalArrayLengths.getOrNull(it) }}"
+            }
+            ClientScriptOpCode.GOSUB_WITH_PARAMS -> " scriptTarget=$operand"
+            else -> ""
+        }
+        if (recent.size == 64) recent.removeFirst()
+        recent.addLast(location + details)
+    }
+
+    fun defined(executor: CS2Executor) {
+        val arrayId = executor.intOpValues!![executor.instrPtr] shr 16
+        definitions[arrayId] = "script=${executor.current?.pointer} instruction=${executor.instrPtr} opcode=${ClientScriptOpCode.DEFINE_ARRAY.opcode} array=$arrayId length=${executor.globalArrayLengths[arrayId]}"
+    }
+
+    fun report(executor: CS2Executor): String = buildString {
+        appendLine("[CS2 array diagnostics] script=${executor.current?.pointer} instruction=${executor.instrPtr}")
+        for (i in executor.returnValuesPtr - 1 downTo 0) {
+            val frame = executor.returnValues[i] ?: continue
+            appendLine("[CS2 array caller] script=${frame.savedScript?.pointer} instruction=${frame.savedInstrPtr}")
+        }
+        for (arrayId in executor.globalArrayLengths.indices) {
+            appendLine("[CS2 array state] array=$arrayId length=${executor.globalArrayLengths[arrayId]}")
+            definitions[arrayId]?.let { appendLine("[CS2 array definition] $it") }
+        }
+        for (entry in recent) appendLine("[CS2 array trace] $entry")
     }
 }

@@ -1,0 +1,10 @@
+instructions	76
+int	727
+int	-2147483648
+int	-999
+int	777
+array	0	8	2147483647	2	2	-2147483648	0	2147483647	-1	-999
+array	1	0
+array	2	0
+array	3	0
+array	4	9	0	1	2	3	4	5	6	777	888

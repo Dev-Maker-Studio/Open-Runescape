@@ -65,7 +65,7 @@ fn start(role: &str, ready: &str, local: &Path, i: usize) -> Result<(), String> 
     cmd.current_dir(&server)
         .env("PLAYER_FILE_DIR", store::root())
         .env("CACHE_SOURCE_PATH", repo.join("assets/cache"))
-        .env("CACHE_BUILD_PATH", repo.join("assets/cache-packed"))
+        .env("CACHE_BUILD_PATH", repo.join("assets/cache/.packed"))
         .env("LOBBY_PORT", &lobby_port)
         .env("WORLD_PORT", &world_port)
         .env("LOBBY_API_PORT", &api_port)

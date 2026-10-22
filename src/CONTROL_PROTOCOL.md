@@ -26,12 +26,12 @@ flowchart LR
 | `openrs down` | Stops the client only, keeping the display and the local server warm |
 | `openrs down all` | Also stops the display, the null audio sink and the local server |
 
-The packed cache is taken from `assets/cache-packed`, then `OPENRS_CACHE`. The local server builds and reads the same `assets/cache-packed`, so the client, lobby and world share one pack. Before the client starts, `openrs up` checks the pack against the target lobby and `openrs cache build|status|verify` manages it, see [CACHE.md](CACHE.md). 
+The packed cache is taken from `assets/cache/.packed`, then `OPENRS_CACHE`. The local server builds and reads the same `assets/cache/.packed`, so the client, lobby and world share one pack. Before the client starts, `openrs up` checks the pack against the target lobby and `openrs cache build|status|verify` manages it, see [CACHE.md](CACHE.md). 
 
 When the client is already in the world `openrs up` prints `ready (already up)` and does nothing else.
 
 ```text
-cache: assets/cache-packed
+cache: assets/cache/.packed
 client pid 517702 on :100 audio openrs_null log /run/user/1000/openrs/client.log
 ready tick 9 pos {"x":3225,"y":3222,"z":0}
 timings: load done 2719, cache ready 2530ms, lobby logged in 3533ms, world selected 3533ms, first world frame 8259ms, world entry 9.5s, total 9.5s
@@ -77,6 +77,7 @@ openrs run -Dautologin=true -Dbot.control=$XDG_RUNTIME_DIR/openrs-control.sock -
 - `wait-tick`, `wait-idle` and `wait-until` park the connection thread and are checked once per pulse on the client thread, so they never stall the game.
 - `screenshot` parks the connection thread until the render thread reads the frame back right before the buffer swap.
 - A tick is a game tick of about 0.6 seconds, counted from each player update packet. It stays at 0 until the first update arrives after login.
+- `dump-frame` and `dump-frames` park the connection thread while the render thread records. `dump-frames` finishes one frame before starting the next and sends a forced keepalive between captures; it does not collect the whole sequence in memory.
 
 # State Reads
 
@@ -220,6 +221,24 @@ Measured live on the virtual display.
 | One `openrs do pos` process, start to answer | about 20 ms |
 | 40 reads in one batch | about 11 ms in total |
 | `wait-tick 1` | about 0.6 s, one game tick |
+
+# Multi Frame Dumps
+
+```bash
+openrs do dump-frames /tmp/client-sequence 30
+openrs do dump-frames /tmp/client-sequence 20 every=2
+```
+
+| Command | Arguments | Result |
+| --- | --- | --- |
+| `dump-frames` | `dir count [every=1]` | Output directory and completed frame count; a failure is returned through the normal error response |
+
+- `count` is from 1 to 600. `every` is a positive integer; a bare integer is also accepted. The first eligible frame is captured, then every Nth rendered frame until the count is reached.
+- `frame-0000.orf` and `frame-0000.png` are one pair from the same rendered frame, before its buffer swap. Indices start at zero and use four digits.
+- Each `.orf` uses the existing bounded streaming writer. PNG encoding completes before the next capture, so frame-sized buffers never accumulate over a sequence.
+- `frames.json` records `index`, absolute `frame`, game `tick`, monotonic `nanos` from `System.nanoTime`, `gameState`, `orf` and `png` for each completed pair, plus `requested`, `count` and `every`.
+- The manifest is replaced through a temporary file. Failed current-frame files are removed, completed pairs remain, and the manifest carries an `error` when it can be written. A failed command must not be treated as a complete sequence.
+- The command can take minutes on a large scene. Consecutive means consecutive rendered frames, not a fixed wall-clock interval or game tick. The connection waits up to 15 minutes; client shutdown can also end the request.
 
 # Embodied Tester Guide
 

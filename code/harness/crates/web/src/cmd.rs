@@ -10,6 +10,19 @@ pub fn exec(page: &mut Page, cmd: &str, args: &[String]) -> Result<Value, String
             let file = args.first().ok_or("usage: replay <file.orf>")?;
             page.run("replay", &[link(Path::new(file))?, file.clone()])
         }
+        "bench" => {
+            let n = args.first().cloned().unwrap_or("60".into());
+            let v = page.run("bench", std::slice::from_ref(&n))?;
+            trail::append(page.frames, "bench", &[("frames", json!(n)), ("report", v.clone())]);
+            Ok(v)
+        }
+        c if crate::input::COMMANDS.contains(&c) => crate::input::exec(page, c, args),
+        "help" => page.run(cmd, args).map(|v| {
+            let mut all: Vec<Value> = v.as_array().cloned().unwrap_or_default();
+            all.extend(crate::input::COMMANDS.iter().map(|c| json!(c)));
+            all.sort_by_key(|c| c.as_str().unwrap_or("").to_string());
+            Value::Array(all)
+        }),
         _ => page.run(cmd, args),
     }
 }
@@ -35,7 +48,7 @@ fn screenshot(page: &mut Page, path: Option<&String>) -> Result<String, String> 
     let out = target(path, page.frames, "png");
     save(&out, &v["data"])?;
     let shown = out.display().to_string();
-    trail::append(page.frames, "shot", &[("path", json!(shown)), ("width", v["width"].clone()), ("height", v["height"].clone())]);
+    trail::append(page.frames, "shot", &[("path", json!(shown)), ("width", v["width"].clone()), ("height", v["height"].clone()), ("colors", v["colors"].clone())]);
     Ok(shown)
 }
 

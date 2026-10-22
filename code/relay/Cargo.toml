@@ -1,0 +1,17 @@
+[package]
+name = "openrs-js5-relay"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tungstenite = "0.29"
+signal-hook = "0.3"
+
+[dev-dependencies]
+socket2 = "0.6"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

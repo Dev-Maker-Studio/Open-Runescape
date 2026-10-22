@@ -1,0 +1,21 @@
+{
+  "oracle": "Actual ConfigTypeChatOps.dispatch (chatSendPublic, chatSendPrivate, chatPlayerName, chatPlayerNameUnfiltered) from an isolated copy of the pinned client JAR; Client rights and quickchat statics, CURRENT_LANGUAGE, PlayerUpdate.MY_PLAYER and HuffmanList.HUFFMAN (table A) set directly, the real Client.GAME_CONNECTION_CONTEXT (isaac null) queue read back for packet bytes.",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "3cc53bb1d45eb76995e4fb5d7b4684afcd0bc803250fcc5e84d7a43f1a19ce65",
+  "generator_sha256": "61e46c5391f0c55092df41ef4820a8b0ad7fb9f5bfe48bbdd5735144262e2e93",
+  "fixture_sha256": {
+    "chat-send.native.tsv": "c217987a1de7526fcb0c77e4368e5b1052e75a03e6a1907b7433de007a2ac923",
+    "chat-send.stats.tsv": "574a5cb2e49c5125883af493b662fb5b72b2260bb09eb0fd0c21c54e3fc3349b"
+  },
+  "cases": 4368,
+  "opcodes": [
+    "CHAT_PLAYERNAME",
+    "CHAT_PLAYERNAME_UNFILTERED",
+    "CHAT_SENDPRIVATE",
+    "CHAT_SENDPUBLIC"
+  ],
+  "random_seed": "0xc4a75e1d (java.util.Random)",
+  "not_injected": "null message strings and the /openrs-show command are never sent to Java",
+  "reproduction": "python3 code/cs2/tests/native/generate_chat_send.py --check"
+}

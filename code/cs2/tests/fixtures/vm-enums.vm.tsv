@@ -1,0 +1,60 @@
+instructions	232
+int	727
+int	20
+int	7
+int	7
+int	7
+int	0
+int	1
+int	0
+int	1
+int	0
+int	1
+int	0
+int	1
+int	5
+int	0
+int	0
+int	3
+int	2
+int	0
+int	0
+int	2
+int	2
+int	0
+int	0
+int	7
+int	-2
+int	5
+int	2
+int	3
+int	8
+int	3
+int	10
+int	20
+int	30
+int	7
+int	100
+string	hex:6c6f7765722d656e756d2d737472696e67
+string	hex:61
+string	hex:64666c74
+string	hex:78
+string	hex:35
+string	hex:6e756c6c
+string	hex:3230
+string	hex:c3a9
+string	hex:64666c74
+string	hex:3130
+string	hex:3230
+string	hex:3330
+string	hex:37
+string	hex:313030
+long	727727727727
+local-int	0
+local-string	null
+local-long	0
+array	0	0
+array	1	0
+array	2	0
+array	3	0
+array	4	0

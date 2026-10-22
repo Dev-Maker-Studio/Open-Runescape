@@ -1,0 +1,17 @@
+{
+  "oracle": "Actual CameraLoginPrefOps.dispatch for the LOGIN_*, CREATE_* and LOBBY_* network-backed opcodes, run through the real LoginManager (startWorldLogin, startLobbyLogin, initializeLogin, cancelLogin, resetLoginState and the base64 token path), AccountCreationStage, the real BufferedConnectionContext queue and the real PacketEncoder sign-up and email packets, whose queued bytes are XTEA-decrypted and parsed by the driver. The jar copy is loaded by a child-first class loader that rewrites only Client$Companion.setGameState(GameState)V and logout(Z)V (java.lang.classfile) to call LoginEffectHooks, which mirror the Kotlin branch order, record state changes, prepare-player and open-lobby calls, and close stub Connections, so engine side effects (gameConnection close, music, toolkit, region, flush and engine resets) are an effect log and not executed. No socket is opened.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "LoginEffectFixtures.java": "d0e4585a8d2533057d9437adb6ebae52562e9968e341486c254b8edf579e315f",
+    "LoginEffectHooks.java": "82868d35f1867ede5e5c36e56828d9d300ce7d4872bf001682c239cf76cd6d57",
+    "LoginEffectBoot.java": "6c16be7d3e8332536aa4a7876825478f6b357a622ea96d6e2cd19066e7aa3a31"
+  },
+  "generator_sha256": "ceddb01892fcd86b889cf398147cb39562da57e2869c480c91574a8949b9a41e",
+  "fixture_sha256": {
+    "login-effects.native.tsv": "9b63b358daa731cadc8e36bfc8d1e0705b60d563d034c14855cd154d80c9fdc5"
+  },
+  "cases": 3240,
+  "random_seed": "0x727c5228 ^ 0x5eed (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_login_effects.py --check"
+}

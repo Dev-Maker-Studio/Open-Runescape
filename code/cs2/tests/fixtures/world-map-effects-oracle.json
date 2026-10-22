@@ -1,0 +1,18 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch for WORLDMAP_SETZOOM, SETMAP, SETMAP_COORD, SETMAP_COORD_OVERRIDE, JUMPTODISPLAYCOORD, JUMPTOSOURCECOORD, FLASHELEMENT, FLASHELEMENTCATEGORY, CLOSEMAP, LISTELEMENT_START and LISTELEMENT_NEXT, run through the real WorldMapDisplay.reset, WorldMapInteraction.requestZoomChange, StaticMethods.setWorldMapScrollTarget and selectWorldMapElement, WorldMapDisplay.highlightCategory, getFirstActiveCategory and WorldMap.getNextActiveCategory with a real MECType and MECTypeList cache. The jar copy is loaded by a child-first class loader that rewrites only Client$Companion.loadAssets(Z)V and setLoadingWorldMap()V (java.lang.classfile) to record calls in WorldMapEffectHooks, so the asset reload and the loading screen are an effect log and not executed. The real Client.loadAssets work (cache clearing, AbstractToolkit.activeRenderMode) is not modelled.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "WorldMapFixtures.java": "a7ae8466ecca3305ef00d4dceb81be4c0047facb331782c706f82669b580999f",
+    "WorldMapEffectFixtures.java": "0f646ce75697ddf340251ac79c0b01170983d2a3c2bf188c143dc237228a051e",
+    "WorldMapEffectHooks.java": "8ecc22ae745c9cf0457c8c72db0dbc5756c00a0508a96ed5783b023ed1e15895",
+    "WorldMapEffectBoot.java": "f9581a23a9ea09c362446ce5d2959fd27dc0190b98f46433fb48d8c79afa755d"
+  },
+  "generator_sha256": "40b50ddeb67fbbbc2c363da675491fee5b11de4f1de2160c309f69fb58b8dc30",
+  "fixture_sha256": {
+    "world-map-effects.native.tsv": "5cf2e0d801f3c8b971649694c6112e096b2b1a0a2c293510d5c29245ee367f9d"
+  },
+  "cases": 3400,
+  "random_seed": "0x727c5228 ^ 0x5eed (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_world_map_effects.py --check"
+}

@@ -78,7 +78,9 @@ fn newest(dir: PathBuf, accept: impl Fn(&Path) -> bool) -> Option<PathBuf> {
     std::fs::read_dir(dir).ok()?.flatten().map(|e| e.path()).filter(|p| accept(p)).max_by_key(|p| p.metadata().and_then(|m| m.modified()).ok())
 }
 
-fn target(o: &Opts) -> Res<(Vec<String>, Vec<(&'static str, String)>, bool)> {
+type Target = (Vec<String>, Vec<(&'static str, String)>, bool);
+
+fn target(o: &Opts) -> Res<Target> {
     let root = env::root();
     match o.kind.as_str() {
         "client" => {

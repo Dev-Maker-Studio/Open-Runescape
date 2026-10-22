@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.graphics.modern.renderer
 
 import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.client.PreferenceManager
 import org.joml.Matrix4f
 import org.lwjgl.opengl.GL
@@ -136,7 +137,7 @@ class HdWaterRenderer {
         glGetFloatv(GL_COLOR_CLEAR_VALUE, savedClearColour)
         glClearColor((fogColour shr 16 and 0xff) / 255f, (fogColour shr 8 and 0xff) / 255f, (fogColour and 0xff) / 255f, 0f)
         glClearDepth(1.0)
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+        GLWrapper.clear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
         glEnable(GL_CLIP_DISTANCE0)
         reflectionPlane = planeY
         return true
@@ -329,7 +330,7 @@ class HdWaterRenderer {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, scene)
         if (scene == 0) glReadBuffer(GL_BACK)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, copyFbo)
-        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT, GL_NEAREST)
+        GLWrapper.blitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT, GL_NEAREST)
         glBindFramebuffer(GL_READ_FRAMEBUFFER, scene)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, scene)
     }

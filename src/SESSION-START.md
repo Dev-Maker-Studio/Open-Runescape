@@ -19,17 +19,17 @@ Step 1, check the environment before anything else:
 
 Step 2, run the live verification:
   cd code/harness && ./target/release/openrs verify
-- It starts the local lobby and world on the shared packed cache (assets/cache-packed), logs a local account into the world, and runs 35 live steps, stopping at the first failure. The report is in code/harness/target/verify/.
+- It starts the local lobby and world on the shared packed cache (assets/cache/.packed), logs a local account into the world, and runs the complete native and browser verification groups, stopping at the first failure. The report is in code/harness/target/verify/.
 - verify takes about 5 minutes, longer than one Bash command may run, so start it detached and poll the log:
   setsid nohup sh -c './target/release/openrs verify > target/verify.log 2>&1; echo verify_exit=$? >> target/verify.log' >/dev/null 2>&1 < /dev/null &
-- All 35 steps passed on 2026-10-20, see the Verified Results in src/HARNESS.md. A failure now is a regression.
+- The latest integrated result is 55 live steps passed, plus separate streamed-game and temporal tests. Read src/HARNESS.md and use openrs verify list for the current step list.
 - Fix each failure at its root cause, rebuild, and rerun verify until it passes. Tell me what failed and what you changed.
 - Compare measurements with the Verified Results in src/HARNESS.md and update them when they change.
 
-Step 3, after verify passes, the remaining work in order:
-1. If a crash left the fleet down, run openrs resume. Then raise the openrs equiv score from 73.1 with the nine slot agents described in src/FLEET.md (Parallel Transpilation): replay offscreen targets such as the minimap, match the 70 unmatched client draws, then fix per draw state differences.
-2. Port planar water reflections and bloom to code/renderer, checked with openrs equiv.
-3. Design the live frame stream from the client to the browser (src/MODERN-RENDERER-WEB-TRANSFER.md, Frame Stream section) and ask me where the client process should run before building it.
+Step 3, remaining work after the harness checks:
+1. Read src/FRAME-STREAM.md and src/GAMES.md. The selected architecture is a game host outside the browser, streaming ORF3 resources and frames over WebSocket and receiving sequenced input. The test games are implemented; the Kotlin game-host adapter is still needed.
+2. Use openrs twin --frames N --every K and openrs equiv --frames N --target browser for temporal rendering work. Preserve same-frame screenshots and records; do not dismiss missing data or alpha-state differences as conventions.
+3. Improve rendering parity (offscreen targets, water, particles, reflections and bloom) using measured artifacts. A harness verification pass does not mean rendering is pixel-equivalent.
 
 Rules:
 - Use the local lobby for testing. Never create accounts on the shared lobby lobby.devmakerstudio.com, and never change the server's login or per-IP limits.
@@ -44,4 +44,4 @@ Rules:
 | --- | --- |
 | Sandbox probe | Prints `OK` |
 | `openrs doctor` | No FAIL lines, a stale jar or closed server ports are warnings |
-| `openrs verify` | All 35 steps pass, or the first failing step names what to fix |
+| `openrs verify` | Every current native and browser step passes, or the first failing step names what to fix |

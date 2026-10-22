@@ -155,7 +155,7 @@ flowchart TD
 | 6 | Water, particles, billboards, sprites and fonts | Pipelines done, planar water reflection target not ported |
 | 7 | Bloom and shadows | Shadow pass done, bloom not ported |
 | 8 | wasm build and golden diff | wasm builds, `openrs equiv` diffs the client and the renderer on the same dumped frame |
-| 9 | Live frame stream from the client to the browser | Not started, see below |
+| 9 | Live frame stream to the browser | Protocol, test games and live native-session host implemented; rendering and live capture performance still require work, see `FRAME-STREAM.md` and `TRANSPILATION-STATUS.md` |
 
 - Every pipeline is verified without a GPU by naga validation and layout tests, and the client and renderer layout tables are checked against one shared fixture.
 - No pass is accepted as transferred until `openrs equiv` passes on a real dumped frame on a GPU.
@@ -177,7 +177,7 @@ flowchart LR
 - The frame records reuse the `.orf` chunks, with meshes and textures sent once and referenced by hash afterwards.
 - Input from the browser is sent back and applied to the client through the same path as the control server.
 - A browser cannot open the lobby's TCP connection, so the client stays next to the server, or a WebSocket relay carries the game protocol.
-- The choice between the two is open and decides where the client process runs.
+- The selected architecture keeps the game host outside the browser. The browser renders WebGPU frames and returns input over WebSocket. Both test games and the live Kotlin session host use this architecture now. The hosted milestone preserves native gameplay and CS2; it is not a standalone wasm game engine.
 
 ## Transfer Order Rules
 

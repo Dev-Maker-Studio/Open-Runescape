@@ -1,0 +1,21 @@
+{
+  "oracle": "Actual DetailCapabilityOps.dispatch for GET_ENTITY_SCREEN_POSITION, GET_LOC_SCREEN_POSITION and GET_OBJ_SCREEN_POSITION and CameraLoginPrefOps.dispatch for VIEWPORT_GETEFFECTIVESIZE from an isolated copy of the pinned shaded client JAR; a ModernGLToolkit built with allocateInstance (matrices, viewport floats), the Client viewport statics, HINT_POSITION, SUN_MATRIX, GAME_SCREEN_INTERFACE and NpcEntity, StationaryInteractiveObject, StationaryWall and GroundItem anchors set directly with Unsafe; scenes from SceneFixtures. NaN is recorded as one canonical quiet NaN.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "59a0bfa0fa880975014f46f2573a1807b831846f8c30a281a5ddf80adb4cb3a5",
+  "scene_driver_sha256": "f4799f92e3c17db95069110c7af87655a09113eb60e40cdae03459ebded0080a",
+  "generator_sha256": "5b3ed8bb5eeb708c97fddde7749e00881087da45c3a24f5b754e0d3f94d8f403",
+  "fixture_sha256": {
+    "projection.native.tsv": "9a966c24f8a2079c10fcc8b194d15c69f1406b884865c2aa0d5876192b1822ea",
+    "projection.stats.tsv": "5a1d022c5edc727c33f86b440c6915142b1a9d13f237e288e24b72751caa17bb"
+  },
+  "cases": 10000,
+  "opcodes": [
+    "GET_ENTITY_SCREEN_POSITION",
+    "GET_LOC_SCREEN_POSITION",
+    "GET_OBJ_SCREEN_POSITION",
+    "VIEWPORT_GETEFFECTIVESIZE"
+  ],
+  "random_seed": "0x727c5228 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_projection.py --check"
+}

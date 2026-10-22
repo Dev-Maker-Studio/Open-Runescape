@@ -20,18 +20,18 @@ flowchart LR
 
 ## Encoding Rules
 
-- All integers are unsigned 32 bit little endian, all floats are 32 bit IEEE little endian.
+- All integers are unsigned 32 bit little endian. Uniform and header floats are 32 bit IEEE little endian; typed texture components use the explicitly declared precision.
 - Every list is a `u32` count followed by its items, with no padding or alignment.
 - Ids are chosen by the writer and only need to be unique per kind within a file.
 - The reserved id `4294967295` means no texture or no instance buffer, the renderer binds a white 1 by 1 texture or draws one instance.
 
 ## File Layout
 
-The file is a header followed by a stream of chunks, so a writer can emit each record as soon as it is complete and never holds a whole frame in memory. The loader accepts the older `ORF2` and `ORF1` files, whose sections were count prefixed lists inside one zlib stream.
+The file is a header followed by a stream of chunks, so a writer can emit each record as soon as it is complete and never holds a whole frame in memory. Normalized frames retain `ORF3`; a frame containing a typed texture uses `ORF4`. Older readers reject that magic instead of treating half-float bits as normalized bytes. The loader accepts the older `ORF2` and `ORF1` files, whose sections were count prefixed lists inside one zlib stream.
 
 | Section | Content |
 | --- | --- |
-| Header | Magic `ORF3`, flags, width, height, clear color as 4 floats |
+| Header | Magic `ORF3` or `ORF4`, flags, width, height, clear color as 4 floats |
 | Chunks | One chunk per record, in any order that defines a record before a draw uses it |
 | End | A chunk of kind 5 with both lengths 0, which proves the writer closed the file |
 
@@ -39,12 +39,12 @@ The file is a header followed by a stream of chunks, so a writer can emit each r
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| kind | `u32` | 0 mesh, 1 texture, 2 uniform, 3 instances, 4 draw, 5 end |
+| kind | `u32` | 0 mesh, 1 texture, 2 uniform, 3 instances, 4 draw, 5 end, 6 typed texture in ORF4 only |
 | raw length | `u32` | Byte length of the record |
 | packed length | `u32` | Byte length of the zlib stream that follows, 0 when the record is stored as is |
 | payload | bytes | The record, or its zlib stream |
 
-The client stores records under 128 bytes and compresses the rest at zlib level 3. A file without an end chunk was cut short and the loader rejects it.
+The client stores records under 128 bytes and compresses larger records at zlib level 1, storing the raw payload instead when compression would not make it smaller. The record headers declare the actual choice. A file without an end chunk was cut short and the loader rejects it.
 
 ### Flags
 
@@ -74,6 +74,25 @@ The client stores records under 128 bytes and compresses the rest at zlib level 
 | width, height | `u32` | Size in texels |
 | layers | `u32` | Layer count, 1 for a plain texture |
 | pixels | bytes | `width * height * layers * 4` bytes of RGBA8, layer major, top row first, no mip levels |
+
+### Typed Texture
+
+Kind 6 is valid only in ORF4. It uses the same stored or bounded-zlib chunk container as ORF3. All header fields are `u32`; the header is 28 bytes.
+
+| Field | Meaning |
+| --- | --- |
+| id | Texture identity |
+| width, height, layers | Texel dimensions; typed recording currently requires one 2D layer |
+| format | 1 means RGBA16Float, four little-endian IEEE binary16 components per texel |
+| byte length | Exactly `width * height * layers * 8` |
+| sampler | Minification, magnification and wrap bits below |
+| pixels | Raw half-float components, with the same row order as normalized records |
+
+Sampler bits 0 through 2 encode nearest, linear, nearest-mipmap-nearest, linear-mipmap-nearest, nearest-mipmap-linear and linear-mipmap-linear as values 0 through 5. Bit 3 selects linear magnification instead of nearest. Bits 4 through 5 and 6 through 7 encode S and T addressing: 0 repeat, 1 clamp-to-edge, 2 mirrored-repeat. Other bits and reserved values are rejected. The default value 9 is linear minification and magnification with repeat addressing. Resource identities include format and, for typed records, sampler bits.
+
+Native GL_RGBA16F and GL_RGB16F are read through GL_HALF_FLOAT. RGB16F gains the native implicit alpha of half-float 1, not a quantized color conversion. Swizzles copy complete 16-bit components; zero and one use half-float encodings. HDR values above one, negatives and signed-zero component bits survive transport. Integer, sRGB, other float precisions, typed sprites, typed cubes and typed volumes remain explicitly unsupported. Dimensions are checked before allocation, and the complete record is capped at 32 MiB.
+
+WebGPU uploads RGBA16Float directly. This format is filterable in baseline WebGPU; no float32-filtering feature is needed. Native nearest/linear filtering and S/T addressing are retained at base level. Typed uploads declare exactly one mip level and clamp sampling to that level; the byte-oriented RGBA8 mip generator is never applied. A GPU test samples explicit LOD 4 from the one-level texture and receives base-level values. Native mip levels are not transported, so minified typed textures do not have full mip parity. Finite binary16 values are represented exactly in shader f32 before subsequent arithmetic; NaN payload behavior after GPU sampling is not guaranteed.
 
 ### Uniform
 
@@ -107,6 +126,30 @@ The client stores records under 128 bytes and compresses the rest at zlib level 
 | name | `u32` length and bytes | Empty for a drawn record, for a skipped one the shader name and the reason, such as `groundTextured.water` |
 
 Draws execute in file order. The depth buffer is cleared once per frame. Skipped draws keep their place so a replay summary can report what the client drew that the renderer does not cover yet.
+
+### Ordered Color Clears
+
+Main-target color clears are serialized as Sprite draws in their original operation order, without drawing anything extra into the native framebuffer. The central OpenGL binding and modern wrapper capture the actual clear color, color write mask and enabled scissor immediately before the native clear. The toolkit's existing sprite flush precedes its clear. The main target is the framebuffer bound when recording begins, plus explicitly registered multisample scene aliases; reflection and shadow targets are not aliases.
+
+A clear quad uses the full framebuffer viewport, not the native drawing viewport. Its geometry and top-left clip box cover the framebuffer intersection of the native bottom-left scissor, or the whole framebuffer when scissoring is disabled. RGBA components are clamped and rounded to normalized 8-bit destination values. Blending, depth testing, depth writes and culling are disabled. Texture slot `-2` identifies an untextured clear and bypasses the ordinary Sprite alpha discard, so zero alpha replaces destination alpha rather than preserving old pixels. Ordinary untextured Sprite slot `-1` is unchanged. The projection follows the existing GL_DEPTH conversion. These records use the existing ORF3/ORF4 mesh, uniform and draw encodings and do not relax parser bounds.
+
+The capture summary counts `clear.color.full` and `clear.color.scissored`. A fully disabled color write mask produces no draw; partial masks and enabled framebuffer sRGB conversion reject the recording rather than silently applying different semantics. Depth and stencil clear operations, including those combined with a captured color clear, are not serialized. Replay still clears depth only once at frame start and has no native stencil-clear parity.
+
+The header clear color remains the legacy capture-start GL state, not a framebuffer-history snapshot. Pixels untouched by generated writes during the frame, modulo the audited identity alias transfers below, can depend on an earlier native back buffer. The bounded history mechanism restores only that complement; it never substitutes captured pixels for missing scene geometry.
+
+### Untouched Framebuffer History
+
+The producer tracks a conservative per-pixel set of possible generated color writes. Every 3D, unknown, unsupported or failed main-target draw excludes its entire viewport intersected with enabled scissor from history capture. The audited Sprite and SurfaceMask vertex shaders both project a two-component position with `uProjection * vec4(position, 0, 1)`. Their supported affine triangles exclude individual projected triangle AABBs, expanded by one pixel for floating-point and sample coverage, rather than the bounding box of the whole batch. Geometry is read with each pass's declared vertex stride, 40 bytes for Sprite and 24 for SurfaceMask. Perspective, malformed or numerically unstable projections fall back to the whole viewport. No other pass is eligible for this narrower coverage. Clear rectangles exclude their framebuffer/scissor intersection. Except for the identity transfers below, color blits exclude their whole destination/scissor intersection even when replay does not support their contents. Native binding draws and blits pass through the same coverage hooks. Depth-only operations need no color exclusion.
+
+The toolkit explicitly registers same-sized multisample scene aliases before initializing them from the restored main framebuffer. Only distinct registered surfaces, exact full-frame source and destination bounds with no scaling, offsets or flips, exactly COLOR_BUFFER_BIT, NEAREST filtering, disabled scissoring, disabled framebuffer sRGB conversion and the expected BACK or COLOR_ATTACHMENT0 buffers qualify as identity transfers. An alias must first receive a qualifying copy from an initialized surface before it may resolve back. Registration or resizing requires fresh initialization. Unknown sources, uninitialized resolves and all other transfers retain conservative destination coverage.
+
+All registered surfaces share the same exclusion mask. Outside that mask, an initialized alias contains the same inherited color as the root: initialization and identity resolve only move that color without generating new scene pixels. Draws, clears and nonidentity transfers on any surface add exclusions that are never removed by a later identity copy. Thus a missing 3D draw cannot be repaired by copying the resolved framebuffer. Accepted transfers increment `aliasIdentityCopies` in the capture profile.
+
+At frame end before swap, the producer computes disjoint rectangles in the complement. The complete complement must contain at most ten percent of framebuffer pixels, at most 32 MiB of RGBA8 data and at most 4096 rectangles. An over-budget frame rejects recording before any history readback; it is not clamped, enlarged into a screenshot or filled with a guessed color. Only a double-buffered default framebuffer is supported. Readback selects BACK, reads only those rectangles and restores read-framebuffer, read-buffer, pixel-pack buffer and pixel-pack state.
+
+Each rectangle becomes a normalized one-layer texture and an opaque Sprite draw named `history.untouched`, appended after recorded operations. Reserved texture slot `-3` samples layer zero and bypasses alpha discard, preserving even zero-alpha destination bytes. UVs and stored rows have a top-left origin. Blending, depth tests, depth writes and culling are disabled. The capture profile reports `historyPixels` and `historyRegions`. Unrecognized full-target transfers still conservatively exclude the whole target and can leave no history to inherit.
+
+A missing or unsupported draw remains excluded from history even if its replay emits no pixels. Tests restore inherited border pixels while deliberately leaving an unported mesh visibly wrong inside its viewport. This mechanism does not implement retained depth/stencil, offscreen render graphs or complete rendering parity.
 
 ### State Bits
 
@@ -223,11 +266,14 @@ The sprite shader reads the texture slot as a layer of the single array texture,
 
 - `dump-frame [path]` on the control server records the next presented frame and answers with the path, the file size and a summary of drawn and skipped draws per shader, or with the error when the dump failed, in which case no file is left behind.
 - `-Drender.dump=<frame>` records that frame number after startup into `frame-<frame>.orf`, or the path in `-Drender.dump.path`.
-- Every draw is read back from OpenGL on the game thread, meshes, textures and uniform blocks are deduplicated by hash, and each record is handed to a writer thread through a bounded queue that compresses and appends it, so the heap holds one draw at a time.
-- A draw is routed by the name of its program: programs built from resources are named after their vertex file, so `shadow.vert` routes to pass 5 and `waterfall.vert` to pass 14, the HD water renderer registers its own program as `hdWater`, and generated programs are classified by their source (`instanced`, `optimized`, `surfaceMask`, `fullscreen`). A name without a `Passes` entry, a draw outside the main target, a non triangle draw such as tessellated water patches, and a textured ground draw in water mode are recorded as skipped with the name and the reason.
+- Draw data is collected on the OpenGL thread and deduplicated by content. A writer thread compresses and appends records through a chunk-count limit and a 64 MiB queued-payload budget; one bounded producer chunk can also be live. This is bounded buffering, not a claim that the whole process holds only one draw.
+- Live stream captures finalize the writer on a completion worker instead of blocking the game thread on compression drain. Offline frame sequences still finalize synchronously so their screenshot and metadata remain tied to the recorded frame.
+- Stream metadata and `stream-state` expose capture stages in nanoseconds. Writer lifetime includes waiting for records; compression, readback and writer timings overlap and must not be summed into wall time.
+- A draw is routed by the name of its program: programs built from resources are named after their vertex file, so `shadow.vert` routes to pass 5 and `waterfall.vert` to pass 14, the HD water renderer registers its own program as `hdWater`, and generated programs are classified by their source (`instanced`, `optimized`, `surfaceMask`, `fullscreen`). A name without a `Passes` entry, a draw outside the main target, an unsupported primitive or an unsupported resource format is recorded as skipped with its reason. Named HD-water patches are accepted only with three ordered control points; supported terrain water is captured with its actual bindings.
 - An attribute narrower than the pass layout, such as a two float water texcoord where the pass stores three, is copied as is and the remaining bytes stay zero.
-- Texture ids of a pass without a dedicated reader are the pass samplers in binding order, each read from the 2D texture bound to the sampler's unit; a volume or cube bound there yields the reserved no texture id.
+- Dedicated water readers capture normalized 2D images, 3D volume layers and ordered cube faces from the appropriate sampler targets, preserving swizzles and restoring texture, pixel-pack and PBO state. RGBA16F and RGB16F 2D inputs use typed recording; integer and other higher-precision formats remain explicitly unsupported. Scene depth is reconstructed by replaying the preceding geometry in WebGPU, not quantized into RGBA8.
 - Sprite draws read the bound texture of every slot the vertices use into one layered texture per distinct slot set, and rescale the texture coordinates to the layer size.
+- `TypedTextureTest` checks the JVM writer against `code/renderer/tests/fixtures/typed.orf`; the bounded Rust host parser and native WebGPU sampling test consume the same bytes, including 4, -0.5, zero and one.
 - `code/client/src/test/.../OrfWriterTest.kt` writes a synthetic frame through the same path, and `code/renderer/tests/fixtures/synthetic.orf` is that file, parsed by `cargo test` without a GPU.
 
 ## Tools

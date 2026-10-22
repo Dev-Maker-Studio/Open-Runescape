@@ -1,0 +1,31 @@
+{
+  "oracle": "FontMetrics (real constructor, getWidthNoSprites, splitLinesToBuffer with and without a width, fitText) over seeded synthetic fixed and variable-width fonts and seeded texts with tags, entities, stray angle brackets and cp1252 characters, run headless from an isolated COPY of the shared client jar.",
+  "injected": "The font metric byte streams are produced by a Java encoder written for the fixture; no sprite icons are passed, so img tags are ignored on both sides.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "jar_sha256": "6b38870f916966c8ab8720f619c9506d5103e23c8cb3918fb15bdd8b7890f0b9",
+  "jar_sha256_after": "6b38870f916966c8ab8720f619c9506d5103e23c8cb3918fb15bdd8b7890f0b9",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/font/FontMetrics.kt": "94286eaa494f9ae6b2153c4e55766c2395036d745e30d8439fcfd7405eb5bf46",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/font/AbstractFontRenderer.kt": "4d22374d223c4b9472e85154a74a0d07ce8e3f6066661cee871ce59d7dcef888",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/buffer/Packet.kt": "496e0841cb82e2d6d8a49e6dcf72217bc0928824b37312e7786b2ac819736734",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/Utils.kt": "f426bd8e158b46718a651fa7113d2c15c168e4423649ea410871cbfa0dd518e8",
+    "code/interface-raster/tests/native/FontLayoutFixtures.java": "ba6ed99d97443d35d6369ce94662b3da966579c33e0f3938136fa3627a8ad0e5"
+  },
+  "generator_sha256": "ba30dea291d017eda143337e60836baf9396acd76eda51a1347904a017fe24b6",
+  "fixture_sha256": {
+    "font.native.tsv": "131fe700fcdc72a663e4b15420c1b0233d993823f12505199771a795419712d1"
+  },
+  "random_seed": "0x727f0a7 (java.util.Random)",
+  "counts": {
+    "font.native.tsv": {
+      "records": 1033,
+      "final": [
+        "Z",
+        "font",
+        "12",
+        "720",
+        "300"
+      ]
+    }
+  }
+}

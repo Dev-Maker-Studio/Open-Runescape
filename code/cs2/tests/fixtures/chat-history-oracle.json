@@ -1,0 +1,33 @@
+{
+  "oracle": "Actual ConfigTypeChatOps.dispatch from an isolated copy of the pinned shaded client JAR; ChatBox lines, line count and filter statics set directly, the real Client.GAME_CONNECTION_CONTEXT (isaac null) queue read back for packet bytes.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "242fd05ef42e097e3634191adf557157f92bd094a5236a51ee7b90f5750da1a5",
+  "generator_sha256": "9bbfc62c394f4deebd6541e94d9ea3d28e2d48359e8da2ca2f412cbf80c4a07a",
+  "fixture_sha256": {
+    "chat-history.native.tsv": "5091bfec5d35ef976390a982dfc23737e0a43f7d7afac27e9ed91f2c22e937a5",
+    "chat-history.stats.tsv": "4ec3e0096ca9b72b899174713f59973c8b83515febd77c6d49a3bf10a74f1dcc"
+  },
+  "cases": 7344,
+  "opcodes": [
+    "CHATLINE_GETEFFECTFLAGS",
+    "CHATLINE_GETSIMPLENAME",
+    "CHATLINE_GETUID",
+    "CHAT_GETFILTER_PRIVATE",
+    "CHAT_GETFILTER_PUBLIC",
+    "CHAT_GETFILTER_TRADE",
+    "CHAT_GETHISTORYCLAN",
+    "CHAT_GETHISTORYLENGTH",
+    "CHAT_GETHISTORYMESSAGE",
+    "CHAT_GETHISTORYNAME",
+    "CHAT_GETHISTORYPHRASE",
+    "CHAT_GETHISTORYTYPE",
+    "CHAT_GETPREVUID",
+    "CHAT_SENDABUSEREPORT",
+    "CHAT_SETFILTER",
+    "CHAT_SETMODE",
+    "UNKNOWN_COMMAND_5019"
+  ],
+  "random_seed": "0x50c1a15 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_chat_history.py --check"
+}

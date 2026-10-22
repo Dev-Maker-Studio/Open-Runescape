@@ -1,4 +1,5 @@
 mod audio;
+mod archive;
 mod hypr;
 mod state;
 mod xserver;
@@ -107,13 +108,9 @@ pub fn shot(out: &str) -> Res {
 }
 
 pub fn stop() -> Res {
-    for name in ["client", "xserver"] {
-        let pid = if name == "xserver" { state::read("xserver").and_then(|s| s.split(' ').nth(1).and_then(|p| p.parse().ok())) } else { state::read(name).and_then(|s| s.parse().ok()) };
-        if let Some(pid) = pid {
-            if state::alive(pid) {
-                let _ = Command::new("kill").arg(pid.to_string()).status();
-            }
-        }
+    stop_client();
+    if let Some(pid) = xserver_pid() {
+        let _ = Command::new("kill").arg(pid.to_string()).status();
     }
     audio::unload();
     let _ = std::fs::remove_dir_all(state::dir());
@@ -131,6 +128,17 @@ pub fn client_pid() -> Option<u32> {
 pub fn stop_client() {
     if let Some(pid) = client_pid() {
         let _ = Command::new("kill").arg(pid.to_string()).status();
+        let start = std::time::Instant::now();
+        while state::alive(pid) && start.elapsed() < std::time::Duration::from_secs(2) {
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+    }
+    if let Ok(root) = root() {
+        match archive::save(&dir().join("client.log"), &root) {
+            Ok(Some(path)) => eprintln!("native log archived: {}", path.display()),
+            Err(e) => eprintln!("native log archive failed: {e}"),
+            _ => {}
+        }
     }
     let _ = std::fs::remove_file(dir().join("client"));
 }

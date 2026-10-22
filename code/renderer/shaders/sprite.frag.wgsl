@@ -38,25 +38,28 @@ fn main_1() {
         }
     }
     let _e33 = vTexIndex_1;
-    if (_e33 >= 0i) {
+    let _e36 = vTexIndex_1;
+    if ((_e33 >= 0i) || (_e36 == -3i)) {
         {
-            let _e37 = vTexCoord_1;
-            let _e38 = vTexIndex_1;
-            let _e42 = vec3<f32>(_e37.x, _e37.y, f32(_e38));
-            let _e47 = textureSampleLevel(uTextures, uTextures_s, _e42.xy, i32(_e42.z), 0f);
-            texColor = _e47;
-            let _e48 = texColor;
-            let _e49 = vColor_1;
-            fragColor = (_e48 * _e49);
+            let _e42 = vTexCoord_1;
+            let _e43 = vTexIndex_1;
+            let _e49 = vec3<f32>(_e42.x, _e42.y, f32(max(_e43, 0i)));
+            let _e54 = textureSampleLevel(uTextures, uTextures_s, _e49.xy, i32(_e49.z), 0f);
+            texColor = _e54;
+            let _e55 = texColor;
+            let _e56 = vColor_1;
+            fragColor = (_e55 * _e56);
         }
     } else {
         {
-            let _e51 = vColor_1;
-            fragColor = _e51;
+            let _e58 = vColor_1;
+            fragColor = _e58;
         }
     }
-    let _e52 = fragColor;
-    if (_e52.w < 0.004f) {
+    let _e59 = vTexIndex_1;
+    let _e63 = vTexIndex_1;
+    let _e68 = fragColor;
+    if (((_e59 != -2i) && (_e63 != -3i)) && (_e68.w < 0.004f)) {
         {
             discard;
         }

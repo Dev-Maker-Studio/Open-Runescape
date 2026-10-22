@@ -21,6 +21,8 @@ flowchart LR
 | --- | --- |
 | `openrs twin [scene]` | Runs the twin on a named scene, default `lumbridge` |
 | `openrs twin --at X Y Z` | Runs it at a tile instead of a scene |
+| `openrs twin --here` (alias `--no-teleport`) | Compares the frame at the player's current position without teleporting; the scene is named `here`, and it takes no scene and no `--at` |
+| `openrs twin ... --frames N [--every K]` | Compares N rendered frames, from 1 to 600, taking every Kth frame, default 1; multi-frame output defaults to `<scene>-frames` |
 | `openrs twin ... --renderdoc` | Also runs `openrs equiv --target browser` on the same place and adds its verdict and score |
 | `openrs twin ... --keep` | Leaves the client running when `twin` started it |
 | `openrs twin ... --out DIR` | Output folder, default `code/harness/target/twin/<scene>`, a relative path is resolved against where `openrs` runs |
@@ -44,7 +46,7 @@ flowchart LR
 | `twin.png` | Client, browser and difference next to each other with the verdict and numbers under them |
 | `twin.json` | Everything above as data: verdict, pixel metrics, worst regions, serialized frame comparison, both states, both descriptions and the optional RenderDoc result |
 | `renderdoc/` | With `--renderdoc`, the full `openrs equiv` folder, and `renderdoc.log` next to it |
-| `../history.jsonl` | One line per run with the scene, verdict, SSIM and PSNR, so a run can print its trend against the previous run of the same scene |
+| `../history.jsonl` | One line per run with the scene, frame count, verdict, SSIM and PSNR, so a run can print its trend against the previous run of the same scene |
 
 # Verdict
 
@@ -70,3 +72,46 @@ worst regions (x0,y0,x1,y1):
 - The first Varrock run showed the fountain's water as a dark pit with a white dot in the browser while the client draws bright water. The worst regions pointed at that spot, which is the HD water pass.
 - Particles such as the snow show up as small bright dots in the difference image. That is the particle pass, which the client and the browser draw differently.
 - Start from the worst region, find the draw that covers it in `renderdoc/report.txt`, and fix the pass that owns the shader.
+
+# Multi Frame Comparison
+
+```bash
+export OPENRS_WEB_STATE=$XDG_RUNTIME_DIR/openrs-web-multi
+openrs twin lumbridge --frames 30
+openrs twin varrock --frames 20 --every 2
+```
+
+The client streams each selected frame to disk and reads its back buffer before the same swap. The browser then loads each `.orf`, waits two rendered frames, takes its screenshot and writes the serialized frame back for a byte comparison. The capture keeps one frame in memory, not the whole sequence. The report reads neighbouring screenshots to estimate motion without loading the full sequence at once.
+
+## Sequence Outputs
+
+| File | Content |
+| --- | --- |
+| `client/frame-0000.orf`, `client/frame-0000.png` | The first recorded frame and its same-frame OpenGL readback, followed by numbered pairs |
+| `client/frames.json` | Zero-based indices, absolute rendered-frame numbers, game ticks, monotonic nanosecond timestamps, game states and file names |
+| `web/frame-0000.orf`, `web/frame-0000.png` | The browser's serialized frame and canvas readback for each pair |
+| `frames/0000/` | `client.png`, `web.png`, `diff.png` and `twin.png` for that pair |
+| `twin-frames.png` | A contact sheet of up to 12 evenly spaced frames, including the first and last |
+| `twin.gif` | The whole sequence as client, browser and amplified difference panels, played at a fixed 120 ms per frame |
+| `twin.json` | Per-frame SSIM, PSNR, differing percentage, byte comparison and worst regions; aggregate minimum, mean, maximum, worst frame and trend |
+| `../history.jsonl` | One record per run including frame count and stride; sequence trends compare runs with the same scene, count and stride |
+
+## Sequence Verdict
+
+- Every serialized frame must be byte identical.
+- Mean SSIM must be at least 0.99.
+- The worst frame must have SSIM at least 0.98. A high mean cannot hide one broken frame.
+- Identical images have infinite PSNR, represented by `null`; finite PSNR summary values exclude these frames.
+- The single-frame command, outputs, threshold and verification step are unchanged. `--renderdoc` still adds one deep capture, not a RenderDoc capture of every sequence frame; use `equiv --frames` for that slower check.
+
+## Reading The Sequence Trend
+
+The report gives the SSIM slope per selected frame and means for the first and second halves. A fitted change under 0.005 over the whole sequence is labelled flat; otherwise it is improving or degrading. Look at the per-frame records as well: reconnect overlays, scene transitions and one isolated outlier can dominate a slope. An outlier is more than 0.1 SSIM below the sequence median.
+
+The time-dependent-region check is a heuristic, not a shader classification. A pixel is moving when its colour changes by more than 8 between neighbouring captures on either side. The mask expands three pixels around motion. A frame is labelled `dynamic_only` when at least 90 percent of its differing pixels are in this mask and the mask covers at most 25 percent of the image. This area bound prevents a whole-screen transition from looking like a particle-only problem. No motion means the check cannot attribute a static water mismatch to animation.
+
+Read the contact sheet for spatial consistency, then the GIF for moving water, snow, players and interface changes. The GIF is a diagnostic animation, not a real-time recording: dumping is slow, game ticks can advance by many steps between consecutive rendered frames, and the nanosecond timestamps give the actual elapsed time. The client sends its existing forced keepalive between dumps to avoid a loop-count-based keepalive timeout. Inspect `gameState` and the original screenshots before calling a sharp SSIM drop an animation regression. Frames with reconnect overlays can preserve old framebuffer contents that a standalone `.orf` replay cannot reconstruct.
+
+## Per-region SSIM
+
+`twin.json` and each frame record carry `region_ssim` beside the whole-frame SSIM: `terrain`, `models`, `minimap` and `chat`, each with its box and score. Boxes are fixed fractions of the 765x503 fixed layout (viewport 0,0 to 516,338; minimap from x 570 to the right edge, y 0 to 190; chat strip y 345 to 475). `models` is the padded bounding box of viewport pixels differing by more than 24 in any channel; `terrain` is the viewport with that box taken from the client image, so a model mismatch does not lower it. A frame with no such pixels reports `models` 1.0 with no box. The text report prints one `region ssim:` line.

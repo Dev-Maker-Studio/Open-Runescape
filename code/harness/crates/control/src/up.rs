@@ -15,15 +15,12 @@ fn local_server_up() -> bool {
 }
 
 fn ensure_cache(root: &std::path::Path) -> String {
-    if root.join("assets/cache-packed/main_file_cache.dat2").exists() || std::env::var_os("OPENRS_CACHE").is_some() {
-        return "assets/cache-packed".into();
+    let packed = cache::packed(root);
+    if packed.join("main_file_cache.dat2").exists() {
+        packed.display().to_string()
+    } else {
+        "none packed, run openrs cache build".into()
     }
-    let built = root.join("code/harness/target/local/cache");
-    if built.join("main_file_cache.dat2").exists() {
-        std::env::set_var("OPENRS_CACHE", &built);
-        return built.display().to_string();
-    }
-    "none packed, client falls back to the remote cache".into()
 }
 
 pub fn milestones(log: &str) -> String {

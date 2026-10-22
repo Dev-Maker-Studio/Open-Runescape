@@ -1,0 +1,11 @@
+{
+  "oracle": "Actual WorldMapUserDetailOps.dispatch for the USERDETAIL_LOBBY_* and USERDETAIL_DOB operations and BOOST_ADVERT_EXISTS, BOOST_ADVERT_AVAILABLE and BOOST_ADVERT_LAUNCH, with the lobby login statics of LoginManager, Client, FileOnDisk and QueueIterator injected, a real HostNameIdentifier with a preset host and an injected Utils.time(), from an isolated COPY of the pinned shaded client JAR.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "fixture_sha256": {
+    "userdetail.native.tsv": "4f01871af80b2ac561fdab62aee2f28a1e2ef0d1772a278c56aea7bb9ee76146"
+  },
+  "generator_sha256": "ea08b1f51202d5d4a34196fc377818099da3276552a11bff186f90d95e021ab7",
+  "driver_sha256": "976eb2f6b8fb25977a1568f9a319e926579b77205ec701be19c3f86ff19e0899",
+  "reproduction": "python3 code/cs2/tests/native/generate_clock.py --check"
+}

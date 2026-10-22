@@ -6,7 +6,7 @@ The client reads the game from a locally packed cache and the harness keeps that
 flowchart LR
   T[assets/cache tree] --> B[openrs cache build]
   B --> G[Gradle tools cache build]
-  G --> P[assets/cache-packed]
+  G --> P[assets/cache/.packed]
   P --> C[Client PackedCache]
   C --> L[Login CRC table]
   S[Lobby JS5 version table] --> L
@@ -19,12 +19,12 @@ flowchart LR
 | Item | Value |
 | --- | --- |
 | Source | `assets/cache`, an unpacked cache tree |
-| Output | `assets/cache-packed`, a JS5 sector store |
+| Output | `assets/cache/.packed`, a JS5 sector store |
 | Builder | `./gradlew :tools:run --args="cache build <tree> <out>"` in `code/server` |
-| Stamp | `assets/.cache-packed.stamp`, the manifest hash of the tree at the last build |
+| Stamp | `assets/cache/.packed.stamp`, the manifest hash of the tree at the last build |
 
 - The build is deterministic: two builds of the same tree give identical reference tables.
-- The manifest hash is the file count plus an order independent sum of the relative path, size and modified time of every file outside `.git`.
+- The manifest hash is the file count plus an order independent sum of the relative path, size and modified time of every source file outside `.git`, `.packed` and `.packed.stamp`.
 
 # Command
 
@@ -66,3 +66,20 @@ The shared lobby serves a different cache build than `assets/cache`.
 
 - The old behaviour was to log in with whatever CRCs the lobby served, which is why the client worked before the local pack.
 - The packed cache cannot be made identical to the shared lobby without the exact source tree the lobby was built from.
+
+# Single Local Root
+
+- `assets/cache` contains the unpacked source and `assets/cache/.packed` contains its derived sector files.
+- The client memory maps that packed directory, and every local lobby and world uses it as `CACHE_BUILD_PATH`. The browser never receives the full cache; game hosts send only the resources needed to render.
+- `assets/cache/.packed.stamp` stores the source manifest. Generated packed files are excluded from that manifest so a build never invalidates itself.
+- The former `assets/cache-packed` and `code/harness/target/local/cache` copies were compared and removed during consolidation.
+
+# Downloaded Native Cache Persistence
+
+The hosted reference client uses its normal downloaded cache rather than the different supplied pack. Client-side limits previously wrote overflow markers and deleted those files at next open. The data file was observed at 524288001 bytes and the maps index at 1048577 bytes, exactly one byte over the old limits.
+
+- Client file handling now preserves oversized files and reports capacity errors without deleting them or appending overflow markers.
+- Native downloaded data is bounded to 4 GiB, each sparse index to 96 MiB and archive payloads to the format's 24-bit length field. Tests exercise an archive above 1.5 MiB and an index slot beyond the old 1 MiB boundary.
+- The client now supplies its reference-table disk store to the network workers. A live run persisted 37 index entries instead of leaving `idx255` at one byte.
+- This changes client persistence behavior, not the supplied cache assets or hosted cache content.
+- Latest hosted restart reached first world frame in 8.3 seconds; one separate warm run spent roughly 100 seconds in `discard_unpacked`. That intermittent stall is not claimed fixed.

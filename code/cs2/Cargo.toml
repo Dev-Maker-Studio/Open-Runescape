@@ -1,0 +1,12 @@
+[package]
+name = "openrs-cs2"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[profile.release]
+lto = true
+codegen-units = 1

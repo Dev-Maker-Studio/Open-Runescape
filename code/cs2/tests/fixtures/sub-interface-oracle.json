@@ -1,0 +1,19 @@
+{
+  "oracle": "Actual DialogOps.dispatch (ifOpenSubClient, ifCloseSubClient) through Interface.openSub and closeChildInterface from an isolated copy of the pinned client JAR; Client.OPEN_INTERFACES and ICOMPONENT_SETTINGS_SLOTS are real IterableNodeMaps seeded directly and read back bucket by bucket",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "fd24db794d205ebc758c15854ed474188c80702c70069208a2330a7537b44487",
+  "generator_sha256": "418dc7b28118afdf17b74bbb869c3db8386bfba41decab742fb6cc35d62affa6",
+  "fixture_sha256": {
+    "sub-interface.native.tsv": "0bacbacf6b94a892bc74abc58ab2a2e0041c01f8da28459aceb354ae975bc3ca",
+    "sub-interface.stats.tsv": "740c0c82421fece6537f055e429fbe6851c6c24181908cdaaaf7e13e8c458ff8"
+  },
+  "cases": 4800,
+  "opcodes": [
+    "IF_CLOSESUBCLIENT",
+    "IF_OPENSUBCLIENT"
+  ],
+  "random_seed": "0x5ab1c11 (java.util.Random)",
+  "not_injected": "Interface.INTERFACES is empty so no component is ever found: the redraw, updateEntityLayout, resetComponentSequences, unloadInterface and MiniMenu prune side effects are not compared (the Rust model records them as InterfaceRequest values); activeDialogueContinue is null",
+  "reproduction": "python3 code/cs2/tests/native/generate_sub_interface.py --check"
+}

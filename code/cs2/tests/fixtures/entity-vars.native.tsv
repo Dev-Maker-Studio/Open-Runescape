@@ -1,0 +1,865 @@
+T	0	105
+V	0	-1
+T	1	105
+T	2	106
+T	3	0
+V	3	255
+T	5	105
+T	6	105
+V	6	1
+T	7	106
+T	8	0
+V	9	2147483647
+T	10	105
+T	11	105
+T	12	106
+V	12	2147483647
+T	13	0
+T	15	105
+V	15	1520824335
+T	16	105
+T	17	106
+T	18	0
+V	18	1
+T	20	105
+T	21	105
+V	21	1
+T	22	106
+T	23	0
+V	24	255
+T	25	105
+T	26	105
+T	27	106
+V	27	1
+T	28	0
+T	30	105
+V	30	255
+T	31	105
+T	32	106
+T	33	0
+V	33	2147483647
+T	35	105
+T	36	105
+V	36	-1
+T	37	106
+T	38	0
+V	39	-16711936
+V	-5	77
+V	65535	-3
+B	100	27	0	31
+B	101	25	0	32
+B	102	44	0	7
+B	103	6	1	33
+B	104	36	1	33
+B	105	35	5	4
+B	106	26	8	15
+B	107	30	28	255
+A	108
+B	109	13	3	10
+B	110	17	0	7
+B	111	32	8	15
+B	112	33	0	32
+B	113	12	255	255
+B	114	34	0	32
+B	115	37	0	7
+B	116	27	3	10
+A	117
+B	118	19	12	40
+B	119	40	16	47
+B	120	33	0	32
+B	121	11	0	30
+B	122	20	2	2
+B	123	12	255	255
+B	124	21	1	33
+B	125	25	3	10
+A	126
+B	127	0	8	15
+B	128	9	7	3
+B	129	18	7	3
+B	130	33	0	0
+B	131	30	255	255
+B	132	9	0	30
+B	133	13	8	15
+B	134	20	0	30
+A	135
+B	136	21	28	255
+B	137	10	30	31
+B	138	20	1	33
+B	139	38	5	4
+B	140	12	0	0
+B	141	5	5	4
+B	142	1	30	31
+B	143	20	0	30
+A	144
+B	145	21	0	7
+B	146	9	0	0
+B	147	42	31	31
+B	148	3	0	7
+B	149	16	7	3
+B	150	37	3	10
+B	151	7	0	30
+B	152	21	0	30
+A	153
+B	154	4	255	255
+B	155	26	8	15
+B	156	12	8	15
+B	157	30	0	31
+B	158	20	0	32
+B	159	38	0	7
+C	GET_VARP_OLD	null	106	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	39	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	143	ok	0
+C	GET_VARPBIT_OLD	null	144	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	113	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	42	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	109	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	115	ok	255
+C	GET_VARPBIT_OLD	npc	17	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	131	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	123	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	11	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	-2	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	162	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	65535	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	44	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	21	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	4	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	36	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	122	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	21	ok	1
+C	GET_VARP_OLD	player	153	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	129	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	256	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	121	ok	0
+C	GET_VARPBIT_OLD	null	158	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	105	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	155	ok	0
+C	GET_VARPBIT_OLD	npc	112	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	41	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	146	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	24	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	112	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	23	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	141	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	0	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	163	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	100	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	143	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	146	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	16	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	114	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	118	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	128	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	123	ok	0
+C	GET_VARPBIT_OLD	null	134	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	106	ok	0
+C	GET_VARPBIT_OLD	npc	256	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	156	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	161	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	110	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	143	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	28	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	121	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	100	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	255	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	140	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	150	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	32	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	161	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	124	ok	0
+C	GET_VARP_OLD	player	36	ok	-1
+C	GET_VARPBIT_OLD	npc	14	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	105	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	134	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	128	ok	0
+C	GET_VARP_OLD	npc	41	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	114	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	25	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	3	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	146	ok	1
+C	GET_VARPBIT_OLD	player	10	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	13	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	11	ok	0
+C	GET_VARP_OLD	player	43	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	23	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	29	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	65536	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	136	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	129	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	126	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	2147483647	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	42	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	104	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	15	ok	1520824335
+C	GET_VARPBIT_OLD	npc	1	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	141	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	133	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	23	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	2	ok	-1
+C	GET_VARPBIT_OLD	player	142	ok	0
+C	GET_VARPBIT_OLD	player	122	ok	0
+C	GET_VARPBIT_OLD	null	31	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	124	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	122	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	126	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	118	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	119	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	148	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	103	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	108	ok	1
+C	GET_VARPBIT_OLD	null	156	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	158	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	109	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	1000	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	7	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	35	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	23	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	41	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	137	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	137	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	9	ok	2147483647
+C	GET_VARPBIT_OLD	null	114	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	149	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	128	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	-1	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	25	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	18	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	43	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	24	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	102	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	11	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	153	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	2	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	114	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	65536	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	117	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	-2147483648	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	159	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	1	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	121	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	38	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	138	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	0	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	11	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	157	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	150	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	116	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	161	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	139	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	136	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	160	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	148	ok	255
+C	GET_VARPBIT_OLD	npc	111	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	14	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	32	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	44	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	154	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	101	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	130	ok	1
+C	GET_VARPBIT_OLD	npc	20	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	256	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	156	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	147	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	2	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	126	ok	1
+C	GET_VARPBIT_OLD	null	19	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	128	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	114	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	105	ok	0
+C	GET_VARP_OLD	null	111	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	2	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	13	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	157	ok	255
+C	GET_VARP_OLD	npc	27	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	5	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	28	ok	-1
+C	GET_VARP_OLD	null	109	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	30	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	147	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	148	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	41	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	16	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	136	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	155	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	37	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	130	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	133	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	25	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	150	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	13	ok	-1
+C	GET_VARPBIT_OLD	null	139	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	12	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	147	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	18	ok	1
+C	GET_VARPBIT_OLD	npc	121	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	15	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	6	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	113	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	134	ok	0
+C	GET_VARPBIT_OLD	npc	101	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	36	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	160	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	1000	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	22	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	-1	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	117	ok	1
+C	GET_VARPBIT_OLD	player	103	ok	0
+C	GET_VARPBIT_OLD	null	157	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	15	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	116	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	18	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	104	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	32	ok	-1
+C	GET_VARPBIT_OLD	player	158	ok	0
+C	GET_VARP_OLD	player	102	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	120	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	15	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	136	ok	0
+C	GET_VARP_OLD	player	128	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	126	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	151	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	39	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	8	ok	-1
+C	GET_VARPBIT_OLD	npc	34	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	101	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	29	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	17	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	131	ok	0
+C	GET_VARP_OLD	npc	125	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	104	ok	1
+C	GET_VARP_OLD	null	126	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	13	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	10	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	119	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	17	ok	-1
+C	GET_VARP_OLD	null	101	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	154	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	113	ok	0
+C	GET_VARPBIT_OLD	player	17	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	112	ok	1
+C	GET_VARPBIT_OLD	npc	31	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	4	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	142	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	35	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	5	ok	0
+C	GET_VARP_OLD	player	33	ok	2147483647
+C	GET_VARPBIT_OLD	null	22	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	130	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	-2	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	30	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	34	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	2	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	163	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	31	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	141	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	120	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	125	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	145	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	150	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	162	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	116	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	100	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	121	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	11	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	153	ok	1
+C	GET_VARP_OLD	null	102	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	108	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	65536	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	19	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	119	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	162	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	0	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	149	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	19	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	39	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	4	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	5	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	42	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	3	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	138	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	107	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	143	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	0	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	256	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	65535	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	29	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	19	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	156	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	31	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	117	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	2	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	147	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	106	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	26	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	1	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	23	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	110	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	27	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	158	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	20	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	65535	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	40	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	102	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	119	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	37	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	34	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	1000	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	101	ok	0
+C	GET_VARPBIT_OLD	player	40	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	-5	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	123	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	65535	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	1	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	151	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	138	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	147	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	107	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	20	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	151	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	160	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	38	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	124	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	113	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	32	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	9	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	132	ok	2147483647
+C	GET_VARPBIT_OLD	null	34	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	152	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	7	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	100	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	107	ok	0
+C	GET_VARPBIT_OLD	null	109	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	2147483647	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	135	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	110	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	145	ok	1
+C	GET_VARP_OLD	player	65535	ok	-3
+C	GET_VARPBIT_OLD	null	33	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	102	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	65535	ok	-3
+C	GET_VARPBIT_OLD	null	6	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	22	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	16	ok	0
+C	GET_VARPBIT_OLD	player	7	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	38	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	118	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	16	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	13	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	116	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	33	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	144	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	65535	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	134	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	120	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	116	ok	0
+C	GET_VARPBIT_OLD	player	120	ok	1
+C	GET_VARP_OLD	player	-5	ok	77
+C	GET_VARP_OLD	npc	35	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	155	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	40	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	141	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	65535	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	255	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	131	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	44	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	113	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	162	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	65536	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	16	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	111	ok	255
+C	GET_VARPBIT_OLD	player	256	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	32	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	122	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	9	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	108	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	37	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	115	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	113	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	0	ok	-1
+C	GET_VARPBIT_OLD	player	2	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	112	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	44	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	151	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	24	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	-1	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	138	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	123	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	104	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	0	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	126	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	1000	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	144	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	2	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	125	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	37	ok	-1
+C	GET_VARP_OLD	null	134	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	119	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	142	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	30	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	65535	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	65536	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	159	ok	255
+C	GET_VARPBIT_OLD	null	123	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	32	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	4	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	13	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	100	ok	1
+C	GET_VARPBIT_OLD	null	1000	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	135	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	110	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	37	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	100	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	158	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	42	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	37	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	256	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	26	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	31	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	21	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	0	ok	-1
+C	GET_VARP_OLD	null	17	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	-1	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	100	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	0	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	-2147483648	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	133	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	157	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	163	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	110	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	8	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	1	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	-1	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	140	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	110	ok	255
+C	GET_VARPBIT_OLD	npc	-2147483648	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	139	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	10	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	36	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	65535	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	127	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	25	ok	0
+C	GET_VARPBIT_OLD	null	105	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	140	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	145	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	32	ok	-1
+C	GET_VARP_OLD	player	22	ok	-1
+C	GET_VARP_OLD	player	40	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	0	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	-2147483648	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	255	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	156	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	-5	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	41	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	65536	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	38	ok	-1
+C	GET_VARPBIT_OLD	npc	145	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	137	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	152	ok	1
+C	GET_VARPBIT_OLD	npc	32	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	115	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	-5	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	141	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	159	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	129	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	148	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	18	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	129	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	24	ok	255
+C	GET_VARPBIT_OLD	null	136	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	136	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	34	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	31	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	27	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	7	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	161	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	127	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	6	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	24	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	106	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	100	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	103	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	8	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	36	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	29	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	20	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	104	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	125	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	130	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	160	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	27	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	152	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	148	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	35	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	150	ok	255
+C	GET_VARPBIT_OLD	npc	147	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	22	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	7	ok	-1
+C	GET_VARPBIT_OLD	player	5	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	137	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	4	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	131	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	31	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	10	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	29	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	122	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	9	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	39	ok	-16711936
+C	GET_VARPBIT_OLD	null	153	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	137	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	106	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	112	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	135	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	100	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	149	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	28	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	103	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	36	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	10	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	146	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	141	ok	0
+C	GET_VARPBIT_OLD	null	152	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	0	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	135	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	145	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	19	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	255	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	1	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	2147483647	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	31	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	1	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	155	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	131	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	137	ok	0
+C	GET_VARPBIT_OLD	null	12	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	32	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	109	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	124	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	132	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	112	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	255	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	8	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	103	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	115	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	18	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	120	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	2147483647	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	14	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	103	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	142	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	102	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	158	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	10	ok	0
+C	GET_VARPBIT_OLD	player	35	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	2	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	1	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	153	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	38	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	138	ok	0
+C	GET_VARPBIT_OLD	player	133	ok	255
+C	GET_VARP_OLD	npc	107	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	33	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	142	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	115	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	145	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	127	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	31	ok	0
+C	GET_VARPBIT_OLD	null	21	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	109	ok	255
+C	GET_VARP_OLD	player	106	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	19	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	-1	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	31	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	107	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	144	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	1000	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	32	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	111	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	15	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	149	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	8	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	32	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	150	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	116	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	134	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	21	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	9	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	149	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	108	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	26	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	255	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	27	ok	1
+C	GET_VARP_OLD	player	31	ok	0
+C	GET_VARP_OLD	null	42	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	163	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	14	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	0	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	26	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	23	ok	-1
+C	GET_VARP_OLD	npc	5	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	131	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	1	ok	0
+C	GET_VARPBIT_OLD	null	132	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	-2	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	2147483647	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	-2147483648	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	1	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	101	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	105	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	-5	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	0	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	139	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	28	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	100	ok	1
+C	GET_VARP_OLD	null	123	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	29	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	154	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	104	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	12	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	108	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	27	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	4	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	128	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	39	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	122	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	121	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	6	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	146	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	2147483647	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	127	ok	255
+C	GET_VARPBIT_OLD	player	43	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	6	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	100	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	-2	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	14	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	6	ok	1
+C	GET_VARPBIT_OLD	player	162	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	107	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	108	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	22	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	139	ok	0
+C	GET_VARPBIT_OLD	npc	142	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	-5	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	161	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	7	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	30	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	155	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	153	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	24	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	40	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	16	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	111	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	8	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	132	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	132	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	140	ok	1
+C	GET_VARPBIT_OLD	player	20	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	14	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	1	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	163	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	1	ok	0
+C	GET_VARPBIT_OLD	npc	26	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	39	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	21	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	133	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	28	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	34	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	130	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	143	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	127	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	143	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	144	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	9	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	154	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	3	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	-2147483648	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	12	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	154	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	31	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	130	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	118	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	125	ok	0
+C	GET_VARPBIT_OLD	player	129	ok	0
+C	GET_VARPBIT_OLD	player	156	ok	255
+C	GET_VARPBIT_OLD	player	2	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	35	ok	0
+C	GET_VARPBIT_OLD	npc	157	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	163	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	118	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	155	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	32	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	120	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	33	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	152	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	30	ok	255
+C	GET_VARP_OLD	null	65535	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	25	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	133	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	124	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	149	ok	0
+C	GET_VARPBIT_OLD	null	115	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	117	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	135	ok	1
+C	GET_VARP_OLD	null	33	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	44	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	3	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	119	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	135	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	20	ok	0
+C	GET_VARP_OLD	null	138	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	160	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	-2	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	43	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	18	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	25	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	144	ok	1
+C	GET_VARP_OLD	npc	148	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	139	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	162	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	117	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	129	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	30	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	125	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	null	38	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	157	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	111	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	161	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	140	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	npc	140	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	118	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	3	ok	255
+C	GET_VARPBIT_OLD	null	151	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	44	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	40	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	105	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	152	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	132	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	117	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	154	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	159	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	42	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	124	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	65535	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	114	error:NullPointerException	1515870810
+C	GET_VARP_OLD	player	26	ok	0
+C	GET_VARPBIT_OLD	player	15	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	43	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	2	ok	-1
+C	GET_VARPBIT_OLD	npc	11	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	12	ok	2147483647
+C	GET_VARP_OLD	npc	100	error:ClassCastException	1515870810
+C	GET_VARP_OLD	npc	-2	error:ClassCastException	1515870810
+C	GET_VARP_OLD	player	127	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	17	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	28	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	159	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	41	error:NullPointerException	1515870810
+C	GET_VARP_OLD	npc	12	error:ClassCastException	1515870810
+C	GET_VARP_OLD	null	160	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	player	3	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	2	error:NullPointerException	1515870810
+C	GET_VARP_OLD	null	43	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	npc	159	error:ClassCastException	1515870810
+C	GET_VARPBIT_OLD	player	151	ok	2147483647
+C	GET_VARP_OLD	null	146	error:NullPointerException	1515870810
+C	GET_VARPBIT_OLD	null	5	error:NullPointerException	1515870810
+Z	756

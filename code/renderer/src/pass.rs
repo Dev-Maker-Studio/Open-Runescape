@@ -1,5 +1,8 @@
 use bytemuck::{Pod, Zeroable};
+#[cfg(feature = "gpu")]
 use wgpu::{TextureViewDimension as D, VertexAttribute, VertexFormat as F};
+
+pub const SHADOW_MAP_SIZE: u32 = 2048;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Pass {
@@ -23,12 +26,42 @@ pub enum Pass {
 
 use Pass::*;
 
-pub const ALL: [Pass; 16] =
-    [Model, Ground, Sprite, Terrain, Instanced, Shadow, Particle, HdWater, Material, Water, WaterHD, WaterLapping, WaterReflecting, WaterRippling, Waterfall, SurfaceMask];
+pub const ALL: [Pass; 16] = [
+    Model,
+    Ground,
+    Sprite,
+    Terrain,
+    Instanced,
+    Shadow,
+    Particle,
+    HdWater,
+    Material,
+    Water,
+    WaterHD,
+    WaterLapping,
+    WaterReflecting,
+    WaterRippling,
+    Waterfall,
+    SurfaceMask,
+];
 
 const SHADERS: [&str; 16] = [
-    "model", "ground", "sprite", "groundTextured", "instanced", "shadow", "particle", "hdWater", "materialCubeSpec", "water", "waterHD",
-    "waterLapping", "waterReflecting", "waterRippling", "waterfall", "surfaceMask",
+    "model",
+    "ground",
+    "sprite",
+    "groundTextured",
+    "instanced",
+    "shadow",
+    "particle",
+    "hdWater",
+    "materialCubeSpec",
+    "water",
+    "waterHD",
+    "waterLapping",
+    "waterReflecting",
+    "waterRippling",
+    "waterfall",
+    "surfaceMask",
 ];
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -47,6 +80,7 @@ pub enum Bind {
 pub const NONE: usize = usize::MAX;
 
 impl Bind {
+    #[cfg(feature = "gpu")]
     pub fn dimension(self) -> D {
         match self {
             Bind::Layered(_) => D::D2Array,
@@ -62,7 +96,13 @@ impl Bind {
 
     pub fn source(self) -> Option<usize> {
         match self {
-            Bind::Flat(k) | Bind::Clamp(k) | Bind::Layered(k) | Bind::Volume(k) | Bind::Cube(k) | Bind::Depth(k) | Bind::Reflection(k) => Some(k),
+            Bind::Flat(k)
+            | Bind::Clamp(k)
+            | Bind::Layered(k)
+            | Bind::Volume(k)
+            | Bind::Cube(k)
+            | Bind::Depth(k)
+            | Bind::Reflection(k) => Some(k),
             _ => None,
         }
     }
@@ -119,20 +159,69 @@ pub struct WaterVertex {
     pub uv: [f32; 3],
 }
 
+#[cfg(feature = "gpu")]
 const fn attr(format: F, offset: u64, shader_location: u32) -> VertexAttribute {
-    VertexAttribute { format, offset, shader_location }
+    VertexAttribute {
+        format,
+        offset,
+        shader_location,
+    }
 }
 
-const MODEL: [VertexAttribute; 4] = [attr(F::Float32x3, 0, 0), attr(F::Float32x3, 12, 1), attr(F::Float32x2, 24, 2), attr(F::Unorm8x4, 32, 3)];
-const GROUND: [VertexAttribute; 3] = [attr(F::Float32x3, 0, 0), attr(F::Float32x3, 12, 1), attr(F::Unorm8x4, 24, 3)];
-const SPRITE: [VertexAttribute; 5] =
-    [attr(F::Float32x2, 0, 0), attr(F::Float32x2, 8, 2), attr(F::Unorm8x4, 16, 3), attr(F::Float32, 20, 4), attr(F::Float32x4, 24, 5)];
-const TERRAIN: [VertexAttribute; 4] = [attr(F::Float32x3, 0, 0), attr(F::Unorm8x4, 12, 1), attr(F::Float32x3, 16, 2), attr(F::Float32x3, 28, 3)];
-const PARTICLE: [VertexAttribute; 3] = [attr(F::Float32x3, 0, 0), attr(F::Float32x2, 12, 2), attr(F::Unorm8x4, 20, 3)];
-const HDWATER: [VertexAttribute; 3] = [attr(F::Float32x3, 0, 0), attr(F::Unorm8x4, 12, 1), attr(F::Float32x3, 16, 2)];
-const MASK: [VertexAttribute; 3] = [attr(F::Float32x2, 0, 0), attr(F::Float32x2, 8, 1), attr(F::Float32x2, 16, 2)];
-const INSTANCE: [VertexAttribute; 5] =
-    [attr(F::Float32x4, 0, 5), attr(F::Float32x4, 16, 6), attr(F::Float32x4, 32, 7), attr(F::Float32x4, 48, 8), attr(F::Float32x4, 64, 9)];
+#[cfg(feature = "gpu")]
+const MODEL: [VertexAttribute; 4] = [
+    attr(F::Float32x3, 0, 0),
+    attr(F::Float32x3, 12, 1),
+    attr(F::Float32x2, 24, 2),
+    attr(F::Unorm8x4, 32, 3),
+];
+#[cfg(feature = "gpu")]
+const GROUND: [VertexAttribute; 3] = [
+    attr(F::Float32x3, 0, 0),
+    attr(F::Float32x3, 12, 1),
+    attr(F::Unorm8x4, 24, 3),
+];
+#[cfg(feature = "gpu")]
+const SPRITE: [VertexAttribute; 5] = [
+    attr(F::Float32x2, 0, 0),
+    attr(F::Float32x2, 8, 2),
+    attr(F::Unorm8x4, 16, 3),
+    attr(F::Float32, 20, 4),
+    attr(F::Float32x4, 24, 5),
+];
+#[cfg(feature = "gpu")]
+const TERRAIN: [VertexAttribute; 4] = [
+    attr(F::Float32x3, 0, 0),
+    attr(F::Unorm8x4, 12, 1),
+    attr(F::Float32x3, 16, 2),
+    attr(F::Float32x3, 28, 3),
+];
+#[cfg(feature = "gpu")]
+const PARTICLE: [VertexAttribute; 3] = [
+    attr(F::Float32x3, 0, 0),
+    attr(F::Float32x2, 12, 2),
+    attr(F::Unorm8x4, 20, 3),
+];
+#[cfg(feature = "gpu")]
+const HDWATER: [VertexAttribute; 3] = [
+    attr(F::Float32x3, 0, 0),
+    attr(F::Unorm8x4, 12, 1),
+    attr(F::Float32x3, 16, 2),
+];
+#[cfg(feature = "gpu")]
+const MASK: [VertexAttribute; 3] = [
+    attr(F::Float32x2, 0, 0),
+    attr(F::Float32x2, 8, 1),
+    attr(F::Float32x2, 16, 2),
+];
+#[cfg(feature = "gpu")]
+const INSTANCE: [VertexAttribute; 5] = [
+    attr(F::Float32x4, 0, 5),
+    attr(F::Float32x4, 16, 6),
+    attr(F::Float32x4, 32, 7),
+    attr(F::Float32x4, 48, 8),
+    attr(F::Float32x4, 64, 9),
+];
 
 pub const INSTANCE_STRIDE: u64 = 80;
 
@@ -170,6 +259,7 @@ impl Pass {
         .unwrap()
     }
 
+    #[cfg(feature = "gpu")]
     pub fn attributes(self) -> &'static [VertexAttribute] {
         match self {
             Ground => &GROUND,
@@ -182,6 +272,7 @@ impl Pass {
         }
     }
 
+    #[cfg(feature = "gpu")]
     pub fn instance_attributes(self) -> Option<&'static [VertexAttribute]> {
         (self == Instanced).then_some(&INSTANCE[..])
     }
@@ -193,7 +284,15 @@ impl Pass {
             Ground => &[Clamp(0), Depth(1)],
             Sprite => &[Layered(0)],
             Terrain => &[Volume(2), SceneDepth, Clamp(1), Flat(0)],
-            HdWater => &[Volume(0), SceneColor, SceneDepth, Volume(1), Cube(2), Depth(3), Reflection(4)],
+            HdWater => &[
+                Volume(0),
+                SceneColor,
+                SceneDepth,
+                Volume(1),
+                Cube(2),
+                Depth(3),
+                Reflection(4),
+            ],
             Water | SurfaceMask => &[Flat(0), Flat(1)],
             WaterHD => &[Volume(0), Cube(1)],
             WaterLapping | Waterfall => &[Flat(0), Volume(1), Flat(2)],
@@ -203,7 +302,9 @@ impl Pass {
     }
 
     pub fn block_size(self) -> usize {
-        [272, 4448, 64, 5552, 4320, 144, 128, 4432, 272, 384, 336, 1392, 272, 304, 304, 64][self as usize]
+        [
+            272, 4448, 64, 5552, 4320, 144, 128, 4432, 272, 384, 336, 1392, 272, 304, 304, 64,
+        ][self as usize]
     }
 
     pub fn default_state(self) -> u32 {

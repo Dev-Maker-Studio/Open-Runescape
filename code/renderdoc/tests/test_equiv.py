@@ -31,11 +31,17 @@ class Golden(unittest.TestCase):
             self.assertEqual(r[k] if k != "ssim" else r["pixels"]["ssim"], v, k)
         self.assertIn("blend", text)
 
-    def test_strict_threshold_fails_on_blend_mismatch(self):
-        code, r, _ = equiv(GOLDEN / "client", GOLDEN / "web")
+    def test_alpha_blend_factor_is_a_real_difference(self):
+        code, r, text = equiv(GOLDEN / "client", GOLDEN / "web")
+        self.assertEqual(code, 1)
+        self.assertEqual(r["draws"]["mismatched"], 1)
+        self.assertNotIn("blend alpha", r.get("conventions", {}))
+        self.assertIn("blend", text)
+
+    def test_strict_threshold_still_fails(self):
+        code, r, _ = equiv(GOLDEN / "client", GOLDEN / "web", "--min-ssim", "1.01")
         self.assertEqual(code, 1)
         self.assertEqual(r["verdict"], "FAIL")
-        self.assertEqual(r["draws"]["mismatched"], 1)
 
     def test_missing_draw_is_unmatched(self):
         web = copy("web")
@@ -45,6 +51,8 @@ class Golden(unittest.TestCase):
         code, r, _ = equiv(GOLDEN / "client", web, "--max-mismatch", "5")
         self.assertEqual(code, 1)
         self.assertEqual(len(r["draws"]["only_client"]), 1)
+        self.assertEqual(r["draws"]["real_unmatched"], 1)
+        self.assertLess(r["score"], 100)
 
     def test_texture_and_uniform_differences_are_listed(self):
         web = copy("web")
@@ -54,6 +62,7 @@ class Golden(unittest.TestCase):
         (web / "summary.json").write_text(json.dumps(s))
         _, r, _ = equiv(GOLDEN / "client", web, "--max-mismatch", "5")
         self.assertTrue(r["texture_diffs"])
+        self.assertTrue(r["uniform_diffs"])
         self.assertEqual(r["texture_sets"]["web_only"], ["deadbeef"])
 
     def test_pixel_regions_find_changed_area(self):

@@ -12,6 +12,7 @@ pub const SCENES: [(&str, &str, &str); 6] = [
     ("edgeville", "3093", "3493"),
 ];
 
+#[derive(Clone)]
 struct Cfg {
     scene: String,
     live: bool,
@@ -27,14 +28,16 @@ struct Cfg {
     size: Option<String>,
     pos: Option<String>,
     browser: bool,
+    frames: Option<u32>,
 }
 
 fn parse(args: &[String]) -> Res<Cfg> {
-    let mut c = Cfg { scene: String::new(), live: false, top: "5".into(), min_ssim: "0.99".into(), max_mismatch: "0".into(), reuse: false, cold: false, builtin: false, settle: "4".into(), out: PathBuf::new(), exe: None, size: None, pos: None, browser: false };
+    let mut c = Cfg { scene: String::new(), live: false, top: "5".into(), min_ssim: "0.99".into(), max_mismatch: "0".into(), reuse: false, cold: false, builtin: false, settle: "4".into(), out: PathBuf::new(), exe: None, size: None, pos: None, browser: false, frames: None };
     let mut it = args.iter();
     while let Some(a) = it.next() {
         let mut val = || it.next().cloned().ok_or(format!("{a} needs a value"));
         match a.as_str() {
+            "--frames" => c.frames = Some(val()?.parse::<u32>().ok().filter(|n| (1..=5).contains(n)).ok_or("--frames needs a number from 1 to 5")?),
             "--live" => c.live = true,
             "--reuse" => c.reuse = true,
             "--cold" => c.cold = true,
@@ -65,6 +68,9 @@ fn parse(args: &[String]) -> Res<Cfg> {
     }
     if c.scene != "live" && !SCENES.iter().any(|s| s.0 == c.scene) {
         return Err(format!("unknown scene {}, scenes: {}", c.scene, SCENES.map(|s| s.0).join(" ")));
+    }
+    if c.frames.is_some() && (c.builtin || c.reuse || c.scene == "login") {
+        return Err("--frames needs a world scene with live dumps; not --builtin or --reuse".into());
     }
     if c.out.as_os_str().is_empty() {
         c.out = base().join(label(&c));
@@ -243,7 +249,13 @@ fn report(c: &Cfg, replay: bool, timings: &str) -> i32 {
     p.status().map_or(2, |s| s.code().unwrap_or(2))
 }
 
+#[path = "equiv_frames.rs"]
+mod frames;
+
 fn run_cfg(c: &Cfg) -> Res<i32> {
+    if let Some(count) = c.frames {
+        return frames::run(c, count);
+    }
     super::setup::verify(false)?;
     let total = Instant::now();
     std::fs::create_dir_all(&c.out).map_err(|e| e.to_string())?;
@@ -281,13 +293,13 @@ fn script(sub: &str, rest: &[String]) -> i32 {
 }
 
 fn test() -> i32 {
-    let unit = env::tool(env::python()).arg("-m").arg("unittest").arg("discover").arg("-s").arg(env::tools().join("tests")).arg("-v").status().map_or(false, |s| s.success());
+    let unit = env::tool(env::python()).arg("-m").arg("unittest").arg("discover").arg("-s").arg(env::tools().join("tests")).arg("-v").status().is_ok_and(|s| s.success());
     let selftest = capture::selftest().is_ok();
     let dir = env::root().join("code/harness/target/capture/selftest");
     let hist = env::root().join("code/harness/target/equiv/selftest-history.jsonl");
     let mut p = env::script("equiv.py", &[]);
     p.arg("report").arg(dir.join("client")).arg(dir.join("web")).arg(dir.join("equiv")).arg("--scene").arg("selftest").arg("--history").arg(hist).arg("--min-ssim").arg("0.995").arg("--max-mismatch").arg("1");
-    let report = p.status().map_or(false, |s| s.success());
+    let report = p.status().is_ok_and(|s| s.success());
     println!("equiv test: unit={unit} selftest={selftest} report={report}");
     (unit && selftest && report) as i32 ^ 1
 }
@@ -334,6 +346,19 @@ mod tests {
         assert!(c.browser && c.out.ends_with("equiv/varrock-browser"));
         assert_eq!(label(&c), "varrock-browser");
         assert!(parse(&args(&["varrock", "--target", "gl"])).is_err());
+    }
+
+    #[test]
+    fn frames_are_opt_in_and_limited_to_five_live_pairs() {
+        assert_eq!(parse(&args(&["lumbridge"])).unwrap().frames, None);
+        assert_eq!(parse(&args(&["lumbridge", "--frames", "5"])).unwrap().frames, Some(5));
+        for value in ["0", "6", "-1", "bad"] {
+            assert!(parse(&args(&["lumbridge", "--frames", value])).is_err());
+        }
+        for extra in ["--builtin", "--reuse"] {
+            assert!(parse(&args(&["lumbridge", "--frames", "2", extra])).is_err());
+        }
+        assert!(parse(&args(&["login", "--frames", "2"])).is_err());
     }
 
     #[test]

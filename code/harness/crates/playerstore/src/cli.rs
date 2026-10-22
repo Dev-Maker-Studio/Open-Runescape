@@ -86,16 +86,21 @@ fn dispatch(a: &[String]) -> Result<(), String> {
             }
         }
         "delete" => fs::remove_file(store::path(name()?)).map_err(|e| e.to_string())?,
-        "set" => edit_file(name()?, |v| Ok(edit::set_at(v, arg(a, 2, "path")?, edit::parse_value(arg(a, 3, "json")?))))?,
+        "set" => edit_file(name()?, |v| {
+            edit::set_at(v, arg(a, 2, "path")?, edit::parse_value(arg(a, 3, "json")?));
+            Ok(())
+        })?,
         "pos" => edit_file(name()?, |v| {
-            Ok(edit::set_position(v, num(a.get(2), "x")?, num(a.get(3), "y")?, num(a.get(4), "plane").unwrap_or(0)))
+            edit::set_position(v, num(a.get(2), "x")?, num(a.get(3), "y")?, num(a.get(4), "plane").unwrap_or(0));
+            Ok(())
         })?,
         "skill" => edit_file(name()?, |v| {
             let level: u32 = num(a.get(3), "level")?;
             let xp = a.get(4).and_then(|s| s.parse().ok());
             let which = arg(a, 2, "skill")?;
             let all: Vec<usize> = if which == "all" { (0..25).collect() } else { vec![edit::skill_index(which)?] };
-            Ok(all.into_iter().for_each(|s| edit::set_skill(v, s, level, xp)))
+            all.into_iter().for_each(|s| edit::set_skill(v, s, level, xp));
+            Ok(())
         })?,
         "item" => edit_file(name()?, |v| {
             let (path, size) = edit::container(arg(a, 2, "container")?)?;
@@ -104,13 +109,15 @@ fn dispatch(a: &[String]) -> Result<(), String> {
                 return Err("slot out of range".into());
             }
             let id = gameval::resolve("obj", arg(a, 4, "item")?)?;
-            Ok(edit::set_item(v, path, slot, id, num(a.get(5), "amount").unwrap_or(1)))
+            edit::set_item(v, path, slot, id, num(a.get(5), "amount").unwrap_or(1));
+            Ok(())
         })?,
         "give" => edit_file(name()?, |v| {
             let (path, size) = edit::container(arg(a, 2, "container")?)?;
             let id = gameval::resolve("obj", arg(a, 3, "item")?)?;
             let slot = edit::free_slot(v, path, size).ok_or("container full")?;
-            Ok(edit::set_item(v, path, slot, id, num(a.get(4), "amount").unwrap_or(1)))
+            edit::set_item(v, path, slot, id, num(a.get(4), "amount").unwrap_or(1));
+            Ok(())
         })?,
         "clear" => edit_file(name()?, |v| {
             let (path, size) = edit::container(arg(a, 2, "container")?)?;
@@ -118,11 +125,13 @@ fn dispatch(a: &[String]) -> Result<(), String> {
                 Some(s) => vec![s.parse().map_err(|_| "bad slot")?],
                 None => (0..size).collect(),
             };
-            Ok(slots.into_iter().for_each(|s| edit::clear_slot(v, path, s)))
+            slots.into_iter().for_each(|s| edit::clear_slot(v, path, s));
+            Ok(())
         })?,
         "varp" => edit_file(name()?, |v| {
             let id = gameval::resolve("varp", arg(a, 2, "varp")?)?;
-            Ok(edit::set_varp(v, id, num(a.get(3), "value")?))
+            edit::set_varp(v, id, num(a.get(3), "value")?);
+            Ok(())
         })?,
         "iface" => iface::run(name()?, &a[2..])?,
         "import" => {

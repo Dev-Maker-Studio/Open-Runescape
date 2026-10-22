@@ -1,0 +1,2351 @@
+{
+  "provenance": {
+    "source": "Existing native jar; synthetic definition span and exact isolated provider calls",
+    "jar": "darkan-client-shaded-2.0.0-all.jar",
+    "jarSha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+    "helperSha256": "94d22398608a9875f61ddfcf011f45ed4ed1a4433b55f3949238a3b1532f5aad",
+    "generatorSha256": "036a0735201b93a01fa74bfe72b44c0b445f135e0de38763bc592a468bb2dffe",
+    "nativeCalls": [
+      "ServerProt.opcode/size",
+      "Packet.readByte",
+      "Packet.readUShortAddLittle",
+      "Packet.readUIntInverseMiddle",
+      "PlayerVarDomain.setVarValueFromServer",
+      "PlayerVarDomain.setVarValue",
+      "PlayerVarDomain.getVarValue",
+      "PlayerVarDomain.service",
+      "PlayerVarDomain.reset"
+    ],
+    "syntheticInputs": [
+      "VarpTypeList(null).size set reflectively before domain construction; no cache",
+      "Before each native time query: Utils.lastSystemTime=2^60 and Utils.timeOffset=desiredTime-2^60; native rollback compensation returns exact desiredTime",
+      "Only the helper is compiled with the existing jar's embedded Kotlin compiler; native jar is never rebuilt"
+    ],
+    "isolation": "bwrap --unshare-net; read-only host root; copied jar; empty temporary home; cleared environment; headless; bot disabled",
+    "scope": "VARP_SMALL/VARP_LARGE payload readers plus provider only; no live dispatcher, host CS2, varbit, varc, persistence or gameplay"
+  },
+  "packets": [
+    {
+      "opcode": 115,
+      "name": "VARP_SMALL",
+      "payloadHex": "808000",
+      "id": 0,
+      "value": -128
+    },
+    {
+      "opcode": 115,
+      "name": "VARP_SMALL",
+      "payloadHex": "ff7fff",
+      "id": 65535,
+      "value": -1
+    },
+    {
+      "opcode": 115,
+      "name": "VARP_SMALL",
+      "payloadHex": "7fb412",
+      "id": 4660,
+      "value": 127
+    },
+    {
+      "opcode": 115,
+      "name": "VARP_SMALL",
+      "payloadHex": "000080",
+      "id": 32896,
+      "value": 0
+    },
+    {
+      "opcode": 8,
+      "name": "VARP_LARGE",
+      "payloadHex": "34127856b412",
+      "id": 4660,
+      "value": 305419896
+    },
+    {
+      "opcode": 8,
+      "name": "VARP_LARGE",
+      "payloadHex": "008000008000",
+      "id": 0,
+      "value": -2147483648
+    },
+    {
+      "opcode": 8,
+      "name": "VARP_LARGE",
+      "payloadHex": "ff7fffff7fff",
+      "id": 65535,
+      "value": 2147483647
+    },
+    {
+      "opcode": 8,
+      "name": "VARP_LARGE",
+      "payloadHex": "ffffffff0080",
+      "id": 32896,
+      "value": -1
+    },
+    {
+      "opcode": 100,
+      "name": "CLEAR_VARPS",
+      "payloadHex": ""
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "immediate-coalescing-and-strict-sentinel",
+      "count": 2,
+      "steps": [
+        {
+          "operation": "server",
+          "now": 0,
+          "id": 1,
+          "value": -128,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": -128
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 0,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": -128
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 1,
+          "id": 1,
+          "value": 127,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 127
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 1,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 127
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 2,
+          "published": [
+            1
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 1,
+              "active": 127,
+              "pending": 127
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "server",
+          "now": 3,
+          "id": 1,
+          "value": 127,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 127,
+              "pending": 127
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 3,
+          "published": [
+            1
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 1,
+              "active": 127,
+              "pending": 127
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "native-bucket-and-insertion-order",
+      "count": 400,
+      "steps": [
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 257,
+          "value": 258,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 2,
+          "value": 3,
+          "published": [],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 129,
+          "value": 130,
+          "published": [],
+          "scheduled": 3,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 128,
+          "value": 129,
+          "published": [],
+          "scheduled": 4,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 0,
+          "value": 1,
+          "published": [],
+          "scheduled": 5,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 0,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 1,
+          "value": 2,
+          "published": [],
+          "scheduled": 6,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 2
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 0,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 256,
+          "value": 257,
+          "published": [],
+          "scheduled": 7,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 2
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": 258
+            }
+          ],
+          "updates": [
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 0,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 256,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 101,
+          "id": 257,
+          "value": -1,
+          "published": [],
+          "scheduled": 7,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 2
+            },
+            {
+              "id": 2,
+              "active": 0,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": 0,
+              "pending": -1
+            }
+          ],
+          "updates": [
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 0,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 256,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 2,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 101,
+          "published": [
+            128,
+            0,
+            256,
+            257,
+            129,
+            1,
+            2
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 2,
+              "pending": 2
+            },
+            {
+              "id": 2,
+              "active": 3,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 129,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 130,
+              "pending": 130
+            },
+            {
+              "id": 256,
+              "active": 257,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": -1,
+              "pending": -1
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "server",
+          "now": 102,
+          "id": 129,
+          "value": -2,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 2,
+              "pending": 2
+            },
+            {
+              "id": 2,
+              "active": 3,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 129,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 130,
+              "pending": -2
+            },
+            {
+              "id": 256,
+              "active": 257,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": -1,
+              "pending": -1
+            }
+          ],
+          "updates": [
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 102,
+          "id": 1,
+          "value": -2,
+          "published": [],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 2,
+              "pending": -2
+            },
+            {
+              "id": 2,
+              "active": 3,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 129,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 130,
+              "pending": -2
+            },
+            {
+              "id": 256,
+              "active": 257,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": -1,
+              "pending": -1
+            }
+          ],
+          "updates": [
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 102,
+          "id": 257,
+          "value": -2,
+          "published": [],
+          "scheduled": 3,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": 2,
+              "pending": -2
+            },
+            {
+              "id": 2,
+              "active": 3,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 129,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": 130,
+              "pending": -2
+            },
+            {
+              "id": 256,
+              "active": 257,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": -1,
+              "pending": -2
+            }
+          ],
+          "updates": [
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 257,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 102,
+          "published": [
+            129,
+            1,
+            257
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 1
+            },
+            {
+              "id": 1,
+              "active": -2,
+              "pending": -2
+            },
+            {
+              "id": 2,
+              "active": 3,
+              "pending": 3
+            },
+            {
+              "id": 128,
+              "active": 129,
+              "pending": 129
+            },
+            {
+              "id": 129,
+              "active": -2,
+              "pending": -2
+            },
+            {
+              "id": 256,
+              "active": 257,
+              "pending": 257
+            },
+            {
+              "id": 257,
+              "active": -2,
+              "pending": -2
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "local-only-strict-deadline",
+      "count": 1,
+      "steps": [
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 0,
+          "value": 55,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 55,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 600,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 55,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 601,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 55,
+              "pending": 0
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "server-after-local-and-repeated-rearm",
+      "count": 1,
+      "steps": [
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 0,
+          "value": 1,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 200,
+          "id": 0,
+          "value": 2,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 2
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 700,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 300,
+          "id": 0,
+          "value": 3,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 3
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 800,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 700,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 3
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 800,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 800,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 3
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 800,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 801,
+          "published": [
+            0
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 3,
+              "pending": 3
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "local-cancels-immediate-server-publication",
+      "count": 1,
+      "steps": [
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 0,
+          "value": 7,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 0,
+              "pending": 7
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "local",
+          "now": 200,
+          "id": 0,
+          "value": 9,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 9,
+              "pending": 7
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 700,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 701,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 9,
+              "pending": 7
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "server",
+          "now": 702,
+          "id": 0,
+          "value": 8,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 9,
+              "pending": 8
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 702,
+          "published": [
+            0
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 8,
+              "pending": 8
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "local-cancels-protected-server-publication",
+      "count": 1,
+      "steps": [
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 0,
+          "value": 1,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 200,
+          "id": 0,
+          "value": 2,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 2
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 700,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "local",
+          "now": 300,
+          "id": 0,
+          "value": 3,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 3,
+              "pending": 2
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 800,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 801,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 3,
+              "pending": 2
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "expired-but-unserviced-local-node-is-rearmed",
+      "count": 1,
+      "steps": [
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 0,
+          "value": 1,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 1000,
+          "id": 0,
+          "value": 2,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 2
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 1500,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 1500,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 1,
+              "pending": 2
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 1500,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 1501,
+          "published": [
+            0
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 2,
+              "pending": 2
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "mixed-expiry-unlinks-and-rescheduling",
+      "count": 400,
+      "steps": [
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 0,
+          "value": 5,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 128,
+          "value": 6,
+          "published": [],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 6
+            },
+            {
+              "id": 256,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 256,
+          "value": 7,
+          "published": [],
+          "scheduled": 3,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 6
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 384,
+          "value": 8,
+          "published": [],
+          "scheduled": 4,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 0,
+              "pending": 6
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 0,
+              "pending": 8
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 384,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 200,
+          "published": [
+            128,
+            384
+          ],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 6,
+              "pending": 6
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 8,
+              "pending": 8
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 200,
+          "id": 128,
+          "value": 9,
+          "published": [],
+          "scheduled": 3,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 6,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 8,
+              "pending": 8
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 128,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 201,
+          "published": [
+            128
+          ],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 9,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 8,
+              "pending": 8
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 201,
+          "id": 384,
+          "value": 10,
+          "published": [],
+          "scheduled": 3,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 9,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 8,
+              "pending": 10
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 384,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 600,
+          "published": [
+            384
+          ],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 9,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 10,
+              "pending": 10
+            }
+          ],
+          "updates": [
+            {
+              "id": 0,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            },
+            {
+              "id": 256,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 601,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 9,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 0
+            },
+            {
+              "id": 384,
+              "active": 10,
+              "pending": 10
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "server",
+          "now": 601,
+          "id": 256,
+          "value": 11,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 9,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 7,
+              "pending": 11
+            },
+            {
+              "id": 384,
+              "active": 10,
+              "pending": 10
+            }
+          ],
+          "updates": [
+            {
+              "id": 256,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 601,
+          "published": [
+            256
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 0,
+              "active": 5,
+              "pending": 0
+            },
+            {
+              "id": 128,
+              "active": 9,
+              "pending": 9
+            },
+            {
+              "id": 256,
+              "active": 11,
+              "pending": 11
+            },
+            {
+              "id": 384,
+              "active": 10,
+              "pending": 10
+            }
+          ],
+          "updates": []
+        }
+      ]
+    },
+    {
+      "name": "clear-both-banks-and-schedules",
+      "count": 130,
+      "steps": [
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 1,
+          "value": -2147483648,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": -2147483648
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "local",
+          "now": 100,
+          "id": 129,
+          "value": 2147483647,
+          "published": [],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": -2147483648
+            },
+            {
+              "id": 129,
+              "active": 2147483647,
+              "pending": 0
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 600,
+              "publish": false,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "server",
+          "now": 100,
+          "id": 129,
+          "value": -1,
+          "published": [],
+          "scheduled": 2,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": -2147483648
+            },
+            {
+              "id": 129,
+              "active": 2147483647,
+              "pending": -1
+            }
+          ],
+          "updates": [
+            {
+              "id": 1,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            },
+            {
+              "id": 129,
+              "deadline": 600,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 100,
+          "published": [
+            1
+          ],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": -2147483648,
+              "pending": -2147483648
+            },
+            {
+              "id": 129,
+              "active": 2147483647,
+              "pending": -1
+            }
+          ],
+          "updates": [
+            {
+              "id": 129,
+              "deadline": 600,
+              "publish": true,
+              "immediate": false
+            }
+          ]
+        },
+        {
+          "operation": "clear",
+          "now": 200,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "service",
+          "now": 1000,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "clear",
+          "now": 1000,
+          "published": [],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 0
+            }
+          ],
+          "updates": []
+        },
+        {
+          "operation": "server",
+          "now": 1001,
+          "id": 129,
+          "value": 4,
+          "published": [],
+          "scheduled": 1,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 0,
+              "pending": 4
+            }
+          ],
+          "updates": [
+            {
+              "id": 129,
+              "deadline": 1,
+              "publish": true,
+              "immediate": true
+            }
+          ]
+        },
+        {
+          "operation": "service",
+          "now": 1001,
+          "published": [
+            129
+          ],
+          "scheduled": 0,
+          "slots": [
+            {
+              "id": 1,
+              "active": 0,
+              "pending": 0
+            },
+            {
+              "id": 129,
+              "active": 4,
+              "pending": 4
+            }
+          ],
+          "updates": []
+        }
+      ]
+    }
+  ]
+}

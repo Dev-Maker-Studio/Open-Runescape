@@ -26,7 +26,7 @@ impl Conn {
             let _ = s.set_nodelay(true);
             Box::new(s)
         } else {
-            Box::new(UnixStream::connect(&endpoint).map_err(|e| format!("control endpoint {endpoint}: {e}"))?)
+            Box::new(UnixStream::connect(endpoint).map_err(|e| format!("control endpoint {endpoint}: {e}"))?)
         };
         Ok(Conn(BufReader::new(stream)))
     }

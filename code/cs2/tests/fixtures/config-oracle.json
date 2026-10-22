@@ -1,0 +1,12 @@
+{
+  "oracle": "Actual ConfigTypeChatOps.dispatch reading real ItemType, NPCType, SeqType, StructType and ParamType objects through TypeLists, from an isolated COPY of the pinned shaded client JAR.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "fixture_sha256": {
+    "config-defs.tsv": "49d085dcbf50dbb610f583a23039428b2a7a7b8374d39995f5bdab8dc7043695",
+    "config.native.tsv": "8d76d6fcdcdef02a1466b4524a27def1fa0705e86d1a64a3d75331d4c74cd1b1"
+  },
+  "generator_sha256": "ea7643a4ef8c1635f3427465df7ed8beb697d458f14eb246aed72fc51b1d99c8",
+  "driver_sha256": "5fdd1be25dd97e67d74fd033e641a581f940b3d0810b6cb5f605133981b9ba48",
+  "reproduction": "python3 code/cs2/tests/native/generate_config.py --check"
+}

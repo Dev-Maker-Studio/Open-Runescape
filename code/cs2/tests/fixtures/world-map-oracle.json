@@ -1,0 +1,27 @@
+{
+  "oracle": "Actual WorldMapElement.list (through an allocateInstance Js5ResourceProvider and Js5MasterIndex holding the element bytes), WorldMap.WORLDMAP_DEFS iteration, and QuickChatDisplayOps.dispatch for ten WORLDMAP_* opcodes from an isolated copy of the pinned shaded client JAR. WorldMap.staticElement, mapSquareAbs, WorldMapDisplay.mapCenter, ComponentMinimap.mapAssetLoadingPercentage and WorldMap.worldMapCategories are injected. Real elements are encoded from assets/cache/worldmapdata/details/*.json with the server layout; the packed cache is not present so no byte read from a real packed cache is covered.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "a7ae8466ecca3305ef00d4dceb81be4c0047facb331782c706f82669b580999f",
+  "generator_sha256": "05ae3efab1c3ce62f7256e5e9aa2dc89a5dc460c7792af758c89e13dceb5e745",
+  "fixture_sha256": {
+    "world-map.native.tsv": "612fdb43122ba0244cdc8332108c8835e3fbc27f99462494d8f0068c70e687b9",
+    "world-map.stats.tsv": "316fb81531f217cc4070b9a43700f757487c45b578c37080d335eee417188eb0"
+  },
+  "cases": 13900,
+  "elements": 305,
+  "opcodes": [
+    "WORLDMAP_COORDINMAP",
+    "WORLDMAP_FINDNEARESTELEMENT",
+    "WORLDMAP_GETCONFIGORIGIN",
+    "WORLDMAP_GETCONFIGSIZE",
+    "WORLDMAP_GETCONFIGZOOM",
+    "WORLDMAP_GETDISPLAYCOORD",
+    "WORLDMAP_GETMAP",
+    "WORLDMAP_GETMAPNAME",
+    "WORLDMAP_GETSOURCECOORD",
+    "WORLDMAP_GETSOURCEPOSITION"
+  ],
+  "random_seed": "0x727c5228 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_world_map.py --check"
+}

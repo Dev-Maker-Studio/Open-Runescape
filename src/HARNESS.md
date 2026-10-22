@@ -35,7 +35,7 @@ The default test loop runs entirely on this machine, with the client, the lobby 
 
 ```mermaid
 flowchart LR
-  U[assets/cache] --> P[assets/cache-packed]
+  U[assets/cache] --> P[assets/cache/.packed]
   P --> C[Client]
   P --> L[Local lobby]
   P --> W[Local world]
@@ -47,7 +47,7 @@ flowchart LR
 2. `openrs do`, `look` and `trail` drive the client.
 3. `openrs down` stops the client, and `openrs down all` also stops the web client, the display and the local server.
 
-- The local server is started with `CACHE_BUILD_PATH` set to `assets/cache-packed`, so the server and the client share one pack and the login CRC check always matches.
+- The local server is started with `CACHE_BUILD_PATH` set to `assets/cache/.packed`, so the server and the client share one pack and the login CRC check always matches.
 - The local world is world 100, started with `WORLD_BOTS_ALLOWED=true` so clients with the bot sidebar list it. Every local client is pinned to it with `-Dautologin.world=100`, and AutoLogin sets the game host for that world before the world login.
 - A recorded process id only counts when its command line is this repository's server, client or Xwayland, so a stale pid file never blocks a start or stops an unrelated process.
 - `openrs up shared` targets the shared lobby instead, whose cache build differs, see `CACHE.md`.
@@ -61,15 +61,17 @@ flowchart LR
 | `openrs up`, `down` | One client in the world, ready for commands | `CONTROL_PROTOCOL.md` |
 | `openrs do`, `look`, `trail` | Commands, vision and footprints for one client | `CONTROL_PROTOCOL.md` |
 | `openrs run`, `show`, `hide`, `toggle`, `shot`, `stop` | Private display, null audio and the display toggle | `CONTROL_PROTOCOL.md` |
-| `openrs web up`, `down`, `do`, `look`, `trail`, `run`, `show`, `hide`, `toggle` | The web client in an isolated Chromium on the private display, driven over DevTools | `WEB-HARNESS.md` |
+| `openrs web up`, `down`, `do`, `look`, `trail`, `run`, `show`, `hide`, `toggle` | The web renderer in isolated Chromium, with keyboard, pointer, wheel and text input through DevTools | `WEB-HARNESS.md` |
+| `openrs web fleet` | Up to nine isolated browsers on one server | `WEB-HARNESS.md` |
+| `openrs web up --game NAME`, `openrs games list` | Start a streaming game host and select orbit, walker or buttons | `GAMES.md` |
 | `openrs player` | Player files, interfaces and the local lobby and world | `PLAYER-INTERFACES.md` |
 | `openrs fleet` | Up to nine clients in parallel, and `fleet compare` for each slot | `FLEET.md` |
 | `openrs resume` | Restarts what a crash left behind, including the web client | This page |
 | `openrs capture` | RenderDoc captures, summaries and diffs | `RENDERDOC.md` |
 | `openrs equiv` | Equivalence loop between the client and the renderer | `RENDERDOC.md` |
-| `openrs twin` | The client and the browser on one frame, side by side, with both frames serialized and compared | `TWIN.md` |
-| `openrs doctor` | One fast check of everything the harness needs | This page |
-| `openrs verify` | Scripted live end to end pass of the whole harness | This page |
+| `openrs twin` | Client and browser serialization and image comparison, with `--frames N --every K` for sequences | `TWIN.md` |
+| `openrs doctor [--deep]` | Checks native and browser prerequisites; deep mode verifies the real WebGPU adapter | `WEB-HARNESS.md` |
+| `openrs verify --group all\|native\|web` | Full verification or one side only; the web group never starts the native client | This page |
 | `openrs help` | Every command with one line each | This page |
 
 `openrs help` prints the same table the command line dispatches from, so the list never drifts from the commands that exist.
@@ -82,7 +84,7 @@ flowchart LR
 | --- | --- | --- |
 | Client jar `code/client/build/libs/darkan-client-shaded-2.0.0-all.jar` | Missing, or older than the newest file or folder in `code/client/src`, `build.gradle.kts`, `settings.gradle` or `gradle.properties` | `./gradlew shadowJar` in `code/client` |
 | Renderer `code/renderer/target/release/renderer-app` | Missing, or older than the newest file in `code/renderer/src`, `shaders` or `Cargo.toml` | `cargo build --release --bin renderer-app` in `code/renderer` |
-| Packed cache `assets/cache-packed` | The manifest hash of `assets/cache` differs from the stamp, as in `openrs cache build` | The `openrs cache build` logic |
+| Packed cache `assets/cache/.packed` | The manifest hash of `assets/cache` differs from the stamp, as in `openrs cache build` | The `openrs cache build` logic |
 
 - Each rebuild prints one line such as `rebuilt client jar (older than the newest client source) in 41.2s`. Nothing is printed when all are fresh.
 - The renderer is always rebuilt when stale, because no running process holds it. A jar or pack rebuild is skipped with a message while any client runs on it, because a rewritten jar or pack breaks a running JVM.
@@ -150,6 +152,7 @@ flowchart LR
 | `iface-open`, `iface-text-look`, `iface-item-model`, `iface-close` | `openrs player iface` opens interface 275, sets text, an item and a model live, `look` sees it, then it closes |
 | `dump-frame`, `renderer-replay` | A `.orf` dump replayed headless by `renderer-app --replay` |
 | `twin` | `openrs twin lumbridge`: the client frame replayed in the browser, both dumped and compared, passing when the serialized frames are identical and the side by side image exists |
+| `twin-multiframe` | Three recorded frames, all three serialized frames identical on the browser side, a per-frame report and contact sheet |
 | `equiv` | `openrs equiv --live --cold`, which must run in replay mode on a dumped frame |
 | `renderdoc-retry` | A capture that fails takes the retry path, then a renderer capture with `--retries` succeeds |
 | `down`, `fleet-up`, `fleet-time-to-world`, `fleet-do` | Nine slots, their world entry times and one parallel `fleet do` round |
@@ -176,6 +179,10 @@ flowchart LR
 | `WEB.md` | The Rust web server and page |
 | `WEB-HARNESS.md` | `openrs web`, the browser, the page bridge and its commands |
 | `TWIN.md` | `openrs twin`, the output folder, the verdict and how to read a report |
+| `FRAME-STREAM.md` | Binary WebSocket protocol, resource reuse, input sequence acknowledgements and backpressure |
+| `NATIVE-WEB-HOST.md` | Live hosted native session, control socket, bounded frame spool and browser integration |
+| `TRANSPILATION-STATUS.md` | Current live results, read-only boundaries and unfinished rendering/gameplay work |
+| `GAMES.md` | Deterministic test games running outside the browser through the production stream architecture |
 | `SESSION-START.md` | The prompt for starting a new Claude Code session on this project |
 
 # Transpilation Work Split
@@ -203,37 +210,60 @@ Nine agents can work on the renderer at once, one per fleet slot.
 - Local accounts `fleet1` to `fleet9` are created on the local server by `openrs fleet up`. Their passwords are generated into `~/.config/openrs/fleet-local.json`, outside the repository.
 - Accounts on the shared lobby are created by the user and named in `code/harness/fleet.toml`, which git ignores, through `env:` or `file:` credential sources.
 
+# Streaming Games And Temporal Tests
+
+The production web architecture keeps the game host outside the browser. Resource records are sent over WebSocket on change, draw frames reference them, and input sequence acknowledgements provide latency measurements. An acknowledgement window bounds queued frames when the browser falls behind.
+
+| Workload | Verified result |
+| --- | --- |
+| Orbit | Deterministic animated scene, about 4.5 KB per streamed frame including changing HUD and particle resources |
+| Walker | Keyboard and click-to-move input, around 35 ms round trip in the measured local session |
+| Buttons | Hover, click counts and slider dragging, 17 to 25 ms round trip in the measured local session |
+| Lumbridge, 30 frames | Mean SSIM 0.9762, minimum 0.9760; 30 of 30 serialized frames identical |
+| Varrock, 20 frames at stride 2 | Mean SSIM 0.9496, minimum 0.9367; 20 of 20 serialized frames identical |
+| Multiframe artifacts | Same-frame client screenshots and records, browser output per frame, contact sheet, GIF and JSON report |
+
+- Temporal tests correctly fail the pixel thresholds when water and snow differ. Identical serialized frame data proves transport preservation, not rendering equivalence.
+- `openrs equiv --frames N` supports up to five RenderDoc frame comparisons as a slower optional check.
+- The Kotlin RuneScape client has not yet been connected as a streaming game host; the interactive test games validate that architecture without claiming the whole game runs in the browser.
+
 # Verified Results
 
-The full live pass, `openrs verify`, passed all 35 steps on this machine against the local lobby and world, with the client, lobby and world on one packed cache.
+The final integrated run passed all 55 live steps in 405 seconds against the single local cache root. The web-only group passed all 18 steps separately in 25.7 seconds.
 
-| Measure | Value |
+| Check | Measured result |
 | --- | --- |
-| Cache ready | 3.2 s after process start |
-| Lobby logged in | 4.3 s |
-| First world frame | 8.2 s |
-| Nine slot fleet up | 69 s, slowest slot in the world after 12.9 s |
-| Nine `fleet do` calls in parallel | 133 ms in total |
-| Nine `fleet compare` runs in parallel | 41 s, SSIM 0.875 to 0.995 |
-| Nine clients | 7.9 GB PSS and 3.7 cores, display 154 MB |
-| One local lobby and world pair | Lobby 3.1 GB to 3.5 GB RSS, world 1.9 GB RSS |
-| Equivalence score on a real dumped frame | 73.2, up from the first score of 64.4 |
-| Twin on Lumbridge | SSIM 0.986, PSNR 39.1 dB, serialized frames identical |
-| Whole verify run | 295 s |
+| Cache | `assets/cache/.packed`, fresh source manifest, 37 index tables |
+| Cache ready and first world frame | 3.5 s and 8.8 s from JVM start |
+| Native fleet | Nine clients across three local server pairs, all logged in and controlled in parallel |
+| Browser fleet | Nine browsers measured during development; three isolated browsers exercised by every integrated verification run |
+| Native serialization and browser replay | Byte-identical frame files, nonblank screenshots, a side-by-side comparison and a strict three-frame sequence |
+| Streaming games | Orbit, walker and buttons all rendered; input sequences reached the host and were echoed back |
+| Browser capture | Real NVIDIA WebGPU adapter, RenderDoc captures from Chromium's Vulkan GPU process |
+| Browser equivalence | 97.5 out of 100, still FAIL against strict rendering thresholds |
+| Native equivalence | 74.3 out of 100, still FAIL against strict rendering thresholds |
+| Median repeat replay CPU time | Native 1.22 ms; browser 0.92 ms for the same 1882-draw frame |
+| Median repeat replay including fence | Native 1.59 ms; browser 5.63 ms |
+| Normal browser pacing | 180 rendered frames in 2.92 s, about 60 frames per second |
+| Repeated resource uploads | Zero for unchanged frames after the first upload |
+| Automated tests | 121 harness, 21 renderer, 10 game-host, 74 Python, 10 JVM tests |
 
 ```mermaid
 flowchart LR
-  A[up 8 s] --> B[control and interfaces]
-  B --> C[dump-frame]
-  C --> D[renderer replay]
-  D --> E[equiv 73.1]
-  E --> F[fleet of 9 and compare]
-  F --> G[down]
+  A[Shared cache] --> B[Native client and controls]
+  B --> C[Same-frame dumps and sequences]
+  C --> D[Browser replay and twin]
+  D --> E[Native and browser RenderDoc]
+  E --> F[Nine native clients]
+  F --> G[Browser input fleet and recovery]
+  G --> H[Three live stream games]
+  H --> I[Clean shutdown]
 ```
 
-- The equivalence score tracks the transpilation. The rise from 64.4 to 73.1 came from the first round of the nine slot agents, which replayed the `surfaceMask` draws and fixed frame wide colour handling.
-- Offscreen draws, such as the minimap, are still skipped on replay.
-- RenderDoc replays run one at a time across every `openrs` process, behind the lock file `openrs-gpu-replay.lock` in the temp folder, because each full replay of a game frame needs gigabytes of GPU memory and the card has 6 GB.
+- A harness PASS means the tools ran and preserved their data. Rendering parity can still FAIL, and those verdicts remain in the reports.
+- Normalized scores must be read with image metrics, known skipped passes and raw mismatches. Alpha-state and unexplained texture differences are not silently dismissed.
+- These measurements use Linux, Hyprland and the GTX 1660 SUPER. They are not promises for every scene or machine.
+- RenderDoc replays take turns across processes behind a file lock because each full replay can consume gigabytes of GPU memory.
 
 # Crash Recovery
 
@@ -241,7 +271,8 @@ flowchart LR
 
 1. Every fleet slot whose state file remains and whose client is gone brings the fleet back up to that size. `fleet up` skips slots that still run and starts the local servers they need.
 2. A single client whose state file remains and whose process is gone is started again with `openrs up`.
-3. When nothing was left behind it prints `nothing to resume`.
+3. `openrs resume web` restores only the web client and web fleet with their recorded startup arguments; surviving browser slots keep their PIDs. A crashed test-game host is restarted and the page reconnects.
+4. When nothing was left behind it prints `nothing to resume`.
 
 - `openrs down` and `openrs fleet down` remove the state files, so a clean shutdown is never resumed.
 - Measured after a session crash: the nine slot fleet and its three server pairs came back in 95 s.
@@ -255,5 +286,5 @@ flowchart LR
 | Platform | Development runs on Linux with Hyprland only: the client's GL context is GLX and the private display needs Hyprland. Every other platform is reached through the WebGPU build |
 | Server memory | Three local server pairs for nine slots use about 15 GB, mostly the lobbies holding the packed cache in memory |
 | Water reflections and bloom | The planar reflection target and bloom are not ported to the renderer yet |
-| Frame stream to the browser | Not built, see `MODERN-RENDERER-WEB-TRANSFER.md` |
+| Hosted game milestone | The native session host now carries live gameplay and browser input, preserving original Kotlin gameplay/CS2. It remains capture-bound and is not a standalone browser engine; see `TRANSPILATION-STATUS.md` |
 | Sandboxed sessions | A Claude Code session whose Bash commands run in a sandbox cannot build to `~/.gradle`, see the GPU or start a display, so it cannot run the client; `openrs doctor` reports this as a restricted sandbox |

@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
-pub const ALL: [fn(&Path) -> Vec<Check>; 10] = [jar, cache, renderdoc, gpu, display, writable, java, ports, fleet, disk];
+pub const ALL: [fn(&Path) -> Vec<Check>; 11] = [jar, cache, renderdoc, gpu, display, writable, java, ports, fleet, disk, crate::web::quick];
 
 const NO_GPU: &str = "no GPU is visible to this process, run from an unrestricted shell on a machine with the driver loaded";
 
@@ -20,7 +20,7 @@ pub fn which(p: &str) -> Option<PathBuf> {
     std::env::split_paths(&std::env::var_os("PATH")?).map(|d| d.join(p)).find(|f| f.is_file())
 }
 
-fn output(cmd: &mut Command, secs: u64) -> Option<String> {
+pub(crate) fn output(cmd: &mut Command, secs: u64) -> Option<String> {
     let mut child = cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().ok()?;
     let t = Instant::now();
     while child.try_wait().ok()?.is_none() {

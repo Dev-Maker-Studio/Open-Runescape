@@ -1,0 +1,28 @@
+instructions	56
+int	1
+int	0
+int	1
+int	1
+int	2
+int	3
+int	2
+int	105
+int	223
+string	hex:76616c75653d2d32313437343833363438
+string	hex:6e756c6c21
+string	hex:76616c75653d2b30
+string	hex:3c636f6c3d66666666666666663e
+string	hex:2d32313437343833363438
+string	null
+string	hex:3c6c743e613c67743e203c6c743e623c67743e
+string	hex:6c65747465723acea3
+string	hex:626364
+string	hex:616263
+string	hex:2d3159325030494a333245384538
+string	hex:52756e657363617065
+local-string	null
+array	0	0
+array	1	0
+array	2	0
+array	3	0
+array	4	0

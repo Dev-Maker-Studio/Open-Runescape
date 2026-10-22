@@ -1,0 +1,17 @@
+standard-104	1	85
+standard-120	1024	85
+standard-136	2047	85
+standard-168	31	85
+standard-72	512	85
+standard-zero-truncate	2	85
+standard-168-truncate	2046	85
+standard-boundary	127	85
+dynamic-size-0	1	51
+dynamic-size-1	501	51
+dynamic-size-2	1001	51
+dynamic-size-3	1501	51
+dynamic-size-4	2001	51
+dynamic-empty	2047	51
+dynamic-all	1023	51
+dynamic-unknown-five	9	51
+dynamic-unknown-zero	2040	51

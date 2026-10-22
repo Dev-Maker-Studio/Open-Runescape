@@ -1,0 +1,89 @@
+{
+  "cases": 24693,
+  "generator": {
+    "path": "code/login/tests/reference/world-packets-generate.py",
+    "sha256": "b4935d7d16c2d8b3501757dd16ab6e08e7db141693bbeef1224c98f2ba0a798b"
+  },
+  "helper": {
+    "path": "code/login/tests/reference/world-packets-oracle.java",
+    "sha256": "42a9aa68b0cd92b3667ef746bd3763553689ba463fa2edbaf9a2522e501549b0"
+  },
+  "invocation": "PacketDecoder.decode(BufferedConnectionContext) with preset currentPacket/currentPacketSize, fake Connection, zero-filled receive buffer, pulse event queues and varVerifyId reset per case; drained PulseEvent fields recorded",
+  "jar": {
+    "mode": "private-copy",
+    "path": "code/client/build/libs/darkan-client-shaded-2.0.0-all.jar",
+    "pinned": false,
+    "sha256": "6b38870f916966c8ab8720f619c9506d5103e23c8cb3918fb15bdd8b7890f0b9"
+  },
+  "jar_class_sha256": {
+    "com/darkan/bot/Bot.class": "c86aae28dba0f743219dfa59c08ec21fb5458983e5d0e0d4e1382d031c486a02",
+    "com/jagex/game/runetek5/client/ChatMessageType.class": "f615ef20418e5ae61960941baf196882262c6b7e52895e74250e4a33f331af6c",
+    "com/jagex/game/runetek5/client/Client$Companion.class": "26f4d06d861179d8eb463d9ba44f7a2227dce97c4e211a7cb83da564268fb47f",
+    "com/jagex/game/runetek5/client/Client.class": "ad30bd5f92a8e2bf9944364291bc55bb75b9ca94957096027b2d138181fc4ed9",
+    "com/jagex/game/runetek5/client/periodic/PulseEvent.class": "66d1969e433e5e5ba34d663f746614921da910b29e06ab0ec2d48fd36b6d70e0",
+    "com/jagex/game/runetek5/client/periodic/PulseEventHandler.class": "db0fef16d045e06dfbfcfa1edfa1df794855f6098ba76f2e6456b95ae6d1b191",
+    "com/jagex/game/runetek5/client/periodic/PulseEventQueue.class": "4fe5e310c1c8073a94ad54358ba8604524a8cbab3e7027793b0da66b12549b90",
+    "com/jagex/game/runetek5/config/cutscene/CutsceneTypeList.class": "c832d1e0ef3fb0abf77a8fc7cfdfbfaf246ce081625ff19e3b9b20b4cfb8fa9e",
+    "com/jagex/game/runetek5/encoding/Huffman.class": "5ee7611cb1e0a914b9faa9944df7d8bbe53fb7de44e9468fee11f053007112f0",
+    "com/jagex/game/runetek5/encoding/HuffmanList.class": "e33ce98920e8c5f8a9111a1f19926ee0e9e931014f6bd92f72031c280fa599f1",
+    "com/jagex/game/runetek5/entity/pathingentity/player/PlayerEntity.class": "679c988eaf8965d34e698ddefdd72d93e93f8b83b2432c1f10f0c47848f89bac",
+    "com/jagex/game/runetek5/entity/pathingentity/player/PlayerUpdate.class": "6e18cda3c2a52cf9b9538575fb52a3f6968f65c6b7642db8f405e99682ab5f88",
+    "com/jagex/game/runetek5/graphics/hint/HintArrow.class": "466f29d2d5926124c94e670c159cf9a8fccbfbeaa8de1bf3219477b24aeabcb5",
+    "com/jagex/game/runetek5/graphics/hint/HintDetails.class": "54b4807a5cb1464d7d144337fa231a86deb9ad4c150ffd0edb9e8fbd1fe7c6fb",
+    "com/jagex/game/runetek5/graphics/hint/HintTrail.class": "3a89ec4848902344aed55500b00d620d16a764d15635c0b45fac6374b00ca26c",
+    "com/jagex/game/runetek5/interaction/Ignore.class": "879b862c13f141d2362c49f1e2daf6a757d5f446de2d63304b29b4009cf7fb47",
+    "com/jagex/game/runetek5/interaction/IgnoreList.class": "b73d36cf72b2b9f743999d840176df5c7aafeefbe755d9ad25ff6ba4e465636a",
+    "com/jagex/game/runetek5/interaction/chat/ChatBox.class": "42d695e3b832b6b74a93fe4d14db716205383f985848771625be315894440f66",
+    "com/jagex/game/runetek5/interaction/chat/ChatLine.class": "7488c508def8d773f6ed6feb05058b7f4856f15dce7d90fa9805fa070cf80507",
+    "com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannel.class": "545fb0b578b6d8d4da210607d9dca965ef575e05e7ecadaf4dd439dc8a3ef74e",
+    "com/jagex/game/runetek5/network/BufferedConnectionContext.class": "77e832e2542e96568e8b2d0c70dcaa0974d3d0bb9666e122080dc1925a6ca5f8",
+    "com/jagex/game/runetek5/network/Connection.class": "08aaad4aa28f26abd335d694fa055aeb71c1de351f08cfa44227b851898f12cc",
+    "com/jagex/game/runetek5/network/packet/PacketDecoder.class": "fcc4ff96f79d50a6e04e9933300619ffceacc586e4730f6cb173c78932c2a12e",
+    "com/jagex/game/runetek5/network/packet/ServerProt.class": "c402ba869dfaf40e1a1f66c3d6294646fdd1e997e27edb1e58c6a8cebf289c0d",
+    "com/jagex/game/runetek5/network/packet/UpdateZonePacket.class": "016f5852dcd7ef1af3849974c3cd0e84b5c95182ac9779fd233bd78aee208d18",
+    "com/jagex/game/runetek5/utils/TextUtils.class": "aa4fe8698f99adf9adbc8985b26a70ecc65778fae73c8eb997fd3025eab1c44d",
+    "com/jagex/game/runetek5/utils/Utils.class": "5ea1aa9c2ac8cf6eaa54ba01d8715a2d9799e6a2dfb09b444e9e2b3a186c74ff"
+  },
+  "native_output_sha256": {
+    "world-packets-cases.tsv": "57241bbb61818cb9be02310fe2ff4bb597dba7743ad923bda310b80b71b289e7"
+  },
+  "sandbox": {
+    "java": "bwrap --unshare-net --ro-bind / /",
+    "javac": "bwrap --unshare-net --ro-bind / /",
+    "writable": "unique oracle evidence directory, tmpfs /tmp, proc /proc, dev /dev"
+  },
+  "schema": "world-packets-native-oracle-v1",
+  "snapshot": {
+    "format": "see WorldPacketsOracle.apply",
+    "strings": "null=~, else quote plus text with non-safe UTF-16 units as percent plus 4 hex digits"
+  },
+  "working_tree_source_sha256": {
+    "code/client/src/main/kotlin/com/darkan/bot/Bot.kt": "2eeab94185cfba6f22ba12899fc3ca21f7c90de589373a3e8f4f21c306c926f3",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/buffer/Packet.kt": "496e0841cb82e2d6d8a49e6dcf72217bc0928824b37312e7786b2ac819736734",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/ChatMessageType.kt": "dd39957daeb10d5815ee632c8fe3882acbffe28c54ba192d434e3a80285453e0",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEvent.kt": "34e721c7d343acb5fcf228618561ce52882766d66fe9f97f82f8d9ff51835787",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventHandler.kt": "fa1bd17b8abf45cb59cb60d212da677d5d7d5e355a8346e420f6f00e6696254a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventQueue.kt": "ed712458a2ed3aa36e158998304f23ae0f40c1d9bfeed3ee4b32dbe4698fe951",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/cutscene/CutsceneTypeList.kt": "5148742a9ab4d9a77641cbcef4d64ee807846e09534c0f78a22e8df4ce6ef247",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/encoding/Huffman.kt": "487ffcac061aec0610b11580941d002c0604faf790f400bfc414b285bac2e1d8",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/encoding/HuffmanList.kt": "a4af4428a33ed9bad7a43eae1fee8304af727b60adf4035a74c12bbd909b0f20",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/entity/pathingentity/player/PlayerEntity.kt": "4e56df8b18e48d53923e9c06c26fdca52342b35e1d2ee31955e64e812a7417f2",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/entity/pathingentity/player/PlayerUpdate.kt": "0d014059ab85ccbc56e8097435cd1fd6aef9f3fb68d400fe7bd90edb1a94adeb",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/hint/HintArrow.kt": "40be32347e56c921ed08c0ab0a9f0cfdd3ce2697ac0a9412f62b24b23467df19",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/hint/HintDetails.kt": "fb2a694e55b3bd5392cecce0efa436ad8af9ffbeeccd34d7b38196b2d41c07f0",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/hint/HintTrail.kt": "32945068645552ee491f9d36455a46f1de95350c824d9dbaa005e7e67fd90dce",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/Ignore.kt": "e6c28c723911e96486fe9794b926559501888fe840cb33a5606a6575d0b393da",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/IgnoreList.kt": "49e6162615a6d21c906014d26eeceb372804cde90348605c94c773ea8756f43d",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/ChatBox.kt": "5a8eb7e085552164106109a8f5d5abd08b526611cfcb5acba56814d0509e94e9",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/ChatLine.kt": "36f65450ca39dc77198da11d5b0ea9d3ea1e6dd012a25b738018868bec6d92d9",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/clanchat/channel/ClanChannel.kt": "1ebcf9a2e6ecc705a1681e67afeae1c280025cc6e7bc7ff292b44ee1dbbab81b",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/BufferedConnectionContext.kt": "275fe0e0c6fbd61d3b30e957e7053cfe34172333410f3738b49c1efab21c4fb2",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/Connection.kt": "27a8364846fe2dba0cc194e18557f686c4c5ac306fbcfa6605ae45f6a86c1e15",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/PacketDecoder.kt": "cf3339d5c70d9385a6b4361299e2e4eaf68100f16de6037df58637a7e7cbd590",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/ServerProt.kt": "a2f60b90b372ab1c07a33ef8e09711be5d99b7395aa7bc7e0583ea4741ce6b0a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/UpdateZonePacket.kt": "9774a13ead7ce88ad49d9eb926d0028b361061eb3b7fd155eb2abc8fa9c9f269",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/TextUtils.kt": "f891cce3caf84d17bcb3e6b0b2f46d21f986d00d1f9809ceed0886e95501191f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/Utils.kt": "f426bd8e158b46718a651fa7113d2c15c168e4423649ea410871cbfa0dd518e8"
+  }
+}

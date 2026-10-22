@@ -48,6 +48,13 @@ object ControlServer {
 
     private val reads = mapOf<String, (List<String>) -> JsonElement>(
         "tick" to { number(Footprints.gameTick) },
+        "worlds" to {
+            val worlds = com.jagex.game.runetek5.network.world.WorldMeta.WORLD_LIST_DESCRIPTORS
+                ?: com.jagex.game.runetek5.network.WorldConnection.WORLD_DESCRIPTORS_BYID
+            list(worlds.filterNotNull().sortedBy { it.worldNumber }.map {
+                entry("id" to number(it.worldNumber), "host" to text(it.ipAddress), "port" to number(it.port), "flags" to number(it.flags))
+            })
+        },
         "describe" to { text(Describe.render()) },
         "state" to { entry("tick" to number(Footprints.gameTick), "gameState" to text(Client.gameState.toString()), "loggedOut" to JsonPrimitive(Bot.isLoggedOut()), "scripts" to list(ScriptExecutor.activeScripts.map { text(it.javaClass.simpleName) })) },
         "pos" to { Bot.getMyPlayerPosition().let { entry("x" to number(it.x), "y" to number(it.y), "z" to number(it.z)) } },
@@ -56,6 +63,7 @@ object ControlServer {
         "bank" to { container(Bot.bank) },
         "varp" to { number(VarProviders.PLAYER_VAR_PROVIDER.getVarValue(it[0].toInt())) },
         "varbit" to { number(VarProviders.PLAYER_VAR_PROVIDER.getVarBitValue(it[0].toInt())) },
+        "cs2-definition" to { Cs2DefinitionDiagnostics.read(it) },
         "interface" to { a -> a.firstOrNull()?.let { JsonPrimitive(Bot.interfaceOpen(it.toInt())) } ?: list(Footprints.openInterfaces().sorted().map(::number)) },
         "chat" to { a ->
             if (a.isNotEmpty() && a[0].toIntOrNull() == null) say(a.joinToString(" ")) else list(ChatBox.CHAT_LINES.take(a.firstOrNull()?.toInt() ?: 10).filterNotNull().map {
@@ -102,9 +110,20 @@ object ControlServer {
             val path = a.firstOrNull()?.let(Path::of) ?: Footprints.shots.resolve("${System.currentTimeMillis()}-t${Footprints.gameTick}.png")
             text(FrameCapture.request(path).also { Footprints.log("shot", "path" to text(it)) })
         },
+        "stream-start" to { NativeStream.start(it) },
+        "stream-stop" to { require(it.isEmpty()) { "usage: stream-stop" }; NativeStream.stop() },
+        "stream-state" to { require(it.isEmpty()) { "usage: stream-state" }; NativeStream.state() },
+        "remote-input" to { NativeInput.receive(it) },
         "dump-frame" to { a ->
             val path = a.firstOrNull()?.let(Path::of) ?: Footprints.shots.resolve("${System.currentTimeMillis()}-t${Footprints.gameTick}.orf")
             text(com.jagex.game.runetek5.graphics.modern.dump.FrameDump.request(path))
+        },
+        "dump-frames" to { a ->
+            val dir = Path.of(a.getOrNull(0) ?: error("usage: dump-frames <dir> <count> [every=1]"))
+            val count = a.getOrNull(1)?.toIntOrNull() ?: error("usage: dump-frames <dir> <count> [every=1]")
+            require(a.size in 2..3) { "usage: dump-frames <dir> <count> [every=1]" }
+            val every = a.getOrNull(2)?.let { it.removePrefix("every=").toInt() } ?: 1
+            text(com.jagex.game.runetek5.graphics.modern.dump.FrameDump.sequence(dir, count, every) { Footprints.gameTick })
         },
         "help" to { list((reads.keys + actions.keys + direct.keys + listOf("wait-tick", "wait-idle", "wait-until")).sorted().map(::text)) },
         "scripts" to {
@@ -210,6 +229,7 @@ object ControlServer {
     }
 
     fun drain() {
+        NativeInput.pulse()
         Footprints.observe()
         while (true) (queue.poll() ?: break).run()
         waiters.removeIf(::poll)
@@ -224,7 +244,7 @@ object ControlServer {
     private fun queued(cmd: String) = reads[cmd] ?: actions[cmd]
 
     private fun logged(cmd: String, args: List<String>, response: JsonObject) = response.also {
-        if (cmd != "help" && cmd != "tick") Footprints.log("cmd", "cmd" to text(cmd), "args" to list(args.map(::text)), "ok" to it["ok"]!!, *(it["error"]?.let { e -> arrayOf("error" to e) } ?: emptyArray()))
+        if (cmd !in setOf("help", "tick", "remote-input", "stream-state")) Footprints.log("cmd", "cmd" to text(cmd), "args" to list(args.map(::text)), "ok" to it["ok"]!!, *(it["error"]?.let { e -> arrayOf("error" to e) } ?: emptyArray()))
     }
 
     private fun single(cmd: String, args: List<String>): JsonObject {

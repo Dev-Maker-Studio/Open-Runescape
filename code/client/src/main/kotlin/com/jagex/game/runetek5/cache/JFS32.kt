@@ -20,7 +20,7 @@ class JFS32 @Throws(IOException::class) constructor(
             adjustedCapacity = Long.MAX_VALUE
         }
         if (outputFile.length() > adjustedCapacity) {
-            outputFile.delete()
+            throw IOException("File exceeds its configured capacity; preserving ${outputFile.absolutePath}")
         }
         this.rwFile = RandomAccessFile(outputFile, "rw")
         this.maxCapacity = adjustedCapacity
@@ -43,10 +43,8 @@ class JFS32 @Throws(IOException::class) constructor(
 
     @Throws(IOException::class)
     fun write(data: ByteArray, writeOffset: Int, seekOffset: Int) {
-        if (seekPosition + seekOffset > maxCapacity) {
-            rwFile!!.seek(maxCapacity)
-            rwFile!!.write(1)
-            throw EOFException()
+        if (seekPosition > maxCapacity || seekOffset.toLong() > maxCapacity - seekPosition) {
+            throw EOFException("Write exceeds configured capacity; existing data preserved")
         } else {
             rwFile!!.write(data, writeOffset, seekOffset)
             seekPosition += seekOffset

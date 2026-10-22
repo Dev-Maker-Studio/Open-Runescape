@@ -1,0 +1,68 @@
+{
+  "cases": 3007,
+  "generator": {
+    "path": "code/login/tests/reference/social-generate.py",
+    "sha256": "bc2d7857e5b7a277537c4a8b6222701f9a81276b18dbe5826fca9a3654e28e52"
+  },
+  "helper": {
+    "path": "code/login/tests/reference/social-oracle.java",
+    "sha256": "d6620024dbd7db73e51d2b9502e4d14a07820869f7cd9f35e12becb5cc643f04"
+  },
+  "invocation": "PacketDecoder.decode(BufferedConnectionContext) with preset currentPacket/currentPacketSize, fake Connection, Unsafe-allocated PlayerEntity and LoginManager.GAME_CONNECTION_INFO stub; TextUtils.formatDisplayname and Utils.nameForLong called directly",
+  "jar": {
+    "mode": "direct-read-only",
+    "path": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+    "sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048"
+  },
+  "native_output_sha256": {
+    "social-cases.tsv": "1de57ebada796b840565edd0def7db7df0fcb2beb2af01bf6ecf3551d6731064"
+  },
+  "pinned_jar_class_sha256": {
+    "com/darkan/bot/Bot.class": "c86aae28dba0f743219dfa59c08ec21fb5458983e5d0e0d4e1382d031c486a02",
+    "com/jagex/game/runetek5/client/Client$Companion.class": "26f4d06d861179d8eb463d9ba44f7a2227dce97c4e211a7cb83da564268fb47f",
+    "com/jagex/game/runetek5/client/Client.class": "ad30bd5f92a8e2bf9944364291bc55bb75b9ca94957096027b2d138181fc4ed9",
+    "com/jagex/game/runetek5/client/login/LoginManager.class": "09864456c2163847826629ed453cd228ac03ad4752623cbf241537a0fa4f8f9e",
+    "com/jagex/game/runetek5/client/login/LoginStateUpdate.class": "a15343bf0ad9f37c7bb37a51a45177835f87868b1257a3047b797b9095251635",
+    "com/jagex/game/runetek5/interaction/Friend.class": "6d95c02ebc12cbc63aeb47f7eb1992e9edbc59dc3679f592b5a1b7042c244dee",
+    "com/jagex/game/runetek5/interaction/FriendList.class": "1e3df98e4bf44cb43e2462d0cd32067090dc56d24b92b484a3f097c0a61e7778",
+    "com/jagex/game/runetek5/interaction/Ignore.class": "879b862c13f141d2362c49f1e2daf6a757d5f446de2d63304b29b4009cf7fb47",
+    "com/jagex/game/runetek5/interaction/IgnoreList.class": "b73d36cf72b2b9f743999d840176df5c7aafeefbe755d9ad25ff6ba4e465636a",
+    "com/jagex/game/runetek5/interaction/chat/friendschat/FriendsChat.class": "3fc12b1aab4390edb5c7e385defbb99b7c7561bb024b6a2fc5ef7ee0d37902c3",
+    "com/jagex/game/runetek5/interaction/chat/friendschat/FriendsChatPlayer.class": "3a7216e9d182aed5096b7653ed286a2066a1fcb829eb24e729c87ad3a8c098b8",
+    "com/jagex/game/runetek5/network/BufferedConnectionContext.class": "77e832e2542e96568e8b2d0c70dcaa0974d3d0bb9666e122080dc1925a6ca5f8",
+    "com/jagex/game/runetek5/network/Connection.class": "08aaad4aa28f26abd335d694fa055aeb71c1de351f08cfa44227b851898f12cc",
+    "com/jagex/game/runetek5/network/packet/PacketDecoder.class": "fcc4ff96f79d50a6e04e9933300619ffceacc586e4730f6cb173c78932c2a12e",
+    "com/jagex/game/runetek5/network/packet/ServerProt.class": "c402ba869dfaf40e1a1f66c3d6294646fdd1e997e27edb1e58c6a8cebf289c0d",
+    "com/jagex/game/runetek5/utils/TextUtils.class": "aa4fe8698f99adf9adbc8985b26a70ecc65778fae73c8eb997fd3025eab1c44d",
+    "com/jagex/game/runetek5/utils/Utils.class": "5ea1aa9c2ac8cf6eaa54ba01d8715a2d9799e6a2dfb09b444e9e2b3a186c74ff"
+  },
+  "sandbox": {
+    "java": "bwrap --unshare-net --ro-bind / /",
+    "javac": "bwrap --unshare-net --ro-bind / /",
+    "writable": "unique oracle evidence directory, tmpfs /tmp, proc /proc, dev /dev"
+  },
+  "schema": "social-native-oracle-v1",
+  "snapshot": {
+    "format": "see SocialOracle.snapshot",
+    "strings": "null=~, else quote plus text with non-safe UTF-16 units as percent plus 4 hex digits"
+  },
+  "working_tree_source_sha256": {
+    "code/client/src/main/kotlin/com/darkan/bot/Bot.kt": "2eeab94185cfba6f22ba12899fc3ca21f7c90de589373a3e8f4f21c306c926f3",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/buffer/Packet.kt": "496e0841cb82e2d6d8a49e6dcf72217bc0928824b37312e7786b2ac819736734",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/login/LoginManager.kt": "895ec26b6a6dbe13cc35bd36c792a80d4a9f1f6337dd1218b7eb40d7af08eb8c",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/login/LoginStateUpdate.kt": "e42e61b587796bd7a05c385e5e8e9e77963814d3c862c0e90f8c31f5508cda37",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/Friend.kt": "6753863bb011d1e9f34a0dd30f8699a5f46fe98c0963322d30d5c74bc7499418",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/FriendList.kt": "7e43f7b8dda6b5128fba7137ffbc324372f959683d795a632a1068d4406d8f60",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/Ignore.kt": "e6c28c723911e96486fe9794b926559501888fe840cb33a5606a6575d0b393da",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/IgnoreList.kt": "49e6162615a6d21c906014d26eeceb372804cde90348605c94c773ea8756f43d",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/friendschat/FriendsChat.kt": "91c55aceb42180caeea4954d2f781db2a331b1e7d65919d994667ac05e0d27b8",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/interaction/chat/friendschat/FriendsChatPlayer.kt": "da6ecea5b6a9d068bb6f7048f8c6d4a9bc53a83b1829c5b5880148ea1e7af209",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/BufferedConnectionContext.kt": "275fe0e0c6fbd61d3b30e957e7053cfe34172333410f3738b49c1efab21c4fb2",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/Connection.kt": "27a8364846fe2dba0cc194e18557f686c4c5ac306fbcfa6605ae45f6a86c1e15",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/PacketDecoder.kt": "cf3339d5c70d9385a6b4361299e2e4eaf68100f16de6037df58637a7e7cbd590",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/ServerProt.kt": "a2f60b90b372ab1c07a33ef8e09711be5d99b7395aa7bc7e0583ea4741ce6b0a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/TextUtils.kt": "f891cce3caf84d17bcb3e6b0b2f46d21f986d00d1f9809ceed0886e95501191f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/Utils.kt": "f426bd8e158b46718a651fa7113d2c15c168e4423649ea410871cbfa0dd518e8"
+  }
+}

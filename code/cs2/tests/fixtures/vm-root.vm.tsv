@@ -1,0 +1,21 @@
+instructions	37
+int	70
+int	11
+int	22
+int	81
+int	-1
+int	71
+string	hex:6c6f776572
+string	hex:66697273747365636f6e64
+string	hex:63616c6c6572
+long	73
+long	74
+long	72
+local-int	71
+local-string	hex:63616c6c6572
+local-long	72
+array	0	0
+array	1	0
+array	2	0
+array	3	0
+array	4	1	-1

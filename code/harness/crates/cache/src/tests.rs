@@ -68,6 +68,10 @@ fn manifest_tracks_files_and_ignores_git() {
     assert!(first.starts_with("2-"), "{first}");
     assert_eq!(pack::manifest(&tree).unwrap(), first);
     write(&tree.join(".git/HEAD"), b"ref");
+    write(&tree.join(".packed/main_file_cache.dat2"), b"generated packed cache");
+    write(&tree.join(".packed.stamp"), b"generated manifest");
+    assert_eq!(pack::manifest(&tree).unwrap(), first);
+    write(&tree.join(".packed/main_file_cache.idx255"), b"rebuilt reference table");
     assert_eq!(pack::manifest(&tree).unwrap(), first);
     write(&tree.join("sub/b.dat"), b"three");
     let second = pack::manifest(&tree).unwrap();
@@ -82,14 +86,24 @@ fn freshness_needs_packed_cache_and_matching_stamp() {
     std::env::remove_var("OPENRS_CACHE");
     let root = tmp("fresh");
     write(&root.join("assets/cache/idx/0.dat"), b"data");
-    let stamp = root.join("assets/.cache-packed.stamp");
+    let stamp = root.join("assets/cache/.packed.stamp");
     assert!(!pack::fresh(&root).unwrap());
     write(&stamp, format!("{}\n", pack::manifest(&root.join("assets/cache")).unwrap()).as_bytes());
     assert!(!pack::fresh(&root).unwrap());
-    write(&root.join("assets/cache-packed/main_file_cache.dat2"), b"");
+    write(&root.join("assets/cache/.packed/main_file_cache.dat2"), b"");
     assert!(pack::fresh(&root).unwrap());
     assert_eq!(crate::check(&root, false), Ok(()));
     write(&root.join("assets/cache/idx/1.dat"), b"more");
     assert!(!pack::fresh(&root).unwrap());
-    assert_eq!(crate::check(&root, true).unwrap_err(), "cache mismatch: assets/cache-packed is stale or missing, run openrs cache build");
+    assert_eq!(crate::check(&root, true).unwrap_err(), "cache mismatch: assets/cache/.packed is stale or missing, run openrs cache build");
+}
+
+#[test]
+fn packed_path_accepts_a_source_root_or_a_sector_directory() {
+    let root = tmp("resolve");
+    write(&root.join("cache.json"), b"{}");
+    assert_eq!(pack::resolve_packed(root.clone()), root.join(".packed"));
+    let packed = root.join(".packed");
+    write(&packed.join("main_file_cache.dat2"), b"cache");
+    assert_eq!(pack::resolve_packed(packed.clone()), packed);
 }

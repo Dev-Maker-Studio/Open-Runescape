@@ -1,0 +1,3520 @@
+{
+  "provenance": {
+    "source": "Existing native jar; synthetic sparse index22 archives and native binary definitions",
+    "jar": "darkan-client-shaded-2.0.0-all.jar",
+    "jarSha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+    "helperSha256": "62ca1443450c1cedc3a348ed13bb16b0599c9842d92b03d4dc6caa9205ff8ea4",
+    "generatorSha256": "2d0b1d9e7345639f6d410881eb25e14a3b85a20a45ab33585b7128b76abe3568",
+    "nativeCalls": [
+      "IndexReference.INDEX_22.indexId",
+      "SharedConfigsType.VARPBIT.archiveId/archiveFileId",
+      "VarpbitType.decode",
+      "VarpbitTypeList.list",
+      "Js5Compression.decompress",
+      "Js5MasterIndex",
+      "Js5ResourceProvider.getFile",
+      "Whirlpool.calculateDigest",
+      "PlayerVarDomain.getVarBitValue",
+      "PlayerVarDomain.setVarBitValue"
+    ],
+    "isolation": "bwrap --unshare-net; read-only host root; copied pinned jar; empty temporary home; cleared environment; headless; bot disabled",
+    "scope": "Pure definition/loader/provider calls only; no native startup, real cache fetch, client launch, CS2 dispatcher, network, account or display",
+    "absentPolicy": "Native loader defaults even for unavailable archives; independent repository only defaults on verified reference absence",
+    "strictPolicy": "Unknown opcodes, trailing data, invalid bit spans, missing terminators and oversized definitions fail closed despite native permissiveness",
+    "sampleValues": "Varbit0=(318,0,0), varbit1031=(568,10,12) match unpacked cache samples; other definitions synthetic"
+  },
+  "index": 22,
+  "configTypeId": 14,
+  "archiveBits": 10,
+  "mapping": [
+    {
+      "id": 0,
+      "archive": 0,
+      "file": 0
+    },
+    {
+      "id": 1,
+      "archive": 0,
+      "file": 1
+    },
+    {
+      "id": 1023,
+      "archive": 0,
+      "file": 1023
+    },
+    {
+      "id": 1024,
+      "archive": 1,
+      "file": 0
+    },
+    {
+      "id": 1031,
+      "archive": 1,
+      "file": 7
+    },
+    {
+      "id": 65535,
+      "archive": 63,
+      "file": 1023
+    },
+    {
+      "id": 65536,
+      "archive": 64,
+      "file": 0
+    },
+    {
+      "id": 67108863,
+      "archive": 65535,
+      "file": 1023
+    }
+  ],
+  "definitions": [
+    {
+      "hex": "00",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      },
+      "consumed": 1
+    },
+    {
+      "hex": "010002040701ffff202700",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 39
+      },
+      "consumed": 11
+    },
+    {
+      "hex": "010000000000",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff000100",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 1
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100000200",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 2
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff000300",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 3
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000000400",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 4
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff000500",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 5
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100000600",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 6
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff000700",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 7
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000000800",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 8
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff000900",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 9
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100000a00",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 10
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff000b00",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 11
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000000c00",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 12
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff000d00",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 13
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100000e00",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 14
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff000f00",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 15
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000001000",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 16
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff001100",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 17
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100001200",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 18
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff001300",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 19
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000001400",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 20
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff001500",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 21
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100001600",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 22
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff001700",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 23
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000001800",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 24
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff001900",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 25
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100001a00",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 26
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff001b00",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 27
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000001c00",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 28
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff001d00",
+      "definition": {
+        "varp": 255,
+        "start": 0,
+        "end": 29
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100001e00",
+      "definition": {
+        "varp": 256,
+        "start": 0,
+        "end": 30
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff001f00",
+      "definition": {
+        "varp": 65535,
+        "start": 0,
+        "end": 31
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000010100",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 1
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff010200",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 2
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100010300",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 3
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff010400",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 4
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000010500",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 5
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff010600",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 6
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100010700",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 7
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff010800",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 8
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000010900",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 9
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff010a00",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 10
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100010b00",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 11
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff010c00",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 12
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000010d00",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 13
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff010e00",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 14
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100010f00",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 15
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff011000",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 16
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000011100",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 17
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff011200",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 18
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100011300",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 19
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff011400",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 20
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000011500",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 21
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff011600",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 22
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100011700",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 23
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff011800",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 24
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000011900",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 25
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff011a00",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 26
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100011b00",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 27
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff011c00",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 28
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000011d00",
+      "definition": {
+        "varp": 0,
+        "start": 1,
+        "end": 29
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff011e00",
+      "definition": {
+        "varp": 255,
+        "start": 1,
+        "end": 30
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100011f00",
+      "definition": {
+        "varp": 256,
+        "start": 1,
+        "end": 31
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff012000",
+      "definition": {
+        "varp": 65535,
+        "start": 1,
+        "end": 32
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000070700",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 7
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff070800",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 8
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100070900",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 9
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff070a00",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 10
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000070b00",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 11
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff070c00",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 12
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100070d00",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 13
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff070e00",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 14
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000070f00",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 15
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff071000",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 16
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100071100",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 17
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff071200",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 18
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000071300",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 19
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff071400",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 20
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100071500",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 21
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff071600",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 22
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000071700",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 23
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff071800",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 24
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100071900",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 25
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff071a00",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 26
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000071b00",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 27
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff071c00",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 28
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100071d00",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 29
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff071e00",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 30
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000071f00",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 31
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff072000",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 32
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100072100",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 33
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff072200",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 34
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000072300",
+      "definition": {
+        "varp": 0,
+        "start": 7,
+        "end": 35
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff072400",
+      "definition": {
+        "varp": 255,
+        "start": 7,
+        "end": 36
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100072500",
+      "definition": {
+        "varp": 256,
+        "start": 7,
+        "end": 37
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff072600",
+      "definition": {
+        "varp": 65535,
+        "start": 7,
+        "end": 38
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f1f00",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 31
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f2000",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 32
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f2100",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 33
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f2200",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 34
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f2300",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 35
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f2400",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 36
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f2500",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 37
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f2600",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 38
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f2700",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 39
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f2800",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 40
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f2900",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 41
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f2a00",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 42
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f2b00",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 43
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f2c00",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 44
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f2d00",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 45
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f2e00",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 46
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f2f00",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 47
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f3000",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 48
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f3100",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 49
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f3200",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 50
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f3300",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 51
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f3400",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 52
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f3500",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 53
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f3600",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 54
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f3700",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 55
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f3800",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 56
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f3900",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 57
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f3a00",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 58
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100001f3b00",
+      "definition": {
+        "varp": 0,
+        "start": 31,
+        "end": 59
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff1f3c00",
+      "definition": {
+        "varp": 255,
+        "start": 31,
+        "end": 60
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101001f3d00",
+      "definition": {
+        "varp": 256,
+        "start": 31,
+        "end": 61
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff1f3e00",
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 62
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000202000",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 32
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff202100",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 33
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100202200",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 34
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff202300",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 35
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000202400",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 36
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff202500",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 37
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100202600",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 38
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff202700",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 39
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000202800",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 40
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff202900",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 41
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100202a00",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 42
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff202b00",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 43
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000202c00",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 44
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff202d00",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 45
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100202e00",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 46
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff202f00",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 47
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000203000",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 48
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff203100",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 49
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100203200",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 50
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff203300",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 51
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000203400",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 52
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff203500",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 53
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100203600",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 54
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff203700",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 55
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000203800",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 56
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff203900",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 57
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100203a00",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 58
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff203b00",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 59
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000203c00",
+      "definition": {
+        "varp": 0,
+        "start": 32,
+        "end": 60
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff203d00",
+      "definition": {
+        "varp": 255,
+        "start": 32,
+        "end": 61
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100203e00",
+      "definition": {
+        "varp": 256,
+        "start": 32,
+        "end": 62
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff203f00",
+      "definition": {
+        "varp": 65535,
+        "start": 32,
+        "end": 63
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000222200",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 34
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff222300",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 35
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100222400",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 36
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff222500",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 37
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000222600",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 38
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff222700",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 39
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100222800",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 40
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff222900",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 41
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000222a00",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 42
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff222b00",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 43
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100222c00",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 44
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff222d00",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 45
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000222e00",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 46
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff222f00",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 47
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100223000",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 48
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff223100",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 49
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000223200",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 50
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff223300",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 51
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100223400",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 52
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff223500",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 53
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000223600",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 54
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff223700",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 55
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100223800",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 56
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff223900",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 57
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000223a00",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 58
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff223b00",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 59
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100223c00",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 60
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff223d00",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 61
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000223e00",
+      "definition": {
+        "varp": 0,
+        "start": 34,
+        "end": 62
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff223f00",
+      "definition": {
+        "varp": 255,
+        "start": 34,
+        "end": 63
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100224000",
+      "definition": {
+        "varp": 256,
+        "start": 34,
+        "end": 64
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff224100",
+      "definition": {
+        "varp": 65535,
+        "start": 34,
+        "end": 65
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f3f00",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 63
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f4000",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 64
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f4100",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 65
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f4200",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 66
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f4300",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 67
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f4400",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 68
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f4500",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 69
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f4600",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 70
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f4700",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 71
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f4800",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 72
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f4900",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 73
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f4a00",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 74
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f4b00",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 75
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f4c00",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 76
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f4d00",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 77
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f4e00",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 78
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f4f00",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 79
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f5000",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 80
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f5100",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 81
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f5200",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 82
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f5300",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 83
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f5400",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 84
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f5500",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 85
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f5600",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 86
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f5700",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 87
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f5800",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 88
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f5900",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 89
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f5a00",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 90
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100003f5b00",
+      "definition": {
+        "varp": 0,
+        "start": 63,
+        "end": 91
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff3f5c00",
+      "definition": {
+        "varp": 255,
+        "start": 63,
+        "end": 92
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0101003f5d00",
+      "definition": {
+        "varp": 256,
+        "start": 63,
+        "end": 93
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff3f5e00",
+      "definition": {
+        "varp": 65535,
+        "start": 63,
+        "end": 94
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000808000",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 128
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff808100",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 129
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100808200",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 130
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff808300",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 131
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000808400",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 132
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff808500",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 133
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100808600",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 134
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff808700",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 135
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000808800",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 136
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff808900",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 137
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100808a00",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 138
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff808b00",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 139
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000808c00",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 140
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff808d00",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 141
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100808e00",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 142
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff808f00",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 143
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000809000",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 144
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff809100",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 145
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100809200",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 146
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff809300",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 147
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000809400",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 148
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff809500",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 149
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100809600",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 150
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff809700",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 151
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000809800",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 152
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff809900",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 153
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100809a00",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 154
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff809b00",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 155
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000809c00",
+      "definition": {
+        "varp": 0,
+        "start": 128,
+        "end": 156
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ff809d00",
+      "definition": {
+        "varp": 255,
+        "start": 128,
+        "end": 157
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100809e00",
+      "definition": {
+        "varp": 256,
+        "start": 128,
+        "end": 158
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffff809f00",
+      "definition": {
+        "varp": 65535,
+        "start": 128,
+        "end": 159
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0e000",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 224
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0e100",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 225
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0e200",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 226
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0e300",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 227
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0e400",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 228
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0e500",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 229
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0e600",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 230
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0e700",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 231
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0e800",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 232
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0e900",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 233
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0ea00",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 234
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0eb00",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 235
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0ec00",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 236
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0ed00",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 237
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0ee00",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 238
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0ef00",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 239
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0f000",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 240
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0f100",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 241
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0f200",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 242
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0f300",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 243
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0f400",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 244
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0f500",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 245
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0f600",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 246
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0f700",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 247
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0f800",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 248
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0f900",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 249
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0fa00",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 250
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0fb00",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 251
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000e0fc00",
+      "definition": {
+        "varp": 0,
+        "start": 224,
+        "end": 252
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100ffe0fd00",
+      "definition": {
+        "varp": 255,
+        "start": 224,
+        "end": 253
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100e0fe00",
+      "definition": {
+        "varp": 256,
+        "start": 224,
+        "end": 254
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "01ffffe0ff00",
+      "definition": {
+        "varp": 65535,
+        "start": 224,
+        "end": 255
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010000fefe00",
+      "definition": {
+        "varp": 0,
+        "start": 254,
+        "end": 254
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "0100fffeff00",
+      "definition": {
+        "varp": 255,
+        "start": 254,
+        "end": 255
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010100ffff00",
+      "definition": {
+        "varp": 256,
+        "start": 255,
+        "end": 255
+      },
+      "consumed": 6
+    }
+  ],
+  "nonCanonical": [
+    {
+      "hex": "",
+      "error": "ArrayIndexOutOfBoundsException"
+    },
+    {
+      "hex": "01",
+      "error": "ArrayIndexOutOfBoundsException"
+    },
+    {
+      "hex": "010001",
+      "error": "ArrayIndexOutOfBoundsException"
+    },
+    {
+      "hex": "01000101",
+      "error": "ArrayIndexOutOfBoundsException"
+    },
+    {
+      "hex": "0100010101",
+      "error": "ArrayIndexOutOfBoundsException"
+    },
+    {
+      "hex": "02",
+      "error": "ArrayIndexOutOfBoundsException"
+    },
+    {
+      "hex": "0200",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      },
+      "consumed": 2
+    },
+    {
+      "hex": "0001",
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      },
+      "consumed": 1
+    },
+    {
+      "hex": "010001010000",
+      "definition": {
+        "varp": 1,
+        "start": 1,
+        "end": 0
+      },
+      "consumed": 6
+    },
+    {
+      "hex": "010001002000",
+      "definition": {
+        "varp": 1,
+        "start": 0,
+        "end": 32
+      },
+      "consumed": 6
+    }
+  ],
+  "referenceHex": "00000000f8060000001102000300000001003f4fd5cef7529f3d38a4589166fa09f8dfba8e57056b48b9220646be790f76adedc46321c188afa0678a0ca44e4e7afa1ce8aa24a3f679227794dec82f8d56a6f87641c915f76aa966907ccc26582dec070181fdc75a93917c8393fb1c466af79cd8485335b54eae87442924705458394db2831dc0515c8b0651bacb5c870a6d481d9f47e33f780c41d396a1700b695c6321de99b0162ac4f9ee68786d6982c0d72fa18e7716071e534e49dba82235e23f0eb73a2106f79e2ed0186813bc1a4aeec9fcb0dfedc707fbf0cc4be2000000140000001500000054000200030001000003ff0000000700050001",
+  "version": {
+    "crc": 543473539,
+    "revision": 17,
+    "whirlpoolHex": "eebf264faa727dee9d193b7d78e52832ae807eafca58ecd3a19d633542320ae2705fd261be8c9cf6d9038cd82beda5ae17ee0bbbfaea4478311b3b8941fed4fc"
+  },
+  "archives": [
+    {
+      "id": 0,
+      "containerHex": "000000001501013e00000001ffff1f1f00000000060000000001",
+      "files": [
+        {
+          "id": 0,
+          "hex": "01013e000000",
+          "definition": {
+            "varp": 318,
+            "start": 0,
+            "end": 0
+          }
+        },
+        {
+          "id": 1023,
+          "hex": "01ffff1f1f00",
+          "definition": {
+            "varp": 65535,
+            "start": 31,
+            "end": 31
+          }
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "containerHex": "000000001a000102380a0c0001000222290000000001000000050000000001",
+      "files": [
+        {
+          "id": 0,
+          "hex": "00",
+          "definition": {
+            "varp": 0,
+            "start": 0,
+            "end": 0
+          }
+        },
+        {
+          "id": 7,
+          "hex": "0102380a0c00",
+          "definition": {
+            "varp": 568,
+            "start": 10,
+            "end": 12
+          }
+        },
+        {
+          "id": 12,
+          "hex": "010002222900",
+          "definition": {
+            "varp": 2,
+            "start": 34,
+            "end": 41
+          }
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "containerHex": "0000000006010002001f00",
+      "files": [
+        {
+          "id": 1,
+          "hex": "010002001f00",
+          "definition": {
+            "varp": 2,
+            "start": 0,
+            "end": 31
+          }
+        }
+      ]
+    }
+  ],
+  "lookups": [
+    {
+      "available": false,
+      "id": 0,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 1,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 1023,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 1024,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 1031,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 1036,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 2048,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": false,
+      "id": 65537,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": true,
+      "id": 0,
+      "fileReturned": true,
+      "definition": {
+        "varp": 318,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": true,
+      "id": 1,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": true,
+      "id": 1023,
+      "fileReturned": true,
+      "definition": {
+        "varp": 65535,
+        "start": 31,
+        "end": 31
+      }
+    },
+    {
+      "available": true,
+      "id": 1024,
+      "fileReturned": true,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": true,
+      "id": 1031,
+      "fileReturned": true,
+      "definition": {
+        "varp": 568,
+        "start": 10,
+        "end": 12
+      }
+    },
+    {
+      "available": true,
+      "id": 1036,
+      "fileReturned": true,
+      "definition": {
+        "varp": 2,
+        "start": 34,
+        "end": 41
+      }
+    },
+    {
+      "available": true,
+      "id": 2048,
+      "fileReturned": false,
+      "definition": {
+        "varp": 0,
+        "start": 0,
+        "end": 0
+      }
+    },
+    {
+      "available": true,
+      "id": 65537,
+      "fileReturned": true,
+      "definition": {
+        "varp": 2,
+        "start": 0,
+        "end": 31
+      }
+    }
+  ],
+  "hostCases": [
+    {
+      "id": 0,
+      "value": -1,
+      "varp": 318,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 0,
+      "value": 0,
+      "varp": 318,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 0,
+      "value": 1,
+      "varp": 318,
+      "before": 0,
+      "after": 1,
+      "active": 305419897,
+      "pending": -727
+    },
+    {
+      "id": 0,
+      "value": 7,
+      "varp": 318,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 0,
+      "value": 255,
+      "varp": 318,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 0,
+      "value": -2147483648,
+      "varp": 318,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 0,
+      "value": 2147483647,
+      "varp": 318,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": -1,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": 0,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": 1,
+      "varp": 0,
+      "before": 0,
+      "after": 1,
+      "active": 305419897,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": 7,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": 255,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": -2147483648,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1,
+      "value": 2147483647,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": -1,
+      "varp": 65535,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": 0,
+      "varp": 65535,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": 1,
+      "varp": 65535,
+      "before": 0,
+      "after": 1,
+      "active": -1842063752,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": 7,
+      "varp": 65535,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": 255,
+      "varp": 65535,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": -2147483648,
+      "varp": 65535,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1023,
+      "value": 2147483647,
+      "varp": 65535,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": -1,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": 0,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": 1,
+      "varp": 0,
+      "before": 0,
+      "after": 1,
+      "active": 305419897,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": 7,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": 255,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": -2147483648,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1024,
+      "value": 2147483647,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": -1,
+      "varp": 568,
+      "before": 5,
+      "after": 0,
+      "active": 305414776,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": 0,
+      "varp": 568,
+      "before": 5,
+      "after": 0,
+      "active": 305414776,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": 1,
+      "varp": 568,
+      "before": 5,
+      "after": 1,
+      "active": 305415800,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": 7,
+      "varp": 568,
+      "before": 5,
+      "after": 7,
+      "active": 305421944,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": 255,
+      "varp": 568,
+      "before": 5,
+      "after": 0,
+      "active": 305414776,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": -2147483648,
+      "varp": 568,
+      "before": 5,
+      "after": 0,
+      "active": 305414776,
+      "pending": -727
+    },
+    {
+      "id": 1031,
+      "value": 2147483647,
+      "varp": 568,
+      "before": 5,
+      "after": 0,
+      "active": 305414776,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": -1,
+      "varp": 2,
+      "before": 158,
+      "after": 0,
+      "active": 305419264,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": 0,
+      "varp": 2,
+      "before": 158,
+      "after": 0,
+      "active": 305419264,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": 1,
+      "varp": 2,
+      "before": 158,
+      "after": 1,
+      "active": 305419268,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": 7,
+      "varp": 2,
+      "before": 158,
+      "after": 7,
+      "active": 305419292,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": 255,
+      "varp": 2,
+      "before": 158,
+      "after": 255,
+      "active": 305420284,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": -2147483648,
+      "varp": 2,
+      "before": 158,
+      "after": 0,
+      "active": 305419264,
+      "pending": -727
+    },
+    {
+      "id": 1036,
+      "value": 2147483647,
+      "varp": 2,
+      "before": 158,
+      "after": 0,
+      "active": 305419264,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": -1,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": 0,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": 1,
+      "varp": 0,
+      "before": 0,
+      "after": 1,
+      "active": 305419897,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": 7,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": 255,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": -2147483648,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 2048,
+      "value": 2147483647,
+      "varp": 0,
+      "before": 0,
+      "after": 0,
+      "active": 305419896,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": -1,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": 0,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": 1,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": 7,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": 255,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": -2147483648,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    },
+    {
+      "id": 65537,
+      "value": 2147483647,
+      "varp": 2,
+      "before": 305419896,
+      "after": 0,
+      "active": 0,
+      "pending": -727
+    }
+  ]
+}

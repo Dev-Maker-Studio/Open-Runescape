@@ -79,6 +79,21 @@ var<private> vEdge_1: f32;
 var<private> fragColor: vec4<f32>;
 var<private> gl_FragCoord_1: vec4<f32>;
 
+fn planarUv(p: vec2<f32>, n: vec2<f32>) -> vec2<f32> {
+    var p_1: vec2<f32>;
+    var n_1: vec2<f32>;
+
+    p_1 = p;
+    n_1 = n;
+    let _e84 = p_1;
+    let _e86 = global.uFramebufferSize;
+    let _e88 = p_1;
+    let _e92 = global.uFramebufferSize;
+    let _e94 = n_1;
+    let _e95 = global.uPlanarDistort;
+    return ((vec2<f32>(_e84.x, (_e86.y - _e88.y)) / _e92) + ((_e94 * _e95) * vec2<f32>(1f, -1f)));
+}
+
 fn unproject(fragXY: vec2<f32>, depth: f32) -> vec3<f32> {
     var fragXY_1: vec2<f32>;
     var depth_1: f32;
@@ -121,13 +136,13 @@ fn project(world_1: vec3<f32>, screen: ptr<function, vec3<f32>>) -> bool {
     let _e120 = global.uViewport;
     let _e122 = ((((_e110.xy * 0.5f) + vec2(0.5f)) * _e117.zw) + _e120.xy);
     let _e123 = ndc_1;
-    (*screen) = vec3<f32>(_e122.x, _e122.y, ((_e123.z * 0.5f) + 0.5f));
-    let _e132 = (*screen);
-    let _e134 = global.uViewport;
-    let _e138 = (*screen);
-    let _e140 = global.uViewport;
-    let _e142 = global.uViewport;
-    return (all((_e132.xy >= _e134.xy)) && all((_e138.xy <= (_e140.xy + _e142.zw))));
+    (*screen) = vec3<f32>(_e122.x, _e122.y, _e123.z);
+    let _e128 = (*screen);
+    let _e130 = global.uViewport;
+    let _e134 = (*screen);
+    let _e136 = global.uViewport;
+    let _e138 = global.uViewport;
+    return (all((_e128.xy >= _e130.xy)) && all((_e134.xy <= (_e136.xy + _e138.zw))));
 }
 
 fn sceneDepth(fragXY_2: vec2<f32>) -> f32 {
@@ -188,23 +203,23 @@ fn octave(xz: vec2<f32>, scale: f32, time: f32, shift: vec2<f32>) -> f32 {
 fn waveHeight(xz_2: vec2<f32>, detail: f32) -> f32 {
     var xz_3: vec2<f32>;
     var detail_1: f32;
-    var p: vec2<f32>;
+    var p_2: vec2<f32>;
 
     xz_3 = xz_2;
     detail_1 = detail;
     let _e90 = xz_3;
     let _e91 = global.uFlow;
-    p = (_e90 + _e91);
-    let _e94 = p;
+    p_2 = (_e90 + _e91);
+    let _e94 = p_2;
     let _e95 = global.uWaveScale;
     let _e96 = global.uTime;
     let _e99 = octave(_e94, _e95, _e96, vec2(0f));
-    let _e101 = p;
+    let _e101 = p_2;
     let _e102 = global.uWaveScale;
     let _e105 = global.uTime;
     let _e114 = octave(_e101, (_e102 * 0.4f), fract(((_e105 * 2f) + 0.5f)), vec2<f32>(0.31f, 0.67f));
     let _e117 = detail_1;
-    let _e120 = p;
+    let _e120 = p_2;
     let _e121 = global.uWaveScale;
     let _e124 = global.uTime;
     let _e133 = octave(_e120, (_e121 * 0.1f), fract(((_e124 * 3f) + 0.25f)), vec2<f32>(0.73f, 0.19f));
@@ -437,7 +452,7 @@ fn main_1() {
     var eye: vec3<f32>;
     var ray_2: vec3<f32>;
     var viewDistance: f32;
-    var n: vec3<f32>;
+    var n_2: vec3<f32>;
     var toEye: vec3<f32>;
     var local: f32;
     var shadow: f32;
@@ -468,7 +483,7 @@ fn main_1() {
     var shafts: f32 = 0f;
     var reach: f32;
     var i_1: i32 = 1i;
-    var p_1: vec3<f32>;
+    var p_3: vec3<f32>;
     var below_1: f32;
     var lightSpecular: vec3<f32> = vec3(0f);
     var i_2: i32 = 0i;
@@ -514,7 +529,7 @@ fn main_1() {
     let _e107 = vWorld_1;
     let _e109 = viewDistance;
     let _e110 = waterNormal(_e107.xz, _e109);
-    n = _e110;
+    n_2 = _e110;
     let _e112 = ray_2;
     toEye = -(_e112);
     let _e115 = global.uShadowEnabled_u;
@@ -552,7 +567,7 @@ fn main_1() {
     let _e177 = gl_FragCoord_1;
     let _e179 = global.uFramebufferSize;
     let _e181 = gl_FragCoord_1;
-    let _e185 = n;
+    let _e185 = n_2;
     let _e187 = global.uRefraction;
     let _e189 = thickness;
     refracted = (vec2<f32>(_e177.x, (_e179.y - _e181.y)) + ((_e185.xz * _e187) * clamp((_e189 / 256f), 0f, 1f)));
@@ -636,7 +651,7 @@ fn main_1() {
     let _e341 = scatterColour;
     let _e344 = deep;
     scatterColour = (_e341 * mix(1f, 0.42f, _e344));
-    let _e349 = n;
+    let _e349 = n_2;
     let _e350 = global.uSunDirection;
     waveLight = (0.7f + (0.6f * max(dot(_e349, _e350), 0f)));
     let _e357 = global.uHasWaveNoise_u;
@@ -670,12 +685,12 @@ fn main_1() {
             let _e408 = ray_2;
             let _e409 = reach;
             let _e411 = i_1;
-            p_1 = (_e407 + ((_e408 * _e409) * (f32(_e411) / 4f)));
-            let _e418 = p_1;
+            p_3 = (_e407 + ((_e408 * _e409) * (f32(_e411) / 4f)));
+            let _e418 = p_3;
             let _e420 = vWorld_1;
             below_1 = max((_e418.y - _e420.y), 0f);
             let _e426 = shafts;
-            let _e427 = p_1;
+            let _e427 = p_3;
             let _e429 = global.uSunDirection;
             let _e431 = below_1;
             let _e434 = caustic((_e427.xz + (_e429.xz * _e431)));
@@ -724,7 +739,7 @@ fn main_1() {
             let _e503 = i_2;
             let _e505 = global.uPointLightColor[_e503];
             let _e506 = attenuation;
-            let _e508 = n;
+            let _e508 = n_2;
             let _e509 = h_1;
             lightSpecular = (_e502 + ((_e505 * _e506) * pow(max(dot(_e508, _e509), 0f), 96f)));
         }
@@ -739,7 +754,7 @@ fn main_1() {
     let _e523 = transmittance;
     body = ((_e517 * _e518) + (_e520 * (vec3(1f) - _e523)));
     let _e528 = ray_2;
-    let _e529 = n;
+    let _e529 = n_2;
     reflected = reflect(_e528, _e529);
     let _e532 = global.uHasEnvMap_u;
     if (_e532 != 0u) {
@@ -761,136 +776,131 @@ fn main_1() {
             let _e554 = gl_FragCoord_1;
             let _e556 = global.uFramebufferSize;
             let _e558 = gl_FragCoord_1;
-            let _e563 = global.uFramebufferSize;
-            let _e565 = gl_FragCoord_1;
-            let _e567 = global.uFramebufferSize;
-            let _e569 = gl_FragCoord_1;
-            let _e576 = global.uFramebufferSize;
-            let _e578 = n;
-            let _e580 = global.uPlanarDistort;
-            let _e583 = textureSample(uReflection, uReflection_s, ((vec2<f32>(vec2<f32>(_e554.x, (_e556.y - _e558.y)).x, (_e563.y - vec2<f32>(_e565.x, (_e567.y - _e569.y)).y)) / _e576) + (_e578.xz * _e580)));
-            planar = _e583;
-            let _e585 = sky;
-            let _e586 = planar;
-            let _e590 = planar;
-            let _e597 = shore;
-            reflection = mix(_e585, (_e586.xyz * 0.85f), vec3((clamp((_e590.w * 4f), 0f, 1f) * _e597)));
+            let _e562 = n_2;
+            let _e564 = planarUv(vec2<f32>(_e554.x, (_e556.y - _e558.y)), _e562.xz);
+            let _e565 = textureSample(uReflection, uReflection_s, _e564);
+            planar = _e565;
+            let _e567 = sky;
+            let _e568 = planar;
+            let _e572 = planar;
+            let _e579 = shore;
+            reflection = mix(_e567, (_e568.xyz * 0.85f), vec3((clamp((_e572.w * 4f), 0f, 1f) * _e579)));
         }
     } else {
         {
-            let _e603 = global.uReflectionSteps;
-            if (_e603 > 0i) {
-                let _e606 = vWorld_1;
-                let _e607 = reflected;
-                let _e610 = traceReflection(_e606, _e607, (&traced));
-                local_3 = _e610;
+            let _e585 = global.uReflectionSteps;
+            if (_e585 > 0i) {
+                let _e588 = vWorld_1;
+                let _e589 = reflected;
+                let _e592 = traceReflection(_e588, _e589, (&traced));
+                local_3 = _e592;
             } else {
                 local_3 = vec3(0f);
             }
-            let _e614 = local_3;
-            scene = _e614;
-            let _e616 = sky;
-            let _e617 = scene;
-            let _e620 = traced;
-            let _e623 = shore;
-            reflection = mix(_e616, (_e617 * 0.75f), vec3(((_e620 * 0.7f) * _e623)));
+            let _e596 = local_3;
+            scene = _e596;
+            let _e598 = sky;
+            let _e599 = scene;
+            let _e602 = traced;
+            let _e605 = shore;
+            reflection = mix(_e598, (_e599 * 0.75f), vec3(((_e602 * 0.7f) * _e605)));
         }
     }
-    let _e629 = toEye;
-    let _e630 = n;
-    let _e641 = shore;
-    fresnel = (mix(REFLECTIVITY, 1f, pow((1f - clamp(dot(_e629, _e630), 0f, 1f)), 5f)) * mix(0.35f, 1f, _e641));
-    let _e645 = global.uSunDirection;
-    let _e646 = toEye;
-    halfway = normalize((_e645 + _e646));
-    let _e650 = n;
-    let _e651 = halfway;
-    highlight = max(dot(_e650, _e651), 0f);
-    let _e659 = toEye;
-    let _e660 = halfway;
-    glancing = (0.02f + (0.98f * pow((1f - clamp(dot(_e659, _e660), 0f, 1f)), 5f)));
-    let _e671 = global.uSunColor;
-    let _e672 = sunLit;
-    let _e674 = glancing;
-    let _e676 = highlight;
-    let _e681 = highlight;
-    specular = (((_e671 * _e672) * _e674) * ((pow(_e676, 512f) * 1.5f) + (pow(_e681, 4096f) * 4f)));
-    let _e689 = body;
-    let _e690 = reflection;
-    let _e691 = fresnel;
-    let _e694 = specular;
-    let _e696 = lightSpecular;
-    colour = ((mix(_e689, _e690, vec3(_e691)) + _e694) + _e696);
-    let _e699 = global.uHasWaveNoise_u;
-    let _e702 = global.uHasFoamNoise_u;
-    if ((_e699 != 0u) && (_e702 != 0u)) {
+    let _e611 = toEye;
+    let _e612 = n_2;
+    let _e623 = shore;
+    fresnel = (mix(REFLECTIVITY, 1f, pow((1f - clamp(dot(_e611, _e612), 0f, 1f)), 5f)) * mix(0.35f, 1f, _e623));
+    let _e627 = global.uSunDirection;
+    let _e628 = toEye;
+    halfway = normalize((_e627 + _e628));
+    let _e632 = n_2;
+    let _e633 = halfway;
+    highlight = max(dot(_e632, _e633), 0f);
+    let _e641 = toEye;
+    let _e642 = halfway;
+    glancing = (0.02f + (0.98f * pow((1f - clamp(dot(_e641, _e642), 0f, 1f)), 5f)));
+    let _e653 = global.uSunColor;
+    let _e654 = sunLit;
+    let _e656 = glancing;
+    let _e658 = highlight;
+    let _e663 = highlight;
+    specular = (((_e653 * _e654) * _e656) * ((pow(_e658, 512f) * 1.5f) + (pow(_e663, 4096f) * 4f)));
+    let _e671 = body;
+    let _e672 = reflection;
+    let _e673 = fresnel;
+    let _e676 = specular;
+    let _e678 = lightSpecular;
+    colour = ((mix(_e671, _e672, vec3(_e673)) + _e676) + _e678);
+    let _e681 = global.uHasWaveNoise_u;
+    let _e684 = global.uHasFoamNoise_u;
+    if ((_e681 != 0u) && (_e684 != 0u)) {
         {
-            let _e708 = vWorld_1;
-            let _e711 = waveHeight(_e708.xz, 1f);
-            crest = smoothstep(1.25f, 1.55f, _e711);
-            let _e714 = vWorld_1;
-            let _e716 = global.uWaveScale;
-            let _e720 = (_e714.xz / vec2((_e716 * 0.125f)));
-            let _e721 = global.uTime;
-            let _e725 = textureSample(uFoamNoise, uFoamNoise_s, vec3<f32>(_e720.x, _e720.y, _e721));
-            spray = _e725.x;
-            let _e728 = crest;
-            let _e731 = spray;
-            let _e734 = deep;
-            let _e739 = viewDistance;
-            whitecap = (((_e728 * smoothstep(0.4f, 0.8f, _e731)) * _e734) * (1f - smoothstep(4000f, 12000f, _e739)));
-            let _e744 = colour;
-            let _e747 = ambientLight;
-            let _e748 = sunLight;
-            let _e753 = whitecap;
-            colour = mix(_e744, (vec3(0.9f) * (_e747 + (_e748 * 0.6f))), vec3((_e753 * 0.35f)));
+            let _e690 = vWorld_1;
+            let _e693 = waveHeight(_e690.xz, 1f);
+            crest = smoothstep(1.25f, 1.55f, _e693);
+            let _e696 = vWorld_1;
+            let _e698 = global.uWaveScale;
+            let _e702 = (_e696.xz / vec2((_e698 * 0.125f)));
+            let _e703 = global.uTime;
+            let _e707 = textureSample(uFoamNoise, uFoamNoise_s, vec3<f32>(_e702.x, _e702.y, _e703));
+            spray = _e707.x;
+            let _e710 = crest;
+            let _e713 = spray;
+            let _e716 = deep;
+            let _e721 = viewDistance;
+            whitecap = (((_e710 * smoothstep(0.4f, 0.8f, _e713)) * _e716) * (1f - smoothstep(4000f, 12000f, _e721)));
+            let _e726 = colour;
+            let _e729 = ambientLight;
+            let _e730 = sunLight;
+            let _e735 = whitecap;
+            colour = mix(_e726, (vec3(0.9f) * (_e729 + (_e730 * 0.6f))), vec3((_e735 * 0.35f)));
         }
     }
-    let _e758 = global.uHasFoamNoise_u;
-    if (_e758 != 0u) {
+    let _e740 = global.uHasFoamNoise_u;
+    if (_e740 != 0u) {
         {
-            let _e764 = thickness;
-            band = (1f - smoothstep(4f, 72f, _e764));
-            let _e768 = vWorld_1;
-            let _e770 = global.uFlow;
-            let _e772 = global.uWaveScale;
-            let _e776 = ((_e768.xz + _e770) / vec2((_e772 * 0.25f)));
-            let _e777 = global.uTime;
-            let _e781 = textureSample(uFoamNoise, uFoamNoise_s, vec3<f32>(_e776.x, _e776.y, _e777));
-            breakup = _e781.x;
-            let _e786 = thickness;
-            let _e789 = global.uTime;
-            let _e795 = breakup;
-            lines = (0.5f + (0.5f * sin((((_e786 * 0.12f) + ((_e789 * 6.2831855f) * 2f)) + (_e795 * 6f)))));
-            let _e803 = band;
-            let _e806 = lines;
-            let _e811 = breakup;
-            foam = ((_e803 * smoothstep(0.7f, 0.95f, _e806)) * smoothstep(0.35f, 0.75f, _e811));
-            let _e815 = colour;
-            let _e818 = ambientLight;
-            let _e819 = sunLight;
-            let _e824 = foam;
-            colour = mix(_e815, (vec3(0.85f) * (_e818 + (_e819 * 0.5f))), vec3((_e824 * 0.25f)));
+            let _e746 = thickness;
+            band = (1f - smoothstep(4f, 72f, _e746));
+            let _e750 = vWorld_1;
+            let _e752 = global.uFlow;
+            let _e754 = global.uWaveScale;
+            let _e758 = ((_e750.xz + _e752) / vec2((_e754 * 0.25f)));
+            let _e759 = global.uTime;
+            let _e763 = textureSample(uFoamNoise, uFoamNoise_s, vec3<f32>(_e758.x, _e758.y, _e759));
+            breakup = _e763.x;
+            let _e768 = thickness;
+            let _e771 = global.uTime;
+            let _e777 = breakup;
+            lines = (0.5f + (0.5f * sin((((_e768 * 0.12f) + ((_e771 * 6.2831855f) * 2f)) + (_e777 * 6f)))));
+            let _e785 = band;
+            let _e788 = lines;
+            let _e793 = breakup;
+            foam = ((_e785 * smoothstep(0.7f, 0.95f, _e788)) * smoothstep(0.35f, 0.75f, _e793));
+            let _e797 = colour;
+            let _e800 = ambientLight;
+            let _e801 = sunLight;
+            let _e806 = foam;
+            colour = mix(_e797, (vec3(0.85f) * (_e800 + (_e801 * 0.5f))), vec3((_e806 * 0.25f)));
         }
     }
-    let _e829 = global.uFogEnabled_u;
-    if (_e829 != 0u) {
+    let _e811 = global.uFogEnabled_u;
+    if (_e811 != 0u) {
         {
-            let _e833 = gl_FragCoord_1;
-            let _e836 = global.uFogStart;
-            let _e838 = global.uFogEnd;
-            let _e839 = global.uFogStart;
-            fog = clamp((((1f / _e833.w) - _e836) / max((_e838 - _e839), 1f)), 0f, 1f);
-            let _e848 = colour;
-            let _e849 = global.uSkyColour;
-            let _e850 = fog;
-            colour = mix(_e848, _e849, vec3(_e850));
+            let _e815 = gl_FragCoord_1;
+            let _e818 = global.uFogStart;
+            let _e820 = global.uFogEnd;
+            let _e821 = global.uFogStart;
+            fog = clamp((((1f / _e815.w) - _e818) / max((_e820 - _e821), 1f)), 0f, 1f);
+            let _e830 = colour;
+            let _e831 = global.uSkyColour;
+            let _e832 = fog;
+            colour = mix(_e830, _e831, vec3(_e832));
         }
     }
-    let _e853 = colour;
-    let _e854 = vEdge_1;
-    let _e857 = thickness;
-    fragColor = vec4<f32>(_e853.x, _e853.y, _e853.z, (_e854 * smoothstep(0f, 24f, _e857)));
+    let _e835 = colour;
+    let _e836 = vEdge_1;
+    let _e839 = thickness;
+    fragColor = vec4<f32>(_e835.x, _e835.y, _e835.z, (_e836 * smoothstep(0f, 24f, _e839)));
     return;
 }
 

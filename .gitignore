@@ -93,13 +93,16 @@ target/
 assets/cache/
 /code/harness/target/
 /code/web/target/
-assets/cache-packed/
 /code/harness/fleet.toml
 /code/renderer/target-s*/
 
-/assets/.cache-packed.stamp
 /code/client/.claude/
 /code/web/static/renderer.js
 /code/web/static/renderer_bg.wasm
+/code/web/static/protocol-runtime.js
+/code/web/static/protocol-runtime_bg.wasm
 !/code/renderer/src/bin/
 !/code/server/buildSrc/src/**/build/
+
+/code/games/target/
+/code/renderer/target-perf/

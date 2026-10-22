@@ -1,0 +1,15 @@
+[package]
+name = "openrs-interface"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "openrs_interface"
+path = "src/lib.rs"
+
+[dependencies]
+openrs-protocol = { path = "../protocol" }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "=0.3.79"

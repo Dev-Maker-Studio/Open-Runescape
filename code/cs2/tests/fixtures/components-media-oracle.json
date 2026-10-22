@@ -1,0 +1,305 @@
+{
+  "oracle": "CC_ and IF_ GETFONTMETRICS, GETFONTGRAPHIC, GETGRAPHICDIMENSIONS, GETINVOBJECT, GETINVCOUNT, CALLONRESIZE, GETCHARINDEXATPOS, GETCHARPOSATINDEX, NPC_SETCUSTOM*, SETMODELANIM, SETVIDEO_*, SETOBJECT*, SETNPCHEAD, SETNPCMODEL, SETPLAYERMODEL, SETPLAYERHEAD_SELF, SETPLAYERMODEL_SELF, RESUME_PAUSEBUTTON and IF_CLOSE through the actual ops dispatchers with real Component, Interface, FontCombo, FontMetrics, NPCType, ItemType and SeqType objects and the TcpPacket queued on Client.GAME_CONNECTION_CONTEXT, run headless from an isolated COPY of the pinned shaded client JAR. No operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentSetterOps.kt": "5f8f51aedc6abdd301c9c349db2d770094573cf80e6e812c0dadba06094184f6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceSetterOps.kt": "d456591367701349e609e5c508b9e5a66ca1dfc6ac32590e053510e2099a2b87",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentQueryOps.kt": "11a490fba441cae41d34532ac10f0aee1e47d475f68fb70249a5fbad5ed3e194",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentLifecycleOps.kt": "d2c9cc40d736eb12ef57dae5e9db05f95c96e1080b4eb7f1991802cd5510f8cd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/DialogOps.kt": "c1a12fa2ac3a53bdb2f203d843f878119d6d751b4a76ae457d819f9eef8bf379",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/SubInterface.kt": "1ba673fd7559461ec83e03d7da9bea7dd1c60f0669fafaab438c67436e900dd5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/IFEvents.kt": "f4e58da8dfb2e35a8a5380bd592a29726b5e1a98982ab1beebfa9eb1bd44d9db",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/PacketEncoder.kt": "d238445b2f67deaf4feda0a0ec92666194968f3c6e847be7bdb0a3f02f16859a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/TcpPacket.kt": "332dd6a67d1e89127dcec0ba101b3f496e75aa30de281a59617f893db1e0da82",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/BufferedConnectionContext.kt": "275fe0e0c6fbd61d3b30e957e7053cfe34172333410f3738b49c1efab21c4fb2",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/ifcomponent/InterfaceComponentRenderer.kt": "27853209907f9bd29dfb7523c6b368958e66b3b30eccec4b38ced742ee4774de",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/entity/pathingentity/PathingEntity.kt": "1d67d997cb78b269c8641cfeecfb976eb82fb7f56e4dccbcd275618ca528b360",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/IterableNodeMap.kt": "e5c334f2569dc991df140e3490b6f8b4111a4d6dfc93b77a1bbde1739f928b18",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/ComponentLayerFixtures.java": "2c2fb81374e676db7047834e7cebebcc380d92c9bbc4bad9de2c3f4bc1846108",
+    "code/cs2/tests/native/FontFixtures.java": "9f90e720006a6ae1254b8b45238e0d322f39ce944f5dd8b673ce6745082258a2",
+    "code/cs2/tests/native/ComponentMediaFixtures.java": "8692b747247f6afa4d03c75460a0babe7dbb1c543ec529bf73129025ddf35a86"
+  },
+  "generator_sha256": "7baa3fd796cd0f202569162230de769f210a93066745446de91d49ebb7ce8b78",
+  "fixture_sha256": {
+    "components-media.native.tsv": "b51b84f274538ca425e62dd90123b3f229f5645389cd3da1209f67f684616ce8",
+    "components-media.stats.tsv": "3f679c7dc6a27d9d754be5764d27c7503f83afa3fca0464f5a08cb81045d93bf"
+  },
+  "random_seeds": [
+    "0x7273c0de (java.util.Random)"
+  ],
+  "tsv_encoding": "components-media: W, I, C, N, K as in components-layer; S, O as in components-interact; G font hex; V name icon widths; J item model views; L npc arrays; E sequences; Y player index; H onResize; F component media overrides; B hook request count; A dialogue continue reset; T world opcode operand ints; R result int-stack console-hex events hook1 hook2; P packet name payload; Q hook requests; D state delta incl x/n keys; Z total.",
+  "media_cases": 18000,
+  "media_records": {
+    "G": 3,
+    "V": 1,
+    "J": 5,
+    "L": 5,
+    "E": 4,
+    "Y": 1,
+    "W": 4,
+    "I": 16,
+    "C": 50,
+    "N": 10,
+    "K": 7,
+    "S": 38,
+    "F": 37,
+    "H": 23,
+    "O": 56,
+    "B": 18000,
+    "T": 18000,
+    "R": 18000,
+    "P": 18000,
+    "Q": 18000,
+    "A": 9071,
+    "D": 10617,
+    "Z": 1
+  },
+  "media_per_opcode": {
+    "CC_CALLONRESIZE": {
+      "ok": 223,
+      "error": 195
+    },
+    "CC_GETCHARINDEXATPOS": {
+      "ok": 72,
+      "error": 158
+    },
+    "CC_GETCHARPOSATINDEX": {
+      "ok": 54,
+      "error": 157
+    },
+    "CC_GETFONTGRAPHIC": {
+      "ok": 205,
+      "error": 28
+    },
+    "CC_GETFONTMETRICS": {
+      "ok": 190,
+      "error": 27
+    },
+    "CC_GETGRAPHICDIMENSIONS": {
+      "ok": 0,
+      "error": 238
+    },
+    "CC_GETINVCOUNT": {
+      "ok": 170,
+      "error": 37
+    },
+    "CC_GETINVOBJECT": {
+      "ok": 200,
+      "error": 19
+    },
+    "CC_NPC_SETCUSTOMBODYMODEL": {
+      "ok": 4,
+      "error": 445
+    },
+    "CC_NPC_SETCUSTOMHEADMODEL": {
+      "ok": 4,
+      "error": 477
+    },
+    "CC_NPC_SETCUSTOMRECOL": {
+      "ok": 6,
+      "error": 454
+    },
+    "CC_NPC_SETCUSTOMRETEX": {
+      "ok": 13,
+      "error": 459
+    },
+    "CC_RESUME_PAUSEBUTTON": {
+      "ok": 260,
+      "error": 162
+    },
+    "CC_SETMODELANIM": {
+      "ok": 275,
+      "error": 181
+    },
+    "CC_SETNPCHEAD": {
+      "ok": 194,
+      "error": 34
+    },
+    "CC_SETNPCMODEL": {
+      "ok": 204,
+      "error": 18
+    },
+    "CC_SETOBJECT": {
+      "ok": 256,
+      "error": 218
+    },
+    "CC_SETOBJECT_ALWAYSNUM": {
+      "ok": 260,
+      "error": 168
+    },
+    "CC_SETOBJECT_NONUM": {
+      "ok": 219,
+      "error": 190
+    },
+    "CC_SETOBJECT_WEARCOL": {
+      "ok": 236,
+      "error": 204
+    },
+    "CC_SETOBJECT_WEARCOL_ALWAYSNUM": {
+      "ok": 243,
+      "error": 196
+    },
+    "CC_SETOBJECT_WEARCOL_NONUM": {
+      "ok": 260,
+      "error": 231
+    },
+    "CC_SETPLAYERHEAD_SELF": {
+      "ok": 222,
+      "error": 35
+    },
+    "CC_SETPLAYERMODEL": {
+      "ok": 179,
+      "error": 27
+    },
+    "CC_SETPLAYERMODEL_SELF": {
+      "ok": 205,
+      "error": 21
+    },
+    "CC_SETVIDEO_GRAPHIC": {
+      "ok": 200,
+      "error": 28
+    },
+    "CC_SETVIDEO_TEXT": {
+      "ok": 185,
+      "error": 29
+    },
+    "IF_CALLONRESIZE": {
+      "ok": 195,
+      "error": 216
+    },
+    "IF_CLOSE": {
+      "ok": 228,
+      "error": 0
+    },
+    "IF_GETCHARINDEXATPOS": {
+      "ok": 79,
+      "error": 123
+    },
+    "IF_GETCHARPOSATINDEX": {
+      "ok": 82,
+      "error": 141
+    },
+    "IF_GETFONTGRAPHIC": {
+      "ok": 195,
+      "error": 43
+    },
+    "IF_GETFONTMETRICS": {
+      "ok": 186,
+      "error": 28
+    },
+    "IF_GETGRAPHICDIMENSIONS": {
+      "ok": 0,
+      "error": 228
+    },
+    "IF_GETINVCOUNT": {
+      "ok": 193,
+      "error": 42
+    },
+    "IF_GETINVOBJECT": {
+      "ok": 166,
+      "error": 43
+    },
+    "IF_NPC_SETCUSTOMBODYMODEL": {
+      "ok": 8,
+      "error": 421
+    },
+    "IF_NPC_SETCUSTOMHEADMODEL": {
+      "ok": 1,
+      "error": 422
+    },
+    "IF_NPC_SETCUSTOMRECOL": {
+      "ok": 13,
+      "error": 451
+    },
+    "IF_NPC_SETCUSTOMRETEX": {
+      "ok": 14,
+      "error": 451
+    },
+    "IF_RESUME_PAUSEBUTTON": {
+      "ok": 352,
+      "error": 85
+    },
+    "IF_SETMODELANIM": {
+      "ok": 254,
+      "error": 197
+    },
+    "IF_SETNPCHEAD": {
+      "ok": 173,
+      "error": 33
+    },
+    "IF_SETNPCMODEL": {
+      "ok": 186,
+      "error": 38
+    },
+    "IF_SETOBJECT": {
+      "ok": 218,
+      "error": 219
+    },
+    "IF_SETOBJECT_ALWAYSNUM": {
+      "ok": 245,
+      "error": 204
+    },
+    "IF_SETOBJECT_NONUM": {
+      "ok": 227,
+      "error": 230
+    },
+    "IF_SETOBJECT_WEARCOL": {
+      "ok": 229,
+      "error": 208
+    },
+    "IF_SETOBJECT_WEARCOL_ALWAYSNUM": {
+      "ok": 229,
+      "error": 196
+    },
+    "IF_SETOBJECT_WEARCOL_NONUM": {
+      "ok": 216,
+      "error": 215
+    },
+    "IF_SETPLAYERHEAD_SELF": {
+      "ok": 181,
+      "error": 33
+    },
+    "IF_SETPLAYERMODEL": {
+      "ok": 196,
+      "error": 49
+    },
+    "IF_SETPLAYERMODEL_SELF": {
+      "ok": 168,
+      "error": 48
+    },
+    "IF_SETVIDEO_GRAPHIC": {
+      "ok": 169,
+      "error": 41
+    },
+    "IF_SETVIDEO_TEXT": {
+      "ok": 176,
+      "error": 41
+    }
+  },
+  "media_error_classes": {
+    "error:RuntimeException": 2958,
+    "error:NullPointerException": 5201,
+    "error:ArrayIndexOutOfBoundsException": 643,
+    "error:IllegalArgumentException": 80
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "oracle": "Actual EnumEmailFriendOps.dispatch from an isolated copy of the pinned shaded client JAR; list state set directly, the real Client.GAME_CONNECTION_CONTEXT (isaac null) queue read back for packet bytes, ChatBox lines for game messages.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "94f75ce504ff0ec4853f8925b198f9d86f5289fc9224211acde368e799962eb4",
+  "generator_sha256": "892245f7fd240a1c31993331bcf3de217cb223634318e91ea63faa736518b34b",
+  "fixture_sha256": {
+    "social-mutations.native.tsv": "5d7a7509c70212be3bc876c2bb26b5053dac236b56d9e49541776cce9cecdcfc",
+    "social-mutations.stats.tsv": "f165aedba44c620f982d4e281cf8f31f93706a637cdbcff040ac796c9f1caf9d"
+  },
+  "cases": 28740,
+  "opcodes": [
+    "CLAN_GETCHATDISPLAYNAME",
+    "CLAN_JOINCHAT",
+    "CLAN_KICKUSER",
+    "CLAN_LEAVECHAT",
+    "FRIEND_ADD",
+    "FRIEND_DEL",
+    "FRIEND_SETRANK",
+    "IGNORE_ADD",
+    "IGNORE_ADD_TEMP",
+    "IGNORE_DEL"
+  ],
+  "random_seed": "0x50c1a15 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_social_mutations.py --check"
+}

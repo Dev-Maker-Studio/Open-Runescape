@@ -1,0 +1,24 @@
+{
+  "oracle": "Actual DialogOps.dispatch (ccDragPickup, ifDragPickup) through InterfaceRenderer.startDragging, Client.getDragTarget, Component.getDepthChild and Interface.getSub from an isolated copy of the pinned client JAR, with real Component, Interface, IFEvents, SubInterface and IterableNodeMap objects; the Client drag statics are read back after every step",
+  "jar": "code/harness/target/loop/mesh-oracle/oracle-client.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "ComponentLayerFixtures.java": "2c2fb81374e676db7047834e7cebebcc380d92c9bbc4bad9de2c3f4bc1846108",
+    "DragFixtures.java": "a6a69a80ea80480b87feeac93589f98f7d217209678c0873c44b0d4c99887e6a"
+  },
+  "generator_sha256": "c123c4d12d3b2e84559e239a3d74c9611ce5783ba39719b71c05041de717a54a",
+  "fixture_sha256": {
+    "components-drag.native.tsv": "cdbe84db8176a7c77da75247bc48423d9febf8e3c31157c46f805c78c3985bf0",
+    "components-drag.stats.tsv": "c8d03072fe9c5a8654f8938c149707d7fdc8236399691b1c07223818b0c38002"
+  },
+  "cases": 12000,
+  "opcodes": [
+    "CC_DRAGPICKUP",
+    "IF_DRAGPICKUP"
+  ],
+  "random_seed": "0x6a6a6a5 (java.util.Random)",
+  "not_injected": "Client.frameComponent is a fixed dummy Component; MiniMenu.isOpen is set directly",
+  "reproduction": "python3 code/cs2/tests/native/generate_components_drag.py --check"
+}

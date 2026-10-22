@@ -1,0 +1,207 @@
+{
+  "oracle": "Option, key trigger, cursor and param opcodes: actual ComponentQueryOps, ComponentSetterOps, InterfaceQueryOps and InterfaceSetterOps dispatch on real Component and Interface objects with a real CS2Executor, run headless from an isolated COPY of the pre-existing pinned shaded client JAR. Pulse events are read from the real PulseEventHandler.LOW_PRIORITY queue and redraws from Client.IS_COMPONENT_ON_TOP. No component operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentLifecycleOps.kt": "d2c9cc40d736eb12ef57dae5e9db05f95c96e1080b4eb7f1991802cd5510f8cd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentQueryOps.kt": "11a490fba441cae41d34532ac10f0aee1e47d475f68fb70249a5fbad5ed3e194",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentSetterOps.kt": "5f8f51aedc6abdd301c9c349db2d770094573cf80e6e812c0dadba06094184f6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceSetterOps.kt": "d456591367701349e609e5c508b9e5a66ca1dfc6ac32590e053510e2099a2b87",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CS2SharedOps.kt": "eb06364612eefa466cfcae26f16e796d7c679cd89676fec9e9253e59d380fd6a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/param/ParamType.kt": "ba8613bb7333e3259dca4a57e75b53e105c6b69995d6a867d165c06a6a21a46f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/param/ParamTypeList.kt": "ded9b6b684b976c71ae248cb7c1cb8b415c0fc6df856d53ad46df599350a083d",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/IFEvents.kt": "f4e58da8dfb2e35a8a5380bd592a29726b5e1a98982ab1beebfa9eb1bd44d9db",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventQueue.kt": "ed712458a2ed3aa36e158998304f23ae0f40c1d9bfeed3ee4b32dbe4698fe951",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/ComponentOptionFixtures.java": "07faa992193faaff78cbe0a28e082c2778096a8180d61d25cc975b92d6eff1d5",
+    "code/cs2/tests/native/generate_components_options.py": "44f150130de47740ed8bb6fa84d4b86d5e7e6aeb114d39a8e9d10a53b97ad275"
+  },
+  "source_provenance": "Hashes identify the current relevant Kotlin sources and the shared Java helper, not a source rebuild; the pinned pre-existing JAR is the executable oracle.",
+  "generator_sha256": "44f150130de47740ed8bb6fa84d4b86d5e7e6aeb114d39a8e9d10a53b97ad275",
+  "driver_sha256": "07faa992193faaff78cbe0a28e082c2778096a8180d61d25cc975b92d6eff1d5",
+  "helper_driver_sha256": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+  "fixture_sha256": {
+    "components-options.native.tsv": "6bb9d5e7ee2d5ef700790c74f809378bb38e98a1ebeff7f21ae71f9b5a33bd84",
+    "components-options.stats.tsv": "2d208bef84c1c6bf171d2fabd2a7559392ed3b96e7e1115b06261c3f00af749d"
+  },
+  "random_seed": "0x727c5222 (java.util.Random)",
+  "tsv_encoding": "Tab separated records. W name capacity canvas-width canvas-height starts a world, I interface prevent-interaction count, C component columns (index type id-hash parent-id x y width height base-x base-y base-width base-height aspect-x/y/width/height types aspect-width aspect-height aspect-x aspect-y hidden scroll x/y/width/height sprite text-hex color transparency rendered cache-reference), N null slot, P param-id default-int type-char type-name-hex (the ParamTypeList registry), S interface index settings-hash (component target settings), H secondary interface index (hook change before the next step, -1 clears), T includes pushed strings and ints. Deltas carry the option state line: options, op base, op cursors, four cursors, key char codes, key actions, key modifiers, has-interaction, client param count, int/string params for ids 1..9, target settings. K initial hook. T world opcode operand int-stack string-stack starts a step, R result (ok or error:exception class) final int stack, final string stack, queued pulse events, secondary hooks 1 and 2 (interface:id-hash:slot or dash), D key then the changed component line (dash when the component is gone), Z total step count. Stacks are comma separated, dash is empty, strings are hex: prefixed or null.",
+  "cases": 18000,
+  "delta_records": 9567,
+  "records": {
+    "W": 2,
+    "I": 8,
+    "C": 25,
+    "N": 5,
+    "K": 0,
+    "P": 18,
+    "S": 9,
+    "H": 1440,
+    "T": 18000,
+    "R": 18000,
+    "D": 9567,
+    "Z": 1
+  },
+  "per_opcode": {
+    "CC_CLEAROPS": {
+      "ok": 487,
+      "error": 48
+    },
+    "CC_GETOP": {
+      "ok": 491,
+      "error": 66
+    },
+    "CC_GETOPBASE": {
+      "ok": 502,
+      "error": 49
+    },
+    "CC_GETTARGETMASK": {
+      "ok": 528,
+      "error": 44
+    },
+    "CC_PARAM": {
+      "ok": 335,
+      "error": 187
+    },
+    "CC_SETMOUSEOVERCURSOR": {
+      "ok": 493,
+      "error": 55
+    },
+    "CC_SETOP": {
+      "ok": 489,
+      "error": 38
+    },
+    "CC_SETOPBASE": {
+      "ok": 467,
+      "error": 49
+    },
+    "CC_SETOPCHAR": {
+      "ok": 341,
+      "error": 173
+    },
+    "CC_SETOPCURSOR": {
+      "ok": 486,
+      "error": 46
+    },
+    "CC_SETOPKEY": {
+      "ok": 351,
+      "error": 202
+    },
+    "CC_SETOPTCHAR": {
+      "ok": 502,
+      "error": 38
+    },
+    "CC_SETOPTKEY": {
+      "ok": 471,
+      "error": 47
+    },
+    "CC_SETPARAM": {
+      "ok": 418,
+      "error": 124
+    },
+    "CC_SETPARAM_INT": {
+      "ok": 398,
+      "error": 119
+    },
+    "CC_SETPARAM_STRING": {
+      "ok": 319,
+      "error": 187
+    },
+    "CC_SETTARGETCURSORS": {
+      "ok": 499,
+      "error": 48
+    },
+    "CC_SETTARGETOPCURSOR": {
+      "ok": 482,
+      "error": 49
+    },
+    "IF_CLEAROPS": {
+      "ok": 432,
+      "error": 110
+    },
+    "IF_GETOP": {
+      "ok": 384,
+      "error": 142
+    },
+    "IF_GETOPBASE": {
+      "ok": 410,
+      "error": 119
+    },
+    "IF_GETTARGETMASK": {
+      "ok": 413,
+      "error": 106
+    },
+    "IF_SETMOUSEOVERCURSOR": {
+      "ok": 412,
+      "error": 94
+    },
+    "IF_SETOP": {
+      "ok": 404,
+      "error": 107
+    },
+    "IF_SETOPBASE": {
+      "ok": 416,
+      "error": 107
+    },
+    "IF_SETOPCHAR": {
+      "ok": 300,
+      "error": 221
+    },
+    "IF_SETOPCURSOR": {
+      "ok": 429,
+      "error": 102
+    },
+    "IF_SETOPKEY": {
+      "ok": 305,
+      "error": 242
+    },
+    "IF_SETOPTCHAR": {
+      "ok": 406,
+      "error": 112
+    },
+    "IF_SETOPTKEY": {
+      "ok": 416,
+      "error": 110
+    },
+    "IF_SETPARAM_INT": {
+      "ok": 315,
+      "error": 186
+    },
+    "IF_SETPARAM_STRING": {
+      "ok": 296,
+      "error": 207
+    },
+    "IF_SETTARGETCURSORS": {
+      "ok": 442,
+      "error": 104
+    },
+    "IF_SETTARGETOPCURSOR": {
+      "ok": 412,
+      "error": 111
+    }
+  },
+  "error_classes": {
+    "error:ArrayIndexOutOfBoundsException": 817,
+    "error:NullPointerException": 2304,
+    "error:RuntimeException": 529,
+    "error:IllegalArgumentException": 99
+  }
+}

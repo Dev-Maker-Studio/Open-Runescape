@@ -1,0 +1,342 @@
+{
+  "oracle": "Script hook setter and clear opcodes (CC_/IF_ SETON* and CLEARSCRIPTHOOKS): actual ComponentSetterOps and InterfaceSetterOps dispatch on real Component and Interface objects with a real CS2Executor, run headless from an isolated COPY of the pre-existing pinned shaded client JAR. Script id, parameter-type string, trigger array and long stacks are filled by the driver; every hook field and trigger array is dumped per component. No component operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentLifecycleOps.kt": "d2c9cc40d736eb12ef57dae5e9db05f95c96e1080b4eb7f1991802cd5510f8cd",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentQueryOps.kt": "11a490fba441cae41d34532ac10f0aee1e47d475f68fb70249a5fbad5ed3e194",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/ComponentSetterOps.kt": "5f8f51aedc6abdd301c9c349db2d770094573cf80e6e812c0dadba06094184f6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceQueryOps.kt": "d4de00660cbe95fba7630195191af2f5ea098b5317e7f6df5c9a01ba3d89d5fa",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/InterfaceSetterOps.kt": "d456591367701349e609e5c508b9e5a66ca1dfc6ac32590e053510e2099a2b87",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CS2SharedOps.kt": "eb06364612eefa466cfcae26f16e796d7c679cd89676fec9e9253e59d380fd6a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/param/ParamType.kt": "ba8613bb7333e3259dca4a57e75b53e105c6b69995d6a867d165c06a6a21a46f",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/param/ParamTypeList.kt": "ded9b6b684b976c71ae248cb7c1cb8b415c0fc6df856d53ad46df599350a083d",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/IFEvents.kt": "f4e58da8dfb2e35a8a5380bd592a29726b5e1a98982ab1beebfa9eb1bd44d9db",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/periodic/PulseEventQueue.kt": "ed712458a2ed3aa36e158998304f23ae0f40c1d9bfeed3ee4b32dbe4698fe951",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/ComponentHookFixtures.java": "594fd31f47730e97b89d00a46242ef3241d15e93cc556c09180d9171d90dd97e",
+    "code/cs2/tests/native/generate_components_hooks.py": "2421588fe5ccf2d4729b3bc4a4690cd35b36d2425093f21f4041f09e852d79e2"
+  },
+  "source_provenance": "Hashes identify the current relevant Kotlin sources and the shared Java helper, not a source rebuild; the pinned pre-existing JAR is the executable oracle.",
+  "generator_sha256": "2421588fe5ccf2d4729b3bc4a4690cd35b36d2425093f21f4041f09e852d79e2",
+  "driver_sha256": "594fd31f47730e97b89d00a46242ef3241d15e93cc556c09180d9171d90dd97e",
+  "helper_driver_sha256": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+  "fixture_sha256": {
+    "components-hooks.native.tsv": "4e5300fe269663040fba51e8cd7876a655cc6fe46e43768632d3e5c5b7ccbe0c",
+    "components-hooks.stats.tsv": "ca044719547e4acc341dacce099559fd6ee5d435faca88b1f35f5a63d53bf703"
+  },
+  "random_seed": "0x727c5223 (java.util.Random)",
+  "tsv_encoding": "Tab separated records. W name capacity canvas-width canvas-height starts a world, I interface prevent-interaction count, C component columns (index type id-hash parent-id x y width height base-x base-y base-width base-height aspect-x/y/width/height types aspect-width aspect-height aspect-x aspect-y hidden scroll x/y/width/height sprite text-hex color transparency rendered cache-reference), N null slot, P param-id default-int type-char type-name-hex (the ParamTypeList registry), S interface index settings-hash (component target settings), H secondary interface index (hook change before the next step, -1 clears), T includes pushed ints, strings and longs; R adds the final long stack. Deltas carry the hook state line: has-script, 33 script fields (i int, l long, s hex string, null) and 5 trigger arrays. K initial hook. T world opcode operand int-stack string-stack starts a step, R result (ok or error:exception class) final int stack, final string stack, queued pulse events, secondary hooks 1 and 2 (interface:id-hash:slot or dash), D key then the changed component line (dash when the component is gone), Z total step count. Stacks are comma separated, dash is empty, strings are hex: prefixed or null.",
+  "cases": 18000,
+  "delta_records": 7374,
+  "records": {
+    "W": 2,
+    "I": 8,
+    "C": 25,
+    "N": 5,
+    "K": 0,
+    "P": 0,
+    "S": 0,
+    "H": 1440,
+    "T": 18000,
+    "R": 18000,
+    "D": 7374,
+    "Z": 1
+  },
+  "per_opcode": {
+    "CC_CLEARSCRIPTHOOKS": {
+      "ok": 240,
+      "error": 22
+    },
+    "CC_SETLINKACTIVECLANCHANNEL": {
+      "ok": 129,
+      "error": 150
+    },
+    "CC_SETONCAMFINISHED": {
+      "ok": 133,
+      "error": 144
+    },
+    "CC_SETONCHATTRANSMIT": {
+      "ok": 139,
+      "error": 125
+    },
+    "CC_SETONCLANCHANNELTRANSMIT": {
+      "ok": 123,
+      "error": 141
+    },
+    "CC_SETONCLANSETTINGSTRANSMIT": {
+      "ok": 125,
+      "error": 120
+    },
+    "CC_SETONCLICK": {
+      "ok": 122,
+      "error": 154
+    },
+    "CC_SETONCLICKREPEAT": {
+      "ok": 140,
+      "error": 156
+    },
+    "CC_SETONDIALOGABORT": {
+      "ok": 129,
+      "error": 128
+    },
+    "CC_SETONDRAG": {
+      "ok": 127,
+      "error": 138
+    },
+    "CC_SETONDRAGCOMPLETE": {
+      "ok": 131,
+      "error": 136
+    },
+    "CC_SETONFRIENDTRANSMIT": {
+      "ok": 125,
+      "error": 129
+    },
+    "CC_SETONHOLD": {
+      "ok": 134,
+      "error": 138
+    },
+    "CC_SETONINVTRANSMIT": {
+      "ok": 166,
+      "error": 93
+    },
+    "CC_SETONKEY": {
+      "ok": 139,
+      "error": 133
+    },
+    "CC_SETONMISCTRANSMIT": {
+      "ok": 133,
+      "error": 131
+    },
+    "CC_SETONMOUSELEAVE": {
+      "ok": 128,
+      "error": 126
+    },
+    "CC_SETONMOUSEOVER": {
+      "ok": 126,
+      "error": 136
+    },
+    "CC_SETONMOUSEREPEAT": {
+      "ok": 136,
+      "error": 128
+    },
+    "CC_SETONOP": {
+      "ok": 129,
+      "error": 126
+    },
+    "CC_SETONOPT": {
+      "ok": 112,
+      "error": 118
+    },
+    "CC_SETONRELEASE": {
+      "ok": 107,
+      "error": 150
+    },
+    "CC_SETONRESIZE": {
+      "ok": 139,
+      "error": 149
+    },
+    "CC_SETONSCROLLWHEEL": {
+      "ok": 134,
+      "error": 142
+    },
+    "CC_SETONSTATTRANSMIT": {
+      "ok": 165,
+      "error": 68
+    },
+    "CC_SETONSTOCKTRANSMIT": {
+      "ok": 111,
+      "error": 147
+    },
+    "CC_SETONSUBCHANGE": {
+      "ok": 111,
+      "error": 131
+    },
+    "CC_SETONTARGETENTER": {
+      "ok": 128,
+      "error": 134
+    },
+    "CC_SETONTARGETLEAVE": {
+      "ok": 114,
+      "error": 133
+    },
+    "CC_SETONTIMER": {
+      "ok": 126,
+      "error": 147
+    },
+    "CC_SETONVARCLANTRANSMIT": {
+      "ok": 141,
+      "error": 140
+    },
+    "CC_SETONVARCSTRTRANSMIT": {
+      "ok": 190,
+      "error": 72
+    },
+    "CC_SETONVARCTRANSMIT": {
+      "ok": 193,
+      "error": 71
+    },
+    "CC_SETONVARTRANSMIT": {
+      "ok": 193,
+      "error": 74
+    },
+    "IF_CLEARSCRIPTHOOKS": {
+      "ok": 212,
+      "error": 38
+    },
+    "IF_SETONCAMFINISHED": {
+      "ok": 131,
+      "error": 165
+    },
+    "IF_SETONCHATTRANSMIT": {
+      "ok": 101,
+      "error": 152
+    },
+    "IF_SETONCLANCHANNELTRANSMIT": {
+      "ok": 107,
+      "error": 159
+    },
+    "IF_SETONCLANSETTINGSTRANSMIT": {
+      "ok": 89,
+      "error": 156
+    },
+    "IF_SETONCLANTRANSMIT": {
+      "ok": 98,
+      "error": 143
+    },
+    "IF_SETONCLICK": {
+      "ok": 114,
+      "error": 180
+    },
+    "IF_SETONCLICKREPEAT": {
+      "ok": 130,
+      "error": 151
+    },
+    "IF_SETONDIALOGABORT": {
+      "ok": 112,
+      "error": 145
+    },
+    "IF_SETONDRAG": {
+      "ok": 99,
+      "error": 131
+    },
+    "IF_SETONDRAGCOMPLETE": {
+      "ok": 122,
+      "error": 155
+    },
+    "IF_SETONFRIENDTRANSMIT": {
+      "ok": 109,
+      "error": 156
+    },
+    "IF_SETONHOLD": {
+      "ok": 110,
+      "error": 166
+    },
+    "IF_SETONINVTRANSMIT": {
+      "ok": 160,
+      "error": 106
+    },
+    "IF_SETONKEY": {
+      "ok": 115,
+      "error": 135
+    },
+    "IF_SETONMISCTRANSMIT": {
+      "ok": 96,
+      "error": 169
+    },
+    "IF_SETONMOUSELEAVE": {
+      "ok": 102,
+      "error": 152
+    },
+    "IF_SETONMOUSEOVER": {
+      "ok": 114,
+      "error": 158
+    },
+    "IF_SETONMOUSEREPEAT": {
+      "ok": 106,
+      "error": 146
+    },
+    "IF_SETONOP": {
+      "ok": 109,
+      "error": 175
+    },
+    "IF_SETONOPT": {
+      "ok": 104,
+      "error": 156
+    },
+    "IF_SETONRELEASE": {
+      "ok": 115,
+      "error": 157
+    },
+    "IF_SETONRESIZE": {
+      "ok": 106,
+      "error": 143
+    },
+    "IF_SETONSCROLLWHEEL": {
+      "ok": 101,
+      "error": 141
+    },
+    "IF_SETONSTATTRANSMIT": {
+      "ok": 175,
+      "error": 110
+    },
+    "IF_SETONSTOCKTRANSMIT": {
+      "ok": 97,
+      "error": 176
+    },
+    "IF_SETONSUBCHANGE": {
+      "ok": 119,
+      "error": 176
+    },
+    "IF_SETONTARGETENTER": {
+      "ok": 128,
+      "error": 160
+    },
+    "IF_SETONTARGETLEAVE": {
+      "ok": 117,
+      "error": 150
+    },
+    "IF_SETONTIMER": {
+      "ok": 111,
+      "error": 156
+    },
+    "IF_SETONVARCLANTRANSMIT": {
+      "ok": 113,
+      "error": 141
+    },
+    "IF_SETONVARCSTRTRANSMIT": {
+      "ok": 175,
+      "error": 110
+    },
+    "IF_SETONVARCTRANSMIT": {
+      "ok": 183,
+      "error": 116
+    },
+    "IF_SETONVARTRANSMIT": {
+      "ok": 162,
+      "error": 80
+    }
+  },
+  "error_classes": {
+    "error:ArrayIndexOutOfBoundsException": 7628,
+    "error:NullPointerException": 1391,
+    "error:IllegalArgumentException": 121
+  }
+}

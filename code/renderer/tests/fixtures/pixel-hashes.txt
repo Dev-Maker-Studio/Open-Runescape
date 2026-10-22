@@ -1,0 +1,13 @@
+NVIDIA GeForce GTX 1660 SUPER
+scene:model cb9f736c6b18039c
+scene:ground e465ac08c675b1be
+scene:sprite c5c0c521bfaa5852
+scene:shadow 6b704b33379fffa1
+scene:particle 247351ddd5b57c91
+scene:water 43d2c8fe3d86fc4c
+scene:material d94b673319e5902e
+scene:all 974abc71c14dff34
+lumbridge.orf 3c941fe8684f1202
+scene-all.orf 9d0f962d3750ae77
+varrock.orf 1d1e5700ffca11e3
+verify.orf e01565d2bbd1ddf9

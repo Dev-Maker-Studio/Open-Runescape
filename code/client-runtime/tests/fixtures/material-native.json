@@ -1,0 +1,118 @@
+{
+  "origin": "Synthetic JS5 integrity chain carrying a material payload decoded by the unchanged native jar; not captured live cache or actual material IDs128/154",
+  "sourceJarSha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "sourceFixtureSha256": "ddad50ed7170177b46d74c123babc33bb205ed7c876c8a22c2daee2860e99a36",
+  "nativeCase": "bytes-128",
+  "additionalNativeCases": {
+    "material-param2-min.wire": "param2--2147483648",
+    "material-param2-max.wire": "param2-2147483647",
+    "material-id-addressing.wire": "id-addressing"
+  },
+  "materialPayloadHex": "0004018000018049915aa26bb37cc48dd59ee6af8080112b08d119e22af33b044c155d266e377f4890594921f9df0921f9dfb27b",
+  "materialFields": [
+    {
+      "id": 0,
+      "values": [
+        0,
+        0,
+        0,
+        -77,
+        -60,
+        -43,
+        -26,
+        -32640,
+        8,
+        25,
+        0,
+        0,
+        76,
+        0,
+        0,
+        0,
+        144,
+        1226963423,
+        178
+      ]
+    },
+    {
+      "id": 3,
+      "values": [
+        0,
+        0,
+        0,
+        124,
+        -115,
+        -98,
+        -81,
+        4395,
+        -47,
+        -30,
+        0,
+        0,
+        21,
+        0,
+        0,
+        0,
+        89,
+        153221599,
+        123
+      ]
+    }
+  ],
+  "index": 26,
+  "archive": 0,
+  "file": 0,
+  "referenceRevision": 727,
+  "archiveRevision": 44,
+  "authenticated": false,
+  "referenceCrcAndWhirlpool": true,
+  "archiveCrcAndWhirlpool": true,
+  "extraFilesPolicy": "Reject any archive except exactly one file with id0; stricter than native getFile(0,0), which could ignore other files",
+  "trailingPolicy": "Reject trailing material bytes although native decoder ignores them",
+  "fixtures": {
+    "material-native.wire": {
+      "bytes": 2354,
+      "sha256": "6a19fce7fef081d5c23c96bbeb560f66e88da5c3cfb2dd32f97caa589e7ff8c4"
+    },
+    "material-truncated.wire": {
+      "bytes": 2353,
+      "sha256": "df93e187b453c758dfccb07b2e42aac045465c962aac6a56ce8052c6bc826ade"
+    },
+    "material-corrupt.wire": {
+      "bytes": 2354,
+      "sha256": "33a1610defe6971facb92cbefa84fd1c9043a2439156ee649e0e6f43ef813473"
+    },
+    "material-missing0.wire": {
+      "bytes": 2354,
+      "sha256": "b24967d9773b070c8b804d2c2664c886f94431db7664707c5f8d5f1e5580ddbd"
+    },
+    "material-extra-files.wire": {
+      "bytes": 2367,
+      "sha256": "8ec3a9b57214ab9f6e3c4897f892efce71561550e3d7eb48b3c320c6e61b8fa0"
+    },
+    "material-metadata-truncated.wire": {
+      "bytes": 2353,
+      "sha256": "82b0c6c58883faf657301218779470330872f0a7a753fed65178b7f012bcd0b9"
+    },
+    "material-trailing.wire": {
+      "bytes": 2355,
+      "sha256": "2b5dc7854d4d132abab5c4d4ce5f94692336f0006376b8afbfd853d9b7be6b58"
+    },
+    "material-param2-min.wire": {
+      "bytes": 2328,
+      "sha256": "ece80fbc65892f55e9303180cfb3f0f03df4296a8028b5370a6a17a997028c35"
+    },
+    "material-param2-max.wire": {
+      "bytes": 2328,
+      "sha256": "bd19aa78adc4ac50b6f3784fdc23a8049c11806887da1962baaed328ef0ab950"
+    },
+    "material-id-addressing.wire": {
+      "bytes": 2505,
+      "sha256": "539d74ecea71c9d6d18257ec5e8e20e75b90509269fb1adc4986a3aca4989fd3"
+    },
+    "material-without-archive-digest.wire": {
+      "bytes": 2290,
+      "sha256": "7c130215dceadadd804812fb26a30270dd0bc6eeb5f98d3a43f29c9146b3d780"
+    }
+  }
+}

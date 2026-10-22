@@ -1,0 +1,42 @@
+{
+  "oracle": "Component.decode (real Component, Packet, ComponentType, ComponentContentType) over seeded Java-encoded component streams for every type and format version plus truncated and corrupted streams, and InterfaceRenderer.updateInterfaceDimensions (initSizes, componentPositionAdjustment, scroll clamp, container recursion) over seeded component trees, run headless from an isolated COPY of the shared client jar.",
+  "injected": "Component.clientParams is pre-initialised to an empty IterableNodeMap before decode because the Kotlin client leaves it null and decode dereferences it with !! for any component that carries client params; the byte streams are produced by a Java encoder written for the fixture.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "jar_sha256": "6b38870f916966c8ab8720f619c9506d5103e23c8cb3918fb15bdd8b7890f0b9",
+  "jar_sha256_after": "6b38870f916966c8ab8720f619c9506d5103e23c8cb3918fb15bdd8b7890f0b9",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/ComponentType.kt": "ab0767b3c386c8598c8622d1d7af92cd37bd1cfc12324eecbb67b1d4ec590286",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/ComponentContentType.kt": "6c270eac5b45b59baf54c0556a8c1412428e53fe982a23a59ec0af658caf1871",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/ifcomponent/InterfaceRenderer.kt": "4496ace0204b5d8e48179f470003abac42ad64b272248ee5b9d2c105583e3e83",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/ifcomponent/InterfaceComponentRenderer.kt": "27853209907f9bd29dfb7523c6b368958e66b3b30eccec4b38ced742ee4774de",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/buffer/Packet.kt": "496e0841cb82e2d6d8a49e6dcf72217bc0928824b37312e7786b2ac819736734",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/Utils.kt": "f426bd8e158b46718a651fa7113d2c15c168e4423649ea410871cbfa0dd518e8",
+    "code/interface/tests/native/InterfaceDecodeFixtures.java": "092c826b63a2057a03743ed1ba5a71413d91a6a2cdc4ed247814d0775e1b4ab9"
+  },
+  "generator_sha256": "d4e9e1c7436e918056e1bf75a78723d30e8e8b0e822bdba0530894433df0c6e1",
+  "fixture_sha256": {
+    "decode.native.tsv": "26916fa7203746b2bed9e2617151d8590866be68e035c7e59d43392ea67ea81c",
+    "layout.native.tsv": "f302bd1faf03a3057bc1f563e77e3469c355c69a838d21929dfb938a52531ab2"
+  },
+  "random_seed": "0x727c1f4e (java.util.Random)",
+  "counts": {
+    "decode.native.tsv": {
+      "records": 2501,
+      "final": [
+        "Z",
+        "decode",
+        "2072",
+        "428"
+      ]
+    },
+    "layout.native.tsv": {
+      "records": 8153,
+      "final": [
+        "Z",
+        "layout",
+        "500"
+      ]
+    }
+  }
+}

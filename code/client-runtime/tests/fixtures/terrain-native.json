@@ -1,0 +1,110 @@
+{
+  "provenance": {
+    "source": "Existing native jar; synthetic sparse named index5 surface archives",
+    "jar": "darkan-client-shaded-2.0.0-all.jar",
+    "jarSha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+    "helperSha256": "de40c06379afae2de7444b6e6fee9cadc4a66bf42680a14dd2ce96637243cef1",
+    "commonHelperSha256": "7e21776f6d2ea845e2a421eb06cb4bff15edfe1883629f681ef659d30b37cf80",
+    "generatorSha256": "c863cfaa73c0225d97724e2ff8183c0fab974595c9a1a73daf61d1a816697015",
+    "nativeCalls": [
+      "Js5ResourceProvider.jaghash",
+      "Js5ResourceProvider.getArchiveId",
+      "Js5MasterIndex",
+      "Js5ResourceProvider.getFile",
+      "Js5Compression.decompress",
+      "Whirlpool.calculateDigest"
+    ],
+    "isolation": "bwrap --unshare-net; read-only host root; copied pinned jar; empty temporary home; cleared environment; headless; bot disabled",
+    "scope": "Pure names, reference lookup, archive/file decode and synthetic JS5 only; no native startup, real cache, network, account or display",
+    "requestedRegions": [
+      65535,
+      12850,
+      4660,
+      0
+    ],
+    "effects": "Three opaque suffix bytes retained only as a count; effects are not decoded"
+  },
+  "cases": [
+    {
+      "regionId": 0,
+      "hash": 3296340,
+      "archiveId": 7
+    },
+    {
+      "regionId": 1,
+      "hash": 3296341,
+      "archiveId": -1
+    },
+    {
+      "regionId": 255,
+      "hash": -1127180938,
+      "archiveId": -1
+    },
+    {
+      "regionId": 256,
+      "hash": 3297301,
+      "archiveId": -1
+    },
+    {
+      "regionId": 257,
+      "hash": 3297302,
+      "archiveId": -1
+    },
+    {
+      "regionId": 4660,
+      "hash": -1127376024,
+      "archiveId": 32000
+    },
+    {
+      "regionId": 12850,
+      "hash": -1123920270,
+      "archiveId": -1
+    },
+    {
+      "regionId": 32767,
+      "hash": -1284063300,
+      "archiveId": -1
+    },
+    {
+      "regionId": 32768,
+      "hash": -1127590949,
+      "archiveId": -1
+    },
+    {
+      "regionId": 65280,
+      "hash": -1126580938,
+      "archiveId": -1
+    },
+    {
+      "regionId": 65534,
+      "hash": -312519209,
+      "archiveId": -1
+    },
+    {
+      "regionId": 65535,
+      "hash": -312519208,
+      "archiveId": 62001
+    }
+  ],
+  "regions": [
+    {
+      "regionId": 0,
+      "archiveId": 7,
+      "fileBytes": 16385,
+      "height": 1
+    },
+    {
+      "regionId": 4660,
+      "archiveId": 32000,
+      "fileBytes": 16385,
+      "height": 7
+    },
+    {
+      "regionId": 65535,
+      "archiveId": 62001,
+      "fileBytes": 16388,
+      "height": 255
+    }
+  ],
+  "wireSha256": "8836dd0ac03a142ce6368052730fc0206a9fe820abbbe2e8bb3ab3e70da8880d"
+}

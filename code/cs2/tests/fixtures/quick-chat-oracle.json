@@ -1,0 +1,33 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch with the real QuickchatCategoryTypeList and QuickchatMessageTypeList decoding synthetic definition bytes through Js5ResourceProvider objects of an isolated copy of the pinned shaded client JAR.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "465a5d5cc2730ba554f52fa90efaa0f121677f30be821959542bac561645eaca",
+  "generator_sha256": "fa38727d571a4c4b2d50bb01234b0025cef4e074f9f801bf05ccacb228a55718",
+  "fixture_sha256": {
+    "quick-chat.native.tsv": "88f6eeed901df05de4e5a281e2e256cd1f3bfc7ccbfbb43bd5c3fcce336d9e05",
+    "quick-chat.defs.tsv": "4133d73726516d82960437e563d7c618d7fe5ef787936a49053ecdad65e66243"
+  },
+  "cases": 3521,
+  "opcodes": [
+    "CHATCAT_FINDPHRASEBYSHORTCUT",
+    "CHATCAT_FINDSUBCATBYSHORTCUT",
+    "CHATCAT_GETDESC",
+    "CHATCAT_GETPHRASE",
+    "CHATCAT_GETPHRASECOUNT",
+    "CHATCAT_GETPHRASESHORTCUT",
+    "CHATCAT_GETSUBCAT",
+    "CHATCAT_GETSUBCATCOUNT",
+    "CHATCAT_GETSUBCATSHORTCUT",
+    "CHATPHRASE_FIND",
+    "CHATPHRASE_FINDNEXT",
+    "CHATPHRASE_FINDRESTART",
+    "CHATPHRASE_GETAUTORESPONSE",
+    "CHATPHRASE_GETAUTORESPONSECOUNT",
+    "CHATPHRASE_GETDYNAMICCOMMAND",
+    "CHATPHRASE_GETDYNAMICCOMMANDCOUNT",
+    "CHATPHRASE_GETDYNAMICCOMMANDPARAM_ENUM",
+    "CHATPHRASE_GETTEXT"
+  ],
+  "reproduction": "python3 code/cs2/tests/native/generate_quick_chat.py --check"
+}

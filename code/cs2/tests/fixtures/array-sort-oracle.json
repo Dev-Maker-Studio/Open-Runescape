@@ -1,0 +1,32 @@
+{
+  "oracle": "Actual DetailCapabilityOps.dispatch(ARRAY_SORT) and decoded CS2Executor.executeScript from an isolated copy of the pre-existing shaded client jar. No native source rebuild, game entry point, supplied cache, accounts, network or display.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Script.kt": "649f42be8713d1c4c743dd8e81ee9d0a7726dc2856169ef0aeb7a0bde6b04476",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/CoreVmOps.kt": "be05214d08ae26980d31470e542ece77d63fbfddbcd16a34a29617441a007b5a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/DetailCapabilityOps.kt": "583c443e446d9a3d9811d4834e36edf922eaeb8457cca72f5e796aa16f34b4a8",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/utils/ArrayUtils.kt": "5a19ce5e3b70cfcf6a6817fd72c32a0177ec46529ce1010f181e5669c5b5cedd",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ArraySortFixtures.java": "c65a95b5863e00069a174ec5a3ac87b0a9c0919d6c35932bdd3c235671035a2b",
+    "code/cs2/tests/native/generate_array_sort.py": "1ca627538f92da0b52ab5c6ae731eb44d674cddf4fbff1189c40e86fc08569a9"
+  },
+  "fixture_sha256": {
+    "array-sort.native.tsv": "b9f46f0d09e4317904860082bedee2f6a4aaf0a51d9aa77986a847bdab7935c9",
+    "vm-sort-child.bin": "85291ef3f1f8892789d064245792837b188c13fdf9db9fcd43fe3df8f24a038f",
+    "vm-sort-child.decode.tsv": "467e1104cca8bba8731a07df562bb2094ec68ebca9f4edc671482aef285f30a1",
+    "vm-sort.bin": "ea21b8843e94916ef7dae2dcfd8db3d554c78b1be0f145c6f4bcd0779ab4722d",
+    "vm-sort.decode.tsv": "2440513ec41c180bbc2d4358fc19bada89e7ec2d54c93fef0e5cf204b86c46e7",
+    "vm-sort.vm.tsv": "d6a75feb1402d15964635e53c69d6345b8f9cff3403b79820d5fd62d1e4b9a67"
+  },
+  "native_cases": 349,
+  "stress_cases": 8,
+  "stress_pairs_per_case": 5000,
+  "native_stack": "-Xss32m permits the native recursive 5000-element maximum-key case; the Rust implementation uses an explicit range stack and no recursion or arbitrary work cutoff.",
+  "fixture_encoding": "Ten tab-separated columns: case name, count, key slot, value slot, five logical lengths, five pipe-separated comma-delimited initial arrays, input int stack, native result/error class/message, final int stack, five final arrays. A dash encodes an empty array/stack. Arrays are logical prefixes of native 5000-element backing storage.",
+  "coverage": "Exact unstable paired ordering, duplicate keys and values, signed extrema, MAX pivot tie mask, all small prefixes, unequal array lengths, both slot orders, negative/zero/one counts, MIN count decrement overflow, invalid slots and validation order, same-slot rejection, nonconsuming stack underflow, 256 deterministic random cases, eight full-size stress patterns, decoded gosub with shared arrays and ignored byte operand.",
+  "reproduction": "python3 code/cs2/tests/native/generate_array_sort.py --check"
+}

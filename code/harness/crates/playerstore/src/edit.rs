@@ -91,7 +91,7 @@ pub fn clear_slot(v: &mut Value, path: &str, slot: usize) {
 
 pub fn free_slot(v: &Value, path: &str, size: usize) -> Option<usize> {
     let a = get_at(v, path).and_then(Value::as_array);
-    (0..size).find(|i| a.and_then(|a| a.get(*i)).map_or(true, Value::is_null))
+    (0..size).find(|i| a.and_then(|a| a.get(*i)).is_none_or(Value::is_null))
 }
 
 pub fn set_varp(v: &mut Value, id: i64, val: i64) {

@@ -1,1 +1,7 @@
-{"baseline": {"verdict": "PASS", "score": 87.5, "ssim": 1.0}}
+{
+  "baseline": {
+    "verdict": "PASS",
+    "score": 87.5,
+    "ssim": 1.0
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "oracle": "Real Camera.moveCamera, setAngle, lookat, smoothReset, startSmoothTransition, calculateCameraPosition, calculateCutsceneCameraPosition, updateFollowPlayerCamera, updateOrbitTargetCamera, updateSmoothTransitionCamera, processCamera and setCameraPosition, MapRegion.tileheightForAbsolutePosition, with Client.cycles, lastCameraSmoothCycle, the spline paths and indices, the shake arrays and the PingRequester/StaticMethods/Client target statics, from an isolated copy of the shaded client JAR, run in a bwrap sandbox without network. Injected or transcribed by the driver: the MapRegion, Scene and GroundSM grids from hash functions, base coordinates, the player position, spline control points from hash functions, the per-cycle phase increment and cycle counter, the Client.drawGameFrame mode dispatch (types 2, 4 and 1), the five-slot shake loop with its Math.random draws taken from a seeded java.util.Random, the pre-shake restore and the scene clamp, and the SET_CAMERA_TARGET and CAM_FOLLOWCOORD tile clamp and target writes.",
+  "jar": "darkan-client-shaded-2.0.0-all.jar",
+  "jar_is_pinned": false,
+  "jar_sha256": "6b38870f916966c8ab8720f619c9506d5103e23c8cb3918fb15bdd8b7890f0b9",
+  "driver_sha256": "f0c1725f06b62b6ff81211b270b88aff3136c6dae21e1f5ce4de33853e9db807",
+  "generator_sha256": "32e84527df63de25b9c73b0c5dad50d3cd4846315aa47e45942878e08e8f2edf",
+  "fixture_sha256": {
+    "camera-modes.native.tsv": "d411fad6f7899e2782ce44baa2c73f972ee410611ee4101eb1d8f5a0dbfb7403"
+  },
+  "cases": 3360,
+  "kinds": [
+    "modes"
+  ],
+  "random_seed": "0x5ce7a9d1 (java.util.Random)",
+  "reproduction": "python3 code/renderer/tests/native/generate_camera_modes.py --check"
+}

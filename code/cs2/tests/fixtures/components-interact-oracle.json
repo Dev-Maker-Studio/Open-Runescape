@@ -1,0 +1,128 @@
+{
+  "oracle": "IF_CREATE, IF_DELETEALL, CC_LOADENTITYMODEL, IF_DEBUG_TARGET and IF_DEBUG_BUTTON1 to 10 through the actual DetailCapabilityOps and WorldMapUserDetailOps dispatch with real Component, Interface, IFEvents, CS2Interface and PlayerEntity objects, the real Client selection statics and ICOMPONENT_SETTINGS_SLOTS, and the TcpPacket that Interface.ifOptionInteract queues on Client.GAME_CONNECTION_CONTEXT, all run headless from an isolated COPY of the pinned shaded client JAR. Hooks that run CS2 scripts (params, hookParams, onTargetEnter) and the gameState gate are not exercised. No operation is reimplemented as an oracle.",
+  "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+  "java_options": [
+    "-Xmx1g",
+    "-Djava.awt.headless=true",
+    "-XX:-OmitStackTraceInFastThrow"
+  ],
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_before": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "copied_jar_sha256_after": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "source_sha256": {
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ClientScriptOpCode.kt": "be88e9805ac994ad1c26320187331429f57cdd2361f4e57847e7dcfffccb0dc4",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Executor.kt": "82011f620eb79da74e5e331899adca7ab1c2b97ece3af3d411afed02af01afc6",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/DetailCapabilityOps.kt": "583c443e446d9a3d9811d4834e36edf922eaeb8457cca72f5e796aa16f34b4a8",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/ops/WorldMapUserDetailOps.kt": "201edf6fa737e6bd5693441b351ff874d4b1c7a2048656e42a387052b732d858",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/SubInterface.kt": "1ba673fd7559461ec83e03d7da9bea7dd1c60f0669fafaab438c67436e900dd5",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Component.kt": "b3ae0b62d53238672b7b3dac26a1f6af70745980b0e492f18cd6db8b82da6271",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/Interface.kt": "444559cc9f3e781465570a15dc5cafe8db79ab9aa9c0601c4be945fb5e5c4381",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/IFEvents.kt": "f4e58da8dfb2e35a8a5380bd592a29726b5e1a98982ab1beebfa9eb1bd44d9db",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interface.kt": "6d59802a8f02238fc8251bbe7fbad21e7502181ea76799be61eeff02ff218d24",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/PacketEncoder.kt": "d238445b2f67deaf4feda0a0ec92666194968f3c6e847be7bdb0a3f02f16859a",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/packet/TcpPacket.kt": "332dd6a67d1e89127dcec0ba101b3f496e75aa30de281a59617f893db1e0da82",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/network/BufferedConnectionContext.kt": "275fe0e0c6fbd61d3b30e957e7053cfe34172333410f3738b49c1efab21c4fb2",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/graphics/ifcomponent/InterfaceComponentRenderer.kt": "27853209907f9bd29dfb7523c6b368958e66b3b30eccec4b38ced742ee4774de",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/entity/pathingentity/PathingEntity.kt": "1d67d997cb78b269c8641cfeecfb976eb82fb7f56e4dccbcd275618ca528b360",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/cache/node/IterableNodeMap.kt": "e5c334f2569dc991df140e3490b6f8b4111a4d6dfc93b77a1bbde1739f928b18",
+    "code/client/src/main/kotlin/com/jagex/game/runetek5/client/Client.kt": "ed44273534560a1ffb89505483dbc894d0242eb2bb87e49e876f7e8f245b4ce5",
+    "code/cs2/tests/native/NativeFixtures.java": "f163200ff06bfe6b11c408344990f4e1a66bc5cddf361ff153f53aff4ef98da8",
+    "code/cs2/tests/native/ComponentExtraFixtures.java": "97e94affb13bab82e1fcd5796da70d91bec1399589c8e0cf5a78090d37990729",
+    "code/cs2/tests/native/ComponentLayerFixtures.java": "2c2fb81374e676db7047834e7cebebcc380d92c9bbc4bad9de2c3f4bc1846108",
+    "code/cs2/tests/native/ComponentInteractFixtures.java": "135703b29e52ac2cc07e63ae33cb1c34061f19d7c23b994619f1b98ad830bfe9"
+  },
+  "generator_sha256": "f35f7c8d11d8c48f2e28fa318a05a4e49c8733b3871e740a22041d5775b6deb0",
+  "fixture_sha256": {
+    "components-interact.native.tsv": "a9297afbf1dbef540c209119213a44aa845d06a60d6915e8423680f99c93b585",
+    "components-interact.stats.tsv": "38b17de43675618ae83e8e2800ea59eca19157b75ab6e4cedef09fc0c0e644d6"
+  },
+  "random_seeds": [
+    "0x7273c0de (java.util.Random)"
+  ],
+  "tsv_encoding": "components-interact: W, I, C, N, K as in components-layer; S interface index targetHash targetInterface item overCursor leaveCursor; O hash slot settingsHash interfaceId slot-keyed settings; M selection statics active hash slot flags interface item useCursor defaultCursor; T world opcode operand ints entity (interface id, u unbound, - absent); R result int-stack - - hook1 hook2; P option hash item16 slot16 of the queued IF_OP packet or -; X selection after the step; D state delta; Z total.",
+  "interact_cases": 18000,
+  "interact_records": {
+    "W": 4,
+    "I": 16,
+    "C": 50,
+    "N": 10,
+    "K": 7,
+    "S": 38,
+    "O": 56,
+    "M": 1491,
+    "T": 18000,
+    "R": 18000,
+    "P": 18000,
+    "X": 18000,
+    "D": 1554,
+    "Z": 1
+  },
+  "interact_per_opcode": {
+    "CC_LOADENTITYMODEL": {
+      "ok": 332,
+      "error": 680
+    },
+    "IF_CREATE": {
+      "ok": 312,
+      "error": 2609
+    },
+    "IF_DEBUG_BUTTON1": {
+      "ok": 766,
+      "error": 207
+    },
+    "IF_DEBUG_BUTTON10": {
+      "ok": 752,
+      "error": 250
+    },
+    "IF_DEBUG_BUTTON2": {
+      "ok": 798,
+      "error": 235
+    },
+    "IF_DEBUG_BUTTON3": {
+      "ok": 761,
+      "error": 233
+    },
+    "IF_DEBUG_BUTTON4": {
+      "ok": 759,
+      "error": 203
+    },
+    "IF_DEBUG_BUTTON5": {
+      "ok": 778,
+      "error": 239
+    },
+    "IF_DEBUG_BUTTON6": {
+      "ok": 809,
+      "error": 231
+    },
+    "IF_DEBUG_BUTTON7": {
+      "ok": 777,
+      "error": 234
+    },
+    "IF_DEBUG_BUTTON8": {
+      "ok": 744,
+      "error": 201
+    },
+    "IF_DEBUG_BUTTON9": {
+      "ok": 772,
+      "error": 242
+    },
+    "IF_DEBUG_TARGET": {
+      "ok": 801,
+      "error": 2165
+    },
+    "IF_DELETEALL": {
+      "ok": 221,
+      "error": 889
+    }
+  },
+  "interact_error_classes": {
+    "error:ArrayIndexOutOfBoundsException": 2624,
+    "error:IllegalArgumentException": 1144,
+    "error:NullPointerException": 4014,
+    "error:RuntimeException": 811,
+    "error:NegativeArraySizeException": 25
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "oracle": "Actual DetailCapabilityOps.dispatch from an isolated copy of the pinned shaded client JAR; PlayerEntity, NpcEntity, GroundItem, NPCType and BasType state set directly with Unsafe.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "e2c9299fc03f6f5e01937fd7e4a8f6f5fede0f20957432c809a367cdf20ca5d0",
+  "generator_sha256": "393b3d8333bc8b3e847aefa31be5b9b445c3c83bc5165150f77de91cd133c7eb",
+  "fixture_sha256": {
+    "entity-state.native.tsv": "02c140b68ca33016ba227a34abe529950321dedda69cace2b55fccb14e03e6dc"
+  },
+  "cases": 2270,
+  "opcodes": [
+    "GETENTITYOVERHEADIF",
+    "GET_DISPLAYNAME_WITHEXTRAS",
+    "GET_ENTITY_OVERLAY_HEIGHT",
+    "GET_ENTITY_SAY",
+    "GET_NPC_NAME",
+    "GET_OBJ_OVERLAY_HEIGHT",
+    "IS_NPC_ACTIVE",
+    "IS_NPC_VISIBLE",
+    "IS_TARGETED_ENTITY",
+    "SETENTITYOVERHEADIF"
+  ],
+  "random_seed": "0x727c5228 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_entity_state.py --check"
+}

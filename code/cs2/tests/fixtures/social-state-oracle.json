@@ -1,0 +1,42 @@
+{
+  "oracle": "Actual EnumEmailFriendOps.dispatch from an isolated copy of the pinned shaded client JAR; FriendList, IgnoreList, FriendsChat, Client.COUNTRY and PlayerUpdate.MY_PLAYER state set directly.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "3699b566b0fb022bb8c2d5e9c7848be6b52f00499ae219d2e7a31c818e38a5db",
+  "generator_sha256": "30d188fd13fbb6c53d117016c3b93d9cb86a9400e083f579bff6c08eb5d8df5a",
+  "fixture_sha256": {
+    "social-state.native.tsv": "b4e29df2a12be1619baf46e1b74ed668488220e465ef57dfe291f98add382a8d",
+    "social-state.stats.tsv": "5ea0c9bc165ae7eb8c6acfb74e8176b664513176915d299007e22661d4b1f812"
+  },
+  "cases": 12564,
+  "opcodes": [
+    "CLAN_GETCHATCOUNT",
+    "CLAN_GETCHATMINKICK",
+    "CLAN_GETCHATOWNERNAME",
+    "CLAN_GETCHATRANK",
+    "CLAN_GETCHATUSERNAME",
+    "CLAN_GETCHATUSERNAME_UNFILTERED",
+    "CLAN_GETCHATUSERRANK",
+    "CLAN_GETCHATUSERWORLD",
+    "CLAN_GETCHATUSERWORLDNAME",
+    "CLAN_ISSELF",
+    "FRIEND_COUNT",
+    "FRIEND_GETNAME",
+    "FRIEND_GETRANK",
+    "FRIEND_GETSLOTFROMNAME",
+    "FRIEND_GETWORLD",
+    "FRIEND_GETWORLDFLAGS",
+    "FRIEND_GETWORLDNAME",
+    "FRIEND_IS_REFERRER",
+    "FRIEND_PLATFORM",
+    "FRIEND_TEST",
+    "IGNORE_COUNT",
+    "IGNORE_GETNAME",
+    "IGNORE_GETNAME_UNFILTERED",
+    "IGNORE_IS_TEMP",
+    "IGNORE_TEST",
+    "PLAYERCOUNTRY"
+  ],
+  "random_seed": "0x50c1a15 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_social_state.py --check"
+}

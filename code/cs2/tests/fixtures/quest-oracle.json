@@ -1,0 +1,11 @@
+{
+  "oracle": "Actual QuestOps.dispatch over real QuestTypeList and QuestType objects decoded from synthetic quest files served by a fake Js5ResourceProvider, with injected varps, varbit definitions, skill levels and param types, from an isolated COPY of the pinned shaded client JAR.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "fixture_sha256": {
+    "quest.native.tsv": "9c515636e492b30ea5e5cd61e62d88ae54f1875463a7dd57559d0a1d6b97c375"
+  },
+  "generator_sha256": "12a624ea18258a0d9863f02e1203cc87320412d0d0c506555445792a2b8c6d6b",
+  "driver_sha256": "e897c185510f05c902da7512ed63f5df3e691506ea4b612bda39e3685885cc6c",
+  "reproduction": "python3 code/cs2/tests/native/generate_clock.py --check"
+}

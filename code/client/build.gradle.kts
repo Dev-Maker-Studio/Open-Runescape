@@ -112,6 +112,7 @@ dependencies {
 tasks.test {
     useJUnit()
     systemProperty("java.io.tmpdir", temporaryDir)
+    systemProperty("java.awt.headless", "true")
 }
 
 publishing {

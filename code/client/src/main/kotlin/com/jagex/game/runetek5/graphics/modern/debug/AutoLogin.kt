@@ -15,6 +15,8 @@ import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.staticmethods.StaticMethods
+import com.jagex.game.runetek5.network.WorldConnection
+import com.jagex.game.runetek5.network.world.WorldDescriptor
 import java.io.File
 import java.lang.management.ManagementFactory
 
@@ -25,6 +27,10 @@ object AutoLogin {
     private const val WORLD_LIST_WAIT_NS = 10_000_000_000L
 
     private var worldWaitStart = 0L
+    private var worldWaitReported = false
+
+    internal fun advertisedWorld(worlds: List<WorldDescriptor>, requested: Int?): WorldDescriptor? =
+        worlds.filter { it.playerCount >= 0 && (requested == null || it.worldNumber == requested) }.minByOrNull { it.worldNumber }
 
     private val targetWorld: Int? by lazy {
         System.getProperty("autologin.world")?.trim()?.toIntOrNull()
@@ -245,16 +251,17 @@ object AutoLogin {
                     milestone("lobby logged in")
                 }
 
-                System.err.println(
-                    "[AutoLogin] lobby ready as '${PlayerUpdate.MY_PLAYER_USERNAME}', " +
-                        "entering world ${targetWorld ?: "(client default)"}"
-                )
-                targetWorld?.let {
-                    if (!LoginManager.setGameHost(it, Loader.IP_ADDRESS ?: "localhost")) {
-                        if (worldWaitStart == 0L) worldWaitStart = now
-                        if (now - worldWaitStart < WORLD_LIST_WAIT_NS) return
-                        System.err.println("[AutoLogin] world $it is not in the world list after 10s, using the default connection")
+                val selected = advertisedWorld(WorldConnection.WORLD_DESCRIPTORS_BYID.filterNotNull(), targetWorld)
+                if (selected == null || !LoginManager.setGameHost(selected.worldNumber, selected.ipAddress ?: Loader.IP_ADDRESS ?: "localhost")) {
+                    if (worldWaitStart == 0L) worldWaitStart = now
+                    if (!worldWaitReported && now - worldWaitStart >= WORLD_LIST_WAIT_NS) {
+                        worldWaitReported = true
+                        System.err.println("[AutoLogin] waiting for an advertised available world${targetWorld?.let { " $it" } ?: ""}; refusing to use the JS5 endpoint as a world")
                     }
+                    return
+                }
+                if (!worldMarked) {
+                    System.err.println("[AutoLogin] lobby ready, entering advertised world ${selected.worldNumber}")
                 }
                 if (!worldMarked) {
                     worldMarked = true

@@ -1,5 +1,6 @@
 package jaggl
 
+import com.jagex.game.runetek5.graphics.modern.dump.FrameDump
 import com.jagex.game.runetek5.toolkit.context.GlxContext
 import org.lwjgl.opengl.*
 import org.lwjgl.system.MemoryStack
@@ -81,7 +82,10 @@ class OpenGL {
         @JvmStatic fun glHint(target: Int, hint: Int) = if (target == 0x0C54) legacy("glHint(GL_FOG_HINT)", Unit) else GL11C.glHint(target, hint)
         @JvmStatic fun glFinish() = GL11C.glFinish()
         @JvmStatic fun glFlush() = GL11C.glFlush()
-        @JvmStatic fun glClear(mask: Int) = GL11C.glClear(mask)
+        @JvmStatic fun glClear(mask: Int) {
+            FrameDump.clear(mask)
+            GL11C.glClear(mask)
+        }
         @JvmStatic fun glClearColor(red: Float, green: Float, blue: Float, alpha: Float) = GL11C.glClearColor(red, green, blue, alpha)
         @JvmStatic fun glClearDepth(depth: Float) = GL11C.glClearDepth(depth.toDouble())
         @JvmStatic fun glDepthFunc(func: Int) = GL11C.glDepthFunc(func)
@@ -109,8 +113,14 @@ class OpenGL {
         @JvmStatic fun glLineWidth(width: Float) = GL11C.glLineWidth(width)
         @JvmStatic fun glPointSize(size: Float) = GL11C.glPointSize(size)
         @JvmStatic fun glPolygonMode(face: Int, mode: Int) = if (face == GL11C.GL_FRONT_AND_BACK) GL11C.glPolygonMode(face, mode) else legacy("glPolygonMode(face 0x${face.toString(16)})", Unit)
-        @JvmStatic fun glDrawArrays(mode: Int, first: Int, count: Int) = GL11C.glDrawArrays(mode, first, count)
-        @JvmStatic fun glDrawElements(mode: Int, count: Int, type: Int, indices: Long) = GL11C.glDrawElements(mode, count, type, indices)
+        @JvmStatic fun glDrawArrays(mode: Int, first: Int, count: Int) {
+            FrameDump.nativeDraw()
+            GL11C.glDrawArrays(mode, first, count)
+        }
+        @JvmStatic fun glDrawElements(mode: Int, count: Int, type: Int, indices: Long) {
+            FrameDump.nativeDraw()
+            GL11C.glDrawElements(mode, count, type, indices)
+        }
         @JvmStatic fun glGenTextures(n: Int, textures: IntArray, offset: Int) { for (i in 0 until n) textures[offset + i] = GL11C.glGenTextures() }
         @JvmStatic fun glDeleteTextures(n: Int, textures: IntArray, offset: Int) { for (i in 0 until n) GL11C.glDeleteTextures(textures[offset + i]) }
         @JvmStatic fun glActiveTexture(texture: Int) = GL13C.glActiveTexture(texture)
@@ -147,7 +157,7 @@ class OpenGL {
         @JvmStatic fun glFramebufferTexture3DEXT(target: Int, attachment: Int, textarget: Int, texture: Int, level: Int, zoffset: Int) = GL30C.glFramebufferTextureLayer(target, attachment, texture, level, zoffset)
         @JvmStatic fun glFramebufferRenderbufferEXT(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: Int) = GL30C.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer)
         @JvmStatic fun glCheckFramebufferStatusEXT(target: Int): Int = GL30C.glCheckFramebufferStatus(target)
-        @JvmStatic fun glBlitFramebufferEXT(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int) = GL30C.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter)
+        @JvmStatic fun glBlitFramebufferEXT(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int) = FrameDump.blit(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter)
         @JvmStatic fun glGenerateMipmapEXT(target: Int) = GL30C.glGenerateMipmap(target)
         @JvmStatic fun glGenRenderbuffersEXT(n: Int, renderbuffers: IntArray, offset: Int) { for (i in 0 until n) renderbuffers[offset + i] = GL30C.glGenRenderbuffers() }
         @JvmStatic fun glDeleteRenderbuffersEXT(n: Int, renderbuffers: IntArray, offset: Int) { for (i in 0 until n) GL30C.glDeleteRenderbuffers(renderbuffers[offset + i]) }

@@ -3,6 +3,9 @@ use serde_json::{json, Map, Value};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+mod web;
+pub use web::{EQUIV, WEB};
+
 const ACCOUNT: &str = "claudeqa";
 const LOGS: &str = "1511";
 
@@ -32,6 +35,7 @@ pub const ALL: &[Step<Live>] = &[
     ("dump-frame", dump_frame),
     ("renderer-replay", replay),
     ("twin", twin),
+    ("twin-multiframe", twin_multiframe),
     ("equiv", equiv),
     ("renderdoc-retry", renderdoc_retry),
     ("down", down),
@@ -124,7 +128,7 @@ pub fn shot(text: &str) -> Result<String, String> {
     if std::fs::metadata(p).is_ok_and(|m| m.len() > 0) { Ok(p.to_string()) } else { Err(format!("screenshot not written: {p}")) }
 }
 
-fn find<'a>(list: &'a Value, f: impl Fn(&Value) -> bool) -> Option<&'a Value> {
+fn find(list: &Value, f: impl Fn(&Value) -> bool) -> Option<&Value> {
     list.as_array()?.iter().find(|v| f(v))
 }
 
@@ -358,6 +362,19 @@ fn twin(l: &mut Live) -> Result<String, String> {
     }
     l.metrics.insert("twin".into(), json!({"ssim": ssim, "psnr": res["pixels"]["psnr_db"], "verdict": res["verdict"]}));
     Ok(format!("{out}/twin.png, ssim {ssim}, serialized frames identical"))
+}
+
+fn twin_multiframe(l: &mut Live) -> Result<String, String> {
+    let out = l.path("twin-multiframe");
+    let (code, text) = l.sh(&["twin", "lumbridge", "--frames", "3", "--out", &out], &[]);
+    if !matches!(code, Some(0 | 1)) { return Err(format!("multiframe twin errored {code:?}\n{}", tail(&text, 12))); }
+    let report: Value = std::fs::read_to_string(format!("{out}/twin.json")).ok().and_then(|t| serde_json::from_str(&t).ok()).ok_or("multiframe twin wrote no report")?;
+    if report["frames"] != 3 || report["summary"]["all_serialized_identical"] != true || report["frame_records"].as_array().map_or(0, |a| a.len()) != 3 {
+        return Err(format!("multiframe serialization check failed: {}", report["summary"]));
+    }
+    l.metrics.insert("twin_multiframe".into(), report.clone());
+    if !std::path::Path::new(&format!("{out}/twin-frames.png")).is_file() { return Err("multiframe contact sheet missing".into()); }
+    Ok(format!("three recorded frames, report and contact sheet at {out}"))
 }
 
 fn equiv(l: &mut Live) -> Result<String, String> {

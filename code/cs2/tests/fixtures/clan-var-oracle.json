@@ -1,0 +1,24 @@
+{
+  "oracle": "Actual CoreVmOps.dispatch of the eight clan variable opcodes from an isolated copy of the pinned shaded client JAR; Client.CURRENT_GAME, ClanVarTypeList.CLAN_VARS, the clan settings statics and the clan variable type lists (served by a fake Js5ResourceProvider) set directly.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "5cab95ccaed3d36e50a8200b91786b58cc8e65d980fb69ac488a6371649c94cf",
+  "generator_sha256": "8b7833df28af376ad8242a0be6239a421c974cd1f9da4299893b3b8551f809f7",
+  "fixture_sha256": {
+    "clan-var.native.tsv": "e08a9a45406ccc08268ff1e927aa2a03cce3a338dfd02e1cc8929e3fdd002c57",
+    "clan-var.stats.tsv": "a6d642e9991a2703fc2089eadec8189a059a77deffc97ba8cd7ebd4fd9908da1"
+  },
+  "cases": 8176,
+  "opcodes": [
+    "LOAD_CLAN_VAR_LONG",
+    "LOAD_CLAN_VAR_STRING",
+    "PUSH_VARCLAN",
+    "PUSH_VARCLANBIT",
+    "PUSH_VARCLANSETTING",
+    "PUSH_VARCLANSETTINGBIT",
+    "PUSH_VARCLANSETTING_LONG",
+    "PUSH_VARCLANSETTING_STRING"
+  ],
+  "random_seed": "0xc1a2b3 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_clan_var.py --check"
+}

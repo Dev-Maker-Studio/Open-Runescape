@@ -1,0 +1,15 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch for MINIMENU_SETMAXENTRIES (MiniMenu.maxVisibleEntries) and DEFAULTMINIMENU (resetChatMediaAndFont, FontMetrics.useBoldFont). FORMATMINIMENU, MINIMENUOPEN and the GET_*_MINIMENU_* ops depend on sprite caches, rendering and the live entry lists and are not modelled.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": {
+    "MiniMenuFixtures.java": "4e2f17ff9261aad1f24a829ccba553799ae161cd380683b63b8fe009637efe01"
+  },
+  "generator_sha256": "37338ac93d80f957a010fd77f2e7bb3cbca3908131e595ed5dc59dd2be37583f",
+  "fixture_sha256": {
+    "mini-menu.native.tsv": "bde908b6fa1cd9cd35459b4b1ed9603d5cad8076c8e2af4468c80735a173a297"
+  },
+  "cases": 240,
+  "random_seed": "0x727c5228 ^ 0x31171 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_mini_menu.py --check"
+}

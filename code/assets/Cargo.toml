@@ -1,0 +1,15 @@
+[package]
+name = "openrs-assets"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+bzip2 = "=0.6.1"
+crc32fast = "=1.5.0"
+libm = "=0.2.16"
+flate2 = { version = "=1.1.9", default-features = false, features = ["rust_backend"] }
+whirlpool = { version = "=0.11.0", default-features = false }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "=0.3.79"

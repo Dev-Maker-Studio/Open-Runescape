@@ -1,0 +1,18 @@
+{
+  "oracle": "Actual QuickChatDisplayOps.dispatch for CAM_LOOKAT and CAM_FORCEANGLE from an isolated copy of the pinned shaded client JAR; Camera, Client, PingRequester, StaticMethods, PlayerUpdate and Resource.mapRegion state (MapRegion, Scene, GroundSM, SettingsBits, SceneGraph built with allocateInstance) set directly with Unsafe. A-lines record Math.atan2 on the same JVM for the fdlibm port.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "driver_sha256": "f4799f92e3c17db95069110c7af87655a09113eb60e40cdae03459ebded0080a",
+  "generator_sha256": "a4a4df1e61ed736f3f142db4d2e9dd5777176e4c360baf768dfc58e7e65b7903",
+  "fixture_sha256": {
+    "scene.native.tsv": "b44ef574a09fe7d7ce540366cab99a109c532f95db53f73750b1af022d9c78bf",
+    "scene.stats.tsv": "24781005e52395fbf85beffb57b7c4e9a0c2fd59b14806de6718f44720728804"
+  },
+  "cases": 3000,
+  "opcodes": [
+    "CAM_FORCEANGLE",
+    "CAM_LOOKAT"
+  ],
+  "random_seed": "0x727c5228 (java.util.Random)",
+  "reproduction": "python3 code/cs2/tests/native/generate_scene.py --check"
+}

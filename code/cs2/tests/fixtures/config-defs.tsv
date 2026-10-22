@@ -1,0 +1,23 @@
+param	0	105	7	6e756c6c
+param	1	115	0	64666c74
+param	2	105	-1	78
+param	3	115	5	c3a9e282ac
+param	4	115	0	
+param	5	105	2147483647	6e
+item	0	6e756c6c	1	0	false	-1	-1	-1	-1	-1	-1	null,null,h54616b65,null,null,h4578616d696e65	null,null,null,null,h44726f70	0	false	-1	-1	-1	-1	-
+item	1	53776f7264	50	1	false	2	-1	3	4	5	100	h61,h,h54616b65,null,h78,h4578616d696e65	h5769656c64,h557365,hc3a9,h,h44726f70	0	false	0	11	2	12	0=i11;1=s70;4=s
+item	2	53776f7264206e6f7465	0	1	true	1	5	0	0	0	1	null,null,h54616b65,null,null,h4578616d696e65	null,null,null,null,h44726f70	255	true	1	9	1	8	1=s6e6f7465;2=i0
+item	3	43657274	2147483647	2	false	4	-1	-1	1	2	0	null,null,h54616b65,null,null,h4578616d696e65	null,null,null,null,h44726f70	65280	false	4	3	3	2	5=i-5
+item	4	4d656dc3a9	-3	0	true	-1	5	9	9	9	-2	null,null,h54616b65,null,null,h4578616d696e65	null,null,null,null,h44726f70	16711680	true	2	1	2	7	0=i2;3=s737472
+item	5	4d69736d61746368	5	1	true	3	3	0	0	0	0	null,null,h54616b65,null,null,h4578616d696e65	null,null,null,null,h44726f70	1	false	-1	5	-1	6	0=s78;1=i3;2=i4
+item	6	4d656d6265727320706c61696e	9	0	true	-1	-1	0	0	0	0	null,null,h54616b65,null,null,h4578616d696e65	null,null,null,null,h44726f70	7	false	-1	0	-1	0	-
+npc	0	-
+npc	1	0=i4;1=s71;2=i-9;3=s;5=i6
+npc	2	0=s626164;1=i3;4=s65
+seq	0	-
+seq	1	0=i4;1=s71;2=i-9;3=s;5=i6
+seq	2	0=s626164;1=i3;4=s65
+struct	0	-
+struct	1	0=i4;1=s71;2=i-9;3=s;5=i6
+struct	2	0=s626164;1=i3;4=s65
+colours	1193046	6636321

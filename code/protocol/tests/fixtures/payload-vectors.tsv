@@ -1,0 +1,3079 @@
+R	readUByte	000000000000000000	0	1
+R	readUByte	ffffffffffffffffff	255	1
+R	readUByte	800000008000000080	128	1
+R	readUByte	7fffffff7fffffff7f	127	1
+R	readUByte	0123456789abcdef55	1	1
+R	readUByte	fedcba9876543210aa	254	1
+R	readUByte	aa55aa55aa55aa55aa	170	1
+R	readByte	000000000000000000	0	1
+R	readByte	ffffffffffffffffff	-1	1
+R	readByte	800000008000000080	-128	1
+R	readByte	7fffffff7fffffff7f	127	1
+R	readByte	0123456789abcdef55	1	1
+R	readByte	fedcba9876543210aa	-2	1
+R	readByte	aa55aa55aa55aa55aa	-86	1
+R	readUByteAdd	000000000000000000	128	1
+R	readUByteAdd	ffffffffffffffffff	127	1
+R	readUByteAdd	800000008000000080	0	1
+R	readUByteAdd	7fffffff7fffffff7f	255	1
+R	readUByteAdd	0123456789abcdef55	129	1
+R	readUByteAdd	fedcba9876543210aa	126	1
+R	readUByteAdd	aa55aa55aa55aa55aa	42	1
+R	readByteAdd	000000000000000000	-128	1
+R	readByteAdd	ffffffffffffffffff	127	1
+R	readByteAdd	800000008000000080	0	1
+R	readByteAdd	7fffffff7fffffff7f	-1	1
+R	readByteAdd	0123456789abcdef55	-127	1
+R	readByteAdd	fedcba9876543210aa	126	1
+R	readByteAdd	aa55aa55aa55aa55aa	42	1
+R	readUByteInverse	000000000000000000	0	1
+R	readUByteInverse	ffffffffffffffffff	1	1
+R	readUByteInverse	800000008000000080	128	1
+R	readUByteInverse	7fffffff7fffffff7f	129	1
+R	readUByteInverse	0123456789abcdef55	255	1
+R	readUByteInverse	fedcba9876543210aa	2	1
+R	readUByteInverse	aa55aa55aa55aa55aa	86	1
+R	readByteInverse	000000000000000000	0	1
+R	readByteInverse	ffffffffffffffffff	1	1
+R	readByteInverse	800000008000000080	-128	1
+R	readByteInverse	7fffffff7fffffff7f	-127	1
+R	readByteInverse	0123456789abcdef55	-1	1
+R	readByteInverse	fedcba9876543210aa	2	1
+R	readByteInverse	aa55aa55aa55aa55aa	86	1
+R	readUByteSubtract	000000000000000000	128	1
+R	readUByteSubtract	ffffffffffffffffff	129	1
+R	readUByteSubtract	800000008000000080	0	1
+R	readUByteSubtract	7fffffff7fffffff7f	1	1
+R	readUByteSubtract	0123456789abcdef55	127	1
+R	readUByteSubtract	fedcba9876543210aa	130	1
+R	readUByteSubtract	aa55aa55aa55aa55aa	214	1
+R	readByteSubtract	000000000000000000	-128	1
+R	readByteSubtract	ffffffffffffffffff	-127	1
+R	readByteSubtract	800000008000000080	0	1
+R	readByteSubtract	7fffffff7fffffff7f	1	1
+R	readByteSubtract	0123456789abcdef55	127	1
+R	readByteSubtract	fedcba9876543210aa	-126	1
+R	readByteSubtract	aa55aa55aa55aa55aa	-42	1
+R	readUShort	000000000000000000	0	2
+R	readUShort	ffffffffffffffffff	65535	2
+R	readUShort	800000008000000080	32768	2
+R	readUShort	7fffffff7fffffff7f	32767	2
+R	readUShort	0123456789abcdef55	291	2
+R	readUShort	fedcba9876543210aa	65244	2
+R	readUShort	aa55aa55aa55aa55aa	43605	2
+R	readShort	000000000000000000	0	2
+R	readShort	ffffffffffffffffff	-1	2
+R	readShort	800000008000000080	-32768	2
+R	readShort	7fffffff7fffffff7f	32767	2
+R	readShort	0123456789abcdef55	291	2
+R	readShort	fedcba9876543210aa	-292	2
+R	readShort	aa55aa55aa55aa55aa	-21931	2
+R	readUShortLittle	000000000000000000	0	2
+R	readUShortLittle	ffffffffffffffffff	65535	2
+R	readUShortLittle	800000008000000080	128	2
+R	readUShortLittle	7fffffff7fffffff7f	65407	2
+R	readUShortLittle	0123456789abcdef55	8961	2
+R	readUShortLittle	fedcba9876543210aa	56574	2
+R	readUShortLittle	aa55aa55aa55aa55aa	21930	2
+R	readShortLittle	000000000000000000	0	2
+R	readShortLittle	ffffffffffffffffff	-1	2
+R	readShortLittle	800000008000000080	128	2
+R	readShortLittle	7fffffff7fffffff7f	-129	2
+R	readShortLittle	0123456789abcdef55	8961	2
+R	readShortLittle	fedcba9876543210aa	-8962	2
+R	readShortLittle	aa55aa55aa55aa55aa	21930	2
+R	readUShortAdd	000000000000000000	128	2
+R	readUShortAdd	ffffffffffffffffff	65407	2
+R	readUShortAdd	800000008000000080	32896	2
+R	readUShortAdd	7fffffff7fffffff7f	32639	2
+R	readUShortAdd	0123456789abcdef55	419	2
+R	readUShortAdd	fedcba9876543210aa	65116	2
+R	readUShortAdd	aa55aa55aa55aa55aa	43733	2
+R	readShortAdd	000000000000000000	128	2
+R	readShortAdd	ffffffffffffffffff	-129	2
+R	readShortAdd	800000008000000080	-32640	2
+R	readShortAdd	7fffffff7fffffff7f	32639	2
+R	readShortAdd	0123456789abcdef55	419	2
+R	readShortAdd	fedcba9876543210aa	-420	2
+R	readShortAdd	aa55aa55aa55aa55aa	-21803	2
+R	readUShortAddLittle	000000000000000000	128	2
+R	readUShortAddLittle	ffffffffffffffffff	65407	2
+R	readUShortAddLittle	800000008000000080	0	2
+R	readUShortAddLittle	7fffffff7fffffff7f	65535	2
+R	readUShortAddLittle	0123456789abcdef55	9089	2
+R	readUShortAddLittle	fedcba9876543210aa	56446	2
+R	readUShortAddLittle	aa55aa55aa55aa55aa	21802	2
+R	readShortAddLittle	000000000000000000	128	2
+R	readShortAddLittle	ffffffffffffffffff	-129	2
+R	readShortAddLittle	800000008000000080	0	2
+R	readShortAddLittle	7fffffff7fffffff7f	-1	2
+R	readShortAddLittle	0123456789abcdef55	9089	2
+R	readShortAddLittle	fedcba9876543210aa	-9090	2
+R	readShortAddLittle	aa55aa55aa55aa55aa	21802	2
+R	readSmart	000000000000000000	-64	1
+R	readSmart	ffffffffffffffffff	16383	2
+R	readSmart	800000008000000080	-16384	2
+R	readSmart	7fffffff7fffffff7f	63	1
+R	readSmart	0123456789abcdef55	-63	1
+R	readSmart	fedcba9876543210aa	16092	2
+R	readSmart	aa55aa55aa55aa55aa	-5547	2
+R	readUSmart	000000000000000000	0	1
+R	readUSmart	ffffffffffffffffff	32767	2
+R	readUSmart	800000008000000080	0	2
+R	readUSmart	7fffffff7fffffff7f	127	1
+R	readUSmart	0123456789abcdef55	1	1
+R	readUSmart	fedcba9876543210aa	32476	2
+R	readUSmart	aa55aa55aa55aa55aa	10837	2
+R	readUMedium	000000000000000000	0	3
+R	readUMedium	ffffffffffffffffff	16777215	3
+R	readUMedium	800000008000000080	8388608	3
+R	readUMedium	7fffffff7fffffff7f	8388607	3
+R	readUMedium	0123456789abcdef55	74565	3
+R	readUMedium	fedcba9876543210aa	16702650	3
+R	readUMedium	aa55aa55aa55aa55aa	11163050	3
+R	readMedium	000000000000000000	0	3
+R	readMedium	ffffffffffffffffff	-1	3
+R	readMedium	800000008000000080	-8388608	3
+R	readMedium	7fffffff7fffffff7f	8388607	3
+R	readMedium	0123456789abcdef55	74565	3
+R	readMedium	fedcba9876543210aa	-74566	3
+R	readMedium	aa55aa55aa55aa55aa	-5614166	3
+R	readInt	000000000000000000	0	4
+R	readInt	ffffffffffffffffff	-1	4
+R	readInt	800000008000000080	-2147483648	4
+R	readInt	7fffffff7fffffff7f	2147483647	4
+R	readInt	0123456789abcdef55	19088743	4
+R	readInt	fedcba9876543210aa	-19088744	4
+R	readInt	aa55aa55aa55aa55aa	-1437226411	4
+R	readUIntLittle	000000000000000000	0	4
+R	readUIntLittle	ffffffffffffffffff	-1	4
+R	readUIntLittle	800000008000000080	128	4
+R	readUIntLittle	7fffffff7fffffff7f	-129	4
+R	readUIntLittle	0123456789abcdef55	1732584193	4
+R	readUIntLittle	fedcba9876543210aa	-1732584194	4
+R	readUIntLittle	aa55aa55aa55aa55aa	1437226410	4
+R	readUIntMiddle	000000000000000000	0	4
+R	readUIntMiddle	ffffffffffffffffff	-1	4
+R	readUIntMiddle	800000008000000080	32768	4
+R	readUIntMiddle	7fffffff7fffffff7f	-32769	4
+R	readUIntMiddle	0123456789abcdef55	1164378403	4
+R	readUIntMiddle	fedcba9876543210aa	-1164378404	4
+R	readUIntMiddle	aa55aa55aa55aa55aa	-1437226411	4
+R	readUIntInverseMiddle	000000000000000000	0	4
+R	readUIntInverseMiddle	ffffffffffffffffff	-1	4
+R	readUIntInverseMiddle	800000008000000080	8388608	4
+R	readUIntInverseMiddle	7fffffff7fffffff7f	-8388609	4
+R	readUIntInverseMiddle	0123456789abcdef55	587294533	4
+R	readUIntInverseMiddle	fedcba9876543210aa	-587294534	4
+R	readUIntInverseMiddle	aa55aa55aa55aa55aa	1437226410	4
+R	readBigSmart	000000000000000000	0	2
+R	readBigSmart	ffffffffffffffffff	2147483647	4
+R	readBigSmart	800000008000000080	0	4
+R	readBigSmart	7fffffff7fffffff7f	-1	2
+R	readBigSmart	0123456789abcdef55	291	2
+R	readBigSmart	fedcba9876543210aa	2128394904	4
+R	readBigSmart	aa55aa55aa55aa55aa	710257237	4
+R	readUBigSmart	000000000000000000	0	2
+R	readUBigSmart	ffffffffffffffffff	2147483647	4
+R	readUBigSmart	800000008000000080	0	4
+R	readUBigSmart	7fffffff7fffffff7f	32767	2
+R	readUBigSmart	0123456789abcdef55	291	2
+R	readUBigSmart	fedcba9876543210aa	2128394904	4
+R	readUBigSmart	aa55aa55aa55aa55aa	710257237	4
+R	readLong	000000000000000000	0	8
+R	readLong	ffffffffffffffffff	-1	8
+R	readLong	800000008000000080	-9223372034707292160	8
+R	readLong	7fffffff7fffffff7f	9223372034707292159	8
+R	readLong	0123456789abcdef55	81985529216486895	8
+R	readLong	fedcba9876543210aa	-81985529216486896	8
+R	readLong	aa55aa55aa55aa55aa	-6172840429334713771	8
+W	writeByte	0	00	1
+W	writeByte	1	01	1
+W	writeByte	63	3f	1
+W	writeByte	64	40	1
+W	writeByte	127	7f	1
+W	writeByte	128	80	1
+W	writeByte	255	ff	1
+W	writeByte	-1	ff	1
+W	writeByte	-128	80	1
+W	writeByteAdd	0	80	1
+W	writeByteAdd	1	81	1
+W	writeByteAdd	63	bf	1
+W	writeByteAdd	64	c0	1
+W	writeByteAdd	127	ff	1
+W	writeByteAdd	128	00	1
+W	writeByteAdd	255	7f	1
+W	writeByteAdd	-1	7f	1
+W	writeByteAdd	-128	00	1
+W	writeByteInverse	0	00	1
+W	writeByteInverse	1	ff	1
+W	writeByteInverse	63	c1	1
+W	writeByteInverse	64	c0	1
+W	writeByteInverse	127	81	1
+W	writeByteInverse	128	80	1
+W	writeByteInverse	255	01	1
+W	writeByteInverse	-1	01	1
+W	writeByteInverse	-128	80	1
+W	writeByteSubtract	0	80	1
+W	writeByteSubtract	1	7f	1
+W	writeByteSubtract	63	41	1
+W	writeByteSubtract	64	40	1
+W	writeByteSubtract	127	01	1
+W	writeByteSubtract	128	00	1
+W	writeByteSubtract	255	81	1
+W	writeByteSubtract	-1	81	1
+W	writeByteSubtract	-128	00	1
+W	writeShort	0	0000	2
+W	writeShort	1	0001	2
+W	writeShort	63	003f	2
+W	writeShort	64	0040	2
+W	writeShort	127	007f	2
+W	writeShort	128	0080	2
+W	writeShort	255	00ff	2
+W	writeShort	256	0100	2
+W	writeShort	32767	7fff	2
+W	writeShort	32768	8000	2
+W	writeShort	65535	ffff	2
+W	writeShort	-1	ffff	2
+W	writeShort	-128	ff80	2
+W	writeShort	-32768	8000	2
+W	writeShortLittle	0	0000	2
+W	writeShortLittle	1	0100	2
+W	writeShortLittle	63	3f00	2
+W	writeShortLittle	64	4000	2
+W	writeShortLittle	127	7f00	2
+W	writeShortLittle	128	8000	2
+W	writeShortLittle	255	ff00	2
+W	writeShortLittle	256	0001	2
+W	writeShortLittle	32767	ff7f	2
+W	writeShortLittle	32768	0080	2
+W	writeShortLittle	65535	ffff	2
+W	writeShortLittle	-1	ffff	2
+W	writeShortLittle	-128	80ff	2
+W	writeShortLittle	-32768	0080	2
+W	writeShortAdd	0	0080	2
+W	writeShortAdd	1	0081	2
+W	writeShortAdd	63	00bf	2
+W	writeShortAdd	64	00c0	2
+W	writeShortAdd	127	00ff	2
+W	writeShortAdd	128	0000	2
+W	writeShortAdd	255	007f	2
+W	writeShortAdd	256	0180	2
+W	writeShortAdd	32767	7f7f	2
+W	writeShortAdd	32768	8080	2
+W	writeShortAdd	65535	ff7f	2
+W	writeShortAdd	-1	ff7f	2
+W	writeShortAdd	-128	ff00	2
+W	writeShortAdd	-32768	8080	2
+W	writeShortAddLittle	0	8000	2
+W	writeShortAddLittle	1	8100	2
+W	writeShortAddLittle	63	bf00	2
+W	writeShortAddLittle	64	c000	2
+W	writeShortAddLittle	127	ff00	2
+W	writeShortAddLittle	128	0000	2
+W	writeShortAddLittle	255	7f00	2
+W	writeShortAddLittle	256	8001	2
+W	writeShortAddLittle	32767	7f7f	2
+W	writeShortAddLittle	32768	8080	2
+W	writeShortAddLittle	65535	7fff	2
+W	writeShortAddLittle	-1	7fff	2
+W	writeShortAddLittle	-128	00ff	2
+W	writeShortAddLittle	-32768	8080	2
+W	writeMedium	0	000000	3
+W	writeMedium	1	000001	3
+W	writeMedium	63	00003f	3
+W	writeMedium	64	000040	3
+W	writeMedium	127	00007f	3
+W	writeMedium	128	000080	3
+W	writeMedium	255	0000ff	3
+W	writeMedium	256	000100	3
+W	writeMedium	32767	007fff	3
+W	writeMedium	32768	008000	3
+W	writeMedium	65535	00ffff	3
+W	writeMedium	65536	010000	3
+W	writeMedium	8388607	7fffff	3
+W	writeMedium	8388608	800000	3
+W	writeMedium	16777215	ffffff	3
+W	writeMedium	-1	ffffff	3
+W	writeMedium	-128	ffff80	3
+W	writeMedium	-32768	ff8000	3
+W	writeMedium	-8388608	800000	3
+W	writeInt	0	00000000	4
+W	writeInt	1	00000001	4
+W	writeInt	63	0000003f	4
+W	writeInt	64	00000040	4
+W	writeInt	127	0000007f	4
+W	writeInt	128	00000080	4
+W	writeInt	255	000000ff	4
+W	writeInt	256	00000100	4
+W	writeInt	32767	00007fff	4
+W	writeInt	32768	00008000	4
+W	writeInt	65535	0000ffff	4
+W	writeInt	65536	00010000	4
+W	writeInt	8388607	007fffff	4
+W	writeInt	8388608	00800000	4
+W	writeInt	16777215	00ffffff	4
+W	writeInt	305419896	12345678	4
+W	writeInt	2147483647	7fffffff	4
+W	writeInt	2147483648	80000000	4
+W	writeInt	4294967295	ffffffff	4
+W	writeInt	-1	ffffffff	4
+W	writeInt	-128	ffffff80	4
+W	writeInt	-32768	ffff8000	4
+W	writeInt	-8388608	ff800000	4
+W	writeInt	-2147483648	80000000	4
+W	writeIntLittle	0	00000000	4
+W	writeIntLittle	1	01000000	4
+W	writeIntLittle	63	3f000000	4
+W	writeIntLittle	64	40000000	4
+W	writeIntLittle	127	7f000000	4
+W	writeIntLittle	128	80000000	4
+W	writeIntLittle	255	ff000000	4
+W	writeIntLittle	256	00010000	4
+W	writeIntLittle	32767	ff7f0000	4
+W	writeIntLittle	32768	00800000	4
+W	writeIntLittle	65535	ffff0000	4
+W	writeIntLittle	65536	00000100	4
+W	writeIntLittle	8388607	ffff7f00	4
+W	writeIntLittle	8388608	00008000	4
+W	writeIntLittle	16777215	ffffff00	4
+W	writeIntLittle	305419896	78563412	4
+W	writeIntLittle	2147483647	ffffff7f	4
+W	writeIntLittle	2147483648	00000080	4
+W	writeIntLittle	4294967295	ffffffff	4
+W	writeIntLittle	-1	ffffffff	4
+W	writeIntLittle	-128	80ffffff	4
+W	writeIntLittle	-32768	0080ffff	4
+W	writeIntLittle	-8388608	000080ff	4
+W	writeIntLittle	-2147483648	00000080	4
+W	writeIntMiddle	0	00000000	4
+W	writeIntMiddle	1	00010000	4
+W	writeIntMiddle	63	003f0000	4
+W	writeIntMiddle	64	00400000	4
+W	writeIntMiddle	127	007f0000	4
+W	writeIntMiddle	128	00800000	4
+W	writeIntMiddle	255	00ff0000	4
+W	writeIntMiddle	256	01000000	4
+W	writeIntMiddle	32767	7fff0000	4
+W	writeIntMiddle	32768	80000000	4
+W	writeIntMiddle	65535	ffff0000	4
+W	writeIntMiddle	65536	00000001	4
+W	writeIntMiddle	8388607	ffff007f	4
+W	writeIntMiddle	8388608	00000080	4
+W	writeIntMiddle	16777215	ffff00ff	4
+W	writeIntMiddle	305419896	56781234	4
+W	writeIntMiddle	2147483647	ffff7fff	4
+W	writeIntMiddle	2147483648	00008000	4
+W	writeIntMiddle	4294967295	ffffffff	4
+W	writeIntMiddle	-1	ffffffff	4
+W	writeIntMiddle	-128	ff80ffff	4
+W	writeIntMiddle	-32768	8000ffff	4
+W	writeIntMiddle	-8388608	0000ff80	4
+W	writeIntMiddle	-2147483648	00008000	4
+W	writeIntInverseMiddle	0	00000000	4
+W	writeIntInverseMiddle	1	00000100	4
+W	writeIntInverseMiddle	63	00003f00	4
+W	writeIntInverseMiddle	64	00004000	4
+W	writeIntInverseMiddle	127	00007f00	4
+W	writeIntInverseMiddle	128	00008000	4
+W	writeIntInverseMiddle	255	0000ff00	4
+W	writeIntInverseMiddle	256	00000001	4
+W	writeIntInverseMiddle	32767	0000ff7f	4
+W	writeIntInverseMiddle	32768	00000080	4
+W	writeIntInverseMiddle	65535	0000ffff	4
+W	writeIntInverseMiddle	65536	01000000	4
+W	writeIntInverseMiddle	8388607	7f00ffff	4
+W	writeIntInverseMiddle	8388608	80000000	4
+W	writeIntInverseMiddle	16777215	ff00ffff	4
+W	writeIntInverseMiddle	305419896	34127856	4
+W	writeIntInverseMiddle	2147483647	ff7fffff	4
+W	writeIntInverseMiddle	2147483648	00800000	4
+W	writeIntInverseMiddle	4294967295	ffffffff	4
+W	writeIntInverseMiddle	-1	ffffffff	4
+W	writeIntInverseMiddle	-128	ffff80ff	4
+W	writeIntInverseMiddle	-32768	ffff0080	4
+W	writeIntInverseMiddle	-8388608	80ff0000	4
+W	writeIntInverseMiddle	-2147483648	00800000	4
+W	writeLong	0	0000000000000000	8
+W	writeLong	1	0000000000000001	8
+W	writeLong	63	000000000000003f	8
+W	writeLong	64	0000000000000040	8
+W	writeLong	127	000000000000007f	8
+W	writeLong	128	0000000000000080	8
+W	writeLong	255	00000000000000ff	8
+W	writeLong	256	0000000000000100	8
+W	writeLong	32767	0000000000007fff	8
+W	writeLong	32768	0000000000008000	8
+W	writeLong	65535	000000000000ffff	8
+W	writeLong	65536	0000000000010000	8
+W	writeLong	8388607	00000000007fffff	8
+W	writeLong	8388608	0000000000800000	8
+W	writeLong	16777215	0000000000ffffff	8
+W	writeLong	305419896	0000000012345678	8
+W	writeLong	2147483647	000000007fffffff	8
+W	writeLong	2147483648	0000000080000000	8
+W	writeLong	4294967295	00000000ffffffff	8
+W	writeLong	-1	ffffffffffffffff	8
+W	writeLong	-128	ffffffffffffff80	8
+W	writeLong	-32768	ffffffffffff8000	8
+W	writeLong	-8388608	ffffffffff800000	8
+W	writeLong	-2147483648	ffffffff80000000	8
+W	writeLong	81985529216486895	0123456789abcdef	8
+W	writeLong	-9223372036854775808	8000000000000000	8
+W	writeLong	9223372036854775807	7fffffffffffffff	8
+W	writeSmart	0	00	1
+W	writeSmart	1	01	1
+W	writeSmart	63	3f	1
+W	writeSmart	64	40	1
+W	writeSmart	127	7f	1
+W	writeSmart	128	8080	2
+W	writeSmart	255	80ff	2
+W	writeSmart	256	8100	2
+W	writeSmart	16383	bfff	2
+W	writeSmart	16384	c000	2
+W	writeSmart	32766	fffe	2
+W	writeSmart	32767	ffff	2
+R	readBigSmart	00000000	0	2
+R	readBigSmart	007f0000	127	2
+R	readBigSmart	00800000	128	2
+R	readBigSmart	7ffe0000	32766	2
+R	readBigSmart	7fff0000	-1	2
+R	readBigSmart	80000000	0	4
+R	readBigSmart	80000001	1	4
+R	readBigSmart	bfff0000	1073676288	4
+R	readBigSmart	c0000000	1073741824	4
+R	readBigSmart	ffff0000	2147418112	4
+R	readBigSmart	ffffffff	2147483647	4
+R	readUBigSmart	00000000	0	2
+R	readUBigSmart	007f0000	127	2
+R	readUBigSmart	00800000	128	2
+R	readUBigSmart	7ffe0000	32766	2
+R	readUBigSmart	7fff0000	32767	2
+R	readUBigSmart	80000000	0	4
+R	readUBigSmart	80000001	1	4
+R	readUBigSmart	bfff0000	1073676288	4
+R	readUBigSmart	c0000000	1073741824	4
+R	readUBigSmart	ffff0000	2147418112	4
+R	readUBigSmart	ffffffff	2147483647	4
+R	readSmart	00000000	-64	1
+R	readSmart	007f0000	-64	1
+R	readSmart	00800000	-64	1
+R	readSmart	7ffe0000	63	1
+R	readSmart	7fff0000	63	1
+R	readSmart	80000000	-16384	2
+R	readSmart	80000001	-16384	2
+R	readSmart	bfff0000	-1	2
+R	readSmart	c0000000	0	2
+R	readSmart	ffff0000	16383	2
+R	readSmart	ffffffff	16383	2
+R	readUSmart	00000000	0	1
+R	readUSmart	007f0000	0	1
+R	readUSmart	00800000	0	1
+R	readUSmart	7ffe0000	127	1
+R	readUSmart	7fff0000	127	1
+R	readUSmart	80000000	0	2
+R	readUSmart	80000001	0	2
+R	readUSmart	bfff0000	16383	2
+R	readUSmart	c0000000	16384	2
+R	readUSmart	ffff0000	32767	2
+R	readUSmart	ffffffff	32767	2
+B	000000000000000000	1	0	1	0	2
+B	000000000000000000	1	0	2	0	2
+B	000000000000000000	1	0	3	0	2
+B	000000000000000000	1	0	4	0	2
+B	000000000000000000	1	0	5	0	2
+B	000000000000000000	1	0	6	0	2
+B	000000000000000000	1	0	7	0	2
+B	000000000000000000	1	0	8	0	2
+B	000000000000000000	1	0	9	0	3
+B	000000000000000000	1	0	10	0	3
+B	000000000000000000	1	0	11	0	3
+B	000000000000000000	1	0	12	0	3
+B	000000000000000000	1	0	13	0	3
+B	000000000000000000	1	0	14	0	3
+B	000000000000000000	1	0	15	0	3
+B	000000000000000000	1	0	16	0	3
+B	000000000000000000	1	0	17	0	4
+B	000000000000000000	1	0	18	0	4
+B	000000000000000000	1	0	19	0	4
+B	000000000000000000	1	0	20	0	4
+B	000000000000000000	1	0	21	0	4
+B	000000000000000000	1	0	22	0	4
+B	000000000000000000	1	0	23	0	4
+B	000000000000000000	1	0	24	0	4
+B	000000000000000000	1	0	25	0	5
+B	000000000000000000	1	0	26	0	5
+B	000000000000000000	1	0	27	0	5
+B	000000000000000000	1	0	28	0	5
+B	000000000000000000	1	0	29	0	5
+B	000000000000000000	1	0	30	0	5
+B	000000000000000000	1	0	31	0	5
+B	000000000000000000	1	0	32	0	5
+B	000000000000000000	1	1	1	0	2
+B	000000000000000000	1	1	2	0	2
+B	000000000000000000	1	1	3	0	2
+B	000000000000000000	1	1	4	0	2
+B	000000000000000000	1	1	5	0	2
+B	000000000000000000	1	1	6	0	2
+B	000000000000000000	1	1	7	0	2
+B	000000000000000000	1	1	8	0	3
+B	000000000000000000	1	1	9	0	3
+B	000000000000000000	1	1	10	0	3
+B	000000000000000000	1	1	11	0	3
+B	000000000000000000	1	1	12	0	3
+B	000000000000000000	1	1	13	0	3
+B	000000000000000000	1	1	14	0	3
+B	000000000000000000	1	1	15	0	3
+B	000000000000000000	1	1	16	0	4
+B	000000000000000000	1	1	17	0	4
+B	000000000000000000	1	1	18	0	4
+B	000000000000000000	1	1	19	0	4
+B	000000000000000000	1	1	20	0	4
+B	000000000000000000	1	1	21	0	4
+B	000000000000000000	1	1	22	0	4
+B	000000000000000000	1	1	23	0	4
+B	000000000000000000	1	1	24	0	5
+B	000000000000000000	1	1	25	0	5
+B	000000000000000000	1	1	26	0	5
+B	000000000000000000	1	1	27	0	5
+B	000000000000000000	1	1	28	0	5
+B	000000000000000000	1	1	29	0	5
+B	000000000000000000	1	1	30	0	5
+B	000000000000000000	1	1	31	0	5
+B	000000000000000000	1	1	32	0	6
+B	000000000000000000	1	2	1	0	2
+B	000000000000000000	1	2	2	0	2
+B	000000000000000000	1	2	3	0	2
+B	000000000000000000	1	2	4	0	2
+B	000000000000000000	1	2	5	0	2
+B	000000000000000000	1	2	6	0	2
+B	000000000000000000	1	2	7	0	3
+B	000000000000000000	1	2	8	0	3
+B	000000000000000000	1	2	9	0	3
+B	000000000000000000	1	2	10	0	3
+B	000000000000000000	1	2	11	0	3
+B	000000000000000000	1	2	12	0	3
+B	000000000000000000	1	2	13	0	3
+B	000000000000000000	1	2	14	0	3
+B	000000000000000000	1	2	15	0	4
+B	000000000000000000	1	2	16	0	4
+B	000000000000000000	1	2	17	0	4
+B	000000000000000000	1	2	18	0	4
+B	000000000000000000	1	2	19	0	4
+B	000000000000000000	1	2	20	0	4
+B	000000000000000000	1	2	21	0	4
+B	000000000000000000	1	2	22	0	4
+B	000000000000000000	1	2	23	0	5
+B	000000000000000000	1	2	24	0	5
+B	000000000000000000	1	2	25	0	5
+B	000000000000000000	1	2	26	0	5
+B	000000000000000000	1	2	27	0	5
+B	000000000000000000	1	2	28	0	5
+B	000000000000000000	1	2	29	0	5
+B	000000000000000000	1	2	30	0	5
+B	000000000000000000	1	2	31	0	6
+B	000000000000000000	1	2	32	0	6
+B	000000000000000000	1	3	1	0	2
+B	000000000000000000	1	3	2	0	2
+B	000000000000000000	1	3	3	0	2
+B	000000000000000000	1	3	4	0	2
+B	000000000000000000	1	3	5	0	2
+B	000000000000000000	1	3	6	0	3
+B	000000000000000000	1	3	7	0	3
+B	000000000000000000	1	3	8	0	3
+B	000000000000000000	1	3	9	0	3
+B	000000000000000000	1	3	10	0	3
+B	000000000000000000	1	3	11	0	3
+B	000000000000000000	1	3	12	0	3
+B	000000000000000000	1	3	13	0	3
+B	000000000000000000	1	3	14	0	4
+B	000000000000000000	1	3	15	0	4
+B	000000000000000000	1	3	16	0	4
+B	000000000000000000	1	3	17	0	4
+B	000000000000000000	1	3	18	0	4
+B	000000000000000000	1	3	19	0	4
+B	000000000000000000	1	3	20	0	4
+B	000000000000000000	1	3	21	0	4
+B	000000000000000000	1	3	22	0	5
+B	000000000000000000	1	3	23	0	5
+B	000000000000000000	1	3	24	0	5
+B	000000000000000000	1	3	25	0	5
+B	000000000000000000	1	3	26	0	5
+B	000000000000000000	1	3	27	0	5
+B	000000000000000000	1	3	28	0	5
+B	000000000000000000	1	3	29	0	5
+B	000000000000000000	1	3	30	0	6
+B	000000000000000000	1	3	31	0	6
+B	000000000000000000	1	3	32	0	6
+B	000000000000000000	1	4	1	0	2
+B	000000000000000000	1	4	2	0	2
+B	000000000000000000	1	4	3	0	2
+B	000000000000000000	1	4	4	0	2
+B	000000000000000000	1	4	5	0	3
+B	000000000000000000	1	4	6	0	3
+B	000000000000000000	1	4	7	0	3
+B	000000000000000000	1	4	8	0	3
+B	000000000000000000	1	4	9	0	3
+B	000000000000000000	1	4	10	0	3
+B	000000000000000000	1	4	11	0	3
+B	000000000000000000	1	4	12	0	3
+B	000000000000000000	1	4	13	0	4
+B	000000000000000000	1	4	14	0	4
+B	000000000000000000	1	4	15	0	4
+B	000000000000000000	1	4	16	0	4
+B	000000000000000000	1	4	17	0	4
+B	000000000000000000	1	4	18	0	4
+B	000000000000000000	1	4	19	0	4
+B	000000000000000000	1	4	20	0	4
+B	000000000000000000	1	4	21	0	5
+B	000000000000000000	1	4	22	0	5
+B	000000000000000000	1	4	23	0	5
+B	000000000000000000	1	4	24	0	5
+B	000000000000000000	1	4	25	0	5
+B	000000000000000000	1	4	26	0	5
+B	000000000000000000	1	4	27	0	5
+B	000000000000000000	1	4	28	0	5
+B	000000000000000000	1	4	29	0	6
+B	000000000000000000	1	4	30	0	6
+B	000000000000000000	1	4	31	0	6
+B	000000000000000000	1	4	32	0	6
+B	000000000000000000	1	5	1	0	2
+B	000000000000000000	1	5	2	0	2
+B	000000000000000000	1	5	3	0	2
+B	000000000000000000	1	5	4	0	3
+B	000000000000000000	1	5	5	0	3
+B	000000000000000000	1	5	6	0	3
+B	000000000000000000	1	5	7	0	3
+B	000000000000000000	1	5	8	0	3
+B	000000000000000000	1	5	9	0	3
+B	000000000000000000	1	5	10	0	3
+B	000000000000000000	1	5	11	0	3
+B	000000000000000000	1	5	12	0	4
+B	000000000000000000	1	5	13	0	4
+B	000000000000000000	1	5	14	0	4
+B	000000000000000000	1	5	15	0	4
+B	000000000000000000	1	5	16	0	4
+B	000000000000000000	1	5	17	0	4
+B	000000000000000000	1	5	18	0	4
+B	000000000000000000	1	5	19	0	4
+B	000000000000000000	1	5	20	0	5
+B	000000000000000000	1	5	21	0	5
+B	000000000000000000	1	5	22	0	5
+B	000000000000000000	1	5	23	0	5
+B	000000000000000000	1	5	24	0	5
+B	000000000000000000	1	5	25	0	5
+B	000000000000000000	1	5	26	0	5
+B	000000000000000000	1	5	27	0	5
+B	000000000000000000	1	5	28	0	6
+B	000000000000000000	1	5	29	0	6
+B	000000000000000000	1	5	30	0	6
+B	000000000000000000	1	5	31	0	6
+B	000000000000000000	1	5	32	0	6
+B	000000000000000000	1	6	1	0	2
+B	000000000000000000	1	6	2	0	2
+B	000000000000000000	1	6	3	0	3
+B	000000000000000000	1	6	4	0	3
+B	000000000000000000	1	6	5	0	3
+B	000000000000000000	1	6	6	0	3
+B	000000000000000000	1	6	7	0	3
+B	000000000000000000	1	6	8	0	3
+B	000000000000000000	1	6	9	0	3
+B	000000000000000000	1	6	10	0	3
+B	000000000000000000	1	6	11	0	4
+B	000000000000000000	1	6	12	0	4
+B	000000000000000000	1	6	13	0	4
+B	000000000000000000	1	6	14	0	4
+B	000000000000000000	1	6	15	0	4
+B	000000000000000000	1	6	16	0	4
+B	000000000000000000	1	6	17	0	4
+B	000000000000000000	1	6	18	0	4
+B	000000000000000000	1	6	19	0	5
+B	000000000000000000	1	6	20	0	5
+B	000000000000000000	1	6	21	0	5
+B	000000000000000000	1	6	22	0	5
+B	000000000000000000	1	6	23	0	5
+B	000000000000000000	1	6	24	0	5
+B	000000000000000000	1	6	25	0	5
+B	000000000000000000	1	6	26	0	5
+B	000000000000000000	1	6	27	0	6
+B	000000000000000000	1	6	28	0	6
+B	000000000000000000	1	6	29	0	6
+B	000000000000000000	1	6	30	0	6
+B	000000000000000000	1	6	31	0	6
+B	000000000000000000	1	6	32	0	6
+B	000000000000000000	1	7	1	0	2
+B	000000000000000000	1	7	2	0	3
+B	000000000000000000	1	7	3	0	3
+B	000000000000000000	1	7	4	0	3
+B	000000000000000000	1	7	5	0	3
+B	000000000000000000	1	7	6	0	3
+B	000000000000000000	1	7	7	0	3
+B	000000000000000000	1	7	8	0	3
+B	000000000000000000	1	7	9	0	3
+B	000000000000000000	1	7	10	0	4
+B	000000000000000000	1	7	11	0	4
+B	000000000000000000	1	7	12	0	4
+B	000000000000000000	1	7	13	0	4
+B	000000000000000000	1	7	14	0	4
+B	000000000000000000	1	7	15	0	4
+B	000000000000000000	1	7	16	0	4
+B	000000000000000000	1	7	17	0	4
+B	000000000000000000	1	7	18	0	5
+B	000000000000000000	1	7	19	0	5
+B	000000000000000000	1	7	20	0	5
+B	000000000000000000	1	7	21	0	5
+B	000000000000000000	1	7	22	0	5
+B	000000000000000000	1	7	23	0	5
+B	000000000000000000	1	7	24	0	5
+B	000000000000000000	1	7	25	0	5
+B	000000000000000000	1	7	26	0	6
+B	000000000000000000	1	7	27	0	6
+B	000000000000000000	1	7	28	0	6
+B	000000000000000000	1	7	29	0	6
+B	000000000000000000	1	7	30	0	6
+B	000000000000000000	1	7	31	0	6
+B	000000000000000000	1	7	32	0	6
+B	ffffffffffffffffff	1	0	1	1	2
+B	ffffffffffffffffff	1	0	2	3	2
+B	ffffffffffffffffff	1	0	3	7	2
+B	ffffffffffffffffff	1	0	4	15	2
+B	ffffffffffffffffff	1	0	5	31	2
+B	ffffffffffffffffff	1	0	6	63	2
+B	ffffffffffffffffff	1	0	7	127	2
+B	ffffffffffffffffff	1	0	8	255	2
+B	ffffffffffffffffff	1	0	9	511	3
+B	ffffffffffffffffff	1	0	10	1023	3
+B	ffffffffffffffffff	1	0	11	2047	3
+B	ffffffffffffffffff	1	0	12	4095	3
+B	ffffffffffffffffff	1	0	13	8191	3
+B	ffffffffffffffffff	1	0	14	16383	3
+B	ffffffffffffffffff	1	0	15	32767	3
+B	ffffffffffffffffff	1	0	16	65535	3
+B	ffffffffffffffffff	1	0	17	131071	4
+B	ffffffffffffffffff	1	0	18	262143	4
+B	ffffffffffffffffff	1	0	19	524287	4
+B	ffffffffffffffffff	1	0	20	1048575	4
+B	ffffffffffffffffff	1	0	21	2097151	4
+B	ffffffffffffffffff	1	0	22	4194303	4
+B	ffffffffffffffffff	1	0	23	8388607	4
+B	ffffffffffffffffff	1	0	24	16777215	4
+B	ffffffffffffffffff	1	0	25	33554431	5
+B	ffffffffffffffffff	1	0	26	67108863	5
+B	ffffffffffffffffff	1	0	27	134217727	5
+B	ffffffffffffffffff	1	0	28	268435455	5
+B	ffffffffffffffffff	1	0	29	536870911	5
+B	ffffffffffffffffff	1	0	30	1073741823	5
+B	ffffffffffffffffff	1	0	31	2147483647	5
+B	ffffffffffffffffff	1	0	32	-1	5
+B	ffffffffffffffffff	1	1	1	1	2
+B	ffffffffffffffffff	1	1	2	3	2
+B	ffffffffffffffffff	1	1	3	7	2
+B	ffffffffffffffffff	1	1	4	15	2
+B	ffffffffffffffffff	1	1	5	31	2
+B	ffffffffffffffffff	1	1	6	63	2
+B	ffffffffffffffffff	1	1	7	127	2
+B	ffffffffffffffffff	1	1	8	255	3
+B	ffffffffffffffffff	1	1	9	511	3
+B	ffffffffffffffffff	1	1	10	1023	3
+B	ffffffffffffffffff	1	1	11	2047	3
+B	ffffffffffffffffff	1	1	12	4095	3
+B	ffffffffffffffffff	1	1	13	8191	3
+B	ffffffffffffffffff	1	1	14	16383	3
+B	ffffffffffffffffff	1	1	15	32767	3
+B	ffffffffffffffffff	1	1	16	65535	4
+B	ffffffffffffffffff	1	1	17	131071	4
+B	ffffffffffffffffff	1	1	18	262143	4
+B	ffffffffffffffffff	1	1	19	524287	4
+B	ffffffffffffffffff	1	1	20	1048575	4
+B	ffffffffffffffffff	1	1	21	2097151	4
+B	ffffffffffffffffff	1	1	22	4194303	4
+B	ffffffffffffffffff	1	1	23	8388607	4
+B	ffffffffffffffffff	1	1	24	16777215	5
+B	ffffffffffffffffff	1	1	25	33554431	5
+B	ffffffffffffffffff	1	1	26	67108863	5
+B	ffffffffffffffffff	1	1	27	134217727	5
+B	ffffffffffffffffff	1	1	28	268435455	5
+B	ffffffffffffffffff	1	1	29	536870911	5
+B	ffffffffffffffffff	1	1	30	1073741823	5
+B	ffffffffffffffffff	1	1	31	2147483647	5
+B	ffffffffffffffffff	1	1	32	-1	6
+B	ffffffffffffffffff	1	2	1	1	2
+B	ffffffffffffffffff	1	2	2	3	2
+B	ffffffffffffffffff	1	2	3	7	2
+B	ffffffffffffffffff	1	2	4	15	2
+B	ffffffffffffffffff	1	2	5	31	2
+B	ffffffffffffffffff	1	2	6	63	2
+B	ffffffffffffffffff	1	2	7	127	3
+B	ffffffffffffffffff	1	2	8	255	3
+B	ffffffffffffffffff	1	2	9	511	3
+B	ffffffffffffffffff	1	2	10	1023	3
+B	ffffffffffffffffff	1	2	11	2047	3
+B	ffffffffffffffffff	1	2	12	4095	3
+B	ffffffffffffffffff	1	2	13	8191	3
+B	ffffffffffffffffff	1	2	14	16383	3
+B	ffffffffffffffffff	1	2	15	32767	4
+B	ffffffffffffffffff	1	2	16	65535	4
+B	ffffffffffffffffff	1	2	17	131071	4
+B	ffffffffffffffffff	1	2	18	262143	4
+B	ffffffffffffffffff	1	2	19	524287	4
+B	ffffffffffffffffff	1	2	20	1048575	4
+B	ffffffffffffffffff	1	2	21	2097151	4
+B	ffffffffffffffffff	1	2	22	4194303	4
+B	ffffffffffffffffff	1	2	23	8388607	5
+B	ffffffffffffffffff	1	2	24	16777215	5
+B	ffffffffffffffffff	1	2	25	33554431	5
+B	ffffffffffffffffff	1	2	26	67108863	5
+B	ffffffffffffffffff	1	2	27	134217727	5
+B	ffffffffffffffffff	1	2	28	268435455	5
+B	ffffffffffffffffff	1	2	29	536870911	5
+B	ffffffffffffffffff	1	2	30	1073741823	5
+B	ffffffffffffffffff	1	2	31	2147483647	6
+B	ffffffffffffffffff	1	2	32	-1	6
+B	ffffffffffffffffff	1	3	1	1	2
+B	ffffffffffffffffff	1	3	2	3	2
+B	ffffffffffffffffff	1	3	3	7	2
+B	ffffffffffffffffff	1	3	4	15	2
+B	ffffffffffffffffff	1	3	5	31	2
+B	ffffffffffffffffff	1	3	6	63	3
+B	ffffffffffffffffff	1	3	7	127	3
+B	ffffffffffffffffff	1	3	8	255	3
+B	ffffffffffffffffff	1	3	9	511	3
+B	ffffffffffffffffff	1	3	10	1023	3
+B	ffffffffffffffffff	1	3	11	2047	3
+B	ffffffffffffffffff	1	3	12	4095	3
+B	ffffffffffffffffff	1	3	13	8191	3
+B	ffffffffffffffffff	1	3	14	16383	4
+B	ffffffffffffffffff	1	3	15	32767	4
+B	ffffffffffffffffff	1	3	16	65535	4
+B	ffffffffffffffffff	1	3	17	131071	4
+B	ffffffffffffffffff	1	3	18	262143	4
+B	ffffffffffffffffff	1	3	19	524287	4
+B	ffffffffffffffffff	1	3	20	1048575	4
+B	ffffffffffffffffff	1	3	21	2097151	4
+B	ffffffffffffffffff	1	3	22	4194303	5
+B	ffffffffffffffffff	1	3	23	8388607	5
+B	ffffffffffffffffff	1	3	24	16777215	5
+B	ffffffffffffffffff	1	3	25	33554431	5
+B	ffffffffffffffffff	1	3	26	67108863	5
+B	ffffffffffffffffff	1	3	27	134217727	5
+B	ffffffffffffffffff	1	3	28	268435455	5
+B	ffffffffffffffffff	1	3	29	536870911	5
+B	ffffffffffffffffff	1	3	30	1073741823	6
+B	ffffffffffffffffff	1	3	31	2147483647	6
+B	ffffffffffffffffff	1	3	32	-1	6
+B	ffffffffffffffffff	1	4	1	1	2
+B	ffffffffffffffffff	1	4	2	3	2
+B	ffffffffffffffffff	1	4	3	7	2
+B	ffffffffffffffffff	1	4	4	15	2
+B	ffffffffffffffffff	1	4	5	31	3
+B	ffffffffffffffffff	1	4	6	63	3
+B	ffffffffffffffffff	1	4	7	127	3
+B	ffffffffffffffffff	1	4	8	255	3
+B	ffffffffffffffffff	1	4	9	511	3
+B	ffffffffffffffffff	1	4	10	1023	3
+B	ffffffffffffffffff	1	4	11	2047	3
+B	ffffffffffffffffff	1	4	12	4095	3
+B	ffffffffffffffffff	1	4	13	8191	4
+B	ffffffffffffffffff	1	4	14	16383	4
+B	ffffffffffffffffff	1	4	15	32767	4
+B	ffffffffffffffffff	1	4	16	65535	4
+B	ffffffffffffffffff	1	4	17	131071	4
+B	ffffffffffffffffff	1	4	18	262143	4
+B	ffffffffffffffffff	1	4	19	524287	4
+B	ffffffffffffffffff	1	4	20	1048575	4
+B	ffffffffffffffffff	1	4	21	2097151	5
+B	ffffffffffffffffff	1	4	22	4194303	5
+B	ffffffffffffffffff	1	4	23	8388607	5
+B	ffffffffffffffffff	1	4	24	16777215	5
+B	ffffffffffffffffff	1	4	25	33554431	5
+B	ffffffffffffffffff	1	4	26	67108863	5
+B	ffffffffffffffffff	1	4	27	134217727	5
+B	ffffffffffffffffff	1	4	28	268435455	5
+B	ffffffffffffffffff	1	4	29	536870911	6
+B	ffffffffffffffffff	1	4	30	1073741823	6
+B	ffffffffffffffffff	1	4	31	2147483647	6
+B	ffffffffffffffffff	1	4	32	-1	6
+B	ffffffffffffffffff	1	5	1	1	2
+B	ffffffffffffffffff	1	5	2	3	2
+B	ffffffffffffffffff	1	5	3	7	2
+B	ffffffffffffffffff	1	5	4	15	3
+B	ffffffffffffffffff	1	5	5	31	3
+B	ffffffffffffffffff	1	5	6	63	3
+B	ffffffffffffffffff	1	5	7	127	3
+B	ffffffffffffffffff	1	5	8	255	3
+B	ffffffffffffffffff	1	5	9	511	3
+B	ffffffffffffffffff	1	5	10	1023	3
+B	ffffffffffffffffff	1	5	11	2047	3
+B	ffffffffffffffffff	1	5	12	4095	4
+B	ffffffffffffffffff	1	5	13	8191	4
+B	ffffffffffffffffff	1	5	14	16383	4
+B	ffffffffffffffffff	1	5	15	32767	4
+B	ffffffffffffffffff	1	5	16	65535	4
+B	ffffffffffffffffff	1	5	17	131071	4
+B	ffffffffffffffffff	1	5	18	262143	4
+B	ffffffffffffffffff	1	5	19	524287	4
+B	ffffffffffffffffff	1	5	20	1048575	5
+B	ffffffffffffffffff	1	5	21	2097151	5
+B	ffffffffffffffffff	1	5	22	4194303	5
+B	ffffffffffffffffff	1	5	23	8388607	5
+B	ffffffffffffffffff	1	5	24	16777215	5
+B	ffffffffffffffffff	1	5	25	33554431	5
+B	ffffffffffffffffff	1	5	26	67108863	5
+B	ffffffffffffffffff	1	5	27	134217727	5
+B	ffffffffffffffffff	1	5	28	268435455	6
+B	ffffffffffffffffff	1	5	29	536870911	6
+B	ffffffffffffffffff	1	5	30	1073741823	6
+B	ffffffffffffffffff	1	5	31	2147483647	6
+B	ffffffffffffffffff	1	5	32	-1	6
+B	ffffffffffffffffff	1	6	1	1	2
+B	ffffffffffffffffff	1	6	2	3	2
+B	ffffffffffffffffff	1	6	3	7	3
+B	ffffffffffffffffff	1	6	4	15	3
+B	ffffffffffffffffff	1	6	5	31	3
+B	ffffffffffffffffff	1	6	6	63	3
+B	ffffffffffffffffff	1	6	7	127	3
+B	ffffffffffffffffff	1	6	8	255	3
+B	ffffffffffffffffff	1	6	9	511	3
+B	ffffffffffffffffff	1	6	10	1023	3
+B	ffffffffffffffffff	1	6	11	2047	4
+B	ffffffffffffffffff	1	6	12	4095	4
+B	ffffffffffffffffff	1	6	13	8191	4
+B	ffffffffffffffffff	1	6	14	16383	4
+B	ffffffffffffffffff	1	6	15	32767	4
+B	ffffffffffffffffff	1	6	16	65535	4
+B	ffffffffffffffffff	1	6	17	131071	4
+B	ffffffffffffffffff	1	6	18	262143	4
+B	ffffffffffffffffff	1	6	19	524287	5
+B	ffffffffffffffffff	1	6	20	1048575	5
+B	ffffffffffffffffff	1	6	21	2097151	5
+B	ffffffffffffffffff	1	6	22	4194303	5
+B	ffffffffffffffffff	1	6	23	8388607	5
+B	ffffffffffffffffff	1	6	24	16777215	5
+B	ffffffffffffffffff	1	6	25	33554431	5
+B	ffffffffffffffffff	1	6	26	67108863	5
+B	ffffffffffffffffff	1	6	27	134217727	6
+B	ffffffffffffffffff	1	6	28	268435455	6
+B	ffffffffffffffffff	1	6	29	536870911	6
+B	ffffffffffffffffff	1	6	30	1073741823	6
+B	ffffffffffffffffff	1	6	31	2147483647	6
+B	ffffffffffffffffff	1	6	32	-1	6
+B	ffffffffffffffffff	1	7	1	1	2
+B	ffffffffffffffffff	1	7	2	3	3
+B	ffffffffffffffffff	1	7	3	7	3
+B	ffffffffffffffffff	1	7	4	15	3
+B	ffffffffffffffffff	1	7	5	31	3
+B	ffffffffffffffffff	1	7	6	63	3
+B	ffffffffffffffffff	1	7	7	127	3
+B	ffffffffffffffffff	1	7	8	255	3
+B	ffffffffffffffffff	1	7	9	511	3
+B	ffffffffffffffffff	1	7	10	1023	4
+B	ffffffffffffffffff	1	7	11	2047	4
+B	ffffffffffffffffff	1	7	12	4095	4
+B	ffffffffffffffffff	1	7	13	8191	4
+B	ffffffffffffffffff	1	7	14	16383	4
+B	ffffffffffffffffff	1	7	15	32767	4
+B	ffffffffffffffffff	1	7	16	65535	4
+B	ffffffffffffffffff	1	7	17	131071	4
+B	ffffffffffffffffff	1	7	18	262143	5
+B	ffffffffffffffffff	1	7	19	524287	5
+B	ffffffffffffffffff	1	7	20	1048575	5
+B	ffffffffffffffffff	1	7	21	2097151	5
+B	ffffffffffffffffff	1	7	22	4194303	5
+B	ffffffffffffffffff	1	7	23	8388607	5
+B	ffffffffffffffffff	1	7	24	16777215	5
+B	ffffffffffffffffff	1	7	25	33554431	5
+B	ffffffffffffffffff	1	7	26	67108863	6
+B	ffffffffffffffffff	1	7	27	134217727	6
+B	ffffffffffffffffff	1	7	28	268435455	6
+B	ffffffffffffffffff	1	7	29	536870911	6
+B	ffffffffffffffffff	1	7	30	1073741823	6
+B	ffffffffffffffffff	1	7	31	2147483647	6
+B	ffffffffffffffffff	1	7	32	-1	6
+B	800000008000000080	1	0	1	0	2
+B	800000008000000080	1	0	2	0	2
+B	800000008000000080	1	0	3	0	2
+B	800000008000000080	1	0	4	0	2
+B	800000008000000080	1	0	5	0	2
+B	800000008000000080	1	0	6	0	2
+B	800000008000000080	1	0	7	0	2
+B	800000008000000080	1	0	8	0	2
+B	800000008000000080	1	0	9	0	3
+B	800000008000000080	1	0	10	0	3
+B	800000008000000080	1	0	11	0	3
+B	800000008000000080	1	0	12	0	3
+B	800000008000000080	1	0	13	0	3
+B	800000008000000080	1	0	14	0	3
+B	800000008000000080	1	0	15	0	3
+B	800000008000000080	1	0	16	0	3
+B	800000008000000080	1	0	17	0	4
+B	800000008000000080	1	0	18	0	4
+B	800000008000000080	1	0	19	0	4
+B	800000008000000080	1	0	20	0	4
+B	800000008000000080	1	0	21	0	4
+B	800000008000000080	1	0	22	0	4
+B	800000008000000080	1	0	23	0	4
+B	800000008000000080	1	0	24	0	4
+B	800000008000000080	1	0	25	1	5
+B	800000008000000080	1	0	26	2	5
+B	800000008000000080	1	0	27	4	5
+B	800000008000000080	1	0	28	8	5
+B	800000008000000080	1	0	29	16	5
+B	800000008000000080	1	0	30	32	5
+B	800000008000000080	1	0	31	64	5
+B	800000008000000080	1	0	32	128	5
+B	800000008000000080	1	1	1	0	2
+B	800000008000000080	1	1	2	0	2
+B	800000008000000080	1	1	3	0	2
+B	800000008000000080	1	1	4	0	2
+B	800000008000000080	1	1	5	0	2
+B	800000008000000080	1	1	6	0	2
+B	800000008000000080	1	1	7	0	2
+B	800000008000000080	1	1	8	0	3
+B	800000008000000080	1	1	9	0	3
+B	800000008000000080	1	1	10	0	3
+B	800000008000000080	1	1	11	0	3
+B	800000008000000080	1	1	12	0	3
+B	800000008000000080	1	1	13	0	3
+B	800000008000000080	1	1	14	0	3
+B	800000008000000080	1	1	15	0	3
+B	800000008000000080	1	1	16	0	4
+B	800000008000000080	1	1	17	0	4
+B	800000008000000080	1	1	18	0	4
+B	800000008000000080	1	1	19	0	4
+B	800000008000000080	1	1	20	0	4
+B	800000008000000080	1	1	21	0	4
+B	800000008000000080	1	1	22	0	4
+B	800000008000000080	1	1	23	0	4
+B	800000008000000080	1	1	24	1	5
+B	800000008000000080	1	1	25	2	5
+B	800000008000000080	1	1	26	4	5
+B	800000008000000080	1	1	27	8	5
+B	800000008000000080	1	1	28	16	5
+B	800000008000000080	1	1	29	32	5
+B	800000008000000080	1	1	30	64	5
+B	800000008000000080	1	1	31	128	5
+B	800000008000000080	1	1	32	256	6
+B	800000008000000080	1	2	1	0	2
+B	800000008000000080	1	2	2	0	2
+B	800000008000000080	1	2	3	0	2
+B	800000008000000080	1	2	4	0	2
+B	800000008000000080	1	2	5	0	2
+B	800000008000000080	1	2	6	0	2
+B	800000008000000080	1	2	7	0	3
+B	800000008000000080	1	2	8	0	3
+B	800000008000000080	1	2	9	0	3
+B	800000008000000080	1	2	10	0	3
+B	800000008000000080	1	2	11	0	3
+B	800000008000000080	1	2	12	0	3
+B	800000008000000080	1	2	13	0	3
+B	800000008000000080	1	2	14	0	3
+B	800000008000000080	1	2	15	0	4
+B	800000008000000080	1	2	16	0	4
+B	800000008000000080	1	2	17	0	4
+B	800000008000000080	1	2	18	0	4
+B	800000008000000080	1	2	19	0	4
+B	800000008000000080	1	2	20	0	4
+B	800000008000000080	1	2	21	0	4
+B	800000008000000080	1	2	22	0	4
+B	800000008000000080	1	2	23	1	5
+B	800000008000000080	1	2	24	2	5
+B	800000008000000080	1	2	25	4	5
+B	800000008000000080	1	2	26	8	5
+B	800000008000000080	1	2	27	16	5
+B	800000008000000080	1	2	28	32	5
+B	800000008000000080	1	2	29	64	5
+B	800000008000000080	1	2	30	128	5
+B	800000008000000080	1	2	31	256	6
+B	800000008000000080	1	2	32	512	6
+B	800000008000000080	1	3	1	0	2
+B	800000008000000080	1	3	2	0	2
+B	800000008000000080	1	3	3	0	2
+B	800000008000000080	1	3	4	0	2
+B	800000008000000080	1	3	5	0	2
+B	800000008000000080	1	3	6	0	3
+B	800000008000000080	1	3	7	0	3
+B	800000008000000080	1	3	8	0	3
+B	800000008000000080	1	3	9	0	3
+B	800000008000000080	1	3	10	0	3
+B	800000008000000080	1	3	11	0	3
+B	800000008000000080	1	3	12	0	3
+B	800000008000000080	1	3	13	0	3
+B	800000008000000080	1	3	14	0	4
+B	800000008000000080	1	3	15	0	4
+B	800000008000000080	1	3	16	0	4
+B	800000008000000080	1	3	17	0	4
+B	800000008000000080	1	3	18	0	4
+B	800000008000000080	1	3	19	0	4
+B	800000008000000080	1	3	20	0	4
+B	800000008000000080	1	3	21	0	4
+B	800000008000000080	1	3	22	1	5
+B	800000008000000080	1	3	23	2	5
+B	800000008000000080	1	3	24	4	5
+B	800000008000000080	1	3	25	8	5
+B	800000008000000080	1	3	26	16	5
+B	800000008000000080	1	3	27	32	5
+B	800000008000000080	1	3	28	64	5
+B	800000008000000080	1	3	29	128	5
+B	800000008000000080	1	3	30	256	6
+B	800000008000000080	1	3	31	512	6
+B	800000008000000080	1	3	32	1024	6
+B	800000008000000080	1	4	1	0	2
+B	800000008000000080	1	4	2	0	2
+B	800000008000000080	1	4	3	0	2
+B	800000008000000080	1	4	4	0	2
+B	800000008000000080	1	4	5	0	3
+B	800000008000000080	1	4	6	0	3
+B	800000008000000080	1	4	7	0	3
+B	800000008000000080	1	4	8	0	3
+B	800000008000000080	1	4	9	0	3
+B	800000008000000080	1	4	10	0	3
+B	800000008000000080	1	4	11	0	3
+B	800000008000000080	1	4	12	0	3
+B	800000008000000080	1	4	13	0	4
+B	800000008000000080	1	4	14	0	4
+B	800000008000000080	1	4	15	0	4
+B	800000008000000080	1	4	16	0	4
+B	800000008000000080	1	4	17	0	4
+B	800000008000000080	1	4	18	0	4
+B	800000008000000080	1	4	19	0	4
+B	800000008000000080	1	4	20	0	4
+B	800000008000000080	1	4	21	1	5
+B	800000008000000080	1	4	22	2	5
+B	800000008000000080	1	4	23	4	5
+B	800000008000000080	1	4	24	8	5
+B	800000008000000080	1	4	25	16	5
+B	800000008000000080	1	4	26	32	5
+B	800000008000000080	1	4	27	64	5
+B	800000008000000080	1	4	28	128	5
+B	800000008000000080	1	4	29	256	6
+B	800000008000000080	1	4	30	512	6
+B	800000008000000080	1	4	31	1024	6
+B	800000008000000080	1	4	32	2048	6
+B	800000008000000080	1	5	1	0	2
+B	800000008000000080	1	5	2	0	2
+B	800000008000000080	1	5	3	0	2
+B	800000008000000080	1	5	4	0	3
+B	800000008000000080	1	5	5	0	3
+B	800000008000000080	1	5	6	0	3
+B	800000008000000080	1	5	7	0	3
+B	800000008000000080	1	5	8	0	3
+B	800000008000000080	1	5	9	0	3
+B	800000008000000080	1	5	10	0	3
+B	800000008000000080	1	5	11	0	3
+B	800000008000000080	1	5	12	0	4
+B	800000008000000080	1	5	13	0	4
+B	800000008000000080	1	5	14	0	4
+B	800000008000000080	1	5	15	0	4
+B	800000008000000080	1	5	16	0	4
+B	800000008000000080	1	5	17	0	4
+B	800000008000000080	1	5	18	0	4
+B	800000008000000080	1	5	19	0	4
+B	800000008000000080	1	5	20	1	5
+B	800000008000000080	1	5	21	2	5
+B	800000008000000080	1	5	22	4	5
+B	800000008000000080	1	5	23	8	5
+B	800000008000000080	1	5	24	16	5
+B	800000008000000080	1	5	25	32	5
+B	800000008000000080	1	5	26	64	5
+B	800000008000000080	1	5	27	128	5
+B	800000008000000080	1	5	28	256	6
+B	800000008000000080	1	5	29	512	6
+B	800000008000000080	1	5	30	1024	6
+B	800000008000000080	1	5	31	2048	6
+B	800000008000000080	1	5	32	4096	6
+B	800000008000000080	1	6	1	0	2
+B	800000008000000080	1	6	2	0	2
+B	800000008000000080	1	6	3	0	3
+B	800000008000000080	1	6	4	0	3
+B	800000008000000080	1	6	5	0	3
+B	800000008000000080	1	6	6	0	3
+B	800000008000000080	1	6	7	0	3
+B	800000008000000080	1	6	8	0	3
+B	800000008000000080	1	6	9	0	3
+B	800000008000000080	1	6	10	0	3
+B	800000008000000080	1	6	11	0	4
+B	800000008000000080	1	6	12	0	4
+B	800000008000000080	1	6	13	0	4
+B	800000008000000080	1	6	14	0	4
+B	800000008000000080	1	6	15	0	4
+B	800000008000000080	1	6	16	0	4
+B	800000008000000080	1	6	17	0	4
+B	800000008000000080	1	6	18	0	4
+B	800000008000000080	1	6	19	1	5
+B	800000008000000080	1	6	20	2	5
+B	800000008000000080	1	6	21	4	5
+B	800000008000000080	1	6	22	8	5
+B	800000008000000080	1	6	23	16	5
+B	800000008000000080	1	6	24	32	5
+B	800000008000000080	1	6	25	64	5
+B	800000008000000080	1	6	26	128	5
+B	800000008000000080	1	6	27	256	6
+B	800000008000000080	1	6	28	512	6
+B	800000008000000080	1	6	29	1024	6
+B	800000008000000080	1	6	30	2048	6
+B	800000008000000080	1	6	31	4096	6
+B	800000008000000080	1	6	32	8192	6
+B	800000008000000080	1	7	1	0	2
+B	800000008000000080	1	7	2	0	3
+B	800000008000000080	1	7	3	0	3
+B	800000008000000080	1	7	4	0	3
+B	800000008000000080	1	7	5	0	3
+B	800000008000000080	1	7	6	0	3
+B	800000008000000080	1	7	7	0	3
+B	800000008000000080	1	7	8	0	3
+B	800000008000000080	1	7	9	0	3
+B	800000008000000080	1	7	10	0	4
+B	800000008000000080	1	7	11	0	4
+B	800000008000000080	1	7	12	0	4
+B	800000008000000080	1	7	13	0	4
+B	800000008000000080	1	7	14	0	4
+B	800000008000000080	1	7	15	0	4
+B	800000008000000080	1	7	16	0	4
+B	800000008000000080	1	7	17	0	4
+B	800000008000000080	1	7	18	1	5
+B	800000008000000080	1	7	19	2	5
+B	800000008000000080	1	7	20	4	5
+B	800000008000000080	1	7	21	8	5
+B	800000008000000080	1	7	22	16	5
+B	800000008000000080	1	7	23	32	5
+B	800000008000000080	1	7	24	64	5
+B	800000008000000080	1	7	25	128	5
+B	800000008000000080	1	7	26	256	6
+B	800000008000000080	1	7	27	512	6
+B	800000008000000080	1	7	28	1024	6
+B	800000008000000080	1	7	29	2048	6
+B	800000008000000080	1	7	30	4096	6
+B	800000008000000080	1	7	31	8192	6
+B	800000008000000080	1	7	32	16384	6
+B	7fffffff7fffffff7f	1	0	1	1	2
+B	7fffffff7fffffff7f	1	0	2	3	2
+B	7fffffff7fffffff7f	1	0	3	7	2
+B	7fffffff7fffffff7f	1	0	4	15	2
+B	7fffffff7fffffff7f	1	0	5	31	2
+B	7fffffff7fffffff7f	1	0	6	63	2
+B	7fffffff7fffffff7f	1	0	7	127	2
+B	7fffffff7fffffff7f	1	0	8	255	2
+B	7fffffff7fffffff7f	1	0	9	511	3
+B	7fffffff7fffffff7f	1	0	10	1023	3
+B	7fffffff7fffffff7f	1	0	11	2047	3
+B	7fffffff7fffffff7f	1	0	12	4095	3
+B	7fffffff7fffffff7f	1	0	13	8191	3
+B	7fffffff7fffffff7f	1	0	14	16383	3
+B	7fffffff7fffffff7f	1	0	15	32767	3
+B	7fffffff7fffffff7f	1	0	16	65535	3
+B	7fffffff7fffffff7f	1	0	17	131071	4
+B	7fffffff7fffffff7f	1	0	18	262143	4
+B	7fffffff7fffffff7f	1	0	19	524287	4
+B	7fffffff7fffffff7f	1	0	20	1048575	4
+B	7fffffff7fffffff7f	1	0	21	2097151	4
+B	7fffffff7fffffff7f	1	0	22	4194303	4
+B	7fffffff7fffffff7f	1	0	23	8388607	4
+B	7fffffff7fffffff7f	1	0	24	16777215	4
+B	7fffffff7fffffff7f	1	0	25	33554430	5
+B	7fffffff7fffffff7f	1	0	26	67108861	5
+B	7fffffff7fffffff7f	1	0	27	134217723	5
+B	7fffffff7fffffff7f	1	0	28	268435447	5
+B	7fffffff7fffffff7f	1	0	29	536870895	5
+B	7fffffff7fffffff7f	1	0	30	1073741791	5
+B	7fffffff7fffffff7f	1	0	31	2147483583	5
+B	7fffffff7fffffff7f	1	0	32	-129	5
+B	7fffffff7fffffff7f	1	1	1	1	2
+B	7fffffff7fffffff7f	1	1	2	3	2
+B	7fffffff7fffffff7f	1	1	3	7	2
+B	7fffffff7fffffff7f	1	1	4	15	2
+B	7fffffff7fffffff7f	1	1	5	31	2
+B	7fffffff7fffffff7f	1	1	6	63	2
+B	7fffffff7fffffff7f	1	1	7	127	2
+B	7fffffff7fffffff7f	1	1	8	255	3
+B	7fffffff7fffffff7f	1	1	9	511	3
+B	7fffffff7fffffff7f	1	1	10	1023	3
+B	7fffffff7fffffff7f	1	1	11	2047	3
+B	7fffffff7fffffff7f	1	1	12	4095	3
+B	7fffffff7fffffff7f	1	1	13	8191	3
+B	7fffffff7fffffff7f	1	1	14	16383	3
+B	7fffffff7fffffff7f	1	1	15	32767	3
+B	7fffffff7fffffff7f	1	1	16	65535	4
+B	7fffffff7fffffff7f	1	1	17	131071	4
+B	7fffffff7fffffff7f	1	1	18	262143	4
+B	7fffffff7fffffff7f	1	1	19	524287	4
+B	7fffffff7fffffff7f	1	1	20	1048575	4
+B	7fffffff7fffffff7f	1	1	21	2097151	4
+B	7fffffff7fffffff7f	1	1	22	4194303	4
+B	7fffffff7fffffff7f	1	1	23	8388607	4
+B	7fffffff7fffffff7f	1	1	24	16777214	5
+B	7fffffff7fffffff7f	1	1	25	33554429	5
+B	7fffffff7fffffff7f	1	1	26	67108859	5
+B	7fffffff7fffffff7f	1	1	27	134217719	5
+B	7fffffff7fffffff7f	1	1	28	268435439	5
+B	7fffffff7fffffff7f	1	1	29	536870879	5
+B	7fffffff7fffffff7f	1	1	30	1073741759	5
+B	7fffffff7fffffff7f	1	1	31	2147483519	5
+B	7fffffff7fffffff7f	1	1	32	-257	6
+B	7fffffff7fffffff7f	1	2	1	1	2
+B	7fffffff7fffffff7f	1	2	2	3	2
+B	7fffffff7fffffff7f	1	2	3	7	2
+B	7fffffff7fffffff7f	1	2	4	15	2
+B	7fffffff7fffffff7f	1	2	5	31	2
+B	7fffffff7fffffff7f	1	2	6	63	2
+B	7fffffff7fffffff7f	1	2	7	127	3
+B	7fffffff7fffffff7f	1	2	8	255	3
+B	7fffffff7fffffff7f	1	2	9	511	3
+B	7fffffff7fffffff7f	1	2	10	1023	3
+B	7fffffff7fffffff7f	1	2	11	2047	3
+B	7fffffff7fffffff7f	1	2	12	4095	3
+B	7fffffff7fffffff7f	1	2	13	8191	3
+B	7fffffff7fffffff7f	1	2	14	16383	3
+B	7fffffff7fffffff7f	1	2	15	32767	4
+B	7fffffff7fffffff7f	1	2	16	65535	4
+B	7fffffff7fffffff7f	1	2	17	131071	4
+B	7fffffff7fffffff7f	1	2	18	262143	4
+B	7fffffff7fffffff7f	1	2	19	524287	4
+B	7fffffff7fffffff7f	1	2	20	1048575	4
+B	7fffffff7fffffff7f	1	2	21	2097151	4
+B	7fffffff7fffffff7f	1	2	22	4194303	4
+B	7fffffff7fffffff7f	1	2	23	8388606	5
+B	7fffffff7fffffff7f	1	2	24	16777213	5
+B	7fffffff7fffffff7f	1	2	25	33554427	5
+B	7fffffff7fffffff7f	1	2	26	67108855	5
+B	7fffffff7fffffff7f	1	2	27	134217711	5
+B	7fffffff7fffffff7f	1	2	28	268435423	5
+B	7fffffff7fffffff7f	1	2	29	536870847	5
+B	7fffffff7fffffff7f	1	2	30	1073741695	5
+B	7fffffff7fffffff7f	1	2	31	2147483391	6
+B	7fffffff7fffffff7f	1	2	32	-513	6
+B	7fffffff7fffffff7f	1	3	1	1	2
+B	7fffffff7fffffff7f	1	3	2	3	2
+B	7fffffff7fffffff7f	1	3	3	7	2
+B	7fffffff7fffffff7f	1	3	4	15	2
+B	7fffffff7fffffff7f	1	3	5	31	2
+B	7fffffff7fffffff7f	1	3	6	63	3
+B	7fffffff7fffffff7f	1	3	7	127	3
+B	7fffffff7fffffff7f	1	3	8	255	3
+B	7fffffff7fffffff7f	1	3	9	511	3
+B	7fffffff7fffffff7f	1	3	10	1023	3
+B	7fffffff7fffffff7f	1	3	11	2047	3
+B	7fffffff7fffffff7f	1	3	12	4095	3
+B	7fffffff7fffffff7f	1	3	13	8191	3
+B	7fffffff7fffffff7f	1	3	14	16383	4
+B	7fffffff7fffffff7f	1	3	15	32767	4
+B	7fffffff7fffffff7f	1	3	16	65535	4
+B	7fffffff7fffffff7f	1	3	17	131071	4
+B	7fffffff7fffffff7f	1	3	18	262143	4
+B	7fffffff7fffffff7f	1	3	19	524287	4
+B	7fffffff7fffffff7f	1	3	20	1048575	4
+B	7fffffff7fffffff7f	1	3	21	2097151	4
+B	7fffffff7fffffff7f	1	3	22	4194302	5
+B	7fffffff7fffffff7f	1	3	23	8388605	5
+B	7fffffff7fffffff7f	1	3	24	16777211	5
+B	7fffffff7fffffff7f	1	3	25	33554423	5
+B	7fffffff7fffffff7f	1	3	26	67108847	5
+B	7fffffff7fffffff7f	1	3	27	134217695	5
+B	7fffffff7fffffff7f	1	3	28	268435391	5
+B	7fffffff7fffffff7f	1	3	29	536870783	5
+B	7fffffff7fffffff7f	1	3	30	1073741567	6
+B	7fffffff7fffffff7f	1	3	31	2147483135	6
+B	7fffffff7fffffff7f	1	3	32	-1025	6
+B	7fffffff7fffffff7f	1	4	1	1	2
+B	7fffffff7fffffff7f	1	4	2	3	2
+B	7fffffff7fffffff7f	1	4	3	7	2
+B	7fffffff7fffffff7f	1	4	4	15	2
+B	7fffffff7fffffff7f	1	4	5	31	3
+B	7fffffff7fffffff7f	1	4	6	63	3
+B	7fffffff7fffffff7f	1	4	7	127	3
+B	7fffffff7fffffff7f	1	4	8	255	3
+B	7fffffff7fffffff7f	1	4	9	511	3
+B	7fffffff7fffffff7f	1	4	10	1023	3
+B	7fffffff7fffffff7f	1	4	11	2047	3
+B	7fffffff7fffffff7f	1	4	12	4095	3
+B	7fffffff7fffffff7f	1	4	13	8191	4
+B	7fffffff7fffffff7f	1	4	14	16383	4
+B	7fffffff7fffffff7f	1	4	15	32767	4
+B	7fffffff7fffffff7f	1	4	16	65535	4
+B	7fffffff7fffffff7f	1	4	17	131071	4
+B	7fffffff7fffffff7f	1	4	18	262143	4
+B	7fffffff7fffffff7f	1	4	19	524287	4
+B	7fffffff7fffffff7f	1	4	20	1048575	4
+B	7fffffff7fffffff7f	1	4	21	2097150	5
+B	7fffffff7fffffff7f	1	4	22	4194301	5
+B	7fffffff7fffffff7f	1	4	23	8388603	5
+B	7fffffff7fffffff7f	1	4	24	16777207	5
+B	7fffffff7fffffff7f	1	4	25	33554415	5
+B	7fffffff7fffffff7f	1	4	26	67108831	5
+B	7fffffff7fffffff7f	1	4	27	134217663	5
+B	7fffffff7fffffff7f	1	4	28	268435327	5
+B	7fffffff7fffffff7f	1	4	29	536870655	6
+B	7fffffff7fffffff7f	1	4	30	1073741311	6
+B	7fffffff7fffffff7f	1	4	31	2147482623	6
+B	7fffffff7fffffff7f	1	4	32	-2049	6
+B	7fffffff7fffffff7f	1	5	1	1	2
+B	7fffffff7fffffff7f	1	5	2	3	2
+B	7fffffff7fffffff7f	1	5	3	7	2
+B	7fffffff7fffffff7f	1	5	4	15	3
+B	7fffffff7fffffff7f	1	5	5	31	3
+B	7fffffff7fffffff7f	1	5	6	63	3
+B	7fffffff7fffffff7f	1	5	7	127	3
+B	7fffffff7fffffff7f	1	5	8	255	3
+B	7fffffff7fffffff7f	1	5	9	511	3
+B	7fffffff7fffffff7f	1	5	10	1023	3
+B	7fffffff7fffffff7f	1	5	11	2047	3
+B	7fffffff7fffffff7f	1	5	12	4095	4
+B	7fffffff7fffffff7f	1	5	13	8191	4
+B	7fffffff7fffffff7f	1	5	14	16383	4
+B	7fffffff7fffffff7f	1	5	15	32767	4
+B	7fffffff7fffffff7f	1	5	16	65535	4
+B	7fffffff7fffffff7f	1	5	17	131071	4
+B	7fffffff7fffffff7f	1	5	18	262143	4
+B	7fffffff7fffffff7f	1	5	19	524287	4
+B	7fffffff7fffffff7f	1	5	20	1048574	5
+B	7fffffff7fffffff7f	1	5	21	2097149	5
+B	7fffffff7fffffff7f	1	5	22	4194299	5
+B	7fffffff7fffffff7f	1	5	23	8388599	5
+B	7fffffff7fffffff7f	1	5	24	16777199	5
+B	7fffffff7fffffff7f	1	5	25	33554399	5
+B	7fffffff7fffffff7f	1	5	26	67108799	5
+B	7fffffff7fffffff7f	1	5	27	134217599	5
+B	7fffffff7fffffff7f	1	5	28	268435199	6
+B	7fffffff7fffffff7f	1	5	29	536870399	6
+B	7fffffff7fffffff7f	1	5	30	1073740799	6
+B	7fffffff7fffffff7f	1	5	31	2147481599	6
+B	7fffffff7fffffff7f	1	5	32	-4097	6
+B	7fffffff7fffffff7f	1	6	1	1	2
+B	7fffffff7fffffff7f	1	6	2	3	2
+B	7fffffff7fffffff7f	1	6	3	7	3
+B	7fffffff7fffffff7f	1	6	4	15	3
+B	7fffffff7fffffff7f	1	6	5	31	3
+B	7fffffff7fffffff7f	1	6	6	63	3
+B	7fffffff7fffffff7f	1	6	7	127	3
+B	7fffffff7fffffff7f	1	6	8	255	3
+B	7fffffff7fffffff7f	1	6	9	511	3
+B	7fffffff7fffffff7f	1	6	10	1023	3
+B	7fffffff7fffffff7f	1	6	11	2047	4
+B	7fffffff7fffffff7f	1	6	12	4095	4
+B	7fffffff7fffffff7f	1	6	13	8191	4
+B	7fffffff7fffffff7f	1	6	14	16383	4
+B	7fffffff7fffffff7f	1	6	15	32767	4
+B	7fffffff7fffffff7f	1	6	16	65535	4
+B	7fffffff7fffffff7f	1	6	17	131071	4
+B	7fffffff7fffffff7f	1	6	18	262143	4
+B	7fffffff7fffffff7f	1	6	19	524286	5
+B	7fffffff7fffffff7f	1	6	20	1048573	5
+B	7fffffff7fffffff7f	1	6	21	2097147	5
+B	7fffffff7fffffff7f	1	6	22	4194295	5
+B	7fffffff7fffffff7f	1	6	23	8388591	5
+B	7fffffff7fffffff7f	1	6	24	16777183	5
+B	7fffffff7fffffff7f	1	6	25	33554367	5
+B	7fffffff7fffffff7f	1	6	26	67108735	5
+B	7fffffff7fffffff7f	1	6	27	134217471	6
+B	7fffffff7fffffff7f	1	6	28	268434943	6
+B	7fffffff7fffffff7f	1	6	29	536869887	6
+B	7fffffff7fffffff7f	1	6	30	1073739775	6
+B	7fffffff7fffffff7f	1	6	31	2147479551	6
+B	7fffffff7fffffff7f	1	6	32	-8193	6
+B	7fffffff7fffffff7f	1	7	1	1	2
+B	7fffffff7fffffff7f	1	7	2	3	3
+B	7fffffff7fffffff7f	1	7	3	7	3
+B	7fffffff7fffffff7f	1	7	4	15	3
+B	7fffffff7fffffff7f	1	7	5	31	3
+B	7fffffff7fffffff7f	1	7	6	63	3
+B	7fffffff7fffffff7f	1	7	7	127	3
+B	7fffffff7fffffff7f	1	7	8	255	3
+B	7fffffff7fffffff7f	1	7	9	511	3
+B	7fffffff7fffffff7f	1	7	10	1023	4
+B	7fffffff7fffffff7f	1	7	11	2047	4
+B	7fffffff7fffffff7f	1	7	12	4095	4
+B	7fffffff7fffffff7f	1	7	13	8191	4
+B	7fffffff7fffffff7f	1	7	14	16383	4
+B	7fffffff7fffffff7f	1	7	15	32767	4
+B	7fffffff7fffffff7f	1	7	16	65535	4
+B	7fffffff7fffffff7f	1	7	17	131071	4
+B	7fffffff7fffffff7f	1	7	18	262142	5
+B	7fffffff7fffffff7f	1	7	19	524285	5
+B	7fffffff7fffffff7f	1	7	20	1048571	5
+B	7fffffff7fffffff7f	1	7	21	2097143	5
+B	7fffffff7fffffff7f	1	7	22	4194287	5
+B	7fffffff7fffffff7f	1	7	23	8388575	5
+B	7fffffff7fffffff7f	1	7	24	16777151	5
+B	7fffffff7fffffff7f	1	7	25	33554303	5
+B	7fffffff7fffffff7f	1	7	26	67108607	6
+B	7fffffff7fffffff7f	1	7	27	134217215	6
+B	7fffffff7fffffff7f	1	7	28	268434431	6
+B	7fffffff7fffffff7f	1	7	29	536868863	6
+B	7fffffff7fffffff7f	1	7	30	1073737727	6
+B	7fffffff7fffffff7f	1	7	31	2147475455	6
+B	7fffffff7fffffff7f	1	7	32	-16385	6
+B	0123456789abcdef55	1	0	1	0	2
+B	0123456789abcdef55	1	0	2	0	2
+B	0123456789abcdef55	1	0	3	1	2
+B	0123456789abcdef55	1	0	4	2	2
+B	0123456789abcdef55	1	0	5	4	2
+B	0123456789abcdef55	1	0	6	8	2
+B	0123456789abcdef55	1	0	7	17	2
+B	0123456789abcdef55	1	0	8	35	2
+B	0123456789abcdef55	1	0	9	70	3
+B	0123456789abcdef55	1	0	10	141	3
+B	0123456789abcdef55	1	0	11	282	3
+B	0123456789abcdef55	1	0	12	564	3
+B	0123456789abcdef55	1	0	13	1128	3
+B	0123456789abcdef55	1	0	14	2257	3
+B	0123456789abcdef55	1	0	15	4514	3
+B	0123456789abcdef55	1	0	16	9029	3
+B	0123456789abcdef55	1	0	17	18058	4
+B	0123456789abcdef55	1	0	18	36117	4
+B	0123456789abcdef55	1	0	19	72235	4
+B	0123456789abcdef55	1	0	20	144470	4
+B	0123456789abcdef55	1	0	21	288940	4
+B	0123456789abcdef55	1	0	22	577881	4
+B	0123456789abcdef55	1	0	23	1155763	4
+B	0123456789abcdef55	1	0	24	2311527	4
+B	0123456789abcdef55	1	0	25	4623055	5
+B	0123456789abcdef55	1	0	26	9246110	5
+B	0123456789abcdef55	1	0	27	18492220	5
+B	0123456789abcdef55	1	0	28	36984440	5
+B	0123456789abcdef55	1	0	29	73968881	5
+B	0123456789abcdef55	1	0	30	147937762	5
+B	0123456789abcdef55	1	0	31	295875524	5
+B	0123456789abcdef55	1	0	32	591751049	5
+B	0123456789abcdef55	1	1	1	0	2
+B	0123456789abcdef55	1	1	2	1	2
+B	0123456789abcdef55	1	1	3	2	2
+B	0123456789abcdef55	1	1	4	4	2
+B	0123456789abcdef55	1	1	5	8	2
+B	0123456789abcdef55	1	1	6	17	2
+B	0123456789abcdef55	1	1	7	35	2
+B	0123456789abcdef55	1	1	8	70	3
+B	0123456789abcdef55	1	1	9	141	3
+B	0123456789abcdef55	1	1	10	282	3
+B	0123456789abcdef55	1	1	11	564	3
+B	0123456789abcdef55	1	1	12	1128	3
+B	0123456789abcdef55	1	1	13	2257	3
+B	0123456789abcdef55	1	1	14	4514	3
+B	0123456789abcdef55	1	1	15	9029	3
+B	0123456789abcdef55	1	1	16	18058	4
+B	0123456789abcdef55	1	1	17	36117	4
+B	0123456789abcdef55	1	1	18	72235	4
+B	0123456789abcdef55	1	1	19	144470	4
+B	0123456789abcdef55	1	1	20	288940	4
+B	0123456789abcdef55	1	1	21	577881	4
+B	0123456789abcdef55	1	1	22	1155763	4
+B	0123456789abcdef55	1	1	23	2311527	4
+B	0123456789abcdef55	1	1	24	4623055	5
+B	0123456789abcdef55	1	1	25	9246110	5
+B	0123456789abcdef55	1	1	26	18492220	5
+B	0123456789abcdef55	1	1	27	36984440	5
+B	0123456789abcdef55	1	1	28	73968881	5
+B	0123456789abcdef55	1	1	29	147937762	5
+B	0123456789abcdef55	1	1	30	295875524	5
+B	0123456789abcdef55	1	1	31	591751049	5
+B	0123456789abcdef55	1	1	32	1183502099	6
+B	0123456789abcdef55	1	2	1	1	2
+B	0123456789abcdef55	1	2	2	2	2
+B	0123456789abcdef55	1	2	3	4	2
+B	0123456789abcdef55	1	2	4	8	2
+B	0123456789abcdef55	1	2	5	17	2
+B	0123456789abcdef55	1	2	6	35	2
+B	0123456789abcdef55	1	2	7	70	3
+B	0123456789abcdef55	1	2	8	141	3
+B	0123456789abcdef55	1	2	9	282	3
+B	0123456789abcdef55	1	2	10	564	3
+B	0123456789abcdef55	1	2	11	1128	3
+B	0123456789abcdef55	1	2	12	2257	3
+B	0123456789abcdef55	1	2	13	4514	3
+B	0123456789abcdef55	1	2	14	9029	3
+B	0123456789abcdef55	1	2	15	18058	4
+B	0123456789abcdef55	1	2	16	36117	4
+B	0123456789abcdef55	1	2	17	72235	4
+B	0123456789abcdef55	1	2	18	144470	4
+B	0123456789abcdef55	1	2	19	288940	4
+B	0123456789abcdef55	1	2	20	577881	4
+B	0123456789abcdef55	1	2	21	1155763	4
+B	0123456789abcdef55	1	2	22	2311527	4
+B	0123456789abcdef55	1	2	23	4623055	5
+B	0123456789abcdef55	1	2	24	9246110	5
+B	0123456789abcdef55	1	2	25	18492220	5
+B	0123456789abcdef55	1	2	26	36984440	5
+B	0123456789abcdef55	1	2	27	73968881	5
+B	0123456789abcdef55	1	2	28	147937762	5
+B	0123456789abcdef55	1	2	29	295875524	5
+B	0123456789abcdef55	1	2	30	591751049	5
+B	0123456789abcdef55	1	2	31	1183502099	6
+B	0123456789abcdef55	1	2	32	-1927963098	6
+B	0123456789abcdef55	1	3	1	0	2
+B	0123456789abcdef55	1	3	2	0	2
+B	0123456789abcdef55	1	3	3	0	2
+B	0123456789abcdef55	1	3	4	1	2
+B	0123456789abcdef55	1	3	5	3	2
+B	0123456789abcdef55	1	3	6	6	3
+B	0123456789abcdef55	1	3	7	13	3
+B	0123456789abcdef55	1	3	8	26	3
+B	0123456789abcdef55	1	3	9	52	3
+B	0123456789abcdef55	1	3	10	104	3
+B	0123456789abcdef55	1	3	11	209	3
+B	0123456789abcdef55	1	3	12	418	3
+B	0123456789abcdef55	1	3	13	837	3
+B	0123456789abcdef55	1	3	14	1674	4
+B	0123456789abcdef55	1	3	15	3349	4
+B	0123456789abcdef55	1	3	16	6699	4
+B	0123456789abcdef55	1	3	17	13398	4
+B	0123456789abcdef55	1	3	18	26796	4
+B	0123456789abcdef55	1	3	19	53593	4
+B	0123456789abcdef55	1	3	20	107187	4
+B	0123456789abcdef55	1	3	21	214375	4
+B	0123456789abcdef55	1	3	22	428751	5
+B	0123456789abcdef55	1	3	23	857502	5
+B	0123456789abcdef55	1	3	24	1715004	5
+B	0123456789abcdef55	1	3	25	3430008	5
+B	0123456789abcdef55	1	3	26	6860017	5
+B	0123456789abcdef55	1	3	27	13720034	5
+B	0123456789abcdef55	1	3	28	27440068	5
+B	0123456789abcdef55	1	3	29	54880137	5
+B	0123456789abcdef55	1	3	30	109760275	6
+B	0123456789abcdef55	1	3	31	219520550	6
+B	0123456789abcdef55	1	3	32	439041101	6
+B	0123456789abcdef55	1	4	1	0	2
+B	0123456789abcdef55	1	4	2	0	2
+B	0123456789abcdef55	1	4	3	1	2
+B	0123456789abcdef55	1	4	4	3	2
+B	0123456789abcdef55	1	4	5	6	3
+B	0123456789abcdef55	1	4	6	13	3
+B	0123456789abcdef55	1	4	7	26	3
+B	0123456789abcdef55	1	4	8	52	3
+B	0123456789abcdef55	1	4	9	104	3
+B	0123456789abcdef55	1	4	10	209	3
+B	0123456789abcdef55	1	4	11	418	3
+B	0123456789abcdef55	1	4	12	837	3
+B	0123456789abcdef55	1	4	13	1674	4
+B	0123456789abcdef55	1	4	14	3349	4
+B	0123456789abcdef55	1	4	15	6699	4
+B	0123456789abcdef55	1	4	16	13398	4
+B	0123456789abcdef55	1	4	17	26796	4
+B	0123456789abcdef55	1	4	18	53593	4
+B	0123456789abcdef55	1	4	19	107187	4
+B	0123456789abcdef55	1	4	20	214375	4
+B	0123456789abcdef55	1	4	21	428751	5
+B	0123456789abcdef55	1	4	22	857502	5
+B	0123456789abcdef55	1	4	23	1715004	5
+B	0123456789abcdef55	1	4	24	3430008	5
+B	0123456789abcdef55	1	4	25	6860017	5
+B	0123456789abcdef55	1	4	26	13720034	5
+B	0123456789abcdef55	1	4	27	27440068	5
+B	0123456789abcdef55	1	4	28	54880137	5
+B	0123456789abcdef55	1	4	29	109760275	6
+B	0123456789abcdef55	1	4	30	219520550	6
+B	0123456789abcdef55	1	4	31	439041101	6
+B	0123456789abcdef55	1	4	32	878082202	6
+B	0123456789abcdef55	1	5	1	0	2
+B	0123456789abcdef55	1	5	2	1	2
+B	0123456789abcdef55	1	5	3	3	2
+B	0123456789abcdef55	1	5	4	6	3
+B	0123456789abcdef55	1	5	5	13	3
+B	0123456789abcdef55	1	5	6	26	3
+B	0123456789abcdef55	1	5	7	52	3
+B	0123456789abcdef55	1	5	8	104	3
+B	0123456789abcdef55	1	5	9	209	3
+B	0123456789abcdef55	1	5	10	418	3
+B	0123456789abcdef55	1	5	11	837	3
+B	0123456789abcdef55	1	5	12	1674	4
+B	0123456789abcdef55	1	5	13	3349	4
+B	0123456789abcdef55	1	5	14	6699	4
+B	0123456789abcdef55	1	5	15	13398	4
+B	0123456789abcdef55	1	5	16	26796	4
+B	0123456789abcdef55	1	5	17	53593	4
+B	0123456789abcdef55	1	5	18	107187	4
+B	0123456789abcdef55	1	5	19	214375	4
+B	0123456789abcdef55	1	5	20	428751	5
+B	0123456789abcdef55	1	5	21	857502	5
+B	0123456789abcdef55	1	5	22	1715004	5
+B	0123456789abcdef55	1	5	23	3430008	5
+B	0123456789abcdef55	1	5	24	6860017	5
+B	0123456789abcdef55	1	5	25	13720034	5
+B	0123456789abcdef55	1	5	26	27440068	5
+B	0123456789abcdef55	1	5	27	54880137	5
+B	0123456789abcdef55	1	5	28	109760275	6
+B	0123456789abcdef55	1	5	29	219520550	6
+B	0123456789abcdef55	1	5	30	439041101	6
+B	0123456789abcdef55	1	5	31	878082202	6
+B	0123456789abcdef55	1	5	32	1756164405	6
+B	0123456789abcdef55	1	6	1	1	2
+B	0123456789abcdef55	1	6	2	3	2
+B	0123456789abcdef55	1	6	3	6	3
+B	0123456789abcdef55	1	6	4	13	3
+B	0123456789abcdef55	1	6	5	26	3
+B	0123456789abcdef55	1	6	6	52	3
+B	0123456789abcdef55	1	6	7	104	3
+B	0123456789abcdef55	1	6	8	209	3
+B	0123456789abcdef55	1	6	9	418	3
+B	0123456789abcdef55	1	6	10	837	3
+B	0123456789abcdef55	1	6	11	1674	4
+B	0123456789abcdef55	1	6	12	3349	4
+B	0123456789abcdef55	1	6	13	6699	4
+B	0123456789abcdef55	1	6	14	13398	4
+B	0123456789abcdef55	1	6	15	26796	4
+B	0123456789abcdef55	1	6	16	53593	4
+B	0123456789abcdef55	1	6	17	107187	4
+B	0123456789abcdef55	1	6	18	214375	4
+B	0123456789abcdef55	1	6	19	428751	5
+B	0123456789abcdef55	1	6	20	857502	5
+B	0123456789abcdef55	1	6	21	1715004	5
+B	0123456789abcdef55	1	6	22	3430008	5
+B	0123456789abcdef55	1	6	23	6860017	5
+B	0123456789abcdef55	1	6	24	13720034	5
+B	0123456789abcdef55	1	6	25	27440068	5
+B	0123456789abcdef55	1	6	26	54880137	5
+B	0123456789abcdef55	1	6	27	109760275	6
+B	0123456789abcdef55	1	6	28	219520550	6
+B	0123456789abcdef55	1	6	29	439041101	6
+B	0123456789abcdef55	1	6	30	878082202	6
+B	0123456789abcdef55	1	6	31	1756164405	6
+B	0123456789abcdef55	1	6	32	-782638486	6
+B	0123456789abcdef55	1	7	1	1	2
+B	0123456789abcdef55	1	7	2	2	3
+B	0123456789abcdef55	1	7	3	5	3
+B	0123456789abcdef55	1	7	4	10	3
+B	0123456789abcdef55	1	7	5	20	3
+B	0123456789abcdef55	1	7	6	40	3
+B	0123456789abcdef55	1	7	7	81	3
+B	0123456789abcdef55	1	7	8	162	3
+B	0123456789abcdef55	1	7	9	325	3
+B	0123456789abcdef55	1	7	10	650	4
+B	0123456789abcdef55	1	7	11	1301	4
+B	0123456789abcdef55	1	7	12	2603	4
+B	0123456789abcdef55	1	7	13	5206	4
+B	0123456789abcdef55	1	7	14	10412	4
+B	0123456789abcdef55	1	7	15	20825	4
+B	0123456789abcdef55	1	7	16	41651	4
+B	0123456789abcdef55	1	7	17	83303	4
+B	0123456789abcdef55	1	7	18	166607	5
+B	0123456789abcdef55	1	7	19	333214	5
+B	0123456789abcdef55	1	7	20	666428	5
+B	0123456789abcdef55	1	7	21	1332856	5
+B	0123456789abcdef55	1	7	22	2665713	5
+B	0123456789abcdef55	1	7	23	5331426	5
+B	0123456789abcdef55	1	7	24	10662852	5
+B	0123456789abcdef55	1	7	25	21325705	5
+B	0123456789abcdef55	1	7	26	42651411	6
+B	0123456789abcdef55	1	7	27	85302822	6
+B	0123456789abcdef55	1	7	28	170605645	6
+B	0123456789abcdef55	1	7	29	341211290	6
+B	0123456789abcdef55	1	7	30	682422581	6
+B	0123456789abcdef55	1	7	31	1364845162	6
+B	0123456789abcdef55	1	7	32	-1565276971	6
+B	fedcba9876543210aa	1	0	1	1	2
+B	fedcba9876543210aa	1	0	2	3	2
+B	fedcba9876543210aa	1	0	3	6	2
+B	fedcba9876543210aa	1	0	4	13	2
+B	fedcba9876543210aa	1	0	5	27	2
+B	fedcba9876543210aa	1	0	6	55	2
+B	fedcba9876543210aa	1	0	7	110	2
+B	fedcba9876543210aa	1	0	8	220	2
+B	fedcba9876543210aa	1	0	9	441	3
+B	fedcba9876543210aa	1	0	10	882	3
+B	fedcba9876543210aa	1	0	11	1765	3
+B	fedcba9876543210aa	1	0	12	3531	3
+B	fedcba9876543210aa	1	0	13	7063	3
+B	fedcba9876543210aa	1	0	14	14126	3
+B	fedcba9876543210aa	1	0	15	28253	3
+B	fedcba9876543210aa	1	0	16	56506	3
+B	fedcba9876543210aa	1	0	17	113013	4
+B	fedcba9876543210aa	1	0	18	226026	4
+B	fedcba9876543210aa	1	0	19	452052	4
+B	fedcba9876543210aa	1	0	20	904105	4
+B	fedcba9876543210aa	1	0	21	1808211	4
+B	fedcba9876543210aa	1	0	22	3616422	4
+B	fedcba9876543210aa	1	0	23	7232844	4
+B	fedcba9876543210aa	1	0	24	14465688	4
+B	fedcba9876543210aa	1	0	25	28931376	5
+B	fedcba9876543210aa	1	0	26	57862753	5
+B	fedcba9876543210aa	1	0	27	115725507	5
+B	fedcba9876543210aa	1	0	28	231451015	5
+B	fedcba9876543210aa	1	0	29	462902030	5
+B	fedcba9876543210aa	1	0	30	925804061	5
+B	fedcba9876543210aa	1	0	31	1851608123	5
+B	fedcba9876543210aa	1	0	32	-591751050	5
+B	fedcba9876543210aa	1	1	1	1	2
+B	fedcba9876543210aa	1	1	2	2	2
+B	fedcba9876543210aa	1	1	3	5	2
+B	fedcba9876543210aa	1	1	4	11	2
+B	fedcba9876543210aa	1	1	5	23	2
+B	fedcba9876543210aa	1	1	6	46	2
+B	fedcba9876543210aa	1	1	7	92	2
+B	fedcba9876543210aa	1	1	8	185	3
+B	fedcba9876543210aa	1	1	9	370	3
+B	fedcba9876543210aa	1	1	10	741	3
+B	fedcba9876543210aa	1	1	11	1483	3
+B	fedcba9876543210aa	1	1	12	2967	3
+B	fedcba9876543210aa	1	1	13	5934	3
+B	fedcba9876543210aa	1	1	14	11869	3
+B	fedcba9876543210aa	1	1	15	23738	3
+B	fedcba9876543210aa	1	1	16	47477	4
+B	fedcba9876543210aa	1	1	17	94954	4
+B	fedcba9876543210aa	1	1	18	189908	4
+B	fedcba9876543210aa	1	1	19	379817	4
+B	fedcba9876543210aa	1	1	20	759635	4
+B	fedcba9876543210aa	1	1	21	1519270	4
+B	fedcba9876543210aa	1	1	22	3038540	4
+B	fedcba9876543210aa	1	1	23	6077080	4
+B	fedcba9876543210aa	1	1	24	12154160	5
+B	fedcba9876543210aa	1	1	25	24308321	5
+B	fedcba9876543210aa	1	1	26	48616643	5
+B	fedcba9876543210aa	1	1	27	97233287	5
+B	fedcba9876543210aa	1	1	28	194466574	5
+B	fedcba9876543210aa	1	1	29	388933149	5
+B	fedcba9876543210aa	1	1	30	777866299	5
+B	fedcba9876543210aa	1	1	31	1555732598	5
+B	fedcba9876543210aa	1	1	32	-1183502100	6
+B	fedcba9876543210aa	1	2	1	0	2
+B	fedcba9876543210aa	1	2	2	1	2
+B	fedcba9876543210aa	1	2	3	3	2
+B	fedcba9876543210aa	1	2	4	7	2
+B	fedcba9876543210aa	1	2	5	14	2
+B	fedcba9876543210aa	1	2	6	28	2
+B	fedcba9876543210aa	1	2	7	57	3
+B	fedcba9876543210aa	1	2	8	114	3
+B	fedcba9876543210aa	1	2	9	229	3
+B	fedcba9876543210aa	1	2	10	459	3
+B	fedcba9876543210aa	1	2	11	919	3
+B	fedcba9876543210aa	1	2	12	1838	3
+B	fedcba9876543210aa	1	2	13	3677	3
+B	fedcba9876543210aa	1	2	14	7354	3
+B	fedcba9876543210aa	1	2	15	14709	4
+B	fedcba9876543210aa	1	2	16	29418	4
+B	fedcba9876543210aa	1	2	17	58836	4
+B	fedcba9876543210aa	1	2	18	117673	4
+B	fedcba9876543210aa	1	2	19	235347	4
+B	fedcba9876543210aa	1	2	20	470694	4
+B	fedcba9876543210aa	1	2	21	941388	4
+B	fedcba9876543210aa	1	2	22	1882776	4
+B	fedcba9876543210aa	1	2	23	3765552	5
+B	fedcba9876543210aa	1	2	24	7531105	5
+B	fedcba9876543210aa	1	2	25	15062211	5
+B	fedcba9876543210aa	1	2	26	30124423	5
+B	fedcba9876543210aa	1	2	27	60248846	5
+B	fedcba9876543210aa	1	2	28	120497693	5
+B	fedcba9876543210aa	1	2	29	240995387	5
+B	fedcba9876543210aa	1	2	30	481990774	5
+B	fedcba9876543210aa	1	2	31	963981548	6
+B	fedcba9876543210aa	1	2	32	1927963097	6
+B	fedcba9876543210aa	1	3	1	1	2
+B	fedcba9876543210aa	1	3	2	3	2
+B	fedcba9876543210aa	1	3	3	7	2
+B	fedcba9876543210aa	1	3	4	14	2
+B	fedcba9876543210aa	1	3	5	28	2
+B	fedcba9876543210aa	1	3	6	57	3
+B	fedcba9876543210aa	1	3	7	114	3
+B	fedcba9876543210aa	1	3	8	229	3
+B	fedcba9876543210aa	1	3	9	459	3
+B	fedcba9876543210aa	1	3	10	919	3
+B	fedcba9876543210aa	1	3	11	1838	3
+B	fedcba9876543210aa	1	3	12	3677	3
+B	fedcba9876543210aa	1	3	13	7354	3
+B	fedcba9876543210aa	1	3	14	14709	4
+B	fedcba9876543210aa	1	3	15	29418	4
+B	fedcba9876543210aa	1	3	16	58836	4
+B	fedcba9876543210aa	1	3	17	117673	4
+B	fedcba9876543210aa	1	3	18	235347	4
+B	fedcba9876543210aa	1	3	19	470694	4
+B	fedcba9876543210aa	1	3	20	941388	4
+B	fedcba9876543210aa	1	3	21	1882776	4
+B	fedcba9876543210aa	1	3	22	3765552	5
+B	fedcba9876543210aa	1	3	23	7531105	5
+B	fedcba9876543210aa	1	3	24	15062211	5
+B	fedcba9876543210aa	1	3	25	30124423	5
+B	fedcba9876543210aa	1	3	26	60248846	5
+B	fedcba9876543210aa	1	3	27	120497693	5
+B	fedcba9876543210aa	1	3	28	240995387	5
+B	fedcba9876543210aa	1	3	29	481990774	5
+B	fedcba9876543210aa	1	3	30	963981548	6
+B	fedcba9876543210aa	1	3	31	1927963097	6
+B	fedcba9876543210aa	1	3	32	-439041102	6
+B	fedcba9876543210aa	1	4	1	1	2
+B	fedcba9876543210aa	1	4	2	3	2
+B	fedcba9876543210aa	1	4	3	6	2
+B	fedcba9876543210aa	1	4	4	12	2
+B	fedcba9876543210aa	1	4	5	25	3
+B	fedcba9876543210aa	1	4	6	50	3
+B	fedcba9876543210aa	1	4	7	101	3
+B	fedcba9876543210aa	1	4	8	203	3
+B	fedcba9876543210aa	1	4	9	407	3
+B	fedcba9876543210aa	1	4	10	814	3
+B	fedcba9876543210aa	1	4	11	1629	3
+B	fedcba9876543210aa	1	4	12	3258	3
+B	fedcba9876543210aa	1	4	13	6517	4
+B	fedcba9876543210aa	1	4	14	13034	4
+B	fedcba9876543210aa	1	4	15	26068	4
+B	fedcba9876543210aa	1	4	16	52137	4
+B	fedcba9876543210aa	1	4	17	104275	4
+B	fedcba9876543210aa	1	4	18	208550	4
+B	fedcba9876543210aa	1	4	19	417100	4
+B	fedcba9876543210aa	1	4	20	834200	4
+B	fedcba9876543210aa	1	4	21	1668400	5
+B	fedcba9876543210aa	1	4	22	3336801	5
+B	fedcba9876543210aa	1	4	23	6673603	5
+B	fedcba9876543210aa	1	4	24	13347207	5
+B	fedcba9876543210aa	1	4	25	26694414	5
+B	fedcba9876543210aa	1	4	26	53388829	5
+B	fedcba9876543210aa	1	4	27	106777659	5
+B	fedcba9876543210aa	1	4	28	213555318	5
+B	fedcba9876543210aa	1	4	29	427110636	6
+B	fedcba9876543210aa	1	4	30	854221273	6
+B	fedcba9876543210aa	1	4	31	1708442546	6
+B	fedcba9876543210aa	1	4	32	-878082203	6
+B	fedcba9876543210aa	1	5	1	1	2
+B	fedcba9876543210aa	1	5	2	2	2
+B	fedcba9876543210aa	1	5	3	4	2
+B	fedcba9876543210aa	1	5	4	9	3
+B	fedcba9876543210aa	1	5	5	18	3
+B	fedcba9876543210aa	1	5	6	37	3
+B	fedcba9876543210aa	1	5	7	75	3
+B	fedcba9876543210aa	1	5	8	151	3
+B	fedcba9876543210aa	1	5	9	302	3
+B	fedcba9876543210aa	1	5	10	605	3
+B	fedcba9876543210aa	1	5	11	1210	3
+B	fedcba9876543210aa	1	5	12	2421	4
+B	fedcba9876543210aa	1	5	13	4842	4
+B	fedcba9876543210aa	1	5	14	9684	4
+B	fedcba9876543210aa	1	5	15	19369	4
+B	fedcba9876543210aa	1	5	16	38739	4
+B	fedcba9876543210aa	1	5	17	77478	4
+B	fedcba9876543210aa	1	5	18	154956	4
+B	fedcba9876543210aa	1	5	19	309912	4
+B	fedcba9876543210aa	1	5	20	619824	5
+B	fedcba9876543210aa	1	5	21	1239649	5
+B	fedcba9876543210aa	1	5	22	2479299	5
+B	fedcba9876543210aa	1	5	23	4958599	5
+B	fedcba9876543210aa	1	5	24	9917198	5
+B	fedcba9876543210aa	1	5	25	19834397	5
+B	fedcba9876543210aa	1	5	26	39668795	5
+B	fedcba9876543210aa	1	5	27	79337590	5
+B	fedcba9876543210aa	1	5	28	158675180	6
+B	fedcba9876543210aa	1	5	29	317350361	6
+B	fedcba9876543210aa	1	5	30	634700722	6
+B	fedcba9876543210aa	1	5	31	1269401445	6
+B	fedcba9876543210aa	1	5	32	-1756164406	6
+B	fedcba9876543210aa	1	6	1	0	2
+B	fedcba9876543210aa	1	6	2	0	2
+B	fedcba9876543210aa	1	6	3	1	3
+B	fedcba9876543210aa	1	6	4	2	3
+B	fedcba9876543210aa	1	6	5	5	3
+B	fedcba9876543210aa	1	6	6	11	3
+B	fedcba9876543210aa	1	6	7	23	3
+B	fedcba9876543210aa	1	6	8	46	3
+B	fedcba9876543210aa	1	6	9	93	3
+B	fedcba9876543210aa	1	6	10	186	3
+B	fedcba9876543210aa	1	6	11	373	4
+B	fedcba9876543210aa	1	6	12	746	4
+B	fedcba9876543210aa	1	6	13	1492	4
+B	fedcba9876543210aa	1	6	14	2985	4
+B	fedcba9876543210aa	1	6	15	5971	4
+B	fedcba9876543210aa	1	6	16	11942	4
+B	fedcba9876543210aa	1	6	17	23884	4
+B	fedcba9876543210aa	1	6	18	47768	4
+B	fedcba9876543210aa	1	6	19	95536	5
+B	fedcba9876543210aa	1	6	20	191073	5
+B	fedcba9876543210aa	1	6	21	382147	5
+B	fedcba9876543210aa	1	6	22	764295	5
+B	fedcba9876543210aa	1	6	23	1528590	5
+B	fedcba9876543210aa	1	6	24	3057181	5
+B	fedcba9876543210aa	1	6	25	6114363	5
+B	fedcba9876543210aa	1	6	26	12228726	5
+B	fedcba9876543210aa	1	6	27	24457452	6
+B	fedcba9876543210aa	1	6	28	48914905	6
+B	fedcba9876543210aa	1	6	29	97829810	6
+B	fedcba9876543210aa	1	6	30	195659621	6
+B	fedcba9876543210aa	1	6	31	391319242	6
+B	fedcba9876543210aa	1	6	32	782638485	6
+B	fedcba9876543210aa	1	7	1	0	2
+B	fedcba9876543210aa	1	7	2	1	3
+B	fedcba9876543210aa	1	7	3	2	3
+B	fedcba9876543210aa	1	7	4	5	3
+B	fedcba9876543210aa	1	7	5	11	3
+B	fedcba9876543210aa	1	7	6	23	3
+B	fedcba9876543210aa	1	7	7	46	3
+B	fedcba9876543210aa	1	7	8	93	3
+B	fedcba9876543210aa	1	7	9	186	3
+B	fedcba9876543210aa	1	7	10	373	4
+B	fedcba9876543210aa	1	7	11	746	4
+B	fedcba9876543210aa	1	7	12	1492	4
+B	fedcba9876543210aa	1	7	13	2985	4
+B	fedcba9876543210aa	1	7	14	5971	4
+B	fedcba9876543210aa	1	7	15	11942	4
+B	fedcba9876543210aa	1	7	16	23884	4
+B	fedcba9876543210aa	1	7	17	47768	4
+B	fedcba9876543210aa	1	7	18	95536	5
+B	fedcba9876543210aa	1	7	19	191073	5
+B	fedcba9876543210aa	1	7	20	382147	5
+B	fedcba9876543210aa	1	7	21	764295	5
+B	fedcba9876543210aa	1	7	22	1528590	5
+B	fedcba9876543210aa	1	7	23	3057181	5
+B	fedcba9876543210aa	1	7	24	6114363	5
+B	fedcba9876543210aa	1	7	25	12228726	5
+B	fedcba9876543210aa	1	7	26	24457452	6
+B	fedcba9876543210aa	1	7	27	48914905	6
+B	fedcba9876543210aa	1	7	28	97829810	6
+B	fedcba9876543210aa	1	7	29	195659621	6
+B	fedcba9876543210aa	1	7	30	391319242	6
+B	fedcba9876543210aa	1	7	31	782638485	6
+B	fedcba9876543210aa	1	7	32	1565276970	6
+B	aa55aa55aa55aa55aa	1	0	1	0	2
+B	aa55aa55aa55aa55aa	1	0	2	1	2
+B	aa55aa55aa55aa55aa	1	0	3	2	2
+B	aa55aa55aa55aa55aa	1	0	4	5	2
+B	aa55aa55aa55aa55aa	1	0	5	10	2
+B	aa55aa55aa55aa55aa	1	0	6	21	2
+B	aa55aa55aa55aa55aa	1	0	7	42	2
+B	aa55aa55aa55aa55aa	1	0	8	85	2
+B	aa55aa55aa55aa55aa	1	0	9	171	3
+B	aa55aa55aa55aa55aa	1	0	10	342	3
+B	aa55aa55aa55aa55aa	1	0	11	685	3
+B	aa55aa55aa55aa55aa	1	0	12	1370	3
+B	aa55aa55aa55aa55aa	1	0	13	2741	3
+B	aa55aa55aa55aa55aa	1	0	14	5482	3
+B	aa55aa55aa55aa55aa	1	0	15	10965	3
+B	aa55aa55aa55aa55aa	1	0	16	21930	3
+B	aa55aa55aa55aa55aa	1	0	17	43860	4
+B	aa55aa55aa55aa55aa	1	0	18	87721	4
+B	aa55aa55aa55aa55aa	1	0	19	175442	4
+B	aa55aa55aa55aa55aa	1	0	20	350885	4
+B	aa55aa55aa55aa55aa	1	0	21	701770	4
+B	aa55aa55aa55aa55aa	1	0	22	1403541	4
+B	aa55aa55aa55aa55aa	1	0	23	2807082	4
+B	aa55aa55aa55aa55aa	1	0	24	5614165	4
+B	aa55aa55aa55aa55aa	1	0	25	11228331	5
+B	aa55aa55aa55aa55aa	1	0	26	22456662	5
+B	aa55aa55aa55aa55aa	1	0	27	44913325	5
+B	aa55aa55aa55aa55aa	1	0	28	89826650	5
+B	aa55aa55aa55aa55aa	1	0	29	179653301	5
+B	aa55aa55aa55aa55aa	1	0	30	359306602	5
+B	aa55aa55aa55aa55aa	1	0	31	718613205	5
+B	aa55aa55aa55aa55aa	1	0	32	1437226410	5
+B	aa55aa55aa55aa55aa	1	1	1	1	2
+B	aa55aa55aa55aa55aa	1	1	2	2	2
+B	aa55aa55aa55aa55aa	1	1	3	5	2
+B	aa55aa55aa55aa55aa	1	1	4	10	2
+B	aa55aa55aa55aa55aa	1	1	5	21	2
+B	aa55aa55aa55aa55aa	1	1	6	42	2
+B	aa55aa55aa55aa55aa	1	1	7	85	2
+B	aa55aa55aa55aa55aa	1	1	8	171	3
+B	aa55aa55aa55aa55aa	1	1	9	342	3
+B	aa55aa55aa55aa55aa	1	1	10	685	3
+B	aa55aa55aa55aa55aa	1	1	11	1370	3
+B	aa55aa55aa55aa55aa	1	1	12	2741	3
+B	aa55aa55aa55aa55aa	1	1	13	5482	3
+B	aa55aa55aa55aa55aa	1	1	14	10965	3
+B	aa55aa55aa55aa55aa	1	1	15	21930	3
+B	aa55aa55aa55aa55aa	1	1	16	43860	4
+B	aa55aa55aa55aa55aa	1	1	17	87721	4
+B	aa55aa55aa55aa55aa	1	1	18	175442	4
+B	aa55aa55aa55aa55aa	1	1	19	350885	4
+B	aa55aa55aa55aa55aa	1	1	20	701770	4
+B	aa55aa55aa55aa55aa	1	1	21	1403541	4
+B	aa55aa55aa55aa55aa	1	1	22	2807082	4
+B	aa55aa55aa55aa55aa	1	1	23	5614165	4
+B	aa55aa55aa55aa55aa	1	1	24	11228331	5
+B	aa55aa55aa55aa55aa	1	1	25	22456662	5
+B	aa55aa55aa55aa55aa	1	1	26	44913325	5
+B	aa55aa55aa55aa55aa	1	1	27	89826650	5
+B	aa55aa55aa55aa55aa	1	1	28	179653301	5
+B	aa55aa55aa55aa55aa	1	1	29	359306602	5
+B	aa55aa55aa55aa55aa	1	1	30	718613205	5
+B	aa55aa55aa55aa55aa	1	1	31	1437226410	5
+B	aa55aa55aa55aa55aa	1	1	32	-1420514476	6
+B	aa55aa55aa55aa55aa	1	2	1	0	2
+B	aa55aa55aa55aa55aa	1	2	2	1	2
+B	aa55aa55aa55aa55aa	1	2	3	2	2
+B	aa55aa55aa55aa55aa	1	2	4	5	2
+B	aa55aa55aa55aa55aa	1	2	5	10	2
+B	aa55aa55aa55aa55aa	1	2	6	21	2
+B	aa55aa55aa55aa55aa	1	2	7	43	3
+B	aa55aa55aa55aa55aa	1	2	8	86	3
+B	aa55aa55aa55aa55aa	1	2	9	173	3
+B	aa55aa55aa55aa55aa	1	2	10	346	3
+B	aa55aa55aa55aa55aa	1	2	11	693	3
+B	aa55aa55aa55aa55aa	1	2	12	1386	3
+B	aa55aa55aa55aa55aa	1	2	13	2773	3
+B	aa55aa55aa55aa55aa	1	2	14	5546	3
+B	aa55aa55aa55aa55aa	1	2	15	11092	4
+B	aa55aa55aa55aa55aa	1	2	16	22185	4
+B	aa55aa55aa55aa55aa	1	2	17	44370	4
+B	aa55aa55aa55aa55aa	1	2	18	88741	4
+B	aa55aa55aa55aa55aa	1	2	19	177482	4
+B	aa55aa55aa55aa55aa	1	2	20	354965	4
+B	aa55aa55aa55aa55aa	1	2	21	709930	4
+B	aa55aa55aa55aa55aa	1	2	22	1419861	4
+B	aa55aa55aa55aa55aa	1	2	23	2839723	5
+B	aa55aa55aa55aa55aa	1	2	24	5679446	5
+B	aa55aa55aa55aa55aa	1	2	25	11358893	5
+B	aa55aa55aa55aa55aa	1	2	26	22717786	5
+B	aa55aa55aa55aa55aa	1	2	27	45435573	5
+B	aa55aa55aa55aa55aa	1	2	28	90871146	5
+B	aa55aa55aa55aa55aa	1	2	29	181742293	5
+B	aa55aa55aa55aa55aa	1	2	30	363484586	5
+B	aa55aa55aa55aa55aa	1	2	31	726969172	6
+B	aa55aa55aa55aa55aa	1	2	32	1453938345	6
+B	aa55aa55aa55aa55aa	1	3	1	1	2
+B	aa55aa55aa55aa55aa	1	3	2	2	2
+B	aa55aa55aa55aa55aa	1	3	3	5	2
+B	aa55aa55aa55aa55aa	1	3	4	10	2
+B	aa55aa55aa55aa55aa	1	3	5	21	2
+B	aa55aa55aa55aa55aa	1	3	6	43	3
+B	aa55aa55aa55aa55aa	1	3	7	86	3
+B	aa55aa55aa55aa55aa	1	3	8	173	3
+B	aa55aa55aa55aa55aa	1	3	9	346	3
+B	aa55aa55aa55aa55aa	1	3	10	693	3
+B	aa55aa55aa55aa55aa	1	3	11	1386	3
+B	aa55aa55aa55aa55aa	1	3	12	2773	3
+B	aa55aa55aa55aa55aa	1	3	13	5546	3
+B	aa55aa55aa55aa55aa	1	3	14	11092	4
+B	aa55aa55aa55aa55aa	1	3	15	22185	4
+B	aa55aa55aa55aa55aa	1	3	16	44370	4
+B	aa55aa55aa55aa55aa	1	3	17	88741	4
+B	aa55aa55aa55aa55aa	1	3	18	177482	4
+B	aa55aa55aa55aa55aa	1	3	19	354965	4
+B	aa55aa55aa55aa55aa	1	3	20	709930	4
+B	aa55aa55aa55aa55aa	1	3	21	1419861	4
+B	aa55aa55aa55aa55aa	1	3	22	2839723	5
+B	aa55aa55aa55aa55aa	1	3	23	5679446	5
+B	aa55aa55aa55aa55aa	1	3	24	11358893	5
+B	aa55aa55aa55aa55aa	1	3	25	22717786	5
+B	aa55aa55aa55aa55aa	1	3	26	45435573	5
+B	aa55aa55aa55aa55aa	1	3	27	90871146	5
+B	aa55aa55aa55aa55aa	1	3	28	181742293	5
+B	aa55aa55aa55aa55aa	1	3	29	363484586	5
+B	aa55aa55aa55aa55aa	1	3	30	726969172	6
+B	aa55aa55aa55aa55aa	1	3	31	1453938345	6
+B	aa55aa55aa55aa55aa	1	3	32	-1387090606	6
+B	aa55aa55aa55aa55aa	1	4	1	0	2
+B	aa55aa55aa55aa55aa	1	4	2	1	2
+B	aa55aa55aa55aa55aa	1	4	3	2	2
+B	aa55aa55aa55aa55aa	1	4	4	5	2
+B	aa55aa55aa55aa55aa	1	4	5	11	3
+B	aa55aa55aa55aa55aa	1	4	6	22	3
+B	aa55aa55aa55aa55aa	1	4	7	45	3
+B	aa55aa55aa55aa55aa	1	4	8	90	3
+B	aa55aa55aa55aa55aa	1	4	9	181	3
+B	aa55aa55aa55aa55aa	1	4	10	362	3
+B	aa55aa55aa55aa55aa	1	4	11	725	3
+B	aa55aa55aa55aa55aa	1	4	12	1450	3
+B	aa55aa55aa55aa55aa	1	4	13	2900	4
+B	aa55aa55aa55aa55aa	1	4	14	5801	4
+B	aa55aa55aa55aa55aa	1	4	15	11602	4
+B	aa55aa55aa55aa55aa	1	4	16	23205	4
+B	aa55aa55aa55aa55aa	1	4	17	46410	4
+B	aa55aa55aa55aa55aa	1	4	18	92821	4
+B	aa55aa55aa55aa55aa	1	4	19	185642	4
+B	aa55aa55aa55aa55aa	1	4	20	371285	4
+B	aa55aa55aa55aa55aa	1	4	21	742571	5
+B	aa55aa55aa55aa55aa	1	4	22	1485142	5
+B	aa55aa55aa55aa55aa	1	4	23	2970285	5
+B	aa55aa55aa55aa55aa	1	4	24	5940570	5
+B	aa55aa55aa55aa55aa	1	4	25	11881141	5
+B	aa55aa55aa55aa55aa	1	4	26	23762282	5
+B	aa55aa55aa55aa55aa	1	4	27	47524565	5
+B	aa55aa55aa55aa55aa	1	4	28	95049130	5
+B	aa55aa55aa55aa55aa	1	4	29	190098260	6
+B	aa55aa55aa55aa55aa	1	4	30	380196521	6
+B	aa55aa55aa55aa55aa	1	4	31	760393042	6
+B	aa55aa55aa55aa55aa	1	4	32	1520786085	6
+B	aa55aa55aa55aa55aa	1	5	1	1	2
+B	aa55aa55aa55aa55aa	1	5	2	2	2
+B	aa55aa55aa55aa55aa	1	5	3	5	2
+B	aa55aa55aa55aa55aa	1	5	4	11	3
+B	aa55aa55aa55aa55aa	1	5	5	22	3
+B	aa55aa55aa55aa55aa	1	5	6	45	3
+B	aa55aa55aa55aa55aa	1	5	7	90	3
+B	aa55aa55aa55aa55aa	1	5	8	181	3
+B	aa55aa55aa55aa55aa	1	5	9	362	3
+B	aa55aa55aa55aa55aa	1	5	10	725	3
+B	aa55aa55aa55aa55aa	1	5	11	1450	3
+B	aa55aa55aa55aa55aa	1	5	12	2900	4
+B	aa55aa55aa55aa55aa	1	5	13	5801	4
+B	aa55aa55aa55aa55aa	1	5	14	11602	4
+B	aa55aa55aa55aa55aa	1	5	15	23205	4
+B	aa55aa55aa55aa55aa	1	5	16	46410	4
+B	aa55aa55aa55aa55aa	1	5	17	92821	4
+B	aa55aa55aa55aa55aa	1	5	18	185642	4
+B	aa55aa55aa55aa55aa	1	5	19	371285	4
+B	aa55aa55aa55aa55aa	1	5	20	742571	5
+B	aa55aa55aa55aa55aa	1	5	21	1485142	5
+B	aa55aa55aa55aa55aa	1	5	22	2970285	5
+B	aa55aa55aa55aa55aa	1	5	23	5940570	5
+B	aa55aa55aa55aa55aa	1	5	24	11881141	5
+B	aa55aa55aa55aa55aa	1	5	25	23762282	5
+B	aa55aa55aa55aa55aa	1	5	26	47524565	5
+B	aa55aa55aa55aa55aa	1	5	27	95049130	5
+B	aa55aa55aa55aa55aa	1	5	28	190098260	6
+B	aa55aa55aa55aa55aa	1	5	29	380196521	6
+B	aa55aa55aa55aa55aa	1	5	30	760393042	6
+B	aa55aa55aa55aa55aa	1	5	31	1520786085	6
+B	aa55aa55aa55aa55aa	1	5	32	-1253395126	6
+B	aa55aa55aa55aa55aa	1	6	1	0	2
+B	aa55aa55aa55aa55aa	1	6	2	1	2
+B	aa55aa55aa55aa55aa	1	6	3	3	3
+B	aa55aa55aa55aa55aa	1	6	4	6	3
+B	aa55aa55aa55aa55aa	1	6	5	13	3
+B	aa55aa55aa55aa55aa	1	6	6	26	3
+B	aa55aa55aa55aa55aa	1	6	7	53	3
+B	aa55aa55aa55aa55aa	1	6	8	106	3
+B	aa55aa55aa55aa55aa	1	6	9	213	3
+B	aa55aa55aa55aa55aa	1	6	10	426	3
+B	aa55aa55aa55aa55aa	1	6	11	852	4
+B	aa55aa55aa55aa55aa	1	6	12	1705	4
+B	aa55aa55aa55aa55aa	1	6	13	3410	4
+B	aa55aa55aa55aa55aa	1	6	14	6821	4
+B	aa55aa55aa55aa55aa	1	6	15	13642	4
+B	aa55aa55aa55aa55aa	1	6	16	27285	4
+B	aa55aa55aa55aa55aa	1	6	17	54570	4
+B	aa55aa55aa55aa55aa	1	6	18	109141	4
+B	aa55aa55aa55aa55aa	1	6	19	218283	5
+B	aa55aa55aa55aa55aa	1	6	20	436566	5
+B	aa55aa55aa55aa55aa	1	6	21	873133	5
+B	aa55aa55aa55aa55aa	1	6	22	1746266	5
+B	aa55aa55aa55aa55aa	1	6	23	3492533	5
+B	aa55aa55aa55aa55aa	1	6	24	6985066	5
+B	aa55aa55aa55aa55aa	1	6	25	13970133	5
+B	aa55aa55aa55aa55aa	1	6	26	27940266	5
+B	aa55aa55aa55aa55aa	1	6	27	55880532	6
+B	aa55aa55aa55aa55aa	1	6	28	111761065	6
+B	aa55aa55aa55aa55aa	1	6	29	223522130	6
+B	aa55aa55aa55aa55aa	1	6	30	447044261	6
+B	aa55aa55aa55aa55aa	1	6	31	894088522	6
+B	aa55aa55aa55aa55aa	1	6	32	1788177045	6
+B	aa55aa55aa55aa55aa	1	7	1	1	2
+B	aa55aa55aa55aa55aa	1	7	2	3	3
+B	aa55aa55aa55aa55aa	1	7	3	6	3
+B	aa55aa55aa55aa55aa	1	7	4	13	3
+B	aa55aa55aa55aa55aa	1	7	5	26	3
+B	aa55aa55aa55aa55aa	1	7	6	53	3
+B	aa55aa55aa55aa55aa	1	7	7	106	3
+B	aa55aa55aa55aa55aa	1	7	8	213	3
+B	aa55aa55aa55aa55aa	1	7	9	426	3
+B	aa55aa55aa55aa55aa	1	7	10	852	4
+B	aa55aa55aa55aa55aa	1	7	11	1705	4
+B	aa55aa55aa55aa55aa	1	7	12	3410	4
+B	aa55aa55aa55aa55aa	1	7	13	6821	4
+B	aa55aa55aa55aa55aa	1	7	14	13642	4
+B	aa55aa55aa55aa55aa	1	7	15	27285	4
+B	aa55aa55aa55aa55aa	1	7	16	54570	4
+B	aa55aa55aa55aa55aa	1	7	17	109141	4
+B	aa55aa55aa55aa55aa	1	7	18	218283	5
+B	aa55aa55aa55aa55aa	1	7	19	436566	5
+B	aa55aa55aa55aa55aa	1	7	20	873133	5
+B	aa55aa55aa55aa55aa	1	7	21	1746266	5
+B	aa55aa55aa55aa55aa	1	7	22	3492533	5
+B	aa55aa55aa55aa55aa	1	7	23	6985066	5
+B	aa55aa55aa55aa55aa	1	7	24	13970133	5
+B	aa55aa55aa55aa55aa	1	7	25	27940266	5
+B	aa55aa55aa55aa55aa	1	7	26	55880532	6
+B	aa55aa55aa55aa55aa	1	7	27	111761065	6
+B	aa55aa55aa55aa55aa	1	7	28	223522130	6
+B	aa55aa55aa55aa55aa	1	7	29	447044261	6
+B	aa55aa55aa55aa55aa	1	7	30	894088522	6
+B	aa55aa55aa55aa55aa	1	7	31	1788177045	6
+B	aa55aa55aa55aa55aa	1	7	32	-718613206	6
+S	writeString		00
+S	writeJagString		0000
+S	writeString	00520075006e006500530063006100700065	52756e65536361706500
+S	writeJagString	00520075006e006500530063006100700065	0052756e65536361706500
+S	writeString	0001007f00a000ff	017fa0ff00
+S	writeJagString	0001007f00a000ff	00017fa0ff00
+S	writeString	20ac201a0192201e20262020202102c62030016020390152017d20182019201c201d20222013201402dc21220161203a0153017e0178	8082838485868788898a8b8c8e9192939495969798999a9b9c9e9f00
+S	writeJagString	20ac201a0192201e20262020202102c62030016020390152017d20182019201c201d20222013201402dc21220161203a0153017e0178	008082838485868788898a8b8c8e9192939495969798999a9b9c9e9f00
+S	writeString	00800081009f01004e2d	3f3f3f3f3f00
+S	writeJagString	00800081009f01004e2d	003f3f3f3f3f00
+S	writeString	d83dde00d834dd1e003f	3f3f3f3f3f00
+S	writeJagString	d83dde00d834dd1e003f	003f3f3f3f3f00
+T	readString	000055		1
+T	readNullString	000055	-	1
+T	readJagString	00000055		2
+T	readString	010055	0001	2
+T	readNullString	010055	0001	2
+T	readJagString	00010055	0001	3
+T	readString	020055	0002	2
+T	readNullString	020055	0002	2
+T	readJagString	00020055	0002	3
+T	readString	030055	0003	2
+T	readNullString	030055	0003	2
+T	readJagString	00030055	0003	3
+T	readString	040055	0004	2
+T	readNullString	040055	0004	2
+T	readJagString	00040055	0004	3
+T	readString	050055	0005	2
+T	readNullString	050055	0005	2
+T	readJagString	00050055	0005	3
+T	readString	060055	0006	2
+T	readNullString	060055	0006	2
+T	readJagString	00060055	0006	3
+T	readString	070055	0007	2
+T	readNullString	070055	0007	2
+T	readJagString	00070055	0007	3
+T	readString	080055	0008	2
+T	readNullString	080055	0008	2
+T	readJagString	00080055	0008	3
+T	readString	090055	0009	2
+T	readNullString	090055	0009	2
+T	readJagString	00090055	0009	3
+T	readString	0a0055	000a	2
+T	readNullString	0a0055	000a	2
+T	readJagString	000a0055	000a	3
+T	readString	0b0055	000b	2
+T	readNullString	0b0055	000b	2
+T	readJagString	000b0055	000b	3
+T	readString	0c0055	000c	2
+T	readNullString	0c0055	000c	2
+T	readJagString	000c0055	000c	3
+T	readString	0d0055	000d	2
+T	readNullString	0d0055	000d	2
+T	readJagString	000d0055	000d	3
+T	readString	0e0055	000e	2
+T	readNullString	0e0055	000e	2
+T	readJagString	000e0055	000e	3
+T	readString	0f0055	000f	2
+T	readNullString	0f0055	000f	2
+T	readJagString	000f0055	000f	3
+T	readString	100055	0010	2
+T	readNullString	100055	0010	2
+T	readJagString	00100055	0010	3
+T	readString	110055	0011	2
+T	readNullString	110055	0011	2
+T	readJagString	00110055	0011	3
+T	readString	120055	0012	2
+T	readNullString	120055	0012	2
+T	readJagString	00120055	0012	3
+T	readString	130055	0013	2
+T	readNullString	130055	0013	2
+T	readJagString	00130055	0013	3
+T	readString	140055	0014	2
+T	readNullString	140055	0014	2
+T	readJagString	00140055	0014	3
+T	readString	150055	0015	2
+T	readNullString	150055	0015	2
+T	readJagString	00150055	0015	3
+T	readString	160055	0016	2
+T	readNullString	160055	0016	2
+T	readJagString	00160055	0016	3
+T	readString	170055	0017	2
+T	readNullString	170055	0017	2
+T	readJagString	00170055	0017	3
+T	readString	180055	0018	2
+T	readNullString	180055	0018	2
+T	readJagString	00180055	0018	3
+T	readString	190055	0019	2
+T	readNullString	190055	0019	2
+T	readJagString	00190055	0019	3
+T	readString	1a0055	001a	2
+T	readNullString	1a0055	001a	2
+T	readJagString	001a0055	001a	3
+T	readString	1b0055	001b	2
+T	readNullString	1b0055	001b	2
+T	readJagString	001b0055	001b	3
+T	readString	1c0055	001c	2
+T	readNullString	1c0055	001c	2
+T	readJagString	001c0055	001c	3
+T	readString	1d0055	001d	2
+T	readNullString	1d0055	001d	2
+T	readJagString	001d0055	001d	3
+T	readString	1e0055	001e	2
+T	readNullString	1e0055	001e	2
+T	readJagString	001e0055	001e	3
+T	readString	1f0055	001f	2
+T	readNullString	1f0055	001f	2
+T	readJagString	001f0055	001f	3
+T	readString	200055	0020	2
+T	readNullString	200055	0020	2
+T	readJagString	00200055	0020	3
+T	readString	210055	0021	2
+T	readNullString	210055	0021	2
+T	readJagString	00210055	0021	3
+T	readString	220055	0022	2
+T	readNullString	220055	0022	2
+T	readJagString	00220055	0022	3
+T	readString	230055	0023	2
+T	readNullString	230055	0023	2
+T	readJagString	00230055	0023	3
+T	readString	240055	0024	2
+T	readNullString	240055	0024	2
+T	readJagString	00240055	0024	3
+T	readString	250055	0025	2
+T	readNullString	250055	0025	2
+T	readJagString	00250055	0025	3
+T	readString	260055	0026	2
+T	readNullString	260055	0026	2
+T	readJagString	00260055	0026	3
+T	readString	270055	0027	2
+T	readNullString	270055	0027	2
+T	readJagString	00270055	0027	3
+T	readString	280055	0028	2
+T	readNullString	280055	0028	2
+T	readJagString	00280055	0028	3
+T	readString	290055	0029	2
+T	readNullString	290055	0029	2
+T	readJagString	00290055	0029	3
+T	readString	2a0055	002a	2
+T	readNullString	2a0055	002a	2
+T	readJagString	002a0055	002a	3
+T	readString	2b0055	002b	2
+T	readNullString	2b0055	002b	2
+T	readJagString	002b0055	002b	3
+T	readString	2c0055	002c	2
+T	readNullString	2c0055	002c	2
+T	readJagString	002c0055	002c	3
+T	readString	2d0055	002d	2
+T	readNullString	2d0055	002d	2
+T	readJagString	002d0055	002d	3
+T	readString	2e0055	002e	2
+T	readNullString	2e0055	002e	2
+T	readJagString	002e0055	002e	3
+T	readString	2f0055	002f	2
+T	readNullString	2f0055	002f	2
+T	readJagString	002f0055	002f	3
+T	readString	300055	0030	2
+T	readNullString	300055	0030	2
+T	readJagString	00300055	0030	3
+T	readString	310055	0031	2
+T	readNullString	310055	0031	2
+T	readJagString	00310055	0031	3
+T	readString	320055	0032	2
+T	readNullString	320055	0032	2
+T	readJagString	00320055	0032	3
+T	readString	330055	0033	2
+T	readNullString	330055	0033	2
+T	readJagString	00330055	0033	3
+T	readString	340055	0034	2
+T	readNullString	340055	0034	2
+T	readJagString	00340055	0034	3
+T	readString	350055	0035	2
+T	readNullString	350055	0035	2
+T	readJagString	00350055	0035	3
+T	readString	360055	0036	2
+T	readNullString	360055	0036	2
+T	readJagString	00360055	0036	3
+T	readString	370055	0037	2
+T	readNullString	370055	0037	2
+T	readJagString	00370055	0037	3
+T	readString	380055	0038	2
+T	readNullString	380055	0038	2
+T	readJagString	00380055	0038	3
+T	readString	390055	0039	2
+T	readNullString	390055	0039	2
+T	readJagString	00390055	0039	3
+T	readString	3a0055	003a	2
+T	readNullString	3a0055	003a	2
+T	readJagString	003a0055	003a	3
+T	readString	3b0055	003b	2
+T	readNullString	3b0055	003b	2
+T	readJagString	003b0055	003b	3
+T	readString	3c0055	003c	2
+T	readNullString	3c0055	003c	2
+T	readJagString	003c0055	003c	3
+T	readString	3d0055	003d	2
+T	readNullString	3d0055	003d	2
+T	readJagString	003d0055	003d	3
+T	readString	3e0055	003e	2
+T	readNullString	3e0055	003e	2
+T	readJagString	003e0055	003e	3
+T	readString	3f0055	003f	2
+T	readNullString	3f0055	003f	2
+T	readJagString	003f0055	003f	3
+T	readString	400055	0040	2
+T	readNullString	400055	0040	2
+T	readJagString	00400055	0040	3
+T	readString	410055	0041	2
+T	readNullString	410055	0041	2
+T	readJagString	00410055	0041	3
+T	readString	420055	0042	2
+T	readNullString	420055	0042	2
+T	readJagString	00420055	0042	3
+T	readString	430055	0043	2
+T	readNullString	430055	0043	2
+T	readJagString	00430055	0043	3
+T	readString	440055	0044	2
+T	readNullString	440055	0044	2
+T	readJagString	00440055	0044	3
+T	readString	450055	0045	2
+T	readNullString	450055	0045	2
+T	readJagString	00450055	0045	3
+T	readString	460055	0046	2
+T	readNullString	460055	0046	2
+T	readJagString	00460055	0046	3
+T	readString	470055	0047	2
+T	readNullString	470055	0047	2
+T	readJagString	00470055	0047	3
+T	readString	480055	0048	2
+T	readNullString	480055	0048	2
+T	readJagString	00480055	0048	3
+T	readString	490055	0049	2
+T	readNullString	490055	0049	2
+T	readJagString	00490055	0049	3
+T	readString	4a0055	004a	2
+T	readNullString	4a0055	004a	2
+T	readJagString	004a0055	004a	3
+T	readString	4b0055	004b	2
+T	readNullString	4b0055	004b	2
+T	readJagString	004b0055	004b	3
+T	readString	4c0055	004c	2
+T	readNullString	4c0055	004c	2
+T	readJagString	004c0055	004c	3
+T	readString	4d0055	004d	2
+T	readNullString	4d0055	004d	2
+T	readJagString	004d0055	004d	3
+T	readString	4e0055	004e	2
+T	readNullString	4e0055	004e	2
+T	readJagString	004e0055	004e	3
+T	readString	4f0055	004f	2
+T	readNullString	4f0055	004f	2
+T	readJagString	004f0055	004f	3
+T	readString	500055	0050	2
+T	readNullString	500055	0050	2
+T	readJagString	00500055	0050	3
+T	readString	510055	0051	2
+T	readNullString	510055	0051	2
+T	readJagString	00510055	0051	3
+T	readString	520055	0052	2
+T	readNullString	520055	0052	2
+T	readJagString	00520055	0052	3
+T	readString	530055	0053	2
+T	readNullString	530055	0053	2
+T	readJagString	00530055	0053	3
+T	readString	540055	0054	2
+T	readNullString	540055	0054	2
+T	readJagString	00540055	0054	3
+T	readString	550055	0055	2
+T	readNullString	550055	0055	2
+T	readJagString	00550055	0055	3
+T	readString	560055	0056	2
+T	readNullString	560055	0056	2
+T	readJagString	00560055	0056	3
+T	readString	570055	0057	2
+T	readNullString	570055	0057	2
+T	readJagString	00570055	0057	3
+T	readString	580055	0058	2
+T	readNullString	580055	0058	2
+T	readJagString	00580055	0058	3
+T	readString	590055	0059	2
+T	readNullString	590055	0059	2
+T	readJagString	00590055	0059	3
+T	readString	5a0055	005a	2
+T	readNullString	5a0055	005a	2
+T	readJagString	005a0055	005a	3
+T	readString	5b0055	005b	2
+T	readNullString	5b0055	005b	2
+T	readJagString	005b0055	005b	3
+T	readString	5c0055	005c	2
+T	readNullString	5c0055	005c	2
+T	readJagString	005c0055	005c	3
+T	readString	5d0055	005d	2
+T	readNullString	5d0055	005d	2
+T	readJagString	005d0055	005d	3
+T	readString	5e0055	005e	2
+T	readNullString	5e0055	005e	2
+T	readJagString	005e0055	005e	3
+T	readString	5f0055	005f	2
+T	readNullString	5f0055	005f	2
+T	readJagString	005f0055	005f	3
+T	readString	600055	0060	2
+T	readNullString	600055	0060	2
+T	readJagString	00600055	0060	3
+T	readString	610055	0061	2
+T	readNullString	610055	0061	2
+T	readJagString	00610055	0061	3
+T	readString	620055	0062	2
+T	readNullString	620055	0062	2
+T	readJagString	00620055	0062	3
+T	readString	630055	0063	2
+T	readNullString	630055	0063	2
+T	readJagString	00630055	0063	3
+T	readString	640055	0064	2
+T	readNullString	640055	0064	2
+T	readJagString	00640055	0064	3
+T	readString	650055	0065	2
+T	readNullString	650055	0065	2
+T	readJagString	00650055	0065	3
+T	readString	660055	0066	2
+T	readNullString	660055	0066	2
+T	readJagString	00660055	0066	3
+T	readString	670055	0067	2
+T	readNullString	670055	0067	2
+T	readJagString	00670055	0067	3
+T	readString	680055	0068	2
+T	readNullString	680055	0068	2
+T	readJagString	00680055	0068	3
+T	readString	690055	0069	2
+T	readNullString	690055	0069	2
+T	readJagString	00690055	0069	3
+T	readString	6a0055	006a	2
+T	readNullString	6a0055	006a	2
+T	readJagString	006a0055	006a	3
+T	readString	6b0055	006b	2
+T	readNullString	6b0055	006b	2
+T	readJagString	006b0055	006b	3
+T	readString	6c0055	006c	2
+T	readNullString	6c0055	006c	2
+T	readJagString	006c0055	006c	3
+T	readString	6d0055	006d	2
+T	readNullString	6d0055	006d	2
+T	readJagString	006d0055	006d	3
+T	readString	6e0055	006e	2
+T	readNullString	6e0055	006e	2
+T	readJagString	006e0055	006e	3
+T	readString	6f0055	006f	2
+T	readNullString	6f0055	006f	2
+T	readJagString	006f0055	006f	3
+T	readString	700055	0070	2
+T	readNullString	700055	0070	2
+T	readJagString	00700055	0070	3
+T	readString	710055	0071	2
+T	readNullString	710055	0071	2
+T	readJagString	00710055	0071	3
+T	readString	720055	0072	2
+T	readNullString	720055	0072	2
+T	readJagString	00720055	0072	3
+T	readString	730055	0073	2
+T	readNullString	730055	0073	2
+T	readJagString	00730055	0073	3
+T	readString	740055	0074	2
+T	readNullString	740055	0074	2
+T	readJagString	00740055	0074	3
+T	readString	750055	0075	2
+T	readNullString	750055	0075	2
+T	readJagString	00750055	0075	3
+T	readString	760055	0076	2
+T	readNullString	760055	0076	2
+T	readJagString	00760055	0076	3
+T	readString	770055	0077	2
+T	readNullString	770055	0077	2
+T	readJagString	00770055	0077	3
+T	readString	780055	0078	2
+T	readNullString	780055	0078	2
+T	readJagString	00780055	0078	3
+T	readString	790055	0079	2
+T	readNullString	790055	0079	2
+T	readJagString	00790055	0079	3
+T	readString	7a0055	007a	2
+T	readNullString	7a0055	007a	2
+T	readJagString	007a0055	007a	3
+T	readString	7b0055	007b	2
+T	readNullString	7b0055	007b	2
+T	readJagString	007b0055	007b	3
+T	readString	7c0055	007c	2
+T	readNullString	7c0055	007c	2
+T	readJagString	007c0055	007c	3
+T	readString	7d0055	007d	2
+T	readNullString	7d0055	007d	2
+T	readJagString	007d0055	007d	3
+T	readString	7e0055	007e	2
+T	readNullString	7e0055	007e	2
+T	readJagString	007e0055	007e	3
+T	readString	7f0055	007f	2
+T	readNullString	7f0055	007f	2
+T	readJagString	007f0055	007f	3
+T	readString	800055	20ac	2
+T	readNullString	800055	20ac	2
+T	readJagString	00800055	20ac	3
+T	readString	810055	003f	2
+T	readNullString	810055	003f	2
+T	readJagString	00810055	003f	3
+T	readString	820055	201a	2
+T	readNullString	820055	201a	2
+T	readJagString	00820055	201a	3
+T	readString	830055	0192	2
+T	readNullString	830055	0192	2
+T	readJagString	00830055	0192	3
+T	readString	840055	201e	2
+T	readNullString	840055	201e	2
+T	readJagString	00840055	201e	3
+T	readString	850055	2026	2
+T	readNullString	850055	2026	2
+T	readJagString	00850055	2026	3
+T	readString	860055	2020	2
+T	readNullString	860055	2020	2
+T	readJagString	00860055	2020	3
+T	readString	870055	2021	2
+T	readNullString	870055	2021	2
+T	readJagString	00870055	2021	3
+T	readString	880055	02c6	2
+T	readNullString	880055	02c6	2
+T	readJagString	00880055	02c6	3
+T	readString	890055	2030	2
+T	readNullString	890055	2030	2
+T	readJagString	00890055	2030	3
+T	readString	8a0055	0160	2
+T	readNullString	8a0055	0160	2
+T	readJagString	008a0055	0160	3
+T	readString	8b0055	2039	2
+T	readNullString	8b0055	2039	2
+T	readJagString	008b0055	2039	3
+T	readString	8c0055	0152	2
+T	readNullString	8c0055	0152	2
+T	readJagString	008c0055	0152	3
+T	readString	8d0055	003f	2
+T	readNullString	8d0055	003f	2
+T	readJagString	008d0055	003f	3
+T	readString	8e0055	017d	2
+T	readNullString	8e0055	017d	2
+T	readJagString	008e0055	017d	3
+T	readString	8f0055	003f	2
+T	readNullString	8f0055	003f	2
+T	readJagString	008f0055	003f	3
+T	readString	900055	003f	2
+T	readNullString	900055	003f	2
+T	readJagString	00900055	003f	3
+T	readString	910055	2018	2
+T	readNullString	910055	2018	2
+T	readJagString	00910055	2018	3
+T	readString	920055	2019	2
+T	readNullString	920055	2019	2
+T	readJagString	00920055	2019	3
+T	readString	930055	201c	2
+T	readNullString	930055	201c	2
+T	readJagString	00930055	201c	3
+T	readString	940055	201d	2
+T	readNullString	940055	201d	2
+T	readJagString	00940055	201d	3
+T	readString	950055	2022	2
+T	readNullString	950055	2022	2
+T	readJagString	00950055	2022	3
+T	readString	960055	2013	2
+T	readNullString	960055	2013	2
+T	readJagString	00960055	2013	3
+T	readString	970055	2014	2
+T	readNullString	970055	2014	2
+T	readJagString	00970055	2014	3
+T	readString	980055	02dc	2
+T	readNullString	980055	02dc	2
+T	readJagString	00980055	02dc	3
+T	readString	990055	2122	2
+T	readNullString	990055	2122	2
+T	readJagString	00990055	2122	3
+T	readString	9a0055	0161	2
+T	readNullString	9a0055	0161	2
+T	readJagString	009a0055	0161	3
+T	readString	9b0055	203a	2
+T	readNullString	9b0055	203a	2
+T	readJagString	009b0055	203a	3
+T	readString	9c0055	0153	2
+T	readNullString	9c0055	0153	2
+T	readJagString	009c0055	0153	3
+T	readString	9d0055	003f	2
+T	readNullString	9d0055	003f	2
+T	readJagString	009d0055	003f	3
+T	readString	9e0055	017e	2
+T	readNullString	9e0055	017e	2
+T	readJagString	009e0055	017e	3
+T	readString	9f0055	0178	2
+T	readNullString	9f0055	0178	2
+T	readJagString	009f0055	0178	3
+T	readString	a00055	00a0	2
+T	readNullString	a00055	00a0	2
+T	readJagString	00a00055	00a0	3
+T	readString	a10055	00a1	2
+T	readNullString	a10055	00a1	2
+T	readJagString	00a10055	00a1	3
+T	readString	a20055	00a2	2
+T	readNullString	a20055	00a2	2
+T	readJagString	00a20055	00a2	3
+T	readString	a30055	00a3	2
+T	readNullString	a30055	00a3	2
+T	readJagString	00a30055	00a3	3
+T	readString	a40055	00a4	2
+T	readNullString	a40055	00a4	2
+T	readJagString	00a40055	00a4	3
+T	readString	a50055	00a5	2
+T	readNullString	a50055	00a5	2
+T	readJagString	00a50055	00a5	3
+T	readString	a60055	00a6	2
+T	readNullString	a60055	00a6	2
+T	readJagString	00a60055	00a6	3
+T	readString	a70055	00a7	2
+T	readNullString	a70055	00a7	2
+T	readJagString	00a70055	00a7	3
+T	readString	a80055	00a8	2
+T	readNullString	a80055	00a8	2
+T	readJagString	00a80055	00a8	3
+T	readString	a90055	00a9	2
+T	readNullString	a90055	00a9	2
+T	readJagString	00a90055	00a9	3
+T	readString	aa0055	00aa	2
+T	readNullString	aa0055	00aa	2
+T	readJagString	00aa0055	00aa	3
+T	readString	ab0055	00ab	2
+T	readNullString	ab0055	00ab	2
+T	readJagString	00ab0055	00ab	3
+T	readString	ac0055	00ac	2
+T	readNullString	ac0055	00ac	2
+T	readJagString	00ac0055	00ac	3
+T	readString	ad0055	00ad	2
+T	readNullString	ad0055	00ad	2
+T	readJagString	00ad0055	00ad	3
+T	readString	ae0055	00ae	2
+T	readNullString	ae0055	00ae	2
+T	readJagString	00ae0055	00ae	3
+T	readString	af0055	00af	2
+T	readNullString	af0055	00af	2
+T	readJagString	00af0055	00af	3
+T	readString	b00055	00b0	2
+T	readNullString	b00055	00b0	2
+T	readJagString	00b00055	00b0	3
+T	readString	b10055	00b1	2
+T	readNullString	b10055	00b1	2
+T	readJagString	00b10055	00b1	3
+T	readString	b20055	00b2	2
+T	readNullString	b20055	00b2	2
+T	readJagString	00b20055	00b2	3
+T	readString	b30055	00b3	2
+T	readNullString	b30055	00b3	2
+T	readJagString	00b30055	00b3	3
+T	readString	b40055	00b4	2
+T	readNullString	b40055	00b4	2
+T	readJagString	00b40055	00b4	3
+T	readString	b50055	00b5	2
+T	readNullString	b50055	00b5	2
+T	readJagString	00b50055	00b5	3
+T	readString	b60055	00b6	2
+T	readNullString	b60055	00b6	2
+T	readJagString	00b60055	00b6	3
+T	readString	b70055	00b7	2
+T	readNullString	b70055	00b7	2
+T	readJagString	00b70055	00b7	3
+T	readString	b80055	00b8	2
+T	readNullString	b80055	00b8	2
+T	readJagString	00b80055	00b8	3
+T	readString	b90055	00b9	2
+T	readNullString	b90055	00b9	2
+T	readJagString	00b90055	00b9	3
+T	readString	ba0055	00ba	2
+T	readNullString	ba0055	00ba	2
+T	readJagString	00ba0055	00ba	3
+T	readString	bb0055	00bb	2
+T	readNullString	bb0055	00bb	2
+T	readJagString	00bb0055	00bb	3
+T	readString	bc0055	00bc	2
+T	readNullString	bc0055	00bc	2
+T	readJagString	00bc0055	00bc	3
+T	readString	bd0055	00bd	2
+T	readNullString	bd0055	00bd	2
+T	readJagString	00bd0055	00bd	3
+T	readString	be0055	00be	2
+T	readNullString	be0055	00be	2
+T	readJagString	00be0055	00be	3
+T	readString	bf0055	00bf	2
+T	readNullString	bf0055	00bf	2
+T	readJagString	00bf0055	00bf	3
+T	readString	c00055	00c0	2
+T	readNullString	c00055	00c0	2
+T	readJagString	00c00055	00c0	3
+T	readString	c10055	00c1	2
+T	readNullString	c10055	00c1	2
+T	readJagString	00c10055	00c1	3
+T	readString	c20055	00c2	2
+T	readNullString	c20055	00c2	2
+T	readJagString	00c20055	00c2	3
+T	readString	c30055	00c3	2
+T	readNullString	c30055	00c3	2
+T	readJagString	00c30055	00c3	3
+T	readString	c40055	00c4	2
+T	readNullString	c40055	00c4	2
+T	readJagString	00c40055	00c4	3
+T	readString	c50055	00c5	2
+T	readNullString	c50055	00c5	2
+T	readJagString	00c50055	00c5	3
+T	readString	c60055	00c6	2
+T	readNullString	c60055	00c6	2
+T	readJagString	00c60055	00c6	3
+T	readString	c70055	00c7	2
+T	readNullString	c70055	00c7	2
+T	readJagString	00c70055	00c7	3
+T	readString	c80055	00c8	2
+T	readNullString	c80055	00c8	2
+T	readJagString	00c80055	00c8	3
+T	readString	c90055	00c9	2
+T	readNullString	c90055	00c9	2
+T	readJagString	00c90055	00c9	3
+T	readString	ca0055	00ca	2
+T	readNullString	ca0055	00ca	2
+T	readJagString	00ca0055	00ca	3
+T	readString	cb0055	00cb	2
+T	readNullString	cb0055	00cb	2
+T	readJagString	00cb0055	00cb	3
+T	readString	cc0055	00cc	2
+T	readNullString	cc0055	00cc	2
+T	readJagString	00cc0055	00cc	3
+T	readString	cd0055	00cd	2
+T	readNullString	cd0055	00cd	2
+T	readJagString	00cd0055	00cd	3
+T	readString	ce0055	00ce	2
+T	readNullString	ce0055	00ce	2
+T	readJagString	00ce0055	00ce	3
+T	readString	cf0055	00cf	2
+T	readNullString	cf0055	00cf	2
+T	readJagString	00cf0055	00cf	3
+T	readString	d00055	00d0	2
+T	readNullString	d00055	00d0	2
+T	readJagString	00d00055	00d0	3
+T	readString	d10055	00d1	2
+T	readNullString	d10055	00d1	2
+T	readJagString	00d10055	00d1	3
+T	readString	d20055	00d2	2
+T	readNullString	d20055	00d2	2
+T	readJagString	00d20055	00d2	3
+T	readString	d30055	00d3	2
+T	readNullString	d30055	00d3	2
+T	readJagString	00d30055	00d3	3
+T	readString	d40055	00d4	2
+T	readNullString	d40055	00d4	2
+T	readJagString	00d40055	00d4	3
+T	readString	d50055	00d5	2
+T	readNullString	d50055	00d5	2
+T	readJagString	00d50055	00d5	3
+T	readString	d60055	00d6	2
+T	readNullString	d60055	00d6	2
+T	readJagString	00d60055	00d6	3
+T	readString	d70055	00d7	2
+T	readNullString	d70055	00d7	2
+T	readJagString	00d70055	00d7	3
+T	readString	d80055	00d8	2
+T	readNullString	d80055	00d8	2
+T	readJagString	00d80055	00d8	3
+T	readString	d90055	00d9	2
+T	readNullString	d90055	00d9	2
+T	readJagString	00d90055	00d9	3
+T	readString	da0055	00da	2
+T	readNullString	da0055	00da	2
+T	readJagString	00da0055	00da	3
+T	readString	db0055	00db	2
+T	readNullString	db0055	00db	2
+T	readJagString	00db0055	00db	3
+T	readString	dc0055	00dc	2
+T	readNullString	dc0055	00dc	2
+T	readJagString	00dc0055	00dc	3
+T	readString	dd0055	00dd	2
+T	readNullString	dd0055	00dd	2
+T	readJagString	00dd0055	00dd	3
+T	readString	de0055	00de	2
+T	readNullString	de0055	00de	2
+T	readJagString	00de0055	00de	3
+T	readString	df0055	00df	2
+T	readNullString	df0055	00df	2
+T	readJagString	00df0055	00df	3
+T	readString	e00055	00e0	2
+T	readNullString	e00055	00e0	2
+T	readJagString	00e00055	00e0	3
+T	readString	e10055	00e1	2
+T	readNullString	e10055	00e1	2
+T	readJagString	00e10055	00e1	3
+T	readString	e20055	00e2	2
+T	readNullString	e20055	00e2	2
+T	readJagString	00e20055	00e2	3
+T	readString	e30055	00e3	2
+T	readNullString	e30055	00e3	2
+T	readJagString	00e30055	00e3	3
+T	readString	e40055	00e4	2
+T	readNullString	e40055	00e4	2
+T	readJagString	00e40055	00e4	3
+T	readString	e50055	00e5	2
+T	readNullString	e50055	00e5	2
+T	readJagString	00e50055	00e5	3
+T	readString	e60055	00e6	2
+T	readNullString	e60055	00e6	2
+T	readJagString	00e60055	00e6	3
+T	readString	e70055	00e7	2
+T	readNullString	e70055	00e7	2
+T	readJagString	00e70055	00e7	3
+T	readString	e80055	00e8	2
+T	readNullString	e80055	00e8	2
+T	readJagString	00e80055	00e8	3
+T	readString	e90055	00e9	2
+T	readNullString	e90055	00e9	2
+T	readJagString	00e90055	00e9	3
+T	readString	ea0055	00ea	2
+T	readNullString	ea0055	00ea	2
+T	readJagString	00ea0055	00ea	3
+T	readString	eb0055	00eb	2
+T	readNullString	eb0055	00eb	2
+T	readJagString	00eb0055	00eb	3
+T	readString	ec0055	00ec	2
+T	readNullString	ec0055	00ec	2
+T	readJagString	00ec0055	00ec	3
+T	readString	ed0055	00ed	2
+T	readNullString	ed0055	00ed	2
+T	readJagString	00ed0055	00ed	3
+T	readString	ee0055	00ee	2
+T	readNullString	ee0055	00ee	2
+T	readJagString	00ee0055	00ee	3
+T	readString	ef0055	00ef	2
+T	readNullString	ef0055	00ef	2
+T	readJagString	00ef0055	00ef	3
+T	readString	f00055	00f0	2
+T	readNullString	f00055	00f0	2
+T	readJagString	00f00055	00f0	3
+T	readString	f10055	00f1	2
+T	readNullString	f10055	00f1	2
+T	readJagString	00f10055	00f1	3
+T	readString	f20055	00f2	2
+T	readNullString	f20055	00f2	2
+T	readJagString	00f20055	00f2	3
+T	readString	f30055	00f3	2
+T	readNullString	f30055	00f3	2
+T	readJagString	00f30055	00f3	3
+T	readString	f40055	00f4	2
+T	readNullString	f40055	00f4	2
+T	readJagString	00f40055	00f4	3
+T	readString	f50055	00f5	2
+T	readNullString	f50055	00f5	2
+T	readJagString	00f50055	00f5	3
+T	readString	f60055	00f6	2
+T	readNullString	f60055	00f6	2
+T	readJagString	00f60055	00f6	3
+T	readString	f70055	00f7	2
+T	readNullString	f70055	00f7	2
+T	readJagString	00f70055	00f7	3
+T	readString	f80055	00f8	2
+T	readNullString	f80055	00f8	2
+T	readJagString	00f80055	00f8	3
+T	readString	f90055	00f9	2
+T	readNullString	f90055	00f9	2
+T	readJagString	00f90055	00f9	3
+T	readString	fa0055	00fa	2
+T	readNullString	fa0055	00fa	2
+T	readJagString	00fa0055	00fa	3
+T	readString	fb0055	00fb	2
+T	readNullString	fb0055	00fb	2
+T	readJagString	00fb0055	00fb	3
+T	readString	fc0055	00fc	2
+T	readNullString	fc0055	00fc	2
+T	readJagString	00fc0055	00fc	3
+T	readString	fd0055	00fd	2
+T	readNullString	fd0055	00fd	2
+T	readJagString	00fd0055	00fd	3
+T	readString	fe0055	00fe	2
+T	readNullString	fe0055	00fe	2
+T	readJagString	00fe0055	00fe	3
+T	readString	ff0055	00ff	2
+T	readNullString	ff0055	00ff	2
+T	readJagString	00ff0055	00ff	3
+H	R	readUByte	85c593ada9e1c925
+H	R	readByte	9055db6a8e322725
+H	R	readUByteAdd	512e9562fef9c925
+H	R	readByteAdd	f983fa7ce62725
+H	R	readUByteInverse	28f5dbefd83de525
+H	R	readByteInverse	e61a80e49a3c6525
+H	R	readUByteSubtract	198b932f962cdd25
+H	R	readByteSubtract	2a3e7d166f15fd25
+H	W	writeByte	978aba375684225
+H	W	writeByteAdd	2328e3a1c612c625
+H	W	writeByteInverse	9317e37bc3aa7c25
+H	W	writeByteSubtract	1545306f63267c25
+H	R	readUShort	7af1423a2a952325
+H	R	readShort	a3bfd8bb0d2a2125
+H	R	readUShortLittle	988bf14888fd325
+H	R	readShortLittle	979b544c3777d125
+H	R	readUShortAdd	b6a11a76e0409325
+H	R	readShortAdd	36d84baf76bf4525
+H	R	readUShortAddLittle	f6e3eedad88fd325
+H	R	readShortAddLittle	15c68ee8a377d125
+H	R	readSmart	1bbf1a7a3737325
+H	R	readUSmart	84ee04a45c22e925
+H	W	writeShort	e5f3e7d18b10a325
+H	W	writeShortLittle	21d9073d29814b25
+H	W	writeShortAdd	a6af5fb1b388a325
+H	W	writeShortAddLittle	cfa60ec2ad981b25
+H	W	writeSmart	f2f64f065d43b7a5
+H	S	writeString	21459ca3199a1adc

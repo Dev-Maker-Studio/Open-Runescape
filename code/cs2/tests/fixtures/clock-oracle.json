@@ -1,0 +1,12 @@
+{
+  "oracle": "Actual MathStringOps.dispatch and CameraLoginPrefOps.dispatch for RANDOM, RANDOMINC, RANDOM_SOUND_PITCH, HSVTORGB, DATE_MINUTES, DATE_RUNEDAY, DATE_YEAR, DATE_RUNEDAY_TODATE, FROMDATE and FORMAT_DATETIME_FROM_MINUTES, with a seeded Math.random, an injected Utils.time(), fixed-offset local zones and the real seeded HSV table, from an isolated COPY of the pinned shaded client JAR.",
+  "jar": "code/scene/target/client-build/build/libs/darkan-client-shaded-2.0.0-all.jar",
+  "jar_sha256": "78edce8b9dd6ef6cf712ebadb1ed3299aa3dec4c1e885dcebd99476aa5d76048",
+  "fixture_sha256": {
+    "clock.native.tsv": "cb63c73deb0734bb7c6b6cef0d4b99e8b2deddc33e67cfa1469d788b9f568ad7",
+    "hsv.native.bin": "d95a4494f14b13df68ecdfddb50e0a9429cb2d89969fce94e2fe141802ac0bd4"
+  },
+  "generator_sha256": "fbc52b2d53e87ccf3ffe9e2a326a7d192873afaec4c5d0f156bfd61c962855dc",
+  "driver_sha256": "841bbe6c92d328f55577be37e481bf3e0f767321c379fcd830bc72b237471322",
+  "reproduction": "python3 code/cs2/tests/native/generate_clock.py --check"
+}
