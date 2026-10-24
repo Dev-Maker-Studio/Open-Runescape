@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sol-fleet-web",
+      "runtimeExecutable": "/usr/bin/env",
+      "runtimeArgs": [
+        "-u",
+        "OPENRS_DEV_LOGIN_CONFIG",
+        "-u",
+        "OPENRS_DEV_ORIGIN",
+        "-u",
+        "FILES_DIR",
+        "PORT=18420",
+        "HOST=127.0.0.1",
+        "STATIC_DIR=/data/projects/Personal/OpenRS-Web/code/web/target/combined-final-1792784175/static",
+        "/data/projects/Personal/OpenRS-Web/code/web/target/release/openrs-web"
+      ],
+      "port": 18420
+    }
+  ]
+}

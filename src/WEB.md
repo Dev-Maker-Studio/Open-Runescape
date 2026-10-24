@@ -22,6 +22,12 @@ cargo build --release
 PORT=8080 ./target/release/openrs-web
 ```
 
+## Desktop Browser Preview
+
+The only active configuration in `.claude/launch.json` is `sol-fleet-web`. Historical fixture, account and relay entries were archived under `code/web/target/launch-backups/`; several referenced expired private bootstrap files and cannot be used without recreating their fixtures. It serves port 18420 using the persistent `code/web/target/release/openrs-web` binary and the verified bundle in `code/web/target/combined-final-1792784175/static`. All 36 bundle files match its publication manifest. This is the last verified bundle, not a fresh build of later runtime changes.
+
+The preview unsets `OPENRS_DEV_LOGIN_CONFIG`, `OPENRS_DEV_ORIGIN` and `FILES_DIR`. The old temporary fleet bootstrap, shared-files directory and staged binary no longer exist after runtime cleanup; depending on them prevents startup. Private-bootstrap security validation remains unchanged. Use `?login=1` for the existing interactive login form rather than a missing fleet bootstrap. Login still requires running lobby/world services and fixed-upstream relays; starting this page does not start those services or authenticate an account.
+
 ## Configuration
 
 | Variable | Default | Meaning |
