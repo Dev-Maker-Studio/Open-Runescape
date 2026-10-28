@@ -164,3 +164,5 @@ flowchart LR
 2. Never inject input into the user's real desktop.
 3. Never edit markdown files that start with `_`, except `_APP-SPECIFICATION.md` when the user asks.
 4. Follow `_MARKDOWN-FORMAT.md` for code and markdown.
+
+Annotate the tokens used in each commit, as a "Tokens: <count>" line in the commit message.
